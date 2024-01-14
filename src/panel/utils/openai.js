@@ -11,10 +11,7 @@ export async function streamTextGeneration({
   config = {},
   run,
 }) {
-  const api = openai.Api({
-    apiKey: config.providers?.OpenAI?.apiKey,
-  });
-
+  const api = openai.Api({ apiKey: config.apiKey });
   const userPromptWithContext = template(userPrompt, context);
 
   const images = files.filter((file) => file.type.startsWith("image/"));

@@ -2,27 +2,23 @@ Title: Kirby Copilot Playground
 
 ----
 
-Openaiapikey: 
+Content01:
 
 ----
 
-Content01: 
+Content02:
 
 ----
 
-Content02: 
+Content05:
 
 ----
 
-Content05: 
+Content03:
 
 ----
 
-Content03: 
-
-----
-
-Content04: 
+Content04:
 
 ----
 

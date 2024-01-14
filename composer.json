@@ -2,7 +2,7 @@
   "name": "johannschopplich/kirby-copilot",
   "description": "Kirby Copilot is your everyday AI companion",
   "type": "kirby-plugin",
-  "version": "0.5.2",
+  "version": "0.1.0",
   "keywords": [
     "content",
     "DeepL",

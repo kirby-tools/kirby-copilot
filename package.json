@@ -5,8 +5,9 @@
   "private": true,
   "packageManager": "pnpm@8.14.1",
   "scripts": {
-    "dev": "kirbyup serve src/panel/index.js",
+    "dev": "PLAYGROUND=true kirbyup serve src/panel/index.js",
     "build": "kirbyup src/panel/index.js",
+    "build:playground": "PLAYGROUND=true kirbyup src/panel/index.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier \"src/panel/**\" --write",

@@ -1,0 +1,9 @@
+.k-panel {
+  --main-start: 0;
+}
+
+.k-panel-menu,
+.k-panel-menu-proxy,
+.k-site-view-preview {
+  display: none;
+}

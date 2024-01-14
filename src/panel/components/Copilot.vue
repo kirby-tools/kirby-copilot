@@ -5,10 +5,11 @@ import SectionMixin from "../mixins/section.js";
 import { streamTextGeneration } from "../utils/openai.js";
 import { downscaleFile, openFilePicker } from "../utils/upload.js";
 
+export const STORAGE_KEY_PREFIX = "kirby$copilot$";
+export const getHashedStorageKey = (...args) =>
+  `${STORAGE_KEY_PREFIX}${hash([...args])}`;
+
 const EMPTY_HTML_TAG_RE = /^<(\w+)>\s*<\/\1>$/;
-const STORAGE_KEY_PREFIX = "kirby$johannschopplich$copilot";
-const getHashedStorageKey = (...args) =>
-  `${STORAGE_KEY_PREFIX}$${hash([...args])}`;
 
 export default {
   mixins: [SectionMixin],
@@ -113,6 +114,16 @@ export default {
       return value[this.$panel.translation.code] ?? Object.values(value)[0];
     },
     async generate() {
+      // eslint-disable-next-line no-undef
+      if (__PLAYGROUND__) {
+        if (!sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`)) {
+          this.$panel.notification.error(
+            "Please set an OpenAI API key for the Playground",
+          );
+          return;
+        }
+      }
+
       if (!this.currentPrompt) {
         this.$panel.notification.error(
           this.$t("johannschopplich.copilot.prompt.empty"),
@@ -134,7 +145,13 @@ export default {
           systemPrompt: this.systemPrompt,
           context: this.createContext(),
           files: this.files,
-          config: this.config,
+          config: {
+            ...this.config,
+            // eslint-disable-next-line no-undef
+            apiKey: __PLAYGROUND__
+              ? sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`)
+              : this.config.providers?.OpenAI?.apiKey,
+          },
           run: {
             abortSignal: this.abortController.signal,
           },
