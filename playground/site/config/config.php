@@ -1,11 +1,7 @@
 <?php
 
 return [
-    'debug' => true,
-
-    'panel' => [
-        'dev' => true
-    ],
+    // 'debug' => true,
 
     'content' => [
         'locking' => false

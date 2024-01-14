@@ -2,32 +2,4 @@ Title: Home
 
 ----
 
-Content01: 
-
-----
-
-Content02: 
-
-----
-
-Content03: 
-
-----
-
-Content04: 
-
-----
-
-Content05: 
-
-----
-
-Intro: Kirby Copilot is your everyday AI companion.
-
-----
-
-Date: 2024-01-14
-
-----
-
 Uuid: TQS9HZVsunT1M8E7

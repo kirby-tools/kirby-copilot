@@ -1,1 +1,33 @@
 Title: Kirby Copilot Playground
+
+----
+
+Openaiapikey: 
+
+----
+
+Content01: 
+
+----
+
+Content02: 
+
+----
+
+Content05: 
+
+----
+
+Content03: 
+
+----
+
+Content04: 
+
+----
+
+Intro: Kirby Copilot is your everyday AI companion
+
+----
+
+Date: 2024-01-14

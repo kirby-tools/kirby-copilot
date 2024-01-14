@@ -1,4 +1,14 @@
 columns:
+  # - width: 2/3
+  #   fields:
+  #     openAiApiKey:
+  #       label: OpenAI API Key
+  #       type: text
+  #       help: |
+  #         In order to test the **Kirby Copilot**, please provide your [OpenAI API key](https://beta.openai.com/account/api-keys) in the field above. If you don't have an API key yet, you can sign up for the [OpenAI Beta](https://platform.openai.com).
+
+  #         Your key will never be stored on the server. It will only be used to make requests to the OpenAI API in your browser.
+
   - width: 1/1
     fields:
       headline01:
@@ -47,7 +57,7 @@ columns:
         text: |
           Context is key to a good user prompt. The content from other fields of the same model are available in the user prompt. Wrap the field name in curly braces to use it as a placeholder.
 
-          This prompt uses the field `date` of the :
+          This prompt uses the field `date`:
           ```
           What is the current date? (Hint, it is {date}!)
           ```

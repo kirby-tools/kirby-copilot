@@ -6,11 +6,14 @@
 # Source files
 scripts/ export-ignore
 src/panel/ export-ignore
+postcss.config export-ignore
+tailwind.config.cjs export-ignore
 
 # Playground files
 playground/ export-ignore
 
 # Development files
+.vscode export-ignore
 .editorconfig export-ignore
 composer.lock export-ignore
 eslint.config.js export-ignore
