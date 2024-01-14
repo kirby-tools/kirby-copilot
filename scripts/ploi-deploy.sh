@@ -9,6 +9,6 @@ composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 {RELOAD_PHP_FPM}
 
 # Build playground plugin
-pnpm i && pnpm run build:playground
+npx pnpm i && npx pnpm run build:playground
 
 echo "🚀 Playground deployed!"
