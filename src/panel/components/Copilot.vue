@@ -1,8 +1,7 @@
 <script>
 import { hash } from "ohash";
-import { AbortError } from "modelfusion";
+import { AbortError, ApiCallError } from "modelfusion";
 import SectionMixin from "../mixins/section.js";
-import LocaleMixin from "../mixins/locale.js";
 import { streamTextGeneration } from "../utils/openai.js";
 import { downscaleFile, openFilePicker } from "../utils/upload.js";
 
@@ -12,7 +11,7 @@ const getHashedStorageKey = (...args) =>
   `${STORAGE_KEY_PREFIX}$${hash([...args])}`;
 
 export default {
-  mixins: [SectionMixin, LocaleMixin],
+  mixins: [SectionMixin],
 
   data() {
     return {
@@ -172,13 +171,18 @@ export default {
         this.$panel.view.isLoading = false;
         this.isGenerating = false;
 
-        if (!(error instanceof AbortError)) {
+        if (error instanceof AbortError) return;
+
+        if (error instanceof ApiCallError) {
           console.error(error);
-          this.$panel.notification.error(
-            this.$t("johannschopplich.copilot.generator.error"),
-          );
+          this.$panel.notification.error(error.message);
+          return;
         }
 
+        console.error(error);
+        this.$panel.notification.error(
+          this.$t("johannschopplich.copilot.generator.error"),
+        );
         return;
       }
 
