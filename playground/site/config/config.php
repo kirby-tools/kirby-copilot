@@ -18,7 +18,7 @@ return [
 
     'hooks' => [
         'site.update:before' => function (\Kirby\Cms\Site $site, array $values, array $strings) {
-            throw new \Kirby\Exception\Exception('You are not allowed to update the site for this playground.');
+            throw new \Kirby\Exception\Exception('You are not allowed to update the content of this playground.');
         },
 
         'system.loadPlugins:after' => function () {
@@ -51,11 +51,12 @@ return [
         }
     ],
 
-    // 'johannschopplich.copilot' => [
-    //     'providers' => [
-    //         'OpenAI' => [
-    //             'apiKey' => $_ENV['OPENAI_API_KEY']
-    //         ]
-    //     ]
-    // ]
+    'johannschopplich.copilot' => [
+        'providers' => [
+            'OpenAI' => [
+                // 'apiKey' => $_ENV['OPENAI_API_KEY']
+                'apiKey' => '<your-api-key>'
+            ]
+        ]
+    ]
 ];

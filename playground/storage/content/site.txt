@@ -2,23 +2,31 @@ Title: Kirby Copilot Playground
 
 ----
 
-Content01:
+Apikey: 
 
 ----
 
-Content02:
+Content01: [{"content":{"text":"<p>Generated blocks are always appended, so you won't accidentally overwrite content. The undo button removes the last generated blocks and reverts to the previous content state.</p>"},"id":"a05b4375-c4af-4b96-b60a-cb981980a4d6","isHidden":false,"type":"text"}]
 
 ----
 
-Content05:
+Content06: <p>Content is always appended. For example, this first line will remain intact.</p>
 
 ----
 
-Content03:
+Content02: Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
 
 ----
 
-Content04:
+Content05: 
+
+----
+
+Content03: 
+
+----
+
+Content04: 
 
 ----
 

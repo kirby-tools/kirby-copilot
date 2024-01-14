@@ -20,7 +20,7 @@ return [
 
                 return in_array(
                     $type,
-                    ['text', 'textarea', 'blocks'],
+                    ['blocks', 'text', 'textarea', 'writer'],
                     true
                 );
             },

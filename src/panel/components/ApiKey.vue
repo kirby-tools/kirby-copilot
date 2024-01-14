@@ -10,19 +10,18 @@ export default {
     value: String,
   },
 
-  data() {
-    return {
-      text: "",
-    };
-  },
-
-  watch: {
-    text(value) {
-      if (value) {
-        sessionStorage.setItem(`${STORAGE_KEY_PREFIX}apiKey`, value);
-      } else {
-        sessionStorage.removeItem(`${STORAGE_KEY_PREFIX}apiKey`);
-      }
+  computed: {
+    text: {
+      get() {
+        return sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`) || "";
+      },
+      set(value) {
+        if (value) {
+          sessionStorage.setItem(`${STORAGE_KEY_PREFIX}apiKey`, value);
+        } else {
+          sessionStorage.removeItem(`${STORAGE_KEY_PREFIX}apiKey`);
+        }
+      },
     },
   },
 };
