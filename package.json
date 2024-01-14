@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier \"src/panel/**\" --write",
+    "archive": "git archive --format=zip --output=./kirby-copilot-$(git describe --tags).zip HEAD",
     "release": "pnpm run build && bumpp --all"
   },
   "devDependencies": {

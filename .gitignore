@@ -5,9 +5,17 @@
 /node_modules
 /vendor
 
+# Playground files
+.env
+/playground/public/media/*
+/playground/storage/accounts/*
+/playground/storage/cache/*
+/playground/storage/sessions/*
+
 # Cache and temporary files
 /.cache
 /.php-cs-fixer.cache
 /.phpunit.result.cache
+/index.dev.mjs
 /tests/coverage
 /tests/*/tmp

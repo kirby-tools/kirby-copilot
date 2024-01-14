@@ -1,0 +1,135 @@
+columns:
+  - width: 1/1
+    fields:
+      headline01:
+        type: headline
+        label: Copilot for Blocks
+  - width: 2/3
+    fields:
+      content01:
+        label: Blocks
+        type: blocks
+  - width: 1/3
+    sections:
+      copilot01:
+        type: copilot
+        field: content01
+
+  - width: 1/1
+    fields:
+      headline02:
+        type: headline
+        label: Copilot for Textareas
+  - width: 2/3
+    fields:
+      content02:
+        label: Text
+        type: textarea
+        buttons: false
+  - width: 1/3
+    sections:
+      copilot02:
+        type: copilot
+        field: content02
+        systemPrompt: Provide responses in plain text.
+
+  - width: 1/1
+    fields:
+      headline05:
+        type: headline
+        label: Include Fields as Context
+  - width: 2/3
+    fields:
+      info05:
+        label: Info
+        type: info
+        theme: passive
+        text: |
+          Context is key to a good user prompt. The content from other fields of the same model are available in the user prompt. Wrap the field name in curly braces to use it as a placeholder.
+
+          This prompt uses the field `date` of the :
+          ```
+          What is the current date? (Hint, it is {date}!)
+          ```
+      content05:
+        label: Blocks
+        type: blocks
+  - width: 1/3
+    sections:
+      copilot05:
+        type: copilot
+        field: content05
+        userPrompt: |
+          What is the current date?
+          (Hint, it is {date}!)
+        files: false
+
+  - width: 1/1
+    fields:
+      headline03:
+        type: headline
+        label: Pre-defined User Prompt
+  - width: 2/3
+    fields:
+      info03:
+        label: Info
+        type: info
+        theme: passive
+        text: |
+          Add a pre-defined user prompt with the `userPrompt` property.
+      content03:
+        label: Blocks
+        type: blocks
+  - width: 1/3
+    sections:
+      copilot03:
+        type: copilot
+        field: content03
+        userPrompt: Write a short story about the future of the world.
+
+  - width: 1/1
+    fields:
+      headline04:
+        type: headline
+        label: Non-editable Pre-defined User Prompt
+  - width: 2/3
+    fields:
+      info04:
+        label: Info
+        type: info
+        theme: passive
+        text: |
+          With both the `editable` and the `files` property set to `false`, the user prompt is not editable and no context files can be added, respectively.
+      content04:
+        label: Blocks
+        type: blocks
+  - width: 1/3
+    sections:
+      copilot04:
+        type: copilot
+        field: content04
+        userPrompt: Write a short story about the future of the world.
+        editable: false
+        files: false
+
+  - width: 1/1
+    fields:
+      headlineContext:
+        type: headline
+        label: Context
+  - width: 2/3
+    fields:
+      intro:
+        label: Intro
+        type: text
+      infoContext:
+        label: Info
+        type: info
+        theme: passive
+        text: |
+          Access the fields above in any user prompt by using the placeholders `{intro}` and `{date}`.
+  - width: 1/3
+    fields:
+      date:
+        label: Date
+        type: date

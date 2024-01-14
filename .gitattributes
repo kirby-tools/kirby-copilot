@@ -7,10 +7,14 @@
 scripts/ export-ignore
 src/panel/ export-ignore
 
+# Playground files
+playground/ export-ignore
+
 # Development files
 .editorconfig export-ignore
-.eslintrc.js export-ignore
 composer.lock export-ignore
+eslint.config.js export-ignore
+index.dev.mjs export-ignore
 package.json export-ignore
 pnpm-lock.yaml export-ignore
 

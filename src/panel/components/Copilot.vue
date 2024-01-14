@@ -1,6 +1,5 @@
 <script>
 import { hash } from "ohash";
-import { upperFirst } from "scule";
 import { AbortError } from "modelfusion";
 import SectionMixin from "../mixins/section.js";
 import LocaleMixin from "../mixins/locale.js";
@@ -9,8 +8,8 @@ import { downscaleFile, openFilePicker } from "../utils/upload.js";
 
 const EMPTY_HTML_TAG_RE = /^<(\w+)>\s*<\/\1>$/;
 const STORAGE_KEY_PREFIX = "kirby$johannschopplich$copilot";
-const getHashedStoragePromptKey = (...args) =>
-  `${STORAGE_KEY_PREFIX}$prompt$${hash([...args])}`;
+const getHashedStorageKey = (...args) =>
+  `${STORAGE_KEY_PREFIX}$${hash([...args])}`;
 
 export default {
   mixins: [SectionMixin, LocaleMixin],
@@ -20,16 +19,18 @@ export default {
       // Section props
       label: undefined,
       field: undefined,
-      contextFields: undefined,
       userPrompt: undefined,
       systemPrompt: undefined,
+      storage: undefined,
       // Section computed
+      supported: undefined,
       config: undefined,
       // Local data
       storageKey: undefined,
       isInitialized: false,
       isGenerating: false,
       isDetailsOpen: false,
+      detailsElement: undefined,
       currentPrompt: undefined,
       currentFieldContent: undefined,
       allow: [],
@@ -50,11 +51,22 @@ export default {
   watch: {
     currentPrompt(value) {
       if (!this.isInitialized) return;
+      if (!this.storage) return;
 
-      if (value === this.userPrompt && localStorage.getItem(this.storageKey)) {
-        localStorage.removeItem(this.storageKey);
-      } else if (value) {
-        localStorage.setItem(this.storageKey, value);
+      if (value && value !== this.userPrompt) {
+        localStorage.setItem(`${this.storageKey}$prompt`, value);
+      } else if (!value || value === this.userPrompt) {
+        localStorage.removeItem(`${this.storageKey}$prompt`);
+      }
+    },
+    isDetailsOpen(value) {
+      if (!this.isInitialized) return;
+      if (!this.storage) return;
+
+      if (value) {
+        localStorage.setItem(`${this.storageKey}$open`, "true");
+      } else {
+        localStorage.removeItem(`${this.storageKey}$open`);
       }
     },
   },
@@ -64,19 +76,29 @@ export default {
     this.label =
       this.t(response.label) || this.$t("johannschopplich.copilot.label");
     this.field = response.field ?? undefined;
-    this.contextFields = response.contextFields ?? {};
     this.userPrompt = response.userPrompt ?? undefined;
-    this.systemPrompt = response.systemPrompt || response.config.systemPrompt;
-    if (response.files !== false) this.allow.push("files");
+    this.systemPrompt =
+      response.systemPrompt || response.config.systemPrompt || undefined;
+    this.storage = response.storage ?? true;
     if (response.editable !== false) this.allow.push("edit");
-    this.config = response.config ?? {};
+    if (response.files !== false) this.allow.push("files");
+    this.supported = response.supported;
+    this.config = response.config;
 
-    this.storageKey = getHashedStoragePromptKey(
-      this.$panel.view.path,
-      this.field,
-    );
-    this.currentPrompt =
-      localStorage.getItem(this.storageKey) || this.userPrompt || "";
+    if (this.storage) {
+      this.storageKey = getHashedStorageKey(this.$panel.view.path, this.field);
+      this.currentPrompt =
+        localStorage.getItem(`${this.storageKey}$prompt`) ||
+        this.userPrompt ||
+        "";
+      this.isDetailsOpen =
+        localStorage.getItem(`${this.storageKey}$open`) === "true";
+      this.$nextTick(() => {
+        if (this.$refs.detailsElement && this.isDetailsOpen) {
+          this.$refs.detailsElement.open = this.isDetailsOpen;
+        }
+      });
+    }
 
     this.$panel.events.on("view.save", this.onModelSave);
     this.isInitialized = true;
@@ -111,7 +133,7 @@ export default {
         const textStream = await streamTextGeneration({
           userPrompt: this.currentPrompt,
           systemPrompt: this.systemPrompt,
-          context: this.createContextSummary(),
+          context: this.createContext(),
           files: this.files,
           config: this.config,
           run: {
@@ -141,7 +163,7 @@ export default {
           else {
             this.$store.dispatch("content/update", [
               this.field,
-              this.currentFieldContent + textPart,
+              this.currentFieldContent + text,
             ]);
           }
         }
@@ -225,17 +247,20 @@ export default {
 
       return result.blocks;
     },
-    createContextSummary() {
-      if (Object.keys(this.contextFields).length === 0) return;
+    createContext() {
+      const context = {
+        ...this.currentContent,
+        title: this.$panel.view.title,
+      };
 
-      return Object.entries(this.contextFields).reduce(
-        (acc, [field, props]) => {
-          if (!this.currentContent[field]) return acc;
-          return `${acc}\n${
-            props.label || upperFirst(field)
-          }: ${this.currentContent[field]}`;
-        },
-        "",
+      // JSON-encode no-primitive values
+      return Object.fromEntries(
+        Object.entries(context).map(([key, value]) => [
+          key,
+          Array.isArray(value) || (typeof value === "object" && value !== null)
+            ? JSON.stringify(value)
+            : value,
+        ]),
       );
     },
     onModelSave() {
@@ -263,13 +288,19 @@ export default {
     </k-box>
     <k-box v-else-if="!field" theme="empty">
       <k-text>
-        Missing <code>field</code> property in the section or global
-        configuration. This will be used to store the generated content.
+        Missing <code>field</code> property in the section configuration. This
+        will be used for the generated content.
       </k-text>
     </k-box>
     <k-box v-else-if="!(field in currentContent)" theme="empty">
       <k-text>
         The <code>{{ field }}</code> field does not exist in the current model.
+      </k-text>
+    </k-box>
+    <k-box v-else-if="!supported" theme="empty">
+      <k-text>
+        The <code>{{ field }}</code> field is not supported. Use
+        <code>blocks</code>, <code>text</code> or <code>textarea</code> fields.
       </k-text>
     </k-box>
     <k-box v-else-if="!allow.includes('edit') && !userPrompt" theme="empty">
@@ -310,6 +341,7 @@ export default {
 
       <details
         v-if="allow.length > 0"
+        ref="detailsElement"
         @toggle="isDetailsOpen = $event.target.open"
       >
         <summary>

@@ -7,26 +7,23 @@ return [
         'props' => [
             'label' => fn ($label = null) => I18n::translate($label, $label),
             'field' => fn ($field = null) => $field,
-            'contextFields' => function ($fields = null) {
-                /** @var array $fieldLabels */
-                $fieldLabels = $this->model()->blueprint()->fields();
-
-                // make sure the fields are an array
-                if (!is_array($fields)) {
-                    $fields = is_string($fields) ? [$fields] : [];
-                }
-
-                return array_reduce($fields, function ($result, $field) use ($fieldLabels) {
-                    $label = $fieldLabels[$field]['label'] ?? $field;
-                    $result[$field]['label'] = I18n::translate($label, $field);
-                    return $result;
-                }, []);
-            },
             'userPrompt' => fn ($userPrompt = null) => is_string($userPrompt) ? trim($userPrompt) : $userPrompt,
             'systemPrompt' => fn ($systemPrompt = null) => is_string($systemPrompt) ? trim($systemPrompt) : $systemPrompt,
-            'allow' => fn ($allow = null) => $allow
+            'storage' => fn ($storage = true) => $storage,
+            'editable' => fn ($editable = true) => $editable,
+            'files' => fn ($files = true) => $files
         ],
         'computed' => [
+            'supported' => function () {
+                $field = $this->model->blueprint()->fields()[$this->field] ?? null;
+                $type = $field['type'] ?? null;
+
+                return in_array(
+                    $type,
+                    ['text', 'textarea', 'blocks'],
+                    true
+                );
+            },
             'config' => function () {
                 /** @var \Kirby\Cms\App $kirby */
                 $kirby = $this->kirby();

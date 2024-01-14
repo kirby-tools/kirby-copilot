@@ -2,7 +2,7 @@
 
 return [
     'en' => [
-        'johannschopplich.copilot.label' => 'AI Assistant',
+        'johannschopplich.copilot.label' => 'Copilot',
         'johannschopplich.copilot.generate' => 'Generate',
         'johannschopplich.copilot.stop' => 'Stop',
         'johannschopplich.copilot.undo' => 'Undo',
@@ -17,7 +17,7 @@ return [
         'johannschopplich.copilot.generator.error' => 'Error while generating'
     ],
     'de' => [
-        'johannschopplich.copilot.label' => 'KI-Assistent',
+        'johannschopplich.copilot.label' => 'Copilot',
         'johannschopplich.copilot.generate' => 'Generieren',
         'johannschopplich.copilot.stop' => 'Stop',
         'johannschopplich.copilot.undo' => 'Rückgängig',
@@ -32,7 +32,7 @@ return [
         'johannschopplich.copilot.generator.error' => 'Fehler beim Generieren'
     ],
     'fr' => [
-        'johannschopplich.copilot.label' => 'Assistant IA',
+        'johannschopplich.copilot.label' => 'Copilot',
         'johannschopplich.copilot.generate' => 'Générer',
         'johannschopplich.copilot.stop' => 'Arrêter',
         'johannschopplich.copilot.undo' => 'Annuler',
