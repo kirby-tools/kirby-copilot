@@ -18,5 +18,7 @@
 /.php-cs-fixer.cache
 /.phpunit.result.cache
 /index.dev.mjs
+/index.js
+/index.css
 /tests/coverage
 /tests/*/tmp
