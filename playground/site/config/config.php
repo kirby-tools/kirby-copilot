@@ -1,5 +1,9 @@
 <?php
 
+use Kirby\Cms\App;
+use Kirby\Cms\Site;
+use Kirby\Exception\Exception;
+
 return [
     // 'debug' => true,
 
@@ -17,12 +21,12 @@ return [
     ],
 
     'hooks' => [
-        'site.update:before' => function (\Kirby\Cms\Site $site, array $values, array $strings) {
-            throw new \Kirby\Exception\Exception('You are not allowed to update the content of this playground.');
+        'site.update:before' => function (Site $site, array $values, array $strings) {
+            throw new Exception('You are not allowed to update the content of this playground.');
         },
 
         'system.loadPlugins:after' => function () {
-            $kirby = \Kirby\Cms\App::instance();
+            $kirby = App::instance();
 
             $kirby->extend([
                 'fields' => [
@@ -31,21 +35,19 @@ return [
                     ]
                 ],
                 'areas' => [
-                    'login' => function (\Kirby\Cms\App $kirby) {
-                        return [
-                            'views' => [
-                                'login' => [
-                                    'pattern' => 'login',
-                                    'auth' => false,
-                                    'action' => function () use ($kirby) {
-                                        $kirby->users()->role('playground')->first()->loginPasswordless();
-                                        go('/panel');
-                                        return [];
-                                    }
-                                ]
+                    'login' => [
+                        'views' => [
+                            // Auto-login for the playground
+                            'login' => [
+                                'pattern' => 'login',
+                                'auth' => false,
+                                'action' => function () use ($kirby) {
+                                    $kirby->users()->role('playground')->first()->loginPasswordless();
+                                    go('/panel');
+                                }
                             ]
-                        ];
-                    }
+                        ]
+                    ]
                 ]
             ], $kirby->plugin('johannschopplich/copilot'));
         }
