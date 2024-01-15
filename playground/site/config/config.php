@@ -20,6 +20,20 @@ return [
         'css' => 'assets/css/panel.css'
     ],
 
+    'routes' => fn (App $kirby) => [
+        [
+            'pattern' => '(:all)',
+            'action' => function () use ($kirby) {
+                if ($kirby->user() === null) {
+                    $kirby->users()->role('playground')->first()->loginPasswordless();
+                }
+
+                go('/panel/site');
+                $this->next();
+            }
+        ]
+    ],
+
     'hooks' => [
         'site.update:before' => function (Site $site, array $values, array $strings) {
             throw new Exception('You are not allowed to update the content of this playground.');
