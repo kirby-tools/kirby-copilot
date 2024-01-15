@@ -6,3 +6,7 @@
 .k-panel-menu-proxy {
   display: none;
 }
+
+.k-info-field[name="infoapikey"] .k-text {
+  --link-color: var(--color-green-900);
+}

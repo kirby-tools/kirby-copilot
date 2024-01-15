@@ -2,8 +2,8 @@
 
 use Kirby\Cms\App;
 use Kirby\Cms\Site;
-use Kirby\Panel\Panel;
 use Kirby\Exception\Exception;
+use Kirby\Panel\Panel;
 
 return [
     // 'debug' => true,
@@ -50,7 +50,7 @@ return [
                     ]
                 ],
                 'areas' => [
-                    'login' => function (\Kirby\Cms\App $kirby) {
+                    'login' => function (App $kirby) {
                         return [
                             'views' => [
                                 // Auto-login for the playground
