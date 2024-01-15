@@ -25,6 +25,7 @@ return [
                 }
 
                 go(Panel::url('site'));
+                // $this->next();
             }
         ]
     ],
