@@ -10,7 +10,7 @@ Content01: [{"content":{"text":"<p>Generated blocks are always appended, so you 
 
 ----
 
-Content06: <p>Content is always appended. For example, this first line will remain intact.</p>
+Content06: <p>Content is always appended. For example, this line of text is retained.</p>
 
 ----
 
