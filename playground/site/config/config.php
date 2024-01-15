@@ -2,6 +2,7 @@
 
 use Kirby\Cms\App;
 use Kirby\Cms\Site;
+use Kirby\Panel\Panel;
 use Kirby\Exception\Exception;
 
 return [
@@ -28,7 +29,7 @@ return [
                     $kirby->users()->role('playground')->first()->loginPasswordless();
                 }
 
-                go('/panel/site');
+                Panel::go('site');
                 $this->next();
             }
         ]
@@ -61,7 +62,7 @@ return [
                                             $kirby->users()->role('playground')->first()->loginPasswordless();
                                         }
 
-                                        go('/panel/site');
+                                        Panel::go('site');
                                     }
                                 ]
                             ]
