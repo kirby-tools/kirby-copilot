@@ -6,26 +6,20 @@ use Kirby\Exception\Exception;
 use Kirby\Panel\Panel;
 
 return [
-    // 'debug' => true,
-
     'content' => [
         'locking' => false
     ],
 
     'panel' => [
-        'css' => 'assets/css/panel.css'
+        'css' => 'assets/css/panel.css',
+        'frameAncestors' => ['https://playground.kirbycopilot.com']
     ],
 
     'routes' => fn (App $kirby) => [
         [
             'pattern' => '(:all)',
             'action' => function () use ($kirby) {
-                if ($kirby->user() === null) {
-                    $kirby->users()->role('playground')->first()->loginPasswordless();
-                }
-
-                go(Panel::url('site'));
-                // $this->next();
+                go($kirby->user() === null ? Panel::url('login') : Panel::url('site'));
             }
         ]
     ],
