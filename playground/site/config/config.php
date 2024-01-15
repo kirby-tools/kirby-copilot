@@ -13,11 +13,6 @@ return [
     ],
 
     'panel' => [
-        'menu' => [
-            'site' => [
-                'label' => 'Playground'
-            ]
-        ],
         'css' => 'assets/css/panel.css'
     ],
 
@@ -30,7 +25,6 @@ return [
                 }
 
                 go(Panel::url('site'));
-                $this->next();
             }
         ]
     ],
