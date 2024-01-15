@@ -116,10 +116,15 @@ export default {
     async generate() {
       // eslint-disable-next-line no-undef
       if (__PLAYGROUND__) {
-        if (!sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`)) {
+        const apiKey = sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`);
+        if (!apiKey) {
           this.$panel.notification.error(
-            "Please set an OpenAI API key for the Playground",
+            "Please set your OpenAI API key in the Playground settings",
           );
+          return;
+        }
+        if (!apiKey.startsWith("sk-")) {
+          this.$panel.notification.error("Invalid OpenAI API key");
           return;
         }
       }
