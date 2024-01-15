@@ -12,7 +12,6 @@ tailwind.config.cjs export-ignore
 
 # Playground files
 playground/ export-ignore
-scripts/ export-ignore
 
 # Development files
 .vscode export-ignore
