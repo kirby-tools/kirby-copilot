@@ -1,23 +1,30 @@
 title: Playground
 
 options:
-  preview: false
+  preview: https://kirbycopilot.com
 
 columns:
   - width: 2/3
     fields:
+      infoApiKey:
+        label: Getting Started
+        type: info
+        theme: positive
+        text: |
+          In order to play with the **Kirby Copilot**, please provide your [OpenAI API key](https://platform.openai.com/api-keys) in the field below. If you don't have an API key yet, you can sign up for the [OpenAI API](https://platform.openai.com). The key is required to make client-side requests to the OpenAI API.
       apiKey:
         label: OpenAI API Key
         type: apiKey
         help: |
-          In order to test the **Kirby Copilot**, please provide your [OpenAI API key](https://platform.openai.com/api-keys) in the field above. If you don't have an API key yet, you can sign up for the [OpenAI API](https://platform.openai.com). The key is required to make client-side requests to the OpenAI API.
+          The key will be saved to the **session storage** of your browser. It will not be stored server-side or in any other way.
   - width: 1/3
     fields:
-      infoApiKey:
-        label: Security
+      infoDocumentation:
+        label: 📚 Documentation
         type: info
+        theme: empty
         text: |
-          The API key you enter will be saved to the **session storage** of your browser. It will not be sent to the Kirby server or stored in any other way.
+          Head over to the [Kirby Copilot website](https://kirbycopilot.com) to learn more about the plugin and how to use it.
 
   - width: 1/1
     fields:

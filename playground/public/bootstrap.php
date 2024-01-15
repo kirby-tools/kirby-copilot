@@ -4,8 +4,11 @@ $base = dirname(__DIR__);
 $root = dirname($base);
 
 require $root . '/vendor/autoload.php';
-// $dotenv = \Dotenv\Dotenv::createImmutable($root);
-// $dotenv->safeLoad();
+
+if (class_exists(\Dotenv\Dotenv::class)) {
+    $dotenv = \Dotenv\Dotenv::createImmutable($root);
+    $dotenv->safeLoad();
+}
 
 $kirby = new \Kirby\Cms\App([
     'roots' => [
