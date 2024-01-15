@@ -15,7 +15,7 @@ return [
         ],
         'computed' => [
             'supported' => function () {
-                $field = $this->model->blueprint()->fields()[$this->field] ?? null;
+                $field = $this->model()->blueprint()->fields()[$this->field] ?? null;
                 $type = $field['type'] ?? null;
 
                 return in_array(
