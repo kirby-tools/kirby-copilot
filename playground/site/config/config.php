@@ -35,19 +35,24 @@ return [
                     ]
                 ],
                 'areas' => [
-                    'login' => [
-                        'views' => [
-                            // Auto-login for the playground
-                            'login' => [
-                                'pattern' => 'login',
-                                'auth' => false,
-                                'action' => function () use ($kirby) {
-                                    $kirby->users()->role('playground')->first()->loginPasswordless();
-                                    go('/panel');
-                                }
+                    'login' => function (\Kirby\Cms\App $kirby) {
+                        return [
+                            'views' => [
+                                // Auto-login for the playground
+                                'login' => [
+                                    'pattern' => 'login',
+                                    'auth' => false,
+                                    'action' => function () use ($kirby) {
+                                        if ($kirby->user() === null) {
+                                            $kirby->users()->role('playground')->first()->loginPasswordless();
+                                        }
+
+                                        go('/panel/site');
+                                    }
+                                ]
                             ]
-                        ]
-                    ]
+                        ];
+                    }
                 ]
             ], $kirby->plugin('johannschopplich/copilot'));
         }
