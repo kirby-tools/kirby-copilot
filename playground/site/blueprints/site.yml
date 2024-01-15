@@ -11,7 +11,7 @@ columns:
         type: info
         theme: positive
         text: |
-          In order to play with the **Kirby Copilot**, please provide your [OpenAI API key](https://platform.openai.com/api-keys) in the field below. If you don't have an API key yet, you can sign up for the [OpenAI API](https://platform.openai.com). The key is required to make client-side requests to the OpenAI API.
+          To play with the **Kirby Copilot**, please enter your [OpenAI API key](https://platform.openai.com/api-keys) in the field below. If you don't have an API key yet, you can register for the [OpenAI API](https://platform.openai.com). The key is required to make client-side requests to the OpenAI API. For production use of the plugin, Kirby's global configuration will be used to store the API key instead.
       apiKey:
         label: OpenAI API Key
         type: apiKey
