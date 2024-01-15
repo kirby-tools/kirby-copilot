@@ -4,7 +4,7 @@ cd {SITE_DIRECTORY}
 git pull origin main
 
 # Install composer dependencies
-composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+composer install --no-interaction --prefer-dist --optimize-autoloader
 
 {RELOAD_PHP_FPM}
 
