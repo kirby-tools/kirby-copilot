@@ -29,7 +29,7 @@ return [
                     $kirby->users()->role('playground')->first()->loginPasswordless();
                 }
 
-                Panel::go('site');
+                go(Panel::url('site'));
                 $this->next();
             }
         ]
@@ -62,7 +62,7 @@ return [
                                             $kirby->users()->role('playground')->first()->loginPasswordless();
                                         }
 
-                                        Panel::go('site');
+                                        go(Panel::url('site'));
                                     }
                                 ]
                             ]
