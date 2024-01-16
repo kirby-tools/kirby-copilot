@@ -26,7 +26,7 @@ return [
 
     'hooks' => [
         'site.update:before' => function (Site $site, array $values, array $strings) {
-            throw new Exception('You are not allowed to update the content of this playground.');
+            throw new Exception('You cannot save changes to the playground content, you can only make local changes as a preview.');
         },
 
         'system.loadPlugins:after' => function () {
@@ -66,7 +66,7 @@ return [
         'providers' => [
             'OpenAI' => [
                 // 'apiKey' => $_ENV['OPENAI_API_KEY']
-                'apiKey' => '<your-api-key>'
+                'apiKey' => 'YOUR_API_KEY'
             ]
         ]
     ]
