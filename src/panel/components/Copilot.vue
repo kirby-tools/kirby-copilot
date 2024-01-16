@@ -167,7 +167,7 @@ export default {
 
           // Preview blocks
           if (Array.isArray(this.currentFieldContent)) {
-            if (Date.now() - lastCallTime < this.config.blocksPreviewThrottle) {
+            if (Date.now() - lastCallTime < this.config.blocksUpdateThrottle) {
               continue;
             }
             lastCallTime = Date.now();

@@ -36,7 +36,8 @@ return [
                     ],
                     'temperature' => 0.5,
                     'maxGenerationTokens' => 1024,
-                    'systemPrompt' => 'Provide responses in HTML format, including only the content that would go inside the <body> tags. Do not include the <head> section or any other parts of a full HTML document structure.'
+                    'systemPrompt' => 'Provide responses in HTML format, including only the content that would go inside the <body> tags. Do not include the <head> section or any other parts of a full HTML document structure.',
+                    'blocksUpdateThrottle' => 250
                 ];
 
                 // Check if `model` is provided as a string
@@ -50,9 +51,9 @@ return [
                 // Merge user configuration with defaults
                 $config = array_replace_recursive($defaultConfig, $config);
 
-                // Limit the preview throttle interval to a minimum of 50ms,
-                // because the HTML to blocks conversion is done via API
-                $config['blocksPreviewThrottle'] = max(50, $config['blocksPreviewThrottle'] ?? 250);
+                // Require a minimum throttle of 50ms to avoid performance issues
+                // with the HTML to blocks API
+                $config['blocksUpdateThrottle'] = max(50, $config['blocksUpdateThrottle']);
 
                 return $config;
             }

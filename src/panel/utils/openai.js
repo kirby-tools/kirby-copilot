@@ -36,7 +36,9 @@ export async function streamTextGeneration({
       api,
       model: config.model.vision,
       temperature: config.temperature,
-      maxGenerationTokens: config.maxGenerationTokens,
+      ...(config.maxGenerationTokens
+        ? { maxGenerationTokens: config.maxGenerationTokens }
+        : {}),
     });
 
     return await streamText({
@@ -60,7 +62,9 @@ export async function streamTextGeneration({
     api,
     model: config.model.default,
     temperature: config.temperature,
-    maxGenerationTokens: config.maxGenerationTokens,
+    ...(config.maxGenerationTokens
+      ? { maxGenerationTokens: config.maxGenerationTokens }
+      : {}),
   });
 
   return await streamText({
