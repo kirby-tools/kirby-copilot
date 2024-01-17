@@ -19,7 +19,7 @@ return [
         [
             'pattern' => '(:all)',
             'action' => function () use ($kirby) {
-                go($kirby->user() === null ? Panel::url('login') : Panel::url('site'));
+                go(Panel::url($kirby->user() === null ? 'login' : 'site'));
             }
         ]
     ],

@@ -11,7 +11,7 @@ columns:
         type: info
         theme: positive
         text: |
-          To play with the **Kirby Copilot**, please enter your [OpenAI API key](https://platform.openai.com/api-keys) in the field below. If you don't have an API key yet, you can register for the [OpenAI API](https://platform.openai.com). The key is required to make client-side requests to the OpenAI API. For production use of the plugin, Kirby's global configuration will be used to store the API key instead.
+          To play with the **Kirby Copilot**, please enter your [OpenAI API key](https://platform.openai.com/api-keys) in the field below. If you don't have an API key yet, you can register for the [OpenAI API](https://platform.openai.com). The key is required to make client-side requests to the OpenAI API. For production use of the plugin, you have to provide an API key in Kirby's global configuration.
       apiKey:
         label: OpenAI API Key
         type: apiKey
@@ -20,11 +20,11 @@ columns:
   - width: 1/3
     fields:
       infoDocumentation:
-        label: 📚 Documentation
+        label: 🛍️ Ready to buy?
         type: info
         theme: empty
         text: |
-          Head over to the [Kirby Copilot website](https://kirbycopilot.com) to learn more about the plugin and how to use it.
+          When you're convinced that the plugin will improve content management in your client's or your own Kirby project, get a copy on the [Kirby Copilot website](https://kirbycopilot.com/pricing).
 
   - width: 1/1
     fields:
