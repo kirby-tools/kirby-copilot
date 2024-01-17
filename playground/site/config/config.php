@@ -15,15 +15,6 @@ return [
         'frameAncestors' => ['https://playground.kirbycopilot.com']
     ],
 
-    'routes' => fn (App $kirby) => [
-        [
-            'pattern' => '(:all)',
-            'action' => function () use ($kirby) {
-                go(Panel::url($kirby->user() === null ? 'login' : 'site'));
-            }
-        ]
-    ],
-
     'hooks' => [
         'site.update:before' => function (Site $site, array $values, array $strings) {
             throw new Exception('You cannot save changes to the playground content, you can only make local changes as a preview.');
@@ -36,6 +27,14 @@ return [
                 'fields' => [
                     'apiKey' => [
                         'extends' => 'text'
+                    ]
+                ],
+                'routes' => fn (App $kirby) => [
+                    [
+                        'pattern' => '(:all)',
+                        'action' => function () use ($kirby) {
+                            go(Panel::url($kirby->user() === null ? 'login' : 'site'));
+                        }
                     ]
                 ],
                 'areas' => [
