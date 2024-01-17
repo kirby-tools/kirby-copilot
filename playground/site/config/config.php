@@ -64,8 +64,7 @@ return [
     'johannschopplich.copilot' => [
         'providers' => [
             'OpenAI' => [
-                // 'apiKey' => $_ENV['OPENAI_API_KEY']
-                'apiKey' => 'YOUR_API_KEY'
+                'apiKey' => $_ENV['OPENAI_API_KEY'] ?? 'YOUR_API_KEY'
             ]
         ]
     ]
