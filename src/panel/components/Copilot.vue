@@ -13,6 +13,7 @@ const EMPTY_HTML_TAG_RE = /^<(\w+)>\s*<\/\1>$/;
 
 export default {
   mixins: [SectionMixin],
+  inheritAttrs: false,
 
   data() {
     return {
