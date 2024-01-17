@@ -20,11 +20,11 @@ columns:
   - width: 1/3
     fields:
       infoDocumentation:
-        label: 🛍️ Ready to buy?
+        label: 🛍️ Convinced? Grab a copy!
         type: info
         theme: empty
         text: |
-          When you're convinced that the plugin will improve content management in your client's or your own Kirby project, get a copy on the [Kirby Copilot website](https://kirbycopilot.com/pricing).
+          If you're convinced that the plugin will improve content management in your client's or your own Kirby project, purchase a copy from the [Kirby Copilot website](https://kirbycopilot.com/pricing).
 
   - width: 1/1
     fields:
