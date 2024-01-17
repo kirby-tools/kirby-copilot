@@ -111,7 +111,7 @@ columns:
     fields:
       headline03:
         type: headline
-        label: Pre-defined User Prompt
+        label: Predefined Prompt
   - width: 2/3
     fields:
       info03:
@@ -119,7 +119,7 @@ columns:
         type: info
         theme: passive
         text: |
-          Add a pre-defined user prompt with the `userPrompt` property.
+          Add a predefined user prompt with the `userPrompt` property.
       content03:
         label: Blocks
         type: blocks
@@ -134,7 +134,7 @@ columns:
     fields:
       headline04:
         type: headline
-        label: Non-editable Pre-defined User Prompt
+        label: Immutable, Predefined Prompt
   - width: 2/3
     fields:
       info04:
