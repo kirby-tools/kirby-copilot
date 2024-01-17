@@ -1,13 +1,34 @@
 <?php
 
 $base = dirname(__DIR__);
-$root = dirname($base);
 
-require $root . '/vendor/autoload.php';
+require dirname($base) . '/vendor/autoload.php';
 
-if (class_exists(\Dotenv\Dotenv::class)) {
-    $dotenv = \Dotenv\Dotenv::createImmutable($root);
-    $dotenv->safeLoad();
+if (class_exists(\Dotenv\Dotenv::class) && !function_exists('env')) {
+    function env($key, $default = null)
+    {
+        static $repository = null;
+
+        if ($repository === null) {
+            $base = dirname(__DIR__, 2);
+            $repository = \Dotenv\Repository\RepositoryBuilder::createWithDefaultAdapters()->immutable()->make();
+            \Dotenv\Dotenv::create($repository, $base)->safeLoad();
+        }
+
+        $value = $repository->get($key);
+
+        if ($value === null) {
+            return $default instanceof \Closure ? $default() : $default;
+        }
+
+        return match (strtolower($value)) {
+            'true', '(true)' => true,
+            'false', '(false)' => false,
+            'empty', '(empty)' => '',
+            'null', '(null)' => null,
+            default => preg_match('/\A([\'"])(.*)\1\z/', $value, $matches) ? $matches[2] : $value
+        };
+    }
 }
 
 $kirby = new \Kirby\Cms\App([

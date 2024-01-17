@@ -21,6 +21,6 @@
   content: "";
   flex-grow: 1;
   height: 1px;
-  background-color: var(--color-text);
+  background-color: var(--color-border);
   transform: translateY(1px);
 }

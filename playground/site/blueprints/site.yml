@@ -24,7 +24,7 @@ columns:
         type: info
         theme: empty
         text: |
-          If you're convinced that the plugin will improve content management in your client's or your own Kirby project, purchase a copy from the [Kirby Copilot website](https://kirbycopilot.com/pricing).
+          Purchase a copy of [Kirby Copilot](https://kirbycopilot.com/pricing) to improve the content management of your client's Kirby project or your own with AI.
 
   - width: 1/1
     fields:
