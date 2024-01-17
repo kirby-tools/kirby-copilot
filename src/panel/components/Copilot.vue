@@ -46,6 +46,12 @@ export default {
     canUndo() {
       return !this.isGenerating && this.currentFieldContent !== undefined;
     },
+    hasContextImages() {
+      return this.files.some((file) => file.type.startsWith("image/"));
+    },
+    hasContextPdfs() {
+      return this.files.some((file) => file.type === "application/pdf");
+    },
   },
 
   watch: {
@@ -119,12 +125,12 @@ export default {
         const apiKey = sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`);
         if (!apiKey) {
           this.$panel.notification.error(
-            "Please set your OpenAI API key in the Playground settings",
+            "Please set your OpenAI API key in the playground settings.",
           );
           return;
         }
         if (!apiKey.startsWith("sk-")) {
-          this.$panel.notification.error("Invalid OpenAI API key");
+          this.$panel.notification.error("Invalid OpenAI API key.");
           return;
         }
       }
@@ -233,27 +239,20 @@ export default {
     },
     async pickFiles() {
       const files = await openFilePicker({
-        // Accept images and PDFs
+        // TODO: Accept PDFs
         // accept: "image/*,application/pdf",
         accept: "image/*",
       });
 
-      const [images, rest] = files.reduce(
-        (acc, file) => {
-          if (file.type.startsWith("image/")) acc[0].push(file);
-          else acc[1].push(file);
-          return acc;
-        },
-        [[], []],
-      );
+      this.files = await Promise.all(
+        files.map(async (file) => {
+          if (file.type.startsWith("image/")) {
+            return downscaleFile(file, { maxSize: 2048 });
+          }
 
-      this.files = [
-        ...rest,
-        // Downscale images
-        ...(await Promise.all(
-          images.map((file) => downscaleFile(file, { maxSize: 2048 })),
-        )),
-      ];
+          return file;
+        }),
+      );
     },
     async htmlToBlocks(html) {
       if (!html) return [];
@@ -416,10 +415,15 @@ export default {
               icon="cancel"
               :text="
                 files.length === 1
-                  ? $t('johannschopplich.copilot.files.remove.one')
-                  : $t('johannschopplich.copilot.files.remove.many', {
-                      count: files.length,
-                    })
+                  ? $t(
+                      `johannschopplich.copilot.${hasContextImages ? 'images' : 'files'}.remove.one`,
+                    )
+                  : $t(
+                      `johannschopplich.copilot.${hasContextImages ? 'images' : 'files'}.remove.many`,
+                      {
+                        count: files.length,
+                      },
+                    )
               "
               variant="filled"
               size="sm"

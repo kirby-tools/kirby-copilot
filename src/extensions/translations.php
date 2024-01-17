@@ -13,6 +13,9 @@ return [
         'johannschopplich.copilot.files.select' => 'Select files',
         'johannschopplich.copilot.files.remove.one' => 'Remove 1 file',
         'johannschopplich.copilot.files.remove.many' => 'Remove {count} files',
+        'johannschopplich.copilot.images.select' => 'Select images',
+        'johannschopplich.copilot.images.remove.one' => 'Remove 1 image',
+        'johannschopplich.copilot.images.remove.many' => 'Remove {count} images',
         'johannschopplich.copilot.generator.success' => 'Content generated',
         'johannschopplich.copilot.generator.error' => 'Error while generating'
     ],
@@ -28,6 +31,9 @@ return [
         'johannschopplich.copilot.files.select' => 'Dateien auswählen',
         'johannschopplich.copilot.files.remove.one' => '1 Datei entfernen',
         'johannschopplich.copilot.files.remove.many' => '{count} Dateien entfernen',
+        'johannschopplich.copilot.images.select' => 'Bilder auswählen',
+        'johannschopplich.copilot.images.remove.one' => '1 Bild entfernen',
+        'johannschopplich.copilot.images.remove.many' => '{count} Bilder entfernen',
         'johannschopplich.copilot.generator.success' => 'Content generiert',
         'johannschopplich.copilot.generator.error' => 'Fehler beim Generieren'
     ],
@@ -43,6 +49,9 @@ return [
         'johannschopplich.copilot.files.select' => 'Sélectionner des fichiers',
         'johannschopplich.copilot.files.remove.one' => 'Supprimer 1 fichier',
         'johannschopplich.copilot.files.remove.many' => 'Supprimer {count} fichiers',
+        'johannschopplich.copilot.images.select' => 'Sélectionner des images',
+        'johannschopplich.copilot.images.remove.one' => 'Supprimer 1 image',
+        'johannschopplich.copilot.images.remove.many' => 'Supprimer {count} images',
         'johannschopplich.copilot.generator.success' => 'Contenu généré',
         'johannschopplich.copilot.generator.error' => 'Erreur lors de la génération'
     ]
