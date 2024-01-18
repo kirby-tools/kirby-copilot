@@ -11,7 +11,8 @@ return [
     ],
 
     'panel' => [
-        'css' => 'assets/css/panel.css',
+        'css' => 'assets/panel.css',
+        'js' => 'assets/panel.js',
         'frameAncestors' => ['https://playground.kirbycopilot.com']
     ],
 

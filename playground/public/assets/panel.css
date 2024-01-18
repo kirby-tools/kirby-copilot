@@ -11,6 +11,10 @@
   --link-color: var(--color-green-900);
 }
 
+.k-box[data-theme="empty"] .k-text {
+  --link-color: var(--color-text);
+}
+
 .h2 {
   display: flex;
   align-items: center;
