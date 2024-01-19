@@ -1,7 +1,7 @@
 {
   "name": "kirby-copilot",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "packageManager": "pnpm@8.14.1",
   "scripts": {
@@ -11,9 +11,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier \"src/panel/**\" --write",
-    "archive": "scripts/archive.sh",
+    "archive": "pnpm run build && scripts/archive.sh",
     "changelog": "changelogen --output",
-    "release": "pnpm run build && bumpp --all"
+    "release": "bumpp --all"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.6.2",
