@@ -128,7 +128,7 @@ columns:
       copilot03:
         type: copilot
         field: content03
-        userPrompt: Write a short story about the future of the world.
+        userPrompt: Write a short story about lorem ipsum. Segment article into headings (H2).
 
   - width: 1/1
     fields:
@@ -151,7 +151,7 @@ columns:
       copilot04:
         type: copilot
         field: content04
-        userPrompt: Write a short story about the future of the world.
+        userPrompt: Write a short story about lorem ipsum. Segment article into headings (H2).
         editable: false
         files: false
 

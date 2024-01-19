@@ -347,7 +347,7 @@ export default {
           @click="generate()"
         />
         <k-button
-          v-show="isGenerating"
+          v-if="isGenerating"
           icon="cancel"
           :text="$t('johannschopplich.copilot.stop')"
           variant="filled"
