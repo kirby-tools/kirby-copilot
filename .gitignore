@@ -22,3 +22,6 @@
 /index.css
 /tests/coverage
 /tests/*/tmp
+
+# Releases
+kirby-copilot-*.zip

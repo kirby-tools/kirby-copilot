@@ -7,7 +7,7 @@
 scripts/ export-ignore
 src/panel/ export-ignore
 kirbyup.config.js export-ignore
-postcss.config export-ignore
+postcss.config.cjs export-ignore
 tailwind.config.cjs export-ignore
 
 # Playground files
