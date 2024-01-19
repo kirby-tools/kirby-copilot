@@ -24,7 +24,7 @@ columns:
         type: info
         theme: empty
         text: |
-          Purchase a copy of <sparkly-text style="--sparkly-text-size: 2em; --sparkly-text-color: var(--color-yellow-600)">[Kirby Copilot](https://kirbycopilot.com/pricing)</sparkly-text> to improve the content management of your client's Kirby project or your own with AI.
+          Purchase a copy of <sparkly-text style="--sparkly-text-size: 2em; --sparkly-text-color: var(--color-yellow-600)">[Kirby Copilot](https://kirbycopilot.com/buy)</sparkly-text> to improve the content management of your client's Kirby project or your own with AI.
 
   - width: 1/1
     fields:
