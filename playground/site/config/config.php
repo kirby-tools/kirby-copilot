@@ -48,7 +48,9 @@ return [
                                     'auth' => false,
                                     'action' => function () use ($kirby) {
                                         if ($kirby->user() === null) {
-                                            $kirby->users()->role('playground')->first()->loginPasswordless();
+                                            $system = $kirby->system();
+                                            $role = $system->isLocal() ? 'admin' : 'playground';
+                                            $kirby->users()->role($role)->first()->loginPasswordless();
                                         }
 
                                         go(Panel::url('site'));

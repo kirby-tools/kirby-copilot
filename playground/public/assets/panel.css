@@ -28,3 +28,12 @@
   background-color: var(--color-border);
   transform: translateY(1px);
 }
+
+.k-page-view[data-id="product"] .k-topbar,
+.k-page-view[data-id="product"] .k-page-view-header {
+  display: none;
+}
+
+.k-page-view[data-id="product"] .k-sections {
+  padding-top: 2rem;
+}
