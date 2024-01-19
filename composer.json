@@ -1,8 +1,8 @@
 {
   "name": "johannschopplich/kirby-copilot",
-  "description": "Kirby Copilot is your everyday AI companion",
+  "description": "AI-powered content generation for the Kirby CMS",
   "type": "kirby-plugin",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "keywords": [
     "content",
     "DeepL",
