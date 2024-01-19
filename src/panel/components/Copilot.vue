@@ -412,7 +412,7 @@ export default {
               @click="pickFiles()"
             />
             <k-button
-              v-show="files.length > 0"
+              v-if="files.length > 0"
               icon="cancel"
               :text="$t('johannschopplich.copilot.remove')"
               variant="filled"
