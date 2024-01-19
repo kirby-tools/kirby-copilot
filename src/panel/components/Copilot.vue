@@ -414,18 +414,7 @@ export default {
             <k-button
               v-show="files.length > 0"
               icon="cancel"
-              :text="
-                files.length === 1
-                  ? $t(
-                      `johannschopplich.copilot.${hasContextImages ? 'images' : 'files'}.remove.one`,
-                    )
-                  : $t(
-                      `johannschopplich.copilot.${hasContextImages ? 'images' : 'files'}.remove.many`,
-                      {
-                        count: files.length,
-                      },
-                    )
-              "
+              :text="$t('johannschopplich.copilot.remove')"
               variant="filled"
               size="sm"
               @click="files = []"
