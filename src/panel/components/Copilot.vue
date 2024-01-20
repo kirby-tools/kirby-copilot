@@ -382,7 +382,7 @@ export default {
             ].join(", ")
           }}
         </summary>
-        <k-navigate class="kai-mt-3">
+        <div class="kai-mt-3">
           <div v-if="allow.includes('edit')" class="kai-mb-2 kai-text-right">
             <k-input
               :key="isDetailsOpen ? 1 : 0"
@@ -420,7 +420,7 @@ export default {
               @click="files = []"
             />
           </k-button-group>
-        </k-navigate>
+        </div>
       </details>
     </div>
   </k-section>
