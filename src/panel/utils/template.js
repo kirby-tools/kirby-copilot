@@ -8,5 +8,8 @@
  * ) // Hello World! My name is Johann.
  */
 export function template(input, args) {
-  return input.replace(/{(\w+)}/g, (match, key) => `${args?.[key] ?? match}`);
+  return input.replace(
+    /{(\w+)}/g,
+    (match, key) => `${args?.[key.toLowerCase()] ?? match}`,
+  );
 }

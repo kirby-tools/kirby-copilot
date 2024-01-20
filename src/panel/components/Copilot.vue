@@ -279,10 +279,10 @@ export default {
         title: this.$panel.view.title,
       };
 
-      // JSON-encode no-primitive values
+      // JSON-encode non-primitive values
       return Object.fromEntries(
         Object.entries(context).map(([key, value]) => [
-          key,
+          key.toLowerCase(),
           Array.isArray(value) || (typeof value === "object" && value !== null)
             ? JSON.stringify(value)
             : value,

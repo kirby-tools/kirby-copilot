@@ -49,7 +49,7 @@ export async function streamTextGeneration({
           { type: "text", text: userPromptWithContext },
           ...serializedImages.map((image) => ({
             type: "image",
-            base64Image: image.data,
+            image: image.data,
             mimeType: image.mimeType,
           })),
         ]),
