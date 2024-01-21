@@ -282,7 +282,7 @@ export default {
       // JSON-encode non-primitive values
       return Object.fromEntries(
         Object.entries(context).map(([key, value]) => [
-          key.toLowerCase(),
+          key,
           Array.isArray(value) || (typeof value === "object" && value !== null)
             ? JSON.stringify(value)
             : value,
