@@ -13,7 +13,7 @@ return [
     'panel' => [
         'css' => 'assets/panel.css',
         'js' => 'assets/panel.js',
-        'frameAncestors' => ['https://playground.kirbycopilot.com']
+        'frameAncestors' => ['https://try.kirbycopilot.com']
     ],
 
     'hooks' => [
@@ -66,7 +66,11 @@ return [
 
     'johannschopplich.copilot' => [
         'providers' => [
-            'OpenAI' => [
+            'openai' => [
+                'model' => [
+                    'default' => 'gpt-4-1106-preview',
+                    'vision' => 'gpt-4-vision-preview'
+                ],
                 'apiKey' => env('OPENAI_API_KEY', 'YOUR_API_KEY')
             ]
         ]

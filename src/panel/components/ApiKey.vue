@@ -1,5 +1,5 @@
 <script>
-import { STORAGE_KEY_PREFIX } from "./Copilot.vue";
+import { STORAGE_KEY_PREFIX } from "../utils/config";
 
 export default {
   props: {

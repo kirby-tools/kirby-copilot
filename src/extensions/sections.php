@@ -30,9 +30,14 @@ return [
                 $config = $kirby->option('johannschopplich.copilot', []);
 
                 $defaultConfig = [
-                    'model' => [
-                        'default' => 'gpt-4-1106-preview',
-                        'vision' => 'gpt-4-vision-preview',
+                    'provider' => 'openai',
+                    'providers' => [
+                        'openai' => [
+                            'model' => [
+                                'default' => 'gpt-4',
+                                'vision' => 'gpt-4-vision-preview'
+                            ]
+                        ]
                     ],
                     'temperature' => 0.5,
                     'maxGenerationTokens' => 1024,
@@ -40,19 +45,16 @@ return [
                     'blocksUpdateThrottle' => 250
                 ];
 
-                // Check if `model` is provided as a string
-                if (isset($config['model']) && !is_array($config['model'])) {
-                    $config['model'] = [
-                        'default' => $config['model'],
-                        'vision' => $defaultConfig['model']['vision']
-                    ];
-                }
-
                 // Merge user configuration with defaults
                 $config = array_replace_recursive($defaultConfig, $config);
 
-                // Require a minimum throttle of 50ms to avoid performance issues
-                // with the HTML to blocks API
+                // Lowercase model provider name
+                $config['provider'] = strtolower($config['provider']);
+
+                // Lowercase model providers configuration keys
+                $config['providers'] = array_change_key_case($config['providers'], CASE_LOWER);
+
+                // Require a minimum throttle to avoid spamming the HTML to blocks API
                 $config['blocksUpdateThrottle'] = max(50, $config['blocksUpdateThrottle']);
 
                 return $config;

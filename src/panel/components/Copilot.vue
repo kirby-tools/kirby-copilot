@@ -1,13 +1,13 @@
 <script>
-import { hash } from "ohash";
 import { AbortError, ApiCallError } from "modelfusion";
-import SectionMixin from "../mixins/section.js";
-import { streamTextGeneration } from "../utils/openai.js";
-import { downscaleFile, openFilePicker } from "../utils/upload.js";
-
-export const STORAGE_KEY_PREFIX = "kirby$copilot$";
-export const getHashedStorageKey = (...args) =>
-  `${STORAGE_KEY_PREFIX}${hash([...args])}`;
+import {
+  STORAGE_KEY_PREFIX,
+  SUPPORTED_PROVIDERS,
+  getHashedStorageKey,
+} from "../utils/config";
+import SectionMixin from "../mixins/section";
+import { streamTextGeneration } from "../utils/ai";
+import { downscaleFile, openFilePicker } from "../utils/upload";
 
 const EMPTY_HTML_TAG_RE = /^<(\w+)>\s*<\/\1>$/;
 
@@ -17,6 +17,8 @@ export default {
 
   data() {
     return {
+      // Constants
+      SUPPORTED_PROVIDERS,
       // Section props
       label: undefined,
       field: undefined,
@@ -47,12 +49,12 @@ export default {
     canUndo() {
       return !this.isGenerating && this.currentFieldContent !== undefined;
     },
-    hasContextImages() {
-      return this.files.some((file) => file.type.startsWith("image/"));
-    },
-    hasContextPdfs() {
-      return this.files.some((file) => file.type === "application/pdf");
-    },
+    // hasContextImages() {
+    //   return this.files.some((file) => file.type.startsWith("image/"));
+    // },
+    // hasContextPdfs() {
+    //   return this.files.some((file) => file.type === "application/pdf");
+    // },
   },
 
   watch: {
@@ -157,13 +159,7 @@ export default {
           systemPrompt: this.systemPrompt,
           context: this.createContext(),
           files: this.files,
-          config: {
-            ...this.config,
-            // eslint-disable-next-line no-undef
-            apiKey: __PLAYGROUND__
-              ? sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`)
-              : this.config.providers?.OpenAI?.apiKey,
-          },
+          config: this.config,
           run: {
             abortSignal: this.abortController.signal,
           },
@@ -300,22 +296,51 @@ export default {
 
 <template>
   <k-section v-if="isInitialized" :label="label">
-    <k-box v-if="!config.model.default" theme="empty">
+    <k-box
+      v-if="!config.provider || !SUPPORTED_PROVIDERS.includes(config.provider)"
+      theme="empty"
+    >
       <k-text>
-        Missing <code>model.default</code> property in the
-        <code>johannschopplich.copilot</code> global configuration.
+        Unsupported provider <code>{{ config.provider }}</code> in the
+        <code>johannschopplich.copilot.provider</code> global configuration.
       </k-text>
     </k-box>
-    <k-box v-if="!config.providers?.OpenAI?.apiKey" theme="empty">
+    <k-box
+      v-else-if="!config.providers?.[config.provider]?.apiKey"
+      theme="empty"
+    >
       <k-text>
-        Missing <code>providers.OpenAI.apiKey</code> property in the
-        <code>johannschopplich.copilot</code> global configuration.
+        Missing <code>apiKey</code> property in the
+        <code>{{
+          `johannschopplich.copilot.providers.${config.provider}`
+        }}</code>
+        global configuration.
+      </k-text>
+    </k-box>
+    <k-box
+      v-else-if="
+        (config.provider === 'openai' &&
+          !config.providers?.openai?.model?.default) ||
+        (config.provider === 'mistral' && !config.providers?.mistral?.model)
+      "
+      theme="empty"
+    >
+      <k-text>
+        Missing
+        <code>{{
+          config.provider === "openai" ? "model.default" : "model"
+        }}</code>
+        property in the
+        <code>{{
+          `johannschopplich.copilot.providers.${config.provider}`
+        }}</code>
+        global configuration.
       </k-text>
     </k-box>
     <k-box v-else-if="!field" theme="empty">
       <k-text>
-        Missing <code>field</code> property in the section configuration. This
-        will be used for the generated content.
+        Missing <code>field</code> property in the section configuration. It is
+        required for the generated text.
       </k-text>
     </k-box>
     <k-box v-else-if="!(field in currentContent)" theme="empty">
@@ -325,8 +350,9 @@ export default {
     </k-box>
     <k-box v-else-if="!supported" theme="empty">
       <k-text>
-        The <code>{{ field }}</code> field is not supported. Use
-        <code>blocks</code>, <code>text</code> or <code>textarea</code> fields.
+        The <code>{{ field }}</code> field is not supported. Use a
+        <code>blocks</code>, <code>text</code>, <code>textarea</code> or
+        <code>textarea</code> type.
       </k-text>
     </k-box>
     <k-box v-else-if="!allow.includes('edit') && !userPrompt" theme="empty">

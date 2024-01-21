@@ -8,7 +8,7 @@ return [
         [
             'pattern' => '__copilot__/html2blocks',
             'method' => 'POST',
-            'action' => function () use (&$kirby) {
+            'action' => function () use ($kirby) {
                 $request = $kirby->request();
                 $html = $request->get('html');
                 $value = Blocks::parse($html);
