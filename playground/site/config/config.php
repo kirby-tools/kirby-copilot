@@ -68,8 +68,7 @@ return [
         'providers' => [
             'openai' => [
                 'model' => [
-                    'default' => 'gpt-4-1106-preview',
-                    'vision' => 'gpt-4-vision-preview'
+                    'default' => 'gpt-4-1106-preview'
                 ],
                 'apiKey' => env('OPENAI_API_KEY', 'YOUR_API_KEY')
             ]
