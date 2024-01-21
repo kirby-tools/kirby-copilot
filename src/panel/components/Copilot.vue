@@ -236,9 +236,14 @@ export default {
     },
     async pickFiles() {
       const files = await openFilePicker({
-        // TODO: Accept PDFs
-        // accept: "image/*,application/pdf",
-        accept: "image/*",
+        accept: [
+          "image/png",
+          "image/jpeg",
+          "image/webp",
+          "image/gif",
+          // TODO: Accept PDFs
+          // "application/pdf",
+        ].join(","),
       });
 
       this.files = await Promise.all(
