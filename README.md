@@ -12,7 +12,7 @@ Here are some quick links:
 
 - [Installation](https://kirbycopilot.com/docs/getting-stared/installation)
 - [Global Configuration](https://kirbycopilot.com/docs/configuration/global)
-- [Seection Configuration](https://kirbycopilot.com/docs/configuration/section)
+- [Section Configuration](https://kirbycopilot.com/docs/configuration/section)
 
 ## Support and Questions
 
