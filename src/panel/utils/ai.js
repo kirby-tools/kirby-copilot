@@ -1,7 +1,6 @@
 import { mistral, openai, streamText } from "modelfusion";
 import { template } from "../utils/template";
 import { STORAGE_KEY_PREFIX } from "./config";
-import { dataUriToBase64, fileToDataUri } from "./upload";
 // import { loadPdfAsText } from "../utils/pdf";
 
 const modelProviders = {
@@ -34,13 +33,12 @@ export async function streamTextGeneration({
   // const pdfTexts = await Promise.all(pdfs.map(loadPdfAsText));
 
   if (provider === "openai" && images.length > 0) {
-    // Convert images to base64
     const serializedImages = await Promise.all(
       images.map(async (blob) => {
-        const { dataUri, mimeType } = await fileToDataUri(blob);
+        const arrayBuffer = await blob.arrayBuffer();
         return {
-          data: dataUriToBase64(dataUri),
-          mimeType,
+          data: new Uint8Array(arrayBuffer),
+          mimeType: blob.type,
         };
       }),
     );
