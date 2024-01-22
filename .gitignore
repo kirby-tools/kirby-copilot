@@ -17,6 +17,8 @@
 /.cache
 /.php-cs-fixer.cache
 /.phpunit.result.cache
+/readme/.vitepress/dist
+/readme/.vitepress/cache
 /index.dev.mjs
 /index.js
 /index.css

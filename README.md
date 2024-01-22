@@ -2,7 +2,7 @@
 
 ## Welcome!
 
-Thank you for purchasing Kirby Copilot. We appreciate your decision to enhance your Kirby projects with our plugin, and we're here to make sure to get you started as quickly and smoothly as possible.
+Thank you for purchasing Kirby Copilot. We appreciate your decision to enhance your Kirby projects with our plugin. This document is intended to help you get started with Kirby Copilot as quickly and easily as possible.
 
 ## Getting Started
 
@@ -16,7 +16,7 @@ Here are some quick links:
 
 ## Support and Questions
 
-We are committed to providing you with the support you need to make the most out of Kirby Copilot. Should you have any questions or require assistance, feel free to reach out to us:
+We are committed to support you if you have any questions or issues with Kirby Copilot. There are several ways to get support:
 
 - **GitHub Discussions**: Join the community and engage in discussions on our [GitHub Discussions page](https://github.com/johannschopplich/kirby-copilot/discussions).
 - **Email Support**: You can ask questions and seek assistance by emailing us at [hello@kirbycopilot.com](mailto:hello@kirbycopilot.com). Please use the GitHub discussions if you have a general question or comment about Kirby Copilot.
@@ -24,9 +24,19 @@ We are committed to providing you with the support you need to make the most out
 
 We encourage you to use the resources above to connect with us and other users of Kirby Copilot.
 
-## Feedback
+For the sake of reproducible bug reports, please include the following information in your bug reports:
 
-We value your feedback. If you have any suggestions, please feel free to reach out to us via email or preferably by creating a new discussion on our [GitHub Discussions page](https://github.com/johannschopplich/kirby-copilot/discussions).
+- Kirby & Kirby Copilot version
+- Browser environment (name, version, operating system)
+- Steps to reproduce the bug
+- Global and section configuration (without any sensitive information)
+- Screenshots or screen recordings if applicable
+
+Please ensure to **never** include any API keys or other sensitive information in your bug reports.
+
+## Feedback & Feature Requests
+
+We value your feedback and ideas for improving Kirby Copilot. If you have any suggestions, please feel free to reach out to us via email or preferably by creating a new discussion on our [GitHub Discussions page](https://github.com/johannschopplich/kirby-copilot/discussions).
 
 ## Thank You
 

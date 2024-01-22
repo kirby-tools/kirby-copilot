@@ -14,8 +14,11 @@ tailwind.config.cjs export-ignore
 # Playground files
 playground/ export-ignore
 
+# Readme files
+readme/ export-ignore
+
 # Development files
-.vscode export-ignore
+.vscode/ export-ignore
 .editorconfig export-ignore
 composer.lock export-ignore
 eslint.config.js export-ignore
