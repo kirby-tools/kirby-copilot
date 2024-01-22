@@ -1,6 +1,6 @@
 # Kirby Copilot Plugin License Agreement
 
-Published: [Date of Last Update]
+Published: 2024-01-22
 
 ## About this License Agreement
 
@@ -80,3 +80,8 @@ The Licensor reserves the right to amend this Agreement at any time. Continued u
 For questions regarding this License Agreement, please contact the Licensor at:
 
 Johann Schopplich
+Paul-Gruner-Str. 38
+04107 Leipzig
+Germany
+
+Email: mail@johannschopplich.com
