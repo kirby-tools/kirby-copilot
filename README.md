@@ -6,11 +6,11 @@ Thank you for purchasing Kirby Copilot. We appreciate your decision to enhance y
 
 ## Getting Started
 
-To get started, please refer to the [documentation](https://kirbycopilot.com/docs/getting-stared) for guidance on installation, configuration, and usage.
+To get started, please refer to the [documentation](https://kirbycopilot.com/docs/getting-started) for guidance on installation, configuration, and usage.
 
 Here are some quick links:
 
-- [Installation](https://kirbycopilot.com/docs/getting-stared/installation)
+- [Installation](https://kirbycopilot.com/docs/getting-started/installation)
 - [Global Configuration](https://kirbycopilot.com/docs/configuration/global)
 - [Section Configuration](https://kirbycopilot.com/docs/configuration/section)
 
