@@ -1,12 +1,8 @@
-Title: Olympia Sneaker cremeweiß
+Title: Red Sneaker
 
 ----
 
-Content01: 
-
-----
-
-Manufacturer: ZEHA Berlin
+Manufacturer: Famous Brand
 
 ----
 
@@ -14,7 +10,11 @@ Category: Streetwear
 
 ----
 
-Releasedate: 2024-01-19
+Releasedate: 2024-01-22
+
+----
+
+Content01: 
 
 ----
 
