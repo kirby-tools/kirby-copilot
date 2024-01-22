@@ -84,4 +84,4 @@ Paul-Gruner-Str. 38
 04107 Leipzig
 Germany
 
-Email: [mailto:hello@kirbycopilot.com](hello@kirbycopilot.com)
+Email: [hello@kirbycopilot.com](mailto:hello@kirbycopilot.com)
