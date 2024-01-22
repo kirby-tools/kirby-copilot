@@ -17,10 +17,11 @@ export async function streamTextGeneration({
   run,
 }) {
   const provider = config.provider;
+  const providerConfig = config.providers[provider];
   // eslint-disable-next-line no-undef
   const apiKey = __PLAYGROUND__
     ? sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`)
-    : config.providers[provider].apiKey;
+    : providerConfig.apiKey;
 
   const facade = modelProviders[provider];
   const api = facade.Api({ apiKey });
@@ -43,60 +44,54 @@ export async function streamTextGeneration({
       }),
     );
 
-    const model = openai.ChatTextGenerator({
-      api,
-      model: config.providers.openai.model.vision,
-      temperature: config.temperature,
-      ...(config.maxGenerationTokens
-        ? { maxGenerationTokens: config.maxGenerationTokens }
-        : {}),
-    });
+    const model = openai
+      .ChatTextGenerator({
+        api,
+        model: config.providers.openai.model.vision,
+        temperature: config.temperature,
+        ...(config.maxGenerationTokens
+          ? { maxGenerationTokens: config.maxGenerationTokens }
+          : {}),
+      })
+      .withInstructionPrompt();
 
     return await streamText({
       model,
-      prompt: [
-        ...(systemPrompt ? [openai.ChatMessage.system(systemPrompt)] : []),
-        openai.ChatMessage.user([
+      prompt: {
+        system: systemPrompt,
+        instruction: [
           { type: "text", text: userPromptWithContext },
           ...serializedImages.map((image) => ({
             type: "image",
             image: image.data,
             mimeType: image.mimeType,
           })),
-        ]),
-      ],
+        ],
+      },
       run,
     });
   }
 
-  const model = facade.ChatTextGenerator({
-    api,
-    model:
-      provider === "openai"
-        ? config.providers.openai.model.default
-        : config.providers[provider].model,
-    temperature: config.temperature,
-    ...(config.maxGenerationTokens
-      ? { maxGenerationTokens: config.maxGenerationTokens }
-      : {}),
-  });
+  const model = facade
+    .ChatTextGenerator({
+      api,
+      model:
+        provider === "openai"
+          ? providerConfig.model.default
+          : providerConfig.model,
+      temperature: config.temperature,
+      ...(config.maxGenerationTokens
+        ? { maxGenerationTokens: config.maxGenerationTokens }
+        : {}),
+    })
+    .withInstructionPrompt();
 
   return await streamText({
     model,
-    prompt: [
-      ...(systemPrompt
-        ? [
-            {
-              role: "system",
-              content: systemPrompt,
-            },
-          ]
-        : []),
-      {
-        role: "user",
-        content: userPromptWithContext,
-      },
-    ],
+    prompt: {
+      system: systemPrompt,
+      instruction: userPromptWithContext,
+    },
     run,
   });
 }
