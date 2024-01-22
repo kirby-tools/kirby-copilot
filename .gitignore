@@ -7,7 +7,7 @@
 
 # Playground files
 .env
-/playground/site/config/.license
+.license
 /playground/public/media/*
 /playground/storage/accounts/*
 !/playground/storage/accounts/playgrnd
