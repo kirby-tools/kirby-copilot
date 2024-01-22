@@ -84,4 +84,4 @@ Paul-Gruner-Str. 38
 04107 Leipzig
 Germany
 
-Email: [mailto:mail@johannschopplich.com](mail@johannschopplich.com)
+Email: [mailto:hello@kirbycopilot.com](hello@kirbycopilot.com)
