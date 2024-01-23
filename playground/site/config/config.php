@@ -15,7 +15,7 @@ return [
     'panel' => [
         'css' => 'assets/panel.css',
         'js' => 'assets/panel.js',
-        'frameAncestors' => ['https://try.kirbycopilot.com']
+        'frameAncestors' => ['https://kirbycopilot.com']
     ],
 
     'hooks' => [
