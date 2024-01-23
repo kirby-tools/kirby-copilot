@@ -1,4 +1,4 @@
-Title: Kirby Copilot Playground
+Title: Playground
 
 ----
 
