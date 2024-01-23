@@ -32,9 +32,10 @@ For the sake of reproducible bug reports, please include the following informati
 - Steps to reproduce the bug (Steps to reproduce the bug (if no reproduction is provided))
 - Screenshots or screen recordings if applicable
 
-Please ensure to **never** include any API keys or other sensitive information in bug reports, feature requests, or any other public communication channel.
+> [!WARNING]
+> Please ensure to **never** include any API keys or other sensitive information in bug reports, feature requests, or any other public communication channel.
 
-## Feedback & Feature Requests
+## Feedback
 
 We value your feedback and ideas for improving Kirby Copilot. If you have any suggestions, please feel free to reach out to us via email or preferably by creating a new discussion on our [GitHub Discussions page](https://github.com/johannschopplich/kirby-copilot/discussions).
 
