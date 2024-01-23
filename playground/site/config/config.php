@@ -6,6 +6,8 @@ use Kirby\Exception\Exception;
 use Kirby\Panel\Panel;
 
 return [
+    'debug' => env('KIRBY_DEBUG', false),
+
     'content' => [
         'locking' => false
     ],
@@ -18,7 +20,9 @@ return [
 
     'hooks' => [
         'site.update:before' => function (Site $site, array $values, array $strings) {
-            throw new Exception('You cannot save changes to the playground content, you can only make local changes as a preview.');
+            if (env('KIRBY_DEBUG', false) === false) {
+                throw new Exception('You cannot save changes to the playground content, you can only make local changes as a preview.');
+            }
         },
 
         'system.loadPlugins:after' => function () {
@@ -48,8 +52,10 @@ return [
                                     'auth' => false,
                                     'action' => function () use ($kirby) {
                                         if ($kirby->user() === null) {
-                                            $system = $kirby->system();
-                                            $role = $system->isLocal() ? 'admin' : 'playground';
+                                            // $system = $kirby->system();
+                                            // $role = $system->isLocal() ? 'admin' : 'playground';
+                                            $isDebug = env('KIRBY_DEBUG', false);
+                                            $role = $isDebug ? 'admin' : 'playground';
                                             $kirby->users()->role($role)->first()->loginPasswordless();
                                         }
 

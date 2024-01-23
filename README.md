@@ -20,7 +20,7 @@ We are committed to support you if you have any questions or issues with Kirby C
 
 - **GitHub Discussions**: Join the community and engage in discussions on our [GitHub Discussions page](https://github.com/johannschopplich/kirby-copilot/discussions).
 - **Email Support**: You can ask questions and seek assistance by emailing us at [hello@kirbycopilot.com](mailto:hello@kirbycopilot.com). Please use the GitHub discussions if you have a general question or comment about Kirby Copilot.
-- **GitHub Issues**: For reporting bugs or issues, please use the [GitHub Issues page](https://github.com/johannschopplich/kirby-copilot/issues).
+- **GitHub Issues**: For reporting bugs or requesting new features, please use the [GitHub Issues page](https://github.com/johannschopplich/kirby-copilot/issues).
 
 We encourage you to use the resources above to connect with us and other users of Kirby Copilot.
 
@@ -28,11 +28,11 @@ For the sake of reproducible bug reports, please include the following informati
 
 - Kirby & Kirby Copilot version
 - Browser environment (name, version, operating system)
-- Steps to reproduce the bug
 - Global and section configuration (without any sensitive information)
+- Steps to reproduce the bug (Steps to reproduce the bug (if no reproduction is provided))
 - Screenshots or screen recordings if applicable
 
-Please ensure to **never** include any API keys or other sensitive information in your bug reports.
+Please ensure to **never** include any API keys or other sensitive information in bug reports, feature requests, or any other public communication channel.
 
 ## Feedback & Feature Requests
 
