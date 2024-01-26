@@ -5,6 +5,12 @@
 /node_modules
 /vendor
 
+# Build files
+/assets
+/index.dev.mjs
+/index.js
+/index.css
+
 # Playground files
 .env
 .license
@@ -20,9 +26,6 @@
 /.phpunit.result.cache
 /readme/.vitepress/dist
 /readme/.vitepress/cache
-/index.dev.mjs
-/index.js
-/index.css
 /tests/coverage
 /tests/*/tmp
 

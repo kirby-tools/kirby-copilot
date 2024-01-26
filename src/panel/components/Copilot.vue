@@ -1,11 +1,11 @@
 <script>
-import { AbortError, ApiCallError } from "modelfusion";
 import {
   STORAGE_KEY_PREFIX,
   SUPPORTED_PROVIDERS,
   getHashedStorageKey,
 } from "../utils/config";
 import SectionMixin from "../mixins/section";
+import { resolvePluginAsset } from "../utils/assets";
 import { streamTextGeneration } from "../utils/ai";
 import { downscaleFile, openFilePicker } from "../utils/upload";
 
@@ -28,6 +28,7 @@ export default {
       // Section computed
       supported: undefined,
       config: undefined,
+      assets: undefined,
       // Local data
       storageKey: undefined,
       isInitialized: false,
@@ -93,6 +94,7 @@ export default {
     if (response.files !== false) this.allow.push("files");
     this.supported = response.supported;
     this.config = response.config;
+    this.assets = response.assets;
 
     if (this.storage) {
       this.storageKey = getHashedStorageKey(this.$panel.view.path, this.field);
@@ -150,11 +152,18 @@ export default {
       this.currentFieldContent = this.currentContent[this.field];
       this.abortController = new AbortController();
 
+      const modelfusion = await resolvePluginAsset(
+        "modelfusion.mjs",
+        this.assets,
+      );
+      const { AbortError, ApiCallError } = modelfusion;
+
       let text = "";
       let lastCallTime = Date.now();
 
       try {
         const textStream = await streamTextGeneration({
+          modelfusion,
           userPrompt: this.currentPrompt,
           systemPrompt: this.systemPrompt,
           context: this.createContext(),

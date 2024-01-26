@@ -1,21 +1,22 @@
-import { mistral, openai, streamText } from "modelfusion";
 import { template } from "../utils/template";
 import { STORAGE_KEY_PREFIX } from "./config";
 // import { loadPdfAsText } from "../utils/pdf";
 
-const modelProviders = {
-  mistral,
-  openai,
-};
-
 export async function streamTextGeneration({
+  modelfusion,
   userPrompt = "",
   systemPrompt,
   context,
-  files = [],
-  config = {},
+  files,
+  config,
   run,
 }) {
+  const { mistral, openai, streamText } = modelfusion;
+  const modelProviders = {
+    mistral,
+    openai,
+  };
+
   const provider = config.provider;
   const providerConfig = config.providers[provider];
   // eslint-disable-next-line no-undef

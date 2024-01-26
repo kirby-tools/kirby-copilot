@@ -1,5 +1,6 @@
 <?php
 
+use Kirby\Cms\PluginAsset;
 use Kirby\Toolkit\I18n;
 
 return [
@@ -66,6 +67,16 @@ return [
                 $config['blocksUpdateThrottle'] = max(50, $config['blocksUpdateThrottle']);
 
                 return $config;
+            },
+            'assets' => function () {
+                /** @var \Kirby\Cms\App $kirby */
+                $kirby = $this->kirby();
+                $plugin = $kirby->plugin('johannschopplich/copilot');
+
+                return $plugin->assets()->map(fn (PluginAsset $asset) => [
+                    'filename' => $asset->filename(),
+                    'url' => $asset->url()
+                ])->values();
             }
         ]
     ]

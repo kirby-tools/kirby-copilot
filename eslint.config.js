@@ -6,7 +6,7 @@ export default await antfu(
     vue: {
       vueVersion: 2,
     },
-    ignores: ["**/vendor/**", "index.js"],
+    ignores: ["**/assets/**", "**/vendor/**", "index.js"],
   },
   {
     files: ["**/*.vue"],
