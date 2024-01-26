@@ -2,4 +2,4 @@
 git archive --format=zip --output=./kirby-copilot-$(git describe --tags).zip HEAD
 
 # Step 2: Add the `index.js` file to the ZIP archive.
-zip -g ./kirby-copilot-$(git describe --tags).zip index.js index.css
+zip -g ./kirby-copilot-$(git describe --tags).zip assets index.js index.css
