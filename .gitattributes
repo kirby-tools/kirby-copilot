@@ -5,6 +5,7 @@
 
 # Source files
 scripts/ export-ignore
+src/assets/ export-ignore
 src/panel/ export-ignore
 kirbyup.config.js export-ignore
 postcss.config.cjs export-ignore
