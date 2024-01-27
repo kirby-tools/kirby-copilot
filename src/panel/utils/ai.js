@@ -39,12 +39,12 @@ export async function streamTextGeneration({
       .map((value, index) => `PDF document ${index + 1}: ${value}`)
       .join("\n\n")}`;
 
-    if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
-      console.log(pdfContext);
-    }
-
     userPromptWithContext += `\n\n${pdfContext}`;
+  }
+
+  if (import.meta.env.DEV) {
+    // eslint-disable-next-line no-console
+    console.log(userPromptWithContext);
   }
 
   if (provider === "openai" && images.length > 0) {
@@ -58,7 +58,7 @@ export async function streamTextGeneration({
       }),
     );
 
-    const model = openai
+    const model = facade
       .ChatTextGenerator({
         api,
         model: config.providers.openai.model.vision,

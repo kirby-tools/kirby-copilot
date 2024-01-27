@@ -1,10 +1,10 @@
 <script>
+import SectionMixin from "../mixins/section";
 import {
   STORAGE_KEY_PREFIX,
   SUPPORTED_PROVIDERS,
   getHashedStorageKey,
 } from "../utils/config";
-import SectionMixin from "../mixins/section";
 import { getModule, registerPluginAssets } from "../utils/assets";
 import { streamTextGeneration } from "../utils/ai";
 import { downscaleFile, openFilePicker } from "../utils/upload";
