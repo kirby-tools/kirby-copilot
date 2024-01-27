@@ -13,18 +13,18 @@ export async function registerPluginAssets(assets) {
   _assets = assets;
 }
 
-export async function resolvePluginAsset(filename) {
+export function resolvePluginAsset(filename) {
   if (_assets.length === 0) {
     throw new Error("Plugin assets are missing");
   }
 
-  const mod = _assets.find((asset) => asset.filename === filename);
+  const asset = _assets.find((asset) => asset.filename === filename);
 
-  if (!mod) {
+  if (!asset) {
     throw new Error(`Plugin asset "${filename}" not found`);
   }
 
-  return import(/* @vite-ignore */ mod.url);
+  return asset;
 }
 
 export async function getModule(filename) {
@@ -36,7 +36,8 @@ export async function getModule(filename) {
     return moduleCache.get(filename);
   }
 
-  const mod = await resolvePluginAsset(filename);
+  const asset = resolvePluginAsset(filename);
+  const mod = import(/* @vite-ignore */ asset.url);
   moduleCache.set(filename, mod);
   return mod;
 }

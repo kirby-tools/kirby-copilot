@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "PLAYGROUND=true kirbyup serve src/panel/index.js",
     "build": "kirbyup src/panel/index.js",
-    "build:assets": "vite build --config vite.config.assets.js && cp node_modules/pdfjs-serverless/dist/index.mjs assets/pdfjs-serverless.mjs",
+    "build:assets": "vite build --config vite.config.assets.js && cp node_modules/pdfjs-dist/build/pdf.min.mjs assets/pdfjs.mjs && cp node_modules/pdfjs-dist/build/pdf.worker.min.mjs assets/pdfjs.worker.mjs",
     "build:playground": "PLAYGROUND=true pnpm run build && pnpm run build:assets",
     "readme:dev": "vitepress dev readme",
     "readme:build": "vitepress build readme",
@@ -26,7 +26,7 @@
     "kirbyup": "^3.1.0",
     "modelfusion": "^0.133.0",
     "ohash": "^1.1.3",
-    "pdfjs-serverless": "^0.4.2",
+    "pdfjs-dist": "^4.0.379",
     "prettier": "^3.2.4",
     "prettier-plugin-tailwindcss": "^0.5.11",
     "tailwindcss": "^3.4.1",

@@ -1,10 +1,11 @@
 import { getModule } from "./assets";
 
+let _PDFJS;
+
 export async function loadPdfAsText(file) {
-  const { resolvePDFJS } = await getModule("pdfjs-serverless");
-  const { getDocument } = await resolvePDFJS();
+  const PDFJS = await resolvePDFJS();
   const data = await file.arrayBuffer();
-  const document = await getDocument({
+  const document = await PDFJS.getDocument({
     data,
     useSystemFonts: true,
   }).promise;
@@ -27,4 +28,15 @@ async function getPageText(document, pageNumber) {
     .filter((item) => item.str != null)
     .map((item) => item.str)
     .join(" ");
+}
+
+async function resolvePDFJS() {
+  if (_PDFJS) {
+    return _PDFJS;
+  }
+
+  _PDFJS = await getModule("pdfjs");
+  const pdfjsWorker = await getModule("pdfjs.worker");
+  _PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+  return _PDFJS;
 }
