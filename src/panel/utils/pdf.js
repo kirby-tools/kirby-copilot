@@ -1,27 +1,28 @@
-import { resolvePDFJS } from "pdfjs-serverless";
-
-export async function loadPdfAsText(file) {
+export async function loadPdfAsText({ file, pdfjsServerless }) {
+  const { resolvePDFJS } = pdfjsServerless;
   const { getDocument } = await resolvePDFJS();
   const data = await file.arrayBuffer();
-  const pdf = await getDocument({
+  const document = await getDocument({
     data,
     useSystemFonts: true,
   }).promise;
 
-  const pageTexts = [];
-
-  for (let i = 0; i < pdf.numPages; i++) {
-    const page = await pdf.getPage(i + 1);
-    const pageContent = await page.getTextContent();
-
-    pageTexts.push(
-      pageContent.items
-        .filter((item) => item.str != null)
-        .map((item) => item.str)
-        .join(" "),
-    );
-  }
+  const texts = await Promise.all(
+    Array.from({ length: document.numPages }, (_, i) =>
+      getPageText(document, i + 1),
+    ),
+  );
 
   // Reduce whitespace to single space
-  return pageTexts.join("\n").replace(/\s+/g, " ");
+  return texts.join("\n").replace(/\s+/g, " ");
+}
+
+async function getPageText(document, pageNumber) {
+  const page = await document.getPage(pageNumber);
+  const content = await page.getTextContent();
+
+  return content.items
+    .filter((item) => item.str != null)
+    .map((item) => item.str)
+    .join(" ");
 }
