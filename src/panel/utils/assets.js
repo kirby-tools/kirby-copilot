@@ -28,8 +28,8 @@ export function resolvePluginAsset(filename) {
 }
 
 export async function getModule(filename) {
-  if (!filename.endsWith(".mjs")) {
-    filename += ".mjs";
+  if (!filename.endsWith(".js")) {
+    filename += ".js";
   }
 
   if (moduleCache.has(filename)) {
