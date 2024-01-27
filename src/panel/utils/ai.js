@@ -1,9 +1,9 @@
-import { template } from "../utils/template";
 import { STORAGE_KEY_PREFIX } from "./config";
-// import { loadPdfAsText } from "../utils/pdf";
+import { getModule } from "./assets";
+import { template } from "./template";
+import { loadPdfAsText } from "./pdf";
 
 export async function streamTextGeneration({
-  modelfusion,
   userPrompt = "",
   systemPrompt,
   context,
@@ -11,7 +11,7 @@ export async function streamTextGeneration({
   config,
   run,
 }) {
-  const { mistral, openai, streamText } = modelfusion;
+  const { mistral, openai, streamText } = await getModule("modelfusion");
   const modelProviders = {
     mistral,
     openai,
@@ -26,13 +26,26 @@ export async function streamTextGeneration({
 
   const facade = modelProviders[provider];
   const api = facade.Api({ apiKey });
-  const userPromptWithContext = template(userPrompt, context);
 
   const images = files.filter((file) => file.type.startsWith("image/"));
-  // const pdfs = files.filter((file) => file.type === "application/pdf")
+  const pdfs = files.filter((file) => file.type === "application/pdf");
+
+  let userPromptWithContext = template(userPrompt, context);
 
   // Extract PDF pages as text
-  // const pdfTexts = await Promise.all(pdfs.map(loadPdfAsText));
+  if (pdfs.length > 0) {
+    const pdfTexts = await Promise.all(pdfs.map(loadPdfAsText));
+    const pdfContext = `Additional context from the following PDF documents has been processed and made available to you. Include the information from these documents as applicable.\n\n${pdfTexts
+      .map((value, index) => `PDF document ${index + 1}: ${value}`)
+      .join("\n\n")}`;
+
+    if (import.meta.env.DEV) {
+      // eslint-disable-next-line no-console
+      console.log(pdfContext);
+    }
+
+    userPromptWithContext += `\n\n${pdfContext}`;
+  }
 
   if (provider === "openai" && images.length > 0) {
     const serializedImages = await Promise.all(

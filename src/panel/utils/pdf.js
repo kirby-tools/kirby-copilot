@@ -1,5 +1,7 @@
-export async function loadPdfAsText({ file, pdfjsServerless }) {
-  const { resolvePDFJS } = pdfjsServerless;
+import { getModule } from "./assets";
+
+export async function loadPdfAsText(file) {
+  const { resolvePDFJS } = await getModule("pdfjs-serverless");
   const { getDocument } = await resolvePDFJS();
   const data = await file.arrayBuffer();
   const document = await getDocument({
