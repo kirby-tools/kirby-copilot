@@ -35,7 +35,7 @@ return [
                     'providers' => [
                         'openai' => [
                             'model' => [
-                                'default' => 'gpt-4',
+                                'default' => 'gpt-4-turbo-preview',
                                 'vision' => 'gpt-4-vision-preview'
                             ]
                         ]
