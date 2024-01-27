@@ -4,13 +4,16 @@
   "type": "kirby-plugin",
   "version": "1.2.0",
   "keywords": [
+    "ai",
     "content",
-    "DeepL",
+    "generation",
+    "gpt",
     "kirby",
-    "translation"
+    "mistral",
+    "openai"
   ],
   "license": "PROPRIETARY",
-  "homepage": "https://github.com/johannschopplich/kirby-copilot#readme",
+  "homepage": "https://kirbycopilot.com",
   "authors": [
     {
       "name": "Johann Schopplich",
