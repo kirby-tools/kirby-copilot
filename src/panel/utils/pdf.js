@@ -1,4 +1,4 @@
-import { getModule } from "./assets";
+import { getModule, resolvePluginAsset } from "./assets";
 
 let _PDFJS;
 
@@ -36,7 +36,7 @@ async function resolvePDFJS() {
   }
 
   _PDFJS = await getModule("pdfjs");
-  const pdfjsWorker = await getModule("pdfjs.worker");
-  _PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+  const pdfjsWorker = resolvePluginAsset("pdfjs.worker.js");
+  _PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker.url;
   return _PDFJS;
 }
