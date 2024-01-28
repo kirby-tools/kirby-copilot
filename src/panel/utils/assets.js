@@ -10,12 +10,18 @@ let _assets = [];
 const moduleCache = new Map();
 
 export async function registerPluginAssets(assets) {
-  _assets = assets;
+  if (!Array.isArray(assets)) {
+    throw new TypeError("Expected an array of assets");
+  }
+
+  if (_assets.length === 0) {
+    _assets = assets;
+  }
 }
 
 export function resolvePluginAsset(filename) {
   if (_assets.length === 0) {
-    throw new Error("Plugin assets are missing");
+    throw new Error("Plugin assets are not registered");
   }
 
   const asset = _assets.find((asset) => asset.filename === filename);
