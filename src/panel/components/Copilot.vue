@@ -5,23 +5,23 @@ import {
   nextTick,
   onBeforeUnmount,
   ref,
-  sectionProps,
   useApi,
   usePanel,
   useSection,
   useStore,
   watch,
 } from "kirbyuse";
+import { section } from "kirbyuse/props";
 import { SUPPORTED_PROVIDERS } from "../constants";
 import { STORAGE_KEY_PREFIX, getHashedStorageKey } from "../utils/storage";
 import { getModule, registerPluginAssets } from "../utils/assets";
-import { streamTextGeneration } from "../utils/ai";
+import { streamTextCompletion } from "../utils/ai";
 import { downscaleFile, openFilePicker } from "../utils/upload";
 
 export default defineComponent({
   inheritAttrs: false,
   props: {
-    ...sectionProps,
+    ...section,
   },
 });
 </script>
@@ -161,7 +161,7 @@ async function generate() {
   let lastCallTime = Date.now();
 
   try {
-    const textStream = await streamTextGeneration({
+    const textStream = await streamTextCompletion({
       userPrompt: currentPrompt.value,
       systemPrompt: systemPrompt.value,
       context: createContext(),

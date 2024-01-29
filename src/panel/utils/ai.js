@@ -3,7 +3,7 @@ import { getModule } from "./assets";
 import { template } from "./template";
 import { loadPdfAsText } from "./pdf";
 
-export async function streamTextGeneration({
+export async function streamTextCompletion({
   userPrompt = "",
   systemPrompt,
   context,
