@@ -111,7 +111,7 @@ watch(isDetailsOpen, (value) => {
     isDetailsOpen.value = localStorage.getItem(`${storageKey}$open`) === "true";
     nextTick(() => {
       if (detailsElement.value && isDetailsOpen.value) {
-        detailsElement.value.open = isDetailsOpen.value;
+        detailsElement.value.open = true;
       }
     });
   }
