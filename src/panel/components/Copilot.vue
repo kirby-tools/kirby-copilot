@@ -1,305 +1,308 @@
 <script>
-import SectionMixin from "../mixins/section";
 import {
-  STORAGE_KEY_PREFIX,
-  SUPPORTED_PROVIDERS,
-  getHashedStorageKey,
-} from "../utils/config";
+  computed,
+  defineComponent,
+  nextTick,
+  onBeforeUnmount,
+  ref,
+  sectionProps,
+  useApi,
+  usePanel,
+  useSection,
+  useStore,
+  watch,
+} from "kirbyuse";
+import { SUPPORTED_PROVIDERS } from "../constants";
+import { STORAGE_KEY_PREFIX, getHashedStorageKey } from "../utils/storage";
 import { getModule, registerPluginAssets } from "../utils/assets";
 import { streamTextGeneration } from "../utils/ai";
 import { downscaleFile, openFilePicker } from "../utils/upload";
 
+export default defineComponent({
+  inheritAttrs: false,
+  props: {
+    ...sectionProps,
+  },
+});
+</script>
+
+<script setup>
+const props = defineProps({});
+
+const panel = usePanel();
+const api = useApi();
+const store = useStore();
+
 const EMPTY_HTML_TAG_RE = /^<(\w+)>\s*<\/\1>$/;
 
-export default {
-  mixins: [SectionMixin],
-  inheritAttrs: false,
+// Section props
+const label = ref();
+const field = ref();
+const userPrompt = ref();
+const systemPrompt = ref();
+const storage = ref();
+// Section computed
+const supported = ref();
+const config = ref();
+// Local data
+const isInitialized = ref(false);
+const isGenerating = ref(false);
+const isDetailsOpen = ref(false);
+const detailsElement = ref();
+const currentPrompt = ref();
+const currentFieldContent = ref();
+const allow = ref([]);
+const files = ref([]);
+const abortController = ref();
 
-  data() {
-    return {
-      // Constants
-      SUPPORTED_PROVIDERS,
-      // Section props
-      label: undefined,
-      field: undefined,
-      userPrompt: undefined,
-      systemPrompt: undefined,
-      storage: undefined,
-      // Section computed
-      supported: undefined,
-      config: undefined,
-      // Local data
-      storageKey: undefined,
-      isInitialized: false,
-      isGenerating: false,
-      isDetailsOpen: false,
-      detailsElement: undefined,
-      currentPrompt: undefined,
-      currentFieldContent: undefined,
-      allow: [],
-      files: [],
-      abortController: undefined,
-    };
-  },
+// Non-reactive data
+let storageKey;
 
-  computed: {
-    currentContent() {
-      return this.$store.getters["content/values"]();
-    },
-    canUndo() {
-      return !this.isGenerating && this.currentFieldContent !== undefined;
-    },
-    // hasContextImages() {
-    //   return this.files.some((file) => file.type.startsWith("image/"));
-    // },
-    // hasContextPdfs() {
-    //   return this.files.some((file) => file.type === "application/pdf");
-    // },
-  },
+const currentContent = computed(() => store.getters["content/values"]());
+const canUndo = computed(
+  () => !isGenerating.value && currentFieldContent.value !== undefined,
+);
 
-  watch: {
-    currentPrompt(value) {
-      if (!this.isInitialized) return;
-      if (!this.storage) return;
+watch(currentPrompt, (value) => {
+  if (!isInitialized.value) return;
+  if (!storage.value) return;
 
-      if (value && value !== this.userPrompt) {
-        localStorage.setItem(`${this.storageKey}$prompt`, value);
-      } else if (!value || value === this.userPrompt) {
-        localStorage.removeItem(`${this.storageKey}$prompt`);
+  if (value && value !== userPrompt.value) {
+    localStorage.setItem(`${storageKey}$prompt`, value);
+  } else if (!value || value === userPrompt.value) {
+    localStorage.removeItem(`${storageKey}$prompt`);
+  }
+});
+
+watch(isDetailsOpen, (value) => {
+  if (!isInitialized.value) return;
+  if (!storage.value) return;
+
+  if (value) {
+    localStorage.setItem(`${storageKey}$open`, "true");
+  } else {
+    localStorage.removeItem(`${storageKey}$open`);
+  }
+});
+
+(async () => {
+  const { load } = useSection();
+  const response = await load({
+    parent: props.parent,
+    name: props.name,
+  });
+  label.value = t(response.label) || panel.t("johannschopplich.copilot.label");
+  field.value = response.field ?? undefined;
+  userPrompt.value = response.userPrompt ?? undefined;
+  systemPrompt.value =
+    response.systemPrompt || response.config.systemPrompt || undefined;
+  storage.value = response.storage ?? true;
+  if (response.editable !== false) allow.value.push("edit");
+  if (response.files !== false) allow.value.push("files");
+  supported.value = response.supported;
+  config.value = response.config;
+
+  registerPluginAssets(response.assets);
+
+  if (storage.value) {
+    storageKey = getHashedStorageKey(panel.view.path, field.value);
+    currentPrompt.value =
+      localStorage.getItem(`${storageKey}$prompt`) || userPrompt.value || "";
+    isDetailsOpen.value = localStorage.getItem(`${storageKey}$open`) === "true";
+    nextTick(() => {
+      if (detailsElement.value && isDetailsOpen.value) {
+        detailsElement.value.open = isDetailsOpen.value;
       }
-    },
-    isDetailsOpen(value) {
-      if (!this.isInitialized) return;
-      if (!this.storage) return;
+    });
+  }
 
-      if (value) {
-        localStorage.setItem(`${this.storageKey}$open`, "true");
-      } else {
-        localStorage.removeItem(`${this.storageKey}$open`);
-      }
-    },
-  },
+  panel.events.on("view.save", onModelSave);
+  isInitialized.value = true;
+})();
 
-  async created() {
-    const response = await this.load();
-    this.label =
-      this.t(response.label) || this.$t("johannschopplich.copilot.label");
-    this.field = response.field ?? undefined;
-    this.userPrompt = response.userPrompt ?? undefined;
-    this.systemPrompt =
-      response.systemPrompt || response.config.systemPrompt || undefined;
-    this.storage = response.storage ?? true;
-    if (response.editable !== false) this.allow.push("edit");
-    if (response.files !== false) this.allow.push("files");
-    this.supported = response.supported;
-    this.config = response.config;
+onBeforeUnmount(() => {
+  panel.events.off("view.save", onModelSave);
+});
 
-    registerPluginAssets(response.assets);
+function t(value) {
+  if (!value || typeof value === "string") return value;
+  return value[panel.translation.code] ?? Object.values(value)[0];
+}
 
-    if (this.storage) {
-      this.storageKey = getHashedStorageKey(this.$panel.view.path, this.field);
-      this.currentPrompt =
-        localStorage.getItem(`${this.storageKey}$prompt`) ||
-        this.userPrompt ||
-        "";
-      this.isDetailsOpen =
-        localStorage.getItem(`${this.storageKey}$open`) === "true";
-      this.$nextTick(() => {
-        if (this.$refs.detailsElement && this.isDetailsOpen) {
-          this.$refs.detailsElement.open = this.isDetailsOpen;
+async function generate() {
+  // eslint-disable-next-line no-undef
+  if (__PLAYGROUND__) {
+    const apiKey = sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`);
+    if (!apiKey) {
+      panel.notification.error(
+        "Please set your OpenAI API key in the playground settings.",
+      );
+      return;
+    }
+    if (!apiKey.startsWith("sk-")) {
+      panel.notification.error("Invalid OpenAI API key.");
+      return;
+    }
+  }
+
+  if (!currentPrompt.value) {
+    panel.notification.error(panel.t("johannschopplich.copilot.prompt.empty"));
+    return;
+  }
+
+  panel.view.isLoading = true;
+  isGenerating.value = true;
+  currentFieldContent.value = currentContent.value[field.value];
+  abortController.value = new AbortController();
+
+  const { AbortError, ApiCallError } = await getModule("modelfusion");
+
+  let text = "";
+  let lastCallTime = Date.now();
+
+  try {
+    const textStream = await streamTextGeneration({
+      userPrompt: currentPrompt.value,
+      systemPrompt: systemPrompt.value,
+      context: createContext(),
+      files: files.value,
+      config: config.value,
+      run: {
+        abortSignal: abortController.value.signal,
+      },
+    });
+
+    for await (const textPart of textStream) {
+      text += textPart;
+
+      // Preview blocks
+      if (Array.isArray(currentFieldContent.value)) {
+        if (Date.now() - lastCallTime < config.value.blocksUpdateThrottle) {
+          continue;
         }
-      });
+        lastCallTime = Date.now();
+
+        const newBlocks = await htmlToBlocks(text);
+        if (newBlocks.length > 0) {
+          store.dispatch("content/update", [
+            field.value,
+            [...currentFieldContent.value, ...newBlocks],
+          ]);
+        }
+      }
+      // Preview text
+      else {
+        store.dispatch("content/update", [
+          field.value,
+          currentFieldContent.value + text,
+        ]);
+      }
+    }
+  } catch (error) {
+    abortController.value = undefined;
+    panel.view.isLoading = false;
+    isGenerating.value = false;
+
+    if (error instanceof AbortError) return;
+
+    if (error instanceof ApiCallError) {
+      console.error(error);
+      panel.notification.error(error.message);
+      return;
     }
 
-    this.$panel.events.on("view.save", this.onModelSave);
-    this.isInitialized = true;
-  },
+    console.error(error);
+    panel.notification.error(
+      panel.t("johannschopplich.copilot.generator.error"),
+    );
+    return;
+  }
 
-  beforeDestroy() {
-    this.$panel.events.off("view.save", this.onModelSave);
-  },
+  // Update content
+  store.dispatch("content/update", [
+    field.value,
+    Array.isArray(currentFieldContent.value)
+      ? [...currentFieldContent.value, ...(await htmlToBlocks(text))]
+      : currentFieldContent.value + text,
+  ]);
 
-  methods: {
-    t(value) {
-      if (!value || typeof value === "string") return value;
-      return value[this.$panel.translation.code] ?? Object.values(value)[0];
-    },
-    async generate() {
-      // eslint-disable-next-line no-undef
-      if (__PLAYGROUND__) {
-        const apiKey = sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`);
-        if (!apiKey) {
-          this.$panel.notification.error(
-            "Please set your OpenAI API key in the playground settings.",
-          );
-          return;
-        }
-        if (!apiKey.startsWith("sk-")) {
-          this.$panel.notification.error("Invalid OpenAI API key.");
-          return;
-        }
+  abortController.value = undefined;
+  panel.view.isLoading = false;
+  isGenerating.value = false;
+  panel.notification.success({
+    icon: "sparkling",
+    message: panel.t("johannschopplich.copilot.generator.success"),
+  });
+}
+
+function undo() {
+  store.dispatch("content/update", [field.value, currentFieldContent.value]);
+  currentFieldContent.value = undefined;
+}
+
+async function pickFiles() {
+  const selectedFiles = await openFilePicker({
+    accept: [
+      "image/png",
+      "image/jpeg",
+      "image/webp",
+      "image/gif",
+      "application/pdf",
+    ].join(","),
+  });
+
+  files.value = await Promise.all(
+    selectedFiles.map(async (file) => {
+      if (file.type.startsWith("image/")) {
+        return downscaleFile(file, { maxSize: 2048 });
       }
 
-      if (!this.currentPrompt) {
-        this.$panel.notification.error(
-          this.$t("johannschopplich.copilot.prompt.empty"),
-        );
-        return;
-      }
+      return file;
+    }),
+  );
+}
 
-      this.$panel.view.isLoading = true;
-      this.isGenerating = true;
-      this.currentFieldContent = this.currentContent[this.field];
-      this.abortController = new AbortController();
+async function htmlToBlocks(html) {
+  if (!html) return [];
 
-      const { AbortError, ApiCallError } = await getModule("modelfusion");
+  const { result } = await api.post("__copilot__/html2blocks", {
+    html,
+  });
 
-      let text = "";
-      let lastCallTime = Date.now();
+  // Skip empty text block
+  if (
+    result.blocks.length === 1 &&
+    "text" in result.blocks[0].content &&
+    EMPTY_HTML_TAG_RE.test(result.blocks[0].content.text)
+  ) {
+    return [];
+  }
 
-      try {
-        const textStream = await streamTextGeneration({
-          userPrompt: this.currentPrompt,
-          systemPrompt: this.systemPrompt,
-          context: this.createContext(),
-          files: this.files,
-          config: this.config,
-          run: {
-            abortSignal: this.abortController.signal,
-          },
-        });
+  return result.blocks;
+}
 
-        for await (const textPart of textStream) {
-          text += textPart;
+function createContext() {
+  const context = {
+    ...currentContent.value,
+    title: panel.view.title,
+  };
 
-          // Preview blocks
-          if (Array.isArray(this.currentFieldContent)) {
-            if (Date.now() - lastCallTime < this.config.blocksUpdateThrottle) {
-              continue;
-            }
-            lastCallTime = Date.now();
+  // JSON-encode non-primitive values
+  return Object.fromEntries(
+    Object.entries(context).map(([key, value]) => [
+      key,
+      Array.isArray(value) || (typeof value === "object" && value !== null)
+        ? JSON.stringify(value)
+        : value,
+    ]),
+  );
+}
 
-            const newBlocks = await this.htmlToBlocks(text);
-            if (newBlocks.length > 0) {
-              this.$store.dispatch("content/update", [
-                this.field,
-                [...this.currentFieldContent, ...newBlocks],
-              ]);
-            }
-          }
-          // Preview text
-          else {
-            this.$store.dispatch("content/update", [
-              this.field,
-              this.currentFieldContent + text,
-            ]);
-          }
-        }
-      } catch (error) {
-        this.abortController = undefined;
-        this.$panel.view.isLoading = false;
-        this.isGenerating = false;
-
-        if (error instanceof AbortError) return;
-
-        if (error instanceof ApiCallError) {
-          console.error(error);
-          this.$panel.notification.error(error.message);
-          return;
-        }
-
-        console.error(error);
-        this.$panel.notification.error(
-          this.$t("johannschopplich.copilot.generator.error"),
-        );
-        return;
-      }
-
-      // Update content
-      this.$store.dispatch("content/update", [
-        this.field,
-        Array.isArray(this.currentFieldContent)
-          ? [...this.currentFieldContent, ...(await this.htmlToBlocks(text))]
-          : this.currentFieldContent + text,
-      ]);
-
-      this.abortController = undefined;
-      this.$panel.view.isLoading = false;
-      this.isGenerating = false;
-      this.$panel.notification.success({
-        icon: "sparkling",
-        message: this.$t("johannschopplich.copilot.generator.success"),
-      });
-    },
-    undo() {
-      this.$store.dispatch("content/update", [
-        this.field,
-        this.currentFieldContent,
-      ]);
-      this.currentFieldContent = undefined;
-    },
-    async pickFiles() {
-      const files = await openFilePicker({
-        accept: [
-          "image/png",
-          "image/jpeg",
-          "image/webp",
-          "image/gif",
-          "application/pdf",
-        ].join(","),
-      });
-
-      this.files = await Promise.all(
-        files.map(async (file) => {
-          if (file.type.startsWith("image/")) {
-            return downscaleFile(file, { maxSize: 2048 });
-          }
-
-          return file;
-        }),
-      );
-    },
-    async htmlToBlocks(html) {
-      if (!html) return [];
-
-      const { result } = await this.$api.post("__copilot__/html2blocks", {
-        html,
-      });
-
-      // Skip empty text block
-      if (
-        result.blocks.length === 1 &&
-        result.blocks[0].type === "text" &&
-        EMPTY_HTML_TAG_RE.test(result.blocks[0].content.text)
-      ) {
-        return [];
-      }
-
-      return result.blocks;
-    },
-    createContext() {
-      const context = {
-        ...this.currentContent,
-        title: this.$panel.view.title,
-      };
-
-      // JSON-encode non-primitive values
-      return Object.fromEntries(
-        Object.entries(context).map(([key, value]) => [
-          key,
-          Array.isArray(value) || (typeof value === "object" && value !== null)
-            ? JSON.stringify(value)
-            : value,
-        ]),
-      );
-    },
-    onModelSave() {
-      if (this.canUndo) {
-        this.currentFieldContent = undefined;
-      }
-    },
-  },
-};
+function onModelSave() {
+  if (canUndo.value) {
+    currentFieldContent.value = undefined;
+  }
+}
 </script>
 
 <template>
@@ -373,7 +376,7 @@ export default {
       <k-button-group layout="collapsed">
         <k-button
           :icon="isGenerating ? 'loader' : 'sparkling'"
-          :text="$t('johannschopplich.copilot.generate')"
+          :text="panel.t('johannschopplich.copilot.generate')"
           variant="filled"
           size="sm"
           theme="positive"
@@ -383,7 +386,7 @@ export default {
         <k-button
           v-if="isGenerating"
           icon="cancel"
-          :text="$t('johannschopplich.copilot.stop')"
+          :text="panel.t('johannschopplich.copilot.stop')"
           variant="filled"
           size="sm"
           theme="notice"
@@ -392,7 +395,7 @@ export default {
         <k-button
           v-if="canUndo"
           icon="undo"
-          :text="$t('johannschopplich.copilot.undo')"
+          :text="panel.t('johannschopplich.copilot.undo')"
           variant="filled"
           size="sm"
           @click="undo()"
@@ -408,10 +411,10 @@ export default {
           {{
             [
               ...(allow.includes("edit")
-                ? [$t("johannschopplich.copilot.prompt.label")]
+                ? [panel.t("johannschopplich.copilot.prompt.label")]
                 : []),
               ...(allow.includes("files")
-                ? [$t("johannschopplich.copilot.context")]
+                ? [panel.t("johannschopplich.copilot.context")]
                 : []),
             ].join(", ")
           }}
@@ -422,7 +425,9 @@ export default {
               :key="isDetailsOpen ? 1 : 0"
               v-model="currentPrompt"
               class="kai-mb-1"
-              :placeholder="$t('johannschopplich.copilot.prompt.placeholder')"
+              :placeholder="
+                panel.t('johannschopplich.copilot.prompt.placeholder')
+              "
               type="textarea"
               :buttons="false"
               :counter="false"
@@ -440,7 +445,7 @@ export default {
           <k-button-group v-if="allow.includes('files')" layout="collapsed">
             <k-button
               icon="upload"
-              :text="$t('johannschopplich.copilot.files.select')"
+              :text="panel.t('johannschopplich.copilot.files.select')"
               variant="filled"
               size="sm"
               @click="pickFiles()"
@@ -448,7 +453,7 @@ export default {
             <k-button
               v-if="files.length > 0"
               icon="cancel"
-              :text="$t('johannschopplich.copilot.remove')"
+              :text="panel.t('johannschopplich.copilot.remove')"
               variant="filled"
               size="sm"
               @click="files = []"

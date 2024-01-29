@@ -1,4 +1,4 @@
-import { STORAGE_KEY_PREFIX } from "./config";
+import { STORAGE_KEY_PREFIX } from "./storage";
 import { getModule } from "./assets";
 import { template } from "./template";
 import { loadPdfAsText } from "./pdf";

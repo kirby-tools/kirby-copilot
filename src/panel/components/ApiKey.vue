@@ -1,30 +1,27 @@
-<script>
-import { STORAGE_KEY_PREFIX } from "../utils/config";
+<script setup>
+import { computed } from "kirbyuse";
+import { STORAGE_KEY_PREFIX } from "../utils/storage";
 
-export default {
-  props: {
-    label: String,
-    before: String,
-    after: String,
-    help: String,
-    value: String,
-  },
+defineProps({
+  label: String,
+  before: String,
+  after: String,
+  help: String,
+  value: String,
+});
 
-  computed: {
-    text: {
-      get() {
-        return sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`) || "";
-      },
-      set(value) {
-        if (value) {
-          sessionStorage.setItem(`${STORAGE_KEY_PREFIX}apiKey`, value);
-        } else {
-          sessionStorage.removeItem(`${STORAGE_KEY_PREFIX}apiKey`);
-        }
-      },
-    },
+const text = computed({
+  get() {
+    return sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`) || "";
   },
-};
+  set(value) {
+    if (value) {
+      sessionStorage.setItem(`${STORAGE_KEY_PREFIX}apiKey`, value);
+    } else {
+      sessionStorage.removeItem(`${STORAGE_KEY_PREFIX}apiKey`);
+    }
+  },
+});
 </script>
 
 <template>
