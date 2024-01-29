@@ -53,10 +53,10 @@ const currentPrompt = ref();
 const currentFieldContent = ref();
 const allow = ref([]);
 const files = ref([]);
-const abortController = ref();
 
 // Non-reactive data
 let storageKey;
+let abortController;
 
 const currentContent = computed(() => store.getters["content/values"]());
 const canUndo = computed(
@@ -150,10 +150,10 @@ async function generate() {
     return;
   }
 
-  panel.view.isLoading = true;
+  panel.isLoading = true;
   isGenerating.value = true;
   currentFieldContent.value = currentContent.value[field.value];
-  abortController.value = new AbortController();
+  abortController = new AbortController();
 
   const { AbortError, ApiCallError } = await getModule("modelfusion");
 
@@ -168,7 +168,7 @@ async function generate() {
       files: files.value,
       config: config.value,
       run: {
-        abortSignal: abortController.value.signal,
+        abortSignal: abortController.signal,
       },
     });
 
@@ -199,8 +199,8 @@ async function generate() {
       }
     }
   } catch (error) {
-    abortController.value = undefined;
-    panel.view.isLoading = false;
+    abortController = undefined;
+    panel.isLoading = false;
     isGenerating.value = false;
 
     if (error instanceof AbortError) return;
@@ -226,13 +226,17 @@ async function generate() {
       : currentFieldContent.value + text,
   ]);
 
-  abortController.value = undefined;
-  panel.view.isLoading = false;
+  abortController = undefined;
+  panel.isLoading = false;
   isGenerating.value = false;
   panel.notification.success({
     icon: "sparkling",
     message: panel.t("johannschopplich.copilot.generator.success"),
   });
+}
+
+function abort() {
+  abortController?.abort();
 }
 
 function undo() {
@@ -390,7 +394,7 @@ function onModelSave() {
           variant="filled"
           size="sm"
           theme="notice"
-          @click="abortController.abort()"
+          @click="abort()"
         />
         <k-button
           v-if="canUndo"
