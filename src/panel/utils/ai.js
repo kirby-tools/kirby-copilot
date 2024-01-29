@@ -1,6 +1,6 @@
 import { STORAGE_KEY_PREFIX } from "./storage";
 import { getModule } from "./assets";
-import { template } from "./template";
+import { renderTemplate } from "./template";
 import { loadPdfAsText } from "./pdf";
 
 export async function streamTextCompletion({
@@ -30,7 +30,7 @@ export async function streamTextCompletion({
   const images = files.filter((file) => file.type.startsWith("image/"));
   const pdfs = files.filter((file) => file.type === "application/pdf");
 
-  let userPromptWithContext = template(userPrompt, context);
+  let userPromptWithContext = renderTemplate(userPrompt, context);
 
   // Extract PDF pages as text
   if (pdfs.length > 0) {

@@ -1,4 +1,4 @@
-export function template(str, variables, fallback) {
+export function renderTemplate(str, variables, fallback) {
   return str.replace(
     /{([\w\d]+)}/g,
     (_, key) =>
