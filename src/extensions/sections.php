@@ -73,10 +73,14 @@ return [
                 $kirby = $this->kirby();
                 $plugin = $kirby->plugin('johannschopplich/copilot');
 
-                return $plugin->assets()->map(fn (PluginAsset $asset) => [
-                    'filename' => $asset->filename(),
-                    'url' => $asset->url()
-                ])->values();
+                return $plugin
+                    ->assets()
+                    ->clone()
+                    ->map(fn (PluginAsset $asset) => [
+                        'filename' => $asset->filename(),
+                        'url' => $asset->url()
+                    ])
+                    ->values();
             }
         ]
     ]
