@@ -1,4 +1,4 @@
-import { STORAGE_KEY_PREFIX } from "./storage";
+import { STORAGE_KEY_PREFIX } from "../constants";
 import { getModule } from "./assets";
 import { renderTemplate } from "./template";
 import { loadPdfAsText } from "./pdf";

@@ -1,14 +1,24 @@
-<script setup>
+<script>
 import { computed } from "kirbyuse";
-import { STORAGE_KEY_PREFIX } from "../utils/storage";
+import {
+  after as _after,
+  before as _before,
+  help as _help,
+  label as _label,
+} from "kirbyuse/props";
+import { STORAGE_KEY_PREFIX } from "../constants";
 
-defineProps({
-  label: String,
-  before: String,
-  after: String,
-  help: String,
+const propsDefinition = {
+  ..._label,
+  ..._before,
+  ..._after,
+  ..._help,
   value: String,
-});
+};
+</script>
+
+<script setup>
+defineProps(propsDefinition);
 
 const text = computed({
   get() {

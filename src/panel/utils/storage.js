@@ -1,5 +1,6 @@
 import { hash } from "ohash";
+import { STORAGE_KEY_PREFIX } from "../constants";
 
-export const STORAGE_KEY_PREFIX = "kirby$copilot$";
-export const getHashedStorageKey = (...args) =>
-  `${STORAGE_KEY_PREFIX}${hash([...args])}`;
+export function getHashedStorageKey(...args) {
+  return `${STORAGE_KEY_PREFIX}${hash([...args])}`;
+}

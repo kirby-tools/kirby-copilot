@@ -18,28 +18,6 @@ export async function openFilePicker({ accept = "*", multiple = true } = {}) {
   });
 }
 
-export function fileToDataUri(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = (event) => {
-      const dataUri = event.target.result;
-      const mimeType = file.type;
-      resolve({ dataUri, mimeType });
-    };
-
-    reader.onerror = (error) => {
-      reject(error);
-    };
-
-    reader.readAsDataURL(file);
-  });
-}
-
-export function dataUriToBase64(dataUri) {
-  return dataUri.split(",")[1];
-}
-
 export async function downscaleFile(file, { maxSize } = {}) {
   if (!maxSize) return file;
 
@@ -94,4 +72,28 @@ async function imageToBlob(img, fileType, maxSize) {
   }
 
   return blob;
+}
+
+// eslint-disable-next-line no-unused-vars
+function _fileToDataUri(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      const dataUri = event.target.result;
+      const mimeType = file.type;
+      resolve({ dataUri, mimeType });
+    };
+
+    reader.onerror = (error) => {
+      reject(error);
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+// eslint-disable-next-line no-unused-vars
+function _dataUriToBase64(dataUri) {
+  return dataUri.split(",")[1];
 }

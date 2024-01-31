@@ -12,22 +12,23 @@ import {
   watch,
 } from "kirbyuse";
 import { section } from "kirbyuse/props";
-import { SUPPORTED_PROVIDERS } from "../constants";
-import { STORAGE_KEY_PREFIX, getHashedStorageKey } from "../utils/storage";
+import { STORAGE_KEY_PREFIX, SUPPORTED_PROVIDERS } from "../constants";
+import { getHashedStorageKey } from "../utils/storage";
 import { getModule, registerPluginAssets } from "../utils/assets";
 import { streamTextCompletion } from "../utils/ai";
 import { downscaleFile, openFilePicker } from "../utils/upload";
 
+const propsDefinition = {
+  ...section,
+};
+
 export default defineComponent({
   inheritAttrs: false,
-  props: {
-    ...section,
-  },
 });
 </script>
 
 <script setup>
-const props = defineProps({});
+const props = defineProps(propsDefinition);
 
 const panel = usePanel();
 const api = useApi();
