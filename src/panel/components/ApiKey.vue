@@ -15,6 +15,10 @@ const propsDefinition = {
   ..._help,
   value: String,
 };
+
+export default {
+  inheritAttrs: false,
+};
 </script>
 
 <script setup>

@@ -1,7 +1,6 @@
 <script>
 import {
   computed,
-  defineComponent,
   nextTick,
   onBeforeUnmount,
   ref,
@@ -12,7 +11,11 @@ import {
   watch,
 } from "kirbyuse";
 import { section } from "kirbyuse/props";
-import { STORAGE_KEY_PREFIX, SUPPORTED_PROVIDERS } from "../constants";
+import {
+  LOG_LEVELS,
+  STORAGE_KEY_PREFIX,
+  SUPPORTED_PROVIDERS,
+} from "../constants";
 import { getHashedStorageKey } from "../utils/storage";
 import { getModule, registerPluginAssets } from "../utils/assets";
 import { streamTextCompletion } from "../utils/ai";
@@ -22,9 +25,9 @@ const propsDefinition = {
   ...section,
 };
 
-export default defineComponent({
+export default {
   inheritAttrs: false,
-});
+};
 </script>
 
 <script setup>
@@ -42,6 +45,7 @@ const field = ref();
 const userPrompt = ref();
 const systemPrompt = ref();
 const storage = ref();
+const logLevel = ref();
 // Section computed
 const supported = ref();
 const config = ref();
@@ -100,6 +104,7 @@ watch(isDetailsOpen, (value) => {
   storage.value = response.storage ?? true;
   if (response.editable !== false) allow.value.push("edit");
   if (response.files !== false) allow.value.push("files");
+  logLevel.value = LOG_LEVELS.indexOf(response.logLevel);
   supported.value = response.supported;
   config.value = response.config;
 
@@ -168,6 +173,7 @@ async function generate() {
       context: createContext(),
       files: files.value,
       config: config.value,
+      logLevel: logLevel.value,
       run: {
         abortSignal: abortController.signal,
       },

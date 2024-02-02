@@ -4,11 +4,12 @@ import { renderTemplate } from "./template";
 import { loadPdfAsText } from "./pdf";
 
 export async function streamTextCompletion({
-  userPrompt = "",
+  userPrompt,
   systemPrompt,
   context,
   files,
   config,
+  logLevel,
   run,
 }) {
   const { mistral, openai, streamText } = await getModule("modelfusion");
@@ -16,6 +17,10 @@ export async function streamTextCompletion({
     mistral,
     openai,
   };
+
+  if (import.meta.env.DEV) {
+    logLevel = 2;
+  }
 
   const provider = config.provider;
   const providerConfig = config.providers[provider];
@@ -42,9 +47,9 @@ export async function streamTextCompletion({
     userPromptWithContext += `\n\n${pdfContext}`;
   }
 
-  if (import.meta.env.DEV) {
+  if (logLevel > 0) {
     // eslint-disable-next-line no-console
-    console.log(userPromptWithContext);
+    console.log("User prompt with context:", userPromptWithContext);
   }
 
   if (provider === "openai" && images.length > 0) {
