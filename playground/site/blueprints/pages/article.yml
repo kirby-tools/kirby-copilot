@@ -1,0 +1,21 @@
+title: Article
+
+options:
+  preview: https://kirbycopilot.com
+
+columns:
+  - width: 1/1
+    fields:
+      headline01:
+        type: headline
+        label: Article
+  - width: 2/3
+    fields:
+      content01:
+        label: Blocks
+        type: blocks
+  - width: 1/3
+    sections:
+      copilot01:
+        type: copilot
+        field: content01

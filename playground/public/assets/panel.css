@@ -52,11 +52,14 @@
   transform: translateY(1px);
 }
 
+.k-page-view[data-id="article"] .k-topbar,
+.k-page-view[data-id="article"] .k-page-view-header,
 .k-page-view[data-id="product"] .k-topbar,
 .k-page-view[data-id="product"] .k-page-view-header {
   display: none;
 }
 
+.k-page-view[data-id="article"] .k-sections,
 .k-page-view[data-id="product"] .k-sections {
   padding-top: 2rem;
 }
