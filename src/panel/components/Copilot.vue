@@ -101,10 +101,12 @@ watch(isDetailsOpen, (value) => {
   userPrompt.value = response.userPrompt ?? undefined;
   systemPrompt.value =
     response.systemPrompt || response.config.systemPrompt || undefined;
-  storage.value = response.storage ?? true;
+  storage.value = response.storage === true;
   if (response.editable !== false) allow.value.push("edit");
   if (response.files !== false) allow.value.push("files");
-  logLevel.value = LOG_LEVELS.indexOf(response.logLevel);
+  logLevel.value = LOG_LEVELS.indexOf(
+    response.config.logLevel ?? response.logLevel,
+  );
   supported.value = response.supported;
   config.value = response.config;
 
