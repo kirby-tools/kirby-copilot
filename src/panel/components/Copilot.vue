@@ -16,9 +16,9 @@ import {
   STORAGE_KEY_PREFIX,
   SUPPORTED_PROVIDERS,
 } from "../constants";
+import { useStreamText } from "../composables";
 import { getHashedStorageKey } from "../utils/storage";
 import { getModule, registerPluginAssets } from "../utils/assets";
-import { streamTextCompletion } from "../utils/ai";
 import { downscaleFile, openFilePicker } from "../utils/upload";
 
 const propsDefinition = {
@@ -167,7 +167,7 @@ async function generate() {
   let lastCallTime = Date.now();
 
   try {
-    const textStream = await streamTextCompletion({
+    const textStream = await useStreamText({
       userPrompt: currentPrompt.value,
       systemPrompt: systemPrompt.value,
       context: createContext(),

@@ -39,7 +39,7 @@ const text = computed({
 </script>
 
 <template>
-  <k-field input="apiKey" :label="label" :help="help">
+  <k-field input="apiKey" :label="label" :help="help" required>
     <k-input
       id="apiKey"
       v-model="text"

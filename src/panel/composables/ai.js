@@ -1,9 +1,10 @@
 import { STORAGE_KEY_PREFIX } from "../constants";
-import { getModule } from "./assets";
-import { renderTemplate } from "./template";
-import { loadPdfAsText } from "./pdf";
+import { getModule } from "../utils/assets";
+import { renderTemplate } from "../utils/template";
+import { loadPdfAsText } from "../utils/pdf";
+import { useLogger } from "./logger";
 
-export async function streamTextCompletion({
+export async function useStreamText({
   userPrompt,
   systemPrompt,
   context,
@@ -12,15 +13,14 @@ export async function streamTextCompletion({
   logLevel,
   run,
 }) {
+  const logger = useLogger();
+  if (import.meta.env.DEV) logLevel = 3;
+
   const { mistral, openai, streamText } = await getModule("modelfusion");
   const modelProviders = {
     mistral,
     openai,
   };
-
-  if (import.meta.env.DEV) {
-    logLevel = 2;
-  }
 
   const provider = config.provider;
   const providerConfig = config.providers[provider];
@@ -47,9 +47,9 @@ export async function streamTextCompletion({
     userPromptWithContext += `\n\n${pdfContext}`;
   }
 
-  if (logLevel > 0) {
-    // eslint-disable-next-line no-console
-    console.log("User prompt with context:", userPromptWithContext);
+  if (logLevel > 1) {
+    logger.info("System prompt:", systemPrompt);
+    logger.info("User prompt with context:", userPromptWithContext);
   }
 
   if (provider === "openai" && images.length > 0) {

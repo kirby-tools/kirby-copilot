@@ -13,7 +13,7 @@ return [
             'storage' => fn ($storage = true) => $storage,
             'editable' => fn ($editable = true) => $editable,
             'files' => fn ($files = true) => $files,
-            'logLevel' => fn ($logLevel = null) => in_array($logLevel, ['error', 'info', 'debug'], true) ? $logLevel : 'error'
+            'logLevel' => fn ($logLevel = null) => in_array($logLevel, ['error', 'warn', 'info', 'debug'], true) ? $logLevel : 'warn'
         ],
         'computed' => [
             'supported' => function () {
