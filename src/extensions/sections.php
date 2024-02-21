@@ -12,7 +12,7 @@ return [
             'systemPrompt' => fn ($systemPrompt = null) => is_string($systemPrompt) ? trim($systemPrompt) : $systemPrompt,
             'storage' => fn ($storage = true) => $storage,
             'editable' => fn ($editable = true) => $editable,
-            'files' => fn ($files = true) => $files,
+            'files' => fn ($files = null) => $files ?? true,
             'logLevel' => fn ($logLevel = null) => in_array($logLevel, ['error', 'warn', 'info', 'debug'], true) ? $logLevel : 'warn'
         ],
         'computed' => [
@@ -27,7 +27,7 @@ return [
                 );
             },
             'config' => function () {
-                /** @var \Kirby\Cms\App $kirby */
+                /** @var \Kirby\Cms\App */
                 $kirby = $this->kirby();
                 $config = $kirby->option('johannschopplich.copilot', []);
 
@@ -70,7 +70,7 @@ return [
                 return $config;
             },
             'assets' => function () {
-                /** @var \Kirby\Cms\App $kirby */
+                /** @var \Kirby\Cms\App */
                 $kirby = $this->kirby();
                 $plugin = $kirby->plugin('johannschopplich/copilot');
 
@@ -82,6 +82,53 @@ return [
                         'url' => $asset->url()
                     ])
                     ->values();
+            },
+            'modelFile' => function () {
+                /** @var \Kirby\Cms\File */
+                $model = $this->model();
+
+                if ($model::CLASS_ALIAS !== 'file') {
+                    return null;
+                }
+
+                if ($this->files !== 'auto') {
+                    return null;
+                }
+
+                $mime = $model->mime();
+                $url = $model->url();
+
+                // Ensure the image context is supported by GPT Vision
+                if (str_starts_with($mime, 'image/')) {
+                    $targetSize = 2048;
+                    /** @var \Kirby\Cms\FileVersion|\Kirby\Cms\File|\Kirby\Filesystem\Asset */
+                    $thumb = null;
+                    $width = $model->width();
+                    $height = $model->height();
+                    $defaultOptions = [
+                        'format' => 'jpg',
+                        'quality' => 60
+                    ];
+
+                    // Resize images if larger than 2048px
+                    if ($width > $targetSize || $height > $targetSize) {
+                        if ($width > $height) {
+                            $thumb = $model->thumb(array_merge($defaultOptions, ['width' => $targetSize]));
+                        } else {
+                            $thumb = $model->thumb(array_merge($defaultOptions, ['height' => $targetSize]));
+                        }
+                    } else {
+                        $thumb = $model->thumb($defaultOptions);
+                    }
+
+                    $mime = $thumb->mime();
+                    $url = $thumb->url();
+                }
+
+                return [
+                    'mime' => $mime,
+                    'url' => $url
+                ];
             }
         ]
     ]

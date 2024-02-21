@@ -15,6 +15,7 @@ import {
   LOG_LEVELS,
   STORAGE_KEY_PREFIX,
   SUPPORTED_PROVIDERS,
+  SUPPORTED_VISION_MIME_TYPES,
 } from "../constants";
 import { useStreamText } from "../composables";
 import { getHashedStorageKey } from "../utils/storage";
@@ -49,6 +50,7 @@ const logLevel = ref();
 // Section computed
 const supported = ref();
 const config = ref();
+const modelFile = ref();
 // Local data
 const isInitialized = ref(false);
 const isGenerating = ref(false);
@@ -102,8 +104,8 @@ watch(isDetailsOpen, (value) => {
   systemPrompt.value =
     response.systemPrompt || response.config.systemPrompt || undefined;
   storage.value = response.storage === true;
-  if (response.editable !== false) allow.value.push("edit");
-  if (response.files !== false) allow.value.push("files");
+  if (response.editable === true) allow.value.push("edit");
+  if (response.files === true) allow.value.push("files");
   logLevel.value = LOG_LEVELS.indexOf(
     response.config.logLevel ?? response.logLevel,
   );
@@ -111,6 +113,18 @@ watch(isDetailsOpen, (value) => {
   config.value = response.config;
 
   registerPluginAssets(response.assets);
+
+  if (response.files === "auto" && response.modelFile) {
+    modelFile.value = response.modelFile;
+    const { mime, url } = response.modelFile;
+    if (SUPPORTED_VISION_MIME_TYPES.includes(mime)) {
+      fetch(url)
+        .then((response) => response.blob())
+        .then((blob) => {
+          files.value = [blob];
+        });
+    }
+  }
 
   if (storage.value) {
     storageKey = getHashedStorageKey(panel.view.path, field.value);
@@ -255,13 +269,7 @@ function undo() {
 
 async function pickFiles() {
   const selectedFiles = await openFilePicker({
-    accept: [
-      "image/png",
-      "image/jpeg",
-      "image/webp",
-      "image/gif",
-      "application/pdf",
-    ].join(","),
+    accept: [...SUPPORTED_VISION_MIME_TYPES, "application/pdf"].join(","),
   });
 
   files.value = await Promise.all(
@@ -474,6 +482,20 @@ function onModelSave() {
           </k-button-group>
         </div>
       </details>
+
+      <k-box v-if="modelFile" class="!kai-mt-2" theme="none">
+        <k-text>
+          {{
+            panel.t(
+              `johannschopplich.copilot.context.file.${
+                SUPPORTED_VISION_MIME_TYPES.includes(modelFile.mime)
+                  ? "model"
+                  : "unsupported"
+              }`,
+            )
+          }}
+        </k-text>
+      </k-box>
     </div>
   </k-section>
 </template>

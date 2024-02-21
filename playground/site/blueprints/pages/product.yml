@@ -28,6 +28,10 @@ columns:
       content01:
         label: Blocks
         type: blocks
+      # files:
+      #   label: Files
+      #   type: files
+      #   uploads: image
   - width: 1/3
     sections:
       copilot01:
