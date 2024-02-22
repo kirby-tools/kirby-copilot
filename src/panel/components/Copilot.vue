@@ -480,22 +480,21 @@ function onModelSave() {
               @click="files = []"
             />
           </k-button-group>
+          <k-box v-else-if="modelFile" theme="none">
+            <k-text>
+              {{
+                panel.t(
+                  `johannschopplich.copilot.context.file.${
+                    SUPPORTED_VISION_MIME_TYPES.includes(modelFile.mime)
+                      ? "model"
+                      : "unsupported"
+                  }`,
+                )
+              }}
+            </k-text>
+          </k-box>
         </div>
       </details>
-
-      <k-box v-if="modelFile" class="!kai-mt-2" theme="none">
-        <k-text>
-          {{
-            panel.t(
-              `johannschopplich.copilot.context.file.${
-                SUPPORTED_VISION_MIME_TYPES.includes(modelFile.mime)
-                  ? "model"
-                  : "unsupported"
-              }`,
-            )
-          }}
-        </k-text>
-      </k-box>
     </div>
   </k-section>
 </template>
