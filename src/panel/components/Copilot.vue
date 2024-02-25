@@ -22,6 +22,11 @@ import { getHashedStorageKey } from "../utils/storage";
 import { getModule, registerPluginAssets } from "../utils/assets";
 import { downscaleFile, openFilePicker } from "../utils/upload";
 
+// Force Kirby v4
+if (!window.panel.$api) {
+  throw new Error("Kirby Copilot requires Kirby 4");
+}
+
 const propsDefinition = {
   ...section,
 };
