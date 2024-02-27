@@ -17,7 +17,7 @@ import {
   SUPPORTED_PROVIDERS,
   SUPPORTED_VISION_MIME_TYPES,
 } from "../constants";
-import { useStreamText } from "../composables";
+import { useCompatibility, useStreamText } from "../composables";
 import { getHashedStorageKey } from "../utils/storage";
 import { getModule, registerPluginAssets } from "../utils/assets";
 import { downscaleFile, openFilePicker } from "../utils/upload";
@@ -34,11 +34,7 @@ export default {
 <script setup>
 const props = defineProps(propsDefinition);
 
-// Force Kirby v4
-if (!window.panel.$api) {
-  throw new Error("Kirby Copilot requires Kirby 4");
-}
-
+useCompatibility();
 const panel = usePanel();
 const api = useApi();
 const store = useStore();
