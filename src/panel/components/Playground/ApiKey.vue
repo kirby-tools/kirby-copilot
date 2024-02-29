@@ -6,7 +6,7 @@ import {
   help as _help,
   label as _label,
 } from "kirbyuse/props";
-import { STORAGE_KEY_PREFIX } from "../constants";
+import { STORAGE_KEY_PREFIX } from "../../constants";
 
 const propsDefinition = {
   ..._label,
