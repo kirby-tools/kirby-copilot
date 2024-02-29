@@ -24,13 +24,15 @@ export async function useStreamText({
 
   const provider = config.provider;
   const providerConfig = config.providers[provider];
-  // eslint-disable-next-line no-undef
-  const apiKey = __PLAYGROUND__
-    ? sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`)
-    : providerConfig.apiKey;
 
   const facade = modelProviders[provider];
-  const api = facade.Api({ apiKey });
+  const api = facade.Api({
+    baseUrl: providerConfig.baseUrl || undefined,
+    // eslint-disable-next-line no-undef
+    apiKey: __PLAYGROUND__
+      ? sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`)
+      : providerConfig.apiKey,
+  });
 
   const images = files.filter((file) => file.type.startsWith("image/"));
   const pdfs = files.filter((file) => file.type === "application/pdf");
