@@ -29,11 +29,6 @@ return [
             $kirby = App::instance();
 
             $kirby->extend([
-                'fields' => [
-                    'playground-api-key' => [
-                        'extends' => 'text'
-                    ]
-                ],
                 'routes' => fn (App $kirby) => [
                     [
                         'pattern' => '(:all)',
