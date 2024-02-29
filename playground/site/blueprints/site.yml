@@ -14,7 +14,7 @@ columns:
           To play with the **Kirby Copilot**, please enter your [OpenAI API key](https://platform.openai.com/api-keys) in the field below. If you don't have an API key yet, you can register for the [OpenAI API](https://platform.openai.com). The key is required to make client-side requests to GPT models. For production use of the plugin, you will need to provide one in the global configuration of Kirby.
       apiKey:
         label: OpenAI API Key
-        type: apiKey
+        type: playground-api-key
         help: |
           The key will be saved to the **session storage** of your browser. It will not be stored server-side or in any other way.
   - width: 1/3

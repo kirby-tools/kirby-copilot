@@ -30,7 +30,7 @@ return [
 
             $kirby->extend([
                 'fields' => [
-                    'apiKey' => [
+                    'playground-api-key' => [
                         'extends' => 'text'
                     ]
                 ],

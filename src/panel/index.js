@@ -1,5 +1,5 @@
 import CopilotSection from "./components/Copilot.vue";
-import ApiKeyField from "./components/ApiKey.vue";
+import PlaygroundApiKeyField from "./components/Playground/ApiKey.vue";
 import "./index.css";
 
 window.panel.plugin("johannschopplich/copilot", {
@@ -9,7 +9,7 @@ window.panel.plugin("johannschopplich/copilot", {
   // eslint-disable-next-line no-undef
   ...(__PLAYGROUND__ && {
     fields: {
-      apiKey: ApiKeyField,
+      "playground-api-key": PlaygroundApiKeyField,
     },
   }),
 });
