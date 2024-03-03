@@ -47,3 +47,8 @@ export async function getModule(filename) {
   moduleCache.set(filename, mod);
   return mod;
 }
+
+export async function interopDefault(m) {
+  const resolved = await m;
+  return resolved.default || resolved;
+}
