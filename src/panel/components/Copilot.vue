@@ -104,7 +104,7 @@ watch(isDetailsOpen, (value) => {
   userPrompt.value = response.userPrompt ?? undefined;
   systemPrompt.value =
     response.systemPrompt || response.config.systemPrompt || undefined;
-  storage.value = response.storage === true;
+  storage.value = response.storage;
   if (response.editable === true) allow.value.push("edit");
   if (response.files === true) allow.value.push("files");
   logLevel.value = LOG_LEVELS.indexOf(

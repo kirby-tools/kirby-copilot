@@ -10,7 +10,7 @@ return [
             'field' => fn ($field = null) => $field,
             'userPrompt' => fn ($userPrompt = null) => is_string($userPrompt) ? trim($userPrompt) : $userPrompt,
             'systemPrompt' => fn ($systemPrompt = null) => is_string($systemPrompt) ? trim($systemPrompt) : $systemPrompt,
-            'storage' => fn ($storage = true) => $storage,
+            'storage' => fn ($storage = true) => $storage !== false,
             'editable' => fn ($editable = true) => $editable,
             'files' => fn ($files = null) => $files ?? true,
             'logLevel' => fn ($logLevel = null) => in_array($logLevel, ['error', 'warn', 'info', 'debug'], true) ? $logLevel : 'warn'
