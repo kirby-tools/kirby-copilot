@@ -14,7 +14,10 @@ export async function useStreamText({
   run,
 }) {
   const logger = useLogger();
-  if (import.meta.env.DEV) logLevel = 3;
+
+  if (import.meta.env.DEV) {
+    logLevel = 3;
+  }
 
   const { mistral, openai, streamText } = await getModule("modelfusion");
   const modelProviders = {

@@ -15,8 +15,6 @@ export default defineConfig({
       output: {
         entryFileNames: "modelfusion.js",
         inlineDynamicImports: true,
-        generatedCode: { constBindings: true },
-        externalLiveBindings: false,
       },
     },
   },
