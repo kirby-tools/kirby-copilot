@@ -22,7 +22,7 @@ columns:
       infoDocumentation:
         label: 🛍️ Convinced? Grab a copy!
         type: info
-        theme: empty
+        theme: passive
         text: |
           Purchase a copy of <sparkly-text style="--sparkly-text-size: 2em; --sparkly-text-color: var(--color-yellow-600)">**Kirby Copilot**</sparkly-text> to improve the content management of your client's Kirby project or your own with AI.
 
