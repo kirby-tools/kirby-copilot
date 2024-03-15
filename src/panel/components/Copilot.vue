@@ -17,7 +17,7 @@ import {
   SUPPORTED_PROVIDERS,
   SUPPORTED_VISION_MIME_TYPES,
 } from "../constants";
-import { useCompatibility, useStreamText } from "../composables";
+import { useStreamText } from "../composables";
 import { getHashedStorageKey } from "../utils/storage";
 import { getModule, registerPluginAssets } from "../utils/assets";
 import { downscaleFile, openFilePicker } from "../utils/upload";
@@ -34,7 +34,6 @@ export default {
 <script setup>
 const props = defineProps(propsDefinition);
 
-useCompatibility();
 const panel = usePanel();
 const api = useApi();
 const store = useStore();
