@@ -1,8 +1,6 @@
 import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
-
-const rootDir = fileURLToPath(new URL("../../../", import.meta.url));
+import { rootDir } from "../constants";
 
 export default defineConfig({
   build: {
