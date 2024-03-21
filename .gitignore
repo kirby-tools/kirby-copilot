@@ -28,6 +28,7 @@
 /readme/.vitepress/cache
 /tests/coverage
 /tests/*/tmp
+/tools/**/vendor
 
 # Releases
 kirby-copilot-*.zip
