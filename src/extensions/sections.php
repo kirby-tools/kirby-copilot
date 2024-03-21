@@ -16,6 +16,12 @@ return [
             'logLevel' => fn ($logLevel = null) => in_array($logLevel, ['error', 'warn', 'info', 'debug'], true) ? $logLevel : 'warn'
         ],
         'computed' => [
+            'userPrompt' => function () {
+                return $this->tryResolveQuery($this->userPrompt);
+            },
+            'systemPrompt' => function () {
+                return $this->tryResolveQuery($this->systemPrompt);
+            },
             'supported' => function () {
                 $field = $this->model()->blueprint()->fields()[$this->field] ?? null;
                 $type = $field['type'] ?? null;
@@ -129,6 +135,19 @@ return [
                     'mime' => $mime,
                     'url' => $url
                 ];
+            }
+        ],
+        'methods' => [
+            'tryResolveQuery' => function ($value, $fallback = null) {
+                if (is_string($value)) {
+                    // Replace all matches of KQL parts with the query results
+                    $value = preg_replace_callback('!\{\{(.+?)\}\}!', function ($matches) {
+                        $result = $this->model()->query(trim($matches[1]));
+                        return $result ?? '';
+                    }, $value);
+                }
+
+                return $value ?? $fallback;
             }
         ]
     ]
