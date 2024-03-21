@@ -10,6 +10,7 @@ return [
     'panel' => [
         'css' => 'assets/panel.css',
         'js' => 'assets/panel.js',
+        'favicon' => 'assets/favicon.ico',
         'frameAncestors' => ['https://kirbycopilot.com']
     ],
 
