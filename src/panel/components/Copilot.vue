@@ -286,20 +286,20 @@ async function pickFiles() {
 async function htmlToBlocks(html) {
   if (!html) return [];
 
-  const { result } = await api.post("__copilot__/html2blocks", {
+  const { blocks } = await api.post("__copilot__/html2blocks", {
     html,
   });
 
   // Skip empty text block
   if (
-    result.blocks.length === 1 &&
-    "text" in result.blocks[0].content &&
-    EMPTY_HTML_TAG_RE.test(result.blocks[0].content.text)
+    blocks.length === 1 &&
+    "text" in blocks[0].content &&
+    EMPTY_HTML_TAG_RE.test(blocks[0].content.text)
   ) {
     return [];
   }
 
-  return result.blocks;
+  return blocks;
 }
 
 function createContext() {

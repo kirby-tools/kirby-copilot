@@ -1,10 +1,10 @@
 <?php
 
+use Kirby\Cms\App;
 use Kirby\Cms\Blocks;
-use Kirby\Http\Response;
 
 return [
-    'routes' => fn (\Kirby\Cms\App $kirby) => [
+    'routes' => fn (App $kirby) => [
         [
             'pattern' => '__copilot__/html2blocks',
             'method' => 'POST',
@@ -14,13 +14,9 @@ return [
                 $value = Blocks::parse($html);
                 $blocks = Blocks::factory($value);
 
-                return Response::json([
-                    'code' => 201,
-                    'status' => 'Created',
-                    'result' => [
-                        'blocks' => $blocks->toArray()
-                    ]
-                ], 201);
+                return [
+                    'blocks' => $blocks->toArray()
+                ];
             }
         ]
     ]
