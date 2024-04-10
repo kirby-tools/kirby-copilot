@@ -15,8 +15,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier \"src/panel/**\" --write",
-    "archive": "git archive --format=zip --output=./kirby-copilot-$(git describe --tags).zip HEAD",
-    "release": "pnpm run build && pnpm run build:assets && bumpp --all && pnpm run archive"
+    "release": "pnpm run build && pnpm run build:assets && bumpp --all --execute \"npx zx scripts/pre-release.mjs\" && zx scripts/post-release.mjs"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.9.0",
@@ -31,6 +30,7 @@
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.12",
     "tailwindcss": "^3.4.1",
-    "vite": "~5.1.6"
+    "vite": "~5.1.6",
+    "zx": "^8.0.1"
   }
 }
