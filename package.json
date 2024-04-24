@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "PLAYGROUND=true kirbyup serve src/panel/index.js",
     "build": "kirbyup src/panel/index.js",
-    "build:assets": "vite build --config src/assets/modelfusion/vite.config.js && cp node_modules/pdfjs-dist/build/pdf.min.mjs assets/pdfjs.js && cp node_modules/pdfjs-dist/build/pdf.worker.min.mjs assets/pdfjs.worker.js",
+    "build:assets": "vite build --config src/assets/ai/vite.config.js && cp node_modules/pdfjs-dist/build/pdf.min.mjs assets/pdfjs.js && cp node_modules/pdfjs-dist/build/pdf.worker.min.mjs assets/pdfjs.worker.js",
     "build:playground": "PLAYGROUND=true pnpm run build && pnpm run build:assets",
     "readme:dev": "vitepress dev readme",
     "readme:build": "vitepress build readme",
@@ -18,13 +18,15 @@
     "release": "pnpm run build && pnpm run build:assets && bumpp --all --execute \"npx zx scripts/pre-release.mjs\" && zx scripts/post-release.mjs"
   },
   "devDependencies": {
+    "@ai-sdk/mistral": "^0.0.6",
+    "@ai-sdk/openai": "^0.0.6",
     "@antfu/eslint-config": "^2.9.0",
+    "ai": "^3.0.29",
     "autoprefixer": "^10.4.19",
     "bumpp": "^9.4.0",
     "eslint": "^8.57.0",
     "kirbyup": "^3.1.5",
     "kirbyuse": "^0.4.1",
-    "modelfusion": "^0.137.0",
     "ohash": "^1.1.3",
     "pdfjs-dist": "^4.0.379",
     "prettier": "^3.2.5",

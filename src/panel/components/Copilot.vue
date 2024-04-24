@@ -19,7 +19,7 @@ import {
 } from "../constants";
 import { useStreamText } from "../composables";
 import { getHashedStorageKey } from "../utils/storage";
-import { getModule, registerPluginAssets } from "../utils/assets";
+import { registerPluginAssets } from "../utils/assets";
 import { downscaleFile, openFilePicker } from "../utils/upload";
 
 const propsDefinition = {
@@ -177,22 +177,18 @@ async function generate() {
   currentFieldContent.value = currentContent.value[field.value];
   abortController = new AbortController();
 
-  const { AbortError, ApiCallError } = await getModule("modelfusion");
-
   let text = "";
   let lastCallTime = Date.now();
 
   try {
-    const textStream = await useStreamText({
+    const { textStream } = await useStreamText({
       userPrompt: currentPrompt.value,
       systemPrompt: systemPrompt.value,
       context: createContext(),
       files: files.value,
       config: config.value,
       logLevel: logLevel.value,
-      run: {
-        abortSignal: abortController.signal,
-      },
+      abortSignal: abortController.signal,
     });
 
     for await (const textPart of textStream) {
@@ -226,9 +222,9 @@ async function generate() {
     panel.isLoading = false;
     isGenerating.value = false;
 
-    if (error instanceof AbortError) return;
+    if (error instanceof Error && error.name === "AbortError") return;
 
-    if (error instanceof ApiCallError) {
+    if (error instanceof Error && error.name === "ApiCallError") {
       console.error(error);
       panel.notification.error(error.message);
       return;
@@ -350,18 +346,12 @@ function onModelSave() {
       </k-text>
     </k-box>
     <k-box
-      v-else-if="
-        (config.provider === 'openai' &&
-          !config.providers?.openai?.model?.default) ||
-        (config.provider === 'mistral' && !config.providers?.mistral?.model)
-      "
+      v-else-if="!config.providers?.[config.provider]?.model"
       theme="empty"
     >
       <k-text>
         Missing
-        <code>{{
-          config.provider === "openai" ? "model.default" : "model"
-        }}</code>
+        <code>model</code>
         property in the
         <code>{{
           `johannschopplich.copilot.providers.${config.provider}`

@@ -41,10 +41,7 @@ return [
                     'provider' => 'openai',
                     'providers' => [
                         'openai' => [
-                            'model' => [
-                                'default' => 'gpt-4-turbo-preview',
-                                'vision' => 'gpt-4-vision-preview'
-                            ]
+                            'model' => 'gpt-4-turbo'
                         ]
                     ],
                     'temperature' => 0.5,
@@ -62,12 +59,9 @@ return [
                 // Lowercase model providers configuration keys
                 $config['providers'] = array_change_key_case($config['providers'], CASE_LOWER);
 
-                // Normalize OpenAI model configuration
-                if (isset($config['providers']['openai']['model']) && is_string($config['providers']['openai']['model'])) {
-                    $config['providers']['openai']['model'] = [
-                        'default' => $config['providers']['openai']['model'],
-                        'vision' => $defaultConfig['providers']['openai']['model']['vision']
-                    ];
+                // Keep backwards compatibility with former OpenAI model configuration
+                if (isset($config['providers']['openai']['model']['default']) && is_string($config['providers']['openai']['model']['default'])) {
+                    $config['providers']['openai']['model'] = $config['providers']['openai']['model']['default'];
                 }
 
                 // Require a minimum throttle to avoid spamming the HTML to blocks API

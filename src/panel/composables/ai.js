@@ -11,7 +11,7 @@ export async function useStreamText({
   files,
   config,
   logLevel,
-  run,
+  abortSignal,
 }) {
   const logger = useLogger();
 
@@ -19,17 +19,17 @@ export async function useStreamText({
     logLevel = 3;
   }
 
-  const { mistral, openai, streamText } = await getModule("modelfusion");
-  const modelProviders = {
-    mistral,
-    openai,
-  };
+  const { createMistral, createOpenAI, experimental_streamText } =
+    await getModule("ai");
 
   const provider = config.provider;
   const providerConfig = config.providers[provider];
 
-  const facade = modelProviders[provider];
-  const api = facade.Api({
+  const createProvider = {
+    mistral: createMistral,
+    openai: createOpenAI,
+  }[provider];
+  const api = createProvider({
     baseUrl: providerConfig.baseUrl || undefined,
     // eslint-disable-next-line no-undef
     apiKey: __PLAYGROUND__
@@ -68,54 +68,44 @@ export async function useStreamText({
       }),
     );
 
-    const model = facade
-      .ChatTextGenerator({
-        api,
-        model: config.providers.openai.model.vision,
-        temperature: config.temperature,
-        ...(config.maxGenerationTokens
-          ? { maxGenerationTokens: config.maxGenerationTokens }
-          : {}),
-      })
-      .withInstructionPrompt();
+    const model = api.chat(providerConfig.model, {
+      temperature: config.temperature,
+      ...(config.maxGenerationTokens
+        ? { maxTokens: config.maxGenerationTokens }
+        : {}),
+    });
 
-    return await streamText({
+    return await experimental_streamText({
       model,
-      prompt: {
-        system: systemPrompt,
-        instruction: [
-          { type: "text", text: userPromptWithContext },
-          ...serializedImages.map((image) => ({
-            type: "image",
-            image: image.data,
-            mimeType: image.mimeType,
-          })),
-        ],
-      },
-      run,
+      system: systemPrompt,
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: userPromptWithContext },
+            ...serializedImages.map((image) => ({
+              type: "image",
+              image: image.data,
+              // mimeType: image.mimeType,
+            })),
+          ],
+        },
+      ],
+      abortSignal,
     });
   }
 
-  const model = facade
-    .ChatTextGenerator({
-      api,
-      model:
-        provider === "openai"
-          ? providerConfig.model.default
-          : providerConfig.model,
-      temperature: config.temperature,
-      ...(config.maxGenerationTokens
-        ? { maxGenerationTokens: config.maxGenerationTokens }
-        : {}),
-    })
-    .withInstructionPrompt();
+  const model = api.chat(providerConfig.model, {
+    temperature: config.temperature,
+    ...(config.maxGenerationTokens
+      ? { maxTokens: config.maxGenerationTokens }
+      : {}),
+  });
 
-  return await streamText({
+  return await experimental_streamText({
     model,
-    prompt: {
-      system: systemPrompt,
-      instruction: userPromptWithContext,
-    },
-    run,
+    system: systemPrompt,
+    prompt: userPromptWithContext,
+    abortSignal,
   });
 }
