@@ -68,15 +68,10 @@ export async function useStreamText({
       }),
     );
 
-    const model = api.chat(providerConfig.model, {
+    return experimental_streamText({
+      model: api.chat(providerConfig.model),
       temperature: config.temperature,
-      ...(config.maxGenerationTokens
-        ? { maxTokens: config.maxGenerationTokens }
-        : {}),
-    });
-
-    return await experimental_streamText({
-      model,
+      maxTokens: config.maxGenerationTokens,
       system: systemPrompt,
       messages: [
         {
@@ -95,15 +90,10 @@ export async function useStreamText({
     });
   }
 
-  const model = api.chat(providerConfig.model, {
+  return experimental_streamText({
+    model: api.chat(providerConfig.model),
     temperature: config.temperature,
-    ...(config.maxGenerationTokens
-      ? { maxTokens: config.maxGenerationTokens }
-      : {}),
-  });
-
-  return await experimental_streamText({
-    model,
+    maxTokens: config.maxGenerationTokens,
     system: systemPrompt,
     prompt: userPromptWithContext,
     abortSignal,
