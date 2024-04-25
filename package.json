@@ -24,7 +24,7 @@
     "ai": "^3.0.31",
     "autoprefixer": "^10.4.19",
     "bumpp": "^9.4.0",
-    "eslint": "^9.1.1",
+    "eslint": "^8.57.0",
     "kirbyup": "^3.1.5",
     "kirbyuse": "^0.4.1",
     "ohash": "^1.1.3",
