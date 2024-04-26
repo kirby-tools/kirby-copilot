@@ -9,17 +9,17 @@ importers:
   .:
     devDependencies:
       '@ai-sdk/mistral':
-        specifier: ^0.0.6
-        version: 0.0.6(zod@3.23.4)
+        specifier: ^0.0.7
+        version: 0.0.7(zod@3.22.4)
       '@ai-sdk/openai':
-        specifier: ^0.0.6
-        version: 0.0.6(zod@3.23.4)
+        specifier: ^0.0.8
+        version: 0.0.8(zod@3.22.4)
       '@antfu/eslint-config':
-        specifier: ^2.15.0
-        version: 2.15.0(@vue/compiler-sfc@2.7.16)(eslint@8.57.0)(svelte@4.2.15)(typescript@5.4.5)
+        specifier: ^2.16.0
+        version: 2.16.0(@vue/compiler-sfc@2.7.16)(eslint@8.57.0)(svelte@4.2.15)(typescript@5.4.5)
       ai:
-        specifier: ^3.0.31
-        version: 3.0.31(react@18.2.0)(solid-js@1.8.17)(svelte@4.2.15)(vue@2.7.16)(zod@3.23.4)
+        specifier: ^3.0.33
+        version: 3.0.33(react@18.2.0)(solid-js@1.8.17)(svelte@4.2.15)(vue@2.7.16)(zod@3.22.4)
       autoprefixer:
         specifier: ^10.4.19
         version: 10.4.19(postcss@8.4.38)
@@ -63,8 +63,8 @@ packages:
     resolution: {integrity: sha512-1Yjs2SvM8TflER/OD3cOjhWWOZb58A2t7wpE2S9XfBYTiIl+XFhQG2bjy4Pu1I+EAlCNUzRDYDdFwFYUKvXcIA==}
     engines: {node: '>=0.10.0'}
 
-  '@ai-sdk/mistral@0.0.6':
-    resolution: {integrity: sha512-BDi5pYO0buZwgt8yRNtozkFspgt8J/RPoqsu07+bUjXAscCD+wXcJT/5Xzx0hoQQv6dDLRsCciv0QSL+n6RJGw==}
+  '@ai-sdk/mistral@0.0.7':
+    resolution: {integrity: sha512-7eLzOO0MWgoi28HpyTGXGELiWJc5/4AR2in2Tz5idgbyY1UYepHccTbfycNbUCPeO6Vj0BEr022H7d4vMb0cmw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.0.0
@@ -72,8 +72,8 @@ packages:
       zod:
         optional: true
 
-  '@ai-sdk/openai@0.0.6':
-    resolution: {integrity: sha512-Ws+cDSfUeiyo3NDNVw+0Cr/7gAmHvoDIfEm2N93yKC28YbdTBWZUyb/hHMT+ih0VvERM5NJuOb3/5RSqFpb/Ow==}
+  '@ai-sdk/openai@0.0.8':
+    resolution: {integrity: sha512-fiSjiyBNqi8onQLsXyxSpn4qgqE8TWD3Aq0Sa3K9uIaOajCOwLiFZkMp7X3G8dIJjOJcJf6oqs6e0eSGR+vAGg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.0.0
@@ -81,8 +81,8 @@ packages:
       zod:
         optional: true
 
-  '@ai-sdk/provider-utils@0.0.3':
-    resolution: {integrity: sha512-13+4v62ylduGvwz8966SdnT1aoQRO4QkWzZJyVswdgmYeX2vrXuU4bssK578+FXIXc1jwi2hLZO8lqgLPT/xDA==}
+  '@ai-sdk/provider-utils@0.0.4':
+    resolution: {integrity: sha512-LOBdO+2Fs5rWA6Akjxj42byW31a1XWZc32HUst7Hz0wOQrbWFl4jnElz38BDDGBtIZxPqWpEvoanfj6xXn8acg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.0.0
@@ -102,8 +102,8 @@ packages:
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
 
-  '@antfu/eslint-config@2.15.0':
-    resolution: {integrity: sha512-qoqw+0N8bqz0vBIigGJamaIf1LdzXcmCDuleygJAF3EtACLieKyIMvpOdc2TU9AnuPbMBFCkN40340UWRChELw==}
+  '@antfu/eslint-config@2.16.0':
+    resolution: {integrity: sha512-K56svKb2tRtJcONE548tyvZJ8ZQPJiHp+20Aez1Dy77nVKQbPiCDFYGHxuk3fn1+NSL6PUxbVm/IEhqIWtZFCQ==}
     hasBin: true
     peerDependencies:
       '@eslint-react/eslint-plugin': ^1.5.8
@@ -835,8 +835,8 @@ packages:
     resolution: {integrity: sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==}
     engines: {node: '>= 6.0.0'}
 
-  ai@3.0.31:
-    resolution: {integrity: sha512-SmwVgBcTLchKTcQjFYRskCkw9H9p/PivUxAQzqIT+aX97kfBr3uBw3nFOH+RKseCsVEMt3w27K2h9n2u0bskZA==}
+  ai@3.0.33:
+    resolution: {integrity: sha512-4jkB5iNrPjhGg/U0mWGD4Zw3ZId/O5JorZFYO4cyjD3o4EVAZ97NbXCCWkeQmXh3fdTm7bqCm0uCLucW65wDkA==}
     engines: {node: '>=18'}
     peerDependencies:
       react: ^18.2.0
@@ -1213,6 +1213,11 @@ packages:
     peerDependencies:
       eslint: '*'
 
+  eslint-plugin-command@0.1.2:
+    resolution: {integrity: sha512-LxP9coE/GwLvF4JMFyJxqjyMxOASxl8Y3UPWyjjfaIBz4X0yWGqidX0gbAeVuZ9xkaBNWIWZtlPtLPlN/wckOA==}
+    peerDependencies:
+      eslint: '*'
+
   eslint-plugin-es-x@7.6.0:
     resolution: {integrity: sha512-I0AmeNgevgaTR7y2lrVCJmGYF0rjoznpDvqV/kIkZSZbZ8Rw3eu4cGlvBBULScfkSOCzqKbff5LR4CNrV7mZHA==}
     engines: {node: ^14.18.0 || >=16.0.0}
@@ -1249,8 +1254,8 @@ packages:
     peerDependencies:
       eslint: '>=8'
 
-  eslint-plugin-n@17.3.0:
-    resolution: {integrity: sha512-BvjwT22+zLsmSTq6Ea4FNK7O2XFrkahDKZSfE6Qo3CEy7cLgVkM1iDsHK9BU69oRmY1aQ4IoyCmfWLN+P52J9A==}
+  eslint-plugin-n@17.3.1:
+    resolution: {integrity: sha512-25+HTtKe1F8U/M4ERmdzbz/xkm/gaY0OYC8Fcv1z/WvpLJ8Xfh9LzJ13JV5uj4QyCUD8kOPJrNjn/3y+tc57Vw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: '>=8.23.0'
@@ -1259,8 +1264,8 @@ packages:
     resolution: {integrity: sha512-Lf4YW/bL6Un1R6A76pRZyE1dl1vr31G/ev8UzIc/geCgFWyrKil8hVjYqWVKGB/UIGmb6Slzs9T0wNezdSVegw==}
     engines: {node: '>=5.0.0'}
 
-  eslint-plugin-perfectionist@2.9.0:
-    resolution: {integrity: sha512-ipFtDrqtF99qVVo+FE1fo6aHyLLp7hg6PNGfzY5KxQjcl0XCbyEFvjtR1NfkHDTN9rdFeEDxg59LLOv3VOAHAw==}
+  eslint-plugin-perfectionist@2.10.0:
+    resolution: {integrity: sha512-P+tdrkHeMWBc55+DZsoDOAftV1WCsEoHaKm6JC7zajFus/syfT4vUPBFb3atGFSuyaVnGQGHlcKpP9X3Q0gH/w==}
     peerDependencies:
       astro-eslint-parser: ^0.16.0
       eslint: '>=8.0.0'
@@ -2656,8 +2661,8 @@ packages:
     peerDependencies:
       zod: ^3.22.4
 
-  zod@3.23.4:
-    resolution: {integrity: sha512-/AtWOKbBgjzEYYQRNfoGKHObgfAZag6qUJX1VbHo2PRBgS+wfWagEY2mizjfyAPcGesrJOcx/wcl0L9WnVrHFw==}
+  zod@3.22.4:
+    resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
 
   zx@8.0.2:
     resolution: {integrity: sha512-3g+ePtPYmyrjRuASlJiUhkje1je4a47woML/fzTKBb9PA5BzRQbSswwyJ8nlFWJjA1ORRi6TMyAdhuz/jK+Gaw==}
@@ -2668,28 +2673,28 @@ snapshots:
 
   '@aashutoshrathi/word-wrap@1.2.6': {}
 
-  '@ai-sdk/mistral@0.0.6(zod@3.23.4)':
+  '@ai-sdk/mistral@0.0.7(zod@3.22.4)':
     dependencies:
       '@ai-sdk/provider': 0.0.2
-      '@ai-sdk/provider-utils': 0.0.3(zod@3.23.4)
+      '@ai-sdk/provider-utils': 0.0.4(zod@3.22.4)
     optionalDependencies:
-      zod: 3.23.4
+      zod: 3.22.4
 
-  '@ai-sdk/openai@0.0.6(zod@3.23.4)':
+  '@ai-sdk/openai@0.0.8(zod@3.22.4)':
     dependencies:
       '@ai-sdk/provider': 0.0.2
-      '@ai-sdk/provider-utils': 0.0.3(zod@3.23.4)
+      '@ai-sdk/provider-utils': 0.0.4(zod@3.22.4)
     optionalDependencies:
-      zod: 3.23.4
+      zod: 3.22.4
 
-  '@ai-sdk/provider-utils@0.0.3(zod@3.23.4)':
+  '@ai-sdk/provider-utils@0.0.4(zod@3.22.4)':
     dependencies:
       '@ai-sdk/provider': 0.0.2
       eventsource-parser: 1.1.2
       nanoid: 3.3.6
       secure-json-parse: 2.7.0
     optionalDependencies:
-      zod: 3.23.4
+      zod: 3.22.4
 
   '@ai-sdk/provider@0.0.2':
     dependencies:
@@ -2702,7 +2707,7 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.5
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@antfu/eslint-config@2.15.0(@vue/compiler-sfc@2.7.16)(eslint@8.57.0)(svelte@4.2.15)(typescript@5.4.5)':
+  '@antfu/eslint-config@2.16.0(@vue/compiler-sfc@2.7.16)(eslint@8.57.0)(svelte@4.2.15)(typescript@5.4.5)':
     dependencies:
       '@antfu/install-pkg': 0.3.2
       '@clack/prompts': 0.7.0
@@ -2714,14 +2719,15 @@ snapshots:
       eslint-flat-config-utils: 0.2.3
       eslint-merge-processors: 0.1.0(eslint@8.57.0)
       eslint-plugin-antfu: 2.1.2(eslint@8.57.0)
+      eslint-plugin-command: 0.1.2(eslint@8.57.0)
       eslint-plugin-eslint-comments: 3.2.0(eslint@8.57.0)
       eslint-plugin-import-x: 0.5.0(eslint@8.57.0)(typescript@5.4.5)
       eslint-plugin-jsdoc: 48.2.3(eslint@8.57.0)
       eslint-plugin-jsonc: 2.15.1(eslint@8.57.0)
       eslint-plugin-markdown: 4.0.1(eslint@8.57.0)
-      eslint-plugin-n: 17.3.0(eslint@8.57.0)
+      eslint-plugin-n: 17.3.1(eslint@8.57.0)
       eslint-plugin-no-only-tests: 3.1.0
-      eslint-plugin-perfectionist: 2.9.0(eslint@8.57.0)(svelte@4.2.15)(typescript@5.4.5)(vue-eslint-parser@9.4.2(eslint@8.57.0))
+      eslint-plugin-perfectionist: 2.10.0(eslint@8.57.0)(svelte@4.2.15)(typescript@5.4.5)(vue-eslint-parser@9.4.2(eslint@8.57.0))
       eslint-plugin-toml: 0.11.0(eslint@8.57.0)
       eslint-plugin-unicorn: 52.0.0(eslint@8.57.0)
       eslint-plugin-unused-imports: 3.1.0(@typescript-eslint/eslint-plugin@7.7.1(@typescript-eslint/parser@7.7.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)
@@ -3496,10 +3502,10 @@ snapshots:
       - supports-color
     optional: true
 
-  ai@3.0.31(react@18.2.0)(solid-js@1.8.17)(svelte@4.2.15)(vue@2.7.16)(zod@3.23.4):
+  ai@3.0.33(react@18.2.0)(solid-js@1.8.17)(svelte@4.2.15)(vue@2.7.16)(zod@3.22.4):
     dependencies:
       '@ai-sdk/provider': 0.0.2
-      '@ai-sdk/provider-utils': 0.0.3(zod@3.23.4)
+      '@ai-sdk/provider-utils': 0.0.4(zod@3.22.4)
       eventsource-parser: 1.1.2
       json-schema: 0.4.0
       jsondiffpatch: 0.6.0
@@ -3510,13 +3516,13 @@ snapshots:
       swr: 2.2.0(react@18.2.0)
       swr-store: 0.10.6
       swrv: 1.0.4(vue@2.7.16)
-      zod-to-json-schema: 3.22.5(zod@3.23.4)
+      zod-to-json-schema: 3.22.5(zod@3.22.4)
     optionalDependencies:
       react: 18.2.0
       solid-js: 1.8.17
       svelte: 4.2.15
       vue: 2.7.16
-      zod: 3.23.4
+      zod: 3.22.4
 
   ajv@6.12.6:
     dependencies:
@@ -3886,6 +3892,10 @@ snapshots:
     dependencies:
       eslint: 8.57.0
 
+  eslint-plugin-command@0.1.2(eslint@8.57.0):
+    dependencies:
+      eslint: 8.57.0
+
   eslint-plugin-es-x@7.6.0(eslint@8.57.0):
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0(eslint@8.57.0)
@@ -3947,7 +3957,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-n@17.3.0(eslint@8.57.0):
+  eslint-plugin-n@17.3.1(eslint@8.57.0):
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0(eslint@8.57.0)
       enhanced-resolve: 5.16.0
@@ -3961,9 +3971,9 @@ snapshots:
 
   eslint-plugin-no-only-tests@3.1.0: {}
 
-  eslint-plugin-perfectionist@2.9.0(eslint@8.57.0)(svelte@4.2.15)(typescript@5.4.5)(vue-eslint-parser@9.4.2(eslint@8.57.0)):
+  eslint-plugin-perfectionist@2.10.0(eslint@8.57.0)(svelte@4.2.15)(typescript@5.4.5)(vue-eslint-parser@9.4.2(eslint@8.57.0)):
     dependencies:
-      '@typescript-eslint/utils': 6.21.0(eslint@8.57.0)(typescript@5.4.5)
+      '@typescript-eslint/utils': 7.7.1(eslint@8.57.0)(typescript@5.4.5)
       eslint: 8.57.0
       minimatch: 9.0.4
       natural-compare-lite: 1.4.0
@@ -5366,11 +5376,11 @@ snapshots:
 
   yocto-queue@1.0.0: {}
 
-  zod-to-json-schema@3.22.5(zod@3.23.4):
+  zod-to-json-schema@3.22.5(zod@3.22.4):
     dependencies:
-      zod: 3.23.4
+      zod: 3.22.4
 
-  zod@3.23.4: {}
+  zod@3.22.4: {}
 
   zx@8.0.2:
     optionalDependencies:
