@@ -18,10 +18,10 @@
     "release": "pnpm run build && pnpm run build:assets && bumpp --all --execute \"npx zx scripts/pre-release.mjs\" && zx scripts/post-release.mjs"
   },
   "devDependencies": {
-    "@ai-sdk/mistral": "^0.0.7",
-    "@ai-sdk/openai": "^0.0.8",
+    "@ai-sdk/mistral": "^0.0.8",
+    "@ai-sdk/openai": "^0.0.9",
     "@antfu/eslint-config": "^2.16.0",
-    "ai": "^3.0.33",
+    "ai": "^3.0.35",
     "autoprefixer": "^10.4.19",
     "bumpp": "^9.4.0",
     "eslint": "^8.57.0",
