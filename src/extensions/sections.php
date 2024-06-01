@@ -41,7 +41,7 @@ return [
                     'provider' => 'openai',
                     'providers' => [
                         'openai' => [
-                            'model' => 'gpt-4-turbo'
+                            'model' => 'gpt-4o'
                         ]
                     ],
                     'temperature' => 0.5,

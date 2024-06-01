@@ -6,6 +6,10 @@ Apikey:
 
 ----
 
+Gptmodel: gpt-4o
+
+----
+
 Content01: [{"content":{"text":"<p>Generated blocks are always appended, so you won't accidentally overwrite content. The undo button removes the last generated blocks and reverts to the previous content state.</p>"},"id":"a05b4375-c4af-4b96-b60a-cb981980a4d6","isHidden":false,"type":"text"}]
 
 ----

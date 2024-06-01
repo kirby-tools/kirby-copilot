@@ -17,6 +17,15 @@ columns:
         type: playground-api-key
         help: |
           The key will be saved to the **session storage** of your browser. It will not be stored server-side or in any other way.
+      gptModel:
+        label: GPT Model
+        type: select
+        options:
+          gpt-3.5-turbo: GPT-3.5 Turbo
+          gpt-4-turbo: GPT-4 Turbo
+          gpt-4o: GPT-4o (recommended)
+        help: |
+          The GPT AI model to use in the Copilot playground. **Note: GPT-4 models will not work without a valid payment method in your account.**
   - width: 1/3
     fields:
       infoDocumentation:

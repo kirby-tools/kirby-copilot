@@ -180,13 +180,20 @@ async function generate() {
   let text = "";
   let lastCallTime = Date.now();
 
+  let _config = config.value;
+  // eslint-disable-next-line no-undef
+  if (__PLAYGROUND__) {
+    _config = JSON.parse(JSON.stringify(config.value));
+    _config.providers[_config.provider].model = currentContent.value.gptmodel;
+  }
+
   try {
     const { textStream } = await useStreamText({
       userPrompt: currentPrompt.value,
       systemPrompt: systemPrompt.value,
       context: createContext(),
       files: files.value,
-      config: config.value,
+      config: _config,
       logLevel: logLevel.value,
       abortSignal: abortController.signal,
     });
