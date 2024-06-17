@@ -1,5 +1,5 @@
-export function renderTemplate(str, variables, fallback) {
-  return str.replace(
+export function renderTemplate(input, variables, fallback) {
+  return input.replace(
     /\{(\w+)\}/g,
     (_, key) =>
       variables[key.toLowerCase()] ||

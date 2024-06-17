@@ -11,6 +11,7 @@ import {
   watch,
 } from "kirbyuse";
 import { section } from "kirbyuse/props";
+import { useLicense } from "@kirby-tools/licensing";
 import {
   LOG_LEVELS,
   STORAGE_KEY_PREFIX,
@@ -37,6 +38,10 @@ const props = defineProps(propsDefinition);
 const panel = usePanel();
 const api = useApi();
 const store = useStore();
+const { openLicenseModal } = useLicense({
+  label: "Kirby Copilot",
+  apiNamespace: "__copilot__",
+});
 
 const EMPTY_HTML_TAG_RE = /^<(\w+)>\s*<\/\1>$/;
 
@@ -51,6 +56,7 @@ const logLevel = ref();
 const supported = ref();
 const config = ref();
 const modelFile = ref();
+const license = ref();
 // Local data
 const isInitialized = ref(false);
 const isGenerating = ref(false);
@@ -111,6 +117,11 @@ watch(isDetailsOpen, (value) => {
   );
   supported.value = response.supported;
   config.value = response.config;
+  license.value =
+    // eslint-disable-next-line no-undef
+    __PLAYGROUND__ && window.location.hostname === "try.kirbycopilot.com"
+      ? true
+      : response.license;
 
   registerPluginAssets(response.assets);
 
@@ -327,6 +338,13 @@ function onModelSave() {
     currentFieldContent.value = undefined;
   }
 }
+
+async function handleRegistration() {
+  const { isRegistered } = await openLicenseModal();
+  if (isRegistered) {
+    license.value = true;
+  }
+}
 </script>
 
 <template>
@@ -418,6 +436,24 @@ function onModelSave() {
           size="sm"
           @click="undo()"
         />
+        <template v-if="license === false">
+          <k-button
+            theme="love"
+            variant="filled"
+            size="sm"
+            link="https://kirbycopilot.com/buy"
+            target="_blank"
+            :text="panel.t('johannschopplich.copilot.license.buy')"
+          />
+          <k-button
+            theme="love"
+            variant="filled"
+            size="sm"
+            icon="key"
+            :text="panel.t('johannschopplich.copilot.license.activate')"
+            @click="handleRegistration()"
+          />
+        </template>
       </k-button-group>
 
       <details

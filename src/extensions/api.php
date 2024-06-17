@@ -1,5 +1,6 @@
 <?php
 
+use JohannSchopplich\Licensing\Licenses;
 use Kirby\Cms\App;
 use Kirby\Cms\Blocks;
 
@@ -17,6 +18,14 @@ return [
                 return [
                     'blocks' => $blocks->toArray()
                 ];
+            }
+        ],
+        [
+            'pattern' => '__copilot__/register',
+            'method' => 'POST',
+            'action' => function () {
+                $licenses = Licenses::read('johannschopplich/kirby-copilot');
+                return $licenses->registerFromRequest();
             }
         ]
     ]

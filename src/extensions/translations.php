@@ -16,7 +16,9 @@ return [
         'johannschopplich.copilot.files.select' => 'Select files',
         'johannschopplich.copilot.images.select' => 'Select images',
         'johannschopplich.copilot.generator.success' => 'Content generated',
-        'johannschopplich.copilot.generator.error' => 'Could not generate text. Please check console logs.'
+        'johannschopplich.copilot.generator.error' => 'Could not generate text. Please check console logs.',
+        'johannschopplich.copilot.license.buy' => 'Buy a license',
+        'johannschopplich.copilot.license.activate' => 'Activate'
     ],
     'de' => [
         'johannschopplich.copilot.label' => 'Copilot',
@@ -33,7 +35,9 @@ return [
         'johannschopplich.copilot.files.select' => 'Dateien auswählen',
         'johannschopplich.copilot.images.select' => 'Bilder auswählen',
         'johannschopplich.copilot.generator.success' => 'Content generiert',
-        'johannschopplich.copilot.generator.error' => 'Text konnte nicht generiert werden. Bitte Konsolenprotokolle prüfen.'
+        'johannschopplich.copilot.generator.error' => 'Text konnte nicht generiert werden. Bitte Konsolenprotokolle prüfen.',
+        'johannschopplich.copilot.license.buy' => 'Lizenz kaufen',
+        'johannschopplich.copilot.license.activate' => 'Aktivieren'
     ],
     'fr' => [
         'johannschopplich.copilot.label' => 'Copilot',
@@ -50,6 +54,8 @@ return [
         'johannschopplich.copilot.files.select' => 'Sélectionner des fichiers',
         'johannschopplich.copilot.images.select' => 'Sélectionner des images',
         'johannschopplich.copilot.generator.success' => 'Contenu généré',
-        'johannschopplich.copilot.generator.error' => 'Impossible de générer le texte. Veuillez vérifier les journaux de la console.'
+        'johannschopplich.copilot.generator.error' => 'Impossible de générer le texte. Veuillez vérifier les journaux de la console.',
+        'johannschopplich.copilot.license.buy' => 'Acheter une licence',
+        'johannschopplich.copilot.license.activate' => 'Activer'
     ]
 ];
