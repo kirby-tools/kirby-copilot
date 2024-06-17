@@ -1,8 +1,22 @@
+[![Kirby Copilot](./.github/social-card.png)](https://kirbycopilot.com)
+
 # Kirby Copilot
 
-## Welcome!
+Kirby Copilot is your everyday AI companion for the Kirby Panel. It helps you to create content faster and more efficiently.
 
-Thank you for purchasing Kirby Copilot. We appreciate your decision to enhance your Kirby projects with our plugin. This document is intended to help you get started with Kirby Copilot as quickly and easily as possible.
+## Features
+
+To streamline content creation for you or your clients and editors, Kirby Copilot offers:
+
+- 🦙 **Multi-model**: Use OpenAI GPT models or Mistral AI models to generate content.
+- 🧱 **Blocks support**: Generate content for blocks fields.
+- 🌞 **Customizable prompts**: Tailor AI responses with user and system instructions.
+- 🎀 **Context-aware responses**: Include context from other fields with placeholders in user prompts to improve content relevance.
+- 🛎️ **Playground**: Try out the plugin's features with an interactive live demo.
+
+## Licensing
+
+Kirby Content Translator is a commercial plugin that requires a license. You can install and test the plugin locally without a license. However, production environments require a valid license. You can purchase a license from the [Kirby Tools Website](https://kirby.tools/content-translator).
 
 ## Getting Started
 
