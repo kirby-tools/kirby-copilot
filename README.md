@@ -16,7 +16,7 @@ To streamline content creation for you or your clients and editors, Kirby Copilo
 
 ## Licensing
 
-Kirby Content Translator is a commercial plugin that requires a license. You can install and test the plugin locally without a license. However, production environments require a valid license. You can purchase a license from the [Kirby Tools Website](https://kirby.tools/content-translator).
+Kirby Content Translator is a commercial plugin that requires a license. You can install and test the plugin locally without a license. However, production environments require a valid license. You can purchase a license from the [Kirby Copilot Website](https://kirbycopilot.com/buy).
 
 ## Getting Started
 
