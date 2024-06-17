@@ -2,7 +2,7 @@
 
 # Kirby Copilot
 
-Kirby Copilot is your everyday AI companion for the Kirby Panel. It helps you to create content faster and more efficiently.
+Kirby Copilot is a plugin for [Kirby CMS](https://getkirby.com) that integrates AI capabilities into your Kirby projects, allowing you to generate content directly from the Panel.
 
 ## Features
 
