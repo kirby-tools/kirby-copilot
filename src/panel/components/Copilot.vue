@@ -349,6 +349,25 @@ async function handleRegistration() {
 
 <template>
   <k-section v-if="isInitialized" :label="label">
+    <k-button-group v-if="license === false" slot="options" layout="collapsed">
+      <k-button
+        theme="love"
+        variant="filled"
+        size="xs"
+        link="https://kirbycopilot.com/buy"
+        target="_blank"
+        :text="panel.t('johannschopplich.copilot.license.buy')"
+      />
+      <k-button
+        theme="love"
+        variant="filled"
+        size="xs"
+        icon="key"
+        :text="panel.t('johannschopplich.copilot.license.activate')"
+        @click="handleRegistration()"
+      />
+    </k-button-group>
+
     <k-box
       v-if="!config.provider || !SUPPORTED_PROVIDERS.includes(config.provider)"
       theme="empty"
@@ -436,24 +455,6 @@ async function handleRegistration() {
           size="sm"
           @click="undo()"
         />
-        <template v-if="license === false">
-          <k-button
-            theme="love"
-            variant="filled"
-            size="sm"
-            link="https://kirbycopilot.com/buy"
-            target="_blank"
-            :text="panel.t('johannschopplich.copilot.license.buy')"
-          />
-          <k-button
-            theme="love"
-            variant="filled"
-            size="sm"
-            icon="key"
-            :text="panel.t('johannschopplich.copilot.license.activate')"
-            @click="handleRegistration()"
-          />
-        </template>
       </k-button-group>
 
       <details
