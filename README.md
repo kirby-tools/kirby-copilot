@@ -53,6 +53,6 @@ For the sake of reproducible bug reports, please include the following informati
 
 We value your feedback and ideas for improving Kirby Copilot. If you have any suggestions, please feel free to reach out to us via email or preferably by creating a new discussion on our [GitHub Discussions page](https://github.com/kirby-tools/community/discussions).
 
-## Thank You
+## License
 
-Once again, thank you for choosing Kirby Copilot. We hope it empowers you to create content more efficiently and effectively.
+[Kirby Copilot Plugin License Agreement](./LICENSE.md) License © 2024-PRESENT [Johann Schopplich](https://github.com/johannschopplich)
