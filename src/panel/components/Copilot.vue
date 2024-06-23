@@ -38,7 +38,7 @@ const props = defineProps(propsDefinition);
 const panel = usePanel();
 const api = useApi();
 const store = useStore();
-const { openLicenseModal } = useLicense({
+const { openLicenseModal, assertActivationIntegrity } = useLicense({
   label: "Kirby Copilot",
   apiNamespace: "__copilot__",
 });
@@ -66,6 +66,7 @@ const currentPrompt = ref();
 const currentFieldContent = ref();
 const allow = ref([]);
 const files = ref([]);
+const licenseButtonGroup = ref();
 
 // Non-reactive data
 let storageKey;
@@ -151,6 +152,10 @@ watch(isDetailsOpen, (value) => {
 
   panel.events.on("view.save", onModelSave);
   isInitialized.value = true;
+  assertActivationIntegrity({
+    component: licenseButtonGroup,
+    license: license.value,
+  });
 })();
 
 onBeforeUnmount(() => {
@@ -349,7 +354,12 @@ async function handleRegistration() {
 
 <template>
   <k-section v-if="isInitialized" :label="label">
-    <k-button-group v-if="license === false" slot="options" layout="collapsed">
+    <k-button-group
+      v-if="license === false"
+      ref="licenseButtonGroup"
+      slot="options"
+      layout="collapsed"
+    >
       <k-button
         theme="love"
         variant="filled"
