@@ -51,6 +51,7 @@ const field = ref();
 const userPrompt = ref();
 const systemPrompt = ref();
 const storage = ref();
+const size = ref();
 const logLevel = ref();
 // Section computed
 const supported = ref();
@@ -113,6 +114,7 @@ watch(isDetailsOpen, (value) => {
   storage.value = response.storage;
   if (response.editable === true) allow.value.push("edit");
   if (response.files === true) allow.value.push("files");
+  size.value = response.size;
   logLevel.value = LOG_LEVELS.indexOf(
     response.config.logLevel ?? response.logLevel,
   );
@@ -121,7 +123,7 @@ watch(isDetailsOpen, (value) => {
   license.value =
     // eslint-disable-next-line no-undef
     __PLAYGROUND__ && window.location.hostname === "try.kirbycopilot.com"
-      ? true
+      ? "active"
       : response.license;
 
   registerPluginAssets(response.assets);
@@ -154,7 +156,7 @@ watch(isDetailsOpen, (value) => {
   isInitialized.value = true;
   assertActivationIntegrity({
     component: licenseButtonGroup,
-    license: license.value,
+    licenseStatus: license.value,
   });
 })();
 
@@ -347,7 +349,7 @@ function onModelSave() {
 async function handleRegistration() {
   const { isRegistered } = await openLicenseModal();
   if (isRegistered) {
-    license.value = true;
+    license.value = "active";
   }
 }
 </script>
@@ -355,7 +357,7 @@ async function handleRegistration() {
 <template>
   <k-section v-if="isInitialized" :label="label">
     <k-button-group
-      v-if="license === false"
+      v-if="license !== 'active'"
       ref="licenseButtonGroup"
       slot="options"
       layout="collapsed"
@@ -443,7 +445,7 @@ async function handleRegistration() {
           :icon="isGenerating ? 'loader' : 'sparkling'"
           :text="panel.t('johannschopplich.copilot.generate')"
           variant="filled"
-          size="sm"
+          :size="size"
           theme="positive"
           :disabled="isGenerating"
           @click="generate()"
@@ -453,7 +455,7 @@ async function handleRegistration() {
           icon="cancel"
           :text="panel.t('johannschopplich.copilot.stop')"
           variant="filled"
-          size="sm"
+          :size="size"
           theme="notice"
           @click="abort()"
         />
@@ -462,7 +464,7 @@ async function handleRegistration() {
           icon="undo"
           :text="panel.t('johannschopplich.copilot.undo')"
           variant="filled"
-          size="sm"
+          :size="size"
           @click="undo()"
         />
       </k-button-group>

@@ -14,6 +14,7 @@ return [
             'storage' => fn ($storage = true) => $storage !== false,
             'editable' => fn ($editable = true) => $editable,
             'files' => fn ($files = null) => $files ?? true,
+            'size' => fn ($size = null) => in_array($size, ['xs', 'sm', 'md', 'lg'], true) ? $size : 'sm',
             'logLevel' => fn ($logLevel = null) => in_array($logLevel, ['error', 'warn', 'info', 'debug'], true) ? $logLevel : 'warn'
         ],
         'computed' => [
@@ -86,7 +87,7 @@ return [
             },
             'license' => function () {
                 $licenses = Licenses::read('johannschopplich/kirby-copilot');
-                return $licenses->isRegistered();
+                return $licenses->getStatus();
             },
             'modelFile' => function () {
                 /** @var \Kirby\Cms\File */
