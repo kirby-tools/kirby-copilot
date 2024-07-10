@@ -36,8 +36,8 @@ importers:
         specifier: ^9.6.0
         version: 9.6.0
       kirbyup:
-        specifier: ^3.1.8
-        version: 3.1.8(@types/node@20.14.10)(jiti@1.21.6)(rollup@4.18.1)
+        specifier: ^3.1.11
+        version: 3.1.11(@types/node@20.14.10)(jiti@1.21.6)(rollup@4.18.1)
       kirbyuse:
         specifier: ^0.7.0
         version: 0.7.0
@@ -1811,8 +1811,8 @@ packages:
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
-  kirbyup@3.1.8:
-    resolution: {integrity: sha512-L6+2LwhFb9l0Gks/pUm6hdkWOxAuzOogdRSDUvBTaERD5nd+Phtky1/F3odLb8xPgnDkRCV7Ar75sApPCfrf4w==}
+  kirbyup@3.1.11:
+    resolution: {integrity: sha512-wvN/RbymwgwUpLaXhaabB4mfpoCIwGTsNlLyyEyFz8x07S60fPH3gH48KIYJIM/tArfWvPYcU4jAzRsmf5UXGA==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -4725,7 +4725,7 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  kirbyup@3.1.8(@types/node@20.14.10)(jiti@1.21.6)(rollup@4.18.1):
+  kirbyup@3.1.11(@types/node@20.14.10)(jiti@1.21.6)(rollup@4.18.1):
     dependencies:
       '@vitejs/plugin-vue2': 2.2.0(vite@5.3.3(@types/node@20.14.10)(sass@1.77.7))(vue@2.7.16)
       '@vitejs/plugin-vue2-jsx': 1.1.0(rollup@4.18.1)(vite@5.3.3(@types/node@20.14.10)(sass@1.77.7))(vue@2.7.16)

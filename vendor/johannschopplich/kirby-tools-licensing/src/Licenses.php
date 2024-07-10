@@ -119,9 +119,14 @@ class Licenses
     public function isCompatible(string|null $versionConstraint): bool
     {
         $kirbyPackageName = str_replace('/kirby-', '/', $this->packageName);
+        $version = App::instance()->plugin($kirbyPackageName)?->version();
+
+        if ($version !== null && str_starts_with($version, 'dev-')) {
+            throw new LogicException('Development versions are not supported');
+        }
 
         return $versionConstraint !== null && Semver::satisfies(
-            App::instance()->plugin($kirbyPackageName)?->version(),
+            $version,
             $versionConstraint
         );
     }
