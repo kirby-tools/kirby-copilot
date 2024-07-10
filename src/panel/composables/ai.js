@@ -19,8 +19,12 @@ export async function useStreamText({
     logLevel = 3;
   }
 
-  const { createMistral, createOpenAI, experimental_streamText } =
-    await getModule("ai");
+  const {
+    createAnthropic,
+    createMistral,
+    createOpenAI,
+    experimental_streamText,
+  } = await getModule("ai");
 
   const provider = config.provider;
   const providerConfig = config.providers[provider];
@@ -28,6 +32,7 @@ export async function useStreamText({
   const createProvider = {
     mistral: createMistral,
     openai: createOpenAI,
+    anthropic: createAnthropic,
   }[provider];
   const api = createProvider({
     baseUrl: providerConfig.baseUrl || undefined,
