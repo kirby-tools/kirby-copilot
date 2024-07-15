@@ -1,4 +1,4 @@
-export const SUPPORTED_PROVIDERS = ["openai", "mistral"];
+export const SUPPORTED_PROVIDERS = ["anthropic", "mistral", "openai"];
 export const SUPPORTED_VISION_MIME_TYPES = [
   "image/png",
   "image/jpeg",
