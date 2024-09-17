@@ -1,4 +1,5 @@
 <script>
+import { useLicense } from "@kirby-tools/licensing";
 import {
   computed,
   nextTick,
@@ -11,16 +12,15 @@ import {
   watch,
 } from "kirbyuse";
 import { section } from "kirbyuse/props";
-import { useLicense } from "@kirby-tools/licensing";
+import { useStreamText } from "../composables";
 import {
   LOG_LEVELS,
   STORAGE_KEY_PREFIX,
   SUPPORTED_PROVIDERS,
   SUPPORTED_VISION_MIME_TYPES,
 } from "../constants";
-import { useStreamText } from "../composables";
-import { getHashedStorageKey } from "../utils/storage";
 import { registerPluginAssets } from "../utils/assets";
+import { getHashedStorageKey } from "../utils/storage";
 import { downscaleFile, openFilePicker } from "../utils/upload";
 
 const propsDefinition = {

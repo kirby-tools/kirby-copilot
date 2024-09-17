@@ -1,7 +1,7 @@
 import { STORAGE_KEY_PREFIX } from "../constants";
 import { getModule } from "../utils/assets";
-import { renderTemplate } from "../utils/template";
 import { loadPdfAsText } from "../utils/pdf";
+import { renderTemplate } from "../utils/template";
 import { useLogger } from "./logger";
 
 export async function useStreamText({
