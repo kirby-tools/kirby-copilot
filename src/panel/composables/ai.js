@@ -19,12 +19,8 @@ export async function useStreamText({
     logLevel = 3;
   }
 
-  const {
-    createAnthropic,
-    createMistral,
-    createOpenAI,
-    experimental_streamText,
-  } = await getModule("ai");
+  const { createAnthropic, createMistral, createOpenAI, streamText } =
+    await getModule("ai");
 
   const provider = config.provider;
   const providerConfig = config.providers[provider];
@@ -73,7 +69,7 @@ export async function useStreamText({
       }),
     );
 
-    return experimental_streamText({
+    return streamText({
       model: api.chat(providerConfig.model),
       temperature: config.temperature,
       maxTokens: config.maxGenerationTokens,
@@ -95,7 +91,7 @@ export async function useStreamText({
     });
   }
 
-  return experimental_streamText({
+  return streamText({
     model: api.chat(providerConfig.model),
     temperature: config.temperature,
     maxTokens: config.maxGenerationTokens,
