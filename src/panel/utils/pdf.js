@@ -1,4 +1,4 @@
-import { getModule, resolvePluginAsset } from "./assets";
+import { loadPluginModule, resolvePluginAsset } from "kirbyuse";
 
 let _PDFJS;
 
@@ -35,7 +35,7 @@ async function resolvePDFJS() {
     return _PDFJS;
   }
 
-  _PDFJS = await getModule("pdfjs");
+  _PDFJS = await loadPluginModule("pdfjs");
   const pdfjsWorker = resolvePluginAsset("pdfjs.worker.js");
   _PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker.url;
   return _PDFJS;

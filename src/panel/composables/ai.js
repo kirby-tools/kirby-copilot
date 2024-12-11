@@ -1,26 +1,51 @@
-import { STORAGE_KEY_PREFIX } from "../constants";
-import { getModule } from "../utils/assets";
+import { loadPluginModule, useContent } from "kirbyuse";
+import { STORAGE_KEY_PREFIX, SUPPORTED_PROVIDERS } from "../constants";
 import { loadPdfAsText } from "../utils/pdf";
 import { renderTemplate } from "../utils/template";
+import { createContentContext } from "./content";
 import { useLogger } from "./logger";
+import { usePluginContext } from "./plugin";
 
 export async function useStreamText({
   userPrompt,
   systemPrompt,
-  context,
-  files,
-  config,
-  logLevel,
+  files = [],
+  logLevel = 1,
   abortSignal,
 }) {
+  userPrompt ||= "";
+
   const logger = useLogger();
+  const pluginContext = await usePluginContext();
+  let config = pluginContext.config;
+
+  // eslint-disable-next-line no-undef
+  if (__PLAYGROUND__) {
+    config = JSON.parse(JSON.stringify(pluginContext.config));
+    config.providers[config.provider].model =
+      useContent().currentContent.value.gptmodel;
+  }
 
   if (import.meta.env.DEV) {
     logLevel = 3;
   }
 
+  if (!config.provider || !SUPPORTED_PROVIDERS.includes(config.provider)) {
+    throw new Error(
+      `Unsupported provider "${config.provider}" in the "johannschopplich.copilot.provider" global configuration.`,
+    );
+  }
+
+  for (const field of ["apiKey", "model"]) {
+    if (!config.providers?.[config.provider]?.[field]) {
+      throw new Error(
+        `Missing "${field}" property in the "johannschopplich.copilot.providers.${config.provider}" global configuration.`,
+      );
+    }
+  }
+
   const { createAnthropic, createMistral, createOpenAI, streamText } =
-    await getModule("ai");
+    await loadPluginModule("ai");
 
   const provider = config.provider;
   const providerConfig = config.providers[provider];
@@ -41,16 +66,18 @@ export async function useStreamText({
   const images = files.filter((file) => file.type.startsWith("image/"));
   const pdfs = files.filter((file) => file.type === "application/pdf");
 
-  let userPromptWithContext = renderTemplate(userPrompt, context);
+  const contentContext = createContentContext();
+  let userPromptWithContext = renderTemplate(userPrompt, contentContext);
 
   // Extract PDF pages as text
   if (pdfs.length > 0) {
     const pdfTexts = await Promise.all(pdfs.map(loadPdfAsText));
-    const pdfContext = `Additional context from the following PDF documents has been processed and made available to you. Include the information from these documents as applicable.\n\n${pdfTexts
-      .map((value, index) => `PDF document ${index + 1}: ${value}`)
+    userPromptWithContext += `\n\n${pdfTexts
+      .map(
+        (value, index) =>
+          `<pdf_document_page_${index + 1}>\n${value}\n</pdf_document_page_${index + 1}>`,
+      )
       .join("\n\n")}`;
-
-    userPromptWithContext += `\n\n${pdfContext}`;
   }
 
   if (logLevel > 1) {
@@ -73,7 +100,7 @@ export async function useStreamText({
       model: api.chat(providerConfig.model),
       temperature: config.temperature,
       maxTokens: config.maxGenerationTokens,
-      system: systemPrompt,
+      system: systemPrompt || undefined,
       messages: [
         {
           role: "user",
@@ -95,7 +122,7 @@ export async function useStreamText({
     model: api.chat(providerConfig.model),
     temperature: config.temperature,
     maxTokens: config.maxGenerationTokens,
-    system: systemPrompt,
+    system: systemPrompt || undefined,
     prompt: userPromptWithContext,
     abortSignal,
   });

@@ -6,22 +6,22 @@ import {
   onBeforeUnmount,
   ref,
   useApi,
+  useContent,
   usePanel,
   useSection,
-  useStore,
   watch,
 } from "kirbyuse";
 import { section } from "kirbyuse/props";
-import { useStreamText } from "../composables";
+import { usePluginContext, useStreamText } from "../composables";
 import {
   LOG_LEVELS,
   STORAGE_KEY_PREFIX,
   SUPPORTED_PROVIDERS,
   SUPPORTED_VISION_MIME_TYPES,
+  SYSTEM_PROMPT_HTML_CONTENT,
 } from "../constants";
-import { registerPluginAssets } from "../utils/assets";
 import { getHashedStorageKey } from "../utils/storage";
-import { downscaleFile, openFilePicker } from "../utils/upload";
+import { openFilePicker, toReducedBlob } from "../utils/upload";
 
 const propsDefinition = {
   ...section,
@@ -37,7 +37,7 @@ const props = defineProps(propsDefinition);
 
 const panel = usePanel();
 const api = useApi();
-const store = useStore();
+const { currentContent, update: updateContent } = useContent();
 const { openLicenseModal, assertActivationIntegrity } = useLicense({
   label: "Kirby Copilot",
   apiNamespace: "__copilot__",
@@ -73,7 +73,6 @@ const licenseButtonGroup = ref();
 let storageKey;
 let abortController;
 
-const currentContent = computed(() => store.getters["content/values"]());
 const canUndo = computed(
   () => !isGenerating.value && currentFieldContent.value !== undefined,
 );
@@ -102,31 +101,33 @@ watch(isDetailsOpen, (value) => {
 
 (async () => {
   const { load } = useSection();
-  const response = await load({
-    parent: props.parent,
-    name: props.name,
-  });
+  const [context, response] = await Promise.all([
+    usePluginContext(),
+    load({
+      parent: props.parent,
+      name: props.name,
+    }),
+  ]);
+
   label.value = t(response.label) || panel.t("johannschopplich.copilot.label");
   field.value = response.field ?? undefined;
   userPrompt.value = response.userPrompt ?? undefined;
   systemPrompt.value =
-    response.systemPrompt || response.config.systemPrompt || undefined;
+    response.systemPrompt ||
+    context.config.systemPrompt ||
+    SYSTEM_PROMPT_HTML_CONTENT;
   storage.value = response.storage;
   if (response.editable === true) allow.value.push("edit");
   if (response.files === true) allow.value.push("files");
   size.value = response.size;
   logLevel.value = LOG_LEVELS.indexOf(
-    response.config.logLevel ?? response.logLevel,
+    context.config.logLevel ?? response.logLevel,
   );
   supported.value = response.supported;
-  config.value = response.config;
+  config.value = context.config;
   license.value =
     // eslint-disable-next-line no-undef
-    __PLAYGROUND__ && window.location.hostname === "try.kirbycopilot.com"
-      ? "active"
-      : response.license;
-
-  registerPluginAssets(response.assets);
+    __PLAYGROUND__ ? "active" : response.license;
 
   if (response.files === "auto" && response.modelFile) {
     modelFile.value = response.modelFile;
@@ -198,20 +199,11 @@ async function generate() {
   let text = "";
   let lastCallTime = Date.now();
 
-  let _config = config.value;
-  // eslint-disable-next-line no-undef
-  if (__PLAYGROUND__) {
-    _config = JSON.parse(JSON.stringify(config.value));
-    _config.providers[_config.provider].model = currentContent.value.gptmodel;
-  }
-
   try {
     const { textStream } = await useStreamText({
       userPrompt: currentPrompt.value,
       systemPrompt: systemPrompt.value,
-      context: createContext(),
       files: files.value,
-      config: _config,
       logLevel: logLevel.value,
       abortSignal: abortController.signal,
     });
@@ -228,18 +220,16 @@ async function generate() {
 
         const newBlocks = await htmlToBlocks(text);
         if (newBlocks.length > 0) {
-          store.dispatch("content/update", [
-            field.value,
-            [...currentFieldContent.value, ...newBlocks],
-          ]);
+          updateContent({
+            [field.value]: [...currentFieldContent.value, ...newBlocks],
+          });
         }
       }
       // Preview text
       else {
-        store.dispatch("content/update", [
-          field.value,
-          currentFieldContent.value + text,
-        ]);
+        updateContent({
+          [field.value]: currentFieldContent.value + text,
+        });
       }
     }
   } catch (error) {
@@ -262,13 +252,11 @@ async function generate() {
     return;
   }
 
-  // Update content
-  store.dispatch("content/update", [
-    field.value,
-    Array.isArray(currentFieldContent.value)
+  updateContent({
+    [field.value]: Array.isArray(currentFieldContent.value)
       ? [...currentFieldContent.value, ...(await htmlToBlocks(text))]
       : currentFieldContent.value + text,
-  ]);
+  });
 
   abortController = undefined;
   panel.isLoading = false;
@@ -284,7 +272,9 @@ function abort() {
 }
 
 function undo() {
-  store.dispatch("content/update", [field.value, currentFieldContent.value]);
+  updateContent({
+    [field.value]: currentFieldContent.value,
+  });
   currentFieldContent.value = undefined;
 }
 
@@ -294,12 +284,12 @@ async function pickFiles() {
   });
 
   files.value = await Promise.all(
-    selectedFiles.map(async (file) => {
-      if (file.type.startsWith("image/")) {
-        return downscaleFile(file, { maxSize: 2048 });
+    selectedFiles.map(async (blob) => {
+      if (blob.type.startsWith("image/")) {
+        return toReducedBlob(blob, 2048);
       }
 
-      return file;
+      return blob;
     }),
   );
 }
@@ -321,23 +311,6 @@ async function htmlToBlocks(html) {
   }
 
   return blocks;
-}
-
-function createContext() {
-  const context = {
-    ...currentContent.value,
-    title: panel.view.title,
-  };
-
-  // JSON-encode non-primitive values
-  return Object.fromEntries(
-    Object.entries(context).map(([key, value]) => [
-      key,
-      Array.isArray(value) || (typeof value === "object" && value !== null)
-        ? JSON.stringify(value)
-        : value,
-    ]),
-  );
 }
 
 function onModelSave() {

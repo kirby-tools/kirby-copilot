@@ -18,53 +18,76 @@ export async function openFilePicker({ accept = "*", multiple = true } = {}) {
   });
 }
 
-export async function downscaleFile(file, { maxSize } = {}) {
-  if (!maxSize) return file;
+export async function toReducedBlob(blob, maxDimension) {
+  if (!maxDimension) return blob;
 
-  const img = await loadImage(file);
-  const reducedBlob = await imageToBlob(img, file.type, maxSize);
-  return reducedBlob;
+  const loadedImage = await loadImage(blob);
+  const resizedBlob = await imageToBlob(loadedImage, blob.type, maxDimension);
+  return resizedBlob;
 }
 
-async function loadImage(file) {
-  const img = new Image();
-  const url = URL.createObjectURL(file);
+async function loadImage(blob, options = {}) {
+  if (!blob.type.startsWith("image/")) {
+    throw new TypeError(`MIME type must be an image, but got: ${blob.type}`);
+  }
 
-  img.src = url;
+  const imageElement = new Image();
+  const objectUrl = URL.createObjectURL(blob);
 
-  await new Promise((resolve, reject) => {
-    img.onload = () => {
-      resolve(img);
-    };
-    img.onerror = () => {
-      // Revoke the created object URL to avoid memory leaks
-      URL.revokeObjectURL(url);
-      reject(new Error("Failed to load the image"));
-    };
-  });
+  if (options.crossOrigin) {
+    imageElement.crossOrigin = options.crossOrigin;
+  }
 
-  // Revoke the created object URL to avoid memory leaks
-  URL.revokeObjectURL(url);
+  try {
+    const resolvedImage = await new Promise((resolve, reject) => {
+      imageElement.addEventListener("load", () => {
+        resolve(imageElement);
+      });
 
-  return img;
+      imageElement.addEventListener("error", reject);
+
+      imageElement.src = objectUrl;
+    });
+
+    return resolvedImage;
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
 }
 
-async function imageToBlob(img, fileType, maxSize) {
+async function imageToBlob(
+  image,
+  /** MIME type for the output blob (e.g., `image/jpeg`, `image/png`) */
+  mimeType,
+  /** Maximum dimension (width or height) in pixels */
+  maxDimension,
+) {
+  if (!image.complete || !image.naturalWidth) {
+    throw new Error("Image has not been properly loaded");
+  }
+
+  if (!mimeType.startsWith("image/")) {
+    throw new Error(`Blob type must be an image, but got: ${mimeType}`);
+  }
+
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
 
-  let scaleFactor = 1;
-  if (maxSize && (img.width > maxSize || img.height > maxSize)) {
-    scaleFactor = maxSize / Math.max(img.width, img.height);
-  }
+  const scaleFactor = maxDimension
+    ? Math.min(1, maxDimension / Math.max(image.width, image.height))
+    : 1;
+  const targetWidth = Math.round(image.width * scaleFactor);
+  const targetHeight = Math.round(image.height * scaleFactor);
 
-  canvas.width = img.width * scaleFactor;
-  canvas.height = img.height * scaleFactor;
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
 
-  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
 
   const blob = await new Promise((resolve) => {
-    canvas.toBlob(resolve, fileType);
+    canvas.toBlob(resolve, mimeType);
   });
 
   if (!blob) {
@@ -72,28 +95,4 @@ async function imageToBlob(img, fileType, maxSize) {
   }
 
   return blob;
-}
-
-// eslint-disable-next-line no-unused-vars
-function _fileToDataUri(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = (event) => {
-      const dataUri = event.target.result;
-      const mimeType = file.type;
-      resolve({ dataUri, mimeType });
-    };
-
-    reader.onerror = (error) => {
-      reject(error);
-    };
-
-    reader.readAsDataURL(file);
-  });
-}
-
-// eslint-disable-next-line no-unused-vars
-function _dataUriToBase64(dataUri) {
-  return dataUri.split(",")[1];
 }
