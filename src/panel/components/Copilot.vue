@@ -1,5 +1,5 @@
 <script>
-import { useLicense } from "@kirby-tools/licensing";
+import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import {
   computed,
   nextTick,
@@ -37,10 +37,6 @@ const props = defineProps(propsDefinition);
 const panel = usePanel();
 const api = useApi();
 const { currentContent, update: updateContent } = useContent();
-const { openLicenseModal, assertActivationIntegrity } = useLicense({
-  label: "Kirby Copilot",
-  apiNamespace: "__copilot__",
-});
 
 const EMPTY_HTML_TAG_RE = /^<(\w+)>\s*<\/\1>$/;
 
@@ -52,12 +48,13 @@ const systemPrompt = ref();
 const storage = ref();
 const size = ref();
 const logLevel = ref();
+
 // Section computed
 const supported = ref();
 const config = ref();
 const modelFile = ref();
-const license = ref();
-// Local data
+
+// Generic data
 const isInitialized = ref(false);
 const isGenerating = ref(false);
 const isDetailsOpen = ref(false);
@@ -66,7 +63,7 @@ const currentPrompt = ref();
 const currentFieldContent = ref();
 const allow = ref([]);
 const files = ref([]);
-const licenseButtonGroup = ref();
+const licenseStatus = ref();
 
 // Non-reactive data
 let storageKey;
@@ -124,9 +121,9 @@ watch(isDetailsOpen, (value) => {
   );
   supported.value = response.supported;
   config.value = context.config;
-  license.value =
+  licenseStatus.value =
     // eslint-disable-next-line no-undef
-    __PLAYGROUND__ ? "active" : response.license;
+    __PLAYGROUND__ ? "active" : context.licenseStatus;
 
   if (response.files === "auto" && response.modelFile) {
     modelFile.value = response.modelFile;
@@ -154,10 +151,6 @@ watch(isDetailsOpen, (value) => {
 
   panel.events.on("view.save", onModelSave);
   isInitialized.value = true;
-  assertActivationIntegrity({
-    component: licenseButtonGroup,
-    licenseStatus: license.value,
-  });
 })();
 
 onBeforeUnmount(() => {
@@ -314,40 +307,18 @@ function onModelSave() {
     currentFieldContent.value = undefined;
   }
 }
-
-async function handleRegistration() {
-  const { isRegistered } = await openLicenseModal();
-  if (isRegistered) {
-    license.value = "active";
-  }
-}
 </script>
 
 <template>
   <k-section v-if="isInitialized" :label="label">
-    <k-button-group
-      v-if="license !== 'active'"
-      ref="licenseButtonGroup"
-      slot="options"
-      layout="collapsed"
-    >
-      <k-button
-        theme="love"
-        variant="filled"
-        size="xs"
-        link="https://kirbycopilot.com/buy"
-        target="_blank"
-        :text="panel.t('johannschopplich.copilot.license.buy')"
+    <template v-if="licenseStatus !== undefined" slot="options">
+      <LicensingButtonGroup
+        label="Kirby Copilot"
+        api-namespace="__copilot__"
+        :license-status="licenseStatus"
+        pricing-url="https://kirbycopilot.com/buy"
       />
-      <k-button
-        theme="love"
-        variant="filled"
-        size="xs"
-        icon="key"
-        :text="panel.t('johannschopplich.copilot.license.activate')"
-        @click="handleRegistration()"
-      />
-    </k-button-group>
+    </template>
 
     <k-box
       v-if="!config.provider || !SUPPORTED_PROVIDERS.includes(config.provider)"

@@ -10,6 +10,7 @@ return [
             'pattern' => '__copilot__/context',
             'method' => 'GET',
             'action' => function () use ($kirby) {
+                $licenses = Licenses::read('johannschopplich/kirby-copilot');
                 $config = $kirby->option('johannschopplich.copilot', []);
 
                 $defaultConfig = [
@@ -46,7 +47,11 @@ return [
                     ])
                     ->values();
 
-                return compact('config', 'assets');
+                return [
+                    'config' => $config,
+                    'assets' => $assets,
+                    'licenseStatus' => $licenses->getStatus()
+                ];
             }
         ],
         [

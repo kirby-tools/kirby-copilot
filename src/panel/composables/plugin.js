@@ -10,9 +10,9 @@ export function usePluginContext() {
 
   pendingPromise = window.panel.api
     .get(PLUGIN_CONTEXT_API_ROUTE)
-    .then(({ config, assets }) => {
-      registerPluginAssets(assets);
-      context = { config, assets };
+    .then((response) => {
+      registerPluginAssets(response.assets);
+      context = response;
       pendingPromise = undefined;
       return context;
     });

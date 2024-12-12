@@ -33,10 +33,6 @@ return [
                     true
                 );
             },
-            'license' => function () {
-                $licenses = Licenses::read('johannschopplich/kirby-copilot');
-                return $licenses->getStatus();
-            },
             'modelFile' => function () {
                 /** @var \Kirby\Cms\File */
                 $model = $this->model();

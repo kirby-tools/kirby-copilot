@@ -18,9 +18,7 @@ return [
         'johannschopplich.copilot.files.select' => 'Select files',
         'johannschopplich.copilot.images.select' => 'Select images',
         'johannschopplich.copilot.generator.success' => 'Content generated',
-        'johannschopplich.copilot.generator.error' => 'Could not generate text. Please check console logs.',
-        'johannschopplich.copilot.license.buy' => 'Buy a license',
-        'johannschopplich.copilot.license.activate' => 'Activate'
+        'johannschopplich.copilot.generator.error' => 'Could not generate text. Please check console logs.'
     ],
     'de' => [
         'johannschopplich.copilot.label' => 'Copilot',
@@ -39,30 +37,7 @@ return [
         'johannschopplich.copilot.files.select' => 'Dateien auswählen',
         'johannschopplich.copilot.images.select' => 'Bilder auswählen',
         'johannschopplich.copilot.generator.success' => 'Content generiert',
-        'johannschopplich.copilot.generator.error' => 'Text konnte nicht generiert werden. Bitte Konsolenprotokolle prüfen.',
-        'johannschopplich.copilot.license.buy' => 'Lizenz kaufen',
-        'johannschopplich.copilot.license.activate' => 'Aktivieren'
-    ],
-    'nl' => [
-        'johannschopplich.copilot.label' => 'Copilot',
-        'johannschopplich.copilot.generate' => 'Genereren',
-        'johannschopplich.copilot.stop' => 'Stoppen',
-        'johannschopplich.copilot.undo' => 'Ongedaan maken',
-        'johannschopplich.copilot.delete' => 'Verwijderen',
-        'johannschopplich.copilot.context' => 'Context',
-        'johannschopplich.copilot.context.file.model' => 'Het huidige bestand wordt gebruikt als context.',
-        'johannschopplich.copilot.context.model.unsupported' => 'Dit bestandstype wordt niet ondersteund als context.',
-        'johannschopplich.copilot.remove' => 'Verwijderen',
-        'johannschopplich.copilot.prompt.label' => 'Prompt',
-        'johannschopplich.copilot.prompt.empty' => 'Lege prompt',
-        'johannschopplich.copilot.prompt.placeholder' => 'Voer hier prompt in',
-        'johannschopplich.copilot.prompt.dialogPlaceholder' => 'Stel een vraag... (Geselecteerde tekst wordt gebruikt als context)',
-        'johannschopplich.copilot.files.select' => 'Selecteer bestanden',
-        'johannschopplich.copilot.images.select' => 'Selecteer afbeeldingen',
-        'johannschopplich.copilot.generator.success' => 'Inhoud gegenereerd',
-        'johannschopplich.copilot.generator.error' => 'Kon geen tekst genereren. Controleer de console logs.',
-        'johannschopplich.copilot.license.buy' => 'Koop een licentie',
-        'johannschopplich.copilot.license.activate' => 'Activeren'
+        'johannschopplich.copilot.generator.error' => 'Text konnte nicht generiert werden. Bitte Konsolenprotokolle prüfen.'
     ],
     'fr' => [
         'johannschopplich.copilot.label' => 'Copilot',
@@ -81,8 +56,25 @@ return [
         'johannschopplich.copilot.files.select' => 'Sélectionner des fichiers',
         'johannschopplich.copilot.images.select' => 'Sélectionner des images',
         'johannschopplich.copilot.generator.success' => 'Contenu généré',
-        'johannschopplich.copilot.generator.error' => 'Impossible de générer le texte. Veuillez vérifier les journaux de la console.',
-        'johannschopplich.copilot.license.buy' => 'Acheter une licence',
-        'johannschopplich.copilot.license.activate' => 'Activer'
+        'johannschopplich.copilot.generator.error' => 'Impossible de générer le texte. Veuillez vérifier les journaux de la console.'
+    ],
+    'nl' => [
+        'johannschopplich.copilot.label' => 'Copilot',
+        'johannschopplich.copilot.generate' => 'Genereren',
+        'johannschopplich.copilot.stop' => 'Stoppen',
+        'johannschopplich.copilot.undo' => 'Ongedaan maken',
+        'johannschopplich.copilot.delete' => 'Verwijderen',
+        'johannschopplich.copilot.context' => 'Context',
+        'johannschopplich.copilot.context.file.model' => 'Het huidige bestand wordt gebruikt als context.',
+        'johannschopplich.copilot.context.model.unsupported' => 'Dit bestandstype wordt niet ondersteund als context.',
+        'johannschopplich.copilot.remove' => 'Verwijderen',
+        'johannschopplich.copilot.prompt.label' => 'Prompt',
+        'johannschopplich.copilot.prompt.empty' => 'Lege prompt',
+        'johannschopplich.copilot.prompt.placeholder' => 'Voer hier prompt in',
+        'johannschopplich.copilot.prompt.dialogPlaceholder' => 'Stel een vraag... (Geselecteerde tekst wordt gebruikt als context)',
+        'johannschopplich.copilot.files.select' => 'Selecteer bestanden',
+        'johannschopplich.copilot.images.select' => 'Selecteer afbeeldingen',
+        'johannschopplich.copilot.generator.success' => 'Inhoud gegenereerd',
+        'johannschopplich.copilot.generator.error' => 'Kon geen tekst genereren. Controleer de console logs.'
     ]
 ];

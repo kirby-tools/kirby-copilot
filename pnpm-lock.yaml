@@ -21,8 +21,8 @@ importers:
         specifier: ^3.11.2
         version: 3.11.2(@typescript-eslint/utils@8.17.0(eslint@9.16.0(jiti@2.4.1))(typescript@5.7.2))(@vue/compiler-sfc@2.7.16)(eslint@9.16.0(jiti@2.4.1))(typescript@5.7.2)
       '@kirby-tools/licensing':
-        specifier: ^0.3.2
-        version: 0.3.2
+        specifier: ^0.4.0
+        version: 0.4.0(kirbyuse@0.9.1)
       ai:
         specifier: ^4.0.13
         version: 4.0.13(react@18.3.1)(zod@3.23.8)
@@ -546,8 +546,10 @@ packages:
     resolution: {integrity: sha512-f5DRIOZf7wxogefH03RjMPMdBF7ADTWUMoOs9kaJo06EfwF+aFhMZMDZxHg/Xe12hptN9xoZjGso2fdjapBRIA==}
     engines: {node: '>=10'}
 
-  '@kirby-tools/licensing@0.3.2':
-    resolution: {integrity: sha512-xL28mFkGSvRsq7CyhjtaJbYyc1xqPNuFmzCpIJRZx/cB7SGbmaov4LRCluukbE3Pjii+CCMKE6P21sfklUWQUA==}
+  '@kirby-tools/licensing@0.4.0':
+    resolution: {integrity: sha512-zvDGVFH1xBCR2N4d4MJs0J8VF9c6kUNK8sGekXFcZx2odPw6Z5ay4ZLJ8qXJ6pOWeMG5v+qGaPTkHG4dGfpKgg==}
+    peerDependencies:
+      kirbyuse: '*'
 
   '@napi-rs/canvas-android-arm64@0.1.65':
     resolution: {integrity: sha512-ZYwqFYEKcT5Zr8lbiaJNJj/poLaeK2TncolY914r+gD2TJNeP7ZqvE7A2SX/1C9MB4E3DQEwm3YhL3WEf0x3MQ==}
@@ -1796,9 +1798,6 @@ packages:
     resolution: {integrity: sha512-6UYDtxCPUdUNG67/kubl7Pitg3h6bf/H+Ueguh+DQ20KPJzVKqLDhF/7uJ9LnkEBgxC7iB7GV14bltwEEcSdNg==}
     engines: {node: '>=18'}
     hasBin: true
-
-  kirbyuse@0.7.1:
-    resolution: {integrity: sha512-wlifiqgDV5pX3VWGihEAAnu7Hf5DSst0vGipnhxJMhIMMFIoA7f7M5br7//kZAQQEj4xEdTpo44Zilj4ohAeww==}
 
   kirbyuse@0.9.1:
     resolution: {integrity: sha512-yE9y4vTELiJjuPAG84BJ3lSQB5pBxeDhsaFrieE8ZEYNBroXCaTfzmUro5fIV/xI5e2u6ISwegw8ZhsjNpe4ug==}
@@ -3255,9 +3254,9 @@ snapshots:
       string-argv: 0.3.2
       type-detect: 4.1.0
 
-  '@kirby-tools/licensing@0.3.2':
+  '@kirby-tools/licensing@0.4.0(kirbyuse@0.9.1)':
     dependencies:
-      kirbyuse: 0.7.1
+      kirbyuse: 0.9.1
       vue: 2.7.16
 
   '@napi-rs/canvas-android-arm64@0.1.65':
@@ -4563,10 +4562,6 @@ snapshots:
       - terser
       - tsx
       - yaml
-
-  kirbyuse@0.7.1:
-    dependencies:
-      vue: 2.7.16
 
   kirbyuse@0.9.1:
     dependencies:
