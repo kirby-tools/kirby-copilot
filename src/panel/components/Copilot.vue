@@ -219,16 +219,24 @@ async function generate() {
 
         const newBlocks = await htmlToBlocks(text);
         if (newBlocks.length > 0) {
-          updateContent({
-            [field.value]: [...currentFieldContent.value, ...newBlocks],
-          });
+          updateContent(
+            {
+              [field.value]: [...currentFieldContent.value, ...newBlocks],
+            },
+            // Disable saving content to storage in Kirby 5
+            false,
+          );
         }
       }
       // Preview text
       else {
-        updateContent({
-          [field.value]: currentFieldContent.value + text,
-        });
+        updateContent(
+          {
+            [field.value]: currentFieldContent.value + text,
+          },
+          // Disable saving content to storage in Kirby 5
+          false,
+        );
       }
     }
   } catch (error) {
