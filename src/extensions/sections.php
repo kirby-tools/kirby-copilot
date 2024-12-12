@@ -1,7 +1,6 @@
 <?php
 
 use JohannSchopplich\Licensing\Licenses;
-use Kirby\Cms\PluginAsset;
 use Kirby\Toolkit\I18n;
 
 return [
@@ -33,61 +32,6 @@ return [
                     ['blocks', 'text', 'textarea', 'writer'],
                     true
                 );
-            },
-            'config' => function () {
-                /** @var \Kirby\Cms\App */
-                $kirby = $this->kirby();
-                $config = $kirby->option('johannschopplich.copilot', []);
-
-                $defaultConfig = [
-                    'provider' => 'openai',
-                    'providers' => [
-                        'openai' => [
-                            'model' => 'gpt-4o'
-                        ]
-                    ],
-                    'temperature' => 0.5,
-                    'maxGenerationTokens' => 1024,
-                    'systemPrompt' => 'Provide responses in HTML format, including only the content that would go inside the <body> tags. Do not include the <head> section or any other parts of a full HTML document structure.',
-                    'blocksUpdateThrottle' => 250
-                ];
-
-                // Merge user configuration with defaults
-                $config = array_replace_recursive($defaultConfig, $config);
-
-                // Lowercase model provider name
-                $config['provider'] = strtolower($config['provider']);
-
-                // Lowercase model providers configuration keys
-                $config['providers'] = array_change_key_case($config['providers'], CASE_LOWER);
-
-                // Keep backwards compatibility with former OpenAI model configuration
-                if (isset($config['providers']['openai']['model']['default']) && is_string($config['providers']['openai']['model']['default'])) {
-                    $config['providers']['openai']['model'] = $config['providers']['openai']['model']['default'];
-                }
-
-                // Require a minimum throttle to avoid spamming the HTML to blocks API
-                $config['blocksUpdateThrottle'] = max(50, $config['blocksUpdateThrottle']);
-
-                return $config;
-            },
-            'assets' => function () {
-                /** @var \Kirby\Cms\App */
-                $kirby = $this->kirby();
-                $plugin = $kirby->plugin('johannschopplich/copilot');
-
-                return $plugin
-                    ->assets()
-                    ->clone()
-                    ->map(fn (PluginAsset $asset) => [
-                        'filename' => $asset->filename(),
-                        'url' => $asset->url()
-                    ])
-                    ->values();
-            },
-            'license' => function () {
-                $licenses = Licenses::read('johannschopplich/kirby-copilot');
-                return $licenses->getStatus();
             },
             'modelFile' => function () {
                 /** @var \Kirby\Cms\File */

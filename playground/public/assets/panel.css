@@ -1,3 +1,4 @@
+/* Hide Panel navigation and topbar */
 .k-panel {
   --main-start: 0;
 }
@@ -30,8 +31,34 @@
   }
 }
 
+/* Improved tabs layout */
+/* Improved tabs layout */
+.k-tabs {
+  padding-top: var(--spacing-4);
+}
+
+.k-tab-button[aria-current] {
+  color: var(--toolbar-text);
+  background: var(--toolbar-back);
+  box-shadow: var(--shadow);
+}
+
+.k-tab-button[aria-current] .k-button-text {
+  filter: unset !important;
+}
+
+.k-tab-button[aria-current]::after {
+  content: unset;
+}
+
+/* Copilot playground changes */
 .k-box[data-theme="positive"] .k-text {
   --link-color: var(--color-green-900);
+}
+
+.k-box[data-theme="positive"] code {
+  --code-inline-color-text: var(--color-green-900);
+  --code-inline-color-back: var(--color-green-300);
 }
 
 .k-box[data-theme="empty"] .k-text {
