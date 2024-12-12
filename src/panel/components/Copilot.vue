@@ -12,7 +12,7 @@ import {
   watch,
 } from "kirbyuse";
 import { section } from "kirbyuse/props";
-import { usePluginContext, useStreamText } from "../composables";
+import { useFilePicker, usePluginContext, useStreamText } from "../composables";
 import {
   LOG_LEVELS,
   STORAGE_KEY_PREFIX,
@@ -21,7 +21,6 @@ import {
   SYSTEM_PROMPT_HTML_CONTENT,
 } from "../constants";
 import { getHashedStorageKey } from "../utils/storage";
-import { openFilePicker, toReducedBlob } from "../utils/upload";
 
 const propsDefinition = {
   ...section,
@@ -279,19 +278,8 @@ function undo() {
 }
 
 async function pickFiles() {
-  const selectedFiles = await openFilePicker({
-    accept: [...SUPPORTED_VISION_MIME_TYPES, "application/pdf"].join(","),
-  });
-
-  files.value = await Promise.all(
-    selectedFiles.map(async (blob) => {
-      if (blob.type.startsWith("image/")) {
-        return toReducedBlob(blob, 2048);
-      }
-
-      return blob;
-    }),
-  );
+  const pickedFiles = await useFilePicker();
+  files.value = [...files.value, ...pickedFiles];
 }
 
 async function htmlToBlocks(html) {

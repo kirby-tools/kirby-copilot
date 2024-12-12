@@ -1,8 +1,6 @@
 <script setup>
 import { ref, usePanel } from "kirbyuse";
-import { useEventListener } from "../composables/events";
-import { SUPPORTED_VISION_MIME_TYPES } from "../constants";
-import { openFilePicker, toReducedBlob } from "../utils/upload";
+import { useEventListener, useFilePicker } from "../composables";
 import AutoGrowTextarea from "./Primitives/AutoGrowTextarea.vue";
 
 const emit = defineEmits(["cancel", "close", "input", "submit", "success"]);
@@ -19,24 +17,13 @@ useEventListener(document, "keydown", (event) => {
   }
 });
 
-async function pickFiles() {
-  const selectedFiles = await openFilePicker({
-    accept: [...SUPPORTED_VISION_MIME_TYPES, "application/pdf"].join(","),
-  });
-
-  files.value = await Promise.all(
-    selectedFiles.map(async (blob) => {
-      if (blob.type.startsWith("image/")) {
-        return toReducedBlob(blob, 2048);
-      }
-
-      return blob;
-    }),
-  );
-}
-
 function submit() {
   emit("submit", { prompt: prompt.value, files: files.value });
+}
+
+async function pickFiles() {
+  const pickedFiles = await useFilePicker();
+  files.value = [...files.value, ...pickedFiles];
 }
 </script>
 

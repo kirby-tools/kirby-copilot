@@ -13,15 +13,12 @@ export async function useStreamText({
   logLevel = 1,
   abortSignal,
 }) {
-  userPrompt ||= "";
-
   const logger = useLogger();
-  const pluginContext = await usePluginContext();
-  let config = pluginContext.config;
+  let { config } = await usePluginContext();
 
   // eslint-disable-next-line no-undef
   if (__PLAYGROUND__) {
-    config = JSON.parse(JSON.stringify(pluginContext.config));
+    config = JSON.parse(JSON.stringify(config));
     config.providers[config.provider].model =
       useContent().currentContent.value.gptmodel;
   }

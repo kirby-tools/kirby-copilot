@@ -43,6 +43,27 @@ return [
         'johannschopplich.copilot.license.buy' => 'Lizenz kaufen',
         'johannschopplich.copilot.license.activate' => 'Aktivieren'
     ],
+    'nl' => [
+        'johannschopplich.copilot.label' => 'Copilot',
+        'johannschopplich.copilot.generate' => 'Genereren',
+        'johannschopplich.copilot.stop' => 'Stoppen',
+        'johannschopplich.copilot.undo' => 'Ongedaan maken',
+        'johannschopplich.copilot.delete' => 'Verwijderen',
+        'johannschopplich.copilot.context' => 'Context',
+        'johannschopplich.copilot.context.file.model' => 'Het huidige bestand wordt gebruikt als context.',
+        'johannschopplich.copilot.context.model.unsupported' => 'Dit bestandstype wordt niet ondersteund als context.',
+        'johannschopplich.copilot.remove' => 'Verwijderen',
+        'johannschopplich.copilot.prompt.label' => 'Prompt',
+        'johannschopplich.copilot.prompt.empty' => 'Lege prompt',
+        'johannschopplich.copilot.prompt.placeholder' => 'Voer hier prompt in',
+        'johannschopplich.copilot.prompt.dialogPlaceholder' => 'Stel een vraag... (Geselecteerde tekst wordt gebruikt als context)',
+        'johannschopplich.copilot.files.select' => 'Selecteer bestanden',
+        'johannschopplich.copilot.images.select' => 'Selecteer afbeeldingen',
+        'johannschopplich.copilot.generator.success' => 'Inhoud gegenereerd',
+        'johannschopplich.copilot.generator.error' => 'Kon geen tekst genereren. Controleer de console logs.',
+        'johannschopplich.copilot.license.buy' => 'Koop een licentie',
+        'johannschopplich.copilot.license.activate' => 'Activeren'
+    ],
     'fr' => [
         'johannschopplich.copilot.label' => 'Copilot',
         'johannschopplich.copilot.generate' => 'Générer',

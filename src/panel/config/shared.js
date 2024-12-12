@@ -1,4 +1,4 @@
-import { usePanel } from "kirbyuse";
+import { loadPluginModule, usePanel } from "kirbyuse";
 import { useStreamText } from "../composables";
 import { SYSTEM_PROMPT_PROMPT_DIALOG } from "../constants";
 import { TextSelector } from "../utils/text-selector";
@@ -27,7 +27,8 @@ export async function generateAndInsertText(insertFn) {
     const { textStream } = await useStreamText({
       userPrompt: `
 ${prompt}
-${selection ? `\n<selected_text>\n${selection}\n</selected_text>` : ""}
+
+${selection ? `<selected_text>\n${selection}\n</selected_text>` : ""}
 `.trim(),
       systemPrompt: SYSTEM_PROMPT_PROMPT_DIALOG,
       files,
@@ -43,9 +44,15 @@ ${selection ? `\n<selected_text>\n${selection}\n</selected_text>` : ""}
       message: panel.t("johannschopplich.copilot.generator.success"),
     });
   } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") return;
+    if (
+      error instanceof Error &&
+      (error.name === "AbortError" || error.name === "TimeoutError")
+    )
+      return;
 
-    if (error instanceof Error && error.name === "ApiCallError") {
+    const { AISDKError } = await loadPluginModule("ai");
+
+    if (AISDKError.isInstance(error)) {
       console.error(error);
       panel.notification.error(error.message);
       return;
