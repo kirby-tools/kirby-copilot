@@ -1,6 +1,5 @@
 <?php
 
-use JohannSchopplich\Licensing\Licenses;
 use Kirby\Toolkit\I18n;
 
 return [
@@ -23,15 +22,15 @@ return [
             'systemPrompt' => function () {
                 return $this->tryResolveQuery($this->systemPrompt);
             },
-            'supported' => function () {
-                $field = $this->model()->blueprint()->fields()[$this->field] ?? null;
-                $type = $field['type'] ?? null;
+            'fieldType' => function () {
+                if (!$this->field) {
+                    return null;
+                }
 
-                return in_array(
-                    $type,
-                    ['blocks', 'text', 'textarea', 'writer'],
-                    true
-                );
+                $fields = $this->model()->blueprint()->fields();
+                $field = $fields[strtolower($this->field)] ?? null;
+                $type = $field['type'] ?? null;
+                return $type;
             },
             'modelFile' => function () {
                 /** @var \Kirby\Cms\File */

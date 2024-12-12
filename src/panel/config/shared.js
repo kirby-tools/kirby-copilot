@@ -1,6 +1,6 @@
 import { loadPluginModule, usePanel } from "kirbyuse";
 import { useStreamText } from "../composables";
-import { SYSTEM_PROMPT_PROMPT_DIALOG } from "../constants";
+import { SYSTEM_PROMPT } from "../constants";
 import { TextSelector } from "../utils/text-selector";
 
 export async function generateAndInsertText(insertFn) {
@@ -28,9 +28,13 @@ export async function generateAndInsertText(insertFn) {
       userPrompt: `
 ${prompt}
 
+<response_format>
+text
+</response_format>
+
 ${selection ? `<selected_text>\n${selection}\n</selected_text>` : ""}
 `.trim(),
-      systemPrompt: SYSTEM_PROMPT_PROMPT_DIALOG,
+      systemPrompt: SYSTEM_PROMPT,
       files,
       abortSignal: abortController.signal,
     });

@@ -18,7 +18,7 @@ import {
   STORAGE_KEY_PREFIX,
   SUPPORTED_PROVIDERS,
   SUPPORTED_VISION_MIME_TYPES,
-  SYSTEM_PROMPT_HTML_CONTENT,
+  SYSTEM_PROMPT,
 } from "../constants";
 import { getHashedStorageKey } from "../utils/storage";
 
@@ -50,11 +50,11 @@ const size = ref();
 const logLevel = ref();
 
 // Section computed
-const supported = ref();
-const config = ref();
+const fieldType = ref();
 const modelFile = ref();
 
 // Generic data
+const config = ref();
 const isInitialized = ref(false);
 const isGenerating = ref(false);
 const isDetailsOpen = ref(false);
@@ -109,9 +109,7 @@ watch(isDetailsOpen, (value) => {
   field.value = response.field ?? undefined;
   userPrompt.value = response.userPrompt ?? undefined;
   systemPrompt.value =
-    response.systemPrompt ||
-    context.config.systemPrompt ||
-    SYSTEM_PROMPT_HTML_CONTENT;
+    response.systemPrompt || context.config.systemPrompt || SYSTEM_PROMPT;
   storage.value = response.storage;
   if (response.editable === true) allow.value.push("edit");
   if (response.files === true) allow.value.push("files");
@@ -119,7 +117,7 @@ watch(isDetailsOpen, (value) => {
   logLevel.value = LOG_LEVELS.indexOf(
     context.config.logLevel ?? response.logLevel,
   );
-  supported.value = response.supported;
+  fieldType.value = response.fieldType;
   config.value = context.config;
   licenseStatus.value =
     // eslint-disable-next-line no-undef
@@ -193,7 +191,11 @@ async function generate() {
 
   try {
     const { textStream } = await useStreamText({
-      userPrompt: currentPrompt.value,
+      userPrompt: `
+${currentPrompt.value}
+
+<response_format>\n${["blocks", "writer"].includes(fieldType.value) ? "HTML" : "text"}\n</response_format>
+`.trim(),
       systemPrompt: systemPrompt.value,
       files: files.value,
       logLevel: logLevel.value,
@@ -364,13 +366,6 @@ function onModelSave() {
     <k-box v-else-if="!(field in currentContent)" theme="empty">
       <k-text>
         The <code>{{ field }}</code> field does not exist in the current model.
-      </k-text>
-    </k-box>
-    <k-box v-else-if="!supported" theme="empty">
-      <k-text>
-        The <code>{{ field }}</code> field is not supported. Use a
-        <code>blocks</code>, <code>text</code>, <code>textarea</code> or
-        <code>textarea</code> type.
       </k-text>
     </k-box>
     <k-box v-else-if="!allow.includes('edit') && !userPrompt" theme="empty">
