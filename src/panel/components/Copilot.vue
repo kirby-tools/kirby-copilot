@@ -215,7 +215,7 @@ ${currentPrompt.value}
 
         const newBlocks = await htmlToBlocks(text);
         if (newBlocks.length > 0) {
-          updateContent(
+          await updateContent(
             {
               [field.value]: [...currentFieldContent.value, ...newBlocks],
             },
@@ -226,7 +226,7 @@ ${currentPrompt.value}
       }
       // Preview text
       else {
-        updateContent(
+        await updateContent(
           {
             [field.value]: currentFieldContent.value + text,
           },
