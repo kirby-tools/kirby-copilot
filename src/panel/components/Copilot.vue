@@ -2,6 +2,7 @@
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import {
   computed,
+  loadPluginModule,
   nextTick,
   onBeforeUnmount,
   ref,
@@ -162,7 +163,7 @@ function t(value) {
 
 async function generate() {
   // eslint-disable-next-line no-undef
-  if (__PLAYGROUND__) {
+  if (__PLAYGROUND__ && !window.location.hostname.includes("localhost")) {
     const apiKey = sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`);
     if (!apiKey) {
       panel.notification.error(
@@ -241,7 +242,9 @@ ${currentPrompt.value}
 
     if (error instanceof Error && error.name === "AbortError") return;
 
-    if (error instanceof Error && error.name === "ApiCallError") {
+    const { AISDKError } = await loadPluginModule("ai");
+
+    if (AISDKError.isInstance(error)) {
       console.error(error);
       panel.notification.error(error.message);
       return;
@@ -446,7 +449,7 @@ function onModelSave() {
 
           <k-button-group v-if="allow.includes('files')" layout="collapsed">
             <k-button
-              icon="upload"
+              icon="attachment"
               :text="panel.t('johannschopplich.copilot.files.select')"
               variant="filled"
               size="sm"

@@ -54,10 +54,11 @@ export async function useStreamText({
   }[provider];
   const api = createProvider({
     baseUrl: providerConfig.baseUrl || undefined,
-    // eslint-disable-next-line no-undef
-    apiKey: __PLAYGROUND__
-      ? sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`)
-      : providerConfig.apiKey,
+    apiKey:
+      // eslint-disable-next-line no-undef
+      __PLAYGROUND__ && !window.location.hostname.includes("localhost")
+        ? sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`)
+        : providerConfig.apiKey,
   });
 
   const images = files.filter((file) => file.type.startsWith("image/"));
@@ -96,7 +97,6 @@ export async function useStreamText({
     return streamText({
       model: api.chat(providerConfig.model),
       temperature: config.temperature,
-      maxTokens: config.maxGenerationTokens,
       system: systemPrompt || undefined,
       messages: [
         {
@@ -118,7 +118,6 @@ export async function useStreamText({
   return streamText({
     model: api.chat(providerConfig.model),
     temperature: config.temperature,
-    maxTokens: config.maxGenerationTokens,
     system: systemPrompt || undefined,
     prompt: userPromptWithContext,
     abortSignal,

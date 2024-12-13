@@ -1,11 +1,27 @@
 import { loadPluginModule, usePanel } from "kirbyuse";
 import { useStreamText } from "../composables";
-import { SYSTEM_PROMPT } from "../constants";
+import { STORAGE_KEY_PREFIX, SYSTEM_PROMPT } from "../constants";
 import { TextSelector } from "../utils/text-selector";
 
 export async function generateAndInsertText(insertFn) {
-  const selection = TextSelector.getSelectedText();
   const panel = usePanel();
+
+  // eslint-disable-next-line no-undef
+  if (__PLAYGROUND__ && !window.location.hostname.includes("localhost")) {
+    const apiKey = sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`);
+    if (!apiKey) {
+      panel.notification.error(
+        "Please set your OpenAI API key in the playground settings.",
+      );
+      return;
+    }
+    if (!apiKey.startsWith("sk-")) {
+      panel.notification.error("Invalid OpenAI API key.");
+      return;
+    }
+  }
+
+  const selection = TextSelector.getSelectedText();
   const abortController = new AbortController();
 
   const handleEscape = (event) => {

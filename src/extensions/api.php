@@ -20,8 +20,7 @@ return [
                             'model' => 'gpt-4o'
                         ]
                     ],
-                    'temperature' => 0.5,
-                    'maxGenerationTokens' => 1024,
+                    'temperature' => 0.7,
                     'blocksUpdateThrottle' => 250
                 ];
 
