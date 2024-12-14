@@ -2,7 +2,10 @@ import { loadPluginModule, usePanel } from "kirbyuse";
 import { useStreamText } from "../composables";
 import { STORAGE_KEY_PREFIX, SYSTEM_PROMPT } from "../constants";
 
-export async function generateAndInsertText(selection, { insertFn }) {
+export async function generateAndInsertText(
+  selection,
+  { appendText, replaceText },
+) {
   const panel = usePanel();
 
   // eslint-disable-next-line no-undef
@@ -51,12 +54,18 @@ export async function generateAndInsertText(selection, { insertFn }) {
       abortSignal: abortController.signal,
     });
 
-    if (promptContext.append) {
-      insertFn(`${selection} `);
-    }
+    let isFirstInsertion = true;
+    for await (let textPart of textStream) {
+      if (promptContext.append) {
+        if (isFirstInsertion) {
+          textPart = selection ? ` ${textPart}` : textPart;
+          isFirstInsertion = false;
+        }
 
-    for await (const textPart of textStream) {
-      insertFn(textPart);
+        appendText(textPart);
+      } else {
+        replaceText(textPart);
+      }
     }
 
     panel.notification.success({

@@ -27,10 +27,22 @@ export const writerMarks = {
       const { state } = this.editor;
       const { from, to } = state.tr.selection;
       const selection = state.doc.textBetween(from, to);
+      let currentPos = to;
 
-      const insertFn = (text) => this.editor.insertText(text);
+      const appendText = (text) => {
+        const { tr } = this.editor.state;
+        tr.insertText(text, currentPos);
+        this.editor.view.dispatch(tr);
+        currentPos += text.length;
+      };
 
-      generateAndInsertText(selection, { insertFn });
+      const replaceText = (text) => {
+        const { tr } = this.editor.state;
+        const transaction = tr.insertText(text);
+        this.editor.view.dispatch(transaction);
+      };
+
+      generateAndInsertText(selection, { replaceText, appendText });
     },
   },
 };

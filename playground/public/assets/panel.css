@@ -1,37 +1,3 @@
-/* Hide Panel navigation and topbar */
-.k-panel {
-  --main-start: 0;
-}
-
-.k-panel-menu,
-.k-panel-menu-proxy,
-.k-topbar {
-  display: none;
-}
-
-/* Limit frame to parent website */
-.k-panel-main {
-  padding-left: 1rem;
-  padding-right: 1rem;
-  max-width: 80rem;
-  margin: 0 auto;
-}
-
-@media (min-width: 640px) {
-  .k-panel-main {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .k-panel-main {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-}
-
-/* Improved tabs layout */
 /* Improved tabs layout */
 .k-tabs {
   padding-top: var(--spacing-4);
@@ -88,16 +54,4 @@
   height: 1px;
   background-color: var(--color-border);
   transform: translateY(1px);
-}
-
-.k-page-view[data-id="article"] .k-topbar,
-.k-page-view[data-id="article"] .k-page-view-header,
-.k-page-view[data-id="product"] .k-topbar,
-.k-page-view[data-id="product"] .k-page-view-header {
-  display: none;
-}
-
-.k-page-view[data-id="article"] .k-sections,
-.k-page-view[data-id="product"] .k-sections {
-  padding-top: 2rem;
 }

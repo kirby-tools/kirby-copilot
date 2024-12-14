@@ -13,9 +13,24 @@ export const textareaButtons = {
         return selection;
       });
 
-      const insertFn = (text) => this.command("insert", () => text);
+      let isFirstInsertion = true;
+      const appendText = (text) => {
+        this.command("insert", (input, selection) => {
+          if (isFirstInsertion) {
+            isFirstInsertion = false;
+            // Concatenating space is handled in generator
+            return selection + text;
+          }
 
-      generateAndInsertText(currentSelection, { insertFn });
+          return text;
+        });
+      };
+
+      const replaceText = (text) => {
+        this.command("insert", () => text);
+      };
+
+      generateAndInsertText(currentSelection, { appendText, replaceText });
     },
     shortcut: ".",
   },

@@ -5,7 +5,7 @@ options:
 
 tabs:
   gettingStarted:
-    label: Getting Started & Blocks
+    label: Getting Started
     columns:
       - width: 2/3
         fields:
@@ -38,6 +38,9 @@ tabs:
             text: |
               Purchase a copy of <sparkly-text style="--sparkly-text-size: 2em; --sparkly-text-color: var(--color-yellow-600)">**Kirby Copilot**</sparkly-text> to improve the content management of your client's Kirby project or your own with AI.
 
+  blocksFields:
+    label: Blocks Fields
+    columns:
       - width: 1/1
         fields:
           headline01:
@@ -60,13 +63,14 @@ tabs:
       - width: 1/1
         fields:
           infoTextlikeFields:
-            label: Text-like Fields
+            label: Writer & Textareas
             type: info
             theme: positive
             text: |
-              Writer and textarea fields support two types of text generation:
+              Writer and textarea fields support two interaction modes:
               - Use the Copilot section on the right, just like with blocks fields.
-              - Use the toolbar button to open a prompt dialog. To open it programmatically, use the shortcut: `Cmd + .` (macOS) or `Ctrl + .` (Windows/Linux).
+              - Use the toolbar button to open a prompt dialog. To open it programmatically, use the shortcut:
+                `Cmd + .` (macOS) or `Ctrl + .` (Windows/Linux).
           headline06:
             type: headline
             label: Copilot for Writer Fields
@@ -81,8 +85,6 @@ tabs:
               - bold
               - italic
               - underline
-              - "|"
-              - clear
               - "|"
               - copilot
       - width: 1/3

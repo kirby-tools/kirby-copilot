@@ -1,0 +1,33 @@
+Title: Recipe
+
+----
+
+Intro: 
+
+----
+
+Ingredients: 
+
+----
+
+Content: 
+
+----
+
+Preptime: 20 min
+
+----
+
+Cooktime: 1 h
+
+----
+
+Servings: 2
+
+----
+
+Image: 
+
+----
+
+Uuid: uWApUYouc9VtOppX

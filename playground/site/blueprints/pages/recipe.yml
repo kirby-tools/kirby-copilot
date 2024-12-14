@@ -1,0 +1,64 @@
+title: Recipe
+
+options:
+  preview: https://kirbycopilot.com
+
+columns:
+  - width: 1/1
+    fields:
+      headline:
+        type: headline
+        label: Recipe Details
+  - width: 2/3
+    fields:
+      instructions:
+        type: writer
+        label: Instructions
+        buttons:
+          - bold
+          - italic
+          - underline
+          - strike
+          - code
+          - "|"
+          - link
+          - email
+          - "|"
+          - clear
+          - "|"
+          - copilot
+      # instructions:
+      #   type: textarea
+      #   size: small
+      #   label: Instructions
+      #   buttons:
+      #     - headlines
+      #     - "|"
+      #     - bold
+      #     - italic
+      #     - code
+      #     - "|"
+      #     - link
+      #     - email
+      #     - file
+      #     - "|"
+      #     - ul
+      #     - ol
+      #     - "|"
+      #     - copilot
+
+  - width: 1/3
+    fields:
+      metadata:
+        type: group
+        label: Recipe Info
+        fields:
+          prepTime:
+            type: text
+            label: Preparation Time
+          cookTime:
+            type: text
+            label: Cooking Time
+          servings:
+            type: number
+            label: Servings

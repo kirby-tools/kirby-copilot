@@ -60,7 +60,11 @@ async function pickFiles() {
         v-model="prompt"
         shared-class="kai-p-2 kai-leading-[1.5] focus:kai-outline-none"
         :placeholder="
-          panel.t('johannschopplich.copilot.prompt.dialogPlaceholder')
+          panel.t(
+            selection
+              ? 'johannschopplich.copilot.prompt.dialogContextPlaceholder'
+              : 'johannschopplich.copilot.prompt.dialogPlaceholder',
+          )
         "
       />
 
@@ -87,13 +91,19 @@ async function pickFiles() {
           <div class="kai-flex kai-gap-2">
             <k-select-input
               v-if="selection"
+              class="k-copilot-prompt-dialog__select"
               :options="INSERT_OPTIONS"
               :empty="false"
               :value="insertOption"
               @input="insertOption = $event"
             />
 
-            <k-button variant="filled" icon="sparkling" @click="submit()">
+            <k-button
+              theme="notice-icon"
+              variant="filled"
+              icon="sparkling"
+              @click="submit()"
+            >
               {{ panel.t("johannschopplich.copilot.generate") }}
             </k-button>
           </div>
@@ -109,5 +119,10 @@ async function pickFiles() {
   --dialog-padding: 0;
   --dialog-rounded: var(--rounded);
   overflow: visible;
+}
+
+.k-copilot-prompt-dialog__select {
+  text-decoration: underline;
+  text-underline-offset: var(--link-underline-offset);
 }
 </style>
