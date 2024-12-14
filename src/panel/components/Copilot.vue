@@ -192,11 +192,10 @@ async function generate() {
 
   try {
     const { textStream } = await useStreamText({
-      userPrompt: `
-${currentPrompt.value}
-
-<response_format>\n${["blocks", "writer"].includes(fieldType.value) ? "HTML" : "text"}\n</response_format>
-`.trim(),
+      userPrompt: [
+        currentPrompt.value,
+        `<response_format>\n${["blocks", "writer"].includes(fieldType.value) ? "HTML" : "text"}\n</response_format>`,
+      ].join("\n\n"),
       systemPrompt: systemPrompt.value,
       files: files.value,
       logLevel: logLevel.value,
@@ -428,7 +427,7 @@ function onModelSave() {
           <div v-if="allow.includes('edit')" class="kai-mb-2 kai-text-right">
             <k-input
               :key="isDetailsOpen ? 1 : 0"
-              v-model="currentPrompt"
+              :value="currentPrompt"
               class="kai-mb-1"
               :placeholder="
                 panel.t('johannschopplich.copilot.prompt.placeholder')
@@ -436,6 +435,7 @@ function onModelSave() {
               type="textarea"
               :buttons="false"
               :counter="false"
+              @input="currentPrompt = $event"
             />
             <k-button
               v-show="userPrompt && currentPrompt !== userPrompt"

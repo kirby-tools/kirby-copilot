@@ -3,10 +3,23 @@ import { ref, usePanel } from "kirbyuse";
 import { useEventListener, useFilePicker } from "../composables";
 import AutoGrowTextarea from "./Primitives/AutoGrowTextarea.vue";
 
+defineProps({
+  selection: {
+    type: String,
+    default: "",
+  },
+});
+
 const emit = defineEmits(["cancel", "close", "input", "submit", "success"]);
 const panel = usePanel();
 
+const INSERT_OPTIONS = [
+  { text: "Append", value: "append" },
+  { text: "Replace", value: "replace" },
+];
+
 const files = ref([]);
+const insertOption = ref("append");
 const prompt = ref("");
 const isBadgeHovered = ref(false);
 
@@ -18,7 +31,11 @@ useEventListener(document, "keydown", (event) => {
 });
 
 function submit() {
-  emit("submit", { prompt: prompt.value, files: files.value });
+  emit("submit", {
+    prompt: prompt.value,
+    files: files.value,
+    append: insertOption.value === "append",
+  });
 }
 
 async function pickFiles() {
@@ -67,9 +84,19 @@ async function pickFiles() {
             </span>
           </div>
 
-          <k-button variant="filled" icon="plane" @click="submit()">
-            Send
-          </k-button>
+          <div class="kai-flex kai-gap-2">
+            <k-select-input
+              v-if="selection"
+              :options="INSERT_OPTIONS"
+              :empty="false"
+              :value="insertOption"
+              @input="insertOption = $event"
+            />
+
+            <k-button variant="filled" icon="sparkling" @click="submit()">
+              {{ panel.t("johannschopplich.copilot.generate") }}
+            </k-button>
+          </div>
         </div>
       </div>
     </div>

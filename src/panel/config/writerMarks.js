@@ -24,8 +24,13 @@ export const writerMarks = {
     },
 
     _openPromptDialog() {
+      const { state } = this.editor;
+      const { from, to } = state.tr.selection;
+      const selection = state.doc.textBetween(from, to);
+
       const insertFn = (text) => this.editor.insertText(text);
-      generateAndInsertText(insertFn);
+
+      generateAndInsertText(selection, { insertFn });
     },
   },
 };

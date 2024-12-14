@@ -5,8 +5,17 @@ export const textareaButtons = {
     icon: "sparkling",
     label: "Copilot Prompt",
     click() {
+      let currentSelection = "";
+
+      // Extract current selection
+      this.command("insert", (input, selection) => {
+        currentSelection = selection;
+        return selection;
+      });
+
       const insertFn = (text) => this.command("insert", () => text);
-      generateAndInsertText(insertFn);
+
+      generateAndInsertText(currentSelection, { insertFn });
     },
     shortcut: ".",
   },

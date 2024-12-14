@@ -42,11 +42,12 @@ const text = computed({
   <k-field input="apiKey" :label="label" :help="help" required>
     <k-input
       id="apiKey"
-      v-model="text"
+      :value="text"
       type="password"
       icon="lock"
       :before="before"
       :after="after"
+      @input="text = $event"
     />
   </k-field>
 </template>

@@ -59,6 +59,17 @@
 .k-box[data-theme="positive"] code {
   --code-inline-color-text: var(--color-green-900);
   --code-inline-color-back: var(--color-green-300);
+  --code-inline-color-border: var(--color-green-400);
+}
+
+.k-box[data-theme="passive"] .k-text {
+  --link-color: var(--theme-color-900);
+}
+
+.k-box[data-theme="passive"] code {
+  --code-inline-color-text: var(--theme-color-900);
+  --code-inline-color-back: var(--theme-color-300);
+  --code-inline-color-border: var(--theme-color-400);
 }
 
 .k-box[data-theme="empty"] .k-text {

@@ -1,9 +1,8 @@
 import { loadPluginModule, usePanel } from "kirbyuse";
 import { useStreamText } from "../composables";
 import { STORAGE_KEY_PREFIX, SYSTEM_PROMPT } from "../constants";
-import { TextSelector } from "../utils/text-selector";
 
-export async function generateAndInsertText(insertFn) {
+export async function generateAndInsertText(selection, { insertFn }) {
   const panel = usePanel();
 
   // eslint-disable-next-line no-undef
@@ -21,7 +20,6 @@ export async function generateAndInsertText(insertFn) {
     }
   }
 
-  const selection = TextSelector.getSelectedText();
   const abortController = new AbortController();
 
   const handleEscape = (event) => {
@@ -30,7 +28,7 @@ export async function generateAndInsertText(insertFn) {
     }
   };
 
-  const promptContext = await openPromptDialog();
+  const promptContext = await openPromptDialog({ selection });
   if (!promptContext) return;
 
   const { prompt, files } = promptContext;
@@ -41,19 +39,21 @@ export async function generateAndInsertText(insertFn) {
 
   try {
     const { textStream } = await useStreamText({
-      userPrompt: `
-${prompt}
-
-<response_format>
-text
-</response_format>
-
-${selection ? `<selected_text>\n${selection}\n</selected_text>` : ""}
-`.trim(),
+      userPrompt: [
+        prompt,
+        `<response_format>\ntext\n</response_format>`,
+        selection && `<selected_text>\n${selection}\n</selected_text>`,
+      ]
+        .filter(Boolean)
+        .join("\n\n"),
       systemPrompt: SYSTEM_PROMPT,
       files,
       abortSignal: abortController.signal,
     });
+
+    if (promptContext.append) {
+      insertFn(`${selection} `);
+    }
 
     for await (const textPart of textStream) {
       insertFn(textPart);
@@ -88,13 +88,14 @@ ${selection ? `<selected_text>\n${selection}\n</selected_text>` : ""}
   }
 }
 
-export async function openPromptDialog() {
+export async function openPromptDialog(props = {}) {
   return new Promise((resolve) => {
     const panel = usePanel();
     let result;
 
     panel.dialog.open({
       component: "k-copilot-prompt-dialog",
+      props,
       on: {
         close: () => {
           resolve(result);

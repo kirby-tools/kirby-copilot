@@ -1,6 +1,7 @@
 import CopilotSection from "./components/Copilot.vue";
 import PlaygroundApiKeyField from "./components/Playground/ApiKey.vue";
 import PromptDialog from "./components/PromptDialog.vue";
+import { icons } from "./config/icons";
 import { textareaButtons } from "./config/textareaButtons";
 import { writerMarks } from "./config/writerMarks";
 import "./index.css";
@@ -18,6 +19,7 @@ window.panel.plugin("johannschopplich/copilot", {
       "playground-api-key": PlaygroundApiKeyField,
     }),
   },
+  icons,
   textareaButtons,
   writerMarks,
 });
