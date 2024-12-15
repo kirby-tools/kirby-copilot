@@ -14,7 +14,9 @@ columns:
       instructions:
         type: writer
         label: Instructions
-        buttons:
+        toolbar:
+          inline: false
+        marks:
           - bold
           - italic
           - underline

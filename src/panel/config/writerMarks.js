@@ -9,13 +9,13 @@ export const writerMarks = {
       };
     },
 
-    commands() {
-      return () => this._openPromptDialog();
+    commands(context) {
+      return () => this._openPromptDialog(context);
     },
 
-    keys() {
+    keys(context) {
       return {
-        "Mod-.": () => this._openPromptDialog(),
+        "Mod-.": () => this._openPromptDialog(context),
       };
     },
 
@@ -23,26 +23,60 @@ export const writerMarks = {
       return "copilot";
     },
 
-    _openPromptDialog() {
+    _insertText(tr, text, startPosition, { schema }) {
+      let position = startPosition;
+      const parts = text.split(/(\n)/);
+
+      for (const part of parts) {
+        if (part === "\n") {
+          tr = tr.replaceWith(
+            position,
+            position,
+            schema.nodes.hardBreak.create(),
+          );
+          position += 1;
+        } else if (part.length > 0) {
+          tr = tr.insertText(part, position);
+          position += part.length;
+        }
+      }
+
+      return { tr, newPosition: position };
+    },
+
+    _openPromptDialog(context) {
       const { state } = this.editor;
       const { from, to } = state.tr.selection;
       const selection = state.doc.textBetween(from, to);
-      let currentPos = to;
+      let currentPosition = to;
 
       const appendText = (text) => {
-        const { tr } = this.editor.state;
-        tr.insertText(text, currentPos);
-        this.editor.view.dispatch(tr);
-        currentPos += text.length;
+        const { state, view } = this.editor;
+        const tr = state.tr;
+        const { tr: newTr, newPosition } = this._insertText(
+          tr,
+          text,
+          currentPosition,
+          context,
+        );
+        currentPosition = newPosition;
+        view.dispatch(newTr);
       };
 
       const replaceText = (text) => {
-        const { tr } = this.editor.state;
-        const transaction = tr.insertText(text);
-        this.editor.view.dispatch(transaction);
+        const { state, view } = this.editor;
+        const { from, to } = state.selection;
+        const tr = state.tr.deleteRange(from, to);
+
+        const { tr: newTr } = this._insertText(tr, text, from, context);
+        view.dispatch(newTr);
       };
 
-      generateAndInsertText(selection, { replaceText, appendText });
+      generateAndInsertText(selection, {
+        responseFormat: "text",
+        replaceText,
+        appendText,
+      });
     },
   },
 };

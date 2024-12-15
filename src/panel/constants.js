@@ -18,6 +18,7 @@ Instructions:
 - If pdf_document_pages are provided, additional context from PDF documents have been processed and made available to you. Consider the information from these documents as applicable.
 
 Output Format:
+- If response_format is set to "text", format your response in plain text. Do not include any special formatting.
 - If response_format is set to "HTML", format your response using HTML syntax. Do not include the <head> section or any other parts of a full HTML document structure, only the content of the <body> element.
-- If response_format is set to "text", Format your response using Markdown syntax. Do not use backticks or any other wrapping characters around your Markdown.
+- If response_format is set to "markdown", format your response using Markdown syntax. Do not use backticks or any other wrapping characters around your Markdown.
 `;

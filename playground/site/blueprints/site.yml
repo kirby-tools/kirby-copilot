@@ -115,7 +115,6 @@ tabs:
           copilot02:
             type: copilot
             field: content02
-            systemPrompt: Provide responses in plain text.
 
   promptUsage:
     label: Prompt Usage

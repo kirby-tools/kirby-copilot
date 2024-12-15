@@ -4,7 +4,7 @@ import { STORAGE_KEY_PREFIX, SYSTEM_PROMPT } from "../constants";
 
 export async function generateAndInsertText(
   selection,
-  { appendText, replaceText },
+  { appendText, replaceText, responseFormat = "text" },
 ) {
   const panel = usePanel();
 
@@ -44,7 +44,7 @@ export async function generateAndInsertText(
     const { textStream } = await useStreamText({
       userPrompt: [
         prompt,
-        `<response_format>\ntext\n</response_format>`,
+        `<response_format>\n${responseFormat}\n</response_format>`,
         selection && `<selected_text>\n${selection}\n</selected_text>`,
       ]
         .filter(Boolean)

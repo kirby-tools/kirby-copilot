@@ -30,7 +30,11 @@ export const textareaButtons = {
         this.command("insert", () => text);
       };
 
-      generateAndInsertText(currentSelection, { appendText, replaceText });
+      generateAndInsertText(currentSelection, {
+        responseFormat: "markdown",
+        appendText,
+        replaceText,
+      });
     },
     shortcut: ".",
   },

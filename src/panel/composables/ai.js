@@ -17,7 +17,7 @@ export async function useStreamText({
   let { config } = await usePluginContext();
 
   // eslint-disable-next-line no-undef
-  if (__PLAYGROUND__) {
+  if (__PLAYGROUND__ && !window.location.hostname.includes("localhost")) {
     config = JSON.parse(JSON.stringify(config));
     config.providers[config.provider].model =
       useContent().currentContent.value.gptmodel;

@@ -40,6 +40,13 @@ const api = useApi();
 const { currentContent, update: updateContent } = useContent();
 
 const EMPTY_HTML_TAG_RE = /^<(\w+)>\s*<\/\1>$/;
+const RESPONSE_FORMAT_PER_FIELD = {
+  blocks: "HTML",
+  writer: "HTML",
+  textarea: "markdown",
+  // Community plugin field types
+  markdown: "markdown",
+};
 
 // Section props
 const label = ref();
@@ -194,7 +201,7 @@ async function generate() {
     const { textStream } = await useStreamText({
       userPrompt: [
         currentPrompt.value,
-        `<response_format>\n${["blocks", "writer"].includes(fieldType.value) ? "HTML" : "text"}\n</response_format>`,
+        `<response_format>\n${fieldTypeToResponseFormat(fieldType.value)}\n</response_format>`,
       ].join("\n\n"),
       systemPrompt: systemPrompt.value,
       files: files.value,
@@ -310,6 +317,10 @@ function onModelSave() {
   if (canUndo.value) {
     currentFieldContent.value = undefined;
   }
+}
+
+function fieldTypeToResponseFormat(fieldType) {
+  return RESPONSE_FORMAT_PER_FIELD[fieldType] || "text";
 }
 </script>
 
