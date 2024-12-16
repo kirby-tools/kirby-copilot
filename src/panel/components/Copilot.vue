@@ -61,7 +61,7 @@ const logLevel = ref();
 const fieldType = ref();
 const modelFile = ref();
 
-// Generic data
+// Local data
 const config = ref();
 const isInitialized = ref(false);
 const isGenerating = ref(false);
