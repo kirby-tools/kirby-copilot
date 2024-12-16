@@ -25,10 +25,22 @@ export const writerMarks = {
 
     _insertText(tr, text, startPosition, { schema }) {
       let position = startPosition;
-      const parts = text.split(/(\n)/);
+      const parts = text.split(/(\n\n?)/);
 
       for (const part of parts) {
-        if (part === "\n") {
+        if (part === "\n\n") {
+          tr = tr.replaceWith(
+            position,
+            position,
+            this.editor.options.inline
+              ? [
+                  schema.nodes.hardBreak.create(),
+                  schema.nodes.hardBreak.create(),
+                ]
+              : schema.nodes.paragraph.create(),
+          );
+          position += 2;
+        } else if (part === "\n") {
           tr = tr.replaceWith(
             position,
             position,
@@ -67,7 +79,6 @@ export const writerMarks = {
         const { state, view } = this.editor;
         const { from, to } = state.selection;
         const tr = state.tr.deleteRange(from, to);
-
         const { tr: newTr } = this._insertText(tr, text, from, context);
         view.dispatch(newTr);
       };
