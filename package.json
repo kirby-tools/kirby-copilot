@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "PLAYGROUND=true kirbyup serve src/panel/index.js",
     "build": "kirbyup src/panel/index.js",
-    "build:assets": "vite build --config src/assets/ai/vite.config.js && cp node_modules/pdfjs-dist/build/pdf.min.mjs assets/pdfjs.js && cp node_modules/pdfjs-dist/build/pdf.worker.min.mjs assets/pdfjs.worker.js",
+    "build:assets": "vite build --config src/assets/ai/vite.config.js && vite build --config src/assets/pdfjs/vite.config.js && vite build --config src/assets/pdfjs-worker/vite.config.js",
     "build:playground": "PLAYGROUND=true pnpm run build && pnpm run build:assets",
     "readme:dev": "vitepress dev readme",
     "readme:build": "vitepress build readme",

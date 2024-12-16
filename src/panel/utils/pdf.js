@@ -17,7 +17,7 @@ export async function loadPdfAsText(file) {
   );
 
   // Reduce whitespace to single space
-  return texts.join("\n").replace(/\s+/g, " ");
+  return texts.map((text) => text.replace(/\s+/g, " ")).join("\n");
 }
 
 async function getPageText(document, pageNumber) {

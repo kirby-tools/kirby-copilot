@@ -1,4 +1,20 @@
-Title: Recipe
+Title: 🍞 Bread Recipe
+
+----
+
+Instructions: 
+
+----
+
+Preptime: 
+
+----
+
+Cooktime: 
+
+----
+
+Servings: 2
 
 ----
 
@@ -11,18 +27,6 @@ Ingredients:
 ----
 
 Content: 
-
-----
-
-Preptime: 20 min
-
-----
-
-Cooktime: 1 h
-
-----
-
-Servings: 2
 
 ----
 

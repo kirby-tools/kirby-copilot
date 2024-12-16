@@ -4,11 +4,6 @@ options:
   preview: https://kirbycopilot.com
 
 columns:
-  - width: 1/1
-    fields:
-      headline:
-        type: headline
-        label: Recipe Details
   - width: 2/3
     fields:
       instructions:
@@ -55,12 +50,12 @@ columns:
         type: group
         label: Recipe Info
         fields:
+          servings:
+            type: number
+            label: Servings
           prepTime:
             type: text
             label: Preparation Time
           cookTime:
             type: text
             label: Cooking Time
-          servings:
-            type: number
-            label: Servings

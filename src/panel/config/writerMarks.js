@@ -61,6 +61,7 @@ export const writerMarks = {
       const { from, to } = state.tr.selection;
       const selection = state.doc.textBetween(from, to);
       let currentPosition = to;
+      let hasDeletedSelection = false;
 
       const appendText = (text) => {
         const { state, view } = this.editor;
@@ -77,9 +78,24 @@ export const writerMarks = {
 
       const replaceText = (text) => {
         const { state, view } = this.editor;
-        const { from, to } = state.selection;
-        const tr = state.tr.deleteRange(from, to);
-        const { tr: newTr } = this._insertText(tr, text, from, context);
+        let tr = state.tr;
+
+        // Only delete the selection on the first call
+        if (!hasDeletedSelection) {
+          const { from, to } = state.selection;
+          tr = tr.deleteRange(from, to);
+          // TODO: This + 1 is weird, but necessary. Why?
+          currentPosition = from + 1;
+          hasDeletedSelection = true;
+        }
+
+        const { tr: newTr, newPosition } = this._insertText(
+          tr,
+          text,
+          currentPosition,
+          context,
+        );
+        currentPosition = newPosition;
         view.dispatch(newTr);
       };
 

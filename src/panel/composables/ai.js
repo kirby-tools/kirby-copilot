@@ -73,7 +73,7 @@ export async function useStreamText({
     userPromptWithContext += `\n\n${pdfTexts
       .map(
         (value, index) =>
-          `<pdf_document_page_${index + 1}>\n${value}\n</pdf_document_page_${index + 1}>`,
+          `<pdf_document_${index + 1}>\n${value}\n</pdf_document_${index + 1}>`,
       )
       .join("\n\n")}`;
   }
