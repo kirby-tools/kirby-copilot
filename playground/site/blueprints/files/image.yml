@@ -19,6 +19,6 @@ columns:
       copilot:
         type: copilot
         field: alt
-        userPrompt: Summarize the provided image in maximum 10 words.
+        userPrompt: Write an alternative text for the provided image. Use a maximum of 10 words.
         editable: false
         files: auto

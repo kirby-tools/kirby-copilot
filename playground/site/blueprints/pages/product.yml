@@ -4,11 +4,6 @@ options:
   preview: https://kirbycopilot.com
 
 columns:
-  - width: 1/1
-    fields:
-      headline01:
-        type: headline
-        label: My Product
   - width: 2/3
     fields:
       manufacturer:
