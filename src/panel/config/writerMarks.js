@@ -82,10 +82,11 @@ export const writerMarks = {
 
         // Only delete the selection on the first call
         if (!hasDeletedSelection) {
-          const { from, to } = state.selection;
+          const isFullSelection = isEntireDocumentSelected(state);
+          const { from, to } = tr.selection;
           tr = tr.deleteRange(from, to);
-          // TODO: This + 1 is weird, but necessary. Why?
-          currentPosition = from + 1;
+          // Required for ProseMirror's 1-based position system
+          currentPosition = isFullSelection ? 1 : from;
           hasDeletedSelection = true;
         }
 
@@ -107,3 +108,9 @@ export const writerMarks = {
     },
   },
 };
+
+function isEntireDocumentSelected(state) {
+  const docSize = state.doc.content.size;
+  const { from, to } = state.selection;
+  return from === 0 && to === docSize;
+}

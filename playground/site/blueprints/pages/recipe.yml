@@ -26,8 +26,8 @@ columns:
           - copilot
       # instructions:
       #   type: textarea
-      #   size: small
       #   label: Instructions
+      #   size: small
       #   buttons:
       #     - headlines
       #     - "|"
@@ -53,9 +53,8 @@ columns:
           servings:
             type: number
             label: Servings
-          prepTime:
-            type: text
-            label: Preparation Time
-          cookTime:
-            type: text
-            label: Cooking Time
+          metaDescription:
+            label: SEO Meta Description
+            type: textarea
+            buttons:
+              - copilot
