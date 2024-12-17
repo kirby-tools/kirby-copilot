@@ -475,7 +475,7 @@ function fieldTypeToResponseFormat(fieldType) {
               class="k-tabs-badge kai-top-[-6px] kai-cursor-pointer"
               @mouseenter="isBadgeHovered = true"
               @mouseleave="isBadgeHovered = false"
-              @click="files = []"
+              @click="((files = []), (isBadgeHovered = false))"
             >
               {{
                 isBadgeHovered
