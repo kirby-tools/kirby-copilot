@@ -54,6 +54,7 @@ const field = ref();
 const userPrompt = ref();
 const systemPrompt = ref();
 const storage = ref();
+const theme = ref();
 const size = ref();
 const logLevel = ref();
 
@@ -66,6 +67,7 @@ const config = ref();
 const isInitialized = ref(false);
 const isGenerating = ref(false);
 const isDetailsOpen = ref(false);
+const isBadgeHovered = ref(false);
 const detailsElement = ref();
 const currentPrompt = ref();
 const currentFieldContent = ref();
@@ -121,7 +123,8 @@ watch(isDetailsOpen, (value) => {
   storage.value = response.storage;
   if (response.editable === true) allow.value.push("edit");
   if (response.files === true) allow.value.push("files");
-  size.value = response.size;
+  theme.value = response.theme || "notice-icon";
+  size.value = response.size || "md";
   logLevel.value = LOG_LEVELS.indexOf(
     context.config.logLevel ?? response.logLevel,
   );
@@ -392,9 +395,9 @@ function fieldTypeToResponseFormat(fieldType) {
         <k-button
           :icon="isGenerating ? 'loader' : 'sparkling'"
           :text="panel.t('johannschopplich.copilot.generate')"
+          :theme="theme"
           variant="filled"
           :size="size"
-          theme="positive"
           :disabled="isGenerating"
           @click="generate()"
         />
@@ -402,9 +405,9 @@ function fieldTypeToResponseFormat(fieldType) {
           v-if="isGenerating"
           icon="cancel"
           :text="panel.t('johannschopplich.copilot.stop')"
+          theme="notice"
           variant="filled"
           :size="size"
-          theme="notice"
           @click="abort()"
         />
         <k-button
@@ -452,13 +455,13 @@ function fieldTypeToResponseFormat(fieldType) {
               v-show="userPrompt && currentPrompt !== userPrompt"
               icon="undo"
               text="Reset"
-              size="xs"
               variant="dimmed"
+              size="xs"
               @click="currentPrompt = userPrompt"
             />
           </div>
 
-          <k-button-group v-if="allow.includes('files')" layout="collapsed">
+          <div v-if="allow.includes('files')" class="kai-relative kai-w-max">
             <k-button
               icon="attachment"
               :text="panel.t('johannschopplich.copilot.files.select')"
@@ -466,15 +469,21 @@ function fieldTypeToResponseFormat(fieldType) {
               size="sm"
               @click="pickFiles()"
             />
-            <k-button
+            <span
               v-if="files.length > 0"
-              icon="cancel"
-              :text="panel.t('johannschopplich.copilot.remove')"
-              variant="filled"
-              size="sm"
+              :data-theme="isBadgeHovered ? 'negative' : 'notice'"
+              class="k-tabs-badge kai-top-[-6px] kai-cursor-pointer"
+              @mouseenter="isBadgeHovered = true"
+              @mouseleave="isBadgeHovered = false"
               @click="files = []"
-            />
-          </k-button-group>
+            >
+              {{
+                isBadgeHovered
+                  ? panel.t("johannschopplich.copilot.delete")
+                  : files.length
+              }}
+            </span>
+          </div>
           <k-box v-else-if="modelFile" theme="none">
             <k-text>
               {{

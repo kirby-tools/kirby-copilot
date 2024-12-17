@@ -12,7 +12,8 @@ return [
             'storage' => fn ($storage = true) => $storage !== false,
             'editable' => fn ($editable = true) => $editable,
             'files' => fn ($files = null) => $files ?? true,
-            'size' => fn ($size = null) => in_array($size, ['xs', 'sm', 'md', 'lg'], true) ? $size : 'sm',
+            'theme' => fn ($theme = null) => is_string($theme) ? $theme : null,
+            'size' => fn ($size = null) => is_string($size) ? $size : null,
             'logLevel' => fn ($logLevel = null) => in_array($logLevel, ['error', 'warn', 'info', 'debug'], true) ? $logLevel : 'warn'
         ],
         'computed' => [

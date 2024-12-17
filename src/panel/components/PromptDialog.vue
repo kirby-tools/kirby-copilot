@@ -13,11 +13,6 @@ defineProps({
 const emit = defineEmits(["cancel", "close", "input", "submit", "success"]);
 const panel = usePanel();
 
-const INSERT_OPTIONS = [
-  { text: "Append", value: "append" },
-  { text: "Replace", value: "replace" },
-];
-
 const files = ref([]);
 const insertOption = ref("append");
 const prompt = ref("");
@@ -76,9 +71,9 @@ async function pickFiles() {
               v-if="files.length > 0"
               :data-theme="isBadgeHovered ? 'negative' : 'notice'"
               class="k-tabs-badge kai-top-[-6px] kai-cursor-pointer"
-              @click="files = []"
               @mouseenter="isBadgeHovered = true"
               @mouseleave="isBadgeHovered = false"
+              @click="files = []"
             >
               {{
                 isBadgeHovered
@@ -92,7 +87,16 @@ async function pickFiles() {
             <k-select-input
               v-if="selection"
               class="k-copilot-prompt-dialog__select"
-              :options="INSERT_OPTIONS"
+              :options="[
+                {
+                  value: 'append',
+                  text: panel.t('johannschopplich.copilot.append'),
+                },
+                {
+                  value: 'replace',
+                  text: panel.t('johannschopplich.copilot.replace'),
+                },
+              ]"
               :empty="false"
               :value="insertOption"
               @input="insertOption = $event"
