@@ -52,7 +52,7 @@ async function pickFiles() {
       class="kai-relative kai-rounded-[var(--rounded)] kai-pb-[calc(1rem+32px)] focus-within:kai-outline focus-within:kai-outline-[2px] focus-within:kai-outline-[var(--color-focus,currentColor)]"
     >
       <AutoGrowTextarea
-        v-model="prompt"
+        :value="prompt"
         shared-class="kai-p-2 kai-leading-[1.5] focus:kai-outline-none"
         :placeholder="
           panel.t(
@@ -61,6 +61,7 @@ async function pickFiles() {
               : 'johannschopplich.copilot.prompt.dialogPlaceholder',
           )
         "
+        @input="prompt = $event"
       />
 
       <div class="kai-absolute kai-inset-x-px kai-bottom-px kai-p-2">
