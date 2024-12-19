@@ -1,6 +1,6 @@
 <script setup>
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
-import { ref, usePanel } from "kirbyuse";
+import { isKirby5, ref, usePanel } from "kirbyuse";
 import {
   useEventListener,
   useFilePicker,
@@ -18,6 +18,7 @@ defineProps({
 const emit = defineEmits(["cancel", "close", "input", "submit", "success"]);
 const panel = usePanel();
 
+const _isKirby5 = isKirby5();
 const files = ref([]);
 const insertOption = ref("append");
 const prompt = ref("");
@@ -81,10 +82,16 @@ async function pickFiles() {
         <div class="kai-flex kai-items-center kai-justify-between">
           <div class="kai-relative">
             <k-button theme="empty" icon="attachment" @click="pickFiles()" />
+            <!-- TODO: `k-tabs-badge` is for Kirby 4 compatibility. `k-button-badge` is for Kirby 5. -->
             <span
               v-if="files.length > 0"
               :data-theme="isBadgeHovered ? 'negative' : 'notice'"
-              class="k-tabs-badge kai-top-[-6px] kai-cursor-pointer"
+              class="kai-cursor-pointer"
+              :class="[
+                _isKirby5
+                  ? 'k-button-badge kai-top-[-2px]'
+                  : 'k-tabs-badge kai-top-[-6px]',
+              ]"
               @mouseenter="isBadgeHovered = true"
               @mouseleave="isBadgeHovered = false"
               @click="((files = []), (isBadgeHovered = false))"

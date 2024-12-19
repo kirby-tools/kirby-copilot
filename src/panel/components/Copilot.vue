@@ -2,6 +2,7 @@
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import {
   computed,
+  isKirby5,
   loadPluginModule,
   nextTick,
   onBeforeUnmount,
@@ -35,6 +36,7 @@ export default {
 <script setup>
 const props = defineProps(propsDefinition);
 
+const _isKirby5 = isKirby5();
 const panel = usePanel();
 const api = useApi();
 const { currentContent, update: updateContent } = useContent();
@@ -472,7 +474,12 @@ function fieldTypeToResponseFormat(fieldType) {
             <span
               v-if="files.length > 0"
               :data-theme="isBadgeHovered ? 'negative' : 'notice'"
-              class="k-tabs-badge kai-top-[-6px] kai-cursor-pointer"
+              class="kai-cursor-pointer"
+              :class="[
+                _isKirby5
+                  ? 'k-button-badge kai-top-[-2px]'
+                  : 'k-tabs-badge kai-top-[-6px]',
+              ]"
               @mouseenter="isBadgeHovered = true"
               @mouseleave="isBadgeHovered = false"
               @click="((files = []), (isBadgeHovered = false))"
