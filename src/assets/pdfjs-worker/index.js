@@ -8,4 +8,4 @@ Promise.withResolvers ??= function () {
   return { promise, resolve, reject };
 };
 
-export * from "pdfjs-dist/build/pdf.worker.min.mjs";
+export * from "pdfjs-dist/build/pdf.worker.mjs";
