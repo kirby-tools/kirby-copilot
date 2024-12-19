@@ -1,6 +1,11 @@
 <script setup>
+import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import { ref, usePanel } from "kirbyuse";
-import { useEventListener, useFilePicker } from "../composables";
+import {
+  useEventListener,
+  useFilePicker,
+  usePluginContext,
+} from "../composables";
 import AutoGrowTextarea from "./Primitives/AutoGrowTextarea.vue";
 
 defineProps({
@@ -17,6 +22,7 @@ const files = ref([]);
 const insertOption = ref("append");
 const prompt = ref("");
 const isBadgeHovered = ref(false);
+const licenseStatus = ref();
 
 // Listen to command + enter to submit the prompt
 useEventListener(document, "keydown", (event) => {
@@ -24,6 +30,13 @@ useEventListener(document, "keydown", (event) => {
     submit();
   }
 });
+
+(async () => {
+  const context = await usePluginContext();
+  licenseStatus.value =
+    // eslint-disable-next-line no-undef
+    __PLAYGROUND__ ? "active" : context.licenseStatus;
+})();
 
 function submit() {
   emit("submit", {
@@ -114,6 +127,15 @@ async function pickFiles() {
           </div>
         </div>
       </div>
+
+      <LicensingButtonGroup
+        v-if="licenseStatus !== undefined"
+        label="Kirby Copilot"
+        api-namespace="__copilot__"
+        :license-status="licenseStatus"
+        pricing-url="https://kirbycopilot.com/buy"
+        class="kai-absolute kai-right-0 kai-top-[calc(-0.25rem-24px)]"
+      />
     </div>
   </k-dialog>
 </template>
