@@ -22,7 +22,7 @@
     "@ai-sdk/mistral": "^1.0.5",
     "@ai-sdk/openai": "^1.0.10",
     "@antfu/eslint-config": "^3.12.0",
-    "@kirby-tools/licensing": "^0.4.1",
+    "@kirby-tools/licensing": "^0.4.2",
     "ai": "^4.0.20",
     "autoprefixer": "^10.4.20",
     "bumpp": "^9.9.1",
