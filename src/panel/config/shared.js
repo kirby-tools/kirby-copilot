@@ -1,5 +1,5 @@
 import { loadPluginModule, usePanel } from "kirbyuse";
-import { useStreamText } from "../composables";
+import { usePluginContext, useStreamText } from "../composables";
 import { STORAGE_KEY_PREFIX, SYSTEM_PROMPT } from "../constants";
 
 export async function generateAndInsertText(
@@ -39,6 +39,10 @@ export async function generateAndInsertText(
 
   panel.isLoading = true;
   document.addEventListener("keydown", handleEscape);
+
+  // Resolve plugin assets, in case stream completion fails
+  // and `AISDKError` is required to be caught
+  await usePluginContext();
 
   try {
     const { textStream } = await useStreamText({
