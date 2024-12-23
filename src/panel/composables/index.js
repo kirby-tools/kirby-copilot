@@ -4,3 +4,4 @@ export * from "./events";
 export * from "./files";
 export * from "./logger";
 export * from "./plugin";
+export * from "./prompts";

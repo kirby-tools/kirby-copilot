@@ -1,5 +1,5 @@
 <script>
-import { ref, watch } from "kirbyuse";
+import { computed } from "kirbyuse";
 
 export default {
   inheritAttrs: false,
@@ -20,10 +20,13 @@ const props = defineProps({
 
 const emit = defineEmits(["input"]);
 
-const text = ref(props.value);
-
-watch(text, (value) => {
-  emit("input", value);
+const text = computed({
+  get() {
+    return props.value;
+  },
+  set(value) {
+    emit("input", value);
+  },
 });
 </script>
 

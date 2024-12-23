@@ -5,6 +5,7 @@ import {
   useEventListener,
   useFilePicker,
   usePluginContext,
+  usePromptHistory,
 } from "../composables";
 import AutoGrowTextarea from "./Primitives/AutoGrowTextarea.vue";
 
@@ -16,9 +17,11 @@ defineProps({
 });
 
 const emit = defineEmits(["cancel", "close", "input", "submit", "success"]);
-const panel = usePanel();
 
 const _isKirby5 = isKirby5();
+const panel = usePanel();
+const { lastPrompt, addToHistory, navigateHistory } = usePromptHistory();
+
 const files = ref([]);
 const insertOption = ref("append");
 const prompt = ref("");
@@ -27,8 +30,33 @@ const licenseStatus = ref();
 
 // Listen to command + enter to submit the prompt
 useEventListener(document, "keydown", (event) => {
+  if (event.target.tagName !== "TEXTAREA") return;
   if (event.metaKey && event.key === "Enter") {
     submit();
+  }
+});
+
+// Listen to arrow up and down to navigate the prompt history
+useEventListener(document, "keydown", (event) => {
+  if (event.target.tagName !== "TEXTAREA") return;
+
+  if (
+    (event.key === "ArrowUp" && event.target.selectionStart === 0) ||
+    (event.key === "ArrowDown" &&
+      event.target.selectionStart === event.target.value.length)
+  ) {
+    event.preventDefault();
+
+    // Store current prompt when starting to navigate
+    if (event.key === "ArrowUp" && prompt.value && lastPrompt.value === "") {
+      lastPrompt.value = prompt.value;
+    }
+
+    const newPrompt = navigateHistory(event.key === "ArrowUp" ? "up" : "down");
+
+    if (newPrompt !== undefined) {
+      prompt.value = newPrompt;
+    }
   }
 });
 
@@ -40,6 +68,7 @@ useEventListener(document, "keydown", (event) => {
 })();
 
 function submit() {
+  addToHistory(prompt.value);
   emit("submit", {
     prompt: prompt.value,
     files: files.value,
