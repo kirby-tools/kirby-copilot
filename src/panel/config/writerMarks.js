@@ -138,19 +138,11 @@ export const writerMarks = {
   copilot,
 };
 
-function isEntireDocumentSelected(state) {
-  const docSize = state.doc.content.size;
-  const { from, to } = state.selection;
-  return from === 0 && to === docSize;
-}
-
 function toggleMark(tr, type, transactionContext, { schema }) {
   if (transactionContext.markStack.has(type)) {
     transactionContext.markStack.delete(type);
-    // Somehow, `removeStoredMark` doesn't work well, so we need
-    // to manually remove the marks from the stack
-    const activeMarks = Array.from(transactionContext.markStack).map(
-      (markType) => schema.marks[markType].create(),
+    const activeMarks = [...transactionContext.markStack].filter(
+      (mark) => mark.name !== type,
     );
     return tr.setStoredMarks(activeMarks);
   } else {
@@ -158,4 +150,10 @@ function toggleMark(tr, type, transactionContext, { schema }) {
     transactionContext.markStack.add(type);
     return tr.addStoredMark(mark);
   }
+}
+
+function isEntireDocumentSelected(state) {
+  const docSize = state.doc.content.size;
+  const { from, to } = state.selection;
+  return from === 0 && to === docSize;
 }
