@@ -40,8 +40,7 @@ export async function generateAndInsertText(
   panel.isLoading = true;
   document.addEventListener("keydown", handleEscape);
 
-  // Resolve plugin assets, in case stream completion fails
-  // and `AISDKError` is required to be caught
+  // Ensure plugin assets are loaded
   await usePluginContext();
 
   try {

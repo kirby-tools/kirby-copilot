@@ -58,7 +58,9 @@ const copilot = {
           (segment in MARKDOWN_SYNTAX_MAP &&
             // Simple check to prevent code blocks from being interpreted as code marks
             !transactionContext.lastSegment.includes(segment)) ||
-          transactionContext.markStack.has(MARKDOWN_SYNTAX_MAP[segment])
+          [...transactionContext.activeMarks].some(
+            (mark) => mark.type.name === segment,
+          )
         ) {
           for (const mark of MARKDOWN_SYNTAX_MAP[segment]) {
             tr = toggleMark(tr, mark, transactionContext, context);
@@ -81,7 +83,7 @@ const copilot = {
     const { from, to } = state.selection;
     const selection = state.doc.textBetween(from, to);
     const transactionContext = {
-      markStack: new Set(),
+      activeMarks: new Set(),
       lastSegment: "",
     };
     let cursorPosition = to;
@@ -139,15 +141,17 @@ export const writerMarks = {
 };
 
 function toggleMark(tr, type, transactionContext, { schema }) {
-  if (transactionContext.markStack.has(type)) {
-    transactionContext.markStack.delete(type);
-    const activeMarks = [...transactionContext.markStack].filter(
-      (mark) => mark.name !== type,
+  if (
+    [...transactionContext.activeMarks].some((mark) => mark.type.name === type)
+  ) {
+    transactionContext.activeMarks.delete(type);
+    const activeMarks = [...transactionContext.activeMarks].filter(
+      (mark) => mark.type.name !== type,
     );
     return tr.setStoredMarks(activeMarks);
   } else {
     const mark = schema.marks[type].create();
-    transactionContext.markStack.add(type);
+    transactionContext.activeMarks.add(mark);
     return tr.addStoredMark(mark);
   }
 }

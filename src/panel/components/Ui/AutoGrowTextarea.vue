@@ -1,5 +1,5 @@
 <script>
-import { computed } from "kirbyuse";
+import { computed, onMounted, ref } from "kirbyuse";
 
 export default {
   inheritAttrs: false,
@@ -18,8 +18,9 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["input"]);
+const emit = defineEmits(["input", "mounted"]);
 
+const textarea = ref();
 const text = computed({
   get() {
     return props.value;
@@ -28,11 +29,16 @@ const text = computed({
     emit("input", value);
   },
 });
+
+onMounted(() => {
+  emit("mounted", textarea.value);
+});
 </script>
 
 <template>
   <div class="kai-grid">
     <textarea
+      ref="textarea"
       v-model="text"
       class="auto-grow-area kai-resize-none kai-overflow-hidden"
       :class="sharedClass"

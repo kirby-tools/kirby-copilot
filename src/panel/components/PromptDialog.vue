@@ -7,7 +7,7 @@ import {
   usePluginContext,
   usePromptHistory,
 } from "../composables";
-import AutoGrowTextarea from "./Primitives/AutoGrowTextarea.vue";
+import AutoGrowTextarea from "./Ui/AutoGrowTextarea.vue";
 
 defineProps({
   selection: {
@@ -22,24 +22,20 @@ const _isKirby5 = isKirby5();
 const panel = usePanel();
 const { lastPrompt, addToHistory, navigateHistory } = usePromptHistory();
 
+const textarea = ref();
 const files = ref([]);
 const insertOption = ref("append");
 const prompt = ref("");
 const isBadgeHovered = ref(false);
 const licenseStatus = ref();
 
-// Listen to command + enter to submit the prompt
-useEventListener(document, "keydown", (event) => {
-  if (event.target.tagName !== "TEXTAREA") return;
+useEventListener(textarea, "keydown", (event) => {
+  // Listen to `Cmd/Ctrl + Enter` to submit the prompt
   if (event.metaKey && event.key === "Enter") {
     submit();
   }
-});
 
-// Listen to arrow up and down to navigate the prompt history
-useEventListener(document, "keydown", (event) => {
-  if (event.target.tagName !== "TEXTAREA") return;
-
+  // Listen to arrow up and down to navigate the prompt history
   if (
     (event.key === "ArrowUp" && event.target.selectionStart === 0) ||
     (event.key === "ArrowDown" &&
@@ -105,6 +101,7 @@ async function pickFiles() {
           )
         "
         @input="prompt = $event"
+        @mounted="textarea = $event"
       />
 
       <div class="kai-absolute kai-inset-x-px kai-bottom-px kai-p-2">
