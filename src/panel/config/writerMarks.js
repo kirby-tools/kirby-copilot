@@ -1,5 +1,10 @@
 import { generateAndInsertText } from "./shared";
 
+const MARKDOWN_SYNTAX_MAP = {
+  "**": "bold",
+  "`": "code",
+};
+
 export const writerMarks = {
   copilot: {
     get button() {
@@ -23,8 +28,9 @@ export const writerMarks = {
       return "copilot";
     },
 
-    _insertText(tr, text, startPosition, { schema }) {
-      let position = startPosition;
+    _insertText(tr, text, cursorPosition, selectionContext, context) {
+      const { schema } = context;
+      let position = cursorPosition;
       const parts = text.split(/(\n\n?)/);
 
       for (const part of parts) {
@@ -48,8 +54,24 @@ export const writerMarks = {
           );
           position += 1;
         } else if (part.length > 0) {
-          tr = tr.insertText(part, position);
-          position += part.length;
+          const textParts = part.split(/(\*\*|```|`)/);
+
+          for (const part of textParts) {
+            if (part in MARKDOWN_SYNTAX_MAP) {
+              tr = toggleMark(
+                tr,
+                MARKDOWN_SYNTAX_MAP[part],
+                selectionContext,
+                context,
+              );
+              continue;
+            } else if (part.length === 0) {
+              continue;
+            }
+
+            tr = tr.insertText(part, position);
+            position += part.length;
+          }
         }
       }
 
@@ -58,9 +80,12 @@ export const writerMarks = {
 
     _openPromptDialog(context) {
       const { state } = this.editor;
-      const { from, to } = state.tr.selection;
+      const { from, to } = state.selection;
       const selection = state.doc.textBetween(from, to);
-      let currentPosition = to;
+      const selectionContext = {
+        activeMarks: new Set(),
+      };
+      let cursorPosition = to;
       let hasDeletedSelection = false;
 
       const appendText = (text) => {
@@ -69,10 +94,11 @@ export const writerMarks = {
         const { tr: newTr, newPosition } = this._insertText(
           tr,
           text,
-          currentPosition,
+          cursorPosition,
+          selectionContext,
           context,
         );
-        currentPosition = newPosition;
+        cursorPosition = newPosition;
         view.dispatch(newTr);
       };
 
@@ -83,20 +109,21 @@ export const writerMarks = {
         // Only delete the selection on the first call
         if (!hasDeletedSelection) {
           const isFullSelection = isEntireDocumentSelected(state);
-          const { from, to } = tr.selection;
+          const { from, to } = state.selection;
           tr = tr.deleteRange(from, to);
           // Required for ProseMirror's 1-based position system
-          currentPosition = isFullSelection ? 1 : from;
+          cursorPosition = isFullSelection ? 1 : from;
           hasDeletedSelection = true;
         }
 
         const { tr: newTr, newPosition } = this._insertText(
           tr,
           text,
-          currentPosition,
+          cursorPosition,
+          selectionContext,
           context,
         );
-        currentPosition = newPosition;
+        cursorPosition = newPosition;
         view.dispatch(newTr);
       };
 
@@ -113,4 +140,17 @@ function isEntireDocumentSelected(state) {
   const docSize = state.doc.content.size;
   const { from, to } = state.selection;
   return from === 0 && to === docSize;
+}
+
+function toggleMark(tr, type, selectionContext, { schema }) {
+  if (selectionContext.activeMarks.has(type)) {
+    tr = tr.removeStoredMark(schema.marks[type]);
+    selectionContext.activeMarks.delete(type);
+  } else {
+    const mark = schema.marks[type].create();
+    tr = tr.addStoredMark(mark);
+    selectionContext.activeMarks.add(type);
+  }
+
+  return tr;
 }
