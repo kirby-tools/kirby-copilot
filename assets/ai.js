@@ -6114,60 +6114,62 @@ async function Ec(e, t, r, n) {
   );
 }
 function Ac(e, t) {
+  var r;
   if (e.type === "text")
     return {
       type: "text",
       text: e.text,
       providerMetadata: e.experimental_providerMetadata
     };
-  let r = e.mimeType, n, a, s;
-  const o = e.type;
-  switch (o) {
+  let n = e.mimeType, a, s, o;
+  const i = e.type;
+  switch (i) {
     case "image":
-      n = e.image;
+      a = e.image;
       break;
     case "file":
-      n = e.data;
+      a = e.data;
       break;
     default:
-      throw new Error(`Unsupported part type: ${o}`);
+      throw new Error(`Unsupported part type: ${i}`);
   }
   try {
-    a = typeof n == "string" ? new URL(n) : n;
+    s = typeof a == "string" ? new URL(a) : a;
   } catch {
-    a = n;
+    s = a;
   }
-  if (a instanceof URL)
-    if (a.protocol === "data:") {
-      const { mimeType: i, base64Content: u } = Sc(
-        a.toString()
+  if (s instanceof URL)
+    if (s.protocol === "data:") {
+      const { mimeType: u, base64Content: c } = Sc(
+        s.toString()
       );
-      if (i == null || u == null)
-        throw new Error(`Invalid data URL format in part ${o}`);
-      r = i, s = wr(u);
+      if (u == null || c == null)
+        throw new Error(`Invalid data URL format in part ${i}`);
+      n = u, o = wr(c);
     } else {
-      const i = t[a.toString()];
-      i ? (s = i.data, r ?? (r = i.mimeType)) : s = a;
+      const u = t[s.toString()];
+      u ? (o = u.data, n ?? (n = u.mimeType)) : o = s;
     }
   else
-    s = wr(a);
-  switch (o) {
+    o = wr(s);
+  switch (i) {
     case "image":
-      return r == null && s instanceof Uint8Array && (r = _c(s)), {
+      return o instanceof Uint8Array && (n = (r = _c(o)) != null ? r : n), {
         type: "image",
-        image: s,
-        mimeType: r,
+        image: o,
+        mimeType: n,
         providerMetadata: e.experimental_providerMetadata
       };
-    case "file":
-      if (r == null)
+    case "file": {
+      if (n == null)
         throw new Error("Mime type is missing for file part");
       return {
         type: "file",
-        data: s instanceof Uint8Array ? wc(s) : s,
-        mimeType: r,
+        data: o instanceof Uint8Array ? wc(o) : o,
+        mimeType: n,
         providerMetadata: e.experimental_providerMetadata
       };
+    }
   }
 }
 function Nc({
@@ -6590,19 +6592,17 @@ function Xc({
   ].filter((a) => a != null).join(`
 `);
 }
-function Kn(e, t) {
-  const r = e.pipeThrough(
-    new TransformStream(t)
-  );
-  return r[Symbol.asyncIterator] = () => {
-    const n = r.getReader();
+function Kn(e) {
+  const t = e.pipeThrough(new TransformStream());
+  return t[Symbol.asyncIterator] = () => {
+    const r = t.getReader();
     return {
       async next() {
-        const { done: a, value: s } = await n.read();
-        return a ? { done: !0, value: void 0 } : { done: !1, value: s };
+        const { done: n, value: a } = await r.read();
+        return n ? { done: !0, value: void 0 } : { done: !1, value: a };
       }
     };
-  }, r;
+  }, t;
 }
 Gt({ prefix: "aiobj", size: 24 });
 var be = class {
@@ -7703,18 +7703,18 @@ var yd = class {
     return this.baseStream = t, e;
   }
   get textStream() {
-    return Kn(this.teeStream(), {
-      transform(e, t) {
-        e.type === "text-delta" ? t.enqueue(e.textDelta) : e.type === "error" && t.error(e.error);
-      }
-    });
+    return Kn(
+      this.teeStream().pipeThrough(
+        new TransformStream({
+          transform(e, t) {
+            e.type === "text-delta" ? t.enqueue(e.textDelta) : e.type === "error" && t.error(e.error);
+          }
+        })
+      )
+    );
   }
   get fullStream() {
-    return Kn(this.teeStream(), {
-      transform(e, t) {
-        t.enqueue(e);
-      }
-    });
+    return Kn(this.teeStream());
   }
   toDataStreamInternal({
     getErrorMessage: e = () => "An error occurred.",
