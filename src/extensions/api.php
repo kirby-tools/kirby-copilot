@@ -68,11 +68,11 @@ return [
             }
         ],
         [
-            'pattern' => '__copilot__/register',
+            'pattern' => '__copilot__/activate',
             'method' => 'POST',
             'action' => function () {
                 $licenses = Licenses::read('johannschopplich/kirby-copilot');
-                return $licenses->registerFromRequest();
+                return $licenses->activateFromRequest();
             }
         ]
     ]
