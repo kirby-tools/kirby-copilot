@@ -1,6 +1,7 @@
 import { loadPluginModule, usePanel } from "kirbyuse";
 import { usePluginContext, useStreamText } from "../composables";
 import { STORAGE_KEY_PREFIX, SYSTEM_PROMPT } from "../constants";
+import { CopilotError } from "../utils/error";
 
 export async function generateAndInsertText(
   selection,
@@ -40,8 +41,9 @@ export async function generateAndInsertText(
   panel.isLoading = true;
   document.addEventListener("keydown", handleEscape);
 
-  // Ensure plugin assets are loaded
+  // Ensure plugin assets are registered for loading the AI module
   await usePluginContext();
+  const { AISDKError } = await loadPluginModule("ai");
 
   try {
     const { textStream } = await useStreamText({
@@ -82,9 +84,7 @@ export async function generateAndInsertText(
     )
       return;
 
-    const { AISDKError } = await loadPluginModule("ai");
-
-    if (AISDKError.isInstance(error)) {
+    if (error instanceof CopilotError || AISDKError.isInstance(error)) {
       console.error(error);
       panel.notification.error(error.message);
       return;

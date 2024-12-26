@@ -1,5 +1,6 @@
 import { loadPluginModule, useContent } from "kirbyuse";
 import { STORAGE_KEY_PREFIX, SUPPORTED_PROVIDERS } from "../constants";
+import { CopilotError } from "../utils/error";
 import { loadPdfAsText } from "../utils/pdf";
 import { renderTemplate } from "../utils/template";
 import { createContentContext } from "./content";
@@ -28,14 +29,14 @@ export async function useStreamText({
   }
 
   if (!config.provider || !SUPPORTED_PROVIDERS.includes(config.provider)) {
-    throw new Error(
+    throw new CopilotError(
       `Unsupported provider "${config.provider}" in the "johannschopplich.copilot.provider" global configuration.`,
     );
   }
 
   for (const field of ["apiKey", "model"]) {
     if (!config.providers?.[config.provider]?.[field]) {
-      throw new Error(
+      throw new CopilotError(
         `Missing "${field}" property in the "johannschopplich.copilot.providers.${config.provider}" global configuration.`,
       );
     }
