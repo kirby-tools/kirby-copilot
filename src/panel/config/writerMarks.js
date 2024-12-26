@@ -81,19 +81,20 @@ const copilot = {
   _openPromptDialog(context) {
     const { state } = this.editor;
     const { from, to } = state.selection;
-    const selection = state.doc.textBetween(from, to);
+    const textSelection = state.doc.textBetween(from, to);
     const transactionContext = {
       activeMarks: new Set(),
       lastSegment: "",
     };
-    let cursorPosition = to;
+
+    let cursorPosition;
     let hasDeletedSelection = false;
 
     const appendText = (text) => {
       const { state, view } = this.editor;
-      const tr = state.tr;
+      cursorPosition = state.selection.to;
       const { tr: newTr, newPosition } = this._insertText(
-        tr,
+        state.tr,
         text,
         cursorPosition,
         transactionContext,
@@ -128,7 +129,7 @@ const copilot = {
       view.dispatch(newTr);
     };
 
-    generateAndInsertText(selection, {
+    generateAndInsertText(textSelection, {
       responseFormat: "text",
       replaceText,
       appendText,
