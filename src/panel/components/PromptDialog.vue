@@ -42,6 +42,7 @@ useEventListener(textarea, "keydown", (event) => {
     (event.key === "ArrowDown" &&
       event.target.selectionStart === event.target.value.length)
   ) {
+    // Prevent cursor movement
     event.preventDefault();
 
     // Store current prompt when starting to navigate

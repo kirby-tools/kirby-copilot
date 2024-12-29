@@ -1,46 +1,46 @@
 import { ref } from "kirbyuse";
-import { STORAGE_KEY_PREFIX } from "../constants";
+import { getHashedStorageKey } from "../utils/storage";
 
-const STORAGE_KEY = `${STORAGE_KEY_PREFIX}promptHistory`;
 const MAX_HISTORY = 50;
 
 export function usePromptHistory() {
+  const storageKey = getHashedStorageKey("history", window.location.hostname);
+  const history = ref(JSON.parse(localStorage.getItem(storageKey) || "[]"));
   const lastPrompt = ref("");
-  let history = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-  let currentIndex = -1;
+  const currentIndex = ref(-1);
 
   function addToHistory(prompt) {
     if (!prompt) return;
 
     // Remove duplicate if exists
-    const index = history.indexOf(prompt);
+    const index = history.value.indexOf(prompt);
     if (index !== -1) {
-      history.splice(index, 1);
+      history.value.splice(index, 1);
     }
 
-    history.unshift(prompt);
+    history.value.unshift(prompt);
 
     // Limit history size
-    if (history.length > MAX_HISTORY) {
-      history = history.slice(0, MAX_HISTORY);
+    if (history.value.length > MAX_HISTORY) {
+      history.value = history.value.slice(0, MAX_HISTORY);
     }
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-    currentIndex = -1;
+    localStorage.setItem(storageKey, JSON.stringify(history.value));
+    currentIndex.value = -1;
   }
 
   function navigateHistory(direction) {
     if (direction === "up") {
-      if (currentIndex + 1 < history.length) {
-        currentIndex++;
-        return history[currentIndex];
+      if (currentIndex.value + 1 < history.value.length) {
+        currentIndex.value++;
+        return history.value[currentIndex.value];
       }
     } else if (direction === "down") {
-      if (currentIndex > 0) {
-        currentIndex--;
-        return history[currentIndex];
-      } else if (currentIndex === 0) {
-        currentIndex = -1;
+      if (currentIndex.value > 0) {
+        currentIndex.value--;
+        return history.value[currentIndex.value];
+      } else if (currentIndex.value === 0) {
+        currentIndex.value = -1;
         return lastPrompt.value;
       }
     }
@@ -48,6 +48,7 @@ export function usePromptHistory() {
 
   return {
     lastPrompt,
+    currentIndex,
     addToHistory,
     navigateHistory,
   };
