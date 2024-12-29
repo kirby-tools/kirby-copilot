@@ -20,7 +20,8 @@ const emit = defineEmits(["cancel", "close", "input", "submit", "success"]);
 
 const _isKirby5 = isKirby5();
 const panel = usePanel();
-const { lastPrompt, addToHistory, navigateHistory } = usePromptHistory();
+const { lastPrompt, currentIndex, addToHistory, navigateHistory } =
+  usePromptHistory();
 
 const textarea = ref();
 const files = ref([]);
@@ -44,7 +45,7 @@ useEventListener(textarea, "keydown", (event) => {
     event.preventDefault();
 
     // Store current prompt when starting to navigate
-    if (event.key === "ArrowUp" && prompt.value && lastPrompt.value === "") {
+    if (event.key === "ArrowUp" && currentIndex.value === -1) {
       lastPrompt.value = prompt.value;
     }
 
@@ -133,7 +134,7 @@ async function pickFiles() {
           <div class="kai-flex kai-gap-2">
             <k-select-input
               v-if="selection"
-              class="k-copilot-prompt-dialog__select"
+              class="kai-underline kai-underline-offset-[var(--link-underline-offset)]"
               :options="[
                 {
                   value: 'append',
@@ -179,10 +180,5 @@ async function pickFiles() {
   --dialog-padding: 0;
   --dialog-rounded: var(--rounded);
   overflow: visible;
-}
-
-.k-copilot-prompt-dialog__select {
-  text-decoration: underline;
-  text-underline-offset: var(--link-underline-offset);
 }
 </style>
