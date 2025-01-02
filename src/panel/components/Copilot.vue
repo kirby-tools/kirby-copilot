@@ -64,7 +64,7 @@ const logLevel = ref();
 const fieldType = ref();
 const modelFile = ref();
 
-// Local data
+// Runtime state
 const config = ref();
 const isInitialized = ref(false);
 const isGenerating = ref(false);
