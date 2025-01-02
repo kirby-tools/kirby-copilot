@@ -9,6 +9,7 @@ import {
   ref,
   useApi,
   useContent,
+  useI18n,
   usePanel,
   useSection,
   watch,
@@ -39,6 +40,7 @@ const props = defineProps(propsDefinition);
 const _isKirby5 = isKirby5();
 const panel = usePanel();
 const api = useApi();
+const { t } = useI18n();
 const { currentContent, update: updateContent } = useContent();
 
 const EMPTY_HTML_TAG_RE = /^<(\w+)>\s*<\/\1>$/;
@@ -167,11 +169,6 @@ watch(isDetailsOpen, (value) => {
 onBeforeUnmount(() => {
   panel.events.off("view.save", onModelSave);
 });
-
-function t(value) {
-  if (!value || typeof value === "string") return value;
-  return value[panel.translation.code] ?? Object.values(value)[0];
-}
 
 async function generate() {
   // eslint-disable-next-line no-undef
