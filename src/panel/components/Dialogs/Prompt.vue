@@ -6,8 +6,8 @@ import {
   useFilePicker,
   usePluginContext,
   usePromptHistory,
-} from "../composables";
-import AutoGrowTextarea from "./Ui/AutoGrowTextarea.vue";
+} from "../../composables";
+import AutoGrowTextarea from "../Ui/AutoGrowTextarea.vue";
 
 defineProps({
   selection: {

@@ -15,15 +15,19 @@ import {
   watch,
 } from "kirbyuse";
 import { section } from "kirbyuse/props";
-import { useFilePicker, usePluginContext, useStreamText } from "../composables";
+import {
+  useFilePicker,
+  usePluginContext,
+  useStreamText,
+} from "../../composables";
 import {
   LOG_LEVELS,
   STORAGE_KEY_PREFIX,
   SUPPORTED_PROVIDERS,
   SUPPORTED_VISION_MIME_TYPES,
   SYSTEM_PROMPT,
-} from "../constants";
-import { getHashedStorageKey } from "../utils/storage";
+} from "../../constants";
+import { getHashedStorageKey } from "../../utils/storage";
 
 const propsDefinition = {
   ...section,

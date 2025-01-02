@@ -1,6 +1,6 @@
-import CopilotSection from "./components/Copilot.vue";
+import PromptDialog from "./components/Dialogs/Prompt.vue";
 import PlaygroundApiKeyField from "./components/Playground/ApiKey.vue";
-import PromptDialog from "./components/PromptDialog.vue";
+import CopilotSection from "./components/Sections/Copilot.vue";
 import { textareaButtons } from "./config/textareaButtons";
 import { writerMarks } from "./config/writerMarks";
 import "./index.css";
