@@ -62,8 +62,8 @@ export async function useStreamText({
         : providerConfig.apiKey,
   });
 
-  const images = files.filter((file) => file.type.startsWith("image/"));
-  const pdfs = files.filter((file) => file.type === "application/pdf");
+  const images = files.filter((blob) => blob.type.startsWith("image/"));
+  const pdfs = files.filter((blob) => blob.type === "application/pdf");
 
   const contentContext = createContentContext();
   let userPromptWithContext = renderTemplate(userPrompt, contentContext);
@@ -84,14 +84,14 @@ export async function useStreamText({
     logger.info("User prompt with context:", userPromptWithContext);
   }
 
-  if (provider === "openai" && images.length > 0) {
+  if (
+    (provider === "openai" || provider === "anthropic") &&
+    images.length > 0
+  ) {
     const serializedImages = await Promise.all(
       images.map(async (blob) => {
         const arrayBuffer = await blob.arrayBuffer();
-        return {
-          data: new Uint8Array(arrayBuffer),
-          mimeType: blob.type,
-        };
+        return new Uint8Array(arrayBuffer);
       }),
     );
 
@@ -106,8 +106,7 @@ export async function useStreamText({
             { type: "text", text: userPromptWithContext },
             ...serializedImages.map((image) => ({
               type: "image",
-              image: image.data,
-              // mimeType: image.mimeType,
+              image,
             })),
           ],
         },
