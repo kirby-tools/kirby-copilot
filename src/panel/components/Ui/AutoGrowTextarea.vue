@@ -40,13 +40,13 @@ onMounted(() => {
     <textarea
       ref="textarea"
       v-model="text"
-      class="auto-grow-area kai-resize-none kai-overflow-hidden"
+      class="stack-layer kai-resize-none kai-overflow-hidden"
       :class="sharedClass"
       v-bind="$attrs"
     />
     <!-- The weird space is needed to prevent jumpy behavior -->
     <div
-      class="auto-grow-area kai-invisible kai-whitespace-pre-wrap"
+      class="stack-layer kai-invisible kai-whitespace-pre-wrap"
       :class="sharedClass"
       v-text="`${value} `"
     />
@@ -54,7 +54,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.auto-grow-area {
+.stack-layer {
   grid-area: 1 / 1 / 2 / 2;
 }
 </style>
