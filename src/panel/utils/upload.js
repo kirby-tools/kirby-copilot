@@ -1,20 +1,22 @@
-let inputElement;
-
 export async function openFilePicker({ accept = "*", multiple = true } = {}) {
-  inputElement = document.createElement("input");
-  inputElement.type = "file";
-  inputElement.classList.add("sr-only");
-  inputElement.value = null;
-  inputElement.accept = accept;
-  inputElement.multiple = multiple;
+  const input = document.createElement("input");
+  input.type = "file";
+  input.classList.add("sr-only");
+  input.value = null;
+  input.accept = accept;
+  input.multiple = multiple;
 
-  inputElement.click();
+  input.click();
 
   return new Promise((resolve) => {
-    inputElement.addEventListener("change", (event) => {
-      resolve([...event.target.files]);
-      inputElement.remove();
-    });
+    input.addEventListener(
+      "change",
+      (event) => {
+        resolve([...(event.target?.files ?? [])]);
+        input.remove();
+      },
+      { once: true },
+    );
   });
 }
 
