@@ -88,7 +88,7 @@ export async function useStreamText({
     (provider === "openai" || provider === "anthropic") &&
     images.length > 0
   ) {
-    const serializedImages = await Promise.all(
+    const imageByteArrays = await Promise.all(
       images.map(async (blob) => {
         const arrayBuffer = await blob.arrayBuffer();
         return new Uint8Array(arrayBuffer);
@@ -104,7 +104,7 @@ export async function useStreamText({
           role: "user",
           content: [
             { type: "text", text: userPromptWithContext },
-            ...serializedImages.map((image) => ({
+            ...imageByteArrays.map((image) => ({
               type: "image",
               image,
             })),
