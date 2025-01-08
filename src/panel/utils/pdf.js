@@ -2,7 +2,7 @@ import { loadPluginModule, resolvePluginAsset } from "kirbyuse";
 
 let _PDFJS;
 
-export async function loadPdfAsText(file) {
+export async function extractTextFromPdf(file) {
   const PDFJS = await resolvePDFJS();
   const data = await file.arrayBuffer();
   const document = await PDFJS.getDocument({

@@ -7,12 +7,12 @@ export async function useFilePicker() {
   });
 
   return await Promise.all(
-    selectedFiles.map(async (blob) => {
-      if (blob.type.startsWith("image/")) {
-        return toReducedBlob(blob, 2048);
+    selectedFiles.map(async (file) => {
+      if (file.type.startsWith("image/")) {
+        return await toReducedBlob(file, 2048);
       }
 
-      return blob;
+      return file;
     }),
   );
 }

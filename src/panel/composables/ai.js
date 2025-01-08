@@ -1,7 +1,7 @@
 import { loadPluginModule, useContent } from "kirbyuse";
 import { STORAGE_KEY_PREFIX, SUPPORTED_PROVIDERS } from "../constants";
 import { CopilotError } from "../utils/error";
-import { loadPdfAsText } from "../utils/pdf";
+import { extractTextFromPdf } from "../utils/pdf";
 import { renderTemplate } from "../utils/template";
 import { createContentContext } from "./content";
 import { useLogger } from "./logger";
@@ -70,7 +70,7 @@ export async function useStreamText({
 
   // Extract PDF pages as text
   if (pdfs.length > 0) {
-    const pdfTexts = await Promise.all(pdfs.map(loadPdfAsText));
+    const pdfTexts = await Promise.all(pdfs.map(extractTextFromPdf));
     userPromptWithContext += `\n\n${pdfTexts
       .map(
         (value, index) =>
