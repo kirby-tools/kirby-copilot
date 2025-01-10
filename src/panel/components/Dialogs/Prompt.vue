@@ -75,8 +75,8 @@ function submit() {
 }
 
 async function pickFiles() {
-  const pickedFiles = await useFilePicker();
-  files.value = [...files.value, ...pickedFiles];
+  const selectedFiles = await useFilePicker();
+  files.value = [...files.value, ...selectedFiles];
 }
 </script>
 

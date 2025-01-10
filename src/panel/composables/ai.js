@@ -3,6 +3,7 @@ import { STORAGE_KEY_PREFIX, SUPPORTED_PROVIDERS } from "../constants";
 import { CopilotError } from "../utils/error";
 import { extractTextFromPdf } from "../utils/pdf";
 import { renderTemplate } from "../utils/template";
+import { toReducedBlob } from "../utils/upload";
 import { createContentContext } from "./content";
 import { useLogger } from "./logger";
 import { usePluginContext } from "./plugin";
@@ -62,13 +63,12 @@ export async function useStreamText({
         : providerConfig.apiKey,
   });
 
-  const images = files.filter((blob) => blob.type.startsWith("image/"));
-  const pdfs = files.filter((blob) => blob.type === "application/pdf");
-
   const contentContext = createContentContext();
   let userPromptWithContext = renderTemplate(userPrompt, contentContext);
 
-  // Extract PDF pages as text
+  const images = files.filter((file) => file.type.startsWith("image/"));
+  const pdfs = files.filter((file) => file.type === "application/pdf");
+
   if (pdfs.length > 0) {
     const pdfTexts = await Promise.all(pdfs.map(extractTextFromPdf));
     userPromptWithContext += `\n\n${pdfTexts
@@ -84,13 +84,11 @@ export async function useStreamText({
     logger.info("User prompt with context:", userPromptWithContext);
   }
 
-  if (
-    (provider === "openai" || provider === "anthropic") &&
-    images.length > 0
-  ) {
+  if (images.length > 0) {
     const imageByteArrays = await Promise.all(
-      images.map(async (blob) => {
-        const arrayBuffer = await blob.arrayBuffer();
+      images.map(async (file) => {
+        const reducedBlob = await toReducedBlob(file, 2048);
+        const arrayBuffer = await reducedBlob.arrayBuffer();
         return new Uint8Array(arrayBuffer);
       }),
     );
