@@ -110,7 +110,9 @@ export async function openPromptDialog(props = {}) {
       props,
       on: {
         close: () => {
-          resolve(result);
+          setTimeout(() => {
+            resolve(result);
+          }, 25);
         },
         submit: (event) => {
           result = event;
