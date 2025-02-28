@@ -20,7 +20,7 @@ return [
     'johannschopplich.copilot' => [
         'providers' => [
             'openai' => [
-                'model' => 'gpt-4o',
+                'model' => 'o3-mini',
                 'apiKey' => env('OPENAI_API_KEY', 'YOUR_API_KEY')
             ]
         ]

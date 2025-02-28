@@ -24,11 +24,10 @@ tabs:
             label: GPT Model
             type: select
             options:
-              gpt-4o: GPT-4o (recommended)
-              gpt-4o-mini: GPT-4o Mini
-              gpt-3.5-turbo: GPT-3.5 Turbo (deprecated)
+              o3-mini: GPT-o3-mini (recommended)
+              gpt-4o: GPT-4o
             help: |
-              The GPT AI model to use in the Copilot playground. <ins>**Note: GPT-4 models will not work without a valid payment method in your account.**</ins>
+              The GPT AI model to use in the Copilot playground. <ins>**Note: Add a valid payment method in your account in order to use them.**</ins>
       - width: 1/3
         fields:
           infoDocumentation:
