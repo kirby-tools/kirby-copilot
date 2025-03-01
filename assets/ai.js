@@ -11629,6 +11629,7 @@ nf({
 });
 export {
   R as AISDKError,
+  Te as APICallError,
   Np as createAnthropic,
   Lp as createMistral,
   nf as createOpenAI,

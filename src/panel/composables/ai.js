@@ -85,6 +85,12 @@ export async function useStreamText({
   }
 
   if (images.length > 0) {
+    if (providerConfig.model === "o3-mini") {
+      throw new CopilotError(
+        `OpenAI's "o3-mini" model does not support images. Please use a different model, such as "gpt-4o".`,
+      );
+    }
+
     const imageByteArrays = await Promise.all(
       images.map(async (file) => {
         const reducedBlob = await toReducedBlob(file, 2048);
@@ -94,7 +100,7 @@ export async function useStreamText({
     );
 
     return streamText({
-      model: api.chat(providerConfig.model),
+      model: api.languageModel(providerConfig.model),
       temperature: config.temperature,
       system: systemPrompt || undefined,
       messages: [
@@ -114,7 +120,7 @@ export async function useStreamText({
   }
 
   return streamText({
-    model: api.chat(providerConfig.model),
+    model: api.languageModel(providerConfig.model),
     temperature: config.temperature,
     system: systemPrompt || undefined,
     prompt: userPromptWithContext,

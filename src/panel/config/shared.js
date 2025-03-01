@@ -43,7 +43,7 @@ export async function generateAndInsertText(
 
   // Ensure plugin assets are registered for loading the AI module
   await usePluginContext();
-  const { AISDKError } = await loadPluginModule("ai");
+  const { AISDKError, APICallError } = await loadPluginModule("ai");
 
   try {
     const { textStream } = await useStreamText({
@@ -60,6 +60,7 @@ export async function generateAndInsertText(
     });
 
     let isFirstInsertion = true;
+
     for await (let textPart of textStream) {
       if (promptContext.append) {
         if (isFirstInsertion) {
@@ -84,7 +85,11 @@ export async function generateAndInsertText(
     )
       return;
 
-    if (error instanceof CopilotError || AISDKError.isInstance(error)) {
+    if (
+      error instanceof CopilotError ||
+      AISDKError.isInstance(error) ||
+      APICallError.isInstance(error)
+    ) {
       console.error(error);
       panel.notification.error(error.message);
       return;

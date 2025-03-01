@@ -27,6 +27,7 @@ import {
   SUPPORTED_VISION_MIME_TYPES,
   SYSTEM_PROMPT,
 } from "../../constants";
+import { CopilotError } from "../../utils/error";
 import { getHashedStorageKey } from "../../utils/storage";
 
 const propsDefinition = {
@@ -252,11 +253,19 @@ async function generate() {
     panel.isLoading = false;
     isGenerating.value = false;
 
-    if (error instanceof Error && error.name === "AbortError") return;
+    if (
+      error instanceof Error &&
+      (error.name === "AbortError" || error.name === "TimeoutError")
+    )
+      return;
 
-    const { AISDKError } = await loadPluginModule("ai");
+    const { AISDKError, APICallError } = await loadPluginModule("ai");
 
-    if (AISDKError.isInstance(error)) {
+    if (
+      error instanceof CopilotError ||
+      AISDKError.isInstance(error) ||
+      APICallError.isInstance(error)
+    ) {
       console.error(error);
       panel.notification.error(error.message);
       return;
