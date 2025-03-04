@@ -43,8 +43,14 @@ export async function useStreamText({
     }
   }
 
-  const { createAnthropic, createMistral, createOpenAI, streamText } =
-    await loadPluginModule("ai");
+  const {
+    AISDKError,
+    APICallError,
+    createAnthropic,
+    createMistral,
+    createOpenAI,
+    streamText,
+  } = await loadPluginModule("ai");
 
   const provider = config.provider;
   const providerConfig = config.providers[provider];
@@ -116,6 +122,11 @@ export async function useStreamText({
         },
       ],
       abortSignal,
+      onError({ error }) {
+        if (AISDKError.isInstance(error) || APICallError.isInstance(error)) {
+          throw error;
+        }
+      },
     });
   }
 
@@ -125,5 +136,10 @@ export async function useStreamText({
     system: systemPrompt || undefined,
     prompt: userPromptWithContext,
     abortSignal,
+    onError({ error }) {
+      if (AISDKError.isInstance(error) || APICallError.isInstance(error)) {
+        throw error;
+      }
+    },
   });
 }
