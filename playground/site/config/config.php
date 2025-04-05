@@ -14,6 +14,9 @@ return [
         ]),
         'js' => 'assets/panel.js',
         'favicon' => 'favicon.ico',
+        'vue' => [
+            'compiler' => false
+        ],
         'frameAncestors' => ['https://kirbycopilot.com']
     ],
 
