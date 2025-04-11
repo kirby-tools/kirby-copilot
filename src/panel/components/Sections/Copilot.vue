@@ -70,6 +70,7 @@ const logLevel = ref();
 // Section computed
 const fieldType = ref();
 const modelFile = ref();
+const help = ref();
 
 // Runtime state
 const config = ref();
@@ -138,6 +139,7 @@ watch(isDetailsOpen, (value) => {
     context.config.logLevel ?? response.logLevel,
   );
   fieldType.value = response.fieldType;
+  help.value = response.help ? t(response.help) : undefined;
   config.value = context.config;
   licenseStatus.value =
     // eslint-disable-next-line no-undef
@@ -159,7 +161,8 @@ watch(isDetailsOpen, (value) => {
     storageKey = getHashedStorageKey(panel.view.path, field.value);
     currentPrompt.value =
       localStorage.getItem(`${storageKey}$prompt`) || userPrompt.value || "";
-    isDetailsOpen.value = localStorage.getItem(`${storageKey}$open`) === "true";
+    isDetailsOpen.value =
+      localStorage.getItem(`${storageKey}$open`) === "true" || response.open;
     nextTick(() => {
       if (detailsElement.value && isDetailsOpen.value) {
         detailsElement.value.open = true;
@@ -517,5 +520,9 @@ function fieldTypeToResponseFormat(fieldType) {
         </div>
       </details>
     </div>
+
+    <footer v-if="help" class="kai-mt-[var(--spacing-2)]">
+      <k-text class="k-help" :html="help" />
+    </footer>
   </k-section>
 </template>
