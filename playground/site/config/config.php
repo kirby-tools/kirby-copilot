@@ -17,7 +17,7 @@ return [
         'vue' => [
             'compiler' => false
         ],
-        'frameAncestors' => ['https://kirbycopilot.com']
+        'frameAncestors' => ['https://kirby.tools', 'self']
     ],
 
     'johannschopplich.copilot' => [
