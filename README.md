@@ -1,4 +1,4 @@
-[![Kirby Copilot](./.github/social-card.png)](https://kirbycopilot.com)
+[![Kirby Copilot](./.github/social-card.png)](https://kirby.tools/copilot)
 
 # Kirby Copilot
 
@@ -16,24 +16,24 @@ To streamline content creation for you or your clients and editors, Kirby Copilo
 
 ## Licensing
 
-Kirby Copilot is a commercial plugin that requires a license. You can install and test the plugin locally without a license. However, production environments require a valid license. You can purchase a license from the [Kirby Copilot Website](https://kirbycopilot.com/buy).
+Kirby Copilot is a commercial plugin that requires a license. You can install and test the plugin locally without a license. However, production environments require a valid license. You can purchase a license from the [Kirby Copilot Website](https://kirby.tools/copilot/buy).
 
 ## Getting Started
 
-To get started, please refer to the [documentation](https://kirbycopilot.com/docs/getting-started) for guidance on installation, configuration, and usage.
+To get started, please refer to the [documentation](https://kirby.tools/docs/copilot/getting-started) for guidance on installation, configuration, and usage.
 
 Here are some quick links:
 
-- [Installation](https://kirbycopilot.com/docs/getting-started/installation)
-- [Global Configuration](https://kirbycopilot.com/docs/configuration/global)
-- [Section Configuration](https://kirbycopilot.com/docs/configuration/section)
+- [Installation](https://kirby.tools/docs/copilot/getting-started/installation)
+- [Global Configuration](https://kirby.tools/docs/copilot/configuration/global)
+- [Section Configuration](https://kirby.tools/docs/copilot/configuration/section)
 
 ## Support and Questions
 
 We are committed to support you if you have any questions or issues with Kirby Copilot. There are several ways to get support:
 
 - **GitHub Discussions**: Join the community and engage in discussions on our [GitHub Discussions page](https://github.com/kirby-tools/community/discussions).
-- **Email Support**: You can ask questions and seek assistance by emailing us at [hello@kirbycopilot.com](mailto:hello@kirbycopilot.com). Please use the GitHub discussions if you have a general question or comment about Kirby Copilot.
+- **Email Support**: You can ask questions and seek assistance by emailing us at [hello@kirby.tools](mailto:hello@kirby.tools). Please use the GitHub discussions if you have a general question or comment about Kirby Content Translator.
 - **GitHub Issues**: For reporting bugs or requesting new features, please use the [GitHub Issues page](https://github.com/kirby-tools/community/issues).
 
 We encourage you to use the resources above to connect with us and other users of Kirby Copilot.
@@ -55,4 +55,4 @@ We value your feedback and ideas for improving Kirby Copilot. If you have any su
 
 ## License
 
-[Kirby Copilot Plugin License Agreement](./LICENSE.md) License © 2024-PRESENT [Johann Schopplich](https://github.com/johannschopplich)
+[Kirby Tools License](./LICENSE.md) License © 2024-PRESENT [Johann Schopplich](https://github.com/johannschopplich)

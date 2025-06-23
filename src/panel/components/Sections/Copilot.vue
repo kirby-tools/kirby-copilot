@@ -349,7 +349,7 @@ function fieldTypeToResponseFormat(fieldType) {
         label="Kirby Copilot"
         api-namespace="__copilot__"
         :license-status="licenseStatus"
-        pricing-url="https://kirbycopilot.com/buy"
+        pricing-url="https://kirby.tools/copilot/buy"
       />
     </template>
 

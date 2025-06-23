@@ -168,7 +168,7 @@ async function pickFiles() {
         label="Kirby Copilot"
         api-namespace="__copilot__"
         :license-status="licenseStatus"
-        pricing-url="https://kirbycopilot.com/buy"
+        pricing-url="https://kirby.tools/copilot/buy"
         class="kai-absolute kai-right-0 kai-top-[calc(-0.25rem-24px)]"
       />
     </div>
