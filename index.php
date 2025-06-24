@@ -5,7 +5,7 @@ use Kirby\Cms\App as Kirby;
 @include_once __DIR__ . '/vendor/autoload.php';
 
 $pluginConfig = [
-    'name' => 'johannschopplich/seo-audit',
+    'name' => 'johannschopplich/copilot',
     'extends' => [
         'api' => require __DIR__ . '/src/extensions/api.php',
         'sections' => require __DIR__ . '/src/extensions/sections.php',
