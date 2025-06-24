@@ -1,4 +1,4 @@
-var is = "vercel.ai.error", Li = Symbol.for(is), ls, Fi = class us extends Error {
+var as = "vercel.ai.error", $i = Symbol.for(as), ss, Di = class os extends Error {
   /**
    * Creates an AI SDK Error.
    *
@@ -12,7 +12,7 @@ var is = "vercel.ai.error", Li = Symbol.for(is), ls, Fi = class us extends Error
     message: r,
     cause: n
   }) {
-    super(r), this[ls] = !0, this.name = t, this.cause = n;
+    super(r), this[ss] = !0, this.name = t, this.cause = n;
   }
   /**
    * Checks if the given error is an AI SDK Error.
@@ -20,15 +20,15 @@ var is = "vercel.ai.error", Li = Symbol.for(is), ls, Fi = class us extends Error
    * @returns {boolean} True if the error is an AI SDK Error, false otherwise.
    */
   static isInstance(t) {
-    return us.hasMarker(t, is);
+    return os.hasMarker(t, as);
   }
   static hasMarker(t, r) {
     const n = Symbol.for(r);
     return t != null && typeof t == "object" && n in t && typeof t[n] == "boolean" && t[n] === !0;
   }
 };
-ls = Li;
-var j = Fi, cs = "AI_APICallError", ds = `vercel.ai.error.${cs}`, Zi = Symbol.for(ds), ps, Be = class extends j {
+ss = $i;
+var j = Di, is = "AI_APICallError", ls = `vercel.ai.error.${is}`, qi = Symbol.for(ls), us, Be = class extends j {
   constructor({
     message: e,
     url: t,
@@ -44,137 +44,137 @@ var j = Fi, cs = "AI_APICallError", ds = `vercel.ai.error.${cs}`, Zi = Symbol.fo
     // server error
     data: l
   }) {
-    super({ name: cs, message: e, cause: o }), this[ps] = !0, this.url = t, this.requestBodyValues = r, this.statusCode = n, this.responseHeaders = a, this.responseBody = s, this.isRetryable = i, this.data = l;
+    super({ name: is, message: e, cause: o }), this[us] = !0, this.url = t, this.requestBodyValues = r, this.statusCode = n, this.responseHeaders = a, this.responseBody = s, this.isRetryable = i, this.data = l;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, ls);
+  }
+};
+us = qi;
+var cs = "AI_EmptyResponseBodyError", ds = `vercel.ai.error.${cs}`, Ui = Symbol.for(ds), ps, Li = class extends j {
+  // used in isInstance
+  constructor({ message: e = "Empty response body" } = {}) {
+    super({ name: cs, message: e }), this[ps] = !0;
   }
   static isInstance(e) {
     return j.hasMarker(e, ds);
   }
 };
-ps = Zi;
-var ms = "AI_EmptyResponseBodyError", fs = `vercel.ai.error.${ms}`, Vi = Symbol.for(fs), hs, Bi = class extends j {
-  // used in isInstance
-  constructor({ message: e = "Empty response body" } = {}) {
-    super({ name: ms, message: e }), this[hs] = !0;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, fs);
-  }
-};
-hs = Vi;
-function Ar(e) {
+ps = Ui;
+function Rr(e) {
   return e == null ? "unknown error" : typeof e == "string" ? e : e instanceof Error ? e.message : JSON.stringify(e);
 }
-var gs = "AI_InvalidArgumentError", ys = `vercel.ai.error.${gs}`, Ji = Symbol.for(ys), vs, Qn = class extends j {
+var ms = "AI_InvalidArgumentError", fs = `vercel.ai.error.${ms}`, Fi = Symbol.for(fs), hs, Kn = class extends j {
   constructor({
     message: t,
     cause: r,
     argument: n
   }) {
-    super({ name: gs, message: t, cause: r }), this[vs] = !0, this.argument = n;
+    super({ name: ms, message: t, cause: r }), this[hs] = !0, this.argument = n;
   }
   static isInstance(t) {
-    return j.hasMarker(t, ys);
+    return j.hasMarker(t, fs);
   }
 };
-vs = Ji;
-var _s = "AI_InvalidPromptError", bs = `vercel.ai.error.${_s}`, Gi = Symbol.for(bs), ws, ut = class extends j {
+hs = Fi;
+var gs = "AI_InvalidPromptError", ys = `vercel.ai.error.${gs}`, Zi = Symbol.for(ys), vs, ut = class extends j {
   constructor({
     prompt: e,
     message: t,
     cause: r
   }) {
-    super({ name: _s, message: `Invalid prompt: ${t}`, cause: r }), this[ws] = !0, this.prompt = e;
+    super({ name: gs, message: `Invalid prompt: ${t}`, cause: r }), this[vs] = !0, this.prompt = e;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, ys);
+  }
+};
+vs = Zi;
+var _s = "AI_InvalidResponseDataError", bs = `vercel.ai.error.${_s}`, Vi = Symbol.for(bs), ws, xn = class extends j {
+  constructor({
+    data: e,
+    message: t = `Invalid response data: ${JSON.stringify(e)}.`
+  }) {
+    super({ name: _s, message: t }), this[ws] = !0, this.data = e;
   }
   static isInstance(e) {
     return j.hasMarker(e, bs);
   }
 };
-ws = Gi;
-var xs = "AI_InvalidResponseDataError", ks = `vercel.ai.error.${xs}`, zi = Symbol.for(ks), Ts, Sn = class extends j {
-  constructor({
-    data: e,
-    message: t = `Invalid response data: ${JSON.stringify(e)}.`
-  }) {
-    super({ name: xs, message: t }), this[Ts] = !0, this.data = e;
+ws = Vi;
+var xs = "AI_JSONParseError", ks = `vercel.ai.error.${xs}`, Bi = Symbol.for(ks), Ts, mr = class extends j {
+  constructor({ text: e, cause: t }) {
+    super({
+      name: xs,
+      message: `JSON parsing failed: Text: ${e}.
+Error message: ${Rr(t)}`,
+      cause: t
+    }), this[Ts] = !0, this.text = e;
   }
   static isInstance(e) {
     return j.hasMarker(e, ks);
   }
 };
-Ts = zi;
-var Ss = "AI_JSONParseError", Is = `vercel.ai.error.${Ss}`, Hi = Symbol.for(Is), Cs, hr = class extends j {
-  constructor({ text: e, cause: t }) {
-    super({
-      name: Ss,
-      message: `JSON parsing failed: Text: ${e}.
-Error message: ${Ar(t)}`,
-      cause: t
-    }), this[Cs] = !0, this.text = e;
+Ts = Bi;
+var Ss = "AI_LoadAPIKeyError", Is = `vercel.ai.error.${Ss}`, Ji = Symbol.for(Is), Cs, Dr = class extends j {
+  // used in isInstance
+  constructor({ message: e }) {
+    super({ name: Ss, message: e }), this[Cs] = !0;
   }
   static isInstance(e) {
     return j.hasMarker(e, Is);
   }
 };
-Cs = Hi;
-var Rs = "AI_LoadAPIKeyError", Es = `vercel.ai.error.${Rs}`, Wi = Symbol.for(Es), As, Ur = class extends j {
+Cs = Ji;
+var Rs = "AI_NoContentGeneratedError", Es = `vercel.ai.error.${Rs}`, zi = Symbol.for(Es), As, lh = class extends j {
   // used in isInstance
-  constructor({ message: e }) {
+  constructor({
+    message: e = "No content generated."
+  } = {}) {
     super({ name: Rs, message: e }), this[As] = !0;
   }
   static isInstance(e) {
     return j.hasMarker(e, Es);
   }
 };
-As = Wi;
-var Ps = "AI_NoContentGeneratedError", Ns = `vercel.ai.error.${Ps}`, Ki = Symbol.for(Ns), Os, ph = class extends j {
-  // used in isInstance
+As = zi;
+var Ns = "AI_NoSuchModelError", Ps = `vercel.ai.error.${Ns}`, Gi = Symbol.for(Ps), Os, pt = class extends j {
   constructor({
-    message: e = "No content generated."
-  } = {}) {
-    super({ name: Ps, message: e }), this[Os] = !0;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, Ns);
-  }
-};
-Os = Ki;
-var Ms = "AI_NoSuchModelError", js = `vercel.ai.error.${Ms}`, Yi = Symbol.for(js), $s, pt = class extends j {
-  constructor({
-    errorName: e = Ms,
+    errorName: e = Ns,
     modelId: t,
     modelType: r,
     message: n = `No such ${r}: ${t}`
   }) {
-    super({ name: e, message: n }), this[$s] = !0, this.modelId = t, this.modelType = r;
+    super({ name: e, message: n }), this[Os] = !0, this.modelId = t, this.modelType = r;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, Ps);
+  }
+};
+Os = Gi;
+var Ms = "AI_TooManyEmbeddingValuesForCallError", js = `vercel.ai.error.${Ms}`, Hi = Symbol.for(js), $s, Ds = class extends j {
+  constructor(e) {
+    super({
+      name: Ms,
+      message: `Too many values for a single embedding call. The ${e.provider} model "${e.modelId}" can only embed up to ${e.maxEmbeddingsPerCall} values per call, but ${e.values.length} values were provided.`
+    }), this[$s] = !0, this.provider = e.provider, this.modelId = e.modelId, this.maxEmbeddingsPerCall = e.maxEmbeddingsPerCall, this.values = e.values;
   }
   static isInstance(e) {
     return j.hasMarker(e, js);
   }
 };
-$s = Yi;
-var Ds = "AI_TooManyEmbeddingValuesForCallError", qs = `vercel.ai.error.${Ds}`, Xi = Symbol.for(qs), Us, Ls = class extends j {
-  constructor(e) {
-    super({
-      name: Ds,
-      message: `Too many values for a single embedding call. The ${e.provider} model "${e.modelId}" can only embed up to ${e.maxEmbeddingsPerCall} values per call, but ${e.values.length} values were provided.`
-    }), this[Us] = !0, this.provider = e.provider, this.modelId = e.modelId, this.maxEmbeddingsPerCall = e.maxEmbeddingsPerCall, this.values = e.values;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, qs);
-  }
-};
-Us = Xi;
-var Fs = "AI_TypeValidationError", Zs = `vercel.ai.error.${Fs}`, Qi = Symbol.for(Zs), Vs, el = class Dn extends j {
+$s = Hi;
+var qs = "AI_TypeValidationError", Us = `vercel.ai.error.${qs}`, Wi = Symbol.for(Us), Ls, Ki = class Mn extends j {
   constructor({ value: t, cause: r }) {
     super({
-      name: Fs,
+      name: qs,
       message: `Type validation failed: Value: ${JSON.stringify(t)}.
-Error message: ${Ar(r)}`,
+Error message: ${Rr(r)}`,
       cause: r
-    }), this[Vs] = !0, this.value = t;
+    }), this[Ls] = !0, this.value = t;
   }
   static isInstance(t) {
-    return j.hasMarker(t, Zs);
+    return j.hasMarker(t, Us);
   }
   /**
    * Wraps an error into a TypeValidationError.
@@ -190,48 +190,48 @@ Error message: ${Ar(r)}`,
     value: t,
     cause: r
   }) {
-    return Dn.isInstance(r) && r.value === t ? r : new Dn({ value: t, cause: r });
+    return Mn.isInstance(r) && r.value === t ? r : new Mn({ value: t, cause: r });
   }
 };
-Vs = Qi;
-var ft = el, Bs = "AI_UnsupportedFunctionalityError", Js = `vercel.ai.error.${Bs}`, tl = Symbol.for(Js), Gs, se = class extends j {
+Ls = Wi;
+var ft = Ki, Fs = "AI_UnsupportedFunctionalityError", Zs = `vercel.ai.error.${Fs}`, Yi = Symbol.for(Zs), Vs, se = class extends j {
   constructor({
     functionality: e,
     message: t = `'${e}' functionality not supported.`
   }) {
-    super({ name: Bs, message: t }), this[Gs] = !0, this.functionality = e;
+    super({ name: Fs, message: t }), this[Vs] = !0, this.functionality = e;
   }
   static isInstance(e) {
-    return j.hasMarker(e, Js);
+    return j.hasMarker(e, Zs);
   }
 };
-Gs = tl;
-function Zr(e) {
-  return e === null || typeof e == "string" || typeof e == "number" || typeof e == "boolean" ? !0 : Array.isArray(e) ? e.every(Zr) : typeof e == "object" ? Object.entries(e).every(
-    ([t, r]) => typeof t == "string" && Zr(r)
+Vs = Yi;
+function Lr(e) {
+  return e === null || typeof e == "string" || typeof e == "number" || typeof e == "boolean" ? !0 : Array.isArray(e) ? e.every(Lr) : typeof e == "object" ? Object.entries(e).every(
+    ([t, r]) => typeof t == "string" && Lr(r)
   ) : !1;
 }
-function Sa(e) {
-  return Array.isArray(e) && e.every(Zr);
+function xa(e) {
+  return Array.isArray(e) && e.every(Lr);
 }
-function qn(e) {
+function jn(e) {
   return e != null && typeof e == "object" && Object.entries(e).every(
-    ([t, r]) => typeof t == "string" && Zr(r)
+    ([t, r]) => typeof t == "string" && Lr(r)
   );
 }
-let rl = (e, t = 21) => (r = t) => {
+let Xi = (e, t = 21) => (r = t) => {
   let n = "", a = r | 0;
   for (; a--; )
     n += e[Math.random() * e.length | 0];
   return n;
 };
-function nl(e) {
+function Qi(e) {
   return e && e.__esModule && Object.prototype.hasOwnProperty.call(e, "default") ? e.default : e;
 }
 var er = { exports: {} };
-const al = typeof Buffer < "u", Ia = /"(?:_|\\u005[Ff])(?:_|\\u005[Ff])(?:p|\\u0070)(?:r|\\u0072)(?:o|\\u006[Ff])(?:t|\\u0074)(?:o|\\u006[Ff])(?:_|\\u005[Ff])(?:_|\\u005[Ff])"\s*:/, Ca = /"(?:c|\\u0063)(?:o|\\u006[Ff])(?:n|\\u006[Ee])(?:s|\\u0073)(?:t|\\u0074)(?:r|\\u0072)(?:u|\\u0075)(?:c|\\u0063)(?:t|\\u0074)(?:o|\\u006[Ff])(?:r|\\u0072)"\s*:/;
-function zs(e, t, r) {
-  r == null && t !== null && typeof t == "object" && (r = t, t = void 0), al && Buffer.isBuffer(e) && (e = e.toString()), e && e.charCodeAt(0) === 65279 && (e = e.slice(1));
+const el = typeof Buffer < "u", ka = /"(?:_|\\u005[Ff])(?:_|\\u005[Ff])(?:p|\\u0070)(?:r|\\u0072)(?:o|\\u006[Ff])(?:t|\\u0074)(?:o|\\u006[Ff])(?:_|\\u005[Ff])(?:_|\\u005[Ff])"\s*:/, Ta = /"(?:c|\\u0063)(?:o|\\u006[Ff])(?:n|\\u006[Ee])(?:s|\\u0073)(?:t|\\u0074)(?:r|\\u0072)(?:u|\\u0075)(?:c|\\u0063)(?:t|\\u0074)(?:o|\\u006[Ff])(?:r|\\u0072)"\s*:/;
+function Bs(e, t, r) {
+  r == null && t !== null && typeof t == "object" && (r = t, t = void 0), el && Buffer.isBuffer(e) && (e = e.toString()), e && e.charCodeAt(0) === 65279 && (e = e.slice(1));
   const n = JSON.parse(e, t);
   if (n === null || typeof n != "object")
     return n;
@@ -239,16 +239,16 @@ function zs(e, t, r) {
   if (a === "ignore" && s === "ignore")
     return n;
   if (a !== "ignore" && s !== "ignore") {
-    if (Ia.test(e) === !1 && Ca.test(e) === !1)
+    if (ka.test(e) === !1 && Ta.test(e) === !1)
       return n;
   } else if (a !== "ignore" && s === "ignore") {
-    if (Ia.test(e) === !1)
+    if (ka.test(e) === !1)
       return n;
-  } else if (Ca.test(e) === !1)
+  } else if (Ta.test(e) === !1)
     return n;
-  return Hs(n, { protoAction: a, constructorAction: s, safe: r && r.safe });
+  return Js(n, { protoAction: a, constructorAction: s, safe: r && r.safe });
 }
-function Hs(e, { protoAction: t = "error", constructorAction: r = "error", safe: n } = {}) {
+function Js(e, { protoAction: t = "error", constructorAction: r = "error", safe: n } = {}) {
   let a = [e];
   for (; a.length; ) {
     const s = a;
@@ -276,33 +276,33 @@ function Hs(e, { protoAction: t = "error", constructorAction: r = "error", safe:
   }
   return e;
 }
-function ea(e, t, r) {
+function Yn(e, t, r) {
   const n = Error.stackTraceLimit;
   Error.stackTraceLimit = 0;
   try {
-    return zs(e, t, r);
+    return Bs(e, t, r);
   } finally {
     Error.stackTraceLimit = n;
   }
 }
-function sl(e, t) {
+function tl(e, t) {
   const r = Error.stackTraceLimit;
   Error.stackTraceLimit = 0;
   try {
-    return zs(e, t, { safe: !0 });
+    return Bs(e, t, { safe: !0 });
   } catch {
     return null;
   } finally {
     Error.stackTraceLimit = r;
   }
 }
-er.exports = ea;
-er.exports.default = ea;
-er.exports.parse = ea;
-er.exports.safeParse = sl;
-er.exports.scan = Hs;
-var ol = er.exports;
-const ta = /* @__PURE__ */ nl(ol);
+er.exports = Yn;
+er.exports.default = Yn;
+er.exports.parse = Yn;
+er.exports.safeParse = tl;
+er.exports.scan = Js;
+var rl = er.exports;
+const Xn = /* @__PURE__ */ Qi(rl);
 function Le(...e) {
   return e.reduce(
     (t, r) => ({
@@ -312,7 +312,7 @@ function Le(...e) {
     {}
   );
 }
-function il(e) {
+function nl(e) {
   return new ReadableStream({
     /**
      * Called when the consumer wants to pull more data from the stream.
@@ -335,10 +335,10 @@ function il(e) {
     }
   });
 }
-async function ra(e) {
+async function Qn(e) {
   return e == null ? Promise.resolve() : new Promise((t) => setTimeout(t, e));
 }
-function Ws() {
+function zs() {
   let e = "", t, r = [], n, a;
   function s(l, u) {
     if (l === "") {
@@ -383,7 +383,7 @@ function Ws() {
   }
   return new TransformStream({
     transform(l, u) {
-      const { lines: c, incompleteLine: d } = ll(e, l);
+      const { lines: c, incompleteLine: d } = al(e, l);
       e = d;
       for (let m = 0; m < c.length; m++)
         s(c[m], u);
@@ -393,7 +393,7 @@ function Ws() {
     }
   });
 }
-function ll(e, t) {
+function al(e, t) {
   const r = [];
   let n = e;
   for (let a = 0; a < t.length; ) {
@@ -404,7 +404,7 @@ function ll(e, t) {
   }
   return { lines: r, incompleteLine: n };
 }
-function Pr(e) {
+function Er(e) {
   const t = {};
   return e.headers.forEach((r, n) => {
     t[n] = r;
@@ -416,28 +416,28 @@ var Ft = ({
   alphabet: r = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
   separator: n = "-"
 } = {}) => {
-  const a = rl(r, t);
+  const a = Xi(r, t);
   if (e == null)
     return a;
   if (r.includes(n))
-    throw new Qn({
+    throw new Kn({
       argument: "separator",
       message: `The separator "${n}" must not be part of the alphabet "${r}".`
     });
   return (s) => `${e}${n}${a(s)}`;
 }, kt = Ft();
-function ul(e) {
+function sl(e) {
   return e == null ? "unknown error" : typeof e == "string" ? e : e instanceof Error ? e.message : JSON.stringify(e);
 }
-function cl(e) {
+function ol(e) {
   return Object.fromEntries(
     Object.entries(e).filter(([t, r]) => r != null)
   );
 }
-function Fr(e) {
+function Ur(e) {
   return e instanceof Error && (e.name === "AbortError" || e.name === "TimeoutError");
 }
-function na({
+function ea({
   apiKey: e,
   environmentVariableName: t,
   apiKeyParameterName: r = "apiKey",
@@ -446,40 +446,40 @@ function na({
   if (typeof e == "string")
     return e;
   if (e != null)
-    throw new Ur({
+    throw new Dr({
       message: `${n} API key must be a string.`
     });
   if (typeof process > "u")
-    throw new Ur({
+    throw new Dr({
       message: `${n} API key is missing. Pass it using the '${r}' parameter. Environment variables is not supported in this environment.`
     });
   if (e = process.env[t], e == null)
-    throw new Ur({
+    throw new Dr({
       message: `${n} API key is missing. Pass it using the '${r}' parameter or the ${t} environment variable.`
     });
   if (typeof e != "string")
-    throw new Ur({
+    throw new Dr({
       message: `${n} API key must be a string. The value of the ${t} environment variable is not a string.`
     });
   return e;
 }
-var Vr = Symbol.for("vercel.ai.validator");
-function dl(e) {
-  return { [Vr]: !0, validate: e };
+var Fr = Symbol.for("vercel.ai.validator");
+function il(e) {
+  return { [Fr]: !0, validate: e };
 }
-function pl(e) {
-  return typeof e == "object" && e !== null && Vr in e && e[Vr] === !0 && "validate" in e;
+function ll(e) {
+  return typeof e == "object" && e !== null && Fr in e && e[Fr] === !0 && "validate" in e;
 }
-function ml(e) {
-  return pl(e) ? e : fl(e);
+function ul(e) {
+  return ll(e) ? e : cl(e);
 }
-function fl(e) {
-  return dl((t) => {
+function cl(e) {
+  return il((t) => {
     const r = e.safeParse(t);
     return r.success ? { success: !0, value: r.data } : { success: !1, error: r.error };
   });
 }
-function hl({
+function dl({
   value: e,
   schema: t
 }) {
@@ -492,7 +492,7 @@ function ht({
   value: e,
   schema: t
 }) {
-  const r = ml(t);
+  const r = ul(t);
   try {
     if (r.validate == null)
       return { success: !0, value: e };
@@ -508,15 +508,15 @@ function ht({
     };
   }
 }
-function gl({
+function pl({
   text: e,
   schema: t
 }) {
   try {
-    const r = ta.parse(e);
-    return t == null ? r : hl({ value: r, schema: t });
+    const r = Xn.parse(e);
+    return t == null ? r : dl({ value: r, schema: t });
   } catch (r) {
-    throw hr.isInstance(r) || ft.isInstance(r) ? r : new hr({ text: e, cause: r });
+    throw mr.isInstance(r) || ft.isInstance(r) ? r : new mr({ text: e, cause: r });
   }
 }
 function Ot({
@@ -524,7 +524,7 @@ function Ot({
   schema: t
 }) {
   try {
-    const r = ta.parse(e);
+    const r = Xn.parse(e);
     if (t == null)
       return { success: !0, value: r, rawValue: r };
     const n = ht({ value: r, schema: t });
@@ -532,18 +532,18 @@ function Ot({
   } catch (r) {
     return {
       success: !1,
-      error: hr.isInstance(r) ? r : new hr({ text: e, cause: r })
+      error: mr.isInstance(r) ? r : new mr({ text: e, cause: r })
     };
   }
 }
-function Ra(e) {
+function Sa(e) {
   try {
-    return ta.parse(e), !0;
+    return Xn.parse(e), !0;
   } catch {
     return !1;
   }
 }
-function pn({
+function un({
   provider: e,
   providerOptions: t,
   schema: r
@@ -555,14 +555,14 @@ function pn({
     schema: r
   });
   if (!n.success)
-    throw new Qn({
+    throw new Kn({
       argument: "providerOptions",
       message: `invalid ${e} provider options`,
       cause: n.error
     });
   return n.value;
 }
-var yl = () => globalThis.fetch, Fe = async ({
+var ml = () => globalThis.fetch, Fe = async ({
   url: e,
   headers: t,
   body: r,
@@ -570,7 +570,7 @@ var yl = () => globalThis.fetch, Fe = async ({
   successfulResponseHandler: a,
   abortSignal: s,
   fetch: o
-}) => Ks({
+}) => Gs({
   url: e,
   headers: {
     "Content-Type": "application/json",
@@ -584,7 +584,7 @@ var yl = () => globalThis.fetch, Fe = async ({
   successfulResponseHandler: a,
   abortSignal: s,
   fetch: o
-}), vl = async ({
+}), fl = async ({
   url: e,
   headers: t,
   formData: r,
@@ -592,7 +592,7 @@ var yl = () => globalThis.fetch, Fe = async ({
   successfulResponseHandler: a,
   abortSignal: s,
   fetch: o
-}) => Ks({
+}) => Gs({
   url: e,
   headers: t,
   body: {
@@ -603,22 +603,22 @@ var yl = () => globalThis.fetch, Fe = async ({
   successfulResponseHandler: a,
   abortSignal: s,
   fetch: o
-}), Ks = async ({
+}), Gs = async ({
   url: e,
   headers: t = {},
   body: r,
   successfulResponseHandler: n,
   failedResponseHandler: a,
   abortSignal: s,
-  fetch: o = yl()
+  fetch: o = ml()
 }) => {
   try {
     const i = await o(e, {
       method: "POST",
-      headers: cl(t),
+      headers: ol(t),
       body: r.content,
       signal: s
-    }), l = Pr(i);
+    }), l = Er(i);
     if (!i.ok) {
       let u;
       try {
@@ -628,7 +628,7 @@ var yl = () => globalThis.fetch, Fe = async ({
           requestBodyValues: r.values
         });
       } catch (c) {
-        throw Fr(c) || Be.isInstance(c) ? c : new Be({
+        throw Ur(c) || Be.isInstance(c) ? c : new Be({
           message: "Failed to process error response",
           cause: c,
           statusCode: i.status,
@@ -646,7 +646,7 @@ var yl = () => globalThis.fetch, Fe = async ({
         requestBodyValues: r.values
       });
     } catch (u) {
-      throw u instanceof Error && (Fr(u) || Be.isInstance(u)) ? u : new Be({
+      throw u instanceof Error && (Ur(u) || Be.isInstance(u)) ? u : new Be({
         message: "Failed to process successful response",
         cause: u,
         statusCode: i.status,
@@ -656,7 +656,7 @@ var yl = () => globalThis.fetch, Fe = async ({
       });
     }
   } catch (i) {
-    if (Fr(i))
+    if (Ur(i))
       throw i;
     if (i instanceof TypeError && i.message === "fetch failed") {
       const l = i.cause;
@@ -673,15 +673,15 @@ var yl = () => globalThis.fetch, Fe = async ({
     throw i;
   }
 };
-async function _l(e) {
+async function hl(e) {
   return typeof e == "function" && (e = e()), Promise.resolve(e);
 }
-var aa = ({
+var ta = ({
   errorSchema: e,
   errorToMessage: t,
   isRetryable: r
 }) => async ({ response: n, url: a, requestBodyValues: s }) => {
-  const o = await n.text(), i = Pr(n);
+  const o = await n.text(), i = Er(n);
   if (o.trim() === "")
     return {
       responseHeaders: i,
@@ -696,7 +696,7 @@ var aa = ({
       })
     };
   try {
-    const l = gl({
+    const l = pl({
       text: o,
       schema: e
     });
@@ -727,13 +727,13 @@ var aa = ({
       })
     };
   }
-}, Nr = (e) => async ({ response: t }) => {
-  const r = Pr(t);
+}, Ar = (e) => async ({ response: t }) => {
+  const r = Er(t);
   if (t.body == null)
-    throw new Bi({});
+    throw new Li({});
   return {
     responseHeaders: r,
-    value: t.body.pipeThrough(new TextDecoderStream()).pipeThrough(Ws()).pipeThrough(
+    value: t.body.pipeThrough(new TextDecoderStream()).pipeThrough(zs()).pipeThrough(
       new TransformStream({
         transform({ data: n }, a) {
           n !== "[DONE]" && a.enqueue(
@@ -750,7 +750,7 @@ var aa = ({
   const a = await t.text(), s = Ot({
     text: a,
     schema: e
-  }), o = Pr(t);
+  }), o = Er(t);
   if (!s.success)
     throw new Be({
       message: "Invalid JSON response",
@@ -766,8 +766,8 @@ var aa = ({
     value: s.value,
     rawValue: s.rawValue
   };
-}, bl = () => async ({ response: e, url: t, requestBodyValues: r }) => {
-  const n = Pr(e);
+}, gl = () => async ({ response: e, url: t, requestBodyValues: r }) => {
+  const n = Er(e);
   if (!e.body)
     throw new Be({
       message: "Response body is empty",
@@ -794,21 +794,21 @@ var aa = ({
       cause: a
     });
   }
-}, { btoa: wl, atob: xl } = globalThis;
-function mn(e) {
-  const t = e.replace(/-/g, "+").replace(/_/g, "/"), r = xl(t);
+}, { btoa: yl, atob: vl } = globalThis;
+function cn(e) {
+  const t = e.replace(/-/g, "+").replace(/_/g, "/"), r = vl(t);
   return Uint8Array.from(r, (n) => n.codePointAt(0));
 }
 function Mt(e) {
   let t = "";
   for (let r = 0; r < e.length; r++)
     t += String.fromCodePoint(e[r]);
-  return wl(t);
+  return yl(t);
 }
-function sa(e) {
+function ra(e) {
   return e == null ? void 0 : e.replace(/\/$/, "");
 }
-const kl = Symbol("Let zodToJsonSchema decide on which parser to use"), Ea = {
+const _l = Symbol("Let zodToJsonSchema decide on which parser to use"), Ia = {
   name: void 0,
   $refStrategy: "root",
   basePath: ["#"],
@@ -830,14 +830,14 @@ const kl = Symbol("Let zodToJsonSchema decide on which parser to use"), Ea = {
   emailStrategy: "format:email",
   base64Strategy: "contentEncoding:base64",
   nameStrategy: "ref"
-}, Tl = (e) => typeof e == "string" ? {
-  ...Ea,
+}, bl = (e) => typeof e == "string" ? {
+  ...Ia,
   name: e
 } : {
-  ...Ea,
+  ...Ia,
   ...e
-}, Sl = (e) => {
-  const t = Tl(e), r = t.name !== void 0 ? [...t.basePath, t.definitionPath, t.name] : t.basePath;
+}, wl = (e) => {
+  const t = bl(e), r = t.name !== void 0 ? [...t.basePath, t.definitionPath, t.name] : t.basePath;
   return {
     ...t,
     currentPath: r,
@@ -853,14 +853,14 @@ const kl = Symbol("Let zodToJsonSchema decide on which parser to use"), Ea = {
     ]))
   };
 };
-function Ys(e, t, r, n) {
+function Hs(e, t, r, n) {
   n != null && n.errorMessages && r && (e.errorMessage = {
     ...e.errorMessage,
     [t]: r
   });
 }
 function ae(e, t, r, n, a) {
-  e[t] = r, Ys(e, t, n, a);
+  e[t] = r, Hs(e, t, n, a);
 }
 var K;
 (function(e) {
@@ -899,14 +899,14 @@ var K;
   }
   e.joinValues = n, e.jsonStringifyReplacer = (a, s) => typeof s == "bigint" ? s.toString() : s;
 })(K || (K = {}));
-var Aa;
+var Ca;
 (function(e) {
   e.mergeShapes = (t, r) => ({
     ...t,
     ...r
     // second overwrites first
   });
-})(Aa || (Aa = {}));
+})(Ca || (Ca = {}));
 const O = K.arrayToEnum([
   "string",
   "nan",
@@ -1027,7 +1027,7 @@ class gt extends Error {
   }
 }
 gt.create = (e) => new gt(e);
-const Un = (e, t) => {
+const $n = (e, t) => {
   let r;
   switch (e.code) {
     case I.invalid_type:
@@ -1083,11 +1083,11 @@ const Un = (e, t) => {
   }
   return { message: r };
 };
-let Il = Un;
-function Cl() {
-  return Il;
+let xl = $n;
+function kl() {
+  return xl;
 }
-const Rl = (e) => {
+const Tl = (e) => {
   const { data: t, path: r, errorMaps: n, issueData: a } = e, s = [...r, ...a.path || []], o = {
     ...a,
     path: s
@@ -1108,8 +1108,8 @@ const Rl = (e) => {
     message: i
   };
 };
-function P(e, t) {
-  const r = Cl(), n = Rl({
+function N(e, t) {
+  const r = kl(), n = Tl({
     issueData: t,
     data: e.data,
     path: e.path,
@@ -1120,7 +1120,7 @@ function P(e, t) {
       // then schema-bound map if available
       r,
       // then global override map
-      r === Un ? void 0 : Un
+      r === $n ? void 0 : $n
       // then global default map
     ].filter((a) => !!a)
   });
@@ -1140,7 +1140,7 @@ class De {
     const n = [];
     for (const a of r) {
       if (a.status === "aborted")
-        return F;
+        return L;
       a.status === "dirty" && t.dirty(), n.push(a.value);
     }
     return { status: t.value, value: n };
@@ -1161,29 +1161,19 @@ class De {
     for (const a of r) {
       const { key: s, value: o } = a;
       if (s.status === "aborted" || o.status === "aborted")
-        return F;
+        return L;
       s.status === "dirty" && t.dirty(), o.status === "dirty" && t.dirty(), s.value !== "__proto__" && (typeof o.value < "u" || a.alwaysSet) && (n[s.value] = o.value);
     }
     return { status: t.value, value: n };
   }
 }
-const F = Object.freeze({
+const L = Object.freeze({
   status: "aborted"
-}), dr = (e) => ({ status: "dirty", value: e }), Ge = (e) => ({ status: "valid", value: e }), Pa = (e) => e.status === "aborted", Na = (e) => e.status === "dirty", Ht = (e) => e.status === "valid", Br = (e) => typeof Promise < "u" && e instanceof Promise;
+}), dr = (e) => ({ status: "dirty", value: e }), ze = (e) => ({ status: "valid", value: e }), Ra = (e) => e.status === "aborted", Ea = (e) => e.status === "dirty", Ht = (e) => e.status === "valid", Zr = (e) => typeof Promise < "u" && e instanceof Promise;
 var M;
 (function(e) {
   e.errToObj = (t) => typeof t == "string" ? { message: t } : t || {}, e.toString = (t) => typeof t == "string" ? t : t == null ? void 0 : t.message;
 })(M || (M = {}));
-var Jr = function(e, t, r, n) {
-  if (r === "a" && !n) throw new TypeError("Private accessor was defined without a getter");
-  if (typeof t == "function" ? e !== t || !n : !t.has(e)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-  return r === "m" ? n : r === "a" ? n.call(e) : n ? n.value : t.get(e);
-}, Xs = function(e, t, r, n, a) {
-  if (n === "m") throw new TypeError("Private method is not writable");
-  if (n === "a" && !a) throw new TypeError("Private accessor was defined without a setter");
-  if (typeof t == "function" ? e !== t || !a : !t.has(e)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-  return n === "a" ? a.call(e, r) : a ? a.value = r : t.set(e, r), r;
-}, pr, mr;
 class rt {
   constructor(t, r, n, a) {
     this._cachedPath = [], this.parent = t, this.data = r, this._path = n, this._key = a;
@@ -1192,7 +1182,7 @@ class rt {
     return this._cachedPath.length || (Array.isArray(this._key) ? this._cachedPath.push(...this._path, ...this._key) : this._cachedPath.push(...this._path, this._key)), this._cachedPath;
   }
 }
-const Oa = (e, t) => {
+const Aa = (e, t) => {
   if (Ht(t))
     return { success: !0, data: t.value };
   if (!e.common.issues.length)
@@ -1218,7 +1208,7 @@ function V(e) {
     return o.code === "invalid_enum_value" ? { message: l ?? i.defaultError } : typeof i.data > "u" ? { message: l ?? n ?? i.defaultError } : o.code !== "invalid_type" ? { message: i.defaultError } : { message: l ?? r ?? i.defaultError };
   }, description: a };
 }
-class G {
+class z {
   get description() {
     return this._def.description;
   }
@@ -1250,7 +1240,7 @@ class G {
   }
   _parseSync(t) {
     const r = this._parse(t);
-    if (Br(r))
+    if (Zr(r))
       throw new Error("Synchronous parse encountered promise.");
     return r;
   }
@@ -1277,7 +1267,7 @@ class G {
       data: t,
       parsedType: xt(t)
     }, a = this._parseSync({ data: t, path: n.path, parent: n });
-    return Oa(n, a);
+    return Aa(n, a);
   }
   "~validate"(t) {
     var n, a;
@@ -1330,8 +1320,8 @@ class G {
       parent: null,
       data: t,
       parsedType: xt(t)
-    }, a = this._parse({ data: t, path: n.path, parent: n }), s = await (Br(a) ? a : Promise.resolve(a));
-    return Oa(n, s);
+    }, a = this._parse({ data: t, path: n.path, parent: n }), s = await (Zr(a) ? a : Promise.resolve(a));
+    return Aa(n, s);
   }
   refine(t, r) {
     const n = (a) => typeof r == "string" || typeof r > "u" ? { message: r } : typeof r == "function" ? r(a) : r;
@@ -1376,13 +1366,13 @@ class G {
     return et.create(this);
   }
   promise() {
-    return Qr.create(this, this._def);
+    return Kr.create(this, this._def);
   }
   or(t) {
-    return Hr.create([this, t], this._def);
+    return Jr.create([this, t], this._def);
   }
   and(t) {
-    return Wr.create(this, t, this._def);
+    return zr.create(this, t, this._def);
   }
   transform(t) {
     return new Dt({
@@ -1394,7 +1384,7 @@ class G {
   }
   default(t) {
     const r = typeof t == "function" ? t : () => t;
-    return new en({
+    return new Yr({
       ...V(this._def),
       innerType: this,
       defaultValue: r,
@@ -1402,7 +1392,7 @@ class G {
     });
   }
   brand() {
-    return new ro({
+    return new Xs({
       typeName: C.ZodBranded,
       type: this,
       ...V(this._def)
@@ -1410,7 +1400,7 @@ class G {
   }
   catch(t) {
     const r = typeof t == "function" ? t : () => t;
-    return new tn({
+    return new Xr({
       ...V(this._def),
       innerType: this,
       catchValue: r,
@@ -1425,10 +1415,10 @@ class G {
     });
   }
   pipe(t) {
-    return ia.create(this, t);
+    return aa.create(this, t);
   }
   readonly() {
-    return rn.create(this);
+    return Qr.create(this);
   }
   isOptional() {
     return this.safeParse(void 0).success;
@@ -1437,28 +1427,28 @@ class G {
     return this.safeParse(null).success;
   }
 }
-const El = /^c[^\s-]{8,}$/i, Al = /^[0-9a-z]+$/, Pl = /^[0-9A-HJKMNP-TV-Z]{26}$/i, Nl = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/i, Ol = /^[a-z0-9_-]{21}$/i, Ml = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$/, jl = /^[-+]?P(?!$)(?:(?:[-+]?\d+Y)|(?:[-+]?\d+[.,]\d+Y$))?(?:(?:[-+]?\d+M)|(?:[-+]?\d+[.,]\d+M$))?(?:(?:[-+]?\d+W)|(?:[-+]?\d+[.,]\d+W$))?(?:(?:[-+]?\d+D)|(?:[-+]?\d+[.,]\d+D$))?(?:T(?=[\d+-])(?:(?:[-+]?\d+H)|(?:[-+]?\d+[.,]\d+H$))?(?:(?:[-+]?\d+M)|(?:[-+]?\d+[.,]\d+M$))?(?:[-+]?\d+(?:[.,]\d+)?S)?)??$/, $l = /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\-]*\.)+[A-Z]{2,}$/i, Dl = "^(\\p{Extended_Pictographic}|\\p{Emoji_Component})+$";
-let In;
-const ql = /^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$/, Ul = /^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\/(3[0-2]|[12]?[0-9])$/, Ll = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/, Fl = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))\/(12[0-8]|1[01][0-9]|[1-9]?[0-9])$/, Zl = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/, Vl = /^([0-9a-zA-Z-_]{4})*(([0-9a-zA-Z-_]{2}(==)?)|([0-9a-zA-Z-_]{3}(=)?))?$/, Qs = "((\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-((0[13578]|1[02])-(0[1-9]|[12]\\d|3[01])|(0[469]|11)-(0[1-9]|[12]\\d|30)|(02)-(0[1-9]|1\\d|2[0-8])))", Bl = new RegExp(`^${Qs}$`);
-function eo(e) {
+const Sl = /^c[^\s-]{8,}$/i, Il = /^[0-9a-z]+$/, Cl = /^[0-9A-HJKMNP-TV-Z]{26}$/i, Rl = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/i, El = /^[a-z0-9_-]{21}$/i, Al = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$/, Nl = /^[-+]?P(?!$)(?:(?:[-+]?\d+Y)|(?:[-+]?\d+[.,]\d+Y$))?(?:(?:[-+]?\d+M)|(?:[-+]?\d+[.,]\d+M$))?(?:(?:[-+]?\d+W)|(?:[-+]?\d+[.,]\d+W$))?(?:(?:[-+]?\d+D)|(?:[-+]?\d+[.,]\d+D$))?(?:T(?=[\d+-])(?:(?:[-+]?\d+H)|(?:[-+]?\d+[.,]\d+H$))?(?:(?:[-+]?\d+M)|(?:[-+]?\d+[.,]\d+M$))?(?:[-+]?\d+(?:[.,]\d+)?S)?)??$/, Pl = /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\-]*\.)+[A-Z]{2,}$/i, Ol = "^(\\p{Extended_Pictographic}|\\p{Emoji_Component})+$";
+let kn;
+const Ml = /^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$/, jl = /^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\/(3[0-2]|[12]?[0-9])$/, $l = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/, Dl = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))\/(12[0-8]|1[01][0-9]|[1-9]?[0-9])$/, ql = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/, Ul = /^([0-9a-zA-Z-_]{4})*(([0-9a-zA-Z-_]{2}(==)?)|([0-9a-zA-Z-_]{3}(=)?))?$/, Ws = "((\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-((0[13578]|1[02])-(0[1-9]|[12]\\d|3[01])|(0[469]|11)-(0[1-9]|[12]\\d|30)|(02)-(0[1-9]|1\\d|2[0-8])))", Ll = new RegExp(`^${Ws}$`);
+function Ks(e) {
   let t = "[0-5]\\d";
   e.precision ? t = `${t}\\.\\d{${e.precision}}` : e.precision == null && (t = `${t}(\\.\\d+)?`);
   const r = e.precision ? "+" : "?";
   return `([01]\\d|2[0-3]):[0-5]\\d(:${t})${r}`;
 }
-function Jl(e) {
-  return new RegExp(`^${eo(e)}$`);
+function Fl(e) {
+  return new RegExp(`^${Ks(e)}$`);
 }
-function Gl(e) {
-  let t = `${Qs}T${eo(e)}`;
+function Zl(e) {
+  let t = `${Ws}T${Ks(e)}`;
   const r = [];
   return r.push(e.local ? "Z?" : "Z"), e.offset && r.push("([+-]\\d{2}:?\\d{2})"), t = `${t}(${r.join("|")})`, new RegExp(`^${t}$`);
 }
-function zl(e, t) {
-  return !!((t === "v4" || !t) && ql.test(e) || (t === "v6" || !t) && Ll.test(e));
+function Vl(e, t) {
+  return !!((t === "v4" || !t) && Ml.test(e) || (t === "v6" || !t) && $l.test(e));
 }
-function Hl(e, t) {
-  if (!Ml.test(e))
+function Bl(e, t) {
+  if (!Al.test(e))
     return !1;
   try {
     const [r] = e.split("."), n = r.replace(/-/g, "+").replace(/_/g, "/").padEnd(r.length + (4 - r.length % 4) % 4, "="), a = JSON.parse(atob(n));
@@ -1467,24 +1457,24 @@ function Hl(e, t) {
     return !1;
   }
 }
-function Wl(e, t) {
-  return !!((t === "v4" || !t) && Ul.test(e) || (t === "v6" || !t) && Fl.test(e));
+function Jl(e, t) {
+  return !!((t === "v4" || !t) && jl.test(e) || (t === "v6" || !t) && Dl.test(e));
 }
-class mt extends G {
+class mt extends z {
   _parse(t) {
     if (this._def.coerce && (t.data = String(t.data)), this._getType(t) !== O.string) {
       const s = this._getOrReturnCtx(t);
-      return P(s, {
+      return N(s, {
         code: I.invalid_type,
         expected: O.string,
         received: s.parsedType
-      }), F;
+      }), L;
     }
     const n = new De();
     let a;
     for (const s of this._def.checks)
       if (s.kind === "min")
-        t.data.length < s.value && (a = this._getOrReturnCtx(t, a), P(a, {
+        t.data.length < s.value && (a = this._getOrReturnCtx(t, a), N(a, {
           code: I.too_small,
           minimum: s.value,
           type: "string",
@@ -1493,7 +1483,7 @@ class mt extends G {
           message: s.message
         }), n.dirty());
       else if (s.kind === "max")
-        t.data.length > s.value && (a = this._getOrReturnCtx(t, a), P(a, {
+        t.data.length > s.value && (a = this._getOrReturnCtx(t, a), N(a, {
           code: I.too_big,
           maximum: s.value,
           type: "string",
@@ -1503,14 +1493,14 @@ class mt extends G {
         }), n.dirty());
       else if (s.kind === "length") {
         const o = t.data.length > s.value, i = t.data.length < s.value;
-        (o || i) && (a = this._getOrReturnCtx(t, a), o ? P(a, {
+        (o || i) && (a = this._getOrReturnCtx(t, a), o ? N(a, {
           code: I.too_big,
           maximum: s.value,
           type: "string",
           inclusive: !0,
           exact: !0,
           message: s.message
-        }) : i && P(a, {
+        }) : i && N(a, {
           code: I.too_small,
           minimum: s.value,
           type: "string",
@@ -1519,43 +1509,43 @@ class mt extends G {
           message: s.message
         }), n.dirty());
       } else if (s.kind === "email")
-        $l.test(t.data) || (a = this._getOrReturnCtx(t, a), P(a, {
+        Pl.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
           validation: "email",
           code: I.invalid_string,
           message: s.message
         }), n.dirty());
       else if (s.kind === "emoji")
-        In || (In = new RegExp(Dl, "u")), In.test(t.data) || (a = this._getOrReturnCtx(t, a), P(a, {
+        kn || (kn = new RegExp(Ol, "u")), kn.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
           validation: "emoji",
           code: I.invalid_string,
           message: s.message
         }), n.dirty());
       else if (s.kind === "uuid")
-        Nl.test(t.data) || (a = this._getOrReturnCtx(t, a), P(a, {
+        Rl.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
           validation: "uuid",
           code: I.invalid_string,
           message: s.message
         }), n.dirty());
       else if (s.kind === "nanoid")
-        Ol.test(t.data) || (a = this._getOrReturnCtx(t, a), P(a, {
+        El.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
           validation: "nanoid",
           code: I.invalid_string,
           message: s.message
         }), n.dirty());
       else if (s.kind === "cuid")
-        El.test(t.data) || (a = this._getOrReturnCtx(t, a), P(a, {
+        Sl.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
           validation: "cuid",
           code: I.invalid_string,
           message: s.message
         }), n.dirty());
       else if (s.kind === "cuid2")
-        Al.test(t.data) || (a = this._getOrReturnCtx(t, a), P(a, {
+        Il.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
           validation: "cuid2",
           code: I.invalid_string,
           message: s.message
         }), n.dirty());
       else if (s.kind === "ulid")
-        Pl.test(t.data) || (a = this._getOrReturnCtx(t, a), P(a, {
+        Cl.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
           validation: "ulid",
           code: I.invalid_string,
           message: s.message
@@ -1564,61 +1554,61 @@ class mt extends G {
         try {
           new URL(t.data);
         } catch {
-          a = this._getOrReturnCtx(t, a), P(a, {
+          a = this._getOrReturnCtx(t, a), N(a, {
             validation: "url",
             code: I.invalid_string,
             message: s.message
           }), n.dirty();
         }
-      else s.kind === "regex" ? (s.regex.lastIndex = 0, s.regex.test(t.data) || (a = this._getOrReturnCtx(t, a), P(a, {
+      else s.kind === "regex" ? (s.regex.lastIndex = 0, s.regex.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
         validation: "regex",
         code: I.invalid_string,
         message: s.message
-      }), n.dirty())) : s.kind === "trim" ? t.data = t.data.trim() : s.kind === "includes" ? t.data.includes(s.value, s.position) || (a = this._getOrReturnCtx(t, a), P(a, {
+      }), n.dirty())) : s.kind === "trim" ? t.data = t.data.trim() : s.kind === "includes" ? t.data.includes(s.value, s.position) || (a = this._getOrReturnCtx(t, a), N(a, {
         code: I.invalid_string,
         validation: { includes: s.value, position: s.position },
         message: s.message
-      }), n.dirty()) : s.kind === "toLowerCase" ? t.data = t.data.toLowerCase() : s.kind === "toUpperCase" ? t.data = t.data.toUpperCase() : s.kind === "startsWith" ? t.data.startsWith(s.value) || (a = this._getOrReturnCtx(t, a), P(a, {
+      }), n.dirty()) : s.kind === "toLowerCase" ? t.data = t.data.toLowerCase() : s.kind === "toUpperCase" ? t.data = t.data.toUpperCase() : s.kind === "startsWith" ? t.data.startsWith(s.value) || (a = this._getOrReturnCtx(t, a), N(a, {
         code: I.invalid_string,
         validation: { startsWith: s.value },
         message: s.message
-      }), n.dirty()) : s.kind === "endsWith" ? t.data.endsWith(s.value) || (a = this._getOrReturnCtx(t, a), P(a, {
+      }), n.dirty()) : s.kind === "endsWith" ? t.data.endsWith(s.value) || (a = this._getOrReturnCtx(t, a), N(a, {
         code: I.invalid_string,
         validation: { endsWith: s.value },
         message: s.message
-      }), n.dirty()) : s.kind === "datetime" ? Gl(s).test(t.data) || (a = this._getOrReturnCtx(t, a), P(a, {
+      }), n.dirty()) : s.kind === "datetime" ? Zl(s).test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
         code: I.invalid_string,
         validation: "datetime",
         message: s.message
-      }), n.dirty()) : s.kind === "date" ? Bl.test(t.data) || (a = this._getOrReturnCtx(t, a), P(a, {
+      }), n.dirty()) : s.kind === "date" ? Ll.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
         code: I.invalid_string,
         validation: "date",
         message: s.message
-      }), n.dirty()) : s.kind === "time" ? Jl(s).test(t.data) || (a = this._getOrReturnCtx(t, a), P(a, {
+      }), n.dirty()) : s.kind === "time" ? Fl(s).test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
         code: I.invalid_string,
         validation: "time",
         message: s.message
-      }), n.dirty()) : s.kind === "duration" ? jl.test(t.data) || (a = this._getOrReturnCtx(t, a), P(a, {
+      }), n.dirty()) : s.kind === "duration" ? Nl.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
         validation: "duration",
         code: I.invalid_string,
         message: s.message
-      }), n.dirty()) : s.kind === "ip" ? zl(t.data, s.version) || (a = this._getOrReturnCtx(t, a), P(a, {
+      }), n.dirty()) : s.kind === "ip" ? Vl(t.data, s.version) || (a = this._getOrReturnCtx(t, a), N(a, {
         validation: "ip",
         code: I.invalid_string,
         message: s.message
-      }), n.dirty()) : s.kind === "jwt" ? Hl(t.data, s.alg) || (a = this._getOrReturnCtx(t, a), P(a, {
+      }), n.dirty()) : s.kind === "jwt" ? Bl(t.data, s.alg) || (a = this._getOrReturnCtx(t, a), N(a, {
         validation: "jwt",
         code: I.invalid_string,
         message: s.message
-      }), n.dirty()) : s.kind === "cidr" ? Wl(t.data, s.version) || (a = this._getOrReturnCtx(t, a), P(a, {
+      }), n.dirty()) : s.kind === "cidr" ? Jl(t.data, s.version) || (a = this._getOrReturnCtx(t, a), N(a, {
         validation: "cidr",
         code: I.invalid_string,
         message: s.message
-      }), n.dirty()) : s.kind === "base64" ? Zl.test(t.data) || (a = this._getOrReturnCtx(t, a), P(a, {
+      }), n.dirty()) : s.kind === "base64" ? ql.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
         validation: "base64",
         code: I.invalid_string,
         message: s.message
-      }), n.dirty()) : s.kind === "base64url" ? Vl.test(t.data) || (a = this._getOrReturnCtx(t, a), P(a, {
+      }), n.dirty()) : s.kind === "base64url" ? Ul.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
         validation: "base64url",
         code: I.invalid_string,
         message: s.message
@@ -1853,50 +1843,50 @@ mt.create = (e) => new mt({
   coerce: (e == null ? void 0 : e.coerce) ?? !1,
   ...V(e)
 });
-function Kl(e, t) {
+function zl(e, t) {
   const r = (e.toString().split(".")[1] || "").length, n = (t.toString().split(".")[1] || "").length, a = r > n ? r : n, s = Number.parseInt(e.toFixed(a).replace(".", "")), o = Number.parseInt(t.toFixed(a).replace(".", ""));
   return s % o / 10 ** a;
 }
-class Wt extends G {
+class Wt extends z {
   constructor() {
     super(...arguments), this.min = this.gte, this.max = this.lte, this.step = this.multipleOf;
   }
   _parse(t) {
     if (this._def.coerce && (t.data = Number(t.data)), this._getType(t) !== O.number) {
       const s = this._getOrReturnCtx(t);
-      return P(s, {
+      return N(s, {
         code: I.invalid_type,
         expected: O.number,
         received: s.parsedType
-      }), F;
+      }), L;
     }
     let n;
     const a = new De();
     for (const s of this._def.checks)
-      s.kind === "int" ? K.isInteger(t.data) || (n = this._getOrReturnCtx(t, n), P(n, {
+      s.kind === "int" ? K.isInteger(t.data) || (n = this._getOrReturnCtx(t, n), N(n, {
         code: I.invalid_type,
         expected: "integer",
         received: "float",
         message: s.message
-      }), a.dirty()) : s.kind === "min" ? (s.inclusive ? t.data < s.value : t.data <= s.value) && (n = this._getOrReturnCtx(t, n), P(n, {
+      }), a.dirty()) : s.kind === "min" ? (s.inclusive ? t.data < s.value : t.data <= s.value) && (n = this._getOrReturnCtx(t, n), N(n, {
         code: I.too_small,
         minimum: s.value,
         type: "number",
         inclusive: s.inclusive,
         exact: !1,
         message: s.message
-      }), a.dirty()) : s.kind === "max" ? (s.inclusive ? t.data > s.value : t.data >= s.value) && (n = this._getOrReturnCtx(t, n), P(n, {
+      }), a.dirty()) : s.kind === "max" ? (s.inclusive ? t.data > s.value : t.data >= s.value) && (n = this._getOrReturnCtx(t, n), N(n, {
         code: I.too_big,
         maximum: s.value,
         type: "number",
         inclusive: s.inclusive,
         exact: !1,
         message: s.message
-      }), a.dirty()) : s.kind === "multipleOf" ? Kl(t.data, s.value) !== 0 && (n = this._getOrReturnCtx(t, n), P(n, {
+      }), a.dirty()) : s.kind === "multipleOf" ? zl(t.data, s.value) !== 0 && (n = this._getOrReturnCtx(t, n), N(n, {
         code: I.not_multiple_of,
         multipleOf: s.value,
         message: s.message
-      }), a.dirty()) : s.kind === "finite" ? Number.isFinite(t.data) || (n = this._getOrReturnCtx(t, n), P(n, {
+      }), a.dirty()) : s.kind === "finite" ? Number.isFinite(t.data) || (n = this._getOrReturnCtx(t, n), N(n, {
         code: I.not_finite,
         message: s.message
       }), a.dirty()) : K.assertNever(s);
@@ -2029,7 +2019,7 @@ Wt.create = (e) => new Wt({
   coerce: (e == null ? void 0 : e.coerce) || !1,
   ...V(e)
 });
-class gr extends G {
+class fr extends z {
   constructor() {
     super(...arguments), this.min = this.gte, this.max = this.lte;
   }
@@ -2045,19 +2035,19 @@ class gr extends G {
     let n;
     const a = new De();
     for (const s of this._def.checks)
-      s.kind === "min" ? (s.inclusive ? t.data < s.value : t.data <= s.value) && (n = this._getOrReturnCtx(t, n), P(n, {
+      s.kind === "min" ? (s.inclusive ? t.data < s.value : t.data <= s.value) && (n = this._getOrReturnCtx(t, n), N(n, {
         code: I.too_small,
         type: "bigint",
         minimum: s.value,
         inclusive: s.inclusive,
         message: s.message
-      }), a.dirty()) : s.kind === "max" ? (s.inclusive ? t.data > s.value : t.data >= s.value) && (n = this._getOrReturnCtx(t, n), P(n, {
+      }), a.dirty()) : s.kind === "max" ? (s.inclusive ? t.data > s.value : t.data >= s.value) && (n = this._getOrReturnCtx(t, n), N(n, {
         code: I.too_big,
         type: "bigint",
         maximum: s.value,
         inclusive: s.inclusive,
         message: s.message
-      }), a.dirty()) : s.kind === "multipleOf" ? t.data % s.value !== BigInt(0) && (n = this._getOrReturnCtx(t, n), P(n, {
+      }), a.dirty()) : s.kind === "multipleOf" ? t.data % s.value !== BigInt(0) && (n = this._getOrReturnCtx(t, n), N(n, {
         code: I.not_multiple_of,
         multipleOf: s.value,
         message: s.message
@@ -2066,11 +2056,11 @@ class gr extends G {
   }
   _getInvalidInput(t) {
     const r = this._getOrReturnCtx(t);
-    return P(r, {
+    return N(r, {
       code: I.invalid_type,
       expected: O.bigint,
       received: r.parsedType
-    }), F;
+    }), L;
   }
   gte(t, r) {
     return this.setLimit("min", t, !0, M.toString(r));
@@ -2085,7 +2075,7 @@ class gr extends G {
     return this.setLimit("max", t, !1, M.toString(r));
   }
   setLimit(t, r, n, a) {
-    return new gr({
+    return new fr({
       ...this._def,
       checks: [
         ...this._def.checks,
@@ -2099,7 +2089,7 @@ class gr extends G {
     });
   }
   _addCheck(t) {
-    return new gr({
+    return new fr({
       ...this._def,
       checks: [...this._def.checks, t]
     });
@@ -2156,57 +2146,57 @@ class gr extends G {
     return t;
   }
 }
-gr.create = (e) => new gr({
+fr.create = (e) => new fr({
   checks: [],
   typeName: C.ZodBigInt,
   coerce: (e == null ? void 0 : e.coerce) ?? !1,
   ...V(e)
 });
-class Ln extends G {
+class Dn extends z {
   _parse(t) {
     if (this._def.coerce && (t.data = !!t.data), this._getType(t) !== O.boolean) {
       const n = this._getOrReturnCtx(t);
-      return P(n, {
+      return N(n, {
         code: I.invalid_type,
         expected: O.boolean,
         received: n.parsedType
-      }), F;
+      }), L;
     }
-    return Ge(t.data);
+    return ze(t.data);
   }
 }
-Ln.create = (e) => new Ln({
+Dn.create = (e) => new Dn({
   typeName: C.ZodBoolean,
   coerce: (e == null ? void 0 : e.coerce) || !1,
   ...V(e)
 });
-class Gr extends G {
+class Vr extends z {
   _parse(t) {
     if (this._def.coerce && (t.data = new Date(t.data)), this._getType(t) !== O.date) {
       const s = this._getOrReturnCtx(t);
-      return P(s, {
+      return N(s, {
         code: I.invalid_type,
         expected: O.date,
         received: s.parsedType
-      }), F;
+      }), L;
     }
     if (Number.isNaN(t.data.getTime())) {
       const s = this._getOrReturnCtx(t);
-      return P(s, {
+      return N(s, {
         code: I.invalid_date
-      }), F;
+      }), L;
     }
     const n = new De();
     let a;
     for (const s of this._def.checks)
-      s.kind === "min" ? t.data.getTime() < s.value && (a = this._getOrReturnCtx(t, a), P(a, {
+      s.kind === "min" ? t.data.getTime() < s.value && (a = this._getOrReturnCtx(t, a), N(a, {
         code: I.too_small,
         message: s.message,
         inclusive: !0,
         exact: !1,
         minimum: s.value,
         type: "date"
-      }), n.dirty()) : s.kind === "max" ? t.data.getTime() > s.value && (a = this._getOrReturnCtx(t, a), P(a, {
+      }), n.dirty()) : s.kind === "max" ? t.data.getTime() > s.value && (a = this._getOrReturnCtx(t, a), N(a, {
         code: I.too_big,
         message: s.message,
         inclusive: !0,
@@ -2220,7 +2210,7 @@ class Gr extends G {
     };
   }
   _addCheck(t) {
-    return new Gr({
+    return new Vr({
       ...this._def,
       checks: [...this._def.checks, t]
     });
@@ -2252,130 +2242,130 @@ class Gr extends G {
     return t != null ? new Date(t) : null;
   }
 }
-Gr.create = (e) => new Gr({
+Vr.create = (e) => new Vr({
   checks: [],
   coerce: (e == null ? void 0 : e.coerce) || !1,
   typeName: C.ZodDate,
   ...V(e)
 });
-class Ma extends G {
+class Na extends z {
   _parse(t) {
     if (this._getType(t) !== O.symbol) {
       const n = this._getOrReturnCtx(t);
-      return P(n, {
+      return N(n, {
         code: I.invalid_type,
         expected: O.symbol,
         received: n.parsedType
-      }), F;
+      }), L;
     }
-    return Ge(t.data);
+    return ze(t.data);
   }
 }
-Ma.create = (e) => new Ma({
+Na.create = (e) => new Na({
   typeName: C.ZodSymbol,
   ...V(e)
 });
-class Fn extends G {
+class qn extends z {
   _parse(t) {
     if (this._getType(t) !== O.undefined) {
       const n = this._getOrReturnCtx(t);
-      return P(n, {
+      return N(n, {
         code: I.invalid_type,
         expected: O.undefined,
         received: n.parsedType
-      }), F;
+      }), L;
     }
-    return Ge(t.data);
+    return ze(t.data);
   }
 }
-Fn.create = (e) => new Fn({
+qn.create = (e) => new qn({
   typeName: C.ZodUndefined,
   ...V(e)
 });
-class zr extends G {
+class Br extends z {
   _parse(t) {
     if (this._getType(t) !== O.null) {
       const n = this._getOrReturnCtx(t);
-      return P(n, {
+      return N(n, {
         code: I.invalid_type,
         expected: O.null,
         received: n.parsedType
-      }), F;
+      }), L;
     }
-    return Ge(t.data);
+    return ze(t.data);
   }
 }
-zr.create = (e) => new zr({
+Br.create = (e) => new Br({
   typeName: C.ZodNull,
   ...V(e)
 });
-class yr extends G {
+class hr extends z {
   constructor() {
     super(...arguments), this._any = !0;
   }
   _parse(t) {
-    return Ge(t.data);
+    return ze(t.data);
   }
 }
-yr.create = (e) => new yr({
+hr.create = (e) => new hr({
   typeName: C.ZodAny,
   ...V(e)
 });
-class Zn extends G {
+class Un extends z {
   constructor() {
     super(...arguments), this._unknown = !0;
   }
   _parse(t) {
-    return Ge(t.data);
+    return ze(t.data);
   }
 }
-Zn.create = (e) => new Zn({
+Un.create = (e) => new Un({
   typeName: C.ZodUnknown,
   ...V(e)
 });
-class St extends G {
+class St extends z {
   _parse(t) {
     const r = this._getOrReturnCtx(t);
-    return P(r, {
+    return N(r, {
       code: I.invalid_type,
       expected: O.never,
       received: r.parsedType
-    }), F;
+    }), L;
   }
 }
 St.create = (e) => new St({
   typeName: C.ZodNever,
   ...V(e)
 });
-class ja extends G {
+class Pa extends z {
   _parse(t) {
     if (this._getType(t) !== O.undefined) {
       const n = this._getOrReturnCtx(t);
-      return P(n, {
+      return N(n, {
         code: I.invalid_type,
         expected: O.void,
         received: n.parsedType
-      }), F;
+      }), L;
     }
-    return Ge(t.data);
+    return ze(t.data);
   }
 }
-ja.create = (e) => new ja({
+Pa.create = (e) => new Pa({
   typeName: C.ZodVoid,
   ...V(e)
 });
-class et extends G {
+class et extends z {
   _parse(t) {
     const { ctx: r, status: n } = this._processInputParams(t), a = this._def;
     if (r.parsedType !== O.array)
-      return P(r, {
+      return N(r, {
         code: I.invalid_type,
         expected: O.array,
         received: r.parsedType
-      }), F;
+      }), L;
     if (a.exactLength !== null) {
       const o = r.data.length > a.exactLength.value, i = r.data.length < a.exactLength.value;
-      (o || i) && (P(r, {
+      (o || i) && (N(r, {
         code: o ? I.too_big : I.too_small,
         minimum: i ? a.exactLength.value : void 0,
         maximum: o ? a.exactLength.value : void 0,
@@ -2385,14 +2375,14 @@ class et extends G {
         message: a.exactLength.message
       }), n.dirty());
     }
-    if (a.minLength !== null && r.data.length < a.minLength.value && (P(r, {
+    if (a.minLength !== null && r.data.length < a.minLength.value && (N(r, {
       code: I.too_small,
       minimum: a.minLength.value,
       type: "array",
       inclusive: !0,
       exact: !1,
       message: a.minLength.message
-    }), n.dirty()), a.maxLength !== null && r.data.length > a.maxLength.value && (P(r, {
+    }), n.dirty()), a.maxLength !== null && r.data.length > a.maxLength.value && (N(r, {
       code: I.too_big,
       maximum: a.maxLength.value,
       type: "array",
@@ -2437,12 +2427,12 @@ et.create = (e, t) => new et({
   typeName: C.ZodArray,
   ...V(t)
 });
-function zt(e) {
+function Gt(e) {
   if (e instanceof ke) {
     const t = {};
     for (const r in e.shape) {
       const n = e.shape[r];
-      t[r] = tt.create(zt(n));
+      t[r] = tt.create(Gt(n));
     }
     return new ke({
       ...e._def,
@@ -2450,10 +2440,10 @@ function zt(e) {
     });
   } else return e instanceof et ? new et({
     ...e._def,
-    type: zt(e.element)
-  }) : e instanceof tt ? tt.create(zt(e.unwrap())) : e instanceof qt ? qt.create(zt(e.unwrap())) : e instanceof jt ? jt.create(e.items.map((t) => zt(t))) : e;
+    type: Gt(e.element)
+  }) : e instanceof tt ? tt.create(Gt(e.unwrap())) : e instanceof qt ? qt.create(Gt(e.unwrap())) : e instanceof jt ? jt.create(e.items.map((t) => Gt(t))) : e;
 }
-class ke extends G {
+class ke extends z {
   constructor() {
     super(...arguments), this._cached = null, this.nonstrict = this.passthrough, this.augment = this.extend;
   }
@@ -2466,11 +2456,11 @@ class ke extends G {
   _parse(t) {
     if (this._getType(t) !== O.object) {
       const u = this._getOrReturnCtx(t);
-      return P(u, {
+      return N(u, {
         code: I.invalid_type,
         expected: O.object,
         received: u.parsedType
-      }), F;
+      }), L;
     }
     const { status: n, ctx: a } = this._processInputParams(t), { shape: s, keys: o } = this._getCached(), i = [];
     if (!(this._def.catchall instanceof St && this._def.unknownKeys === "strip"))
@@ -2494,7 +2484,7 @@ class ke extends G {
             value: { status: "valid", value: a.data[c] }
           });
       else if (u === "strict")
-        i.length > 0 && (P(a, {
+        i.length > 0 && (N(a, {
           code: I.unrecognized_keys,
           keys: i
         }), n.dirty());
@@ -2687,7 +2677,7 @@ class ke extends G {
    * @deprecated
    */
   deepPartial() {
-    return zt(this);
+    return Gt(this);
   }
   partial(t) {
     const r = {};
@@ -2717,7 +2707,7 @@ class ke extends G {
     });
   }
   keyof() {
-    return to(K.objectKeys(this.shape));
+    return Ys(K.objectKeys(this.shape));
   }
 }
 ke.create = (e, t) => new ke({
@@ -2741,7 +2731,7 @@ ke.lazycreate = (e, t) => new ke({
   typeName: C.ZodObject,
   ...V(t)
 });
-class Hr extends G {
+class Jr extends z {
   _parse(t) {
     const { ctx: r } = this._processInputParams(t), n = this._def.options;
     function a(s) {
@@ -2752,10 +2742,10 @@ class Hr extends G {
         if (i.result.status === "dirty")
           return r.common.issues.push(...i.ctx.common.issues), i.result;
       const o = s.map((i) => new gt(i.ctx.common.issues));
-      return P(r, {
+      return N(r, {
         code: I.invalid_union,
         unionErrors: o
-      }), F;
+      }), L;
     }
     if (r.common.async)
       return Promise.all(n.map(async (s) => {
@@ -2799,31 +2789,31 @@ class Hr extends G {
       if (s)
         return r.common.issues.push(...s.ctx.common.issues), s.result;
       const i = o.map((l) => new gt(l));
-      return P(r, {
+      return N(r, {
         code: I.invalid_union,
         unionErrors: i
-      }), F;
+      }), L;
     }
   }
   get options() {
     return this._def.options;
   }
 }
-Hr.create = (e, t) => new Hr({
+Jr.create = (e, t) => new Jr({
   options: e,
   typeName: C.ZodUnion,
   ...V(t)
 });
-const lt = (e) => e instanceof Yr ? lt(e.schema) : e instanceof Dt ? lt(e.innerType()) : e instanceof Xr ? [e.value] : e instanceof $t ? e.options : e instanceof Bn ? K.objectValues(e.enum) : e instanceof en ? lt(e._def.innerType) : e instanceof Fn ? [void 0] : e instanceof zr ? [null] : e instanceof tt ? [void 0, ...lt(e.unwrap())] : e instanceof qt ? [null, ...lt(e.unwrap())] : e instanceof ro || e instanceof rn ? lt(e.unwrap()) : e instanceof tn ? lt(e._def.innerType) : [];
-class oa extends G {
+const lt = (e) => e instanceof Hr ? lt(e.schema) : e instanceof Dt ? lt(e.innerType()) : e instanceof Wr ? [e.value] : e instanceof $t ? e.options : e instanceof Fn ? K.objectValues(e.enum) : e instanceof Yr ? lt(e._def.innerType) : e instanceof qn ? [void 0] : e instanceof Br ? [null] : e instanceof tt ? [void 0, ...lt(e.unwrap())] : e instanceof qt ? [null, ...lt(e.unwrap())] : e instanceof Xs || e instanceof Qr ? lt(e.unwrap()) : e instanceof Xr ? lt(e._def.innerType) : [];
+class na extends z {
   _parse(t) {
     const { ctx: r } = this._processInputParams(t);
     if (r.parsedType !== O.object)
-      return P(r, {
+      return N(r, {
         code: I.invalid_type,
         expected: O.object,
         received: r.parsedType
-      }), F;
+      }), L;
     const n = this.discriminator, a = r.data[n], s = this.optionsMap.get(a);
     return s ? r.common.async ? s._parseAsync({
       data: r.data,
@@ -2833,11 +2823,11 @@ class oa extends G {
       data: r.data,
       path: r.path,
       parent: r
-    }) : (P(r, {
+    }) : (N(r, {
       code: I.invalid_union_discriminator,
       options: Array.from(this.optionsMap.keys()),
       path: [n]
-    }), F);
+    }), L);
   }
   get discriminator() {
     return this._def.discriminator;
@@ -2868,7 +2858,7 @@ class oa extends G {
         a.set(i, s);
       }
     }
-    return new oa({
+    return new na({
       typeName: C.ZodDiscriminatedUnion,
       discriminator: t,
       options: r,
@@ -2877,14 +2867,14 @@ class oa extends G {
     });
   }
 }
-function Vn(e, t) {
+function Ln(e, t) {
   const r = xt(e), n = xt(t);
   if (e === t)
     return { valid: !0, data: e };
   if (r === O.object && n === O.object) {
     const a = K.objectKeys(t), s = K.objectKeys(e).filter((i) => a.indexOf(i) !== -1), o = { ...e, ...t };
     for (const i of s) {
-      const l = Vn(e[i], t[i]);
+      const l = Ln(e[i], t[i]);
       if (!l.valid)
         return { valid: !1 };
       o[i] = l.data;
@@ -2895,7 +2885,7 @@ function Vn(e, t) {
       return { valid: !1 };
     const a = [];
     for (let s = 0; s < e.length; s++) {
-      const o = e[s], i = t[s], l = Vn(o, i);
+      const o = e[s], i = t[s], l = Ln(o, i);
       if (!l.valid)
         return { valid: !1 };
       a.push(l.data);
@@ -2903,15 +2893,15 @@ function Vn(e, t) {
     return { valid: !0, data: a };
   } else return r === O.date && n === O.date && +e == +t ? { valid: !0, data: e } : { valid: !1 };
 }
-class Wr extends G {
+class zr extends z {
   _parse(t) {
     const { status: r, ctx: n } = this._processInputParams(t), a = (s, o) => {
-      if (Pa(s) || Pa(o))
-        return F;
-      const i = Vn(s.value, o.value);
-      return i.valid ? ((Na(s) || Na(o)) && r.dirty(), { status: r.value, value: i.data }) : (P(n, {
+      if (Ra(s) || Ra(o))
+        return L;
+      const i = Ln(s.value, o.value);
+      return i.valid ? ((Ea(s) || Ea(o)) && r.dirty(), { status: r.value, value: i.data }) : (N(n, {
         code: I.invalid_intersection_types
-      }), F);
+      }), L);
     };
     return n.common.async ? Promise.all([
       this._def.left._parseAsync({
@@ -2935,30 +2925,30 @@ class Wr extends G {
     }));
   }
 }
-Wr.create = (e, t, r) => new Wr({
+zr.create = (e, t, r) => new zr({
   left: e,
   right: t,
   typeName: C.ZodIntersection,
   ...V(r)
 });
-class jt extends G {
+class jt extends z {
   _parse(t) {
     const { status: r, ctx: n } = this._processInputParams(t);
     if (n.parsedType !== O.array)
-      return P(n, {
+      return N(n, {
         code: I.invalid_type,
         expected: O.array,
         received: n.parsedType
-      }), F;
+      }), L;
     if (n.data.length < this._def.items.length)
-      return P(n, {
+      return N(n, {
         code: I.too_small,
         minimum: this._def.items.length,
         inclusive: !0,
         exact: !1,
         type: "array"
-      }), F;
-    !this._def.rest && n.data.length > this._def.items.length && (P(n, {
+      }), L;
+    !this._def.rest && n.data.length > this._def.items.length && (N(n, {
       code: I.too_big,
       maximum: this._def.items.length,
       inclusive: !0,
@@ -2991,7 +2981,7 @@ jt.create = (e, t) => {
     ...V(t)
   });
 };
-class Kr extends G {
+class Gr extends z {
   get keySchema() {
     return this._def.keyType;
   }
@@ -3001,11 +2991,11 @@ class Kr extends G {
   _parse(t) {
     const { status: r, ctx: n } = this._processInputParams(t);
     if (n.parsedType !== O.object)
-      return P(n, {
+      return N(n, {
         code: I.invalid_type,
         expected: O.object,
         received: n.parsedType
-      }), F;
+      }), L;
     const a = [], s = this._def.keyType, o = this._def.valueType;
     for (const i in n.data)
       a.push({
@@ -3019,12 +3009,12 @@ class Kr extends G {
     return this._def.valueType;
   }
   static create(t, r, n) {
-    return r instanceof G ? new Kr({
+    return r instanceof z ? new Gr({
       keyType: t,
       valueType: r,
       typeName: C.ZodRecord,
       ...V(n)
-    }) : new Kr({
+    }) : new Gr({
       keyType: mt.create(),
       valueType: t,
       typeName: C.ZodRecord,
@@ -3032,7 +3022,7 @@ class Kr extends G {
     });
   }
 }
-class $a extends G {
+class Oa extends z {
   get keySchema() {
     return this._def.keyType;
   }
@@ -3042,11 +3032,11 @@ class $a extends G {
   _parse(t) {
     const { status: r, ctx: n } = this._processInputParams(t);
     if (n.parsedType !== O.map)
-      return P(n, {
+      return N(n, {
         code: I.invalid_type,
         expected: O.map,
         received: n.parsedType
-      }), F;
+      }), L;
     const a = this._def.keyType, s = this._def.valueType, o = [...n.data.entries()].map(([i, l], u) => ({
       key: a._parse(new rt(n, i, n.path, [u, "key"])),
       value: s._parse(new rt(n, l, n.path, [u, "value"]))
@@ -3057,7 +3047,7 @@ class $a extends G {
         for (const l of o) {
           const u = await l.key, c = await l.value;
           if (u.status === "aborted" || c.status === "aborted")
-            return F;
+            return L;
           (u.status === "dirty" || c.status === "dirty") && r.dirty(), i.set(u.value, c.value);
         }
         return { status: r.value, value: i };
@@ -3067,37 +3057,37 @@ class $a extends G {
       for (const l of o) {
         const u = l.key, c = l.value;
         if (u.status === "aborted" || c.status === "aborted")
-          return F;
+          return L;
         (u.status === "dirty" || c.status === "dirty") && r.dirty(), i.set(u.value, c.value);
       }
       return { status: r.value, value: i };
     }
   }
 }
-$a.create = (e, t, r) => new $a({
+Oa.create = (e, t, r) => new Oa({
   valueType: t,
   keyType: e,
   typeName: C.ZodMap,
   ...V(r)
 });
-class vr extends G {
+class gr extends z {
   _parse(t) {
     const { status: r, ctx: n } = this._processInputParams(t);
     if (n.parsedType !== O.set)
-      return P(n, {
+      return N(n, {
         code: I.invalid_type,
         expected: O.set,
         received: n.parsedType
-      }), F;
+      }), L;
     const a = this._def;
-    a.minSize !== null && n.data.size < a.minSize.value && (P(n, {
+    a.minSize !== null && n.data.size < a.minSize.value && (N(n, {
       code: I.too_small,
       minimum: a.minSize.value,
       type: "set",
       inclusive: !0,
       exact: !1,
       message: a.minSize.message
-    }), r.dirty()), a.maxSize !== null && n.data.size > a.maxSize.value && (P(n, {
+    }), r.dirty()), a.maxSize !== null && n.data.size > a.maxSize.value && (N(n, {
       code: I.too_big,
       maximum: a.maxSize.value,
       type: "set",
@@ -3110,7 +3100,7 @@ class vr extends G {
       const u = /* @__PURE__ */ new Set();
       for (const c of l) {
         if (c.status === "aborted")
-          return F;
+          return L;
         c.status === "dirty" && r.dirty(), u.add(c.value);
       }
       return { status: r.value, value: u };
@@ -3119,13 +3109,13 @@ class vr extends G {
     return n.common.async ? Promise.all(i).then((l) => o(l)) : o(i);
   }
   min(t, r) {
-    return new vr({
+    return new gr({
       ...this._def,
       minSize: { value: t, message: M.toString(r) }
     });
   }
   max(t, r) {
-    return new vr({
+    return new gr({
       ...this._def,
       maxSize: { value: t, message: M.toString(r) }
     });
@@ -3137,14 +3127,14 @@ class vr extends G {
     return this.min(1, t);
   }
 }
-vr.create = (e, t) => new vr({
+gr.create = (e, t) => new gr({
   valueType: e,
   minSize: null,
   maxSize: null,
   typeName: C.ZodSet,
   ...V(t)
 });
-class Yr extends G {
+class Hr extends z {
   get schema() {
     return this._def.getter();
   }
@@ -3153,20 +3143,20 @@ class Yr extends G {
     return this._def.getter()._parse({ data: r.data, path: r.path, parent: r });
   }
 }
-Yr.create = (e, t) => new Yr({
+Hr.create = (e, t) => new Hr({
   getter: e,
   typeName: C.ZodLazy,
   ...V(t)
 });
-class Xr extends G {
+class Wr extends z {
   _parse(t) {
     if (t.data !== this._def.value) {
       const r = this._getOrReturnCtx(t);
-      return P(r, {
+      return N(r, {
         received: r.data,
         code: I.invalid_literal,
         expected: this._def.value
-      }), F;
+      }), L;
     }
     return { status: "valid", value: t.data };
   }
@@ -3174,40 +3164,37 @@ class Xr extends G {
     return this._def.value;
   }
 }
-Xr.create = (e, t) => new Xr({
+Wr.create = (e, t) => new Wr({
   value: e,
   typeName: C.ZodLiteral,
   ...V(t)
 });
-function to(e, t) {
+function Ys(e, t) {
   return new $t({
     values: e,
     typeName: C.ZodEnum,
     ...V(t)
   });
 }
-class $t extends G {
-  constructor() {
-    super(...arguments), pr.set(this, void 0);
-  }
+class $t extends z {
   _parse(t) {
     if (typeof t.data != "string") {
       const r = this._getOrReturnCtx(t), n = this._def.values;
-      return P(r, {
+      return N(r, {
         expected: K.joinValues(n),
         received: r.parsedType,
         code: I.invalid_type
-      }), F;
+      }), L;
     }
-    if (Jr(this, pr, "f") || Xs(this, pr, new Set(this._def.values), "f"), !Jr(this, pr, "f").has(t.data)) {
+    if (this._cache || (this._cache = new Set(this._def.values)), !this._cache.has(t.data)) {
       const r = this._getOrReturnCtx(t), n = this._def.values;
-      return P(r, {
+      return N(r, {
         received: r.data,
         code: I.invalid_enum_value,
         options: n
-      }), F;
+      }), L;
     }
-    return Ge(t.data);
+    return ze(t.data);
   }
   get options() {
     return this._def.values;
@@ -3243,67 +3230,62 @@ class $t extends G {
     });
   }
 }
-pr = /* @__PURE__ */ new WeakMap();
-$t.create = to;
-class Bn extends G {
-  constructor() {
-    super(...arguments), mr.set(this, void 0);
-  }
+$t.create = Ys;
+class Fn extends z {
   _parse(t) {
     const r = K.getValidEnumValues(this._def.values), n = this._getOrReturnCtx(t);
     if (n.parsedType !== O.string && n.parsedType !== O.number) {
       const a = K.objectValues(r);
-      return P(n, {
+      return N(n, {
         expected: K.joinValues(a),
         received: n.parsedType,
         code: I.invalid_type
-      }), F;
+      }), L;
     }
-    if (Jr(this, mr, "f") || Xs(this, mr, new Set(K.getValidEnumValues(this._def.values)), "f"), !Jr(this, mr, "f").has(t.data)) {
+    if (this._cache || (this._cache = new Set(K.getValidEnumValues(this._def.values))), !this._cache.has(t.data)) {
       const a = K.objectValues(r);
-      return P(n, {
+      return N(n, {
         received: n.data,
         code: I.invalid_enum_value,
         options: a
-      }), F;
+      }), L;
     }
-    return Ge(t.data);
+    return ze(t.data);
   }
   get enum() {
     return this._def.values;
   }
 }
-mr = /* @__PURE__ */ new WeakMap();
-Bn.create = (e, t) => new Bn({
+Fn.create = (e, t) => new Fn({
   values: e,
   typeName: C.ZodNativeEnum,
   ...V(t)
 });
-class Qr extends G {
+class Kr extends z {
   unwrap() {
     return this._def.type;
   }
   _parse(t) {
     const { ctx: r } = this._processInputParams(t);
     if (r.parsedType !== O.promise && r.common.async === !1)
-      return P(r, {
+      return N(r, {
         code: I.invalid_type,
         expected: O.promise,
         received: r.parsedType
-      }), F;
+      }), L;
     const n = r.parsedType === O.promise ? r.data : Promise.resolve(r.data);
-    return Ge(n.then((a) => this._def.type.parseAsync(a, {
+    return ze(n.then((a) => this._def.type.parseAsync(a, {
       path: r.path,
       errorMap: r.common.contextualErrorMap
     })));
   }
 }
-Qr.create = (e, t) => new Qr({
+Kr.create = (e, t) => new Kr({
   type: e,
   typeName: C.ZodPromise,
   ...V(t)
 });
-class Dt extends G {
+class Dt extends z {
   innerType() {
     return this._def.schema;
   }
@@ -3313,7 +3295,7 @@ class Dt extends G {
   _parse(t) {
     const { status: r, ctx: n } = this._processInputParams(t), a = this._def.effect || null, s = {
       addIssue: (o) => {
-        P(n, o), o.fatal ? r.abort() : r.dirty();
+        N(n, o), o.fatal ? r.abort() : r.dirty();
       },
       get path() {
         return n.path;
@@ -3324,23 +3306,23 @@ class Dt extends G {
       if (n.common.async)
         return Promise.resolve(o).then(async (i) => {
           if (r.value === "aborted")
-            return F;
+            return L;
           const l = await this._def.schema._parseAsync({
             data: i,
             path: n.path,
             parent: n
           });
-          return l.status === "aborted" ? F : l.status === "dirty" || r.value === "dirty" ? dr(l.value) : l;
+          return l.status === "aborted" ? L : l.status === "dirty" || r.value === "dirty" ? dr(l.value) : l;
         });
       {
         if (r.value === "aborted")
-          return F;
+          return L;
         const i = this._def.schema._parseSync({
           data: o,
           path: n.path,
           parent: n
         });
-        return i.status === "aborted" ? F : i.status === "dirty" || r.value === "dirty" ? dr(i.value) : i;
+        return i.status === "aborted" ? L : i.status === "dirty" || r.value === "dirty" ? dr(i.value) : i;
       }
     }
     if (a.type === "refinement") {
@@ -3358,9 +3340,9 @@ class Dt extends G {
           path: n.path,
           parent: n
         });
-        return i.status === "aborted" ? F : (i.status === "dirty" && r.dirty(), o(i.value), { status: r.value, value: i.value });
+        return i.status === "aborted" ? L : (i.status === "dirty" && r.dirty(), o(i.value), { status: r.value, value: i.value });
       } else
-        return this._def.schema._parseAsync({ data: n.data, path: n.path, parent: n }).then((i) => i.status === "aborted" ? F : (i.status === "dirty" && r.dirty(), o(i.value).then(() => ({ status: r.value, value: i.value }))));
+        return this._def.schema._parseAsync({ data: n.data, path: n.path, parent: n }).then((i) => i.status === "aborted" ? L : (i.status === "dirty" && r.dirty(), o(i.value).then(() => ({ status: r.value, value: i.value }))));
     }
     if (a.type === "transform")
       if (n.common.async === !1) {
@@ -3370,7 +3352,7 @@ class Dt extends G {
           parent: n
         });
         if (!Ht(o))
-          return o;
+          return L;
         const i = a.transform(o.value, s);
         if (i instanceof Promise)
           throw new Error("Asynchronous transform encountered during synchronous parse operation. Use .parseAsync instead.");
@@ -3379,7 +3361,7 @@ class Dt extends G {
         return this._def.schema._parseAsync({ data: n.data, path: n.path, parent: n }).then((o) => Ht(o) ? Promise.resolve(a.transform(o.value, s)).then((i) => ({
           status: r.value,
           value: i
-        })) : o);
+        })) : L);
     K.assertNever(a);
   }
 }
@@ -3395,9 +3377,9 @@ Dt.createWithPreprocess = (e, t, r) => new Dt({
   typeName: C.ZodEffects,
   ...V(r)
 });
-class tt extends G {
+class tt extends z {
   _parse(t) {
-    return this._getType(t) === O.undefined ? Ge(void 0) : this._def.innerType._parse(t);
+    return this._getType(t) === O.undefined ? ze(void 0) : this._def.innerType._parse(t);
   }
   unwrap() {
     return this._def.innerType;
@@ -3408,9 +3390,9 @@ tt.create = (e, t) => new tt({
   typeName: C.ZodOptional,
   ...V(t)
 });
-class qt extends G {
+class qt extends z {
   _parse(t) {
-    return this._getType(t) === O.null ? Ge(null) : this._def.innerType._parse(t);
+    return this._getType(t) === O.null ? ze(null) : this._def.innerType._parse(t);
   }
   unwrap() {
     return this._def.innerType;
@@ -3421,7 +3403,7 @@ qt.create = (e, t) => new qt({
   typeName: C.ZodNullable,
   ...V(t)
 });
-class en extends G {
+class Yr extends z {
   _parse(t) {
     const { ctx: r } = this._processInputParams(t);
     let n = r.data;
@@ -3435,13 +3417,13 @@ class en extends G {
     return this._def.innerType;
   }
 }
-en.create = (e, t) => new en({
+Yr.create = (e, t) => new Yr({
   innerType: e,
   typeName: C.ZodDefault,
   defaultValue: typeof t.default == "function" ? t.default : () => t.default,
   ...V(t)
 });
-class tn extends G {
+class Xr extends z {
   _parse(t) {
     const { ctx: r } = this._processInputParams(t), n = {
       ...r,
@@ -3456,7 +3438,7 @@ class tn extends G {
         ...n
       }
     });
-    return Br(a) ? a.then((s) => ({
+    return Zr(a) ? a.then((s) => ({
       status: "valid",
       value: s.status === "valid" ? s.value : this._def.catchValue({
         get error() {
@@ -3478,30 +3460,30 @@ class tn extends G {
     return this._def.innerType;
   }
 }
-tn.create = (e, t) => new tn({
+Xr.create = (e, t) => new Xr({
   innerType: e,
   typeName: C.ZodCatch,
   catchValue: typeof t.catch == "function" ? t.catch : () => t.catch,
   ...V(t)
 });
-class Da extends G {
+class Ma extends z {
   _parse(t) {
     if (this._getType(t) !== O.nan) {
       const n = this._getOrReturnCtx(t);
-      return P(n, {
+      return N(n, {
         code: I.invalid_type,
         expected: O.nan,
         received: n.parsedType
-      }), F;
+      }), L;
     }
     return { status: "valid", value: t.data };
   }
 }
-Da.create = (e) => new Da({
+Ma.create = (e) => new Ma({
   typeName: C.ZodNaN,
   ...V(e)
 });
-class ro extends G {
+class Xs extends z {
   _parse(t) {
     const { ctx: r } = this._processInputParams(t), n = r.data;
     return this._def.type._parse({
@@ -3514,7 +3496,7 @@ class ro extends G {
     return this._def.type;
   }
 }
-class ia extends G {
+class aa extends z {
   _parse(t) {
     const { status: r, ctx: n } = this._processInputParams(t);
     if (n.common.async)
@@ -3524,7 +3506,7 @@ class ia extends G {
           path: n.path,
           parent: n
         });
-        return s.status === "aborted" ? F : s.status === "dirty" ? (r.dirty(), dr(s.value)) : this._def.out._parseAsync({
+        return s.status === "aborted" ? L : s.status === "dirty" ? (r.dirty(), dr(s.value)) : this._def.out._parseAsync({
           data: s.value,
           path: n.path,
           parent: n
@@ -3536,7 +3518,7 @@ class ia extends G {
         path: n.path,
         parent: n
       });
-      return a.status === "aborted" ? F : a.status === "dirty" ? (r.dirty(), {
+      return a.status === "aborted" ? L : a.status === "dirty" ? (r.dirty(), {
         status: "dirty",
         value: a.value
       }) : this._def.out._parseSync({
@@ -3547,65 +3529,65 @@ class ia extends G {
     }
   }
   static create(t, r) {
-    return new ia({
+    return new aa({
       in: t,
       out: r,
       typeName: C.ZodPipeline
     });
   }
 }
-class rn extends G {
+class Qr extends z {
   _parse(t) {
     const r = this._def.innerType._parse(t), n = (a) => (Ht(a) && (a.value = Object.freeze(a.value)), a);
-    return Br(r) ? r.then((a) => n(a)) : n(r);
+    return Zr(r) ? r.then((a) => n(a)) : n(r);
   }
   unwrap() {
     return this._def.innerType;
   }
 }
-rn.create = (e, t) => new rn({
+Qr.create = (e, t) => new Qr({
   innerType: e,
   typeName: C.ZodReadonly,
   ...V(t)
 });
-function qa(e, t) {
+function ja(e, t) {
   const r = typeof e == "function" ? e(t) : typeof e == "string" ? { message: e } : e;
   return typeof r == "string" ? { message: r } : r;
 }
-function no(e, t = {}, r) {
-  return e ? yr.create().superRefine((n, a) => {
+function Qs(e, t = {}, r) {
+  return e ? hr.create().superRefine((n, a) => {
     const s = e(n);
     if (s instanceof Promise)
       return s.then((o) => {
         if (!o) {
-          const i = qa(t, n), l = i.fatal ?? r ?? !0;
+          const i = ja(t, n), l = i.fatal ?? r ?? !0;
           a.addIssue({ code: "custom", ...i, fatal: l });
         }
       });
     if (!s) {
-      const o = qa(t, n), i = o.fatal ?? r ?? !0;
+      const o = ja(t, n), i = o.fatal ?? r ?? !0;
       a.addIssue({ code: "custom", ...o, fatal: i });
     }
-  }) : yr.create();
+  }) : hr.create();
 }
 var C;
 (function(e) {
   e.ZodString = "ZodString", e.ZodNumber = "ZodNumber", e.ZodNaN = "ZodNaN", e.ZodBigInt = "ZodBigInt", e.ZodBoolean = "ZodBoolean", e.ZodDate = "ZodDate", e.ZodSymbol = "ZodSymbol", e.ZodUndefined = "ZodUndefined", e.ZodNull = "ZodNull", e.ZodAny = "ZodAny", e.ZodUnknown = "ZodUnknown", e.ZodNever = "ZodNever", e.ZodVoid = "ZodVoid", e.ZodArray = "ZodArray", e.ZodObject = "ZodObject", e.ZodUnion = "ZodUnion", e.ZodDiscriminatedUnion = "ZodDiscriminatedUnion", e.ZodIntersection = "ZodIntersection", e.ZodTuple = "ZodTuple", e.ZodRecord = "ZodRecord", e.ZodMap = "ZodMap", e.ZodSet = "ZodSet", e.ZodFunction = "ZodFunction", e.ZodLazy = "ZodLazy", e.ZodLiteral = "ZodLiteral", e.ZodEnum = "ZodEnum", e.ZodEffects = "ZodEffects", e.ZodNativeEnum = "ZodNativeEnum", e.ZodOptional = "ZodOptional", e.ZodNullable = "ZodNullable", e.ZodDefault = "ZodDefault", e.ZodCatch = "ZodCatch", e.ZodPromise = "ZodPromise", e.ZodBranded = "ZodBranded", e.ZodPipeline = "ZodPipeline", e.ZodReadonly = "ZodReadonly";
 })(C || (C = {}));
-const nn = (e, t = {
+const en = (e, t = {
   message: `Input not instance of ${e.name}`
-}) => no((r) => r instanceof e, t), h = mt.create, R = Wt.create, Je = Ln.create, Yl = zr.create, ao = yr.create, Or = Zn.create;
+}) => Qs((r) => r instanceof e, t), h = mt.create, R = Wt.create, Je = Dn.create, Gl = Br.create, eo = hr.create, Nr = Un.create;
 St.create;
-const L = et.create, y = ke.create, ge = Hr.create, Tt = oa.create;
-Wr.create;
-const Ua = jt.create, _r = Kr.create, Xl = Yr.create, A = Xr.create, yt = $t.create;
-Qr.create;
+const F = et.create, y = ke.create, ge = Jr.create, Tt = na.create;
+zr.create;
+const $a = jt.create, yr = Gr.create, Hl = Hr.create, A = Wr.create, yt = $t.create;
+Kr.create;
 const Ie = tt.create;
 qt.create;
-function Ql() {
+function Wl() {
   return {};
 }
-function eu(e, t) {
+function Kl(e, t) {
   var n, a, s;
   const r = {
     type: "array"
@@ -3615,7 +3597,7 @@ function eu(e, t) {
     currentPath: [...t.currentPath, "items"]
   })), e.minLength && ae(r, "minItems", e.minLength.value, e.minLength.message, t), e.maxLength && ae(r, "maxItems", e.maxLength.value, e.maxLength.message, t), e.exactLength && (ae(r, "minItems", e.exactLength.value, e.exactLength.message, t), ae(r, "maxItems", e.exactLength.value, e.exactLength.message, t)), r;
 }
-function tu(e, t) {
+function Yl(e, t) {
   const r = {
     type: "integer",
     format: "int64"
@@ -3636,20 +3618,20 @@ function tu(e, t) {
     }
   return r;
 }
-function ru() {
+function Xl() {
   return {
     type: "boolean"
   };
 }
-function so(e, t) {
+function to(e, t) {
   return Q(e.type._def, t);
 }
-const nu = (e, t) => Q(e.innerType._def, t);
-function oo(e, t, r) {
+const Ql = (e, t) => Q(e.innerType._def, t);
+function ro(e, t, r) {
   const n = r ?? t.dateStrategy;
   if (Array.isArray(n))
     return {
-      anyOf: n.map((a, s) => oo(e, t, a))
+      anyOf: n.map((a, s) => ro(e, t, a))
     };
   switch (n) {
     case "string":
@@ -3664,10 +3646,10 @@ function oo(e, t, r) {
         format: "date"
       };
     case "integer":
-      return au(e, t);
+      return eu(e, t);
   }
 }
-const au = (e, t) => {
+const eu = (e, t) => {
   const r = {
     type: "integer",
     format: "unix-time"
@@ -3699,23 +3681,23 @@ const au = (e, t) => {
     }
   return r;
 };
-function su(e, t) {
+function tu(e, t) {
   return {
     ...Q(e.innerType._def, t),
     default: e.defaultValue()
   };
 }
-function ou(e, t) {
+function ru(e, t) {
   return t.effectStrategy === "input" ? Q(e.schema._def, t) : {};
 }
-function iu(e) {
+function nu(e) {
   return {
     type: "string",
     enum: Array.from(e.values)
   };
 }
-const lu = (e) => "type" in e && e.type === "string" ? !1 : "allOf" in e;
-function uu(e, t) {
+const au = (e) => "type" in e && e.type === "string" ? !1 : "allOf" in e;
+function su(e, t) {
   const r = [
     Q(e.left._def, {
       ...t,
@@ -3729,7 +3711,7 @@ function uu(e, t) {
   let n = t.target === "jsonSchema2019-09" ? { unevaluatedProperties: !1 } : void 0;
   const a = [];
   return r.forEach((s) => {
-    if (lu(s))
+    if (au(s))
       a.push(...s.allOf), s.unevaluatedProperties === void 0 && (n = void 0);
     else {
       let o = s;
@@ -3745,7 +3727,7 @@ function uu(e, t) {
     ...n
   } : void 0;
 }
-function cu(e, t) {
+function ou(e, t) {
   const r = typeof e.value;
   return r !== "bigint" && r !== "number" && r !== "boolean" && r !== "string" ? {
     type: Array.isArray(e.value) ? "array" : "object"
@@ -3757,7 +3739,7 @@ function cu(e, t) {
     const: e.value
   };
 }
-let Cn;
+let Tn;
 const We = {
   /**
    * `c` was changed to `[cC]` to replicate /i flag
@@ -3780,7 +3762,7 @@ const We = {
    * Fix in Zod:
    * https://github.com/colinhacks/zod/commit/9340fd51e48576a75adc919bff65dbc4a5d4c99b
    */
-  emoji: () => (Cn === void 0 && (Cn = RegExp("^(\\p{Extended_Pictographic}|\\p{Emoji_Component})+$", "u")), Cn),
+  emoji: () => (Tn === void 0 && (Tn = RegExp("^(\\p{Extended_Pictographic}|\\p{Emoji_Component})+$", "u")), Tn),
   /**
    * Unused
    */
@@ -3800,7 +3782,7 @@ const We = {
   nanoid: /^[a-zA-Z0-9_-]{21}$/,
   jwt: /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$/
 };
-function io(e, t) {
+function no(e, t) {
   const r = {
     type: "string"
   };
@@ -3842,10 +3824,10 @@ function io(e, t) {
           $e(r, We.cuid2, n.message, t);
           break;
         case "startsWith":
-          $e(r, RegExp(`^${Rn(n.value, t)}`), n.message, t);
+          $e(r, RegExp(`^${Sn(n.value, t)}`), n.message, t);
           break;
         case "endsWith":
-          $e(r, RegExp(`${Rn(n.value, t)}$`), n.message, t);
+          $e(r, RegExp(`${Sn(n.value, t)}$`), n.message, t);
           break;
         case "datetime":
           Ke(r, "date-time", n.message, t);
@@ -3863,7 +3845,7 @@ function io(e, t) {
           ae(r, "minLength", typeof r.minLength == "number" ? Math.max(r.minLength, n.value) : n.value, n.message, t), ae(r, "maxLength", typeof r.maxLength == "number" ? Math.min(r.maxLength, n.value) : n.value, n.message, t);
           break;
         case "includes": {
-          $e(r, RegExp(Rn(n.value, t)), n.message, t);
+          $e(r, RegExp(Sn(n.value, t)), n.message, t);
           break;
         }
         case "ip": {
@@ -3909,14 +3891,14 @@ function io(e, t) {
       }
   return r;
 }
-function Rn(e, t) {
-  return t.patternStrategy === "escape" ? pu(e) : e;
+function Sn(e, t) {
+  return t.patternStrategy === "escape" ? lu(e) : e;
 }
-const du = new Set("ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvxyz0123456789");
-function pu(e) {
+const iu = new Set("ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvxyz0123456789");
+function lu(e) {
   let t = "";
   for (let r = 0; r < e.length; r++)
-    du.has(e[r]) || (t += "\\"), t += e[r];
+    iu.has(e[r]) || (t += "\\"), t += e[r];
   return t;
 }
 function Ke(e, t, r, n) {
@@ -3939,11 +3921,11 @@ function $e(e, t, r, n) {
       errorMessage: { pattern: e.errorMessage.pattern }
     }
   }), delete e.pattern, e.errorMessage && (delete e.errorMessage.pattern, Object.keys(e.errorMessage).length === 0 && delete e.errorMessage)), e.allOf.push({
-    pattern: La(t, n),
+    pattern: Da(t, n),
     ...r && n.errorMessages && { errorMessage: { pattern: r } }
-  })) : ae(e, "pattern", La(t, n), r, n);
+  })) : ae(e, "pattern", Da(t, n), r, n);
 }
-function La(e, t) {
+function Da(e, t) {
   var l;
   if (!t.applyRegexFlags || !e.flags)
     return e.source;
@@ -3996,7 +3978,7 @@ function La(e, t) {
   }
   return a;
 }
-function lo(e, t) {
+function ao(e, t) {
   var n, a, s, o, i, l;
   if (t.target === "openAi" && console.warn("Warning: OpenAI may not support records in schemas! Try an array of key-value pairs instead."), t.target === "openApi3" && ((n = e.keyType) == null ? void 0 : n._def.typeName) === C.ZodEnum)
     return {
@@ -4021,7 +4003,7 @@ function lo(e, t) {
   if (t.target === "openApi3")
     return r;
   if (((a = e.keyType) == null ? void 0 : a._def.typeName) === C.ZodString && ((s = e.keyType._def.checks) != null && s.length)) {
-    const { type: u, ...c } = io(e.keyType._def, t);
+    const { type: u, ...c } = no(e.keyType._def, t);
     return {
       ...r,
       propertyNames: c
@@ -4035,7 +4017,7 @@ function lo(e, t) {
         }
       };
     if (((i = e.keyType) == null ? void 0 : i._def.typeName) === C.ZodBranded && e.keyType._def.type._def.typeName === C.ZodString && ((l = e.keyType._def.type._def.checks) != null && l.length)) {
-      const { type: u, ...c } = so(e.keyType._def, t);
+      const { type: u, ...c } = to(e.keyType._def, t);
       return {
         ...r,
         propertyNames: c
@@ -4044,9 +4026,9 @@ function lo(e, t) {
   }
   return r;
 }
-function mu(e, t) {
+function uu(e, t) {
   if (t.mapStrategy === "record")
-    return lo(e, t);
+    return ao(e, t);
   const r = Q(e.keyType._def, {
     ...t,
     currentPath: [...t.currentPath, "items", "items", "0"]
@@ -4065,19 +4047,19 @@ function mu(e, t) {
     }
   };
 }
-function fu(e) {
+function cu(e) {
   const t = e.values, n = Object.keys(e.values).filter((s) => typeof t[t[s]] != "number").map((s) => t[s]), a = Array.from(new Set(n.map((s) => typeof s)));
   return {
     type: a.length === 1 ? a[0] === "string" ? "string" : "number" : ["string", "number"],
     enum: n
   };
 }
-function hu() {
+function du() {
   return {
     not: {}
   };
 }
-function gu(e) {
+function pu(e) {
   return e.target === "openApi3" ? {
     enum: ["null"],
     nullable: !0
@@ -4085,20 +4067,20 @@ function gu(e) {
     type: "null"
   };
 }
-const an = {
+const tn = {
   ZodString: "string",
   ZodNumber: "number",
   ZodBigInt: "integer",
   ZodBoolean: "boolean",
   ZodNull: "null"
 };
-function yu(e, t) {
+function mu(e, t) {
   if (t.target === "openApi3")
-    return Fa(e, t);
+    return qa(e, t);
   const r = e.options instanceof Map ? Array.from(e.options.values()) : e.options;
-  if (r.every((n) => n._def.typeName in an && (!n._def.checks || !n._def.checks.length))) {
+  if (r.every((n) => n._def.typeName in tn && (!n._def.checks || !n._def.checks.length))) {
     const n = r.reduce((a, s) => {
-      const o = an[s._def.typeName];
+      const o = tn[s._def.typeName];
       return o && !a.includes(o) ? [...a, o] : a;
     }, []);
     return {
@@ -4139,23 +4121,23 @@ function yu(e, t) {
         ...a._def.values.filter((s) => !n.includes(s))
       ], [])
     };
-  return Fa(e, t);
+  return qa(e, t);
 }
-const Fa = (e, t) => {
+const qa = (e, t) => {
   const r = (e.options instanceof Map ? Array.from(e.options.values()) : e.options).map((n, a) => Q(n._def, {
     ...t,
     currentPath: [...t.currentPath, "anyOf", `${a}`]
   })).filter((n) => !!n && (!t.strictUnions || typeof n == "object" && Object.keys(n).length > 0));
   return r.length ? { anyOf: r } : void 0;
 };
-function vu(e, t) {
+function fu(e, t) {
   if (["ZodString", "ZodNumber", "ZodBigInt", "ZodBoolean", "ZodNull"].includes(e.innerType._def.typeName) && (!e.innerType._def.checks || !e.innerType._def.checks.length))
     return t.target === "openApi3" ? {
-      type: an[e.innerType._def.typeName],
+      type: tn[e.innerType._def.typeName],
       nullable: !0
     } : {
       type: [
-        an[e.innerType._def.typeName],
+        tn[e.innerType._def.typeName],
         "null"
       ]
     };
@@ -4172,7 +4154,7 @@ function vu(e, t) {
   });
   return r && { anyOf: [r, { type: "null" }] };
 }
-function _u(e, t) {
+function hu(e, t) {
   const r = {
     type: "number"
   };
@@ -4181,7 +4163,7 @@ function _u(e, t) {
   for (const n of e.checks)
     switch (n.kind) {
       case "int":
-        r.type = "integer", Ys(r, "type", n.message, t);
+        r.type = "integer", Hs(r, "type", n.message, t);
         break;
       case "min":
         t.target === "jsonSchema7" ? n.inclusive ? ae(r, "minimum", n.value, n.message, t) : ae(r, "exclusiveMinimum", n.value, n.message, t) : (n.inclusive || (r.exclusiveMinimum = !0), ae(r, "minimum", n.value, n.message, t));
@@ -4195,7 +4177,7 @@ function _u(e, t) {
     }
   return r;
 }
-function bu(e, t) {
+function gu(e, t) {
   const r = t.target === "openAi", n = {
     type: "object",
     properties: {}
@@ -4204,7 +4186,7 @@ function bu(e, t) {
     let l = s[i];
     if (l === void 0 || l._def === void 0)
       continue;
-    let u = xu(l);
+    let u = vu(l);
     u && r && (l instanceof tt && (l = l._def.innerType), l.isNullable() || (l = l.nullable()), u = !1);
     const c = Q(l._def, {
       ...t,
@@ -4214,10 +4196,10 @@ function bu(e, t) {
     c !== void 0 && (n.properties[i] = c, u || a.push(i));
   }
   a.length && (n.required = a);
-  const o = wu(e, t);
+  const o = yu(e, t);
   return o !== void 0 && (n.additionalProperties = o), n;
 }
-function wu(e, t) {
+function yu(e, t) {
   if (e.catchall._def.typeName !== "ZodNever")
     return Q(e.catchall._def, {
       ...t,
@@ -4232,14 +4214,14 @@ function wu(e, t) {
       return t.removeAdditionalStrategy === "strict" ? t.allowedAdditionalProperties : t.rejectedAdditionalProperties;
   }
 }
-function xu(e) {
+function vu(e) {
   try {
     return e.isOptional();
   } catch {
     return !0;
   }
 }
-const ku = (e, t) => {
+const _u = (e, t) => {
   var n;
   if (t.currentPath.toString() === ((n = t.propertyPath) == null ? void 0 : n.toString()))
     return Q(e.innerType._def, t);
@@ -4255,7 +4237,7 @@ const ku = (e, t) => {
       r
     ]
   } : {};
-}, Tu = (e, t) => {
+}, bu = (e, t) => {
   if (t.pipeStrategy === "input")
     return Q(e.in._def, t);
   if (t.pipeStrategy === "output")
@@ -4271,10 +4253,10 @@ const ku = (e, t) => {
     allOf: [r, n].filter((a) => a !== void 0)
   };
 };
-function Su(e, t) {
+function wu(e, t) {
   return Q(e.type._def, t);
 }
-function Iu(e, t) {
+function xu(e, t) {
   const n = {
     type: "array",
     uniqueItems: !0,
@@ -4285,7 +4267,7 @@ function Iu(e, t) {
   };
   return e.minSize && ae(n, "minItems", e.minSize.value, e.minSize.message, t), e.maxSize && ae(n, "maxItems", e.maxSize.value, e.maxSize.message, t), n;
 }
-function Cu(e, t) {
+function ku(e, t) {
   return e.rest ? {
     type: "array",
     minItems: e.items.length,
@@ -4307,80 +4289,80 @@ function Cu(e, t) {
     })).reduce((r, n) => n === void 0 ? r : [...r, n], [])
   };
 }
-function Ru() {
+function Tu() {
   return {
     not: {}
   };
 }
-function Eu() {
+function Su() {
   return {};
 }
-const Au = (e, t) => Q(e.innerType._def, t), Pu = (e, t, r) => {
+const Iu = (e, t) => Q(e.innerType._def, t), Cu = (e, t, r) => {
   switch (t) {
     case C.ZodString:
-      return io(e, r);
+      return no(e, r);
     case C.ZodNumber:
-      return _u(e, r);
+      return hu(e, r);
     case C.ZodObject:
-      return bu(e, r);
+      return gu(e, r);
     case C.ZodBigInt:
-      return tu(e, r);
+      return Yl(e, r);
     case C.ZodBoolean:
-      return ru();
+      return Xl();
     case C.ZodDate:
-      return oo(e, r);
+      return ro(e, r);
     case C.ZodUndefined:
-      return Ru();
+      return Tu();
     case C.ZodNull:
-      return gu(r);
+      return pu(r);
     case C.ZodArray:
-      return eu(e, r);
+      return Kl(e, r);
     case C.ZodUnion:
     case C.ZodDiscriminatedUnion:
-      return yu(e, r);
-    case C.ZodIntersection:
-      return uu(e, r);
-    case C.ZodTuple:
-      return Cu(e, r);
-    case C.ZodRecord:
-      return lo(e, r);
-    case C.ZodLiteral:
-      return cu(e, r);
-    case C.ZodEnum:
-      return iu(e);
-    case C.ZodNativeEnum:
-      return fu(e);
-    case C.ZodNullable:
-      return vu(e, r);
-    case C.ZodOptional:
-      return ku(e, r);
-    case C.ZodMap:
       return mu(e, r);
+    case C.ZodIntersection:
+      return su(e, r);
+    case C.ZodTuple:
+      return ku(e, r);
+    case C.ZodRecord:
+      return ao(e, r);
+    case C.ZodLiteral:
+      return ou(e, r);
+    case C.ZodEnum:
+      return nu(e);
+    case C.ZodNativeEnum:
+      return cu(e);
+    case C.ZodNullable:
+      return fu(e, r);
+    case C.ZodOptional:
+      return _u(e, r);
+    case C.ZodMap:
+      return uu(e, r);
     case C.ZodSet:
-      return Iu(e, r);
+      return xu(e, r);
     case C.ZodLazy:
       return () => e.getter()._def;
     case C.ZodPromise:
-      return Su(e, r);
+      return wu(e, r);
     case C.ZodNaN:
     case C.ZodNever:
-      return hu();
+      return du();
     case C.ZodEffects:
-      return ou(e, r);
+      return ru(e, r);
     case C.ZodAny:
-      return Ql();
+      return Wl();
     case C.ZodUnknown:
-      return Eu();
+      return Su();
     case C.ZodDefault:
-      return su(e, r);
+      return tu(e, r);
     case C.ZodBranded:
-      return so(e, r);
+      return to(e, r);
     case C.ZodReadonly:
-      return Au(e, r);
+      return Iu(e, r);
     case C.ZodCatch:
-      return nu(e, r);
+      return Ql(e, r);
     case C.ZodPipeline:
-      return Tu(e, r);
+      return bu(e, r);
     case C.ZodFunction:
     case C.ZodVoid:
     case C.ZodSymbol:
@@ -4395,40 +4377,40 @@ function Q(e, t, r = !1) {
   const n = t.seen.get(e);
   if (t.override) {
     const l = (i = t.override) == null ? void 0 : i.call(t, e, t, n, r);
-    if (l !== kl)
+    if (l !== _l)
       return l;
   }
   if (n && !r) {
-    const l = Nu(n, t);
+    const l = Ru(n, t);
     if (l !== void 0)
       return l;
   }
   const a = { def: e, path: t.currentPath, jsonSchema: void 0 };
   t.seen.set(e, a);
-  const s = Pu(e, e.typeName, t), o = typeof s == "function" ? Q(s(), t) : s;
-  if (o && Mu(e, t, o), t.postProcess) {
+  const s = Cu(e, e.typeName, t), o = typeof s == "function" ? Q(s(), t) : s;
+  if (o && Au(e, t, o), t.postProcess) {
     const l = t.postProcess(o, e, t);
     return a.jsonSchema = o, l;
   }
   return a.jsonSchema = o, o;
 }
-const Nu = (e, t) => {
+const Ru = (e, t) => {
   switch (t.$refStrategy) {
     case "root":
       return { $ref: e.path.join("/") };
     case "relative":
-      return { $ref: Ou(t.currentPath, e.path) };
+      return { $ref: Eu(t.currentPath, e.path) };
     case "none":
     case "seen":
       return e.path.length < t.currentPath.length && e.path.every((r, n) => t.currentPath[n] === r) ? (console.warn(`Recursive reference detected at ${t.currentPath.join("/")}! Defaulting to any`), {}) : t.$refStrategy === "seen" ? {} : void 0;
   }
-}, Ou = (e, t) => {
+}, Eu = (e, t) => {
   let r = 0;
   for (; r < e.length && r < t.length && e[r] === t[r]; r++)
     ;
   return [(e.length - r).toString(), ...t.slice(r)].join("/");
-}, Mu = (e, t, r) => (e.description && (r.description = e.description, t.markdownDescription && (r.markdownDescription = e.description)), r), ju = (e, t) => {
-  const r = Sl(t), n = typeof t == "object" && t.definitions ? Object.entries(t.definitions).reduce((l, [u, c]) => ({
+}, Au = (e, t, r) => (e.description && (r.description = e.description, t.markdownDescription && (r.markdownDescription = e.description)), r), Nu = (e, t) => {
+  const r = wl(t), n = typeof t == "object" && t.definitions ? Object.entries(t.definitions).reduce((l, [u, c]) => ({
     ...l,
     [u]: Q(c._def, {
       ...r,
@@ -4455,7 +4437,7 @@ const Nu = (e, t) => {
   };
   return r.target === "jsonSchema7" ? i.$schema = "http://json-schema.org/draft-07/schema#" : (r.target === "jsonSchema2019-09" || r.target === "openAi") && (i.$schema = "https://json-schema.org/draft/2019-09/schema#"), r.target === "openAi" && ("anyOf" in i || "oneOf" in i || "allOf" in i || "type" in i && Array.isArray(i.type)) && console.warn("Warning: OpenAI may not support schemas with unions as roots! Try wrapping it in an object property."), i;
 };
-var br = {
+var vr = {
   code: "0",
   name: "text",
   parse: (e) => {
@@ -4463,7 +4445,7 @@ var br = {
       throw new Error('"text" parts expect a string value.');
     return { type: "text", value: e };
   }
-}, wr = {
+}, _r = {
   code: "3",
   name: "error",
   parse: (e) => {
@@ -4471,7 +4453,7 @@ var br = {
       throw new Error('"error" parts expect a string value.');
     return { type: "error", value: e };
   }
-}, xr = {
+}, br = {
   code: "4",
   name: "assistant_message",
   parse: (e) => {
@@ -4486,7 +4468,7 @@ var br = {
       value: e
     };
   }
-}, kr = {
+}, wr = {
   code: "5",
   name: "assistant_control_data",
   parse: (e) => {
@@ -4502,7 +4484,7 @@ var br = {
       }
     };
   }
-}, Tr = {
+}, xr = {
   code: "6",
   name: "data_message",
   parse: (e) => {
@@ -4515,38 +4497,38 @@ var br = {
       value: e
     };
   }
-}, uo = [
+}, so = [
+  vr,
+  _r,
   br,
   wr,
-  xr,
-  kr,
-  Tr
-], $u = {
+  xr
+], Pu = {
+  [vr.code]: vr,
+  [_r.code]: _r,
   [br.code]: br,
   [wr.code]: wr,
-  [xr.code]: xr,
-  [kr.code]: kr,
-  [Tr.code]: Tr
+  [xr.code]: xr
 };
-br.name + "", br.code, wr.name + "", wr.code, xr.name + "", xr.code, kr.name + "", kr.code, Tr.name + "", Tr.code;
-var Du = uo.map((e) => e.code), mh = (e) => {
+vr.name + "", vr.code, _r.name + "", _r.code, br.name + "", br.code, wr.name + "", wr.code, xr.name + "", xr.code;
+var Ou = so.map((e) => e.code), uh = (e) => {
   const t = e.indexOf(":");
   if (t === -1)
     throw new Error("Failed to parse stream string. No separator found.");
   const r = e.slice(0, t);
-  if (!Du.includes(r))
+  if (!Ou.includes(r))
     throw new Error(`Failed to parse stream string. Invalid code ${r}.`);
   const n = r, a = e.slice(t + 1), s = JSON.parse(a);
-  return $u[n].parse(s);
+  return Pu[n].parse(s);
 };
-function Gt(e, t) {
-  const r = uo.find((n) => n.name === e);
+function zt(e, t) {
+  const r = so.find((n) => n.name === e);
   if (!r)
     throw new Error(`Invalid stream part type: ${e}`);
   return `${r.code}:${JSON.stringify(t)}
 `;
 }
-function qu(e) {
+function Mu(e) {
   const t = ["ROOT"];
   let r = -1, n = null;
   function a(l, u, c) {
@@ -4794,13 +4776,13 @@ function qu(e) {
     }
   return i;
 }
-function co(e) {
+function oo(e) {
   if (e === void 0)
     return { value: void 0, state: "undefined-input" };
   let t = Ot({ text: e });
-  return t.success ? { value: t.value, state: "successful-parse" } : (t = Ot({ text: qu(e) }), t.success ? { value: t.value, state: "repaired-parse" } : { value: void 0, state: "failed-parse" });
+  return t.success ? { value: t.value, state: "successful-parse" } : (t = Ot({ text: Mu(e) }), t.success ? { value: t.value, state: "repaired-parse" } : { value: void 0, state: "failed-parse" });
 }
-var Uu = {
+var ju = {
   code: "0",
   name: "text",
   parse: (e) => {
@@ -4808,7 +4790,7 @@ var Uu = {
       throw new Error('"text" parts expect a string value.');
     return { type: "text", value: e };
   }
-}, Lu = {
+}, $u = {
   code: "2",
   name: "data",
   parse: (e) => {
@@ -4816,7 +4798,7 @@ var Uu = {
       throw new Error('"data" parts expect an array value.');
     return { type: "data", value: e };
   }
-}, Fu = {
+}, Du = {
   code: "3",
   name: "error",
   parse: (e) => {
@@ -4824,7 +4806,7 @@ var Uu = {
       throw new Error('"error" parts expect a string value.');
     return { type: "error", value: e };
   }
-}, Zu = {
+}, qu = {
   code: "8",
   name: "message_annotations",
   parse: (e) => {
@@ -4832,7 +4814,7 @@ var Uu = {
       throw new Error('"message_annotations" parts expect an array value.');
     return { type: "message_annotations", value: e };
   }
-}, Vu = {
+}, Uu = {
   code: "9",
   name: "tool_call",
   parse: (e) => {
@@ -4845,7 +4827,7 @@ var Uu = {
       value: e
     };
   }
-}, Bu = {
+}, Lu = {
   code: "a",
   name: "tool_result",
   parse: (e) => {
@@ -4858,7 +4840,7 @@ var Uu = {
       value: e
     };
   }
-}, Ju = {
+}, Fu = {
   code: "b",
   name: "tool_call_streaming_start",
   parse: (e) => {
@@ -4871,7 +4853,7 @@ var Uu = {
       value: e
     };
   }
-}, Gu = {
+}, Zu = {
   code: "c",
   name: "tool_call_delta",
   parse: (e) => {
@@ -4884,7 +4866,7 @@ var Uu = {
       value: e
     };
   }
-}, zu = {
+}, Vu = {
   code: "d",
   name: "finish_message",
   parse: (e) => {
@@ -4903,7 +4885,7 @@ var Uu = {
       value: t
     };
   }
-}, Hu = {
+}, Bu = {
   code: "e",
   name: "finish_step",
   parse: (e) => {
@@ -4923,7 +4905,7 @@ var Uu = {
       value: t
     };
   }
-}, Wu = {
+}, Ju = {
   code: "f",
   name: "start_step",
   parse: (e) => {
@@ -4938,7 +4920,7 @@ var Uu = {
       }
     };
   }
-}, Ku = {
+}, zu = {
   code: "g",
   name: "reasoning",
   parse: (e) => {
@@ -4946,7 +4928,7 @@ var Uu = {
       throw new Error('"reasoning" parts expect a string value.');
     return { type: "reasoning", value: e };
   }
-}, Yu = {
+}, Gu = {
   code: "h",
   name: "source",
   parse: (e) => {
@@ -4957,7 +4939,7 @@ var Uu = {
       value: e
     };
   }
-}, Xu = {
+}, Hu = {
   code: "i",
   name: "redacted_reasoning",
   parse: (e) => {
@@ -4967,7 +4949,7 @@ var Uu = {
       );
     return { type: "redacted_reasoning", value: { data: e.data } };
   }
-}, Qu = {
+}, Wu = {
   code: "j",
   name: "reasoning_signature",
   parse: (e) => {
@@ -4980,7 +4962,7 @@ var Uu = {
       value: { signature: e.signature }
     };
   }
-}, ec = {
+}, Ku = {
   code: "k",
   name: "file",
   parse: (e) => {
@@ -4990,7 +4972,11 @@ var Uu = {
       );
     return { type: "file", value: e };
   }
-}, fn = [
+}, dn = [
+  ju,
+  $u,
+  Du,
+  qu,
   Uu,
   Lu,
   Fu,
@@ -4998,47 +4984,43 @@ var Uu = {
   Vu,
   Bu,
   Ju,
-  Gu,
   zu,
+  Gu,
   Hu,
   Wu,
-  Ku,
-  Yu,
-  Xu,
-  Qu,
-  ec
-], tc = Object.fromEntries(
-  fn.map((e) => [e.code, e])
+  Ku
+], Yu = Object.fromEntries(
+  dn.map((e) => [e.code, e])
 );
 Object.fromEntries(
-  fn.map((e) => [e.name, e.code])
+  dn.map((e) => [e.name, e.code])
 );
-var rc = fn.map((e) => e.code), nc = (e) => {
+var Xu = dn.map((e) => e.code), Qu = (e) => {
   const t = e.indexOf(":");
   if (t === -1)
     throw new Error("Failed to parse stream string. No separator found.");
   const r = e.slice(0, t);
-  if (!rc.includes(r))
+  if (!Xu.includes(r))
     throw new Error(`Failed to parse stream string. Invalid code ${r}.`);
   const n = r, a = e.slice(t + 1), s = JSON.parse(a);
-  return tc[n].parse(s);
+  return Yu[n].parse(s);
 };
 function pe(e, t) {
-  const r = fn.find((n) => n.name === e);
+  const r = dn.find((n) => n.name === e);
   if (!r)
     throw new Error(`Invalid stream part type: ${e}`);
   return `${r.code}:${JSON.stringify(t)}
 `;
 }
-var ac = 10;
-function sc(e, t) {
+var ec = 10;
+function tc(e, t) {
   const r = new Uint8Array(t);
   let n = 0;
   for (const a of e)
     r.set(a, n), n += a.length;
   return e.length = 0, r;
 }
-async function fh({
+async function ch({
   stream: e,
   onTextPart: t,
   onReasoningPart: r,
@@ -5061,72 +5043,72 @@ async function fh({
   let b = 0;
   for (; ; ) {
     const { value: x } = await f.read();
-    if (x && (k.push(x), b += x.length, x[x.length - 1] !== ac))
+    if (x && (k.push(x), b += x.length, x[x.length - 1] !== ec))
       continue;
     if (k.length === 0)
       break;
-    const S = sc(k, b);
+    const S = tc(k, b);
     b = 0;
     const $ = w.decode(S, { stream: !0 }).split(`
-`).filter((E) => E !== "").map(nc);
-    for (const { type: E, value: N } of $)
+`).filter((E) => E !== "").map(Qu);
+    for (const { type: E, value: P } of $)
       switch (E) {
         case "text":
-          await (t == null ? void 0 : t(N));
+          await (t == null ? void 0 : t(P));
           break;
         case "reasoning":
-          await (r == null ? void 0 : r(N));
+          await (r == null ? void 0 : r(P));
           break;
         case "reasoning_signature":
-          await (n == null ? void 0 : n(N));
+          await (n == null ? void 0 : n(P));
           break;
         case "redacted_reasoning":
-          await (a == null ? void 0 : a(N));
+          await (a == null ? void 0 : a(P));
           break;
         case "file":
-          await (o == null ? void 0 : o(N));
+          await (o == null ? void 0 : o(P));
           break;
         case "source":
-          await (s == null ? void 0 : s(N));
+          await (s == null ? void 0 : s(P));
           break;
         case "data":
-          await (i == null ? void 0 : i(N));
+          await (i == null ? void 0 : i(P));
           break;
         case "error":
-          await (l == null ? void 0 : l(N));
+          await (l == null ? void 0 : l(P));
           break;
         case "message_annotations":
-          await (_ == null ? void 0 : _(N));
+          await (_ == null ? void 0 : _(P));
           break;
         case "tool_call_streaming_start":
-          await (u == null ? void 0 : u(N));
+          await (u == null ? void 0 : u(P));
           break;
         case "tool_call_delta":
-          await (c == null ? void 0 : c(N));
+          await (c == null ? void 0 : c(P));
           break;
         case "tool_call":
-          await (d == null ? void 0 : d(N));
+          await (d == null ? void 0 : d(P));
           break;
         case "tool_result":
-          await (m == null ? void 0 : m(N));
+          await (m == null ? void 0 : m(P));
           break;
         case "finish_message":
-          await (v == null ? void 0 : v(N));
+          await (v == null ? void 0 : v(P));
           break;
         case "finish_step":
-          await (g == null ? void 0 : g(N));
+          await (g == null ? void 0 : g(P));
           break;
         case "start_step":
-          await (p == null ? void 0 : p(N));
+          await (p == null ? void 0 : p(P));
           break;
         default: {
-          const z = E;
-          throw new Error(`Unknown stream part type: ${z}`);
+          const G = E;
+          throw new Error(`Unknown stream part type: ${G}`);
         }
       }
   }
 }
-async function hh({
+async function dh({
   stream: e,
   onTextPart: t
 }) {
@@ -5138,13 +5120,13 @@ async function hh({
     await t(a);
   }
 }
-function oc(e) {
+function rc(e) {
   return e == null ? void 0 : e.reduce((t, r) => {
     var n;
     return Math.max(t, (n = r.step) != null ? n : 0);
   }, 0);
 }
-function sn(e, t) {
+function rn(e, t) {
   if (e === t)
     return !0;
   if (e == null || t == null)
@@ -5159,7 +5141,7 @@ function sn(e, t) {
     if (e.length !== t.length)
       return !1;
     for (let a = 0; a < e.length; a++)
-      if (!sn(e[a], t[a]))
+      if (!rn(e[a], t[a]))
         return !1;
     return !0;
   }
@@ -5167,15 +5149,15 @@ function sn(e, t) {
   if (r.length !== n.length)
     return !1;
   for (const a of r)
-    if (!n.includes(a) || !sn(e[a], t[a]))
+    if (!n.includes(a) || !rn(e[a], t[a]))
       return !1;
   return !0;
 }
-function ic(e, t) {
+function nc(e, t) {
   var r;
   const n = (r = t == null ? void 0 : t.useReferences) != null ? r : !1;
-  return po(
-    ju(e, {
+  return io(
+    Nu(e, {
       $refStrategy: n ? "root" : "none",
       target: "jsonSchema7"
       // note: openai mode breaks various gemini conversions
@@ -5188,28 +5170,28 @@ function ic(e, t) {
     }
   );
 }
-var Jn = Symbol.for("vercel.ai.schema");
-function po(e, {
+var Zn = Symbol.for("vercel.ai.schema");
+function io(e, {
   validate: t
 } = {}) {
   return {
-    [Jn]: !0,
+    [Zn]: !0,
     _type: void 0,
     // should never be used directly
-    [Vr]: !0,
+    [Fr]: !0,
     jsonSchema: e,
     validate: t
   };
 }
-function lc(e) {
-  return typeof e == "object" && e !== null && Jn in e && e[Jn] === !0 && "jsonSchema" in e && "validate" in e;
+function ac(e) {
+  return typeof e == "object" && e !== null && Zn in e && e[Zn] === !0 && "jsonSchema" in e && "validate" in e;
 }
 function Kt(e) {
-  return lc(e) ? e : ic(e);
+  return ac(e) ? e : nc(e);
 }
-var uc = typeof globalThis == "object" ? globalThis : typeof self == "object" ? self : typeof window == "object" ? window : typeof global == "object" ? global : {}, Pt = "1.9.0", Za = /^(\d+)\.(\d+)\.(\d+)(-(.+))?$/;
-function cc(e) {
-  var t = /* @__PURE__ */ new Set([e]), r = /* @__PURE__ */ new Set(), n = e.match(Za);
+var sc = typeof globalThis == "object" ? globalThis : typeof self == "object" ? self : typeof window == "object" ? window : typeof global == "object" ? global : {}, Nt = "1.9.0", Ua = /^(\d+)\.(\d+)\.(\d+)(-(.+))?$/;
+function oc(e) {
+  var t = /* @__PURE__ */ new Set([e]), r = /* @__PURE__ */ new Set(), n = e.match(Ua);
   if (!n)
     return function() {
       return !1;
@@ -5235,7 +5217,7 @@ function cc(e) {
       return !0;
     if (r.has(l))
       return !1;
-    var u = l.match(Za);
+    var u = l.match(Ua);
     if (!u)
       return s(l);
     var c = {
@@ -5247,34 +5229,34 @@ function cc(e) {
     return c.prerelease != null || a.major !== c.major ? s(l) : a.major === 0 ? a.minor === c.minor && a.patch <= c.patch ? o(l) : s(l) : a.minor <= c.minor ? o(l) : s(l);
   };
 }
-var dc = cc(Pt), pc = Pt.split(".")[0], Sr = Symbol.for("opentelemetry.js.api." + pc), Ir = uc;
-function Mr(e, t, r, n) {
+var ic = oc(Nt), lc = Nt.split(".")[0], kr = Symbol.for("opentelemetry.js.api." + lc), Tr = sc;
+function Pr(e, t, r, n) {
   var a;
   n === void 0 && (n = !1);
-  var s = Ir[Sr] = (a = Ir[Sr]) !== null && a !== void 0 ? a : {
-    version: Pt
+  var s = Tr[kr] = (a = Tr[kr]) !== null && a !== void 0 ? a : {
+    version: Nt
   };
   if (!n && s[e]) {
     var o = new Error("@opentelemetry/api: Attempted duplicate registration of API: " + e);
     return r.error(o.stack || o.message), !1;
   }
-  if (s.version !== Pt) {
-    var o = new Error("@opentelemetry/api: Registration of version v" + s.version + " for " + e + " does not match previously registered API v" + Pt);
+  if (s.version !== Nt) {
+    var o = new Error("@opentelemetry/api: Registration of version v" + s.version + " for " + e + " does not match previously registered API v" + Nt);
     return r.error(o.stack || o.message), !1;
   }
-  return s[e] = t, r.debug("@opentelemetry/api: Registered a global for " + e + " v" + Pt + "."), !0;
+  return s[e] = t, r.debug("@opentelemetry/api: Registered a global for " + e + " v" + Nt + "."), !0;
 }
 function Ut(e) {
-  var t, r, n = (t = Ir[Sr]) === null || t === void 0 ? void 0 : t.version;
-  if (!(!n || !dc(n)))
-    return (r = Ir[Sr]) === null || r === void 0 ? void 0 : r[e];
+  var t, r, n = (t = Tr[kr]) === null || t === void 0 ? void 0 : t.version;
+  if (!(!n || !ic(n)))
+    return (r = Tr[kr]) === null || r === void 0 ? void 0 : r[e];
 }
-function jr(e, t) {
-  t.debug("@opentelemetry/api: Unregistering a global for " + e + " v" + Pt + ".");
-  var r = Ir[Sr];
+function Or(e, t) {
+  t.debug("@opentelemetry/api: Unregistering a global for " + e + " v" + Nt + ".");
+  var r = Tr[kr];
   r && delete r[e];
 }
-var mc = function(e, t) {
+var uc = function(e, t) {
   var r = typeof Symbol == "function" && e[Symbol.iterator];
   if (!r) return e;
   var n = r.call(e), a, s = [], o;
@@ -5290,11 +5272,11 @@ var mc = function(e, t) {
     }
   }
   return s;
-}, fc = function(e, t, r) {
+}, cc = function(e, t, r) {
   if (r || arguments.length === 2) for (var n = 0, a = t.length, s; n < a; n++)
     (s || !(n in t)) && (s || (s = Array.prototype.slice.call(t, 0, n)), s[n] = t[n]);
   return e.concat(s || Array.prototype.slice.call(t));
-}, hc = (
+}, dc = (
   /** @class */
   function() {
     function e(t) {
@@ -5326,13 +5308,13 @@ var mc = function(e, t) {
 function cr(e, t, r) {
   var n = Ut("diag");
   if (n)
-    return r.unshift(t), n[e].apply(n, fc([], mc(r), !1));
+    return r.unshift(t), n[e].apply(n, cc([], uc(r), !1));
 }
 var Ve;
 (function(e) {
   e[e.NONE = 0] = "NONE", e[e.ERROR = 30] = "ERROR", e[e.WARN = 50] = "WARN", e[e.INFO = 60] = "INFO", e[e.DEBUG = 70] = "DEBUG", e[e.VERBOSE = 80] = "VERBOSE", e[e.ALL = 9999] = "ALL";
 })(Ve || (Ve = {}));
-function gc(e, t) {
+function pc(e, t) {
   e < Ve.NONE ? e = Ve.NONE : e > Ve.ALL && (e = Ve.ALL), t = t || {};
   function r(n, a) {
     var s = t[n];
@@ -5347,7 +5329,7 @@ function gc(e, t) {
     verbose: r("verbose", Ve.VERBOSE)
   };
 }
-var yc = function(e, t) {
+var mc = function(e, t) {
   var r = typeof Symbol == "function" && e[Symbol.iterator];
   if (!r) return e;
   var n = r.call(e), a, s = [], o;
@@ -5363,11 +5345,11 @@ var yc = function(e, t) {
     }
   }
   return s;
-}, vc = function(e, t, r) {
+}, fc = function(e, t, r) {
   if (r || arguments.length === 2) for (var n = 0, a = t.length, s; n < a; n++)
     (s || !(n in t)) && (s || (s = Array.prototype.slice.call(t, 0, n)), s[n] = t[n]);
   return e.concat(s || Array.prototype.slice.call(t));
-}, _c = "diag", nt = (
+}, hc = "diag", nt = (
   /** @class */
   function() {
     function e() {
@@ -5377,7 +5359,7 @@ var yc = function(e, t) {
             s[o] = arguments[o];
           var i = Ut("diag");
           if (i)
-            return i[a].apply(i, vc([], yc(s), !1));
+            return i[a].apply(i, fc([], mc(s), !1));
         };
       }
       var r = this, n = function(a, s) {
@@ -5389,24 +5371,24 @@ var yc = function(e, t) {
         typeof s == "number" && (s = {
           logLevel: s
         });
-        var c = Ut("diag"), d = gc((i = s.logLevel) !== null && i !== void 0 ? i : Ve.INFO, a);
+        var c = Ut("diag"), d = pc((i = s.logLevel) !== null && i !== void 0 ? i : Ve.INFO, a);
         if (c && !s.suppressOverrideMessage) {
           var m = (l = new Error().stack) !== null && l !== void 0 ? l : "<failed to generate stacktrace>";
           c.warn("Current logger will be overwritten from " + m), d.warn("Current logger will overwrite one already registered from " + m);
         }
-        return Mr("diag", d, r, !0);
+        return Pr("diag", d, r, !0);
       };
       r.setLogger = n, r.disable = function() {
-        jr(_c, r);
+        Or(hc, r);
       }, r.createComponentLogger = function(a) {
-        return new hc(a);
+        return new dc(a);
       }, r.verbose = t("verbose"), r.debug = t("debug"), r.info = t("info"), r.warn = t("warn"), r.error = t("error");
     }
     return e.instance = function() {
       return this._instance || (this._instance = new e()), this._instance;
     }, e;
   }()
-), bc = function(e, t) {
+), gc = function(e, t) {
   var r = typeof Symbol == "function" && e[Symbol.iterator];
   if (!r) return e;
   var n = r.call(e), a, s = [], o;
@@ -5422,7 +5404,7 @@ var yc = function(e, t) {
     }
   }
   return s;
-}, wc = function(e) {
+}, yc = function(e) {
   var t = typeof Symbol == "function" && Symbol.iterator, r = t && e[t], n = 0;
   if (r) return r.call(e);
   if (e && typeof e.length == "number") return {
@@ -5431,7 +5413,7 @@ var yc = function(e, t) {
     }
   };
   throw new TypeError(t ? "Object is not iterable." : "Symbol.iterator is not defined.");
-}, xc = (
+}, vc = (
   /** @class */
   function() {
     function e(t) {
@@ -5443,7 +5425,7 @@ var yc = function(e, t) {
         return Object.assign({}, r);
     }, e.prototype.getAllEntries = function() {
       return Array.from(this._entries.entries()).map(function(t) {
-        var r = bc(t, 2), n = r[0], a = r[1];
+        var r = gc(t, 2), n = r[0], a = r[1];
         return [n, a];
       });
     }, e.prototype.setEntry = function(t, r) {
@@ -5457,7 +5439,7 @@ var yc = function(e, t) {
         n[a] = arguments[a];
       var s = new e(this._entries);
       try {
-        for (var o = wc(n), i = o.next(); !i.done; i = o.next()) {
+        for (var o = yc(n), i = o.next(); !i.done; i = o.next()) {
           var l = i.value;
           s._entries.delete(l);
         }
@@ -5477,13 +5459,13 @@ var yc = function(e, t) {
   }()
 );
 nt.instance();
-function kc(e) {
-  return e === void 0 && (e = {}), new xc(new Map(Object.entries(e)));
+function _c(e) {
+  return e === void 0 && (e = {}), new vc(new Map(Object.entries(e)));
 }
-function mo(e) {
+function lo(e) {
   return Symbol.for(e);
 }
-var Tc = (
+var bc = (
   /** @class */
   /* @__PURE__ */ function() {
     function e(t) {
@@ -5500,7 +5482,7 @@ var Tc = (
     }
     return e;
   }()
-), Sc = new Tc(), Zt = /* @__PURE__ */ function() {
+), wc = new bc(), Zt = /* @__PURE__ */ function() {
   var e = function(t, r) {
     return e = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(n, a) {
       n.__proto__ = a;
@@ -5517,37 +5499,37 @@ var Tc = (
     }
     t.prototype = r === null ? Object.create(r) : (n.prototype = r.prototype, new n());
   };
-}(), Ic = (
+}(), xc = (
   /** @class */
   function() {
     function e() {
     }
     return e.prototype.createGauge = function(t, r) {
-      return $c;
+      return Pc;
     }, e.prototype.createHistogram = function(t, r) {
-      return Dc;
+      return Oc;
     }, e.prototype.createCounter = function(t, r) {
-      return jc;
+      return Nc;
     }, e.prototype.createUpDownCounter = function(t, r) {
-      return qc;
+      return Mc;
     }, e.prototype.createObservableGauge = function(t, r) {
-      return Lc;
+      return $c;
     }, e.prototype.createObservableCounter = function(t, r) {
-      return Uc;
+      return jc;
     }, e.prototype.createObservableUpDownCounter = function(t, r) {
-      return Fc;
+      return Dc;
     }, e.prototype.addBatchObservableCallback = function(t, r) {
     }, e.prototype.removeBatchObservableCallback = function(t) {
     }, e;
   }()
-), hn = (
+), pn = (
   /** @class */
   /* @__PURE__ */ function() {
     function e() {
     }
     return e;
   }()
-), Cc = (
+), kc = (
   /** @class */
   function(e) {
     Zt(t, e);
@@ -5556,8 +5538,8 @@ var Tc = (
     }
     return t.prototype.add = function(r, n) {
     }, t;
-  }(hn)
-), Rc = (
+  }(pn)
+), Tc = (
   /** @class */
   function(e) {
     Zt(t, e);
@@ -5566,8 +5548,8 @@ var Tc = (
     }
     return t.prototype.add = function(r, n) {
     }, t;
-  }(hn)
-), Ec = (
+  }(pn)
+), Sc = (
   /** @class */
   function(e) {
     Zt(t, e);
@@ -5576,8 +5558,8 @@ var Tc = (
     }
     return t.prototype.record = function(r, n) {
     }, t;
-  }(hn)
-), Ac = (
+  }(pn)
+), Ic = (
   /** @class */
   function(e) {
     Zt(t, e);
@@ -5586,8 +5568,8 @@ var Tc = (
     }
     return t.prototype.record = function(r, n) {
     }, t;
-  }(hn)
-), la = (
+  }(pn)
+), sa = (
   /** @class */
   function() {
     function e() {
@@ -5596,7 +5578,7 @@ var Tc = (
     }, e.prototype.removeCallback = function(t) {
     }, e;
   }()
-), Pc = (
+), Cc = (
   /** @class */
   function(e) {
     Zt(t, e);
@@ -5604,8 +5586,8 @@ var Tc = (
       return e !== null && e.apply(this, arguments) || this;
     }
     return t;
-  }(la)
-), Nc = (
+  }(sa)
+), Rc = (
   /** @class */
   function(e) {
     Zt(t, e);
@@ -5613,8 +5595,8 @@ var Tc = (
       return e !== null && e.apply(this, arguments) || this;
     }
     return t;
-  }(la)
-), Oc = (
+  }(sa)
+), Ec = (
   /** @class */
   function(e) {
     Zt(t, e);
@@ -5622,8 +5604,8 @@ var Tc = (
       return e !== null && e.apply(this, arguments) || this;
     }
     return t;
-  }(la)
-), Mc = new Ic(), jc = new Cc(), $c = new Ec(), Dc = new Ac(), qc = new Rc(), Uc = new Pc(), Lc = new Nc(), Fc = new Oc(), Zc = {
+  }(sa)
+), Ac = new xc(), Nc = new kc(), Pc = new Sc(), Oc = new Ic(), Mc = new Tc(), jc = new Cc(), $c = new Rc(), Dc = new Ec(), qc = {
   get: function(e, t) {
     if (e != null)
       return e[t];
@@ -5631,11 +5613,11 @@ var Tc = (
   keys: function(e) {
     return e == null ? [] : Object.keys(e);
   }
-}, Vc = {
+}, Uc = {
   set: function(e, t, r) {
     e != null && (e[t] = r);
   }
-}, Bc = function(e, t) {
+}, Lc = function(e, t) {
   var r = typeof Symbol == "function" && e[Symbol.iterator];
   if (!r) return e;
   var n = r.call(e), a, s = [], o;
@@ -5651,21 +5633,21 @@ var Tc = (
     }
   }
   return s;
-}, Jc = function(e, t, r) {
+}, Fc = function(e, t, r) {
   if (r || arguments.length === 2) for (var n = 0, a = t.length, s; n < a; n++)
     (s || !(n in t)) && (s || (s = Array.prototype.slice.call(t, 0, n)), s[n] = t[n]);
   return e.concat(s || Array.prototype.slice.call(t));
-}, Gc = (
+}, Zc = (
   /** @class */
   function() {
     function e() {
     }
     return e.prototype.active = function() {
-      return Sc;
+      return wc;
     }, e.prototype.with = function(t, r, n) {
       for (var a = [], s = 3; s < arguments.length; s++)
         a[s - 3] = arguments[s];
-      return r.call.apply(r, Jc([n], Bc(a), !1));
+      return r.call.apply(r, Fc([n], Lc(a), !1));
     }, e.prototype.bind = function(t, r) {
       return r;
     }, e.prototype.enable = function() {
@@ -5674,7 +5656,7 @@ var Tc = (
       return this;
     }, e;
   }()
-), zc = function(e, t) {
+), Vc = function(e, t) {
   var r = typeof Symbol == "function" && e[Symbol.iterator];
   if (!r) return e;
   var n = r.call(e), a, s = [], o;
@@ -5690,11 +5672,11 @@ var Tc = (
     }
   }
   return s;
-}, Hc = function(e, t, r) {
+}, Bc = function(e, t, r) {
   if (r || arguments.length === 2) for (var n = 0, a = t.length, s; n < a; n++)
     (s || !(n in t)) && (s || (s = Array.prototype.slice.call(t, 0, n)), s[n] = t[n]);
   return e.concat(s || Array.prototype.slice.call(t));
-}, En = "context", Wc = new Gc(), gn = (
+}, In = "context", Jc = new Zc(), mn = (
   /** @class */
   function() {
     function e() {
@@ -5702,34 +5684,34 @@ var Tc = (
     return e.getInstance = function() {
       return this._instance || (this._instance = new e()), this._instance;
     }, e.prototype.setGlobalContextManager = function(t) {
-      return Mr(En, t, nt.instance());
+      return Pr(In, t, nt.instance());
     }, e.prototype.active = function() {
       return this._getContextManager().active();
     }, e.prototype.with = function(t, r, n) {
       for (var a, s = [], o = 3; o < arguments.length; o++)
         s[o - 3] = arguments[o];
-      return (a = this._getContextManager()).with.apply(a, Hc([t, r, n], zc(s), !1));
+      return (a = this._getContextManager()).with.apply(a, Bc([t, r, n], Vc(s), !1));
     }, e.prototype.bind = function(t, r) {
       return this._getContextManager().bind(t, r);
     }, e.prototype._getContextManager = function() {
-      return Ut(En) || Wc;
+      return Ut(In) || Jc;
     }, e.prototype.disable = function() {
-      this._getContextManager().disable(), jr(En, nt.instance());
+      this._getContextManager().disable(), Or(In, nt.instance());
     }, e;
   }()
-), Gn;
+), Vn;
 (function(e) {
   e[e.NONE = 0] = "NONE", e[e.SAMPLED = 1] = "SAMPLED";
-})(Gn || (Gn = {}));
-var fo = "0000000000000000", ho = "00000000000000000000000000000000", Kc = {
-  traceId: ho,
-  spanId: fo,
-  traceFlags: Gn.NONE
-}, fr = (
+})(Vn || (Vn = {}));
+var uo = "0000000000000000", co = "00000000000000000000000000000000", zc = {
+  traceId: co,
+  spanId: uo,
+  traceFlags: Vn.NONE
+}, pr = (
   /** @class */
   function() {
     function e(t) {
-      t === void 0 && (t = Kc), this._spanContext = t;
+      t === void 0 && (t = zc), this._spanContext = t;
     }
     return e.prototype.spanContext = function() {
       return this._spanContext;
@@ -5753,65 +5735,65 @@ var fo = "0000000000000000", ho = "00000000000000000000000000000000", Kc = {
     }, e.prototype.recordException = function(t, r) {
     }, e;
   }()
-), ua = mo("OpenTelemetry Context Key SPAN");
-function ca(e) {
-  return e.getValue(ua) || void 0;
+), oa = lo("OpenTelemetry Context Key SPAN");
+function ia(e) {
+  return e.getValue(oa) || void 0;
 }
-function Yc() {
-  return ca(gn.getInstance().active());
+function Gc() {
+  return ia(mn.getInstance().active());
 }
-function da(e, t) {
-  return e.setValue(ua, t);
+function la(e, t) {
+  return e.setValue(oa, t);
 }
-function Xc(e) {
-  return e.deleteValue(ua);
+function Hc(e) {
+  return e.deleteValue(oa);
 }
-function Qc(e, t) {
-  return da(e, new fr(t));
+function Wc(e, t) {
+  return la(e, new pr(t));
 }
-function go(e) {
+function po(e) {
   var t;
-  return (t = ca(e)) === null || t === void 0 ? void 0 : t.spanContext();
+  return (t = ia(e)) === null || t === void 0 ? void 0 : t.spanContext();
 }
-var ed = /^([0-9a-f]{32})$/i, td = /^[0-9a-f]{16}$/i;
-function rd(e) {
-  return ed.test(e) && e !== ho;
+var Kc = /^([0-9a-f]{32})$/i, Yc = /^[0-9a-f]{16}$/i;
+function Xc(e) {
+  return Kc.test(e) && e !== co;
 }
-function nd(e) {
-  return td.test(e) && e !== fo;
+function Qc(e) {
+  return Yc.test(e) && e !== uo;
 }
-function yo(e) {
-  return rd(e.traceId) && nd(e.spanId);
+function mo(e) {
+  return Xc(e.traceId) && Qc(e.spanId);
 }
-function ad(e) {
-  return new fr(e);
+function ed(e) {
+  return new pr(e);
 }
-var An = gn.getInstance(), vo = (
+var Cn = mn.getInstance(), fo = (
   /** @class */
   function() {
     function e() {
     }
     return e.prototype.startSpan = function(t, r, n) {
-      n === void 0 && (n = An.active());
+      n === void 0 && (n = Cn.active());
       var a = !!(r != null && r.root);
       if (a)
-        return new fr();
-      var s = n && go(n);
-      return sd(s) && yo(s) ? new fr(s) : new fr();
+        return new pr();
+      var s = n && po(n);
+      return td(s) && mo(s) ? new pr(s) : new pr();
     }, e.prototype.startActiveSpan = function(t, r, n, a) {
       var s, o, i;
       if (!(arguments.length < 2)) {
         arguments.length === 2 ? i = r : arguments.length === 3 ? (s = r, i = n) : (s = r, o = n, i = a);
-        var l = o ?? An.active(), u = this.startSpan(t, s, l), c = da(l, u);
-        return An.with(c, i, void 0, u);
+        var l = o ?? Cn.active(), u = this.startSpan(t, s, l), c = la(l, u);
+        return Cn.with(c, i, void 0, u);
       }
     }, e;
   }()
 );
-function sd(e) {
+function td(e) {
   return typeof e == "object" && typeof e.spanId == "string" && typeof e.traceId == "string" && typeof e.traceFlags == "number";
 }
-var od = new vo(), id = (
+var rd = new fo(), nd = (
   /** @class */
   function() {
     function e(t, r, n, a) {
@@ -5826,29 +5808,29 @@ var od = new vo(), id = (
       if (this._delegate)
         return this._delegate;
       var t = this._provider.getDelegateTracer(this.name, this.version, this.options);
-      return t ? (this._delegate = t, this._delegate) : od;
+      return t ? (this._delegate = t, this._delegate) : rd;
     }, e;
   }()
-), ld = (
+), ad = (
   /** @class */
   function() {
     function e() {
     }
     return e.prototype.getTracer = function(t, r, n) {
-      return new vo();
+      return new fo();
     }, e;
   }()
-), ud = new ld(), Va = (
+), sd = new ad(), La = (
   /** @class */
   function() {
     function e() {
     }
     return e.prototype.getTracer = function(t, r, n) {
       var a;
-      return (a = this.getDelegateTracer(t, r, n)) !== null && a !== void 0 ? a : new id(this, t, r, n);
+      return (a = this.getDelegateTracer(t, r, n)) !== null && a !== void 0 ? a : new nd(this, t, r, n);
     }, e.prototype.getDelegate = function() {
       var t;
-      return (t = this._delegate) !== null && t !== void 0 ? t : ud;
+      return (t = this._delegate) !== null && t !== void 0 ? t : sd;
     }, e.prototype.setDelegate = function(t) {
       this._delegate = t;
     }, e.prototype.getDelegateTracer = function(t, r, n) {
@@ -5856,22 +5838,22 @@ var od = new vo(), id = (
       return (a = this._delegate) === null || a === void 0 ? void 0 : a.getTracer(t, r, n);
     }, e;
   }()
-), on;
+), nn;
 (function(e) {
   e[e.UNSET = 0] = "UNSET", e[e.OK = 1] = "OK", e[e.ERROR = 2] = "ERROR";
-})(on || (on = {}));
-gn.getInstance();
+})(nn || (nn = {}));
+mn.getInstance();
 nt.instance();
-var cd = (
+var od = (
   /** @class */
   function() {
     function e() {
     }
     return e.prototype.getMeter = function(t, r, n) {
-      return Mc;
+      return Ac;
     }, e;
   }()
-), dd = new cd(), Pn = "metrics", pd = (
+), id = new od(), Rn = "metrics", ld = (
   /** @class */
   function() {
     function e() {
@@ -5879,18 +5861,18 @@ var cd = (
     return e.getInstance = function() {
       return this._instance || (this._instance = new e()), this._instance;
     }, e.prototype.setGlobalMeterProvider = function(t) {
-      return Mr(Pn, t, nt.instance());
+      return Pr(Rn, t, nt.instance());
     }, e.prototype.getMeterProvider = function() {
-      return Ut(Pn) || dd;
+      return Ut(Rn) || id;
     }, e.prototype.getMeter = function(t, r, n) {
       return this.getMeterProvider().getMeter(t, r, n);
     }, e.prototype.disable = function() {
-      jr(Pn, nt.instance());
+      Or(Rn, nt.instance());
     }, e;
   }()
 );
-pd.getInstance();
-var md = (
+ld.getInstance();
+var ud = (
   /** @class */
   function() {
     function e() {
@@ -5902,67 +5884,67 @@ var md = (
       return [];
     }, e;
   }()
-), pa = mo("OpenTelemetry Baggage Key");
-function _o(e) {
-  return e.getValue(pa) || void 0;
+), ua = lo("OpenTelemetry Baggage Key");
+function ho(e) {
+  return e.getValue(ua) || void 0;
 }
-function fd() {
-  return _o(gn.getInstance().active());
+function cd() {
+  return ho(mn.getInstance().active());
 }
-function hd(e, t) {
-  return e.setValue(pa, t);
+function dd(e, t) {
+  return e.setValue(ua, t);
 }
-function gd(e) {
-  return e.deleteValue(pa);
+function pd(e) {
+  return e.deleteValue(ua);
 }
-var Nn = "propagation", yd = new md(), vd = (
+var En = "propagation", md = new ud(), fd = (
   /** @class */
   function() {
     function e() {
-      this.createBaggage = kc, this.getBaggage = _o, this.getActiveBaggage = fd, this.setBaggage = hd, this.deleteBaggage = gd;
+      this.createBaggage = _c, this.getBaggage = ho, this.getActiveBaggage = cd, this.setBaggage = dd, this.deleteBaggage = pd;
     }
     return e.getInstance = function() {
       return this._instance || (this._instance = new e()), this._instance;
     }, e.prototype.setGlobalPropagator = function(t) {
-      return Mr(Nn, t, nt.instance());
+      return Pr(En, t, nt.instance());
     }, e.prototype.inject = function(t, r, n) {
-      return n === void 0 && (n = Vc), this._getGlobalPropagator().inject(t, r, n);
+      return n === void 0 && (n = Uc), this._getGlobalPropagator().inject(t, r, n);
     }, e.prototype.extract = function(t, r, n) {
-      return n === void 0 && (n = Zc), this._getGlobalPropagator().extract(t, r, n);
+      return n === void 0 && (n = qc), this._getGlobalPropagator().extract(t, r, n);
     }, e.prototype.fields = function() {
       return this._getGlobalPropagator().fields();
     }, e.prototype.disable = function() {
-      jr(Nn, nt.instance());
+      Or(En, nt.instance());
     }, e.prototype._getGlobalPropagator = function() {
-      return Ut(Nn) || yd;
+      return Ut(En) || md;
     }, e;
   }()
 );
-vd.getInstance();
-var On = "trace", _d = (
+fd.getInstance();
+var An = "trace", hd = (
   /** @class */
   function() {
     function e() {
-      this._proxyTracerProvider = new Va(), this.wrapSpanContext = ad, this.isSpanContextValid = yo, this.deleteSpan = Xc, this.getSpan = ca, this.getActiveSpan = Yc, this.getSpanContext = go, this.setSpan = da, this.setSpanContext = Qc;
+      this._proxyTracerProvider = new La(), this.wrapSpanContext = ed, this.isSpanContextValid = mo, this.deleteSpan = Hc, this.getSpan = ia, this.getActiveSpan = Gc, this.getSpanContext = po, this.setSpan = la, this.setSpanContext = Wc;
     }
     return e.getInstance = function() {
       return this._instance || (this._instance = new e()), this._instance;
     }, e.prototype.setGlobalTracerProvider = function(t) {
-      var r = Mr(On, this._proxyTracerProvider, nt.instance());
+      var r = Pr(An, this._proxyTracerProvider, nt.instance());
       return r && this._proxyTracerProvider.setDelegate(t), r;
     }, e.prototype.getTracerProvider = function() {
-      return Ut(On) || this._proxyTracerProvider;
+      return Ut(An) || this._proxyTracerProvider;
     }, e.prototype.getTracer = function(t, r) {
       return this.getTracerProvider().getTracer(t, r);
     }, e.prototype.disable = function() {
-      jr(On, nt.instance()), this._proxyTracerProvider = new Va();
+      Or(An, nt.instance()), this._proxyTracerProvider = new La();
     }, e;
   }()
-), bd = _d.getInstance(), wd = Object.defineProperty, ma = (e, t) => {
+), gd = hd.getInstance(), yd = Object.defineProperty, ca = (e, t) => {
   for (var r in t)
-    wd(e, r, { get: t[r], enumerable: !0 });
+    yd(e, r, { get: t[r], enumerable: !0 });
 };
-function bo({
+function go({
   execute: e,
   onError: t = () => "An error occurred."
   // mask error messages for safety by default
@@ -6036,7 +6018,7 @@ function Lt(e, {
   const n = new Headers(e ?? {});
   return n.has("Content-Type") || n.set("Content-Type", t), r !== void 0 && n.set("X-Vercel-AI-Data-Stream", r), n;
 }
-function gh({
+function ph({
   status: e,
   statusText: t,
   headers: r,
@@ -6044,7 +6026,7 @@ function gh({
   onError: a
 }) {
   return new Response(
-    bo({ execute: n, onError: a }).pipeThrough(new TextEncoderStream()),
+    go({ execute: n, onError: a }).pipeThrough(new TextEncoderStream()),
     {
       status: e,
       statusText: t,
@@ -6055,7 +6037,7 @@ function gh({
     }
   );
 }
-function ln(e, {
+function an(e, {
   contentType: t,
   dataStreamVersion: r
 }) {
@@ -6065,7 +6047,7 @@ function ln(e, {
       n[a] = s;
   return n["Content-Type"] == null && (n["Content-Type"] = t), r !== void 0 && (n["X-Vercel-AI-Data-Stream"] = r), n;
 }
-function un({
+function sn({
   response: e,
   status: t,
   statusText: r,
@@ -6089,65 +6071,65 @@ function un({
     }
   })();
 }
-function yh(e, {
+function mh(e, {
   status: t,
   statusText: r,
   headers: n,
   execute: a,
   onError: s
 }) {
-  un({
+  sn({
     response: e,
     status: t,
     statusText: r,
-    headers: ln(n, {
+    headers: an(n, {
       contentType: "text/plain; charset=utf-8",
       dataStreamVersion: "v1"
     }),
-    stream: bo({ execute: a, onError: s }).pipeThrough(
+    stream: go({ execute: a, onError: s }).pipeThrough(
       new TextEncoderStream()
     )
   });
 }
-var wo = "AI_InvalidArgumentError", xo = `vercel.ai.error.${wo}`, xd = Symbol.for(xo), ko, ne = class extends j {
+var yo = "AI_InvalidArgumentError", vo = `vercel.ai.error.${yo}`, vd = Symbol.for(vo), _o, ne = class extends j {
   constructor({
     parameter: e,
     value: t,
     message: r
   }) {
     super({
-      name: wo,
+      name: yo,
       message: `Invalid argument for parameter ${e}: ${r}`
-    }), this[ko] = !0, this.parameter = e, this.value = t;
+    }), this[_o] = !0, this.parameter = e, this.value = t;
   }
   static isInstance(e) {
-    return j.hasMarker(e, xo);
+    return j.hasMarker(e, vo);
   }
 };
-ko = xd;
-var To = "AI_RetryError", So = `vercel.ai.error.${To}`, kd = Symbol.for(So), Io, Ba = class extends j {
+_o = vd;
+var bo = "AI_RetryError", wo = `vercel.ai.error.${bo}`, _d = Symbol.for(wo), xo, Fa = class extends j {
   constructor({
     message: e,
     reason: t,
     errors: r
   }) {
-    super({ name: To, message: e }), this[Io] = !0, this.reason = t, this.errors = r, this.lastError = r[r.length - 1];
+    super({ name: bo, message: e }), this[xo] = !0, this.reason = t, this.errors = r, this.lastError = r[r.length - 1];
   }
   static isInstance(e) {
-    return j.hasMarker(e, So);
+    return j.hasMarker(e, wo);
   }
 };
-Io = kd;
-var Td = ({
+xo = _d;
+var bd = ({
   maxRetries: e = 2,
   initialDelayInMs: t = 2e3,
   backoffFactor: r = 2
-} = {}) => async (n) => Co(n, {
+} = {}) => async (n) => ko(n, {
   maxRetries: e,
   delayInMs: t,
   backoffFactor: r
 });
-async function Co(e, {
+async function ko(e, {
   maxRetries: t,
   delayInMs: r,
   backoffFactor: n
@@ -6155,22 +6137,22 @@ async function Co(e, {
   try {
     return await e();
   } catch (s) {
-    if (Fr(s) || t === 0)
+    if (Ur(s) || t === 0)
       throw s;
-    const o = ul(s), i = [...a, s], l = i.length;
+    const o = sl(s), i = [...a, s], l = i.length;
     if (l > t)
-      throw new Ba({
+      throw new Fa({
         message: `Failed after ${l} attempts. Last error: ${o}`,
         reason: "maxRetriesExceeded",
         errors: i
       });
     if (s instanceof Error && Be.isInstance(s) && s.isRetryable === !0 && l <= t)
-      return await ra(r), Co(
+      return await Qn(r), ko(
         e,
         { maxRetries: t, delayInMs: n * r, backoffFactor: n },
         i
       );
-    throw l === 1 ? s : new Ba({
+    throw l === 1 ? s : new Fa({
       message: `Failed after ${l} attempts with non-retryable error: '${o}'`,
       reason: "errorNotRetryable",
       errors: i
@@ -6197,7 +6179,7 @@ function _t({
   const t = e ?? 2;
   return {
     maxRetries: t,
-    retry: Td({ maxRetries: t })
+    retry: bd({ maxRetries: t })
   };
 }
 function Oe({
@@ -6234,21 +6216,21 @@ function tr({
     ...Object.entries(n ?? {}).reduce((s, [o, i]) => (i !== void 0 && (s[`ai.request.headers.${o}`] = i), s), {})
   };
 }
-var Sd = {
+var wd = {
   startSpan() {
-    return Lr;
+    return qr;
   },
   startActiveSpan(e, t, r, n) {
     if (typeof t == "function")
-      return t(Lr);
+      return t(qr);
     if (typeof r == "function")
-      return r(Lr);
+      return r(qr);
     if (typeof n == "function")
-      return n(Lr);
+      return n(qr);
   }
-}, Lr = {
+}, qr = {
   spanContext() {
-    return Id;
+    return xd;
   },
   setAttribute() {
     return this;
@@ -6280,7 +6262,7 @@ var Sd = {
   recordException() {
     return this;
   }
-}, Id = {
+}, xd = {
   traceId: "",
   spanId: "",
   traceFlags: 0
@@ -6289,7 +6271,7 @@ function rr({
   isEnabled: e = !1,
   tracer: t
 } = {}) {
-  return e ? t || bd.getTracer("ai") : Sd;
+  return e ? t || gd.getTracer("ai") : wd;
 }
 function Me({
   name: e,
@@ -6309,9 +6291,9 @@ function Me({
           message: o.message,
           stack: o.stack
         }), s.setStatus({
-          code: on.ERROR,
+          code: nn.ERROR,
           message: o.message
-        })) : s.setStatus({ code: on.ERROR });
+        })) : s.setStatus({ code: nn.ERROR });
       } finally {
         s.end();
       }
@@ -6341,7 +6323,7 @@ function W({
     return { ...r, [n]: a };
   }, {});
 }
-async function vh({
+async function fh({
   model: e,
   value: t,
   maxRetries: r,
@@ -6421,16 +6403,16 @@ async function vh({
             "ai.usage.tokens": m.tokens
           }
         })
-      ), new Cd({ value: t, embedding: d, usage: m, rawResponse: _ });
+      ), new kd({ value: t, embedding: d, usage: m, rawResponse: _ });
     }
   });
 }
-var Cd = class {
+var kd = class {
   constructor(e) {
     this.value = e.value, this.embedding = e.embedding, this.usage = e.usage, this.rawResponse = e.rawResponse;
   }
 };
-function Rd(e, t) {
+function Td(e, t) {
   if (t <= 0)
     throw new Error("chunkSize must be greater than 0");
   const r = [];
@@ -6438,7 +6420,7 @@ function Rd(e, t) {
     r.push(e.slice(n, n + t));
   return r;
 }
-async function _h({
+async function hh({
   model: e,
   values: t,
   maxRetries: r,
@@ -6516,9 +6498,9 @@ async function _h({
               "ai.usage.tokens": p.tokens
             }
           })
-        ), new Ja({ values: t, embeddings: g, usage: p });
+        ), new Za({ values: t, embeddings: g, usage: p });
       }
-      const m = Rd(t, d), _ = [];
+      const m = Td(t, d), _ = [];
       let v = 0;
       for (const g of m) {
         const { embeddings: p, usage: f } = await i(() => Me({
@@ -6570,7 +6552,7 @@ async function _h({
             "ai.usage.tokens": v
           }
         })
-      ), new Ja({
+      ), new Za({
         values: t,
         embeddings: _,
         usage: { tokens: v }
@@ -6578,24 +6560,24 @@ async function _h({
     }
   });
 }
-var Ja = class {
+var Za = class {
   constructor(e) {
     this.values = e.values, this.embeddings = e.embeddings, this.usage = e.usage;
   }
-}, Ro = "AI_NoImageGeneratedError", Eo = `vercel.ai.error.${Ro}`, Ed = Symbol.for(Eo), Ao, Ad = class extends j {
+}, To = "AI_NoImageGeneratedError", So = `vercel.ai.error.${To}`, Sd = Symbol.for(So), Io, Id = class extends j {
   constructor({
     message: e = "No image generated.",
     cause: t,
     responses: r
   }) {
-    super({ name: Ro, message: e, cause: t }), this[Ao] = !0, this.responses = r;
+    super({ name: To, message: e, cause: t }), this[Io] = !0, this.responses = r;
   }
   static isInstance(e) {
-    return j.hasMarker(e, Eo);
+    return j.hasMarker(e, So);
   }
 };
-Ao = Ed;
-var yn = class {
+Io = Sd;
+var fn = class {
   constructor({
     data: e,
     mimeType: t
@@ -6609,13 +6591,13 @@ var yn = class {
   }
   // lazy conversion with caching to avoid unnecessary conversion overhead:
   get uint8Array() {
-    return this.uint8ArrayData == null && (this.uint8ArrayData = mn(this.base64Data)), this.uint8ArrayData;
+    return this.uint8ArrayData == null && (this.uint8ArrayData = cn(this.base64Data)), this.uint8ArrayData;
   }
-}, Pd = class extends yn {
+}, Cd = class extends fn {
   constructor(e) {
     super(e), this.type = "file";
   }
-}, Po = [
+}, Co = [
   {
     mimeType: "image/gif",
     bytesPrefix: [71, 73, 70],
@@ -6687,7 +6669,7 @@ var yn = class {
     ],
     base64Prefix: "AAAAIGZ0eXBoZWlj"
   }
-], No = [
+], Ro = [
   {
     mimeType: "audio/mpeg",
     bytesPrefix: [255, 251],
@@ -6718,27 +6700,27 @@ var yn = class {
     bytesPrefix: [102, 116, 121, 112],
     base64Prefix: "ZnR5cA"
   }
-], Nd = (e) => {
-  const t = typeof e == "string" ? mn(e) : e, r = (t[6] & 127) << 21 | (t[7] & 127) << 14 | (t[8] & 127) << 7 | t[9] & 127;
+], Rd = (e) => {
+  const t = typeof e == "string" ? cn(e) : e, r = (t[6] & 127) << 21 | (t[7] & 127) << 14 | (t[8] & 127) << 7 | t[9] & 127;
   return t.slice(r + 10);
 };
-function Od(e) {
+function Ed(e) {
   return typeof e == "string" && e.startsWith("SUQz") || typeof e != "string" && e.length > 10 && e[0] === 73 && // 'I'
   e[1] === 68 && // 'D'
-  e[2] === 51 ? Nd(e) : e;
+  e[2] === 51 ? Rd(e) : e;
 }
-function vn({
+function hn({
   data: e,
   signatures: t
 }) {
-  const r = Od(e);
+  const r = Ed(e);
   for (const n of t)
     if (typeof r == "string" ? r.startsWith(n.base64Prefix) : r.length >= n.bytesPrefix.length && n.bytesPrefix.every(
       (a, s) => r[s] === a
     ))
       return n.mimeType;
 }
-async function bh({
+async function gh({
   model: e,
   prompt: t,
   n: r = 1,
@@ -6777,28 +6759,28 @@ async function bh({
       ...k.images.map(
         (b) => {
           var x;
-          return new yn({
+          return new fn({
             data: b,
-            mimeType: (x = vn({
+            mimeType: (x = hn({
               data: b,
-              signatures: Po
+              signatures: Co
             })) != null ? x : "image/png"
           });
         }
       )
     ), f.push(...k.warnings), w.push(k.response);
   if (!p.length)
-    throw new Ad({ responses: w });
-  return new Md({ images: p, warnings: f, responses: w });
+    throw new Id({ responses: w });
+  return new Ad({ images: p, warnings: f, responses: w });
 }
-var Md = class {
+var Ad = class {
   constructor(e) {
     this.images = e.images, this.warnings = e.warnings, this.responses = e.responses;
   }
   get image() {
     return this.images[0];
   }
-}, Oo = "AI_NoObjectGeneratedError", Mo = `vercel.ai.error.${Oo}`, jd = Symbol.for(Mo), jo, dt = class extends j {
+}, Eo = "AI_NoObjectGeneratedError", Ao = `vercel.ai.error.${Eo}`, Nd = Symbol.for(Ao), No, dt = class extends j {
   constructor({
     message: e = "No object generated.",
     cause: t,
@@ -6807,14 +6789,14 @@ var Md = class {
     usage: a,
     finishReason: s
   }) {
-    super({ name: Oo, message: e, cause: t }), this[jo] = !0, this.text = r, this.response = n, this.usage = a, this.finishReason = s;
+    super({ name: Eo, message: e, cause: t }), this[No] = !0, this.text = r, this.response = n, this.usage = a, this.finishReason = s;
   }
   static isInstance(e) {
-    return j.hasMarker(e, Mo);
+    return j.hasMarker(e, Ao);
   }
 };
-jo = jd;
-var $o = "AI_DownloadError", Do = `vercel.ai.error.${$o}`, $d = Symbol.for(Do), qo, Mn = class extends j {
+No = Nd;
+var Po = "AI_DownloadError", Oo = `vercel.ai.error.${Po}`, Pd = Symbol.for(Oo), Mo, Nn = class extends j {
   constructor({
     url: e,
     statusCode: t,
@@ -6822,20 +6804,20 @@ var $o = "AI_DownloadError", Do = `vercel.ai.error.${$o}`, $d = Symbol.for(Do), 
     cause: n,
     message: a = n == null ? `Failed to download ${e}: ${t} ${r}` : `Failed to download ${e}: ${n}`
   }) {
-    super({ name: $o, message: a, cause: n }), this[qo] = !0, this.url = e, this.statusCode = t, this.statusText = r;
+    super({ name: Po, message: a, cause: n }), this[Mo] = !0, this.url = e, this.statusCode = t, this.statusText = r;
   }
   static isInstance(e) {
-    return j.hasMarker(e, Do);
+    return j.hasMarker(e, Oo);
   }
 };
-qo = $d;
-async function Uo({ url: e }) {
+Mo = Pd;
+async function jo({ url: e }) {
   var t;
   const r = e.toString();
   try {
     const n = await fetch(r);
     if (!n.ok)
-      throw new Mn({
+      throw new Nn({
         url: r,
         statusCode: n.status,
         statusText: n.statusText
@@ -6845,27 +6827,27 @@ async function Uo({ url: e }) {
       mimeType: (t = n.headers.get("content-type")) != null ? t : void 0
     };
   } catch (n) {
-    throw Mn.isInstance(n) ? n : new Mn({ url: r, cause: n });
+    throw Nn.isInstance(n) ? n : new Nn({ url: r, cause: n });
   }
 }
-var Lo = "AI_InvalidDataContentError", Fo = `vercel.ai.error.${Lo}`, Dd = Symbol.for(Fo), Zo, Ga = class extends j {
+var $o = "AI_InvalidDataContentError", Do = `vercel.ai.error.${$o}`, Od = Symbol.for(Do), qo, Va = class extends j {
   constructor({
     content: e,
     cause: t,
     message: r = `Invalid data content. Expected a base64 string, Uint8Array, ArrayBuffer, or Buffer, but got ${typeof e}.`
   }) {
-    super({ name: Lo, message: r, cause: t }), this[Zo] = !0, this.content = e;
+    super({ name: $o, message: r, cause: t }), this[qo] = !0, this.content = e;
   }
   static isInstance(e) {
-    return j.hasMarker(e, Fo);
+    return j.hasMarker(e, Do);
   }
 };
-Zo = Dd;
-var Vo = ge([
+qo = Od;
+var Uo = ge([
   h(),
-  nn(Uint8Array),
-  nn(ArrayBuffer),
-  no(
+  en(Uint8Array),
+  en(ArrayBuffer),
+  Qs(
     // Buffer might not be available in some environments such as CloudFlare:
     (e) => {
       var t, r;
@@ -6874,17 +6856,17 @@ var Vo = ge([
     { message: "Must be a Buffer" }
   )
 ]);
-function _n(e) {
+function gn(e) {
   return typeof e == "string" ? e : e instanceof ArrayBuffer ? Mt(new Uint8Array(e)) : Mt(e);
 }
-function Cr(e) {
+function Sr(e) {
   if (e instanceof Uint8Array)
     return e;
   if (typeof e == "string")
     try {
-      return mn(e);
+      return cn(e);
     } catch (t) {
-      throw new Ga({
+      throw new Va({
         message: "Invalid data content. Content string is not a base64-encoded media.",
         content: e,
         cause: t
@@ -6892,28 +6874,28 @@ function Cr(e) {
     }
   if (e instanceof ArrayBuffer)
     return new Uint8Array(e);
-  throw new Ga({ content: e });
+  throw new Va({ content: e });
 }
-function qd(e) {
+function Md(e) {
   try {
     return new TextDecoder().decode(e);
   } catch {
     throw new Error("Error decoding Uint8Array to text");
   }
 }
-var Bo = "AI_InvalidMessageRoleError", Jo = `vercel.ai.error.${Bo}`, Ud = Symbol.for(Jo), Go, Ld = class extends j {
+var Lo = "AI_InvalidMessageRoleError", Fo = `vercel.ai.error.${Lo}`, jd = Symbol.for(Fo), Zo, $d = class extends j {
   constructor({
     role: e,
     message: t = `Invalid message role: '${e}'. Must be one of: "system", "user", "assistant", "tool".`
   }) {
-    super({ name: Bo, message: t }), this[Go] = !0, this.role = e;
+    super({ name: Lo, message: t }), this[Zo] = !0, this.role = e;
   }
   static isInstance(e) {
-    return j.hasMarker(e, Jo);
+    return j.hasMarker(e, Fo);
   }
 };
-Go = Ud;
-function Fd(e) {
+Zo = jd;
+function Dd(e) {
   try {
     const [t, r] = e.split(",");
     return {
@@ -6931,9 +6913,9 @@ async function Yt({
   prompt: e,
   modelSupportsImageUrls: t = !0,
   modelSupportsUrl: r = () => !1,
-  downloadImplementation: n = Uo
+  downloadImplementation: n = jo
 }) {
-  const a = await Vd(
+  const a = await Ud(
     e.messages,
     n,
     t,
@@ -6942,11 +6924,11 @@ async function Yt({
   return [
     ...e.system != null ? [{ role: "system", content: e.system }] : [],
     ...e.messages.map(
-      (s) => Zd(s, a)
+      (s) => qd(s, a)
     )
   ];
 }
-function Zd(e, t) {
+function qd(e, t) {
   var r, n, a, s, o, i;
   const l = e.role;
   switch (l) {
@@ -6963,7 +6945,7 @@ function Zd(e, t) {
         providerMetadata: (n = e.providerOptions) != null ? n : e.experimental_providerMetadata
       } : {
         role: "user",
-        content: e.content.map((u) => Bd(u, t)).filter((u) => u.type !== "text" || u.text !== ""),
+        content: e.content.map((u) => Ld(u, t)).filter((u) => u.type !== "text" || u.text !== ""),
         providerMetadata: (a = e.providerOptions) != null ? a : e.experimental_providerMetadata
       };
     case "assistant":
@@ -6983,7 +6965,7 @@ function Zd(e, t) {
             case "file":
               return {
                 type: "file",
-                data: u.data instanceof URL ? u.data : _n(u.data),
+                data: u.data instanceof URL ? u.data : gn(u.data),
                 filename: u.filename,
                 mimeType: u.mimeType,
                 providerMetadata: d
@@ -7038,11 +7020,11 @@ function Zd(e, t) {
       };
     default: {
       const u = l;
-      throw new Ld({ role: u });
+      throw new $d({ role: u });
     }
   }
 }
-async function Vd(e, t, r, n) {
+async function Ud(e, t, r, n) {
   const a = e.filter((o) => o.role === "user").map((o) => o.content).filter(
     (o) => Array.isArray(o)
   ).flat().filter(
@@ -7064,7 +7046,7 @@ async function Vd(e, t, r, n) {
     s.map(({ url: o, data: i }) => [o.toString(), i])
   );
 }
-function Bd(e, t) {
+function Ld(e, t) {
   var r, n, a, s;
   if (e.type === "text")
     return {
@@ -7091,23 +7073,23 @@ function Bd(e, t) {
   }
   if (l instanceof URL)
     if (l.protocol === "data:") {
-      const { mimeType: d, base64Content: m } = Fd(
+      const { mimeType: d, base64Content: m } = Dd(
         l.toString()
       );
       if (d == null || m == null)
         throw new Error(`Invalid data URL format in part ${c}`);
-      o = d, u = Cr(m);
+      o = d, u = Sr(m);
     } else {
       const d = t[l.toString()];
       d ? (u = d.data, o ?? (o = d.mimeType)) : u = l;
     }
   else
-    u = Cr(l);
+    u = Sr(l);
   switch (c) {
     case "image":
-      return u instanceof Uint8Array && (o = (n = vn({
+      return u instanceof Uint8Array && (o = (n = hn({
         data: u,
-        signatures: Po
+        signatures: Co
       })) != null ? n : o), {
         type: "image",
         image: u,
@@ -7119,7 +7101,7 @@ function Bd(e, t) {
         throw new Error("Mime type is missing for file part");
       return {
         type: "file",
-        data: u instanceof Uint8Array ? _n(u) : u,
+        data: u instanceof Uint8Array ? gn(u) : u,
         filename: e.filename,
         mimeType: o,
         providerMetadata: (s = e.providerOptions) != null ? s : e.experimental_providerMetadata
@@ -7199,7 +7181,7 @@ function Xt({
     seed: i
   };
 }
-function za(e) {
+function Ba(e) {
   var t, r, n;
   const a = [];
   for (const s of e) {
@@ -7239,13 +7221,13 @@ function za(e) {
         if ((r = s.contentType) != null && r.startsWith("image/"))
           a.push({
             type: "image",
-            image: Cr(l)
+            image: Sr(l)
           });
         else if ((n = s.contentType) != null && n.startsWith("text/"))
           a.push({
             type: "text",
-            text: qd(
-              Cr(l)
+            text: Md(
+              Sr(l)
             )
           });
         else {
@@ -7267,19 +7249,19 @@ function za(e) {
   }
   return a;
 }
-var zo = "AI_MessageConversionError", Ho = `vercel.ai.error.${zo}`, Jd = Symbol.for(Ho), Wo, jn = class extends j {
+var Vo = "AI_MessageConversionError", Bo = `vercel.ai.error.${Vo}`, Fd = Symbol.for(Bo), Jo, Pn = class extends j {
   constructor({
     originalMessage: e,
     message: t
   }) {
-    super({ name: zo, message: t }), this[Wo] = !0, this.originalMessage = e;
+    super({ name: Vo, message: t }), this[Jo] = !0, this.originalMessage = e;
   }
   static isInstance(e) {
-    return j.hasMarker(e, Ho);
+    return j.hasMarker(e, Bo);
   }
 };
-Wo = Jd;
-function Gd(e, t) {
+Jo = Fd;
+function Zd(e, t) {
   var r, n;
   const a = (r = t == null ? void 0 : t.tools) != null ? r : {}, s = [];
   for (let o = 0; o < e.length; o++) {
@@ -7298,7 +7280,7 @@ function Gd(e, t) {
             role: "user",
             content: d ? [
               { type: "text", text: c },
-              ...za(d)
+              ...Ba(d)
             ] : c
           });
         else {
@@ -7308,7 +7290,7 @@ function Gd(e, t) {
           }));
           s.push({
             role: "user",
-            content: d ? [...m, ...za(d)] : m
+            content: d ? [...m, ...Ba(d)] : m
           });
         }
         break;
@@ -7368,7 +7350,7 @@ function Gd(e, t) {
               content: k.map(
                 (b) => {
                   if (!("result" in b))
-                    throw new jn({
+                    throw new Pn({
                       originalMessage: i,
                       message: "ToolInvocation must have a result: " + JSON.stringify(b)
                     });
@@ -7441,7 +7423,7 @@ function Gd(e, t) {
             role: "tool",
             content: g.map((p) => {
               if (!("result" in p))
-                throw new jn({
+                throw new Pn({
                   originalMessage: i,
                   message: "ToolInvocation must have a result: " + JSON.stringify(p)
                 });
@@ -7468,7 +7450,7 @@ function Gd(e, t) {
         break;
       default: {
         const m = u;
-        throw new jn({
+        throw new Pn({
           originalMessage: i,
           message: `Unsupported role: ${m}`
         });
@@ -7477,19 +7459,19 @@ function Gd(e, t) {
   }
   return s;
 }
-var zn = Xl(
+var Bn = Hl(
   () => ge([
-    Yl(),
+    Gl(),
     h(),
     R(),
     Je(),
-    _r(h(), zn),
-    L(zn)
+    yr(h(), Bn),
+    F(Bn)
   ])
-), ve = _r(
+), ve = yr(
   h(),
-  _r(h(), zn)
-), zd = L(
+  yr(h(), Bn)
+), Vd = F(
   ge([
     y({ type: A("text"), text: h() }),
     y({
@@ -7498,89 +7480,89 @@ var zn = Xl(
       mimeType: h().optional()
     })
   ])
-), Ko = y({
+), zo = y({
   type: A("text"),
   text: h(),
   providerOptions: ve.optional(),
   experimental_providerMetadata: ve.optional()
-}), Hd = y({
+}), Bd = y({
   type: A("image"),
-  image: ge([Vo, nn(URL)]),
+  image: ge([Uo, en(URL)]),
   mimeType: h().optional(),
   providerOptions: ve.optional(),
   experimental_providerMetadata: ve.optional()
-}), Yo = y({
+}), Go = y({
   type: A("file"),
-  data: ge([Vo, nn(URL)]),
+  data: ge([Uo, en(URL)]),
   filename: h().optional(),
   mimeType: h(),
   providerOptions: ve.optional(),
   experimental_providerMetadata: ve.optional()
-}), Wd = y({
+}), Jd = y({
   type: A("reasoning"),
   text: h(),
   providerOptions: ve.optional(),
   experimental_providerMetadata: ve.optional()
-}), Kd = y({
+}), zd = y({
   type: A("redacted-reasoning"),
   data: h(),
   providerOptions: ve.optional(),
   experimental_providerMetadata: ve.optional()
-}), Yd = y({
+}), Gd = y({
   type: A("tool-call"),
   toolCallId: h(),
   toolName: h(),
-  args: Or(),
+  args: Nr(),
   providerOptions: ve.optional(),
   experimental_providerMetadata: ve.optional()
-}), Xd = y({
+}), Hd = y({
   type: A("tool-result"),
   toolCallId: h(),
   toolName: h(),
-  result: Or(),
-  content: zd.optional(),
+  result: Nr(),
+  content: Vd.optional(),
   isError: Je().optional(),
   providerOptions: ve.optional(),
   experimental_providerMetadata: ve.optional()
-}), Qd = y({
+}), Wd = y({
   role: A("system"),
   content: h(),
   providerOptions: ve.optional(),
   experimental_providerMetadata: ve.optional()
-}), ep = y({
+}), Kd = y({
   role: A("user"),
   content: ge([
     h(),
-    L(ge([Ko, Hd, Yo]))
+    F(ge([zo, Bd, Go]))
   ]),
   providerOptions: ve.optional(),
   experimental_providerMetadata: ve.optional()
-}), tp = y({
+}), Yd = y({
   role: A("assistant"),
   content: ge([
     h(),
-    L(
+    F(
       ge([
-        Ko,
-        Yo,
-        Wd,
-        Kd,
-        Yd
+        zo,
+        Go,
+        Jd,
+        zd,
+        Gd
       ])
     )
   ]),
   providerOptions: ve.optional(),
   experimental_providerMetadata: ve.optional()
-}), rp = y({
+}), Xd = y({
   role: A("tool"),
-  content: L(Xd),
+  content: F(Hd),
   providerOptions: ve.optional(),
   experimental_providerMetadata: ve.optional()
-}), np = ge([
-  Qd,
-  ep,
-  tp,
-  rp
+}), Qd = ge([
+  Wd,
+  Kd,
+  Yd,
+  Xd
 ]);
 function Qt({
   prompt: e,
@@ -7619,7 +7601,7 @@ function Qt({
     };
   }
   if (e.messages != null) {
-    const n = ap(e.messages) === "ui-messages" ? Gd(e.messages, {
+    const n = ep(e.messages) === "ui-messages" ? Zd(e.messages, {
       tools: t
     }) : e.messages;
     if (n.length === 0)
@@ -7629,7 +7611,7 @@ function Qt({
       });
     const a = ht({
       value: n,
-      schema: L(np)
+      schema: F(Qd)
     });
     if (!a.success)
       throw new ut({
@@ -7649,7 +7631,7 @@ function Qt({
   }
   throw new Error("unreachable");
 }
-function ap(e) {
+function ep(e) {
   if (!Array.isArray(e))
     throw new ut({
       prompt: e,
@@ -7662,7 +7644,7 @@ function ap(e) {
     });
   if (e.length === 0)
     return "messages";
-  const t = e.map(sp);
+  const t = e.map(tp);
   if (t.some((n) => n === "has-ui-specific-parts"))
     return "ui-messages";
   const r = t.findIndex(
@@ -7681,7 +7663,7 @@ function ap(e) {
     cause: e
   });
 }
-function sp(e) {
+function tp(e) {
   return typeof e == "object" && e !== null && (e.role === "function" || // UI-only role
   e.role === "data" || // UI-only role
   "toolInvocations" in e || // UI-specific field
@@ -7699,19 +7681,19 @@ function ct({
     totalTokens: e + t
   };
 }
-function Xo(e, t) {
+function Ho(e, t) {
   return {
     promptTokens: e.promptTokens + t.promptTokens,
     completionTokens: e.completionTokens + t.completionTokens,
     totalTokens: e.totalTokens + t.totalTokens
   };
 }
-var op = "JSON schema:", ip = "You MUST answer with a JSON object that matches the JSON schema above.", lp = "You MUST answer with JSON.";
-function Rr({
+var rp = "JSON schema:", np = "You MUST answer with a JSON object that matches the JSON schema above.", ap = "You MUST answer with JSON.";
+function Ir({
   prompt: e,
   schema: t,
-  schemaPrefix: r = t != null ? op : void 0,
-  schemaSuffix: n = t != null ? ip : lp
+  schemaPrefix: r = t != null ? rp : void 0,
+  schemaSuffix: n = t != null ? np : ap
 }) {
   return [
     e != null && e.length > 0 ? e : void 0,
@@ -7723,7 +7705,7 @@ function Rr({
   ].filter((a) => a != null).join(`
 `);
 }
-function Nt(e) {
+function Pt(e) {
   const t = e.pipeThrough(new TransformStream());
   return t[Symbol.asyncIterator] = () => {
     const r = t.getReader();
@@ -7735,7 +7717,7 @@ function Nt(e) {
     };
   }, t;
 }
-var up = {
+var sp = {
   type: "no-schema",
   jsonSchema: void 0,
   validatePartialResult({ value: e, textDelta: t }) {
@@ -7758,7 +7740,7 @@ var up = {
       functionality: "element streams in no-schema mode"
     });
   }
-}, cp = (e) => ({
+}, op = (e) => ({
   type: "object",
   jsonSchema: e.jsonSchema,
   validatePartialResult({ value: t, textDelta: r }) {
@@ -7779,7 +7761,7 @@ var up = {
       functionality: "element streams in object mode"
     });
   }
-}), dp = (e) => {
+}), ip = (e) => {
   const { $schema: t, ...r } = e.jsonSchema;
   return {
     type: "enum",
@@ -7797,7 +7779,7 @@ var up = {
     },
     validatePartialResult({ value: n, latestObject: a, isFirstDelta: s, isFinalDelta: o }) {
       var i;
-      if (!qn(n) || !Sa(n.elements))
+      if (!jn(n) || !xa(n.elements))
         return {
           success: !1,
           error: new ft({
@@ -7825,7 +7807,7 @@ var up = {
       };
     },
     validateFinalResult(n) {
-      if (!qn(n) || !Sa(n.elements))
+      if (!jn(n) || !xa(n.elements))
         return {
           success: !1,
           error: new ft({
@@ -7843,7 +7825,7 @@ var up = {
     },
     createElementStream(n) {
       let a = 0;
-      return Nt(
+      return Pt(
         n.pipeThrough(
           new TransformStream({
             transform(s, o) {
@@ -7871,7 +7853,7 @@ var up = {
       );
     }
   };
-}, pp = (e) => ({
+}, lp = (e) => ({
   type: "enum",
   // wrap in object that contains result, since most LLMs will not
   // be able to generate an enum value directly:
@@ -7886,7 +7868,7 @@ var up = {
     additionalProperties: !1
   },
   validateFinalResult(t) {
-    if (!qn(t) || typeof t.result != "string")
+    if (!jn(t) || typeof t.result != "string")
       return {
         success: !1,
         error: new ft({
@@ -7914,27 +7896,27 @@ var up = {
     });
   }
 });
-function Qo({
+function Wo({
   output: e,
   schema: t,
   enumValues: r
 }) {
   switch (e) {
     case "object":
-      return cp(Kt(t));
+      return op(Kt(t));
     case "array":
-      return dp(Kt(t));
+      return ip(Kt(t));
     case "enum":
-      return pp(r);
+      return lp(r);
     case "no-schema":
-      return up;
+      return sp;
     default: {
       const n = e;
       throw new Error(`Unsupported output: ${n}`);
     }
   }
 }
-function ei({
+function Ko({
   output: e,
   mode: t,
   schema: r,
@@ -8042,21 +8024,21 @@ function ei({
         });
   }
 }
-function bn(e) {
+function yn(e) {
   const t = e.map((r) => ({
     ...r,
-    content: typeof r.content == "string" ? r.content : r.content.map(mp)
+    content: typeof r.content == "string" ? r.content : r.content.map(up)
   }));
   return JSON.stringify(t);
 }
-function mp(e) {
+function up(e) {
   return e.type === "image" ? {
     ...e,
-    image: e.image instanceof Uint8Array ? _n(e.image) : e.image
+    image: e.image instanceof Uint8Array ? gn(e.image) : e.image
   } : e;
 }
-var fp = Ft({ prefix: "aiobj", size: 24 });
-async function wh({
+var cp = Ft({ prefix: "aiobj", size: 24 });
+async function yh({
   model: e,
   enum: t,
   // rename bc enum is reserved by typescript
@@ -8076,12 +8058,12 @@ async function wh({
   experimental_providerMetadata: g,
   providerOptions: p = g,
   _internal: {
-    generateId: f = fp,
+    generateId: f = cp,
     currentDate: w = () => /* @__PURE__ */ new Date()
   } = {},
   ...k
 }) {
-  ei({
+  Ko({
     output: o,
     mode: s,
     schema: r,
@@ -8089,7 +8071,7 @@ async function wh({
     schemaDescription: a,
     enumValues: t
   });
-  const { maxRetries: b, retry: x } = _t({ maxRetries: c }), S = Qo({
+  const { maxRetries: b, retry: x } = _t({ maxRetries: c }), S = Wo({
     output: o,
     schema: r,
     enumValues: t
@@ -8123,15 +8105,15 @@ async function wh({
       }
     }),
     tracer: E,
-    fn: async (N) => {
-      var z, ce, be, me;
+    fn: async (P) => {
+      var G, ce, be, me;
       (s === "auto" || s == null) && (s = e.defaultObjectGenerationMode);
       let ie, de, ye, fe, H, ue, Y, U, Ce;
       switch (s) {
         case "json": {
           const ee = Qt({
             prompt: {
-              system: S.jsonSchema == null ? Rr({ prompt: i }) : e.supportsStructuredOutputs ? i : Rr({
+              system: S.jsonSchema == null ? Ir({ prompt: i }) : e.supportsStructuredOutputs ? i : Ir({
                 prompt: i,
                 schema: S.jsonSchema
               }),
@@ -8142,7 +8124,7 @@ async function wh({
           }), oe = await Yt({
             prompt: ee,
             modelSupportsImageUrls: e.supportsImageUrls,
-            modelSupportsUrl: (z = e.supportsUrl) == null ? void 0 : z.bind(e)
+            modelSupportsUrl: (G = e.supportsUrl) == null ? void 0 : G.bind(e)
             // support 'this' context
           }), re = await x(
             () => Me({
@@ -8175,7 +8157,7 @@ async function wh({
               }),
               tracer: E,
               fn: async (te) => {
-                var q, he, Ae, Pe, je, B;
+                var q, he, Ae, Ne, je, B;
                 const D = await e.doGenerate({
                   mode: {
                     type: "object-json",
@@ -8191,7 +8173,7 @@ async function wh({
                   headers: m
                 }), Z = {
                   id: (he = (q = D.response) == null ? void 0 : q.id) != null ? he : f(),
-                  timestamp: (Pe = (Ae = D.response) == null ? void 0 : Ae.timestamp) != null ? Pe : w(),
+                  timestamp: (Ne = (Ae = D.response) == null ? void 0 : Ae.timestamp) != null ? Ne : w(),
                   modelId: (B = (je = D.response) == null ? void 0 : je.modelId) != null ? B : e.modelId
                 };
                 if (D.text === void 0)
@@ -8251,7 +8233,7 @@ async function wh({
                     input: () => re
                   },
                   "ai.prompt.messages": {
-                    input: () => bn(oe)
+                    input: () => yn(oe)
                   },
                   "ai.settings.mode": s,
                   // standardized gen-ai llm span attributes:
@@ -8267,7 +8249,7 @@ async function wh({
               }),
               tracer: E,
               fn: async (q) => {
-                var he, Ae, Pe, je, B, D, Z, we;
+                var he, Ae, Ne, je, B, D, Z, we;
                 const X = await e.doGenerate({
                   mode: {
                     type: "object-tool",
@@ -8285,7 +8267,7 @@ async function wh({
                   abortSignal: d,
                   headers: m
                 }), T = (Ae = (he = X.toolCalls) == null ? void 0 : he[0]) == null ? void 0 : Ae.args, le = {
-                  id: (je = (Pe = X.response) == null ? void 0 : Pe.id) != null ? je : f(),
+                  id: (je = (Ne = X.response) == null ? void 0 : Ne.id) != null ? je : f(),
                   timestamp: (D = (B = X.response) == null ? void 0 : B.timestamp) != null ? D : w(),
                   modelId: (we = (Z = X.response) == null ? void 0 : Z.modelId) != null ? we : e.modelId
                 };
@@ -8365,7 +8347,7 @@ async function wh({
       try {
         Re = qe(ie);
       } catch (ee) {
-        if (_ != null && dt.isInstance(ee) && (hr.isInstance(ee.cause) || ft.isInstance(ee.cause))) {
+        if (_ != null && dt.isInstance(ee) && (mr.isInstance(ee.cause) || ft.isInstance(ee.cause))) {
           const oe = await _({
             text: ie,
             error: ee.cause
@@ -8376,7 +8358,7 @@ async function wh({
         } else
           throw ee;
       }
-      return N.setAttributes(
+      return P.setAttributes(
         W({
           telemetry: v,
           attributes: {
@@ -8388,7 +8370,7 @@ async function wh({
             "ai.usage.completionTokens": ye.completionTokens
           }
         })
-      ), new hp({
+      ), new dp({
         object: Re,
         finishReason: de,
         usage: ct(ye),
@@ -8405,7 +8387,7 @@ async function wh({
     }
   });
 }
-var hp = class {
+var dp = class {
   constructor(e) {
     this.object = e.object, this.finishReason = e.finishReason, this.usage = e.usage, this.warnings = e.warnings, this.providerMetadata = e.providerMetadata, this.experimental_providerMetadata = e.providerMetadata, this.response = e.response, this.request = e.request, this.logprobs = e.logprobs;
   }
@@ -8436,7 +8418,7 @@ var hp = class {
     this.status = { type: "rejected", error: e }, this.promise && ((t = this._reject) == null || t.call(this, e));
   }
 };
-function Ha() {
+function Ja() {
   let e, t;
   return {
     promise: new Promise((n, a) => {
@@ -8446,15 +8428,15 @@ function Ha() {
     reject: t
   };
 }
-function ti() {
-  let e = [], t = null, r = !1, n = Ha();
+function Yo() {
+  let e = [], t = null, r = !1, n = Ja();
   const a = async () => {
     if (r && e.length === 0) {
       t == null || t.close();
       return;
     }
     if (e.length === 0)
-      return n = Ha(), await n.promise, a();
+      return n = Ja(), await n.promise, a();
     try {
       const { value: s, done: o } = await e[0].read();
       o ? (e.shift(), e.length > 0 ? await a() : r && (t == null || t.close())) : t == null || t.enqueue(s);
@@ -8495,12 +8477,12 @@ function ti() {
     }
   };
 }
-function ri() {
+function Xo() {
   var e, t;
   return (t = (e = globalThis == null ? void 0 : globalThis.performance) == null ? void 0 : e.now()) != null ? t : Date.now();
 }
-var gp = Ft({ prefix: "aiobj", size: 24 });
-function xh({
+var pp = Ft({ prefix: "aiobj", size: 24 });
+function vh({
   model: e,
   schema: t,
   schemaName: r,
@@ -8519,21 +8501,21 @@ function xh({
   onError: g,
   onFinish: p,
   _internal: {
-    generateId: f = gp,
+    generateId: f = pp,
     currentDate: w = () => /* @__PURE__ */ new Date(),
-    now: k = ri
+    now: k = Xo
   } = {},
   ...b
 }) {
-  ei({
+  Ko({
     output: s,
     mode: a,
     schema: t,
     schemaName: r,
     schemaDescription: n
   });
-  const x = Qo({ output: s, schema: t });
-  return x.type === "no-schema" && a === void 0 && (a = "json"), new yp({
+  const x = Wo({ output: s, schema: t });
+  return x.type === "no-schema" && a === void 0 && (a = "json"), new mp({
     model: e,
     telemetry: m,
     headers: d,
@@ -8555,7 +8537,7 @@ function xh({
     now: k
   });
 }
-var yp = class {
+var mp = class {
   constructor({
     model: e,
     headers: t,
@@ -8585,12 +8567,12 @@ var yp = class {
       telemetry: r,
       headers: t,
       settings: { ...n, maxRetries: k }
-    }), S = rr(r), $ = this, E = ti(), N = new TransformStream({
-      transform(z, ce) {
-        ce.enqueue(z), z.type === "error" && (v == null || v({ error: z.error }));
+    }), S = rr(r), $ = this, E = Yo(), P = new TransformStream({
+      transform(G, ce) {
+        ce.enqueue(G), G.type === "error" && (v == null || v({ error: G.error }));
       }
     });
-    this.baseStream = E.stream.pipeThrough(N), Me({
+    this.baseStream = E.stream.pipeThrough(P), Me({
       name: "ai.streamObject",
       attributes: W({
         telemetry: r,
@@ -8613,7 +8595,7 @@ var yp = class {
       }),
       tracer: S,
       endWhenDone: !1,
-      fn: async (z) => {
+      fn: async (G) => {
         var ce, be;
         (_ === "auto" || _ == null) && (_ = e.defaultObjectGenerationMode);
         let me, ie;
@@ -8621,7 +8603,7 @@ var yp = class {
           case "json": {
             const B = Qt({
               prompt: {
-                system: o.jsonSchema == null ? Rr({ prompt: i }) : e.supportsStructuredOutputs ? i : Rr({
+                system: o.jsonSchema == null ? Ir({ prompt: i }) : e.supportsStructuredOutputs ? i : Ir({
                   prompt: i,
                   schema: o.jsonSchema
                 }),
@@ -8734,7 +8716,7 @@ var yp = class {
                   input: () => me.inputFormat
                 },
                 "ai.prompt.messages": {
-                  input: () => bn(me.prompt)
+                  input: () => yn(me.prompt)
                 },
                 "ai.settings.mode": _,
                 // standardized gen-ai llm span attributes:
@@ -8762,7 +8744,7 @@ var yp = class {
           id: p(),
           timestamp: f(),
           modelId: e.modelId
-        }, q, he, Ae = !0, Pe = !0;
+        }, q, he, Ae = !0, Ne = !0;
         const je = de.pipeThrough(new TransformStream(ie)).pipeThrough(
           new TransformStream({
             async transform(B, D) {
@@ -8777,16 +8759,16 @@ var yp = class {
               }
               if (typeof B == "string") {
                 oe += B, re += B;
-                const { value: T, state: le } = co(oe);
-                if (T !== void 0 && !sn(q, T)) {
+                const { value: T, state: le } = oo(oe);
+                if (T !== void 0 && !rn(q, T)) {
                   const Ee = o.validatePartialResult({
                     value: T,
                     textDelta: re,
                     latestObject: he,
-                    isFirstDelta: Pe,
+                    isFirstDelta: Ne,
                     isFinalDelta: le === "successful-parse"
                   });
-                  Ee.success && !sn(
+                  Ee.success && !rn(
                     he,
                     Ee.value.partial
                   ) && (q = T, he = Ee.value.partial, D.enqueue({
@@ -8795,7 +8777,7 @@ var yp = class {
                   }), D.enqueue({
                     type: "text-delta",
                     textDelta: Ee.value.textDelta
-                  }), re = "", Pe = !1);
+                  }), re = "", Ne = !1);
                 }
                 return;
               }
@@ -8866,7 +8848,7 @@ var yp = class {
                       "gen_ai.usage.output_tokens": D.completionTokens
                     }
                   })
-                ), ue.end(), z.setAttributes(
+                ), ue.end(), G.setAttributes(
                   W({
                     telemetry: r,
                     attributes: {
@@ -8892,18 +8874,18 @@ var yp = class {
               } catch (D) {
                 B.enqueue({ type: "error", error: D });
               } finally {
-                z.end();
+                G.end();
               }
             }
           })
         );
         E.addStream(je);
       }
-    }).catch((z) => {
+    }).catch((G) => {
       E.addStream(
         new ReadableStream({
           start(ce) {
-            ce.enqueue({ type: "error", error: z }), ce.close();
+            ce.enqueue({ type: "error", error: G }), ce.close();
           }
         })
       );
@@ -8933,7 +8915,7 @@ var yp = class {
     return this.responsePromise.value;
   }
   get partialObjectStream() {
-    return Nt(
+    return Pt(
       this.baseStream.pipeThrough(
         new TransformStream({
           transform(e, t) {
@@ -8959,7 +8941,7 @@ var yp = class {
     return this.outputStrategy.createElementStream(this.baseStream);
   }
   get textStream() {
-    return Nt(
+    return Pt(
       this.baseStream.pipeThrough(
         new TransformStream({
           transform(e, t) {
@@ -8982,14 +8964,14 @@ var yp = class {
     );
   }
   get fullStream() {
-    return Nt(this.baseStream);
+    return Pt(this.baseStream);
   }
   pipeTextStreamToResponse(e, t) {
-    un({
+    sn({
       response: e,
       status: t == null ? void 0 : t.status,
       statusText: t == null ? void 0 : t.statusText,
-      headers: ln(t == null ? void 0 : t.headers, {
+      headers: an(t == null ? void 0 : t.headers, {
         contentType: "text/plain; charset=utf-8"
       }),
       stream: this.textStream.pipeThrough(new TextEncoderStream())
@@ -9004,40 +8986,40 @@ var yp = class {
       })
     });
   }
-}, ni = "AI_NoOutputSpecifiedError", ai = `vercel.ai.error.${ni}`, vp = Symbol.for(ai), si, oi = class extends j {
+}, Qo = "AI_NoOutputSpecifiedError", ei = `vercel.ai.error.${Qo}`, fp = Symbol.for(ei), ti, ri = class extends j {
   // used in isInstance
   constructor({ message: e = "No output specified." } = {}) {
-    super({ name: ni, message: e }), this[si] = !0;
+    super({ name: Qo, message: e }), this[ti] = !0;
   }
   static isInstance(e) {
-    return j.hasMarker(e, ai);
+    return j.hasMarker(e, ei);
   }
 };
-si = vp;
-var ii = "AI_ToolExecutionError", li = `vercel.ai.error.${ii}`, _p = Symbol.for(li), ui, ci = class extends j {
+ti = fp;
+var ni = "AI_ToolExecutionError", ai = `vercel.ai.error.${ni}`, hp = Symbol.for(ai), si, oi = class extends j {
   constructor({
     toolArgs: e,
     toolName: t,
     toolCallId: r,
     cause: n,
-    message: a = `Error executing tool ${t}: ${Ar(n)}`
+    message: a = `Error executing tool ${t}: ${Rr(n)}`
   }) {
-    super({ name: ii, message: a, cause: n }), this[ui] = !0, this.toolArgs = e, this.toolName = t, this.toolCallId = r;
+    super({ name: ni, message: a, cause: n }), this[si] = !0, this.toolArgs = e, this.toolName = t, this.toolCallId = r;
   }
   static isInstance(e) {
-    return j.hasMarker(e, li);
+    return j.hasMarker(e, ai);
   }
 };
-ui = _p;
-function bp(e) {
+si = hp;
+function gp(e) {
   return e != null && Object.keys(e).length > 0;
 }
-function di({
+function ii({
   tools: e,
   toolChoice: t,
   activeTools: r
 }) {
-  return bp(e) ? {
+  return gp(e) ? {
     tools: (r != null ? Object.entries(e).filter(
       ([a]) => r.includes(a)
     ) : Object.entries(e)).map(([a, s]) => {
@@ -9070,58 +9052,58 @@ function di({
     toolChoice: void 0
   };
 }
-var wp = /^([\s\S]*?)(\s+)(\S*)$/;
-function pi(e) {
-  const t = e.match(wp);
+var yp = /^([\s\S]*?)(\s+)(\S*)$/;
+function li(e) {
+  const t = e.match(yp);
   return t ? { prefix: t[1], whitespace: t[2], suffix: t[3] } : void 0;
 }
-function xp(e) {
-  const t = pi(e);
+function vp(e) {
+  const t = li(e);
   return t ? t.prefix + t.whitespace : e;
 }
-var mi = "AI_InvalidToolArgumentsError", fi = `vercel.ai.error.${mi}`, kp = Symbol.for(fi), hi, gi = class extends j {
+var ui = "AI_InvalidToolArgumentsError", ci = `vercel.ai.error.${ui}`, _p = Symbol.for(ci), di, pi = class extends j {
   constructor({
     toolArgs: e,
     toolName: t,
     cause: r,
-    message: n = `Invalid arguments for tool ${t}: ${Ar(
+    message: n = `Invalid arguments for tool ${t}: ${Rr(
       r
     )}`
   }) {
-    super({ name: mi, message: n, cause: r }), this[hi] = !0, this.toolArgs = e, this.toolName = t;
+    super({ name: ui, message: n, cause: r }), this[di] = !0, this.toolArgs = e, this.toolName = t;
   }
   static isInstance(e) {
-    return j.hasMarker(e, fi);
+    return j.hasMarker(e, ci);
   }
 };
-hi = kp;
-var yi = "AI_NoSuchToolError", vi = `vercel.ai.error.${yi}`, Tp = Symbol.for(vi), _i, Hn = class extends j {
+di = _p;
+var mi = "AI_NoSuchToolError", fi = `vercel.ai.error.${mi}`, bp = Symbol.for(fi), hi, Jn = class extends j {
   constructor({
     toolName: e,
     availableTools: t = void 0,
     message: r = `Model tried to call unavailable tool '${e}'. ${t === void 0 ? "No tools are available." : `Available tools: ${t.join(", ")}.`}`
   }) {
-    super({ name: yi, message: r }), this[_i] = !0, this.toolName = e, this.availableTools = t;
+    super({ name: mi, message: r }), this[hi] = !0, this.toolName = e, this.availableTools = t;
   }
   static isInstance(e) {
-    return j.hasMarker(e, vi);
+    return j.hasMarker(e, fi);
   }
 };
-_i = Tp;
-var bi = "AI_ToolCallRepairError", wi = `vercel.ai.error.${bi}`, Sp = Symbol.for(wi), xi, Ip = class extends j {
+hi = bp;
+var gi = "AI_ToolCallRepairError", yi = `vercel.ai.error.${gi}`, wp = Symbol.for(yi), vi, xp = class extends j {
   constructor({
     cause: e,
     originalError: t,
-    message: r = `Error repairing tool call: ${Ar(e)}`
+    message: r = `Error repairing tool call: ${Rr(e)}`
   }) {
-    super({ name: bi, message: r, cause: e }), this[xi] = !0, this.originalError = t;
+    super({ name: gi, message: r, cause: e }), this[vi] = !0, this.originalError = t;
   }
   static isInstance(e) {
-    return j.hasMarker(e, wi);
+    return j.hasMarker(e, yi);
   }
 };
-xi = Sp;
-async function ki({
+vi = wp;
+async function _i({
   toolCall: e,
   tools: t,
   repairToolCall: r,
@@ -9129,11 +9111,11 @@ async function ki({
   messages: a
 }) {
   if (t == null)
-    throw new Hn({ toolName: e.toolName });
+    throw new Jn({ toolName: e.toolName });
   try {
-    return await Wa({ toolCall: e, tools: t });
+    return await za({ toolCall: e, tools: t });
   } catch (s) {
-    if (r == null || !(Hn.isInstance(s) || gi.isInstance(s)))
+    if (r == null || !(Jn.isInstance(s) || pi.isInstance(s)))
       throw s;
     let o = null;
     try {
@@ -9146,29 +9128,29 @@ async function ki({
         error: s
       });
     } catch (i) {
-      throw new Ip({
+      throw new xp({
         cause: i,
         originalError: s
       });
     }
     if (o == null)
       throw s;
-    return await Wa({ toolCall: o, tools: t });
+    return await za({ toolCall: o, tools: t });
   }
 }
-async function Wa({
+async function za({
   toolCall: e,
   tools: t
 }) {
   const r = e.toolName, n = t[r];
   if (n == null)
-    throw new Hn({
+    throw new Jn({
       toolName: e.toolName,
       availableTools: Object.keys(t)
     });
   const a = Kt(n.parameters), s = e.args.trim() === "" ? ht({ value: {}, schema: a }) : Ot({ text: e.args, schema: a });
   if (s.success === !1)
-    throw new gi({
+    throw new pi({
       toolName: r,
       toolArgs: e.args,
       cause: s.error
@@ -9180,11 +9162,11 @@ async function Wa({
     args: s.value
   };
 }
-function Wn(e) {
+function zn(e) {
   const t = e.filter((r) => r.type === "text").map((r) => r.text).join("");
   return t.length > 0 ? t : void 0;
 }
-function Kn({
+function Gn({
   text: e = "",
   files: t,
   reasoning: r,
@@ -9231,14 +9213,14 @@ function Kn({
     })
   }), l;
 }
-var Cp = Ft({
+var kp = Ft({
   prefix: "aitxt",
   size: 24
-}), Rp = Ft({
+}), Tp = Ft({
   prefix: "msg",
   size: 24
 });
-async function kh({
+async function _h({
   model: e,
   tools: t,
   toolChoice: r,
@@ -9249,7 +9231,7 @@ async function kh({
   abortSignal: i,
   headers: l,
   maxSteps: u = 1,
-  experimental_generateMessageId: c = Rp,
+  experimental_generateMessageId: c = Tp,
   experimental_output: d,
   experimental_continueSteps: m = !1,
   experimental_telemetry: _,
@@ -9259,7 +9241,7 @@ async function kh({
   experimental_prepareStep: f,
   experimental_repairToolCall: w,
   _internal: {
-    generateId: k = Cp,
+    generateId: k = kp,
     currentDate: b = () => /* @__PURE__ */ new Date()
   } = {},
   onStepFinish: x,
@@ -9272,7 +9254,7 @@ async function kh({
       value: u,
       message: "maxSteps must be at least 1"
     });
-  const { maxRetries: E, retry: N } = _t({ maxRetries: o }), z = tr({
+  const { maxRetries: E, retry: P } = _t({ maxRetries: o }), G = tr({
     model: e,
     telemetry: _,
     headers: l,
@@ -9294,7 +9276,7 @@ async function kh({
           operationId: "ai.generateText",
           telemetry: _
         }),
-        ...z,
+        ...G,
         // model:
         "ai.model.provider": e.provider,
         "ai.model.id": e.modelId,
@@ -9309,7 +9291,7 @@ async function kh({
     fn: async (me) => {
       var ie, de, ye, fe, H, ue, Y, U, Ce, qe, Re, ee, oe, re;
       const te = Xt(S);
-      let q, he = [], Ae = [], Pe = [], je = 0;
+      let q, he = [], Ae = [], Ne = [], je = 0;
       const B = [];
       let D = "";
       const Z = [], we = [];
@@ -9327,7 +9309,7 @@ async function kh({
           steps: we,
           maxSteps: u,
           stepNumber: je
-        })), Vt = (ie = Te == null ? void 0 : Te.toolChoice) != null ? ie : r, xn = (de = Te == null ? void 0 : Te.experimental_activeTools) != null ? de : p, Ue = (ye = Te == null ? void 0 : Te.model) != null ? ye : e, nr = await Yt({
+        })), Vt = (ie = Te == null ? void 0 : Te.toolChoice) != null ? ie : r, _n = (de = Te == null ? void 0 : Te.experimental_activeTools) != null ? de : p, Ue = (ye = Te == null ? void 0 : Te.model) != null ? ye : e, nr = await Yt({
           prompt: {
             type: le,
             system: ce.system,
@@ -9338,13 +9320,13 @@ async function kh({
           // support 'this' context
         }), bt = {
           type: "regular",
-          ...di({
+          ...ii({
             tools: t,
             toolChoice: Vt,
-            activeTools: xn
+            activeTools: _n
           })
         };
-        q = await N(
+        q = await P(
           () => Me({
             name: "ai.generateText.doGenerate",
             attributes: W({
@@ -9354,20 +9336,20 @@ async function kh({
                   operationId: "ai.generateText.doGenerate",
                   telemetry: _
                 }),
-                ...z,
+                ...G,
                 // model:
                 "ai.model.provider": Ue.provider,
                 "ai.model.id": Ue.modelId,
                 // prompt:
                 "ai.prompt.format": { input: () => le },
                 "ai.prompt.messages": {
-                  input: () => bn(nr)
+                  input: () => yn(nr)
                 },
                 "ai.prompt.tools": {
                   // convert the language model level tools:
                   input: () => {
                     var Ze;
-                    return (Ze = bt.tools) == null ? void 0 : Ze.map((ze) => JSON.stringify(ze));
+                    return (Ze = bt.tools) == null ? void 0 : Ze.map((Ge) => JSON.stringify(Ge));
                   }
                 },
                 "ai.prompt.toolChoice": {
@@ -9387,8 +9369,8 @@ async function kh({
             }),
             tracer: be,
             fn: async (Ze) => {
-              var ze, sr, Dr, or, Ye, Bt;
-              const Ne = await Ue.doGenerate({
+              var Ge, sr, jr, or, Ye, Bt;
+              const Pe = await Ue.doGenerate({
                 mode: bt,
                 ...te,
                 inputFormat: le,
@@ -9398,40 +9380,40 @@ async function kh({
                 abortSignal: i,
                 headers: l
               }), it = {
-                id: (sr = (ze = Ne.response) == null ? void 0 : ze.id) != null ? sr : k(),
-                timestamp: (or = (Dr = Ne.response) == null ? void 0 : Dr.timestamp) != null ? or : b(),
-                modelId: (Bt = (Ye = Ne.response) == null ? void 0 : Ye.modelId) != null ? Bt : Ue.modelId
+                id: (sr = (Ge = Pe.response) == null ? void 0 : Ge.id) != null ? sr : k(),
+                timestamp: (or = (jr = Pe.response) == null ? void 0 : jr.timestamp) != null ? or : b(),
+                modelId: (Bt = (Ye = Pe.response) == null ? void 0 : Ye.modelId) != null ? Bt : Ue.modelId
               };
               return Ze.setAttributes(
                 W({
                   telemetry: _,
                   attributes: {
-                    "ai.response.finishReason": Ne.finishReason,
+                    "ai.response.finishReason": Pe.finishReason,
                     "ai.response.text": {
-                      output: () => Ne.text
+                      output: () => Pe.text
                     },
                     "ai.response.toolCalls": {
-                      output: () => JSON.stringify(Ne.toolCalls)
+                      output: () => JSON.stringify(Pe.toolCalls)
                     },
                     "ai.response.id": it.id,
                     "ai.response.model": it.modelId,
                     "ai.response.timestamp": it.timestamp.toISOString(),
-                    "ai.usage.promptTokens": Ne.usage.promptTokens,
-                    "ai.usage.completionTokens": Ne.usage.completionTokens,
+                    "ai.usage.promptTokens": Pe.usage.promptTokens,
+                    "ai.usage.completionTokens": Pe.usage.completionTokens,
                     // standardized gen-ai llm span attributes:
-                    "gen_ai.response.finish_reasons": [Ne.finishReason],
+                    "gen_ai.response.finish_reasons": [Pe.finishReason],
                     "gen_ai.response.id": it.id,
                     "gen_ai.response.model": it.modelId,
-                    "gen_ai.usage.input_tokens": Ne.usage.promptTokens,
-                    "gen_ai.usage.output_tokens": Ne.usage.completionTokens
+                    "gen_ai.usage.input_tokens": Pe.usage.promptTokens,
+                    "gen_ai.usage.output_tokens": Pe.usage.completionTokens
                   }
                 })
-              ), { ...Ne, response: it };
+              ), { ...Pe, response: it };
             }
           })
         ), he = await Promise.all(
           ((H = q.toolCalls) != null ? H : []).map(
-            (Ze) => ki({
+            (Ze) => _i({
               toolCall: Ze,
               tools: t,
               repairToolCall: w,
@@ -9439,7 +9421,7 @@ async function kh({
               messages: Ee
             })
           )
-        ), Ae = t == null ? [] : await Ep({
+        ), Ae = t == null ? [] : await Sp({
           toolCalls: he,
           tools: t,
           tracer: be,
@@ -9450,7 +9432,7 @@ async function kh({
         const ar = ct(
           q.usage
         );
-        X = Xo(X, ar);
+        X = Ho(X, ar);
         let st = "done";
         ++je < u && (m && q.finishReason === "length" && // only use continue when there are no tool calls:
         he.length === 0 ? st = "continue" : (
@@ -9458,9 +9440,9 @@ async function kh({
           he.length > 0 && // all current tool calls have results:
           Ae.length === he.length && (st = "tool-result")
         ));
-        const It = (ue = q.text) != null ? ue : "", $r = T === "continue" && // only for continue steps
-        D.trimEnd() !== D ? It.trimStart() : It, ot = st === "continue" ? xp($r) : $r;
-        if (D = st === "continue" || T === "continue" ? D + ot : ot, Pe = Ka(
+        const It = (ue = q.text) != null ? ue : "", Mr = T === "continue" && // only for continue steps
+        D.trimEnd() !== D ? It.trimStart() : It, ot = st === "continue" ? vp(Mr) : Mr;
+        if (D = st === "continue" || T === "continue" ? D + ot : ot, Ne = Ga(
           q.reasoning
         ), Z.push(...(Y = q.sources) != null ? Y : []), T === "continue") {
           const Ze = B[B.length - 1];
@@ -9470,10 +9452,10 @@ async function kh({
           });
         } else
           B.push(
-            ...Kn({
+            ...Gn({
               text: D,
-              files: $n(q.files),
-              reasoning: Ka(q.reasoning),
+              files: On(q.files),
+              reasoning: Ga(q.reasoning),
               tools: t ?? {},
               toolCalls: he,
               toolResults: Ae,
@@ -9485,9 +9467,9 @@ async function kh({
           stepType: T,
           text: ot,
           // TODO v5: rename reasoning to reasoningText (and use reasoning for composite array)
-          reasoning: Wn(Pe),
-          reasoningDetails: Pe,
-          files: $n(q.files),
+          reasoning: zn(Ne),
+          reasoningDetails: Ne,
+          files: On(q.files),
           sources: (U = q.sources) != null ? U : [],
           toolCalls: he,
           toolResults: Ae,
@@ -9524,15 +9506,15 @@ async function kh({
             "ai.usage.completionTokens": q.usage.completionTokens
           }
         })
-      ), new Ap({
+      ), new Ip({
         text: D,
-        files: $n(q.files),
-        reasoning: Wn(Pe),
-        reasoningDetails: Pe,
+        files: On(q.files),
+        reasoning: zn(Ne),
+        reasoningDetails: Ne,
         sources: Z,
         outputResolver: () => {
           if (d == null)
-            throw new oi();
+            throw new ri();
           return d.parseOutput(
             { text: D },
             {
@@ -9561,7 +9543,7 @@ async function kh({
     }
   });
 }
-async function Ep({
+async function Sp({
   toolCalls: e,
   tools: t,
   tracer: r,
@@ -9613,7 +9595,7 @@ async function Ep({
             }
             return _;
           } catch (_) {
-            throw new ci({
+            throw new oi({
               toolCallId: i,
               toolName: l,
               toolArgs: u,
@@ -9634,7 +9616,7 @@ async function Ep({
     (i) => i != null
   );
 }
-var Ap = class {
+var Ip = class {
   constructor(e) {
     this.text = e.text, this.files = e.files, this.reasoning = e.reasoning, this.reasoningDetails = e.reasoningDetails, this.toolCalls = e.toolCalls, this.toolResults = e.toolResults, this.finishReason = e.finishReason, this.usage = e.usage, this.warnings = e.warnings, this.request = e.request, this.response = e.response, this.steps = e.steps, this.experimental_providerMetadata = e.providerMetadata, this.providerMetadata = e.providerMetadata, this.logprobs = e.logprobs, this.outputResolver = e.outputResolver, this.sources = e.sources;
   }
@@ -9642,44 +9624,44 @@ var Ap = class {
     return this.outputResolver();
   }
 };
-function Ka(e) {
+function Ga(e) {
   return e == null ? [] : typeof e == "string" ? [{ type: "text", text: e }] : e;
 }
-function $n(e) {
+function On(e) {
   var t;
-  return (t = e == null ? void 0 : e.map((r) => new yn(r))) != null ? t : [];
+  return (t = e == null ? void 0 : e.map((r) => new fn(r))) != null ? t : [];
 }
-var Pp = {};
-ma(Pp, {
-  object: () => Dp,
-  text: () => $p
+var Cp = {};
+ca(Cp, {
+  object: () => Op,
+  text: () => Pp
 });
-var Ti = "AI_InvalidStreamPartError", Si = `vercel.ai.error.${Ti}`, Np = Symbol.for(Si), Ii, Op = class extends j {
+var bi = "AI_InvalidStreamPartError", wi = `vercel.ai.error.${bi}`, Rp = Symbol.for(wi), xi, Ep = class extends j {
   constructor({
     chunk: e,
     message: t
   }) {
-    super({ name: Ti, message: t }), this[Ii] = !0, this.chunk = e;
+    super({ name: bi, message: t }), this[xi] = !0, this.chunk = e;
   }
   static isInstance(e) {
-    return j.hasMarker(e, Si);
+    return j.hasMarker(e, wi);
   }
 };
-Ii = Np;
-var Mp = "AI_MCPClientError", Ci = `vercel.ai.error.${Mp}`, jp = Symbol.for(Ci), Ri, Se = class extends j {
+xi = Rp;
+var Ap = "AI_MCPClientError", ki = `vercel.ai.error.${Ap}`, Np = Symbol.for(ki), Ti, Se = class extends j {
   constructor({
     name: e = "MCPClientError",
     message: t,
     cause: r
   }) {
-    super({ name: e, message: t, cause: r }), this[Ri] = !0;
+    super({ name: e, message: t, cause: r }), this[Ti] = !0;
   }
   static isInstance(e) {
-    return j.hasMarker(e, Ci);
+    return j.hasMarker(e, ki);
   }
 };
-Ri = jp;
-var $p = () => ({
+Ti = Np;
+var Pp = () => ({
   type: "text",
   responseFormat: () => ({ type: "text" }),
   injectIntoSystemPrompt({ system: e }) {
@@ -9691,7 +9673,7 @@ var $p = () => ({
   parseOutput({ text: e }) {
     return e;
   }
-}), Dp = ({
+}), Op = ({
   schema: e
 }) => {
   const t = Kt(e);
@@ -9702,13 +9684,13 @@ var $p = () => ({
       schema: r.supportsStructuredOutputs ? t.jsonSchema : void 0
     }),
     injectIntoSystemPrompt({ system: r, model: n }) {
-      return n.supportsStructuredOutputs ? r : Rr({
+      return n.supportsStructuredOutputs ? r : Ir({
         prompt: r,
         schema: t.jsonSchema
       });
     },
     parsePartial({ text: r }) {
-      const n = co(r);
+      const n = oo(r);
       switch (n.state) {
         case "failed-parse":
         case "undefined-input":
@@ -9752,14 +9734,14 @@ var $p = () => ({
       return s.value;
     }
   };
-}, qp = {
+}, Mp = {
   word: /\S+\s+/m,
   line: /\n+/m
 };
-function Th({
+function bh({
   delayInMs: e = 10,
   chunking: t = "word",
-  _internal: { delay: r = ra } = {}
+  _internal: { delay: r = Qn } = {}
 } = {}) {
   let n;
   if (typeof t == "function")
@@ -9776,9 +9758,9 @@ function Th({
       return s;
     };
   else {
-    const a = typeof t == "string" ? qp[t] : t;
+    const a = typeof t == "string" ? Mp[t] : t;
     if (a == null)
-      throw new Qn({
+      throw new Kn({
         argument: "chunking",
         message: `Chunking must be "word" or "line" or a RegExp. Received: ${t}`
       });
@@ -9803,10 +9785,10 @@ function Th({
     });
   };
 }
-function Ei(e) {
+function Si(e) {
   return e === void 0 ? [] : Array.isArray(e) ? e : [e];
 }
-async function Up({
+async function jp({
   stream: e,
   onError: t
 }) {
@@ -9823,7 +9805,7 @@ async function Up({
     r.releaseLock();
   }
 }
-function fa(e, t) {
+function da(e, t) {
   const r = e.getReader(), n = t.getReader();
   let a, s, o = !1, i = !1;
   async function l(c) {
@@ -9870,7 +9852,7 @@ function fa(e, t) {
     }
   });
 }
-function Lp({
+function $p({
   tools: e,
   generatorStream: t,
   toolCallStreaming: r,
@@ -9907,7 +9889,7 @@ function Lp({
         }
         case "file": {
           w.enqueue(
-            new Pd({
+            new Cd({
               data: f.data,
               mimeType: f.mimeType
             })
@@ -9929,7 +9911,7 @@ function Lp({
         }
         case "tool-call": {
           try {
-            const b = await ki({
+            const b = await _i({
               toolCall: f,
               tools: e,
               repairToolCall: l,
@@ -9985,7 +9967,7 @@ function Lp({
                   (E) => {
                     u.enqueue({
                       type: "error",
-                      error: new ci({
+                      error: new oi({
                         toolCallId: b.toolCallId,
                         toolName: b.toolName,
                         toolArgs: b.args,
@@ -10050,14 +10032,14 @@ function Lp({
     }
   });
 }
-var Fp = Ft({
+var Dp = Ft({
   prefix: "aitxt",
   size: 24
-}), Zp = Ft({
+}), qp = Ft({
   prefix: "msg",
   size: 24
 });
-function Sh({
+function wh({
   model: e,
   tools: t,
   toolChoice: r,
@@ -10068,7 +10050,7 @@ function Sh({
   abortSignal: i,
   headers: l,
   maxSteps: u = 1,
-  experimental_generateMessageId: c = Zp,
+  experimental_generateMessageId: c = qp,
   experimental_output: d,
   experimental_continueSteps: m = !1,
   experimental_telemetry: _,
@@ -10084,13 +10066,13 @@ function Sh({
   onFinish: $,
   onStepFinish: E,
   _internal: {
-    now: N = ri,
-    generateId: z = Fp,
+    now: P = Xo,
+    generateId: G = Dp,
     currentDate: ce = () => /* @__PURE__ */ new Date()
   } = {},
   ...be
 }) {
-  return new Bp({
+  return new Lp({
     model: e,
     telemetry: _,
     headers: l,
@@ -10103,7 +10085,7 @@ function Sh({
     tools: t,
     toolChoice: r,
     toolCallStreaming: f,
-    transforms: Ei(b),
+    transforms: Si(b),
     activeTools: w,
     repairToolCall: k,
     maxSteps: u,
@@ -10114,13 +10096,13 @@ function Sh({
     onError: S,
     onFinish: $,
     onStepFinish: E,
-    now: N,
+    now: P,
     currentDate: ce,
-    generateId: z,
+    generateId: G,
     generateMessageId: c
   });
 }
-function Vp(e) {
+function Up(e) {
   if (!e)
     return new TransformStream({
       transform(s, o) {
@@ -10155,7 +10137,7 @@ function Vp(e) {
     }
   });
 }
-var Bp = class {
+var Lp = class {
   constructor({
     model: e,
     telemetry: t,
@@ -10182,8 +10164,8 @@ var Bp = class {
     generateMessageId: S,
     onChunk: $,
     onError: E,
-    onFinish: N,
-    onStepFinish: z
+    onFinish: P,
+    onStepFinish: G
   }) {
     this.warningsPromise = new xe(), this.usagePromise = new xe(), this.finishReasonPromise = new xe(), this.providerMetadataPromise = new xe(), this.textPromise = new xe(), this.reasoningPromise = new xe(), this.reasoningDetailsPromise = new xe(), this.sourcesPromise = new xe(), this.filesPromise = new xe(), this.toolCallsPromise = new xe(), this.toolResultsPromise = new xe(), this.requestPromise = new xe(), this.responsePromise = new xe(), this.stepsPromise = new xe();
     var ce;
@@ -10217,7 +10199,7 @@ var Bp = class {
           fe.signature = T.signature, fe = void 0;
         }
         if (T.type === "redacted-reasoning" && de.push({ type: "redacted", data: T.data }), T.type === "file" && ye.push(T), T.type === "source" && (ue.push(T.source), H.push(T.source)), T.type === "tool-call" && U.push(T), T.type === "tool-result" && Ce.push(T), T.type === "step-finish") {
-          const le = Kn({
+          const le = Gn({
             text: me,
             files: ye,
             reasoning: de,
@@ -10237,7 +10219,7 @@ var Bp = class {
           const Vt = {
             stepType: ee,
             text: be,
-            reasoning: Wn(de),
+            reasoning: zn(de),
             reasoningDetails: de,
             files: ye,
             sources: H,
@@ -10256,7 +10238,7 @@ var Bp = class {
             experimental_providerMetadata: T.experimental_providerMetadata,
             isContinued: T.isContinued
           };
-          await (z == null ? void 0 : z(Vt)), oe.push(Vt), U = [], Ce = [], be = "", H = [], de = [], ye = [], fe = void 0, Te !== "done" && (ee = Te), Te !== "continue" && (Y.messages.push(...le), me = "");
+          await (G == null ? void 0 : G(Vt)), oe.push(Vt), U = [], Ce = [], be = "", H = [], de = [], ye = [], fe = void 0, Te !== "done" && (ee = Te), Te !== "continue" && (Y.messages.push(...le), me = "");
         }
         T.type === "finish" && (Y.id = T.response.id, Y.timestamp = T.response.timestamp, Y.modelId = T.response.modelId, Y.headers = T.response.headers, Re = T.usage, qe = T.finishReason);
       },
@@ -10274,7 +10256,7 @@ var Bp = class {
             promptTokens: NaN,
             totalTokens: NaN
           };
-          Z.finishReasonPromise.resolve(le), Z.usagePromise.resolve(Ee), Z.textPromise.resolve(ie), Z.sourcesPromise.resolve(ue), Z.filesPromise.resolve(T.files), Z.stepsPromise.resolve(oe), await (N == null ? void 0 : N({
+          Z.finishReasonPromise.resolve(le), Z.usagePromise.resolve(Ee), Z.textPromise.resolve(ie), Z.sourcesPromise.resolve(ue), Z.filesPromise.resolve(T.files), Z.stepsPromise.resolve(oe), await (P == null ? void 0 : P({
             finishReason: le,
             logprobs: void 0,
             usage: Ee,
@@ -10314,7 +10296,7 @@ var Bp = class {
           re.end();
         }
       }
-    }), q = ti();
+    }), q = Yo();
     this.addStream = q.addStream, this.closeStream = q.close;
     let he = q.stream;
     for (const we of m)
@@ -10326,8 +10308,8 @@ var Bp = class {
           }
         })
       );
-    this.baseStream = he.pipeThrough(Vp(p)).pipeThrough(te);
-    const { maxRetries: Ae, retry: Pe } = _t({
+    this.baseStream = he.pipeThrough(Up(p)).pipeThrough(te);
+    const { maxRetries: Ae, retry: Ne } = _t({
       maxRetries: a
     }), je = rr(t), B = tr({
       model: e,
@@ -10366,7 +10348,7 @@ var Bp = class {
           usage: Ee,
           stepType: Te,
           previousStepText: Vt,
-          hasLeadingWhitespace: xn,
+          hasLeadingWhitespace: _n,
           messageId: Ue
         }) {
           var nr;
@@ -10384,12 +10366,12 @@ var Bp = class {
             // support 'this' context
           }), It = {
             type: "regular",
-            ...di({ tools: u, toolChoice: c, activeTools: _ })
+            ...ii({ tools: u, toolChoice: c, activeTools: _ })
           }, {
-            result: { stream: $r, warnings: ot, rawResponse: Ct, request: Ze },
-            doStreamSpan: ze,
+            result: { stream: Mr, warnings: ot, rawResponse: Ct, request: Ze },
+            doStreamSpan: Ge,
             startTimestampMs: sr
-          } = await Pe(
+          } = await Ne(
             () => Me({
               name: "ai.streamText.doStream",
               attributes: W({
@@ -10404,7 +10386,7 @@ var Bp = class {
                     input: () => bt
                   },
                   "ai.prompt.messages": {
-                    input: () => bn(st)
+                    input: () => yn(st)
                   },
                   "ai.prompt.tools": {
                     // convert the language model level tools:
@@ -10446,9 +10428,9 @@ var Bp = class {
                 })
               })
             })
-          ), Dr = Lp({
+          ), jr = $p({
             tools: u,
-            generatorStream: $r,
+            generatorStream: Mr,
             toolCallStreaming: d,
             tracer: je,
             telemetry: t,
@@ -10456,32 +10438,32 @@ var Bp = class {
             messages: ar,
             repairToolCall: v,
             abortSignal: s
-          }), or = Ze ?? {}, Ye = [], Bt = [], Ne = [], it = [];
+          }), or = Ze ?? {}, Ye = [], Bt = [], Pe = [], it = [];
           let Rt, Et = "unknown", wt = {
             promptTokens: 0,
             completionTokens: 0,
             totalTokens: 0
-          }, ir, _a = !0, lr = "", ba = Te === "continue" ? Vt : "", kn, He = {
+          }, ir, ga = !0, lr = "", ya = Te === "continue" ? Vt : "", bn, He = {
             id: x(),
             timestamp: b(),
             modelId: e.modelId
-          }, Jt = "", wa = !1, xa = !0, ka = !1;
-          async function Tn({
+          }, Jt = "", va = !1, _a = !0, ba = !1;
+          async function wn({
             controller: J,
             chunk: _e
           }) {
-            J.enqueue(_e), lr += _e.textDelta, ba += _e.textDelta, wa = !0, ka = _e.textDelta.trimEnd() !== _e.textDelta;
+            J.enqueue(_e), lr += _e.textDelta, ya += _e.textDelta, va = !0, ba = _e.textDelta.trimEnd() !== _e.textDelta;
           }
           Z.addStream(
-            Dr.pipeThrough(
+            jr.pipeThrough(
               new TransformStream({
                 async transform(J, _e) {
                   var Xe, ur, At;
-                  if (_a) {
+                  if (ga) {
                     const Qe = k() - sr;
-                    _a = !1, ze.addEvent("ai.stream.firstChunk", {
+                    ga = !1, Ge.addEvent("ai.stream.firstChunk", {
                       "ai.response.msToFirstChunk": Qe
-                    }), ze.setAttributes({
+                    }), Ge.setAttributes({
                       "ai.response.msToFirstChunk": Qe
                     }), _e.enqueue({
                       type: "step-start",
@@ -10492,36 +10474,36 @@ var Bp = class {
                   }
                   if (J.type === "text-delta" && J.textDelta.length === 0)
                     return;
-                  const Ta = J.type;
-                  switch (Ta) {
+                  const wa = J.type;
+                  switch (wa) {
                     case "text-delta": {
                       if (f) {
-                        const Qe = xa && xn ? J.textDelta.trimStart() : J.textDelta;
+                        const Qe = _a && _n ? J.textDelta.trimStart() : J.textDelta;
                         if (Qe.length === 0)
                           break;
-                        xa = !1, Jt += Qe;
-                        const qr = pi(Jt);
-                        qr != null && (Jt = qr.suffix, await Tn({
+                        _a = !1, Jt += Qe;
+                        const $r = li(Jt);
+                        $r != null && (Jt = $r.suffix, await wn({
                           controller: _e,
                           chunk: {
                             type: "text-delta",
-                            textDelta: qr.prefix + qr.whitespace
+                            textDelta: $r.prefix + $r.whitespace
                           }
                         }));
                       } else
-                        await Tn({ controller: _e, chunk: J });
+                        await wn({ controller: _e, chunk: J });
                       break;
                     }
                     case "reasoning": {
                       _e.enqueue(J), Rt == null ? (Rt = {
                         type: "text",
                         text: J.textDelta
-                      }, Ne.push(Rt)) : Rt.text += J.textDelta;
+                      }, Pe.push(Rt)) : Rt.text += J.textDelta;
                       break;
                     }
                     case "reasoning-signature": {
                       if (_e.enqueue(J), Rt == null)
-                        throw new Op({
+                        throw new Ep({
                           chunk: J,
                           message: "reasoning-signature without reasoning"
                         });
@@ -10529,7 +10511,7 @@ var Bp = class {
                       break;
                     }
                     case "redacted-reasoning": {
-                      _e.enqueue(J), Ne.push({
+                      _e.enqueue(J), Pe.push({
                         type: "redacted",
                         data: J.data
                       });
@@ -10552,9 +10534,9 @@ var Bp = class {
                       break;
                     }
                     case "finish": {
-                      wt = J.usage, Et = J.finishReason, ir = J.experimental_providerMetadata, kn = J.logprobs;
+                      wt = J.usage, Et = J.finishReason, ir = J.experimental_providerMetadata, bn = J.logprobs;
                       const Qe = k() - sr;
-                      ze.addEvent("ai.stream.finish"), ze.setAttributes({
+                      Ge.addEvent("ai.stream.finish"), Ge.setAttributes({
                         "ai.response.msToFinish": Qe,
                         "ai.response.avgCompletionTokensPerSecond": 1e3 * wt.completionTokens / Qe
                       });
@@ -10575,7 +10557,7 @@ var Bp = class {
                       break;
                     }
                     default: {
-                      const Qe = Ta;
+                      const Qe = wa;
                       throw new Error(`Unknown chunk type: ${Qe}`);
                     }
                   }
@@ -10590,7 +10572,7 @@ var Bp = class {
                     Ye.length > 0 && // all current tool calls have results:
                     Bt.length === Ye.length && (Xe = "tool-result")
                   )), f && Jt.length > 0 && (Xe !== "continue" || // when the next step is a regular step, publish the buffer
-                  Te === "continue" && !wa) && (await Tn({
+                  Te === "continue" && !va) && (await wn({
                     controller: J,
                     chunk: {
                       type: "text-delta",
@@ -10598,7 +10580,7 @@ var Bp = class {
                     }
                   }), Jt = "");
                   try {
-                    ze.setAttributes(
+                    Ge.setAttributes(
                       W({
                         telemetry: t,
                         attributes: {
@@ -10623,7 +10605,7 @@ var Bp = class {
                     );
                   } catch {
                   } finally {
-                    ze.end();
+                    Ge.end();
                   }
                   J.enqueue({
                     type: "step-finish",
@@ -10631,7 +10613,7 @@ var Bp = class {
                     usage: wt,
                     providerMetadata: ir,
                     experimental_providerMetadata: ir,
-                    logprobs: kn,
+                    logprobs: bn,
                     request: or,
                     response: {
                       ...He,
@@ -10641,7 +10623,7 @@ var Bp = class {
                     isContinued: Xe === "continue",
                     messageId: Ue
                   });
-                  const ur = Xo(Ee, wt);
+                  const ur = Ho(Ee, wt);
                   if (Xe === "done")
                     J.enqueue({
                       type: "finish",
@@ -10649,7 +10631,7 @@ var Bp = class {
                       usage: ur,
                       providerMetadata: ir,
                       experimental_providerMetadata: ir,
-                      logprobs: kn,
+                      logprobs: bn,
                       response: {
                         ...He,
                         headers: Ct == null ? void 0 : Ct.headers
@@ -10664,10 +10646,10 @@ var Bp = class {
                       });
                     } else
                       le.push(
-                        ...Kn({
+                        ...Gn({
                           text: lr,
                           files: it,
-                          reasoning: Ne,
+                          reasoning: Pe,
                           tools: u ?? {},
                           toolCalls: Ye,
                           toolResults: Bt,
@@ -10680,8 +10662,8 @@ var Bp = class {
                       responseMessages: le,
                       usage: ur,
                       stepType: Xe,
-                      previousStepText: ba,
-                      hasLeadingWhitespace: ka,
+                      previousStepText: ya,
+                      hasLeadingWhitespace: ba,
                       messageId: (
                         // keep the same id when continuing a step:
                         Xe === "continue" ? Ue : S()
@@ -10775,7 +10757,7 @@ var Bp = class {
     return this.baseStream = t, e;
   }
   get textStream() {
-    return Nt(
+    return Pt(
       this.teeStream().pipeThrough(
         new TransformStream({
           transform({ part: e }, t) {
@@ -10786,7 +10768,7 @@ var Bp = class {
     );
   }
   get fullStream() {
-    return Nt(
+    return Pt(
       this.teeStream().pipeThrough(
         new TransformStream({
           transform({ part: e }, t) {
@@ -10799,7 +10781,7 @@ var Bp = class {
   async consumeStream(e) {
     var t;
     try {
-      await Up({
+      await jp({
         stream: this.fullStream,
         onError: e == null ? void 0 : e.onError
       });
@@ -10809,8 +10791,8 @@ var Bp = class {
   }
   get experimental_partialOutputStream() {
     if (this.output == null)
-      throw new oi();
-    return Nt(
+      throw new ri();
+    return Pt(
       this.teeStream().pipeThrough(
         new TransformStream({
           transform({ partialOutput: e }, t) {
@@ -10970,11 +10952,11 @@ var Bp = class {
     sendSources: l,
     experimental_sendFinish: u
   } = {}) {
-    un({
+    sn({
       response: e,
       status: t,
       statusText: r,
-      headers: ln(n, {
+      headers: an(n, {
         contentType: "text/plain; charset=utf-8",
         dataStreamVersion: "v1"
       }),
@@ -10989,11 +10971,11 @@ var Bp = class {
     });
   }
   pipeTextStreamToResponse(e, t) {
-    un({
+    sn({
       response: e,
       status: t == null ? void 0 : t.status,
       statusText: t == null ? void 0 : t.statusText,
-      headers: ln(t == null ? void 0 : t.headers, {
+      headers: an(t == null ? void 0 : t.headers, {
         contentType: "text/plain; charset=utf-8"
       }),
       stream: this.textStream.pipeThrough(new TextEncoderStream())
@@ -11008,7 +10990,7 @@ var Bp = class {
       sendSources: e == null ? void 0 : e.sendSources,
       experimental_sendFinish: e == null ? void 0 : e.experimental_sendFinish
     }).pipeThrough(new TextEncoderStream());
-    return e != null && e.data ? fa(e == null ? void 0 : e.data.stream, t) : t;
+    return e != null && e.data ? da(e == null ? void 0 : e.data.stream, t) : t;
   }
   mergeIntoDataStream(e, t) {
     e.merge(
@@ -11060,14 +11042,14 @@ var Bp = class {
       })
     });
   }
-}, Jp = class extends j {
+}, Fp = class extends j {
   constructor(e) {
     super({
       name: "AI_NoSpeechGeneratedError",
       message: "No speech audio generated."
     }), this.responses = e.responses;
   }
-}, Gp = class extends yn {
+}, Zp = class extends fn {
   constructor({
     data: e,
     mimeType: t
@@ -11085,7 +11067,7 @@ var Bp = class {
     this.format = r;
   }
 };
-async function Ih({
+async function xh({
   model: e,
   text: t,
   voice: r,
@@ -11111,13 +11093,13 @@ async function Ih({
     })
   );
   if (!m.audio || m.audio.length === 0)
-    throw new Jp({ responses: [m.response] });
-  return new zp({
-    audio: new Gp({
+    throw new Fp({ responses: [m.response] });
+  return new Vp({
+    audio: new Zp({
       data: m.audio,
-      mimeType: (c = vn({
+      mimeType: (c = hn({
         data: m.audio,
-        signatures: No
+        signatures: Ro
       })) != null ? c : "audio/mp3"
     }),
     warnings: m.warnings,
@@ -11125,12 +11107,12 @@ async function Ih({
     providerMetadata: m.providerMetadata
   });
 }
-var zp = class {
+var Vp = class {
   constructor(e) {
     var t;
     this.audio = e.audio, this.warnings = e.warnings, this.responses = e.responses, this.providerMetadata = (t = e.providerMetadata) != null ? t : {};
   }
-}, Hp = class extends j {
+}, Bp = class extends j {
   constructor(e) {
     super({
       name: "AI_NoTranscriptGeneratedError",
@@ -11138,7 +11120,7 @@ var zp = class {
     }), this.responses = e.responses;
   }
 };
-async function Ch({
+async function kh({
   model: e,
   audio: t,
   providerOptions: r = {},
@@ -11146,7 +11128,7 @@ async function Ch({
   abortSignal: a,
   headers: s
 }) {
-  const { retry: o } = _t({ maxRetries: n }), i = t instanceof URL ? (await Uo({ url: t })).data : Cr(t), l = await o(
+  const { retry: o } = _t({ maxRetries: n }), i = t instanceof URL ? (await jo({ url: t })).data : Sr(t), l = await o(
     () => {
       var u;
       return e.doGenerate({
@@ -11154,16 +11136,16 @@ async function Ch({
         abortSignal: a,
         headers: s,
         providerOptions: r,
-        mediaType: (u = vn({
+        mediaType: (u = hn({
           data: i,
-          signatures: No
+          signatures: Ro
         })) != null ? u : "audio/wav"
       });
     }
   );
   if (!l.text)
-    throw new Hp({ responses: [l.response] });
-  return new Wp({
+    throw new Bp({ responses: [l.response] });
+  return new Jp({
     text: l.text,
     segments: l.segments,
     language: l.language,
@@ -11173,13 +11155,13 @@ async function Ch({
     providerMetadata: l.providerMetadata
   });
 }
-var Wp = class {
+var Jp = class {
   constructor(e) {
     var t;
     this.text = e.text, this.segments = e.segments, this.language = e.language, this.durationInSeconds = e.durationInSeconds, this.warnings = e.warnings, this.responses = e.responses, this.providerMetadata = (t = e.providerMetadata) != null ? t : {};
   }
 };
-function Ai(e, t) {
+function Ii(e, t) {
   if (e === void 0 && t === void 0)
     return;
   if (e === void 0)
@@ -11193,14 +11175,14 @@ function Ai(e, t) {
       if (a === void 0)
         continue;
       const s = n in e ? e[n] : void 0, o = a !== null && typeof a == "object" && !Array.isArray(a) && !(a instanceof Date) && !(a instanceof RegExp), i = s != null && typeof s == "object" && !Array.isArray(s) && !(s instanceof Date) && !(s instanceof RegExp);
-      o && i ? r[n] = Ai(
+      o && i ? r[n] = Ii(
         s,
         a
       ) : r[n] = a;
     }
   return r;
 }
-function Rh({
+function Th({
   settings: e
 }) {
   return {
@@ -11210,7 +11192,7 @@ function Rh({
       return {
         ...e,
         ...t,
-        providerMetadata: Ai(
+        providerMetadata: Ii(
           e.providerMetadata,
           t.providerMetadata
         ),
@@ -11221,7 +11203,7 @@ function Rh({
     }
   };
 }
-function Kp(e, t) {
+function zp(e, t) {
   if (t.length === 0)
     return null;
   const r = e.indexOf(t);
@@ -11234,7 +11216,7 @@ function Kp(e, t) {
   }
   return null;
 }
-function Eh({
+function Sh({
   tagName: e,
   separator: t = `
 `,
@@ -11282,7 +11264,7 @@ function Eh({
                 }
               }
               do {
-                const p = d ? a : n, f = Kp(m, p);
+                const p = d ? a : n, f = zp(m, p);
                 if (f == null) {
                   g(m), m = "";
                   break;
@@ -11302,7 +11284,7 @@ function Eh({
     }
   };
 }
-function Ah() {
+function Ih() {
   return {
     middlewareVersion: "v1",
     wrapStream: async ({ doGenerate: e }) => {
@@ -11368,12 +11350,12 @@ function Ah() {
     }
   };
 }
-var Yp = ({
+var Gp = ({
   model: e,
   middleware: t,
   modelId: r,
   providerId: n
-}) => Ei(t).reverse().reduce((a, s) => Xp({ model: a, middleware: s, modelId: r, providerId: n }), e), Xp = ({
+}) => Si(t).reverse().reduce((a, s) => Hp({ model: a, middleware: s, modelId: r, providerId: n }), e), Hp = ({
   model: e,
   middleware: { transformParams: t, wrapGenerate: r, wrapStream: n },
   modelId: a,
@@ -11408,8 +11390,8 @@ var Yp = ({
       return n ? n({ doGenerate: c, doStream: d, params: u, model: e }) : d();
     }
   };
-}, Ph = Yp;
-function Nh({
+}, Ch = Gp;
+function Rh({
   messages: e,
   message: t
 }) {
@@ -11418,7 +11400,7 @@ function Nh({
     t
   ];
 }
-function Oh({
+function Eh({
   messages: e,
   responseMessages: t,
   _internal: { currentDate: r = () => /* @__PURE__ */ new Date() } = {}
@@ -11490,13 +11472,13 @@ function Oh({
                 _.push({
                   type: "file",
                   mimeType: f.mimeType,
-                  data: _n(f.data)
+                  data: gn(f.data)
                 });
                 break;
             }
         }
         if (d) {
-          const p = oc(
+          const p = rc(
             c.toolInvocations
           );
           (n = c.parts) != null || (c.parts = []), c.content = v, c.reasoning = g, c.parts.push(..._), c.toolInvocations = [
@@ -11558,7 +11540,7 @@ function Oh({
   }
   return i;
 }
-function Qp({
+function Wp({
   languageModels: e,
   textEmbeddingModels: t,
   imageModels: r,
@@ -11588,7 +11570,7 @@ function Qp({
     }
   };
 }
-var Mh = Qp, Pi = "AI_NoSuchProviderError", Ni = `vercel.ai.error.${Pi}`, em = Symbol.for(Ni), Oi, tm = class extends pt {
+var Ah = Wp, Ci = "AI_NoSuchProviderError", Ri = `vercel.ai.error.${Ci}`, Kp = Symbol.for(Ri), Ei, Yp = class extends pt {
   constructor({
     modelId: e,
     modelType: t,
@@ -11596,24 +11578,24 @@ var Mh = Qp, Pi = "AI_NoSuchProviderError", Ni = `vercel.ai.error.${Pi}`, em = S
     availableProviders: n,
     message: a = `No such provider: ${r} (available providers: ${n.join()})`
   }) {
-    super({ errorName: Pi, modelId: e, modelType: t, message: a }), this[Oi] = !0, this.providerId = r, this.availableProviders = n;
+    super({ errorName: Ci, modelId: e, modelType: t, message: a }), this[Ei] = !0, this.providerId = r, this.availableProviders = n;
   }
   static isInstance(e) {
-    return j.hasMarker(e, Ni);
+    return j.hasMarker(e, Ri);
   }
 };
-Oi = em;
-function rm(e, {
+Ei = Kp;
+function Xp(e, {
   separator: t = ":"
 } = {}) {
-  const r = new nm({
+  const r = new Qp({
     separator: t
   });
   for (const [n, a] of Object.entries(e))
     r.registerProvider({ id: n, provider: a });
   return r;
 }
-var jh = rm, nm = class {
+var Nh = Xp, Qp = class {
   constructor({ separator: e }) {
     this.providers = {}, this.separator = e;
   }
@@ -11626,7 +11608,7 @@ var jh = rm, nm = class {
   getProvider(e) {
     const t = this.providers[e];
     if (t == null)
-      throw new tm({
+      throw new Yp({
         modelId: e,
         modelType: "languageModel",
         providerId: e,
@@ -11669,21 +11651,21 @@ var jh = rm, nm = class {
     return s;
   }
 };
-function $h(e) {
+function Ph(e) {
   return e;
 }
-var Mi = "2024-11-05", am = [
-  Mi,
+var Ai = "2024-11-05", em = [
+  Ai,
   "2024-10-07"
-], sm = y({
+], tm = y({
   name: h(),
   version: h()
-}).passthrough(), ha = y({
+}).passthrough(), pa = y({
   _meta: Ie(y({}).passthrough())
-}).passthrough(), Er = ha, om = y({
+}).passthrough(), Cr = pa, rm = y({
   method: h(),
-  params: Ie(ha)
-}), im = y({
+  params: Ie(pa)
+}), nm = y({
   experimental: Ie(y({}).passthrough()),
   logging: Ie(y({}).passthrough()),
   prompts: Ie(
@@ -11702,30 +11684,30 @@ var Mi = "2024-11-05", am = [
       listChanged: Ie(Je())
     }).passthrough()
   )
-}).passthrough(), lm = Er.extend({
+}).passthrough(), am = Cr.extend({
   protocolVersion: h(),
-  capabilities: im,
-  serverInfo: sm,
+  capabilities: nm,
+  serverInfo: tm,
   instructions: Ie(h())
-}), um = Er.extend({
+}), sm = Cr.extend({
   nextCursor: Ie(h())
-}), cm = y({
+}), om = y({
   name: h(),
   description: Ie(h()),
   inputSchema: y({
     type: A("object"),
     properties: Ie(y({}).passthrough())
   }).passthrough()
-}).passthrough(), dm = um.extend({
-  tools: L(cm)
-}), pm = y({
+}).passthrough(), im = sm.extend({
+  tools: F(om)
+}), lm = y({
   type: A("text"),
   text: h()
-}).passthrough(), mm = y({
+}).passthrough(), um = y({
   type: A("image"),
   data: h().base64(),
   mimeType: h()
-}).passthrough(), ji = y({
+}).passthrough(), Ni = y({
   /**
    * The URI of this resource.
    */
@@ -11734,50 +11716,50 @@ var Mi = "2024-11-05", am = [
    * The MIME type of this resource, if known.
    */
   mimeType: Ie(h())
-}).passthrough(), fm = ji.extend({
+}).passthrough(), cm = Ni.extend({
   text: h()
-}), hm = ji.extend({
+}), dm = Ni.extend({
   blob: h().base64()
-}), gm = y({
+}), pm = y({
   type: A("resource"),
-  resource: ge([fm, hm])
-}).passthrough(), ym = Er.extend({
-  content: L(
-    ge([pm, mm, gm])
+  resource: ge([cm, dm])
+}).passthrough(), mm = Cr.extend({
+  content: F(
+    ge([lm, um, pm])
   ),
   isError: Je().default(!1).optional()
 }).or(
-  Er.extend({
-    toolResult: Or()
+  Cr.extend({
+    toolResult: Nr()
   })
-), wn = "2.0", vm = y({
-  jsonrpc: A(wn),
+), vn = "2.0", fm = y({
+  jsonrpc: A(vn),
   id: ge([h(), R().int()])
-}).merge(om).strict(), _m = y({
-  jsonrpc: A(wn),
+}).merge(rm).strict(), hm = y({
+  jsonrpc: A(vn),
   id: ge([h(), R().int()]),
-  result: Er
-}).strict(), bm = y({
-  jsonrpc: A(wn),
+  result: Cr
+}).strict(), gm = y({
+  jsonrpc: A(vn),
   id: ge([h(), R().int()]),
   error: y({
     code: R().int(),
     message: h(),
-    data: Ie(Or())
+    data: Ie(Nr())
   })
-}).strict(), wm = y({
-  jsonrpc: A(wn)
+}).strict(), ym = y({
+  jsonrpc: A(vn)
 }).merge(
   y({
     method: h(),
-    params: Ie(ha)
+    params: Ie(pa)
   })
-).strict(), xm = ge([
-  vm,
-  wm,
-  _m,
-  bm
-]), km = class {
+).strict(), vm = ge([
+  fm,
+  ym,
+  hm,
+  gm
+]), _m = class {
   constructor({
     url: e,
     headers: t
@@ -11803,7 +11785,7 @@ var Mi = "2024-11-05", am = [
             });
             return (a = this.onerror) == null || a.call(this, d), t(d);
           }
-          const u = i.body.pipeThrough(new TextDecoderStream()).pipeThrough(Ws()).getReader(), c = async () => {
+          const u = i.body.pipeThrough(new TextDecoderStream()).pipeThrough(zs()).getReader(), c = async () => {
             var d, m, _;
             try {
               for (; ; ) {
@@ -11824,7 +11806,7 @@ var Mi = "2024-11-05", am = [
                   this.connected = !0, e();
                 } else if (p === "message")
                   try {
-                    const w = xm.parse(
+                    const w = vm.parse(
                       JSON.parse(f)
                     );
                     (d = this.onmessage) == null || d.call(this, w);
@@ -11885,28 +11867,28 @@ var Mi = "2024-11-05", am = [
     }
   }
 };
-function Tm(e) {
+function bm(e) {
   if (e.type !== "sse")
     throw new Se({
       message: "Unsupported or invalid transport configuration. If you are using a custom transport, make sure it implements the MCPTransport interface."
     });
-  return new km(e);
+  return new _m(e);
 }
-function Sm(e) {
+function wm(e) {
   return "start" in e && typeof e.start == "function" && "send" in e && typeof e.send == "function" && "close" in e && typeof e.close == "function";
 }
-var Im = "1.0.0";
-async function Dh(e) {
-  const t = new Cm(e);
+var xm = "1.0.0";
+async function Oh(e) {
+  const t = new km(e);
   return await t.init(), t;
 }
-var Cm = class {
+var km = class {
   constructor({
     transport: e,
     name: t = "ai-sdk-mcp-client",
     onUncaughtError: r
   }) {
-    this.requestMessageId = 0, this.responseHandlers = /* @__PURE__ */ new Map(), this.serverCapabilities = {}, this.isClosed = !0, this.onUncaughtError = r, Sm(e) ? this.transport = e : this.transport = Tm(e), this.transport.onclose = () => this.onClose(), this.transport.onerror = (n) => this.onError(n), this.transport.onmessage = (n) => {
+    this.requestMessageId = 0, this.responseHandlers = /* @__PURE__ */ new Map(), this.serverCapabilities = {}, this.isClosed = !0, this.onUncaughtError = r, wm(e) ? this.transport = e : this.transport = bm(e), this.transport.onclose = () => this.onClose(), this.transport.onerror = (n) => this.onError(n), this.transport.onmessage = (n) => {
       if ("method" in n) {
         this.onError(
           new Se({
@@ -11918,7 +11900,7 @@ var Cm = class {
       this.onResponse(n);
     }, this.clientInfo = {
       name: t,
-      version: Im
+      version: xm
     };
   }
   async init() {
@@ -11928,18 +11910,18 @@ var Cm = class {
         request: {
           method: "initialize",
           params: {
-            protocolVersion: Mi,
+            protocolVersion: Ai,
             capabilities: {},
             clientInfo: this.clientInfo
           }
         },
-        resultSchema: lm
+        resultSchema: am
       });
       if (e === void 0)
         throw new Se({
           message: "Server sent invalid initialize result"
         });
-      if (!am.includes(e.protocolVersion))
+      if (!em.includes(e.protocolVersion))
         throw new Se({
           message: `Server's protocol version is not supported: ${e.protocolVersion}`
         });
@@ -12025,7 +12007,7 @@ var Cm = class {
     try {
       return this.request({
         request: { method: "tools/list", params: e },
-        resultSchema: dm,
+        resultSchema: im,
         options: t
       });
     } catch (r) {
@@ -12040,7 +12022,7 @@ var Cm = class {
     try {
       return this.request({
         request: { method: "tools/call", params: { name: e, arguments: t } },
-        resultSchema: ym,
+        resultSchema: mm,
         options: {
           signal: r == null ? void 0 : r.abortSignal
         }
@@ -12070,7 +12052,7 @@ var Cm = class {
       for (const { name: a, description: s, inputSchema: o } of n.tools) {
         if (e !== "automatic" && !(a in e))
           continue;
-        const i = e === "automatic" ? po({
+        const i = e === "automatic" ? io({
           ...o,
           properties: (t = o.properties) != null ? t : {},
           additionalProperties: !1
@@ -12123,7 +12105,7 @@ var Cm = class {
     );
   }
 };
-function qh(e, t, r) {
+function Mh(e, t, r) {
   if (e.length !== t.length)
     throw new ne({
       parameter: "vector1,vector2",
@@ -12147,14 +12129,14 @@ function qh(e, t, r) {
   }
   return a === 0 || s === 0 ? 0 : o / (Math.sqrt(a) * Math.sqrt(s));
 }
-function Uh({
+function jh({
   chunks: e,
   initialDelayInMs: t = 0,
   chunkDelayInMs: r = 0,
   _internal: n
 }) {
   var a;
-  const s = (a = n == null ? void 0 : n.delay) != null ? a : ra;
+  const s = (a = n == null ? void 0 : n.delay) != null ? a : Qn;
   let o = 0;
   return new ReadableStream({
     async pull(i) {
@@ -12162,25 +12144,25 @@ function Uh({
     }
   });
 }
-function Lh({ threadId: e, messageId: t }, r) {
+function $h({ threadId: e, messageId: t }, r) {
   const n = new ReadableStream({
     async start(a) {
       var s;
       const o = new TextEncoder(), i = (d) => {
         a.enqueue(
           o.encode(
-            Gt("assistant_message", d)
+            zt("assistant_message", d)
           )
         );
       }, l = (d) => {
         a.enqueue(
           o.encode(
-            Gt("data_message", d)
+            zt("data_message", d)
           )
         );
       }, u = (d) => {
         a.enqueue(
-          o.encode(Gt("error", d))
+          o.encode(zt("error", d))
         );
       }, c = async (d) => {
         var m, _;
@@ -12190,7 +12172,7 @@ function Lh({ threadId: e, messageId: t }, r) {
             case "thread.message.created": {
               a.enqueue(
                 o.encode(
-                  Gt("assistant_message", {
+                  zt("assistant_message", {
                     id: g.data.id,
                     role: "assistant",
                     content: [{ type: "text", text: { value: "" } }]
@@ -12203,7 +12185,7 @@ function Lh({ threadId: e, messageId: t }, r) {
               const p = (m = g.data.delta.content) == null ? void 0 : m[0];
               (p == null ? void 0 : p.type) === "text" && ((_ = p.text) == null ? void 0 : _.value) != null && a.enqueue(
                 o.encode(
-                  Gt("text", p.text.value)
+                  zt("text", p.text.value)
                 )
               );
               break;
@@ -12218,7 +12200,7 @@ function Lh({ threadId: e, messageId: t }, r) {
       };
       a.enqueue(
         o.encode(
-          Gt("assistant_control_data", {
+          zt("assistant_control_data", {
             threadId: e,
             messageId: t
           })
@@ -12248,13 +12230,13 @@ function Lh({ threadId: e, messageId: t }, r) {
     }
   });
 }
-var Rm = {};
-ma(Rm, {
-  mergeIntoDataStream: () => Pm,
-  toDataStream: () => Em,
-  toDataStreamResponse: () => Am
+var Tm = {};
+ca(Tm, {
+  mergeIntoDataStream: () => Cm,
+  toDataStream: () => Sm,
+  toDataStreamResponse: () => Im
 });
-function $i(e = {}) {
+function Pi(e = {}) {
   const t = new TextEncoder();
   let r = "";
   return new TransformStream({
@@ -12269,7 +12251,7 @@ function $i(e = {}) {
     }
   });
 }
-function ga(e, t) {
+function ma(e, t) {
   return e.pipeThrough(
     new TransformStream({
       transform: async (r, n) => {
@@ -12279,16 +12261,16 @@ function ga(e, t) {
           return;
         }
         if ("event" in r) {
-          r.event === "on_chat_model_stream" && Ya(
+          r.event === "on_chat_model_stream" && Ha(
             (a = r.data) == null ? void 0 : a.chunk,
             n
           );
           return;
         }
-        Ya(r, n);
+        Ha(r, n);
       }
     })
-  ).pipeThrough($i(t)).pipeThrough(new TextDecoderStream()).pipeThrough(
+  ).pipeThrough(Pi(t)).pipeThrough(new TextDecoderStream()).pipeThrough(
     new TransformStream({
       transform: async (r, n) => {
         n.enqueue(pe("text", r));
@@ -12296,17 +12278,17 @@ function ga(e, t) {
     })
   );
 }
-function Em(e, t) {
-  return ga(e, t).pipeThrough(
+function Sm(e, t) {
+  return ma(e, t).pipeThrough(
     new TextEncoderStream()
   );
 }
-function Am(e, t) {
+function Im(e, t) {
   var r;
-  const n = ga(
+  const n = ma(
     e,
     t == null ? void 0 : t.callbacks
-  ).pipeThrough(new TextEncoderStream()), a = t == null ? void 0 : t.data, s = t == null ? void 0 : t.init, o = a ? fa(a.stream, n) : n;
+  ).pipeThrough(new TextEncoderStream()), a = t == null ? void 0 : t.data, s = t == null ? void 0 : t.init, o = a ? da(a.stream, n) : n;
   return new Response(o, {
     status: (r = s == null ? void 0 : s.status) != null ? r : 200,
     statusText: s == null ? void 0 : s.statusText,
@@ -12316,10 +12298,10 @@ function Am(e, t) {
     })
   });
 }
-function Pm(e, t) {
-  t.dataStream.merge(ga(e, t.callbacks));
+function Cm(e, t) {
+  t.dataStream.merge(ma(e, t.callbacks));
 }
-function Ya(e, t) {
+function Ha(e, t) {
   if (typeof e.content == "string")
     t.enqueue(e.content);
   else {
@@ -12328,21 +12310,21 @@ function Ya(e, t) {
       n.type === "text" && t.enqueue(n.text);
   }
 }
-var Nm = {};
-ma(Nm, {
-  mergeIntoDataStream: () => jm,
-  toDataStream: () => Om,
-  toDataStreamResponse: () => Mm
+var Rm = {};
+ca(Rm, {
+  mergeIntoDataStream: () => Nm,
+  toDataStream: () => Em,
+  toDataStreamResponse: () => Am
 });
-function ya(e, t) {
-  const r = $m();
-  return il(e[Symbol.asyncIterator]()).pipeThrough(
+function fa(e, t) {
+  const r = Pm();
+  return nl(e[Symbol.asyncIterator]()).pipeThrough(
     new TransformStream({
       async transform(n, a) {
         a.enqueue(r(n.delta));
       }
     })
-  ).pipeThrough($i(t)).pipeThrough(new TextDecoderStream()).pipeThrough(
+  ).pipeThrough(Pi(t)).pipeThrough(new TextDecoderStream()).pipeThrough(
     new TransformStream({
       transform: async (n, a) => {
         a.enqueue(pe("text", n));
@@ -12350,16 +12332,16 @@ function ya(e, t) {
     })
   );
 }
-function Om(e, t) {
-  return ya(e, t).pipeThrough(
+function Em(e, t) {
+  return fa(e, t).pipeThrough(
     new TextEncoderStream()
   );
 }
-function Mm(e, t = {}) {
+function Am(e, t = {}) {
   var r;
-  const { init: n, data: a, callbacks: s } = t, o = ya(e, s).pipeThrough(
+  const { init: n, data: a, callbacks: s } = t, o = fa(e, s).pipeThrough(
     new TextEncoderStream()
-  ), i = a ? fa(a.stream, o) : o;
+  ), i = a ? da(a.stream, o) : o;
   return new Response(i, {
     status: (r = n == null ? void 0 : n.status) != null ? r : 200,
     statusText: n == null ? void 0 : n.statusText,
@@ -12369,14 +12351,14 @@ function Mm(e, t = {}) {
     })
   });
 }
-function jm(e, t) {
-  t.dataStream.merge(ya(e, t.callbacks));
+function Nm(e, t) {
+  t.dataStream.merge(fa(e, t.callbacks));
 }
-function $m() {
+function Pm() {
   let e = !0;
   return (t) => (e && (t = t.trimStart(), t && (e = !1)), t);
 }
-var Dm = 15 * 1e3, Fh = class {
+var Om = 15 * 1e3, Dh = class {
   constructor() {
     this.encoder = new TextEncoder(), this.controller = null, this.isClosed = !1, this.warningTimeout = null;
     const e = this;
@@ -12386,7 +12368,7 @@ var Dm = 15 * 1e3, Fh = class {
           console.warn(
             "The data stream is hanging. Did you forget to close it with `data.close()`?"
           );
-        }, Dm));
+        }, Om));
       },
       pull: (t) => {
       },
@@ -12420,17 +12402,17 @@ var Dm = 15 * 1e3, Fh = class {
       this.encoder.encode(pe("message_annotations", [e]))
     );
   }
-}, qm = y({
+}, Mm = y({
   type: A("error"),
   error: y({
     type: h(),
     message: h()
   })
-}), Xa = aa({
-  errorSchema: qm,
+}), Wa = ta({
+  errorSchema: Mm,
   errorToMessage: (e) => e.error.message
 });
-function Um(e) {
+function jm(e) {
   var t;
   const r = (t = e.tools) != null && t.length ? e.tools : void 0, n = [], a = /* @__PURE__ */ new Set();
   if (r == null)
@@ -12539,13 +12521,13 @@ function Um(e) {
     }
   }
 }
-function Lm({
+function $m({
   prompt: e,
   sendReasoning: t,
   warnings: r
 }) {
   var n, a, s, o;
-  const i = /* @__PURE__ */ new Set(), l = Fm(e);
+  const i = /* @__PURE__ */ new Set(), l = Dm(e);
   let u;
   const c = [];
   function d(m) {
@@ -12625,13 +12607,13 @@ function Lm({
             }
             case "tool": {
               for (let b = 0; b < k.length; b++) {
-                const x = k[b], S = b === k.length - 1, $ = (s = d(x.providerMetadata)) != null ? s : S ? d(f.providerMetadata) : void 0, E = x.content != null ? x.content.map((N) => {
-                  var z;
-                  switch (N.type) {
+                const x = k[b], S = b === k.length - 1, $ = (s = d(x.providerMetadata)) != null ? s : S ? d(f.providerMetadata) : void 0, E = x.content != null ? x.content.map((P) => {
+                  var G;
+                  switch (P.type) {
                     case "text":
                       return {
                         type: "text",
-                        text: N.text,
+                        text: P.text,
                         cache_control: void 0
                       };
                     case "image":
@@ -12639,8 +12621,8 @@ function Lm({
                         type: "image",
                         source: {
                           type: "base64",
-                          media_type: (z = N.mimeType) != null ? z : "image/jpeg",
-                          data: N.data
+                          media_type: (G = P.mimeType) != null ? G : "image/jpeg",
+                          data: P.data
                         },
                         cache_control: void 0
                       };
@@ -12732,7 +12714,7 @@ function Lm({
     betas: i
   };
 }
-function Fm(e) {
+function Dm(e) {
   const t = [];
   let r;
   for (const n of e) {
@@ -12762,7 +12744,7 @@ function Fm(e) {
   }
   return t;
 }
-function Qa(e) {
+function Ka(e) {
   switch (e) {
     case "end_turn":
     case "stop_sequence":
@@ -12775,7 +12757,7 @@ function Qa(e) {
       return "unknown";
   }
 }
-var Zm = class {
+var qm = class {
   constructor(e, t, r) {
     this.specificationVersion = "v1", this.defaultObjectGenerationMode = "tool", this.modelId = e, this.settings = t, this.config = r;
   }
@@ -12819,14 +12801,14 @@ var Zm = class {
       setting: "responseFormat",
       details: "JSON response format is not supported."
     });
-    const { prompt: f, betas: w } = Lm({
+    const { prompt: f, betas: w } = $m({
       prompt: t,
       sendReasoning: (m = this.settings.sendReasoning) != null ? m : !0,
       warnings: p
-    }), k = pn({
+    }), k = un({
       provider: "anthropic",
       providerOptions: d,
-      schema: Jm
+      schema: Fm
     }), b = ((_ = k == null ? void 0 : k.thinking) == null ? void 0 : _.type) === "enabled", x = (v = k == null ? void 0 : k.thinking) == null ? void 0 : v.budgetTokens, S = {
       // model id:
       model: this.modelId,
@@ -12868,13 +12850,13 @@ var Zm = class {
         const {
           tools: $,
           tool_choice: E,
-          toolWarnings: N,
-          betas: z
-        } = Um(e);
+          toolWarnings: P,
+          betas: G
+        } = jm(e);
         return {
           args: { ...S, tools: $, tool_choice: E },
-          warnings: [...p, ...N],
-          betas: /* @__PURE__ */ new Set([...w, ...z])
+          warnings: [...p, ...P],
+          betas: /* @__PURE__ */ new Set([...w, ...G])
         };
       }
       case "object-json":
@@ -12882,11 +12864,11 @@ var Zm = class {
           functionality: "json-mode object generation"
         });
       case "object-tool": {
-        const { name: $, description: E, parameters: N } = e.tool;
+        const { name: $, description: E, parameters: P } = e.tool;
         return {
           args: {
             ...S,
-            tools: [{ name: $, description: E, input_schema: N }],
+            tools: [{ name: $, description: E, input_schema: P }],
             tool_choice: { type: "tool", name: $ }
           },
           warnings: p,
@@ -12904,7 +12886,7 @@ var Zm = class {
     headers: t
   }) {
     return Le(
-      await _l(this.config.headers),
+      await hl(this.config.headers),
       e.size > 0 ? { "anthropic-beta": Array.from(e).join(",") } : {},
       t
     );
@@ -12927,9 +12909,9 @@ var Zm = class {
       url: this.buildRequestUrl(!1),
       headers: await this.getHeaders({ betas: i, headers: e.headers }),
       body: this.transformRequestBody(s),
-      failedResponseHandler: Xa,
+      failedResponseHandler: Wa,
       successfulResponseHandler: vt(
-        Vm
+        Um
       ),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
@@ -12964,7 +12946,7 @@ var Zm = class {
       text: _,
       reasoning: g.length > 0 ? g : void 0,
       toolCalls: v,
-      finishReason: Qa(u.stop_reason),
+      finishReason: Ka(u.stop_reason),
       usage: {
         promptTokens: u.usage.input_tokens,
         completionTokens: u.usage.output_tokens
@@ -12993,9 +12975,9 @@ var Zm = class {
       url: this.buildRequestUrl(!0),
       headers: await this.getHeaders({ betas: n, headers: e.headers }),
       body: this.transformRequestBody(a),
-      failedResponseHandler: Xa,
-      successfulResponseHandler: Nr(
-        Bm
+      failedResponseHandler: Wa,
+      successfulResponseHandler: Ar(
+        Lm
       ),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
@@ -13119,7 +13101,7 @@ var Zm = class {
                 return;
               }
               case "message_delta": {
-                c.completionTokens = b.usage.output_tokens, u = Qa(b.delta.stop_reason);
+                c.completionTokens = b.usage.output_tokens, u = Ka(b.delta.stop_reason);
                 return;
               }
               case "message_stop": {
@@ -13149,11 +13131,11 @@ var Zm = class {
       request: { body: JSON.stringify(a) }
     };
   }
-}, Vm = y({
+}, Um = y({
   type: A("message"),
   id: h().nullish(),
   model: h().nullish(),
-  content: L(
+  content: F(
     Tt("type", [
       y({
         type: A("text"),
@@ -13172,7 +13154,7 @@ var Zm = class {
         type: A("tool_use"),
         id: h(),
         name: h(),
-        input: Or()
+        input: Nr()
       })
     ])
   ),
@@ -13183,7 +13165,7 @@ var Zm = class {
     cache_creation_input_tokens: R().nullish(),
     cache_read_input_tokens: R().nullish()
   })
-}), Bm = Tt("type", [
+}), Lm = Tt("type", [
   y({
     type: A("message_start"),
     message: y({
@@ -13264,33 +13246,71 @@ var Zm = class {
   y({
     type: A("ping")
   })
-]), Jm = y({
+]), Fm = y({
   thinking: y({
     type: ge([A("enabled"), A("disabled")]),
     budgetTokens: R().optional()
   }).optional()
-}), Gm = y({
+}), Zm = y({
   command: h(),
   restart: Je().optional()
 });
-function zm(e = {}) {
+function Vm(e = {}) {
   return {
     type: "provider-defined",
     id: "anthropic.bash_20241022",
     args: {},
-    parameters: Gm,
+    parameters: Zm,
+    execute: e.execute,
+    experimental_toToolResultContent: e.experimental_toToolResultContent
+  };
+}
+var Bm = y({
+  command: h(),
+  restart: Je().optional()
+});
+function Jm(e = {}) {
+  return {
+    type: "provider-defined",
+    id: "anthropic.bash_20250124",
+    args: {},
+    parameters: Bm,
+    execute: e.execute,
+    experimental_toToolResultContent: e.experimental_toToolResultContent
+  };
+}
+var zm = y({
+  command: yt(["view", "create", "str_replace", "insert", "undo_edit"]),
+  path: h(),
+  file_text: h().optional(),
+  insert_line: R().int().optional(),
+  new_str: h().optional(),
+  old_str: h().optional(),
+  view_range: F(R().int()).optional()
+});
+function Gm(e = {}) {
+  return {
+    type: "provider-defined",
+    id: "anthropic.text_editor_20241022",
+    args: {},
+    parameters: zm,
     execute: e.execute,
     experimental_toToolResultContent: e.experimental_toToolResultContent
   };
 }
 var Hm = y({
-  command: h(),
-  restart: Je().optional()
+  command: yt(["view", "create", "str_replace", "insert", "undo_edit"]),
+  path: h(),
+  file_text: h().optional(),
+  insert_line: R().int().optional(),
+  new_str: h().optional(),
+  old_str: h().optional(),
+  view_range: F(R().int()).optional()
 });
 function Wm(e = {}) {
   return {
     type: "provider-defined",
-    id: "anthropic.bash_20250124",
+    id: "anthropic.text_editor_20250124",
     args: {},
     parameters: Hm,
     execute: e.execute,
@@ -13298,44 +13318,6 @@ function Wm(e = {}) {
   };
 }
 var Km = y({
-  command: yt(["view", "create", "str_replace", "insert", "undo_edit"]),
-  path: h(),
-  file_text: h().optional(),
-  insert_line: R().int().optional(),
-  new_str: h().optional(),
-  old_str: h().optional(),
-  view_range: L(R().int()).optional()
-});
-function Ym(e = {}) {
-  return {
-    type: "provider-defined",
-    id: "anthropic.text_editor_20241022",
-    args: {},
-    parameters: Km,
-    execute: e.execute,
-    experimental_toToolResultContent: e.experimental_toToolResultContent
-  };
-}
-var Xm = y({
-  command: yt(["view", "create", "str_replace", "insert", "undo_edit"]),
-  path: h(),
-  file_text: h().optional(),
-  insert_line: R().int().optional(),
-  new_str: h().optional(),
-  old_str: h().optional(),
-  view_range: L(R().int()).optional()
-});
-function Qm(e = {}) {
-  return {
-    type: "provider-defined",
-    id: "anthropic.text_editor_20250124",
-    args: {},
-    parameters: Xm,
-    execute: e.execute,
-    experimental_toToolResultContent: e.experimental_toToolResultContent
-  };
-}
-var ef = y({
   action: yt([
     "key",
     "type",
@@ -13348,10 +13330,10 @@ var ef = y({
     "screenshot",
     "cursor_position"
   ]),
-  coordinate: L(R().int()).optional(),
+  coordinate: F(R().int()).optional(),
   text: h().optional()
 });
-function tf(e) {
+function Ym(e) {
   return {
     type: "provider-defined",
     id: "anthropic.computer_20241022",
@@ -13360,12 +13342,12 @@ function tf(e) {
       displayHeightPx: e.displayHeightPx,
       displayNumber: e.displayNumber
     },
-    parameters: ef,
+    parameters: Km,
     execute: e.execute,
     experimental_toToolResultContent: e.experimental_toToolResultContent
   };
 }
-var rf = y({
+var Xm = y({
   action: yt([
     "key",
     "hold_key",
@@ -13384,14 +13366,14 @@ var rf = y({
     "wait",
     "screenshot"
   ]),
-  coordinate: Ua([R().int(), R().int()]).optional(),
+  coordinate: $a([R().int(), R().int()]).optional(),
   duration: R().optional(),
   scroll_amount: R().optional(),
   scroll_direction: yt(["up", "down", "left", "right"]).optional(),
-  start_coordinate: Ua([R().int(), R().int()]).optional(),
+  start_coordinate: $a([R().int(), R().int()]).optional(),
   text: h().optional()
 });
-function nf(e) {
+function Qm(e) {
   return {
     type: "provider-defined",
     id: "anthropic.computer_20250124",
@@ -13400,30 +13382,30 @@ function nf(e) {
       displayHeightPx: e.displayHeightPx,
       displayNumber: e.displayNumber
     },
-    parameters: rf,
+    parameters: Xm,
     execute: e.execute,
     experimental_toToolResultContent: e.experimental_toToolResultContent
   };
 }
-var af = {
-  bash_20241022: zm,
-  bash_20250124: Wm,
-  textEditor_20241022: Ym,
-  textEditor_20250124: Qm,
-  computer_20241022: tf,
-  computer_20250124: nf
+var ef = {
+  bash_20241022: Vm,
+  bash_20250124: Jm,
+  textEditor_20241022: Gm,
+  textEditor_20250124: Wm,
+  computer_20241022: Ym,
+  computer_20250124: Qm
 };
-function sf(e = {}) {
+function tf(e = {}) {
   var t;
-  const r = (t = sa(e.baseURL)) != null ? t : "https://api.anthropic.com/v1", n = () => ({
+  const r = (t = ra(e.baseURL)) != null ? t : "https://api.anthropic.com/v1", n = () => ({
     "anthropic-version": "2023-06-01",
-    "x-api-key": na({
+    "x-api-key": ea({
       apiKey: e.apiKey,
       environmentVariableName: "ANTHROPIC_API_KEY",
       description: "Anthropic"
     }),
     ...e.headers
-  }), a = (o, i = {}) => new Zm(o, i, {
+  }), a = (o, i = {}) => new qm(o, i, {
     provider: "anthropic.messages",
     baseURL: r,
     headers: n,
@@ -13438,10 +13420,10 @@ function sf(e = {}) {
   };
   return s.languageModel = a, s.chat = a, s.messages = a, s.textEmbeddingModel = (o) => {
     throw new pt({ modelId: o, modelType: "textEmbeddingModel" });
-  }, s.tools = af, s;
+  }, s.tools = ef, s;
 }
-sf();
-function of(e) {
+tf();
+function rf(e) {
   const t = [];
   for (let r = 0; r < e.length; r++) {
     const { role: n, content: a } = e[r], s = r === e.length - 1;
@@ -13532,7 +13514,7 @@ function of(e) {
   }
   return t;
 }
-function es(e) {
+function Ya(e) {
   switch (e) {
     case "stop":
       return "stop";
@@ -13545,17 +13527,17 @@ function es(e) {
       return "unknown";
   }
 }
-var lf = y({
+var nf = y({
   object: A("error"),
   message: h(),
   type: h(),
   param: h().nullable(),
   code: h().nullable()
-}), Yn = aa({
-  errorSchema: lf,
+}), Hn = ta({
+  errorSchema: nf,
   errorToMessage: (e) => e.message
 });
-function ts({
+function Xa({
   id: e,
   model: t,
   created: r
@@ -13566,7 +13548,7 @@ function ts({
     timestamp: r != null ? new Date(r * 1e3) : void 0
   };
 }
-function uf(e) {
+function af(e) {
   var t;
   const r = (t = e.tools) != null && t.length ? e.tools : void 0, n = [];
   if (r == null)
@@ -13607,7 +13589,7 @@ function uf(e) {
     }
   }
 }
-var cf = class {
+var sf = class {
   constructor(e, t, r) {
     this.specificationVersion = "v1", this.defaultObjectGenerationMode = "json", this.supportsImageUrls = !1, this.modelId = e, this.settings = t, this.config = r;
   }
@@ -13666,11 +13648,11 @@ var cf = class {
       document_image_limit: (m = d == null ? void 0 : d.mistral) == null ? void 0 : m.documentImageLimit,
       document_page_limit: (_ = d == null ? void 0 : d.mistral) == null ? void 0 : _.documentPageLimit,
       // messages:
-      messages: of(t)
+      messages: rf(t)
     };
     switch (v) {
       case "regular": {
-        const { tools: f, tool_choice: w, toolWarnings: k } = uf(e);
+        const { tools: f, tool_choice: w, toolWarnings: k } = af(e);
         return {
           args: { ...p, tools: f, tool_choice: w },
           warnings: [...g, ...k]
@@ -13709,14 +13691,14 @@ var cf = class {
       url: `${this.config.baseURL}/chat/completions`,
       headers: Le(this.config.headers(), e.headers),
       body: r,
-      failedResponseHandler: Yn,
+      failedResponseHandler: Hn,
       successfulResponseHandler: vt(
-        df
+        of
       ),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
     }), { messages: i, ...l } = r, u = s.choices[0];
-    let c = rs(u.message.content);
+    let c = Qa(u.message.content);
     const d = i[i.length - 1];
     return d.role === "assistant" && (c != null && c.startsWith(d.content)) && (c = c.slice(d.content.length)), {
       text: c,
@@ -13726,7 +13708,7 @@ var cf = class {
         toolName: m.function.name,
         args: m.function.arguments
       })),
-      finishReason: es(u.finish_reason),
+      finishReason: Ya(u.finish_reason),
       usage: {
         promptTokens: s.usage.prompt_tokens,
         completionTokens: s.usage.completion_tokens
@@ -13737,7 +13719,7 @@ var cf = class {
         body: o
       },
       request: { body: JSON.stringify(r) },
-      response: ts(s),
+      response: Xa(s),
       warnings: n
     };
   }
@@ -13746,9 +13728,9 @@ var cf = class {
       url: `${this.config.baseURL}/chat/completions`,
       headers: Le(this.config.headers(), e.headers),
       body: n,
-      failedResponseHandler: Yn,
-      successfulResponseHandler: Nr(
-        pf
+      failedResponseHandler: Hn,
+      successfulResponseHandler: Ar(
+        lf
       ),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
@@ -13769,15 +13751,15 @@ var cf = class {
             const v = m.value;
             c === 1 && _.enqueue({
               type: "response-metadata",
-              ...ts(v)
+              ...Xa(v)
             }), v.usage != null && (u = {
               promptTokens: v.usage.prompt_tokens,
               completionTokens: v.usage.completion_tokens
             });
             const g = v.choices[0];
-            if ((g == null ? void 0 : g.finish_reason) != null && (l = es(g.finish_reason)), (g == null ? void 0 : g.delta) == null)
+            if ((g == null ? void 0 : g.finish_reason) != null && (l = Ya(g.finish_reason)), (g == null ? void 0 : g.delta) == null)
               return;
-            const p = g.delta, f = rs(p.content);
+            const p = g.delta, f = Qa(p.content);
             if (c <= 2) {
               const w = o[o.length - 1];
               if (w.role === "assistant" && f === w.content.trimEnd()) {
@@ -13816,7 +13798,7 @@ var cf = class {
     };
   }
 };
-function rs(e) {
+function Qa(e) {
   if (typeof e == "string")
     return e;
   if (e == null)
@@ -13839,9 +13821,9 @@ function rs(e) {
   }
   return t.length ? t.join("") : void 0;
 }
-var Di = ge([
+var Oi = ge([
   h(),
-  L(
+  F(
     Tt("type", [
       y({
         type: A("text"),
@@ -13859,20 +13841,20 @@ var Di = ge([
       }),
       y({
         type: A("reference"),
-        reference_ids: L(R())
+        reference_ids: F(R())
       })
     ])
   )
-]).nullish(), df = y({
+]).nullish(), of = y({
   id: h().nullish(),
   created: R().nullish(),
   model: h().nullish(),
-  choices: L(
+  choices: F(
     y({
       message: y({
         role: A("assistant"),
-        content: Di,
-        tool_calls: L(
+        content: Oi,
+        tool_calls: F(
           y({
             id: h(),
             function: y({ name: h(), arguments: h() })
@@ -13888,16 +13870,16 @@ var Di = ge([
     prompt_tokens: R(),
     completion_tokens: R()
   })
-}), pf = y({
+}), lf = y({
   id: h().nullish(),
   created: R().nullish(),
   model: h().nullish(),
-  choices: L(
+  choices: F(
     y({
       delta: y({
         role: yt(["assistant"]).optional(),
-        content: Di,
-        tool_calls: L(
+        content: Oi,
+        tool_calls: F(
           y({
             id: h(),
             function: y({ name: h(), arguments: h() })
@@ -13912,7 +13894,7 @@ var Di = ge([
     prompt_tokens: R(),
     completion_tokens: R()
   }).nullish()
-}), mf = class {
+}), uf = class {
   constructor(e, t, r) {
     this.specificationVersion = "v1", this.modelId = e, this.settings = t, this.config = r;
   }
@@ -13933,7 +13915,7 @@ var Di = ge([
     headers: r
   }) {
     if (e.length > this.maxEmbeddingsPerCall)
-      throw new Ls({
+      throw new Ds({
         provider: this.provider,
         modelId: this.modelId,
         maxEmbeddingsPerCall: this.maxEmbeddingsPerCall,
@@ -13947,9 +13929,9 @@ var Di = ge([
         input: e,
         encoding_format: "float"
       },
-      failedResponseHandler: Yn,
+      failedResponseHandler: Hn,
       successfulResponseHandler: vt(
-        ff
+        cf
       ),
       abortSignal: t,
       fetch: this.config.fetch
@@ -13960,25 +13942,25 @@ var Di = ge([
       rawResponse: { headers: n }
     };
   }
-}, ff = y({
-  data: L(y({ embedding: L(R()) })),
+}, cf = y({
+  data: F(y({ embedding: F(R()) })),
   usage: y({ prompt_tokens: R() }).nullish()
 });
-function hf(e = {}) {
+function df(e = {}) {
   var t;
-  const r = (t = sa(e.baseURL)) != null ? t : "https://api.mistral.ai/v1", n = () => ({
-    Authorization: `Bearer ${na({
+  const r = (t = ra(e.baseURL)) != null ? t : "https://api.mistral.ai/v1", n = () => ({
+    Authorization: `Bearer ${ea({
       apiKey: e.apiKey,
       environmentVariableName: "MISTRAL_API_KEY",
       description: "Mistral"
     })}`,
     ...e.headers
-  }), a = (i, l = {}) => new cf(i, l, {
+  }), a = (i, l = {}) => new sf(i, l, {
     provider: "mistral.chat",
     baseURL: r,
     headers: n,
     fetch: e.fetch
-  }), s = (i, l = {}) => new mf(i, l, {
+  }), s = (i, l = {}) => new uf(i, l, {
     provider: "mistral.embedding",
     baseURL: r,
     headers: n,
@@ -13992,8 +13974,8 @@ function hf(e = {}) {
   };
   return o.languageModel = a, o.chat = a, o.embedding = s, o.textEmbedding = s, o.textEmbeddingModel = s, o;
 }
-hf();
-function gf({
+df();
+function pf({
   prompt: e,
   useLegacyFunctionCalling: t = !1,
   systemMessageMode: r = "system"
@@ -14143,7 +14125,7 @@ function gf({
     }
   return { messages: n, warnings: a };
 }
-function ns(e) {
+function es(e) {
   var t, r;
   return (r = (t = e == null ? void 0 : e.content) == null ? void 0 : t.map(({ token: n, logprob: a, top_logprobs: s }) => ({
     token: n,
@@ -14154,7 +14136,7 @@ function ns(e) {
     })) : []
   }))) != null ? r : void 0;
 }
-function cn(e) {
+function on(e) {
   switch (e) {
     case "stop":
       return "stop";
@@ -14169,21 +14151,21 @@ function cn(e) {
       return "unknown";
   }
 }
-var va = y({
+var ha = y({
   error: y({
     message: h(),
     // The additional information below is handled loosely to support
     // OpenAI-compatible providers that have slightly different error
     // responses:
     type: h().nullish(),
-    param: ao().nullish(),
+    param: eo().nullish(),
     code: ge([h(), R()]).nullish()
   })
-}), at = aa({
-  errorSchema: va,
+}), at = ta({
+  errorSchema: ha,
   errorToMessage: (e) => e.error.message
 });
-function dn({
+function ln({
   id: e,
   model: t,
   created: r
@@ -14194,7 +14176,7 @@ function dn({
     timestamp: r != null ? new Date(r * 1e3) : void 0
   };
 }
-function yf({
+function mf({
   mode: e,
   useLegacyFunctionCalling: t = !1,
   structuredOutputs: r
@@ -14277,16 +14259,16 @@ function yf({
     }
   }
 }
-var vf = class {
+var ff = class {
   constructor(e, t, r) {
     this.specificationVersion = "v1", this.modelId = e, this.settings = t, this.config = r;
   }
   get supportsStructuredOutputs() {
     var e;
-    return (e = this.settings.structuredOutputs) != null ? e : Xn(this.modelId);
+    return (e = this.settings.structuredOutputs) != null ? e : Wn(this.modelId);
   }
   get defaultObjectGenerationMode() {
-    return wf(this.modelId) ? "tool" : this.supportsStructuredOutputs ? "json" : "tool";
+    return yf(this.modelId) ? "tool" : this.supportsStructuredOutputs ? "json" : "tool";
   }
   get provider() {
     return this.config.provider;
@@ -14327,15 +14309,15 @@ var vf = class {
       throw new se({
         functionality: "structuredOutputs with useLegacyFunctionCalling"
       });
-    const { messages: $, warnings: E } = gf(
+    const { messages: $, warnings: E } = pf(
       {
         prompt: t,
         useLegacyFunctionCalling: S,
-        systemMessageMode: xf(this.modelId)
+        systemMessageMode: vf(this.modelId)
       }
     );
     x.push(...E);
-    const N = {
+    const P = {
       // model id:
       model: this.modelId,
       // model specific settings:
@@ -14371,46 +14353,46 @@ var vf = class {
       // messages:
       messages: $
     };
-    switch (Xn(this.modelId) ? (N.temperature != null && (N.temperature = void 0, x.push({
+    switch (Wn(this.modelId) ? (P.temperature != null && (P.temperature = void 0, x.push({
       type: "unsupported-setting",
       setting: "temperature",
       details: "temperature is not supported for reasoning models"
-    })), N.top_p != null && (N.top_p = void 0, x.push({
+    })), P.top_p != null && (P.top_p = void 0, x.push({
       type: "unsupported-setting",
       setting: "topP",
       details: "topP is not supported for reasoning models"
-    })), N.frequency_penalty != null && (N.frequency_penalty = void 0, x.push({
+    })), P.frequency_penalty != null && (P.frequency_penalty = void 0, x.push({
       type: "unsupported-setting",
       setting: "frequencyPenalty",
       details: "frequencyPenalty is not supported for reasoning models"
-    })), N.presence_penalty != null && (N.presence_penalty = void 0, x.push({
+    })), P.presence_penalty != null && (P.presence_penalty = void 0, x.push({
       type: "unsupported-setting",
       setting: "presencePenalty",
       details: "presencePenalty is not supported for reasoning models"
-    })), N.logit_bias != null && (N.logit_bias = void 0, x.push({
+    })), P.logit_bias != null && (P.logit_bias = void 0, x.push({
       type: "other",
       message: "logitBias is not supported for reasoning models"
-    })), N.logprobs != null && (N.logprobs = void 0, x.push({
+    })), P.logprobs != null && (P.logprobs = void 0, x.push({
       type: "other",
       message: "logprobs is not supported for reasoning models"
-    })), N.top_logprobs != null && (N.top_logprobs = void 0, x.push({
+    })), P.top_logprobs != null && (P.top_logprobs = void 0, x.push({
       type: "other",
       message: "topLogprobs is not supported for reasoning models"
-    })), N.max_tokens != null && (N.max_completion_tokens == null && (N.max_completion_tokens = N.max_tokens), N.max_tokens = void 0)) : (this.modelId.startsWith("gpt-4o-search-preview") || this.modelId.startsWith("gpt-4o-mini-search-preview")) && N.temperature != null && (N.temperature = void 0, x.push({
+    })), P.max_tokens != null && (P.max_completion_tokens == null && (P.max_completion_tokens = P.max_tokens), P.max_tokens = void 0)) : (this.modelId.startsWith("gpt-4o-search-preview") || this.modelId.startsWith("gpt-4o-mini-search-preview")) && P.temperature != null && (P.temperature = void 0, x.push({
       type: "unsupported-setting",
       setting: "temperature",
       details: "temperature is not supported for the search preview models and has been removed."
     })), b) {
       case "regular": {
-        const { tools: z, tool_choice: ce, functions: be, function_call: me, toolWarnings: ie } = yf({
+        const { tools: G, tool_choice: ce, functions: be, function_call: me, toolWarnings: ie } = mf({
           mode: e,
           useLegacyFunctionCalling: S,
           structuredOutputs: this.supportsStructuredOutputs
         });
         return {
           args: {
-            ...N,
-            tools: z,
+            ...P,
+            tools: G,
             tool_choice: ce,
             functions: be,
             function_call: me
@@ -14421,7 +14403,7 @@ var vf = class {
       case "object-json":
         return {
           args: {
-            ...N,
+            ...P,
             response_format: this.supportsStructuredOutputs && e.schema != null ? {
               type: "json_schema",
               json_schema: {
@@ -14437,7 +14419,7 @@ var vf = class {
       case "object-tool":
         return {
           args: S ? {
-            ...N,
+            ...P,
             function_call: {
               name: e.tool.name
             },
@@ -14449,7 +14431,7 @@ var vf = class {
               }
             ]
           } : {
-            ...N,
+            ...P,
             tool_choice: {
               type: "function",
               function: { name: e.tool.name }
@@ -14469,8 +14451,8 @@ var vf = class {
           warnings: x
         };
       default: {
-        const z = b;
-        throw new Error(`Unsupported type: ${z}`);
+        const G = b;
+        throw new Error(`Unsupported type: ${G}`);
       }
     }
   }
@@ -14489,7 +14471,7 @@ var vf = class {
       body: u,
       failedResponseHandler: at,
       successfulResponseHandler: vt(
-        _f
+        hf
       ),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
@@ -14512,7 +14494,7 @@ var vf = class {
           args: b.function.arguments
         };
       }),
-      finishReason: cn(p.finish_reason),
+      finishReason: on(p.finish_reason),
       usage: {
         promptTokens: (o = (s = m.usage) == null ? void 0 : s.prompt_tokens) != null ? o : NaN,
         completionTokens: (l = (i = m.usage) == null ? void 0 : i.completion_tokens) != null ? l : NaN
@@ -14520,9 +14502,9 @@ var vf = class {
       rawCall: { rawPrompt: v, rawSettings: g },
       rawResponse: { headers: d, body: _ },
       request: { body: JSON.stringify(u) },
-      response: dn(m),
+      response: ln(m),
       warnings: c,
-      logprobs: ns(p.logprobs),
+      logprobs: es(p.logprobs),
       providerMetadata: k
     };
   }
@@ -14574,8 +14556,8 @@ var vf = class {
       headers: Le(this.config.headers(), e.headers),
       body: n,
       failedResponseHandler: at,
-      successfulResponseHandler: Nr(
-        bf
+      successfulResponseHandler: Ar(
+        gf
       ),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
@@ -14589,7 +14571,7 @@ var vf = class {
       stream: s.pipeThrough(
         new TransformStream({
           transform(g, p) {
-            var f, w, k, b, x, S, $, E, N, z, ce, be;
+            var f, w, k, b, x, S, $, E, P, G, ce, be;
             if (!g.success) {
               u = "error", p.enqueue({ type: "error", error: g.error });
               return;
@@ -14601,7 +14583,7 @@ var vf = class {
             }
             if (m && (m = !1, p.enqueue({
               type: "response-metadata",
-              ...dn(me)
+              ...ln(me)
             })), me.usage != null) {
               const {
                 prompt_tokens: H,
@@ -14615,14 +14597,14 @@ var vf = class {
               }, (U == null ? void 0 : U.reasoning_tokens) != null && (v.openai.reasoningTokens = U == null ? void 0 : U.reasoning_tokens), (U == null ? void 0 : U.accepted_prediction_tokens) != null && (v.openai.acceptedPredictionTokens = U == null ? void 0 : U.accepted_prediction_tokens), (U == null ? void 0 : U.rejected_prediction_tokens) != null && (v.openai.rejectedPredictionTokens = U == null ? void 0 : U.rejected_prediction_tokens), (Y == null ? void 0 : Y.cached_tokens) != null && (v.openai.cachedPromptTokens = Y == null ? void 0 : Y.cached_tokens);
             }
             const ie = me.choices[0];
-            if ((ie == null ? void 0 : ie.finish_reason) != null && (u = cn(ie.finish_reason)), (ie == null ? void 0 : ie.delta) == null)
+            if ((ie == null ? void 0 : ie.finish_reason) != null && (u = on(ie.finish_reason)), (ie == null ? void 0 : ie.delta) == null)
               return;
             const de = ie.delta;
             de.content != null && p.enqueue({
               type: "text-delta",
               textDelta: de.content
             });
-            const ye = ns(
+            const ye = es(
               ie == null ? void 0 : ie.logprobs
             );
             ye != null && ye.length && (d === void 0 && (d = []), d.push(...ye));
@@ -14639,17 +14621,17 @@ var vf = class {
                 const ue = H.index;
                 if (l[ue] == null) {
                   if (H.type !== "function")
-                    throw new Sn({
+                    throw new xn({
                       data: H,
                       message: "Expected 'function' type."
                     });
                   if (H.id == null)
-                    throw new Sn({
+                    throw new xn({
                       data: H,
                       message: "Expected 'id' to be a string."
                     });
                   if (((f = H.function) == null ? void 0 : f.name) == null)
-                    throw new Sn({
+                    throw new xn({
                       data: H,
                       message: "Expected 'function.name' to be a string."
                     });
@@ -14669,7 +14651,7 @@ var vf = class {
                     toolCallId: U.id,
                     toolName: U.function.name,
                     argsTextDelta: U.function.arguments
-                  }), Ra(U.function.arguments) && (p.enqueue({
+                  }), Sa(U.function.arguments) && (p.enqueue({
                     type: "tool-call",
                     toolCallType: "function",
                     toolCallId: (x = U.id) != null ? x : kt(),
@@ -14684,8 +14666,8 @@ var vf = class {
                   toolCallType: "function",
                   toolCallId: Y.id,
                   toolName: Y.function.name,
-                  argsTextDelta: (N = H.function.arguments) != null ? N : ""
-                }), ((z = Y.function) == null ? void 0 : z.name) != null && ((ce = Y.function) == null ? void 0 : ce.arguments) != null && Ra(Y.function.arguments) && (p.enqueue({
+                  argsTextDelta: (P = H.function.arguments) != null ? P : ""
+                }), ((G = Y.function) == null ? void 0 : G.name) != null && ((ce = Y.function) == null ? void 0 : ce.arguments) != null && Sa(Y.function.arguments) && (p.enqueue({
                   type: "tool-call",
                   toolCallType: "function",
                   toolCallId: (be = Y.id) != null ? be : kt(),
@@ -14715,7 +14697,7 @@ var vf = class {
       warnings: r
     };
   }
-}, qi = y({
+}, Mi = y({
   prompt_tokens: R().nullish(),
   completion_tokens: R().nullish(),
   prompt_tokens_details: y({
@@ -14726,11 +14708,11 @@ var vf = class {
     accepted_prediction_tokens: R().nullish(),
     rejected_prediction_tokens: R().nullish()
   }).nullish()
-}).nullish(), _f = y({
+}).nullish(), hf = y({
   id: h().nullish(),
   created: R().nullish(),
   model: h().nullish(),
-  choices: L(
+  choices: F(
     y({
       message: y({
         role: A("assistant").nullish(),
@@ -14739,7 +14721,7 @@ var vf = class {
           arguments: h(),
           name: h()
         }).nullish(),
-        tool_calls: L(
+        tool_calls: F(
           y({
             id: h().nullish(),
             type: A("function"),
@@ -14752,11 +14734,11 @@ var vf = class {
       }),
       index: R(),
       logprobs: y({
-        content: L(
+        content: F(
           y({
             token: h(),
             logprob: R(),
-            top_logprobs: L(
+            top_logprobs: F(
               y({
                 token: h(),
                 logprob: R()
@@ -14768,13 +14750,13 @@ var vf = class {
       finish_reason: h().nullish()
     })
   ),
-  usage: qi
-}), bf = ge([
+  usage: Mi
+}), gf = ge([
   y({
     id: h().nullish(),
     created: R().nullish(),
     model: h().nullish(),
-    choices: L(
+    choices: F(
       y({
         delta: y({
           role: yt(["assistant"]).nullish(),
@@ -14783,7 +14765,7 @@ var vf = class {
             name: h().optional(),
             arguments: h().optional()
           }).nullish(),
-          tool_calls: L(
+          tool_calls: F(
             y({
               index: R(),
               id: h().nullish(),
@@ -14796,11 +14778,11 @@ var vf = class {
           ).nullish()
         }).nullish(),
         logprobs: y({
-          content: L(
+          content: F(
             y({
               token: h(),
               logprob: R(),
-              top_logprobs: L(
+              top_logprobs: F(
                 y({
                   token: h(),
                   logprob: R()
@@ -14813,21 +14795,21 @@ var vf = class {
         index: R()
       })
     ),
-    usage: qi
+    usage: Mi
   }),
-  va
+  ha
 ]);
-function Xn(e) {
+function Wn(e) {
   return e.startsWith("o");
 }
-function wf(e) {
+function yf(e) {
   return e.startsWith("gpt-4o-audio-preview");
 }
-function xf(e) {
+function vf(e) {
   var t, r;
-  return Xn(e) ? (r = (t = kf[e]) == null ? void 0 : t.systemMessageMode) != null ? r : "developer" : "system";
+  return Wn(e) ? (r = (t = _f[e]) == null ? void 0 : t.systemMessageMode) != null ? r : "developer" : "system";
 }
-var kf = {
+var _f = {
   "o1-mini": {
     systemMessageMode: "remove"
   },
@@ -14859,7 +14841,7 @@ var kf = {
     systemMessageMode: "developer"
   }
 };
-function Tf({
+function bf({
   prompt: e,
   inputFormat: t,
   user: r = "user",
@@ -14928,7 +14910,7 @@ ${i}
 ${r}:`]
   };
 }
-function as(e) {
+function ts(e) {
   return e == null ? void 0 : e.tokens.map((t, r) => ({
     token: t,
     logprob: e.token_logprobs[r],
@@ -14940,7 +14922,7 @@ function as(e) {
     ) : []
   }));
 }
-var Sf = class {
+var wf = class {
   constructor(e, t, r) {
     this.specificationVersion = "v1", this.defaultObjectGenerationMode = void 0, this.modelId = e, this.settings = t, this.config = r;
   }
@@ -14971,7 +14953,7 @@ var Sf = class {
       setting: "responseFormat",
       details: "JSON response format is not supported."
     });
-    const { prompt: g, stopSequences: p } = Tf({ prompt: r, inputFormat: t }), f = [...p ?? [], ...u ?? []], w = {
+    const { prompt: g, stopSequences: p } = bf({ prompt: r, inputFormat: t }), f = [...p ?? [], ...u ?? []], w = {
       // model id:
       model: this.modelId,
       // model specific settings:
@@ -15032,7 +15014,7 @@ var Sf = class {
       body: t,
       failedResponseHandler: at,
       successfulResponseHandler: vt(
-        If
+        xf
       ),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
@@ -15043,11 +15025,11 @@ var Sf = class {
         promptTokens: a.usage.prompt_tokens,
         completionTokens: a.usage.completion_tokens
       },
-      finishReason: cn(l.finish_reason),
-      logprobs: as(l.logprobs),
+      finishReason: on(l.finish_reason),
+      logprobs: ts(l.logprobs),
       rawCall: { rawPrompt: o, rawSettings: i },
       rawResponse: { headers: n, body: s },
-      response: dn(a),
+      response: ln(a),
       warnings: r,
       request: { body: JSON.stringify(t) }
     };
@@ -15066,8 +15048,8 @@ var Sf = class {
       headers: Le(this.config.headers(), e.headers),
       body: n,
       failedResponseHandler: at,
-      successfulResponseHandler: Nr(
-        Cf
+      successfulResponseHandler: Ar(
+        kf
       ),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
@@ -15091,17 +15073,17 @@ var Sf = class {
             }
             d && (d = !1, _.enqueue({
               type: "response-metadata",
-              ...dn(v)
+              ...ln(v)
             })), v.usage != null && (u = {
               promptTokens: v.usage.prompt_tokens,
               completionTokens: v.usage.completion_tokens
             });
             const g = v.choices[0];
-            (g == null ? void 0 : g.finish_reason) != null && (l = cn(g.finish_reason)), (g == null ? void 0 : g.text) != null && _.enqueue({
+            (g == null ? void 0 : g.finish_reason) != null && (l = on(g.finish_reason)), (g == null ? void 0 : g.text) != null && _.enqueue({
               type: "text-delta",
               textDelta: g.text
             });
-            const p = as(
+            const p = ts(
               g == null ? void 0 : g.logprobs
             );
             p != null && p.length && (c === void 0 && (c = []), c.push(...p));
@@ -15122,18 +15104,18 @@ var Sf = class {
       request: { body: JSON.stringify(n) }
     };
   }
-}, If = y({
+}, xf = y({
   id: h().nullish(),
   created: R().nullish(),
   model: h().nullish(),
-  choices: L(
+  choices: F(
     y({
       text: h(),
       finish_reason: h(),
       logprobs: y({
-        tokens: L(h()),
-        token_logprobs: L(R()),
-        top_logprobs: L(_r(h(), R())).nullable()
+        tokens: F(h()),
+        token_logprobs: F(R()),
+        top_logprobs: F(yr(h(), R())).nullable()
       }).nullish()
     })
   ),
@@ -15141,20 +15123,20 @@ var Sf = class {
     prompt_tokens: R(),
     completion_tokens: R()
   })
-}), Cf = ge([
+}), kf = ge([
   y({
     id: h().nullish(),
     created: R().nullish(),
     model: h().nullish(),
-    choices: L(
+    choices: F(
       y({
         text: h(),
         finish_reason: h().nullish(),
         index: R(),
         logprobs: y({
-          tokens: L(h()),
-          token_logprobs: L(R()),
-          top_logprobs: L(_r(h(), R())).nullable()
+          tokens: F(h()),
+          token_logprobs: F(R()),
+          top_logprobs: F(yr(h(), R())).nullable()
         }).nullish()
       })
     ),
@@ -15163,8 +15145,8 @@ var Sf = class {
       completion_tokens: R()
     }).nullish()
   }),
-  va
-]), Rf = class {
+  ha
+]), Tf = class {
   constructor(e, t, r) {
     this.specificationVersion = "v1", this.modelId = e, this.settings = t, this.config = r;
   }
@@ -15185,7 +15167,7 @@ var Sf = class {
     abortSignal: r
   }) {
     if (e.length > this.maxEmbeddingsPerCall)
-      throw new Ls({
+      throw new Ds({
         provider: this.provider,
         modelId: this.modelId,
         maxEmbeddingsPerCall: this.maxEmbeddingsPerCall,
@@ -15206,7 +15188,7 @@ var Sf = class {
       },
       failedResponseHandler: at,
       successfulResponseHandler: vt(
-        Ef
+        Sf
       ),
       abortSignal: r,
       fetch: this.config.fetch
@@ -15217,20 +15199,20 @@ var Sf = class {
       rawResponse: { headers: n }
     };
   }
-}, Ef = y({
-  data: L(y({ embedding: L(R()) })),
+}, Sf = y({
+  data: F(y({ embedding: F(R()) })),
   usage: y({ prompt_tokens: R() }).nullish()
-}), Af = {
+}), If = {
   "dall-e-3": 1,
   "dall-e-2": 10,
   "gpt-image-1": 10
-}, Pf = /* @__PURE__ */ new Set(["gpt-image-1"]), Nf = class {
+}, Cf = /* @__PURE__ */ new Set(["gpt-image-1"]), Rf = class {
   constructor(e, t, r) {
     this.modelId = e, this.settings = t, this.config = r, this.specificationVersion = "v1";
   }
   get maxImagesPerCall() {
     var e, t;
-    return (t = (e = this.settings.maxImagesPerCall) != null ? e : Af[this.modelId]) != null ? t : 1;
+    return (t = (e = this.settings.maxImagesPerCall) != null ? e : If[this.modelId]) != null ? t : 1;
   }
   get provider() {
     return this.config.provider;
@@ -15264,11 +15246,11 @@ var Sf = class {
         n: t,
         size: r,
         ...(d = s.openai) != null ? d : {},
-        ...Pf.has(this.modelId) ? {} : { response_format: "b64_json" }
+        ...Cf.has(this.modelId) ? {} : { response_format: "b64_json" }
       },
       failedResponseHandler: at,
       successfulResponseHandler: vt(
-        Of
+        Ef
       ),
       abortSignal: i,
       fetch: this.config.fetch
@@ -15283,15 +15265,15 @@ var Sf = class {
       }
     };
   }
-}, Of = y({
-  data: L(y({ b64_json: h() }))
-}), Mf = y({
-  include: L(h()).nullish(),
+}, Ef = y({
+  data: F(y({ b64_json: h() }))
+}), Af = y({
+  include: F(h()).nullish(),
   language: h().nullish(),
   prompt: h().nullish(),
   temperature: R().min(0).max(1).nullish().default(0),
-  timestampGranularities: L(yt(["word", "segment"])).nullish().default(["segment"])
-}), ss = {
+  timestampGranularities: F(yt(["word", "segment"])).nullish().default(["segment"])
+}), rs = {
   afrikaans: "af",
   arabic: "ar",
   armenian: "hy",
@@ -15349,7 +15331,7 @@ var Sf = class {
   urdu: "ur",
   vietnamese: "vi",
   welsh: "cy"
-}, jf = class {
+}, Nf = class {
   constructor(e, t) {
     this.modelId = e, this.config = t, this.specificationVersion = "v1";
   }
@@ -15362,11 +15344,11 @@ var Sf = class {
     providerOptions: r
   }) {
     var n, a, s, o, i;
-    const l = [], u = pn({
+    const l = [], u = un({
       provider: "openai",
       providerOptions: r,
-      schema: Mf
-    }), c = new FormData(), d = e instanceof Uint8Array ? new Blob([e]) : new Blob([mn(e)]);
+      schema: Af
+    }), c = new FormData(), d = e instanceof Uint8Array ? new Blob([e]) : new Blob([cn(e)]);
     if (c.append("model", this.modelId), c.append("file", new File([d], "audio", { type: t })), u) {
       const m = {
         include: (n = u.include) != null ? n : void 0,
@@ -15391,7 +15373,7 @@ var Sf = class {
       value: c,
       responseHeaders: d,
       rawValue: m
-    } = await vl({
+    } = await fl({
       url: this.config.url({
         path: "/audio/transcriptions",
         modelId: this.modelId
@@ -15400,11 +15382,11 @@ var Sf = class {
       formData: l,
       failedResponseHandler: at,
       successfulResponseHandler: vt(
-        $f
+        Pf
       ),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
-    }), _ = c.language != null && c.language in ss ? ss[c.language] : void 0;
+    }), _ = c.language != null && c.language in rs ? rs[c.language] : void 0;
     return {
       text: c.text,
       segments: (s = (a = c.words) == null ? void 0 : a.map((v) => ({
@@ -15423,11 +15405,11 @@ var Sf = class {
       }
     };
   }
-}, $f = y({
+}, Pf = y({
   text: h(),
   language: h().nullish(),
   duration: R().nullish(),
-  words: L(
+  words: F(
     y({
       word: h(),
       start: R(),
@@ -15435,7 +15417,7 @@ var Sf = class {
     })
   ).nullish()
 });
-function Df({
+function Of({
   prompt: e,
   systemMessageMode: t
 }) {
@@ -15544,7 +15526,7 @@ function Df({
     }
   return { messages: r, warnings: n };
 }
-function os({
+function ns({
   finishReason: e,
   hasToolCalls: t
 }) {
@@ -15560,7 +15542,7 @@ function os({
       return t ? "tool-calls" : "unknown";
   }
 }
-function qf({
+function Mf({
   mode: e,
   strict: t
 }) {
@@ -15629,7 +15611,7 @@ function qf({
     }
   }
 }
-var Uf = class {
+var jf = class {
   constructor(e, t) {
     this.specificationVersion = "v1", this.defaultObjectGenerationMode = "json", this.supportsStructuredOutputs = !0, this.modelId = e, this.config = t;
   }
@@ -15651,7 +15633,7 @@ var Uf = class {
     responseFormat: d
   }) {
     var m, _, v;
-    const g = [], p = nh(this.modelId), f = e.type;
+    const g = [], p = Qf(this.modelId), f = e.type;
     s != null && g.push({
       type: "unsupported-setting",
       setting: "topK"
@@ -15668,15 +15650,15 @@ var Uf = class {
       type: "unsupported-setting",
       setting: "stopSequences"
     });
-    const { messages: w, warnings: k } = Df({
+    const { messages: w, warnings: k } = Of({
       prompt: u,
       systemMessageMode: p.systemMessageMode
     });
     g.push(...k);
-    const b = pn({
+    const b = un({
       provider: "openai",
       providerOptions: c,
-      schema: ah
+      schema: eh
     }), x = (m = b == null ? void 0 : b.strictSchemas) != null ? m : !0, S = {
       model: this.modelId,
       input: w,
@@ -15726,7 +15708,7 @@ var Uf = class {
       details: "topP is not supported for reasoning models"
     }))), f) {
       case "regular": {
-        const { tools: $, tool_choice: E, toolWarnings: N } = qf({
+        const { tools: $, tool_choice: E, toolWarnings: P } = Mf({
           mode: e,
           strict: x
           // TODO support provider options on tools
@@ -15737,7 +15719,7 @@ var Uf = class {
             tools: $,
             tool_choice: E
           },
-          warnings: [...g, ...N]
+          warnings: [...g, ...P]
         };
       }
       case "object-json":
@@ -15798,16 +15780,16 @@ var Uf = class {
           id: h(),
           created_at: R(),
           model: h(),
-          output: L(
+          output: F(
             Tt("type", [
               y({
                 type: A("message"),
                 role: A("assistant"),
-                content: L(
+                content: F(
                   y({
                     type: A("output_text"),
                     text: h(),
-                    annotations: L(
+                    annotations: F(
                       y({
                         type: A("url_citation"),
                         start_index: R(),
@@ -15833,7 +15815,7 @@ var Uf = class {
               }),
               y({
                 type: A("reasoning"),
-                summary: L(
+                summary: F(
                   y({
                     type: A("summary_text"),
                     text: h()
@@ -15843,7 +15825,7 @@ var Uf = class {
             ])
           ),
           incomplete_details: y({ reason: h() }).nullable(),
-          usage: Ui
+          usage: ji
         })
       ),
       abortSignal: e.abortSignal,
@@ -15868,7 +15850,7 @@ var Uf = class {
           };
         })
       ),
-      finishReason: os({
+      finishReason: ns({
         finishReason: (n = d.incomplete_details) == null ? void 0 : n.reason,
         hasToolCalls: v.length > 0
       }),
@@ -15919,8 +15901,8 @@ var Uf = class {
         stream: !0
       },
       failedResponseHandler: at,
-      successfulResponseHandler: Nr(
-        Hf
+      successfulResponseHandler: Ar(
+        Bf
       ),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
@@ -15938,7 +15920,7 @@ var Uf = class {
               return;
             }
             const E = v.value;
-            if (eh(E))
+            if (Kf(E))
               E.item.type === "function_call" && (m[E.output_index] = {
                 toolName: E.item.name,
                 toolCallId: E.item.call_id
@@ -15949,36 +15931,36 @@ var Uf = class {
                 toolName: E.item.name,
                 argsTextDelta: E.item.arguments
               }));
-            else if (Qf(E)) {
-              const N = m[E.output_index];
-              N != null && g.enqueue({
+            else if (Wf(E)) {
+              const P = m[E.output_index];
+              P != null && g.enqueue({
                 type: "tool-call-delta",
                 toolCallType: "function",
-                toolCallId: N.toolCallId,
-                toolName: N.toolName,
+                toolCallId: P.toolCallId,
+                toolName: P.toolName,
                 argsTextDelta: E.delta
               });
-            } else Xf(E) ? (d = E.response.id, g.enqueue({
+            } else Hf(E) ? (d = E.response.id, g.enqueue({
               type: "response-metadata",
               id: E.response.id,
               timestamp: new Date(E.response.created_at * 1e3),
               modelId: E.response.model
-            })) : Wf(E) ? g.enqueue({
+            })) : Jf(E) ? g.enqueue({
               type: "text-delta",
               textDelta: E.delta
-            }) : rh(E) ? g.enqueue({
+            }) : Xf(E) ? g.enqueue({
               type: "reasoning",
               textDelta: E.delta
-            }) : Kf(E) && E.item.type === "function_call" ? (m[E.output_index] = void 0, _ = !0, g.enqueue({
+            }) : zf(E) && E.item.type === "function_call" ? (m[E.output_index] = void 0, _ = !0, g.enqueue({
               type: "tool-call",
               toolCallType: "function",
               toolCallId: E.item.call_id,
               toolName: E.item.name,
               args: E.item.arguments
-            })) : Yf(E) ? (o = os({
+            })) : Gf(E) ? (o = ns({
               finishReason: (p = E.response.incomplete_details) == null ? void 0 : p.reason,
               hasToolCalls: _
-            }), i = E.response.usage.input_tokens, l = E.response.usage.output_tokens, u = (w = (f = E.response.usage.input_tokens_details) == null ? void 0 : f.cached_tokens) != null ? w : u, c = (b = (k = E.response.usage.output_tokens_details) == null ? void 0 : k.reasoning_tokens) != null ? b : c) : th(E) && g.enqueue({
+            }), i = E.response.usage.input_tokens, l = E.response.usage.output_tokens, u = (w = (f = E.response.usage.input_tokens_details) == null ? void 0 : f.cached_tokens) != null ? w : u, c = (b = (k = E.response.usage.output_tokens_details) == null ? void 0 : k.reasoning_tokens) != null ? b : c) : Yf(E) && g.enqueue({
               type: "source",
               source: {
                 sourceType: "url",
@@ -16015,28 +15997,28 @@ var Uf = class {
       warnings: r
     };
   }
-}, Ui = y({
+}, ji = y({
   input_tokens: R(),
   input_tokens_details: y({ cached_tokens: R().nullish() }).nullish(),
   output_tokens: R(),
   output_tokens_details: y({ reasoning_tokens: R().nullish() }).nullish()
-}), Lf = y({
+}), $f = y({
   type: A("response.output_text.delta"),
   delta: h()
-}), Ff = y({
+}), Df = y({
   type: yt(["response.completed", "response.incomplete"]),
   response: y({
     incomplete_details: y({ reason: h() }).nullish(),
-    usage: Ui
+    usage: ji
   })
-}), Zf = y({
+}), qf = y({
   type: A("response.created"),
   response: y({
     id: h(),
     created_at: R(),
     model: h()
   })
-}), Vf = y({
+}), Uf = y({
   type: A("response.output_item.done"),
   output_index: R(),
   item: Tt("type", [
@@ -16052,12 +16034,12 @@ var Uf = class {
       status: A("completed")
     })
   ])
-}), Bf = y({
+}), Lf = y({
   type: A("response.function_call_arguments.delta"),
   item_id: h(),
   output_index: R(),
   delta: h()
-}), Jf = y({
+}), Ff = y({
   type: A("response.output_item.added"),
   output_index: R(),
   item: Tt("type", [
@@ -16072,56 +16054,56 @@ var Uf = class {
       arguments: h()
     })
   ])
-}), Gf = y({
+}), Zf = y({
   type: A("response.output_text.annotation.added"),
   annotation: y({
     type: A("url_citation"),
     url: h(),
     title: h()
   })
-}), zf = y({
+}), Vf = y({
   type: A("response.reasoning_summary_text.delta"),
   item_id: h(),
   output_index: R(),
   summary_index: R(),
   delta: h()
-}), Hf = ge([
+}), Bf = ge([
+  $f,
+  Df,
+  qf,
+  Uf,
   Lf,
   Ff,
   Zf,
   Vf,
-  Bf,
-  Jf,
-  Gf,
-  zf,
   y({ type: h() }).passthrough()
   // fallback for unknown chunks
 ]);
-function Wf(e) {
+function Jf(e) {
   return e.type === "response.output_text.delta";
 }
-function Kf(e) {
+function zf(e) {
   return e.type === "response.output_item.done";
 }
-function Yf(e) {
+function Gf(e) {
   return e.type === "response.completed" || e.type === "response.incomplete";
 }
-function Xf(e) {
+function Hf(e) {
   return e.type === "response.created";
 }
-function Qf(e) {
+function Wf(e) {
   return e.type === "response.function_call_arguments.delta";
 }
-function eh(e) {
+function Kf(e) {
   return e.type === "response.output_item.added";
 }
-function th(e) {
+function Yf(e) {
   return e.type === "response.output_text.annotation.added";
 }
-function rh(e) {
+function Xf(e) {
   return e.type === "response.reasoning_summary_text.delta";
 }
-function nh(e) {
+function Qf(e) {
   return e.startsWith("o") ? e.startsWith("o1-mini") || e.startsWith("o1-preview") ? {
     isReasoningModel: !0,
     systemMessageMode: "remove",
@@ -16136,8 +16118,8 @@ function nh(e) {
     requiredAutoTruncation: !1
   };
 }
-var ah = y({
-  metadata: ao().nullish(),
+var eh = y({
+  metadata: eo().nullish(),
   parallelToolCalls: Je().nullish(),
   previousResponseId: h().nullish(),
   store: Je().nullish(),
@@ -16146,8 +16128,8 @@ var ah = y({
   strictSchemas: Je().nullish(),
   instructions: h().nullish(),
   reasoningSummary: h().nullish()
-}), sh = y({});
-function oh({
+}), th = y({});
+function rh({
   searchContextSize: e,
   userLocation: t
 } = {}) {
@@ -16158,15 +16140,15 @@ function oh({
       searchContextSize: e,
       userLocation: t
     },
-    parameters: sh
+    parameters: th
   };
 }
-var ih = {
-  webSearchPreview: oh
-}, lh = y({
+var nh = {
+  webSearchPreview: rh
+}, ah = y({
   instructions: h().nullish(),
   speed: R().min(0.25).max(4).default(1).nullish()
-}), uh = class {
+}), sh = class {
   constructor(e, t) {
     this.modelId = e, this.config = t, this.specificationVersion = "v1";
   }
@@ -16181,10 +16163,10 @@ var ih = {
     instructions: a,
     providerOptions: s
   }) {
-    const o = [], i = pn({
+    const o = [], i = un({
       provider: "openai",
       providerOptions: s,
-      schema: lh
+      schema: ah
     }), l = {
       model: this.modelId,
       input: e,
@@ -16223,7 +16205,7 @@ var ih = {
       headers: Le(this.config.headers(), e.headers),
       body: s,
       failedResponseHandler: at,
-      successfulResponseHandler: bl(),
+      successfulResponseHandler: gl(),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
     });
@@ -16242,10 +16224,10 @@ var ih = {
     };
   }
 };
-function ch(e = {}) {
+function oh(e = {}) {
   var t, r, n;
-  const a = (t = sa(e.baseURL)) != null ? t : "https://api.openai.com/v1", s = (r = e.compatibility) != null ? r : "compatible", o = (n = e.name) != null ? n : "openai", i = () => ({
-    Authorization: `Bearer ${na({
+  const a = (t = ra(e.baseURL)) != null ? t : "https://api.openai.com/v1", s = (r = e.compatibility) != null ? r : "compatible", o = (n = e.name) != null ? n : "openai", i = () => ({
+    Authorization: `Bearer ${ea({
       apiKey: e.apiKey,
       environmentVariableName: "OPENAI_API_KEY",
       description: "OpenAI"
@@ -16253,34 +16235,34 @@ function ch(e = {}) {
     "OpenAI-Organization": e.organization,
     "OpenAI-Project": e.project,
     ...e.headers
-  }), l = (f, w = {}) => new vf(f, w, {
+  }), l = (f, w = {}) => new ff(f, w, {
     provider: `${o}.chat`,
     url: ({ path: k }) => `${a}${k}`,
     headers: i,
     compatibility: s,
     fetch: e.fetch
-  }), u = (f, w = {}) => new Sf(f, w, {
+  }), u = (f, w = {}) => new wf(f, w, {
     provider: `${o}.completion`,
     url: ({ path: k }) => `${a}${k}`,
     headers: i,
     compatibility: s,
     fetch: e.fetch
-  }), c = (f, w = {}) => new Rf(f, w, {
+  }), c = (f, w = {}) => new Tf(f, w, {
     provider: `${o}.embedding`,
     url: ({ path: k }) => `${a}${k}`,
     headers: i,
     fetch: e.fetch
-  }), d = (f, w = {}) => new Nf(f, w, {
+  }), d = (f, w = {}) => new Rf(f, w, {
     provider: `${o}.image`,
     url: ({ path: k }) => `${a}${k}`,
     headers: i,
     fetch: e.fetch
-  }), m = (f) => new jf(f, {
+  }), m = (f) => new Nf(f, {
     provider: `${o}.transcription`,
     url: ({ path: w }) => `${a}${w}`,
     headers: i,
     fetch: e.fetch
-  }), _ = (f) => new uh(f, {
+  }), _ = (f) => new sh(f, {
     provider: `${o}.speech`,
     url: ({ path: w }) => `${a}${w}`,
     headers: i,
@@ -16294,7 +16276,7 @@ function ch(e = {}) {
       f,
       w
     ) : l(f, w);
-  }, g = (f) => new Uf(f, {
+  }, g = (f) => new jf(f, {
     provider: `${o}.responses`,
     url: ({ path: w }) => `${a}${w}`,
     headers: i,
@@ -16302,90 +16284,90 @@ function ch(e = {}) {
   }), p = function(f, w) {
     return v(f, w);
   };
-  return p.languageModel = v, p.chat = l, p.completion = u, p.responses = g, p.embedding = c, p.textEmbedding = c, p.textEmbeddingModel = c, p.image = d, p.imageModel = d, p.transcription = m, p.transcriptionModel = m, p.speech = _, p.speechModel = _, p.tools = ih, p;
+  return p.languageModel = v, p.chat = l, p.completion = u, p.responses = g, p.embedding = c, p.textEmbedding = c, p.textEmbeddingModel = c, p.image = d, p.imageModel = d, p.transcription = m, p.transcriptionModel = m, p.speech = _, p.speechModel = _, p.tools = nh, p;
 }
-ch({
+oh({
   compatibility: "strict"
   // strict for OpenAI API
 });
 export {
   j as AISDKError,
   Be as APICallError,
-  Lh as AssistantResponse,
-  Mn as DownloadError,
-  Bi as EmptyResponseBodyError,
+  $h as AssistantResponse,
+  Nn as DownloadError,
+  Li as EmptyResponseBodyError,
   ne as InvalidArgumentError,
-  Ga as InvalidDataContentError,
-  Ld as InvalidMessageRoleError,
+  Va as InvalidDataContentError,
+  $d as InvalidMessageRoleError,
   ut as InvalidPromptError,
-  Sn as InvalidResponseDataError,
-  Op as InvalidStreamPartError,
-  gi as InvalidToolArgumentsError,
-  hr as JSONParseError,
-  Rm as LangChainAdapter,
-  Nm as LlamaIndexAdapter,
-  Ur as LoadAPIKeyError,
+  xn as InvalidResponseDataError,
+  Ep as InvalidStreamPartError,
+  pi as InvalidToolArgumentsError,
+  mr as JSONParseError,
+  Tm as LangChainAdapter,
+  Rm as LlamaIndexAdapter,
+  Dr as LoadAPIKeyError,
   Se as MCPClientError,
-  jn as MessageConversionError,
-  ph as NoContentGeneratedError,
-  Ad as NoImageGeneratedError,
+  Pn as MessageConversionError,
+  lh as NoContentGeneratedError,
+  Id as NoImageGeneratedError,
   dt as NoObjectGeneratedError,
-  oi as NoOutputSpecifiedError,
+  ri as NoOutputSpecifiedError,
   pt as NoSuchModelError,
-  tm as NoSuchProviderError,
-  Hn as NoSuchToolError,
-  Pp as Output,
-  Ba as RetryError,
-  Fh as StreamData,
-  Ip as ToolCallRepairError,
-  ci as ToolExecutionError,
+  Yp as NoSuchProviderError,
+  Jn as NoSuchToolError,
+  Cp as Output,
+  Fa as RetryError,
+  Dh as StreamData,
+  xp as ToolCallRepairError,
+  oi as ToolExecutionError,
   ft as TypeValidationError,
   se as UnsupportedFunctionalityError,
-  Nh as appendClientMessage,
-  Oh as appendResponseMessages,
-  Gd as convertToCoreMessages,
-  tp as coreAssistantMessageSchema,
-  np as coreMessageSchema,
-  Qd as coreSystemMessageSchema,
-  rp as coreToolMessageSchema,
-  ep as coreUserMessageSchema,
-  qh as cosineSimilarity,
-  sf as createAnthropic,
-  bo as createDataStream,
-  gh as createDataStreamResponse,
+  Rh as appendClientMessage,
+  Eh as appendResponseMessages,
+  Zd as convertToCoreMessages,
+  Yd as coreAssistantMessageSchema,
+  Qd as coreMessageSchema,
+  Wd as coreSystemMessageSchema,
+  Xd as coreToolMessageSchema,
+  Kd as coreUserMessageSchema,
+  Mh as cosineSimilarity,
+  tf as createAnthropic,
+  go as createDataStream,
+  ph as createDataStreamResponse,
   Ft as createIdGenerator,
-  hf as createMistral,
-  ch as createOpenAI,
-  rm as createProviderRegistry,
-  Qp as customProvider,
-  Rh as defaultSettingsMiddleware,
-  vh as embed,
-  _h as embedMany,
-  Dh as experimental_createMCPClient,
-  jh as experimental_createProviderRegistry,
-  Mh as experimental_customProvider,
-  bh as experimental_generateImage,
-  Ih as experimental_generateSpeech,
-  Ch as experimental_transcribe,
-  Ph as experimental_wrapLanguageModel,
-  Eh as extractReasoningMiddleware,
-  Gt as formatAssistantStreamPart,
+  df as createMistral,
+  oh as createOpenAI,
+  Xp as createProviderRegistry,
+  Wp as customProvider,
+  Th as defaultSettingsMiddleware,
+  fh as embed,
+  hh as embedMany,
+  Oh as experimental_createMCPClient,
+  Nh as experimental_createProviderRegistry,
+  Ah as experimental_customProvider,
+  gh as experimental_generateImage,
+  xh as experimental_generateSpeech,
+  kh as experimental_transcribe,
+  Ch as experimental_wrapLanguageModel,
+  Sh as extractReasoningMiddleware,
+  zt as formatAssistantStreamPart,
   pe as formatDataStreamPart,
   kt as generateId,
-  wh as generateObject,
-  kh as generateText,
-  po as jsonSchema,
-  mh as parseAssistantStreamPart,
-  nc as parseDataStreamPart,
-  yh as pipeDataStreamToResponse,
-  fh as processDataStream,
-  hh as processTextStream,
-  Uh as simulateReadableStream,
-  Ah as simulateStreamingMiddleware,
-  Th as smoothStream,
-  xh as streamObject,
-  Sh as streamText,
-  $h as tool,
-  Yp as wrapLanguageModel,
-  ic as zodSchema
+  yh as generateObject,
+  _h as generateText,
+  io as jsonSchema,
+  uh as parseAssistantStreamPart,
+  Qu as parseDataStreamPart,
+  mh as pipeDataStreamToResponse,
+  ch as processDataStream,
+  dh as processTextStream,
+  jh as simulateReadableStream,
+  Ih as simulateStreamingMiddleware,
+  bh as smoothStream,
+  vh as streamObject,
+  wh as streamText,
+  Ph as tool,
+  Gp as wrapLanguageModel,
+  nc as zodSchema
 };
