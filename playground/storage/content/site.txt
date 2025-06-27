@@ -6,7 +6,7 @@ Apikey:
 
 ----
 
-Gptmodel: o3-mini
+Gptmodel: o4-mini
 
 ----
 

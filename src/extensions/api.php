@@ -17,10 +17,10 @@ return [
                     'provider' => 'openai',
                     'providers' => [
                         'openai' => [
-                            'model' => 'o3-mini'
+                            'model' => 'o4-mini'
                         ]
                     ],
-                    'temperature' => 0.7,
+                    'temperature' => 0.5,
                     'blocksUpdateThrottle' => 250
                 ];
 

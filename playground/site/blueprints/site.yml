@@ -24,7 +24,7 @@ tabs:
             label: GPT Model
             type: select
             options:
-              o3-mini: o3-mini (recommended)
+              o4-mini: o4-mini (recommended)
               gpt-4o: GPT-4o
             help: |
               The GPT AI model to use in the Copilot playground. <ins>**Note: Add a valid payment method in your account in order to use them.**</ins>
