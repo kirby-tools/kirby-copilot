@@ -47,6 +47,7 @@ export async function useStreamText({
     AISDKError,
     APICallError,
     createAnthropic,
+    createGoogleGenerativeAI,
     createMistral,
     createOpenAI,
     streamText,
@@ -55,10 +56,12 @@ export async function useStreamText({
   const provider = config.provider;
   const providerConfig = config.providers[provider];
 
+  /// keep-sorted
   const createProvider = {
+    anthropic: createAnthropic,
+    google: createGoogleGenerativeAI,
     mistral: createMistral,
     openai: createOpenAI,
-    anthropic: createAnthropic,
   }[provider];
   const api = createProvider({
     baseUrl: providerConfig.baseUrl || undefined,
@@ -91,12 +94,6 @@ export async function useStreamText({
   }
 
   if (images.length > 0) {
-    if (providerConfig.model === "o3-mini") {
-      throw new CopilotError(
-        `OpenAI's "o3-mini" model does not support images. Please use a different model, such as "gpt-4o".`,
-      );
-    }
-
     const imageByteArrays = await Promise.all(
       images.map(async (file) => {
         const reducedBlob = await toReducedBlob(file, 2048);

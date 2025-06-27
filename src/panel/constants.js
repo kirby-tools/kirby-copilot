@@ -1,6 +1,7 @@
 export const PLUGIN_CONTEXT_API_ROUTE = "__copilot__/context";
 
-export const SUPPORTED_PROVIDERS = ["anthropic", "mistral", "openai"];
+/// keep-sorted
+export const SUPPORTED_PROVIDERS = ["anthropic", "google", "mistral", "openai"];
 export const SUPPORTED_VISION_MIME_TYPES = [
   "image/png",
   "image/jpeg",
