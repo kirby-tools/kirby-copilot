@@ -11,7 +11,7 @@ export default antfu({
     },
     vueVersion: 2,
   },
-  ignores: ["**/assets/**", "**/vendor/**", "index.js"],
+  ignores: ["**/assets/*.js", "**/vendor/**", "index.js"],
 }).append({
   files: ["**/*.vue"],
   rules: {
