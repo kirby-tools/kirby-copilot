@@ -1,0 +1,76 @@
+name: Contact Section
+icon: email
+preview: fields
+wysiwyg: true
+tabs:
+  content:
+    label: Content
+    fields:
+      heading:
+        label: Section Heading
+        type: text
+        placeholder: Get in Touch
+      description:
+        label: Description
+        type: textarea
+        placeholder: We'd love to hear from you. Send us a message!
+      contact_info:
+        label: Contact Information
+        type: structure
+        fields:
+          type:
+            label: Contact Type
+            type: select
+            options:
+              email: Email
+              phone: Phone
+              address: Address
+              social: Social Media
+          label:
+            label: Label
+            type: text
+            placeholder: Email Us
+          value:
+            label: Value
+            type: text
+            placeholder: hello@example.com
+          icon:
+            label: Icon
+            type: select
+            options:
+              email: Email
+              phone: Phone
+              location: Location
+              twitter: Twitter
+              linkedin: LinkedIn
+              instagram: Instagram
+              facebook: Facebook
+  form:
+    label: Contact Form
+    fields:
+      show_form:
+        label: Show Contact Form
+        type: toggle
+        default: true
+      form_title:
+        label: Form Title
+        type: text
+        placeholder: Send us a message
+        when:
+          show_form: true
+      form_fields:
+        label: Form Fields to Include
+        type: checkboxes
+        default:
+          - name
+          - email
+          - message
+        options:
+          name: Name
+          email: Email
+          phone: Phone
+          company: Company
+          subject: Subject
+          message: Message
+        when:
+          show_form: true

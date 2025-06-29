@@ -1,4 +1,5 @@
 <script>
+import { isAbortError } from "@ai-sdk/provider-utils";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import {
   computed,
@@ -7,7 +8,6 @@ import {
   nextTick,
   onBeforeUnmount,
   ref,
-  useApi,
   useContent,
   useI18n,
   usePanel,
@@ -16,8 +16,10 @@ import {
 } from "kirbyuse";
 import { section } from "kirbyuse/props";
 import {
+  useBlocks,
   useFilePicker,
   usePluginContext,
+  useStreamObject,
   useStreamText,
 } from "../../composables";
 import {
@@ -44,13 +46,10 @@ const props = defineProps(propsDefinition);
 
 const _isKirby5 = isKirby5();
 const panel = usePanel();
-const api = useApi();
 const { t } = useI18n();
 const { currentContent, update: updateContent } = useContent();
 
-const EMPTY_HTML_TAG_RE = /^<(\w+)>\s*<\/\1>$/;
 const RESPONSE_FORMAT_PER_FIELD = {
-  blocks: "HTML",
   writer: "HTML",
   textarea: "markdown",
   // Community plugin field types
@@ -68,7 +67,6 @@ const size = ref();
 const logLevel = ref();
 
 // Section computed
-const fieldType = ref();
 const modelFile = ref();
 const help = ref();
 
@@ -138,7 +136,6 @@ watch(isDetailsOpen, (value) => {
   logLevel.value = LOG_LEVELS.indexOf(
     context.config.logLevel ?? response.logLevel,
   );
-  fieldType.value = response.fieldType;
   help.value = response.help ? t(response.help) : undefined;
   config.value = context.config;
   licenseStatus.value =
@@ -158,7 +155,7 @@ watch(isDetailsOpen, (value) => {
   }
 
   if (storage.value) {
-    storageKey = getHashedStorageKey(panel.view.path, field.value);
+    storageKey = getHashedStorageKey(panel.view.path, field.value.name);
     currentPrompt.value =
       localStorage.getItem(`${storageKey}$prompt`) || userPrompt.value || "";
     isDetailsOpen.value =
@@ -201,50 +198,65 @@ async function generate() {
 
   panel.isLoading = true;
   isGenerating.value = true;
-  currentFieldContent.value = currentContent.value[field.value];
+  currentFieldContent.value = currentContent.value[field.value.name];
   abortController = new AbortController();
 
+  const { getZodSchema, normalizeBlock } = useBlocks();
   let text = "";
-  let lastCallTime = Date.now();
+  let blocks = [];
 
   try {
-    const { textStream } = await useStreamText({
-      userPrompt: [
-        currentPrompt.value,
-        `<response_format>\n${fieldTypeToResponseFormat(fieldType.value)}\n</response_format>`,
-      ].join("\n\n"),
-      systemPrompt: systemPrompt.value,
-      files: files.value,
-      logLevel: logLevel.value,
-      abortSignal: abortController.signal,
-    });
+    // Handle blocks by streaming the object
+    if (field.value.type === "blocks") {
+      const schema = await getZodSchema(field.value);
 
-    for await (const textPart of textStream) {
-      text += textPart;
+      const { partialObjectStream, object: finalObject } =
+        await useStreamObject({
+          userPrompt: currentPrompt.value,
+          systemPrompt: systemPrompt.value,
+          schema,
+          output: "array",
+          files: files.value,
+          logLevel: logLevel.value,
+          abortSignal: abortController.signal,
+        });
 
-      // Preview blocks
-      if (Array.isArray(currentFieldContent.value)) {
-        if (Date.now() - lastCallTime < config.value.blocksUpdateThrottle) {
-          continue;
-        }
-        lastCallTime = Date.now();
-
-        const newBlocks = await htmlToBlocks(text);
-        if (newBlocks.length > 0) {
+      // Stream partial updates
+      for await (const partialObject of partialObjectStream) {
+        if (partialObject && Array.isArray(partialObject)) {
           await updateContent(
             {
-              [field.value]: [...currentFieldContent.value, ...newBlocks],
+              [field.value.name]: [
+                ...currentFieldContent.value,
+                ...partialObject.map(normalizeBlock),
+              ],
             },
             // Disable saving content to storage in Kirby 5
             false,
           );
         }
       }
-      // Preview text
-      else {
+
+      // Set final result
+      blocks = await finalObject;
+    } else {
+      const { textStream } = await useStreamText({
+        userPrompt: [
+          `<response_format>\n${fieldTypeToResponseFormat(field.value.type)}\n</response_format>`,
+          currentPrompt.value,
+        ].join("\n\n"),
+        systemPrompt: systemPrompt.value,
+        files: files.value,
+        logLevel: logLevel.value,
+        abortSignal: abortController.signal,
+      });
+
+      for await (const textPart of textStream) {
+        text += textPart;
+
         await updateContent(
           {
-            [field.value]: currentFieldContent.value + text,
+            [field.value.name]: currentFieldContent.value + text,
           },
           // Disable saving content to storage in Kirby 5
           false,
@@ -256,11 +268,7 @@ async function generate() {
     panel.isLoading = false;
     isGenerating.value = false;
 
-    if (
-      error instanceof Error &&
-      (error.name === "AbortError" || error.name === "TimeoutError")
-    )
-      return;
+    if (isAbortError(error)) return;
 
     const { AISDKError, APICallError } = await loadPluginModule("ai");
 
@@ -281,10 +289,12 @@ async function generate() {
     return;
   }
 
+  // Store the final content
   updateContent({
-    [field.value]: Array.isArray(currentFieldContent.value)
-      ? [...currentFieldContent.value, ...(await htmlToBlocks(text))]
-      : currentFieldContent.value + text,
+    [field.value.name]:
+      field.value.type === "blocks"
+        ? [...currentFieldContent.value, ...(blocks ?? []).map(normalizeBlock)]
+        : currentFieldContent.value + text,
   });
 
   abortController = undefined;
@@ -302,7 +312,7 @@ function abort() {
 
 function undo() {
   updateContent({
-    [field.value]: currentFieldContent.value,
+    [field.value.name]: currentFieldContent.value,
   });
   currentFieldContent.value = undefined;
 }
@@ -310,25 +320,6 @@ function undo() {
 async function pickFiles() {
   const selectedFiles = await useFilePicker();
   files.value = [...files.value, ...selectedFiles];
-}
-
-async function htmlToBlocks(html) {
-  if (!html) return [];
-
-  const { blocks } = await api.post("__copilot__/html2blocks", {
-    html,
-  });
-
-  // Skip empty text block
-  if (
-    blocks.length === 1 &&
-    "text" in blocks[0].content &&
-    EMPTY_HTML_TAG_RE.test(blocks[0].content.text)
-  ) {
-    return [];
-  }
-
-  return blocks;
 }
 
 function onModelSave() {
@@ -394,7 +385,7 @@ function fieldTypeToResponseFormat(fieldType) {
         required for the generated text.
       </k-text>
     </k-box>
-    <k-box v-else-if="!(field in currentContent)" theme="empty">
+    <k-box v-else-if="!(field.name in currentContent)" theme="empty">
       <k-text>
         The <code>{{ field }}</code> field does not exist in the current model.
       </k-text>

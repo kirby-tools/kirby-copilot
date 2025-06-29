@@ -1,0 +1,80 @@
+name: Call to Action
+icon: bolt
+preview: fields
+wysiwyg: true
+tabs:
+  content:
+    label: Content
+    fields:
+      title:
+        label: CTA Title
+        type: text
+        placeholder: Ready to Get Started?
+      description:
+        label: Description
+        type: textarea
+        placeholder: Join thousands of satisfied customers today
+      primary_button:
+        label: Primary Button
+        type: structure
+        max: 1
+        fields:
+          text:
+            label: Button Text
+            type: text
+            placeholder: Start Free Trial
+          link:
+            label: Button Link
+            type: url
+            placeholder: https://example.com/signup
+      secondary_button:
+        label: Secondary Button (Optional)
+        type: structure
+        max: 1
+        fields:
+          text:
+            label: Button Text
+            type: text
+            placeholder: Learn More
+          link:
+            label: Button Link
+            type: url
+            placeholder: https://example.com/features
+  design:
+    label: Design
+    fields:
+      background_style:
+        label: Background Style
+        type: select
+        default: solid
+        options:
+          solid: Solid Color
+          gradient: Gradient
+          image: Background Image
+      background_color:
+        label: Background Color
+        type: select
+        default: blue
+        options:
+          blue: Blue
+          purple: Purple
+          green: Green
+          dark: Dark
+        when:
+          background_style: solid
+      background_image:
+        label: Background Image
+        type: files
+        layout: cards
+        max: 1
+        uploads: image
+        when:
+          background_style: image
+      text_alignment:
+        label: Text Alignment
+        type: radio
+        default: center
+        options:
+          left: Left
+          center: Center
+          right: Right

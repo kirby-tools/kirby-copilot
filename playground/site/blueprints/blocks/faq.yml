@@ -1,0 +1,37 @@
+name: FAQ Section
+icon: question
+preview: fields
+wysiwyg: true
+fields:
+  heading:
+    label: Section Heading
+    type: text
+    placeholder: Frequently Asked Questions
+  description:
+    label: Section Description
+    type: textarea
+    placeholder: Find answers to common questions about our service
+  questions:
+    label: Questions & Answers
+    type: structure
+    min: 1
+    fields:
+      question:
+        label: Question
+        type: text
+        placeholder: What is your refund policy?
+      answer:
+        label: Answer
+        type: writer
+        placeholder: We offer a 30-day money-back guarantee...
+        marks:
+          - bold
+          - italic
+          - link
+  layout:
+    label: Layout Style
+    type: radio
+    default: accordion
+    options:
+      accordion: Accordion (Expandable)
+      list: Simple List

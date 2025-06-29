@@ -14,20 +14,66 @@ tabs:
             type: info
             theme: positive
             text: |
-              To play with the **Kirby Copilot**, please enter your [OpenAI API key](https://platform.openai.com/api-keys) in the field below. If you don't have an API key yet, you can register for the [OpenAI API](https://platform.openai.com). The key is required to make client-side requests to GPT models. For production use of the plugin, you will need to provide one in the global configuration of Kirby.
+              To play with the **Kirby Copilot**, please configure your AI provider settings below. Choose from **OpenAI**, **Google**, or **Anthropic** and enter your corresponding API key. The key is required to make client-side requests to AI models. For production use of the plugin, you will need to provide one in the global configuration of Kirby.
+          headlineProvider:
+            type: headline
+            label: AI Provider Configuration
+            numbered: false
+          modelProvider:
+            label: AI Provider
+            type: toggles
+            default: openai
+            grow: false
+            options:
+              - value: openai
+                text: OpenAI
+              - value: google
+                text: Google
+              - value: anthropic
+                text: Anthropic
+            help: |
+              Choose your preferred AI provider. Each provider offers different models and capabilities.
           apiKey:
-            label: OpenAI API Key
+            label: API Key
             type: playground-api-key
             help: |
+              **OpenAI**: Get your key from [OpenAI Platform](https://platform.openai.com/api-keys)
+              **Google**: Get your key from [Google AI Studio](https://aistudio.google.com/app/apikey)
+              **Anthropic**: Get your key from [Anthropic Console](https://console.anthropic.com/settings/keys)
+
               The key will be saved to the **session storage** of your browser. It will not be stored server-side or in any other way.
-          gptModel:
-            label: GPT Model
+          openaiModel:
+            label: AI Model
             type: select
+            when:
+              modelProvider: openai
             options:
               o4-mini: o4-mini (recommended)
               gpt-4o: GPT-4o
+              gpt-4o-mini: GPT-4o Mini
             help: |
-              The GPT AI model to use in the Copilot playground. <ins>**Note: Add a valid payment method in your account in order to use them.**</ins>
+              Select the OpenAI model to use. **o4-mini** is recommended for most use cases. <ins>**Note: Add a valid payment method in your account to use these models.**</ins>
+          googleModel:
+            label: Google Model
+            type: select
+            when:
+              modelProvider: google
+            options:
+              gemini-2.5-flash-preview-04-17: Gemini 2.5 Flash (recommended)
+              gemini-2.5-pro-preview-06-05: Gemini 2.5 Pro
+            help: |
+              Select the Google Gemini model to use. **Gemini 2.5 Flash** offers the best performance for most cases.
+          anthropicModel:
+            label: Anthropic Model
+            type: select
+            when:
+              modelProvider: anthropic
+            options:
+              claude-sonnet-4-20250514: Claude 4 Sonnet (recommended)
+              claude-opus-4-20250514: Claude 4 Opus
+            help: |
+              Select the Anthropic Claude model to use. **Claude 4 Sonnet** provides an excellent balance of capability and speed.
+
       - width: 1/3
         fields:
           infoDocumentation:
@@ -35,7 +81,7 @@ tabs:
             type: info
             theme: passive
             text: |
-              Purchase a copy of <sparkly-text style="--sparkly-text-size: 2em; --sparkly-text-color: var(--color-yellow-600)">**Kirby Copilot**</sparkly-text> to improve the content management of your client's Kirby project or your own with AI.
+              Purchase a copy of <sparkly-text style="--sparkly-text-size: 2em; --sparkly-text-color: var(--color-yellow-600)">**[Kirby Copilot](https://kirby.tools/copilot)**</sparkly-text> to improve the content management of your client's Kirby project or your own with AI.
 
   blocksFields:
     label: Blocks Fields
@@ -48,8 +94,29 @@ tabs:
       - width: 2/3
         fields:
           content01:
-            label: Blocks
+            label: Landing Page
             type: blocks
+            fieldsets:
+              # Landing page blocks
+              - hero
+              - features
+              - showcase
+              - stats
+              - testimonials
+              - team
+              # - pricing
+              - faq
+              - cta
+              - contact
+              # # Core Kirby blocks
+              # - heading
+              # - text
+              # - list
+              # - quote
+              # - image
+              # - video
+              # - code
+              # - markdown
       - width: 1/3
         sections:
           copilot01:

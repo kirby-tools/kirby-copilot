@@ -1,0 +1,49 @@
+name: Feature Grid
+icon: grid
+preview: fields
+wysiwyg: true
+fields:
+  heading:
+    label: Section Heading
+    type: text
+    placeholder: Why Choose Us
+  description:
+    label: Section Description
+    type: textarea
+    placeholder: Here are the key features that make us stand out
+  features:
+    label: Features
+    type: structure
+    min: 1
+    max: 6
+    fields:
+      icon:
+        label: Icon
+        type: select
+        options:
+          rocket: Rocket
+          shield: Shield
+          heart: Heart
+          star: Star
+          bolt: Lightning
+          check: Checkmark
+          clock: Clock
+          users: Users
+          globe: Globe
+          lock: Lock
+      title:
+        label: Feature Title
+        type: text
+        placeholder: Amazing Feature
+      description:
+        label: Feature Description
+        type: textarea
+        placeholder: A brief description of this amazing feature
+  layout:
+    label: Layout
+    type: radio
+    default: grid-3
+    options:
+      grid-2: 2 Columns
+      grid-3: 3 Columns
+      grid-4: 4 Columns

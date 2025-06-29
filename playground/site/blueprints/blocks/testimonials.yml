@@ -1,0 +1,49 @@
+name: Testimonial Carousel
+icon: account
+preview: fields
+wysiwyg: true
+fields:
+  heading:
+    label: Section Heading
+    type: text
+    placeholder: What Our Customers Say
+  testimonials:
+    label: Testimonials
+    type: structure
+    min: 1
+    fields:
+      quote:
+        label: Quote
+        type: textarea
+        placeholder: This product changed my life completely!
+      name:
+        label: Customer Name
+        type: text
+        placeholder: John Doe
+      position:
+        label: Position/Title
+        type: text
+        placeholder: CEO at Company
+      company:
+        label: Company
+        type: text
+        placeholder: Amazing Corp
+      avatar:
+        label: Customer Photo
+        type: files
+        layout: cards
+        max: 1
+        uploads: image
+      rating:
+        label: Star Rating
+        type: range
+        min: 1
+        max: 5
+        default: 5
+  style:
+    label: Display Style
+    type: radio
+    default: carousel
+    options:
+      carousel: Carousel
+      grid: Grid Layout

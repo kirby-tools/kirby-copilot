@@ -1,0 +1,61 @@
+name: Team Section
+icon: users
+preview: fields
+wysiwyg: true
+fields:
+  heading:
+    label: Section Heading
+    type: text
+    placeholder: Meet Our Team
+  description:
+    label: Section Description
+    type: textarea
+    placeholder: The amazing people behind our success
+  team_members:
+    label: Team Members
+    type: structure
+    min: 1
+    fields:
+      name:
+        label: Full Name
+        type: text
+        placeholder: Jane Smith
+      position:
+        label: Job Title
+        type: text
+        placeholder: Lead Developer
+      bio:
+        label: Short Bio
+        type: textarea
+        placeholder: Jane has 10+ years of experience in software development...
+      photo:
+        label: Profile Photo
+        type: files
+        layout: cards
+        max: 1
+        uploads: image
+      social_links:
+        label: Social Media Links
+        type: structure
+        fields:
+          platform:
+            label: Platform
+            type: select
+            options:
+              linkedin: LinkedIn
+              twitter: Twitter
+              github: GitHub
+              dribbble: Dribbble
+              behance: Behance
+              instagram: Instagram
+          url:
+            label: Profile URL
+            type: url
+            placeholder: https://linkedin.com/in/username
+  layout:
+    label: Layout Style
+    type: radio
+    default: grid
+    options:
+      grid: Grid Layout
+      carousel: Carousel

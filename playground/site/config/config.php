@@ -21,10 +21,15 @@ return [
     ],
 
     'johannschopplich.copilot' => [
+        'provider' => 'openai',
         'providers' => [
             'openai' => [
                 'model' => 'o4-mini',
                 'apiKey' => env('OPENAI_API_KEY', 'YOUR_API_KEY')
+            ],
+            'google' => [
+                'model' => 'gemini-2.5-flash-preview-04-17',
+                'apiKey' => env('GOOGLE_API_KEY', 'YOUR_API_KEY')
             ]
         ]
     ]

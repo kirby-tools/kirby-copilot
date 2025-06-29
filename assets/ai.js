@@ -1,4 +1,4 @@
-var as = "vercel.ai.error", $i = Symbol.for(as), ss, Di = class os extends Error {
+var Cs = "vercel.ai.error", bi = Symbol.for(Cs), Rs, wi = class Es extends Error {
   /**
    * Creates an AI SDK Error.
    *
@@ -9,10 +9,10 @@ var as = "vercel.ai.error", $i = Symbol.for(as), ss, Di = class os extends Error
    */
   constructor({
     name: t,
-    message: r,
-    cause: n
+    message: n,
+    cause: r
   }) {
-    super(r), this[ss] = !0, this.name = t, this.cause = n;
+    super(n), this[Rs] = !0, this.name = t, this.cause = r;
   }
   /**
    * Checks if the given error is an AI SDK Error.
@@ -20,161 +20,161 @@ var as = "vercel.ai.error", $i = Symbol.for(as), ss, Di = class os extends Error
    * @returns {boolean} True if the error is an AI SDK Error, false otherwise.
    */
   static isInstance(t) {
-    return os.hasMarker(t, as);
+    return Es.hasMarker(t, Cs);
   }
-  static hasMarker(t, r) {
-    const n = Symbol.for(r);
-    return t != null && typeof t == "object" && n in t && typeof t[n] == "boolean" && t[n] === !0;
+  static hasMarker(t, n) {
+    const r = Symbol.for(n);
+    return t != null && typeof t == "object" && r in t && typeof t[r] == "boolean" && t[r] === !0;
   }
 };
-ss = $i;
-var j = Di, is = "AI_APICallError", ls = `vercel.ai.error.${is}`, qi = Symbol.for(ls), us, Be = class extends j {
+Rs = bi;
+var j = wi, As = "AI_APICallError", Os = `vercel.ai.error.${As}`, xi = Symbol.for(Os), Ms, $e = class extends j {
   constructor({
     message: e,
     url: t,
-    requestBodyValues: r,
-    statusCode: n,
-    responseHeaders: a,
-    responseBody: s,
+    requestBodyValues: n,
+    statusCode: r,
+    responseHeaders: s,
+    responseBody: a,
     cause: o,
-    isRetryable: i = n != null && (n === 408 || // request timeout
-    n === 409 || // conflict
-    n === 429 || // too many requests
-    n >= 500),
+    isRetryable: i = r != null && (r === 408 || // request timeout
+    r === 409 || // conflict
+    r === 429 || // too many requests
+    r >= 500),
     // server error
     data: l
   }) {
-    super({ name: is, message: e, cause: o }), this[us] = !0, this.url = t, this.requestBodyValues = r, this.statusCode = n, this.responseHeaders = a, this.responseBody = s, this.isRetryable = i, this.data = l;
+    super({ name: As, message: e, cause: o }), this[Ms] = !0, this.url = t, this.requestBodyValues = n, this.statusCode = r, this.responseHeaders = s, this.responseBody = a, this.isRetryable = i, this.data = l;
   }
   static isInstance(e) {
-    return j.hasMarker(e, ls);
+    return j.hasMarker(e, Os);
   }
 };
-us = qi;
-var cs = "AI_EmptyResponseBodyError", ds = `vercel.ai.error.${cs}`, Ui = Symbol.for(ds), ps, Li = class extends j {
+Ms = xi;
+var Ns = "AI_EmptyResponseBodyError", Ps = `vercel.ai.error.${Ns}`, Ti = Symbol.for(Ps), $s, ki = class extends j {
   // used in isInstance
   constructor({ message: e = "Empty response body" } = {}) {
-    super({ name: cs, message: e }), this[ps] = !0;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, ds);
-  }
-};
-ps = Ui;
-function Rr(e) {
-  return e == null ? "unknown error" : typeof e == "string" ? e : e instanceof Error ? e.message : JSON.stringify(e);
-}
-var ms = "AI_InvalidArgumentError", fs = `vercel.ai.error.${ms}`, Fi = Symbol.for(fs), hs, Kn = class extends j {
-  constructor({
-    message: t,
-    cause: r,
-    argument: n
-  }) {
-    super({ name: ms, message: t, cause: r }), this[hs] = !0, this.argument = n;
-  }
-  static isInstance(t) {
-    return j.hasMarker(t, fs);
-  }
-};
-hs = Fi;
-var gs = "AI_InvalidPromptError", ys = `vercel.ai.error.${gs}`, Zi = Symbol.for(ys), vs, ut = class extends j {
-  constructor({
-    prompt: e,
-    message: t,
-    cause: r
-  }) {
-    super({ name: gs, message: `Invalid prompt: ${t}`, cause: r }), this[vs] = !0, this.prompt = e;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, ys);
-  }
-};
-vs = Zi;
-var _s = "AI_InvalidResponseDataError", bs = `vercel.ai.error.${_s}`, Vi = Symbol.for(bs), ws, xn = class extends j {
-  constructor({
-    data: e,
-    message: t = `Invalid response data: ${JSON.stringify(e)}.`
-  }) {
-    super({ name: _s, message: t }), this[ws] = !0, this.data = e;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, bs);
-  }
-};
-ws = Vi;
-var xs = "AI_JSONParseError", ks = `vercel.ai.error.${xs}`, Bi = Symbol.for(ks), Ts, mr = class extends j {
-  constructor({ text: e, cause: t }) {
-    super({
-      name: xs,
-      message: `JSON parsing failed: Text: ${e}.
-Error message: ${Rr(t)}`,
-      cause: t
-    }), this[Ts] = !0, this.text = e;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, ks);
-  }
-};
-Ts = Bi;
-var Ss = "AI_LoadAPIKeyError", Is = `vercel.ai.error.${Ss}`, Ji = Symbol.for(Is), Cs, Dr = class extends j {
-  // used in isInstance
-  constructor({ message: e }) {
-    super({ name: Ss, message: e }), this[Cs] = !0;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, Is);
-  }
-};
-Cs = Ji;
-var Rs = "AI_NoContentGeneratedError", Es = `vercel.ai.error.${Rs}`, zi = Symbol.for(Es), As, lh = class extends j {
-  // used in isInstance
-  constructor({
-    message: e = "No content generated."
-  } = {}) {
-    super({ name: Rs, message: e }), this[As] = !0;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, Es);
-  }
-};
-As = zi;
-var Ns = "AI_NoSuchModelError", Ps = `vercel.ai.error.${Ns}`, Gi = Symbol.for(Ps), Os, pt = class extends j {
-  constructor({
-    errorName: e = Ns,
-    modelId: t,
-    modelType: r,
-    message: n = `No such ${r}: ${t}`
-  }) {
-    super({ name: e, message: n }), this[Os] = !0, this.modelId = t, this.modelType = r;
+    super({ name: Ns, message: e }), this[$s] = !0;
   }
   static isInstance(e) {
     return j.hasMarker(e, Ps);
   }
 };
-Os = Gi;
-var Ms = "AI_TooManyEmbeddingValuesForCallError", js = `vercel.ai.error.${Ms}`, Hi = Symbol.for(js), $s, Ds = class extends j {
-  constructor(e) {
-    super({
-      name: Ms,
-      message: `Too many values for a single embedding call. The ${e.provider} model "${e.modelId}" can only embed up to ${e.maxEmbeddingsPerCall} values per call, but ${e.values.length} values were provided.`
-    }), this[$s] = !0, this.provider = e.provider, this.modelId = e.modelId, this.maxEmbeddingsPerCall = e.maxEmbeddingsPerCall, this.values = e.values;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, js);
-  }
-};
-$s = Hi;
-var qs = "AI_TypeValidationError", Us = `vercel.ai.error.${qs}`, Wi = Symbol.for(Us), Ls, Ki = class Mn extends j {
-  constructor({ value: t, cause: r }) {
-    super({
-      name: qs,
-      message: `Type validation failed: Value: ${JSON.stringify(t)}.
-Error message: ${Rr(r)}`,
-      cause: r
-    }), this[Ls] = !0, this.value = t;
+$s = Ti;
+function en(e) {
+  return e == null ? "unknown error" : typeof e == "string" ? e : e instanceof Error ? e.message : JSON.stringify(e);
+}
+var js = "AI_InvalidArgumentError", Ds = `vercel.ai.error.${js}`, Si = Symbol.for(Ds), qs, _r = class extends j {
+  constructor({
+    message: t,
+    cause: n,
+    argument: r
+  }) {
+    super({ name: js, message: t, cause: n }), this[qs] = !0, this.argument = r;
   }
   static isInstance(t) {
-    return j.hasMarker(t, Us);
+    return j.hasMarker(t, Ds);
+  }
+};
+qs = Si;
+var Us = "AI_InvalidPromptError", Ls = `vercel.ai.error.${Us}`, Ii = Symbol.for(Ls), Zs, gt = class extends j {
+  constructor({
+    prompt: e,
+    message: t,
+    cause: n
+  }) {
+    super({ name: Us, message: `Invalid prompt: ${t}`, cause: n }), this[Zs] = !0, this.prompt = e;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, Ls);
+  }
+};
+Zs = Ii;
+var Vs = "AI_InvalidResponseDataError", Bs = `vercel.ai.error.${Vs}`, Ci = Symbol.for(Bs), Fs, Wn = class extends j {
+  constructor({
+    data: e,
+    message: t = `Invalid response data: ${JSON.stringify(e)}.`
+  }) {
+    super({ name: Vs, message: t }), this[Fs] = !0, this.data = e;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, Bs);
+  }
+};
+Fs = Ci;
+var Gs = "AI_JSONParseError", Js = `vercel.ai.error.${Gs}`, Ri = Symbol.for(Js), Hs, zt = class extends j {
+  constructor({ text: e, cause: t }) {
+    super({
+      name: Gs,
+      message: `JSON parsing failed: Text: ${e}.
+Error message: ${en(t)}`,
+      cause: t
+    }), this[Hs] = !0, this.text = e;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, Js);
+  }
+};
+Hs = Ri;
+var zs = "AI_LoadAPIKeyError", Ws = `vercel.ai.error.${zs}`, Ei = Symbol.for(Ws), Ys, ln = class extends j {
+  // used in isInstance
+  constructor({ message: e }) {
+    super({ name: zs, message: e }), this[Ys] = !0;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, Ws);
+  }
+};
+Ys = Ei;
+var Ks = "AI_NoContentGeneratedError", Xs = `vercel.ai.error.${Ks}`, Ai = Symbol.for(Xs), Qs, Tf = class extends j {
+  // used in isInstance
+  constructor({
+    message: e = "No content generated."
+  } = {}) {
+    super({ name: Ks, message: e }), this[Qs] = !0;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, Xs);
+  }
+};
+Qs = Ai;
+var ea = "AI_NoSuchModelError", ta = `vercel.ai.error.${ea}`, Oi = Symbol.for(ta), na, je = class extends j {
+  constructor({
+    errorName: e = ea,
+    modelId: t,
+    modelType: n,
+    message: r = `No such ${n}: ${t}`
+  }) {
+    super({ name: e, message: r }), this[na] = !0, this.modelId = t, this.modelType = n;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, ta);
+  }
+};
+na = Oi;
+var ra = "AI_TooManyEmbeddingValuesForCallError", sa = `vercel.ai.error.${ra}`, Mi = Symbol.for(sa), aa, br = class extends j {
+  constructor(e) {
+    super({
+      name: ra,
+      message: `Too many values for a single embedding call. The ${e.provider} model "${e.modelId}" can only embed up to ${e.maxEmbeddingsPerCall} values per call, but ${e.values.length} values were provided.`
+    }), this[aa] = !0, this.provider = e.provider, this.modelId = e.modelId, this.maxEmbeddingsPerCall = e.maxEmbeddingsPerCall, this.values = e.values;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, sa);
+  }
+};
+aa = Mi;
+var oa = "AI_TypeValidationError", ia = `vercel.ai.error.${oa}`, Ni = Symbol.for(ia), la, Pi = class ar extends j {
+  constructor({ value: t, cause: n }) {
+    super({
+      name: oa,
+      message: `Type validation failed: Value: ${JSON.stringify(t)}.
+Error message: ${en(n)}`,
+      cause: n
+    }), this[la] = !0, this.value = t;
+  }
+  static isInstance(t) {
+    return j.hasMarker(t, ia);
   }
   /**
    * Wraps an error into a TypeValidationError.
@@ -188,627 +188,38 @@ Error message: ${Rr(r)}`,
    */
   static wrap({
     value: t,
-    cause: r
+    cause: n
   }) {
-    return Mn.isInstance(r) && r.value === t ? r : new Mn({ value: t, cause: r });
+    return ar.isInstance(n) && n.value === t ? n : new ar({ value: t, cause: n });
   }
 };
-Ls = Wi;
-var ft = Ki, Fs = "AI_UnsupportedFunctionalityError", Zs = `vercel.ai.error.${Fs}`, Yi = Symbol.for(Zs), Vs, se = class extends j {
+la = Ni;
+var De = Pi, ua = "AI_UnsupportedFunctionalityError", ca = `vercel.ai.error.${ua}`, $i = Symbol.for(ca), da, he = class extends j {
   constructor({
     functionality: e,
     message: t = `'${e}' functionality not supported.`
   }) {
-    super({ name: Fs, message: t }), this[Vs] = !0, this.functionality = e;
+    super({ name: ua, message: t }), this[da] = !0, this.functionality = e;
   }
   static isInstance(e) {
-    return j.hasMarker(e, Zs);
+    return j.hasMarker(e, ca);
   }
 };
-Vs = Yi;
-function Lr(e) {
-  return e === null || typeof e == "string" || typeof e == "number" || typeof e == "boolean" ? !0 : Array.isArray(e) ? e.every(Lr) : typeof e == "object" ? Object.entries(e).every(
-    ([t, r]) => typeof t == "string" && Lr(r)
+da = $i;
+function dn(e) {
+  return e === null || typeof e == "string" || typeof e == "number" || typeof e == "boolean" ? !0 : Array.isArray(e) ? e.every(dn) : typeof e == "object" ? Object.entries(e).every(
+    ([t, n]) => typeof t == "string" && dn(n)
   ) : !1;
 }
-function xa(e) {
-  return Array.isArray(e) && e.every(Lr);
+function Fr(e) {
+  return Array.isArray(e) && e.every(dn);
 }
-function jn(e) {
+function pn(e) {
   return e != null && typeof e == "object" && Object.entries(e).every(
-    ([t, r]) => typeof t == "string" && Lr(r)
+    ([t, n]) => typeof t == "string" && dn(n)
   );
 }
-let Xi = (e, t = 21) => (r = t) => {
-  let n = "", a = r | 0;
-  for (; a--; )
-    n += e[Math.random() * e.length | 0];
-  return n;
-};
-function Qi(e) {
-  return e && e.__esModule && Object.prototype.hasOwnProperty.call(e, "default") ? e.default : e;
-}
-var er = { exports: {} };
-const el = typeof Buffer < "u", ka = /"(?:_|\\u005[Ff])(?:_|\\u005[Ff])(?:p|\\u0070)(?:r|\\u0072)(?:o|\\u006[Ff])(?:t|\\u0074)(?:o|\\u006[Ff])(?:_|\\u005[Ff])(?:_|\\u005[Ff])"\s*:/, Ta = /"(?:c|\\u0063)(?:o|\\u006[Ff])(?:n|\\u006[Ee])(?:s|\\u0073)(?:t|\\u0074)(?:r|\\u0072)(?:u|\\u0075)(?:c|\\u0063)(?:t|\\u0074)(?:o|\\u006[Ff])(?:r|\\u0072)"\s*:/;
-function Bs(e, t, r) {
-  r == null && t !== null && typeof t == "object" && (r = t, t = void 0), el && Buffer.isBuffer(e) && (e = e.toString()), e && e.charCodeAt(0) === 65279 && (e = e.slice(1));
-  const n = JSON.parse(e, t);
-  if (n === null || typeof n != "object")
-    return n;
-  const a = r && r.protoAction || "error", s = r && r.constructorAction || "error";
-  if (a === "ignore" && s === "ignore")
-    return n;
-  if (a !== "ignore" && s !== "ignore") {
-    if (ka.test(e) === !1 && Ta.test(e) === !1)
-      return n;
-  } else if (a !== "ignore" && s === "ignore") {
-    if (ka.test(e) === !1)
-      return n;
-  } else if (Ta.test(e) === !1)
-    return n;
-  return Js(n, { protoAction: a, constructorAction: s, safe: r && r.safe });
-}
-function Js(e, { protoAction: t = "error", constructorAction: r = "error", safe: n } = {}) {
-  let a = [e];
-  for (; a.length; ) {
-    const s = a;
-    a = [];
-    for (const o of s) {
-      if (t !== "ignore" && Object.prototype.hasOwnProperty.call(o, "__proto__")) {
-        if (n === !0)
-          return null;
-        if (t === "error")
-          throw new SyntaxError("Object contains forbidden prototype property");
-        delete o.__proto__;
-      }
-      if (r !== "ignore" && Object.prototype.hasOwnProperty.call(o, "constructor") && Object.prototype.hasOwnProperty.call(o.constructor, "prototype")) {
-        if (n === !0)
-          return null;
-        if (r === "error")
-          throw new SyntaxError("Object contains forbidden prototype property");
-        delete o.constructor;
-      }
-      for (const i in o) {
-        const l = o[i];
-        l && typeof l == "object" && a.push(l);
-      }
-    }
-  }
-  return e;
-}
-function Yn(e, t, r) {
-  const n = Error.stackTraceLimit;
-  Error.stackTraceLimit = 0;
-  try {
-    return Bs(e, t, r);
-  } finally {
-    Error.stackTraceLimit = n;
-  }
-}
-function tl(e, t) {
-  const r = Error.stackTraceLimit;
-  Error.stackTraceLimit = 0;
-  try {
-    return Bs(e, t, { safe: !0 });
-  } catch {
-    return null;
-  } finally {
-    Error.stackTraceLimit = r;
-  }
-}
-er.exports = Yn;
-er.exports.default = Yn;
-er.exports.parse = Yn;
-er.exports.safeParse = tl;
-er.exports.scan = Js;
-var rl = er.exports;
-const Xn = /* @__PURE__ */ Qi(rl);
-function Le(...e) {
-  return e.reduce(
-    (t, r) => ({
-      ...t,
-      ...r ?? {}
-    }),
-    {}
-  );
-}
-function nl(e) {
-  return new ReadableStream({
-    /**
-     * Called when the consumer wants to pull more data from the stream.
-     *
-     * @param {ReadableStreamDefaultController<T>} controller - The controller to enqueue data into the stream.
-     * @returns {Promise<void>}
-     */
-    async pull(t) {
-      try {
-        const { value: r, done: n } = await e.next();
-        n ? t.close() : t.enqueue(r);
-      } catch (r) {
-        t.error(r);
-      }
-    },
-    /**
-     * Called when the consumer cancels the stream.
-     */
-    cancel() {
-    }
-  });
-}
-async function Qn(e) {
-  return e == null ? Promise.resolve() : new Promise((t) => setTimeout(t, e));
-}
-function zs() {
-  let e = "", t, r = [], n, a;
-  function s(l, u) {
-    if (l === "") {
-      o(u);
-      return;
-    }
-    if (l.startsWith(":"))
-      return;
-    const c = l.indexOf(":");
-    if (c === -1) {
-      i(l, "");
-      return;
-    }
-    const d = l.slice(0, c), m = c + 1, _ = m < l.length && l[m] === " " ? l.slice(m + 1) : l.slice(m);
-    i(d, _);
-  }
-  function o(l) {
-    r.length > 0 && (l.enqueue({
-      event: t,
-      data: r.join(`
-`),
-      id: n,
-      retry: a
-    }), r = [], t = void 0, a = void 0);
-  }
-  function i(l, u) {
-    switch (l) {
-      case "event":
-        t = u;
-        break;
-      case "data":
-        r.push(u);
-        break;
-      case "id":
-        n = u;
-        break;
-      case "retry":
-        const c = parseInt(u, 10);
-        isNaN(c) || (a = c);
-        break;
-    }
-  }
-  return new TransformStream({
-    transform(l, u) {
-      const { lines: c, incompleteLine: d } = al(e, l);
-      e = d;
-      for (let m = 0; m < c.length; m++)
-        s(c[m], u);
-    },
-    flush(l) {
-      s(e, l), o(l);
-    }
-  });
-}
-function al(e, t) {
-  const r = [];
-  let n = e;
-  for (let a = 0; a < t.length; ) {
-    const s = t[a++];
-    s === `
-` ? (r.push(n), n = "") : s === "\r" ? (r.push(n), n = "", t[a] === `
-` && a++) : n += s;
-  }
-  return { lines: r, incompleteLine: n };
-}
-function Er(e) {
-  const t = {};
-  return e.headers.forEach((r, n) => {
-    t[n] = r;
-  }), t;
-}
-var Ft = ({
-  prefix: e,
-  size: t = 16,
-  alphabet: r = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-  separator: n = "-"
-} = {}) => {
-  const a = Xi(r, t);
-  if (e == null)
-    return a;
-  if (r.includes(n))
-    throw new Kn({
-      argument: "separator",
-      message: `The separator "${n}" must not be part of the alphabet "${r}".`
-    });
-  return (s) => `${e}${n}${a(s)}`;
-}, kt = Ft();
-function sl(e) {
-  return e == null ? "unknown error" : typeof e == "string" ? e : e instanceof Error ? e.message : JSON.stringify(e);
-}
-function ol(e) {
-  return Object.fromEntries(
-    Object.entries(e).filter(([t, r]) => r != null)
-  );
-}
-function Ur(e) {
-  return e instanceof Error && (e.name === "AbortError" || e.name === "TimeoutError");
-}
-function ea({
-  apiKey: e,
-  environmentVariableName: t,
-  apiKeyParameterName: r = "apiKey",
-  description: n
-}) {
-  if (typeof e == "string")
-    return e;
-  if (e != null)
-    throw new Dr({
-      message: `${n} API key must be a string.`
-    });
-  if (typeof process > "u")
-    throw new Dr({
-      message: `${n} API key is missing. Pass it using the '${r}' parameter. Environment variables is not supported in this environment.`
-    });
-  if (e = process.env[t], e == null)
-    throw new Dr({
-      message: `${n} API key is missing. Pass it using the '${r}' parameter or the ${t} environment variable.`
-    });
-  if (typeof e != "string")
-    throw new Dr({
-      message: `${n} API key must be a string. The value of the ${t} environment variable is not a string.`
-    });
-  return e;
-}
-var Fr = Symbol.for("vercel.ai.validator");
-function il(e) {
-  return { [Fr]: !0, validate: e };
-}
-function ll(e) {
-  return typeof e == "object" && e !== null && Fr in e && e[Fr] === !0 && "validate" in e;
-}
-function ul(e) {
-  return ll(e) ? e : cl(e);
-}
-function cl(e) {
-  return il((t) => {
-    const r = e.safeParse(t);
-    return r.success ? { success: !0, value: r.data } : { success: !1, error: r.error };
-  });
-}
-function dl({
-  value: e,
-  schema: t
-}) {
-  const r = ht({ value: e, schema: t });
-  if (!r.success)
-    throw ft.wrap({ value: e, cause: r.error });
-  return r.value;
-}
-function ht({
-  value: e,
-  schema: t
-}) {
-  const r = ul(t);
-  try {
-    if (r.validate == null)
-      return { success: !0, value: e };
-    const n = r.validate(e);
-    return n.success ? n : {
-      success: !1,
-      error: ft.wrap({ value: e, cause: n.error })
-    };
-  } catch (n) {
-    return {
-      success: !1,
-      error: ft.wrap({ value: e, cause: n })
-    };
-  }
-}
-function pl({
-  text: e,
-  schema: t
-}) {
-  try {
-    const r = Xn.parse(e);
-    return t == null ? r : dl({ value: r, schema: t });
-  } catch (r) {
-    throw mr.isInstance(r) || ft.isInstance(r) ? r : new mr({ text: e, cause: r });
-  }
-}
-function Ot({
-  text: e,
-  schema: t
-}) {
-  try {
-    const r = Xn.parse(e);
-    if (t == null)
-      return { success: !0, value: r, rawValue: r };
-    const n = ht({ value: r, schema: t });
-    return n.success ? { ...n, rawValue: r } : n;
-  } catch (r) {
-    return {
-      success: !1,
-      error: mr.isInstance(r) ? r : new mr({ text: e, cause: r })
-    };
-  }
-}
-function Sa(e) {
-  try {
-    return Xn.parse(e), !0;
-  } catch {
-    return !1;
-  }
-}
-function un({
-  provider: e,
-  providerOptions: t,
-  schema: r
-}) {
-  if ((t == null ? void 0 : t[e]) == null)
-    return;
-  const n = ht({
-    value: t[e],
-    schema: r
-  });
-  if (!n.success)
-    throw new Kn({
-      argument: "providerOptions",
-      message: `invalid ${e} provider options`,
-      cause: n.error
-    });
-  return n.value;
-}
-var ml = () => globalThis.fetch, Fe = async ({
-  url: e,
-  headers: t,
-  body: r,
-  failedResponseHandler: n,
-  successfulResponseHandler: a,
-  abortSignal: s,
-  fetch: o
-}) => Gs({
-  url: e,
-  headers: {
-    "Content-Type": "application/json",
-    ...t
-  },
-  body: {
-    content: JSON.stringify(r),
-    values: r
-  },
-  failedResponseHandler: n,
-  successfulResponseHandler: a,
-  abortSignal: s,
-  fetch: o
-}), fl = async ({
-  url: e,
-  headers: t,
-  formData: r,
-  failedResponseHandler: n,
-  successfulResponseHandler: a,
-  abortSignal: s,
-  fetch: o
-}) => Gs({
-  url: e,
-  headers: t,
-  body: {
-    content: r,
-    values: Object.fromEntries(r.entries())
-  },
-  failedResponseHandler: n,
-  successfulResponseHandler: a,
-  abortSignal: s,
-  fetch: o
-}), Gs = async ({
-  url: e,
-  headers: t = {},
-  body: r,
-  successfulResponseHandler: n,
-  failedResponseHandler: a,
-  abortSignal: s,
-  fetch: o = ml()
-}) => {
-  try {
-    const i = await o(e, {
-      method: "POST",
-      headers: ol(t),
-      body: r.content,
-      signal: s
-    }), l = Er(i);
-    if (!i.ok) {
-      let u;
-      try {
-        u = await a({
-          response: i,
-          url: e,
-          requestBodyValues: r.values
-        });
-      } catch (c) {
-        throw Ur(c) || Be.isInstance(c) ? c : new Be({
-          message: "Failed to process error response",
-          cause: c,
-          statusCode: i.status,
-          url: e,
-          responseHeaders: l,
-          requestBodyValues: r.values
-        });
-      }
-      throw u.value;
-    }
-    try {
-      return await n({
-        response: i,
-        url: e,
-        requestBodyValues: r.values
-      });
-    } catch (u) {
-      throw u instanceof Error && (Ur(u) || Be.isInstance(u)) ? u : new Be({
-        message: "Failed to process successful response",
-        cause: u,
-        statusCode: i.status,
-        url: e,
-        responseHeaders: l,
-        requestBodyValues: r.values
-      });
-    }
-  } catch (i) {
-    if (Ur(i))
-      throw i;
-    if (i instanceof TypeError && i.message === "fetch failed") {
-      const l = i.cause;
-      if (l != null)
-        throw new Be({
-          message: `Cannot connect to API: ${l.message}`,
-          cause: l,
-          url: e,
-          requestBodyValues: r.values,
-          isRetryable: !0
-          // retry when network error
-        });
-    }
-    throw i;
-  }
-};
-async function hl(e) {
-  return typeof e == "function" && (e = e()), Promise.resolve(e);
-}
-var ta = ({
-  errorSchema: e,
-  errorToMessage: t,
-  isRetryable: r
-}) => async ({ response: n, url: a, requestBodyValues: s }) => {
-  const o = await n.text(), i = Er(n);
-  if (o.trim() === "")
-    return {
-      responseHeaders: i,
-      value: new Be({
-        message: n.statusText,
-        url: a,
-        requestBodyValues: s,
-        statusCode: n.status,
-        responseHeaders: i,
-        responseBody: o,
-        isRetryable: r == null ? void 0 : r(n)
-      })
-    };
-  try {
-    const l = pl({
-      text: o,
-      schema: e
-    });
-    return {
-      responseHeaders: i,
-      value: new Be({
-        message: t(l),
-        url: a,
-        requestBodyValues: s,
-        statusCode: n.status,
-        responseHeaders: i,
-        responseBody: o,
-        data: l,
-        isRetryable: r == null ? void 0 : r(n, l)
-      })
-    };
-  } catch {
-    return {
-      responseHeaders: i,
-      value: new Be({
-        message: n.statusText,
-        url: a,
-        requestBodyValues: s,
-        statusCode: n.status,
-        responseHeaders: i,
-        responseBody: o,
-        isRetryable: r == null ? void 0 : r(n)
-      })
-    };
-  }
-}, Ar = (e) => async ({ response: t }) => {
-  const r = Er(t);
-  if (t.body == null)
-    throw new Li({});
-  return {
-    responseHeaders: r,
-    value: t.body.pipeThrough(new TextDecoderStream()).pipeThrough(zs()).pipeThrough(
-      new TransformStream({
-        transform({ data: n }, a) {
-          n !== "[DONE]" && a.enqueue(
-            Ot({
-              text: n,
-              schema: e
-            })
-          );
-        }
-      })
-    )
-  };
-}, vt = (e) => async ({ response: t, url: r, requestBodyValues: n }) => {
-  const a = await t.text(), s = Ot({
-    text: a,
-    schema: e
-  }), o = Er(t);
-  if (!s.success)
-    throw new Be({
-      message: "Invalid JSON response",
-      cause: s.error,
-      statusCode: t.status,
-      responseHeaders: o,
-      responseBody: a,
-      url: r,
-      requestBodyValues: n
-    });
-  return {
-    responseHeaders: o,
-    value: s.value,
-    rawValue: s.rawValue
-  };
-}, gl = () => async ({ response: e, url: t, requestBodyValues: r }) => {
-  const n = Er(e);
-  if (!e.body)
-    throw new Be({
-      message: "Response body is empty",
-      url: t,
-      requestBodyValues: r,
-      statusCode: e.status,
-      responseHeaders: n,
-      responseBody: void 0
-    });
-  try {
-    const a = await e.arrayBuffer();
-    return {
-      responseHeaders: n,
-      value: new Uint8Array(a)
-    };
-  } catch (a) {
-    throw new Be({
-      message: "Failed to read response as array buffer",
-      url: t,
-      requestBodyValues: r,
-      statusCode: e.status,
-      responseHeaders: n,
-      responseBody: void 0,
-      cause: a
-    });
-  }
-}, { btoa: yl, atob: vl } = globalThis;
-function cn(e) {
-  const t = e.replace(/-/g, "+").replace(/_/g, "/"), r = vl(t);
-  return Uint8Array.from(r, (n) => n.codePointAt(0));
-}
-function Mt(e) {
-  let t = "";
-  for (let r = 0; r < e.length; r++)
-    t += String.fromCodePoint(e[r]);
-  return yl(t);
-}
-function ra(e) {
-  return e == null ? void 0 : e.replace(/\/$/, "");
-}
-const _l = Symbol("Let zodToJsonSchema decide on which parser to use"), Ia = {
+const ji = Symbol("Let zodToJsonSchema decide on which parser to use"), Gr = {
   name: void 0,
   $refStrategy: "root",
   basePath: ["#"],
@@ -830,84 +241,84 @@ const _l = Symbol("Let zodToJsonSchema decide on which parser to use"), Ia = {
   emailStrategy: "format:email",
   base64Strategy: "contentEncoding:base64",
   nameStrategy: "ref"
-}, bl = (e) => typeof e == "string" ? {
-  ...Ia,
+}, Di = (e) => typeof e == "string" ? {
+  ...Gr,
   name: e
 } : {
-  ...Ia,
+  ...Gr,
   ...e
-}, wl = (e) => {
-  const t = bl(e), r = t.name !== void 0 ? [...t.basePath, t.definitionPath, t.name] : t.basePath;
+}, qi = (e) => {
+  const t = Di(e), n = t.name !== void 0 ? [...t.basePath, t.definitionPath, t.name] : t.basePath;
   return {
     ...t,
-    currentPath: r,
+    currentPath: n,
     propertyPath: void 0,
-    seen: new Map(Object.entries(t.definitions).map(([n, a]) => [
-      a._def,
+    seen: new Map(Object.entries(t.definitions).map(([r, s]) => [
+      s._def,
       {
-        def: a._def,
-        path: [...t.basePath, t.definitionPath, n],
+        def: s._def,
+        path: [...t.basePath, t.definitionPath, r],
         // Resolution of references will be forced even though seen, so it's ok that the schema is undefined here for now.
         jsonSchema: void 0
       }
     ]))
   };
 };
-function Hs(e, t, r, n) {
-  n != null && n.errorMessages && r && (e.errorMessage = {
+function pa(e, t, n, r) {
+  r != null && r.errorMessages && n && (e.errorMessage = {
     ...e.errorMessage,
-    [t]: r
+    [t]: n
   });
 }
-function ae(e, t, r, n, a) {
-  e[t] = r, Hs(e, t, n, a);
+function re(e, t, n, r, s) {
+  e[t] = n, pa(e, t, r, s);
 }
-var K;
+var W;
 (function(e) {
-  e.assertEqual = (a) => {
+  e.assertEqual = (s) => {
   };
-  function t(a) {
+  function t(s) {
   }
   e.assertIs = t;
-  function r(a) {
+  function n(s) {
     throw new Error();
   }
-  e.assertNever = r, e.arrayToEnum = (a) => {
-    const s = {};
-    for (const o of a)
-      s[o] = o;
-    return s;
-  }, e.getValidEnumValues = (a) => {
-    const s = e.objectKeys(a).filter((i) => typeof a[a[i]] != "number"), o = {};
-    for (const i of s)
-      o[i] = a[i];
+  e.assertNever = n, e.arrayToEnum = (s) => {
+    const a = {};
+    for (const o of s)
+      a[o] = o;
+    return a;
+  }, e.getValidEnumValues = (s) => {
+    const a = e.objectKeys(s).filter((i) => typeof s[s[i]] != "number"), o = {};
+    for (const i of a)
+      o[i] = s[i];
     return e.objectValues(o);
-  }, e.objectValues = (a) => e.objectKeys(a).map(function(s) {
-    return a[s];
-  }), e.objectKeys = typeof Object.keys == "function" ? (a) => Object.keys(a) : (a) => {
-    const s = [];
-    for (const o in a)
-      Object.prototype.hasOwnProperty.call(a, o) && s.push(o);
-    return s;
-  }, e.find = (a, s) => {
-    for (const o of a)
-      if (s(o))
+  }, e.objectValues = (s) => e.objectKeys(s).map(function(a) {
+    return s[a];
+  }), e.objectKeys = typeof Object.keys == "function" ? (s) => Object.keys(s) : (s) => {
+    const a = [];
+    for (const o in s)
+      Object.prototype.hasOwnProperty.call(s, o) && a.push(o);
+    return a;
+  }, e.find = (s, a) => {
+    for (const o of s)
+      if (a(o))
         return o;
-  }, e.isInteger = typeof Number.isInteger == "function" ? (a) => Number.isInteger(a) : (a) => typeof a == "number" && Number.isFinite(a) && Math.floor(a) === a;
-  function n(a, s = " | ") {
-    return a.map((o) => typeof o == "string" ? `'${o}'` : o).join(s);
+  }, e.isInteger = typeof Number.isInteger == "function" ? (s) => Number.isInteger(s) : (s) => typeof s == "number" && Number.isFinite(s) && Math.floor(s) === s;
+  function r(s, a = " | ") {
+    return s.map((o) => typeof o == "string" ? `'${o}'` : o).join(a);
   }
-  e.joinValues = n, e.jsonStringifyReplacer = (a, s) => typeof s == "bigint" ? s.toString() : s;
-})(K || (K = {}));
-var Ca;
+  e.joinValues = r, e.jsonStringifyReplacer = (s, a) => typeof a == "bigint" ? a.toString() : a;
+})(W || (W = {}));
+var Jr;
 (function(e) {
-  e.mergeShapes = (t, r) => ({
+  e.mergeShapes = (t, n) => ({
     ...t,
-    ...r
+    ...n
     // second overwrites first
   });
-})(Ca || (Ca = {}));
-const O = K.arrayToEnum([
+})(Jr || (Jr = {}));
+const A = W.arrayToEnum([
   "string",
   "nan",
   "number",
@@ -928,28 +339,28 @@ const O = K.arrayToEnum([
   "never",
   "map",
   "set"
-]), xt = (e) => {
+]), ct = (e) => {
   switch (typeof e) {
     case "undefined":
-      return O.undefined;
+      return A.undefined;
     case "string":
-      return O.string;
+      return A.string;
     case "number":
-      return Number.isNaN(e) ? O.nan : O.number;
+      return Number.isNaN(e) ? A.nan : A.number;
     case "boolean":
-      return O.boolean;
+      return A.boolean;
     case "function":
-      return O.function;
+      return A.function;
     case "bigint":
-      return O.bigint;
+      return A.bigint;
     case "symbol":
-      return O.symbol;
+      return A.symbol;
     case "object":
-      return Array.isArray(e) ? O.array : e === null ? O.null : e.then && typeof e.then == "function" && e.catch && typeof e.catch == "function" ? O.promise : typeof Map < "u" && e instanceof Map ? O.map : typeof Set < "u" && e instanceof Set ? O.set : typeof Date < "u" && e instanceof Date ? O.date : O.object;
+      return Array.isArray(e) ? A.array : e === null ? A.null : e.then && typeof e.then == "function" && e.catch && typeof e.catch == "function" ? A.promise : typeof Map < "u" && e instanceof Map ? A.map : typeof Set < "u" && e instanceof Set ? A.set : typeof Date < "u" && e instanceof Date ? A.date : A.object;
     default:
-      return O.unknown;
+      return A.unknown;
   }
-}, I = K.arrayToEnum([
+}, I = W.arrayToEnum([
   "invalid_type",
   "invalid_literal",
   "custom",
@@ -967,149 +378,149 @@ const O = K.arrayToEnum([
   "not_multiple_of",
   "not_finite"
 ]);
-class gt extends Error {
+class at extends Error {
   get errors() {
     return this.issues;
   }
   constructor(t) {
-    super(), this.issues = [], this.addIssue = (n) => {
-      this.issues = [...this.issues, n];
-    }, this.addIssues = (n = []) => {
-      this.issues = [...this.issues, ...n];
+    super(), this.issues = [], this.addIssue = (r) => {
+      this.issues = [...this.issues, r];
+    }, this.addIssues = (r = []) => {
+      this.issues = [...this.issues, ...r];
     };
-    const r = new.target.prototype;
-    Object.setPrototypeOf ? Object.setPrototypeOf(this, r) : this.__proto__ = r, this.name = "ZodError", this.issues = t;
+    const n = new.target.prototype;
+    Object.setPrototypeOf ? Object.setPrototypeOf(this, n) : this.__proto__ = n, this.name = "ZodError", this.issues = t;
   }
   format(t) {
-    const r = t || function(s) {
-      return s.message;
-    }, n = { _errors: [] }, a = (s) => {
-      for (const o of s.issues)
+    const n = t || function(a) {
+      return a.message;
+    }, r = { _errors: [] }, s = (a) => {
+      for (const o of a.issues)
         if (o.code === "invalid_union")
-          o.unionErrors.map(a);
+          o.unionErrors.map(s);
         else if (o.code === "invalid_return_type")
-          a(o.returnTypeError);
+          s(o.returnTypeError);
         else if (o.code === "invalid_arguments")
-          a(o.argumentsError);
+          s(o.argumentsError);
         else if (o.path.length === 0)
-          n._errors.push(r(o));
+          r._errors.push(n(o));
         else {
-          let i = n, l = 0;
+          let i = r, l = 0;
           for (; l < o.path.length; ) {
             const u = o.path[l];
-            l === o.path.length - 1 ? (i[u] = i[u] || { _errors: [] }, i[u]._errors.push(r(o))) : i[u] = i[u] || { _errors: [] }, i = i[u], l++;
+            l === o.path.length - 1 ? (i[u] = i[u] || { _errors: [] }, i[u]._errors.push(n(o))) : i[u] = i[u] || { _errors: [] }, i = i[u], l++;
           }
         }
     };
-    return a(this), n;
+    return s(this), r;
   }
   static assert(t) {
-    if (!(t instanceof gt))
+    if (!(t instanceof at))
       throw new Error(`Not a ZodError: ${t}`);
   }
   toString() {
     return this.message;
   }
   get message() {
-    return JSON.stringify(this.issues, K.jsonStringifyReplacer, 2);
+    return JSON.stringify(this.issues, W.jsonStringifyReplacer, 2);
   }
   get isEmpty() {
     return this.issues.length === 0;
   }
-  flatten(t = (r) => r.message) {
-    const r = {}, n = [];
-    for (const a of this.issues)
-      a.path.length > 0 ? (r[a.path[0]] = r[a.path[0]] || [], r[a.path[0]].push(t(a))) : n.push(t(a));
-    return { formErrors: n, fieldErrors: r };
+  flatten(t = (n) => n.message) {
+    const n = {}, r = [];
+    for (const s of this.issues)
+      s.path.length > 0 ? (n[s.path[0]] = n[s.path[0]] || [], n[s.path[0]].push(t(s))) : r.push(t(s));
+    return { formErrors: r, fieldErrors: n };
   }
   get formErrors() {
     return this.flatten();
   }
 }
-gt.create = (e) => new gt(e);
-const $n = (e, t) => {
-  let r;
+at.create = (e) => new at(e);
+const or = (e, t) => {
+  let n;
   switch (e.code) {
     case I.invalid_type:
-      e.received === O.undefined ? r = "Required" : r = `Expected ${e.expected}, received ${e.received}`;
+      e.received === A.undefined ? n = "Required" : n = `Expected ${e.expected}, received ${e.received}`;
       break;
     case I.invalid_literal:
-      r = `Invalid literal value, expected ${JSON.stringify(e.expected, K.jsonStringifyReplacer)}`;
+      n = `Invalid literal value, expected ${JSON.stringify(e.expected, W.jsonStringifyReplacer)}`;
       break;
     case I.unrecognized_keys:
-      r = `Unrecognized key(s) in object: ${K.joinValues(e.keys, ", ")}`;
+      n = `Unrecognized key(s) in object: ${W.joinValues(e.keys, ", ")}`;
       break;
     case I.invalid_union:
-      r = "Invalid input";
+      n = "Invalid input";
       break;
     case I.invalid_union_discriminator:
-      r = `Invalid discriminator value. Expected ${K.joinValues(e.options)}`;
+      n = `Invalid discriminator value. Expected ${W.joinValues(e.options)}`;
       break;
     case I.invalid_enum_value:
-      r = `Invalid enum value. Expected ${K.joinValues(e.options)}, received '${e.received}'`;
+      n = `Invalid enum value. Expected ${W.joinValues(e.options)}, received '${e.received}'`;
       break;
     case I.invalid_arguments:
-      r = "Invalid function arguments";
+      n = "Invalid function arguments";
       break;
     case I.invalid_return_type:
-      r = "Invalid function return type";
+      n = "Invalid function return type";
       break;
     case I.invalid_date:
-      r = "Invalid date";
+      n = "Invalid date";
       break;
     case I.invalid_string:
-      typeof e.validation == "object" ? "includes" in e.validation ? (r = `Invalid input: must include "${e.validation.includes}"`, typeof e.validation.position == "number" && (r = `${r} at one or more positions greater than or equal to ${e.validation.position}`)) : "startsWith" in e.validation ? r = `Invalid input: must start with "${e.validation.startsWith}"` : "endsWith" in e.validation ? r = `Invalid input: must end with "${e.validation.endsWith}"` : K.assertNever(e.validation) : e.validation !== "regex" ? r = `Invalid ${e.validation}` : r = "Invalid";
+      typeof e.validation == "object" ? "includes" in e.validation ? (n = `Invalid input: must include "${e.validation.includes}"`, typeof e.validation.position == "number" && (n = `${n} at one or more positions greater than or equal to ${e.validation.position}`)) : "startsWith" in e.validation ? n = `Invalid input: must start with "${e.validation.startsWith}"` : "endsWith" in e.validation ? n = `Invalid input: must end with "${e.validation.endsWith}"` : W.assertNever(e.validation) : e.validation !== "regex" ? n = `Invalid ${e.validation}` : n = "Invalid";
       break;
     case I.too_small:
-      e.type === "array" ? r = `Array must contain ${e.exact ? "exactly" : e.inclusive ? "at least" : "more than"} ${e.minimum} element(s)` : e.type === "string" ? r = `String must contain ${e.exact ? "exactly" : e.inclusive ? "at least" : "over"} ${e.minimum} character(s)` : e.type === "number" ? r = `Number must be ${e.exact ? "exactly equal to " : e.inclusive ? "greater than or equal to " : "greater than "}${e.minimum}` : e.type === "date" ? r = `Date must be ${e.exact ? "exactly equal to " : e.inclusive ? "greater than or equal to " : "greater than "}${new Date(Number(e.minimum))}` : r = "Invalid input";
+      e.type === "array" ? n = `Array must contain ${e.exact ? "exactly" : e.inclusive ? "at least" : "more than"} ${e.minimum} element(s)` : e.type === "string" ? n = `String must contain ${e.exact ? "exactly" : e.inclusive ? "at least" : "over"} ${e.minimum} character(s)` : e.type === "number" ? n = `Number must be ${e.exact ? "exactly equal to " : e.inclusive ? "greater than or equal to " : "greater than "}${e.minimum}` : e.type === "date" ? n = `Date must be ${e.exact ? "exactly equal to " : e.inclusive ? "greater than or equal to " : "greater than "}${new Date(Number(e.minimum))}` : n = "Invalid input";
       break;
     case I.too_big:
-      e.type === "array" ? r = `Array must contain ${e.exact ? "exactly" : e.inclusive ? "at most" : "less than"} ${e.maximum} element(s)` : e.type === "string" ? r = `String must contain ${e.exact ? "exactly" : e.inclusive ? "at most" : "under"} ${e.maximum} character(s)` : e.type === "number" ? r = `Number must be ${e.exact ? "exactly" : e.inclusive ? "less than or equal to" : "less than"} ${e.maximum}` : e.type === "bigint" ? r = `BigInt must be ${e.exact ? "exactly" : e.inclusive ? "less than or equal to" : "less than"} ${e.maximum}` : e.type === "date" ? r = `Date must be ${e.exact ? "exactly" : e.inclusive ? "smaller than or equal to" : "smaller than"} ${new Date(Number(e.maximum))}` : r = "Invalid input";
+      e.type === "array" ? n = `Array must contain ${e.exact ? "exactly" : e.inclusive ? "at most" : "less than"} ${e.maximum} element(s)` : e.type === "string" ? n = `String must contain ${e.exact ? "exactly" : e.inclusive ? "at most" : "under"} ${e.maximum} character(s)` : e.type === "number" ? n = `Number must be ${e.exact ? "exactly" : e.inclusive ? "less than or equal to" : "less than"} ${e.maximum}` : e.type === "bigint" ? n = `BigInt must be ${e.exact ? "exactly" : e.inclusive ? "less than or equal to" : "less than"} ${e.maximum}` : e.type === "date" ? n = `Date must be ${e.exact ? "exactly" : e.inclusive ? "smaller than or equal to" : "smaller than"} ${new Date(Number(e.maximum))}` : n = "Invalid input";
       break;
     case I.custom:
-      r = "Invalid input";
+      n = "Invalid input";
       break;
     case I.invalid_intersection_types:
-      r = "Intersection results could not be merged";
+      n = "Intersection results could not be merged";
       break;
     case I.not_multiple_of:
-      r = `Number must be a multiple of ${e.multipleOf}`;
+      n = `Number must be a multiple of ${e.multipleOf}`;
       break;
     case I.not_finite:
-      r = "Number must be finite";
+      n = "Number must be finite";
       break;
     default:
-      r = t.defaultError, K.assertNever(e);
+      n = t.defaultError, W.assertNever(e);
   }
-  return { message: r };
+  return { message: n };
 };
-let xl = $n;
-function kl() {
-  return xl;
+let Ui = or;
+function Li() {
+  return Ui;
 }
-const Tl = (e) => {
-  const { data: t, path: r, errorMaps: n, issueData: a } = e, s = [...r, ...a.path || []], o = {
-    ...a,
-    path: s
+const Zi = (e) => {
+  const { data: t, path: n, errorMaps: r, issueData: s } = e, a = [...n, ...s.path || []], o = {
+    ...s,
+    path: a
   };
-  if (a.message !== void 0)
+  if (s.message !== void 0)
     return {
-      ...a,
-      path: s,
-      message: a.message
+      ...s,
+      path: a,
+      message: s.message
     };
   let i = "";
-  const l = n.filter((u) => !!u).slice().reverse();
+  const l = r.filter((u) => !!u).slice().reverse();
   for (const u of l)
     i = u(o, { data: t, defaultError: i }).message;
   return {
-    ...a,
-    path: s,
+    ...s,
+    path: a,
     message: i
   };
 };
-function N(e, t) {
-  const r = kl(), n = Tl({
+function E(e, t) {
+  const n = Li(), r = Zi({
     issueData: t,
     data: e.data,
     path: e.path,
@@ -1118,15 +529,15 @@ function N(e, t) {
       // contextual error map is first priority
       e.schemaErrorMap,
       // then schema-bound map if available
-      r,
+      n,
       // then global override map
-      r === $n ? void 0 : $n
+      n === or ? void 0 : or
       // then global default map
-    ].filter((a) => !!a)
+    ].filter((s) => !!s)
   });
-  e.common.issues.push(n);
+  e.common.issues.push(r);
 }
-class De {
+class Oe {
   constructor() {
     this.value = "valid";
   }
@@ -1136,54 +547,54 @@ class De {
   abort() {
     this.value !== "aborted" && (this.value = "aborted");
   }
-  static mergeArray(t, r) {
-    const n = [];
-    for (const a of r) {
-      if (a.status === "aborted")
-        return L;
-      a.status === "dirty" && t.dirty(), n.push(a.value);
+  static mergeArray(t, n) {
+    const r = [];
+    for (const s of n) {
+      if (s.status === "aborted")
+        return D;
+      s.status === "dirty" && t.dirty(), r.push(s.value);
     }
-    return { status: t.value, value: n };
+    return { status: t.value, value: r };
   }
-  static async mergeObjectAsync(t, r) {
-    const n = [];
-    for (const a of r) {
-      const s = await a.key, o = await a.value;
-      n.push({
-        key: s,
+  static async mergeObjectAsync(t, n) {
+    const r = [];
+    for (const s of n) {
+      const a = await s.key, o = await s.value;
+      r.push({
+        key: a,
         value: o
       });
     }
-    return De.mergeObjectSync(t, n);
+    return Oe.mergeObjectSync(t, r);
   }
-  static mergeObjectSync(t, r) {
-    const n = {};
-    for (const a of r) {
-      const { key: s, value: o } = a;
-      if (s.status === "aborted" || o.status === "aborted")
-        return L;
-      s.status === "dirty" && t.dirty(), o.status === "dirty" && t.dirty(), s.value !== "__proto__" && (typeof o.value < "u" || a.alwaysSet) && (n[s.value] = o.value);
+  static mergeObjectSync(t, n) {
+    const r = {};
+    for (const s of n) {
+      const { key: a, value: o } = s;
+      if (a.status === "aborted" || o.status === "aborted")
+        return D;
+      a.status === "dirty" && t.dirty(), o.status === "dirty" && t.dirty(), a.value !== "__proto__" && (typeof o.value < "u" || s.alwaysSet) && (r[a.value] = o.value);
     }
-    return { status: t.value, value: n };
+    return { status: t.value, value: r };
   }
 }
-const L = Object.freeze({
+const D = Object.freeze({
   status: "aborted"
-}), dr = (e) => ({ status: "dirty", value: e }), ze = (e) => ({ status: "valid", value: e }), Ra = (e) => e.status === "aborted", Ea = (e) => e.status === "dirty", Ht = (e) => e.status === "valid", Zr = (e) => typeof Promise < "u" && e instanceof Promise;
-var M;
+}), Jt = (e) => ({ status: "dirty", value: e }), Ue = (e) => ({ status: "valid", value: e }), Hr = (e) => e.status === "aborted", zr = (e) => e.status === "dirty", $t = (e) => e.status === "valid", hn = (e) => typeof Promise < "u" && e instanceof Promise;
+var $;
 (function(e) {
   e.errToObj = (t) => typeof t == "string" ? { message: t } : t || {}, e.toString = (t) => typeof t == "string" ? t : t == null ? void 0 : t.message;
-})(M || (M = {}));
-class rt {
-  constructor(t, r, n, a) {
-    this._cachedPath = [], this.parent = t, this.data = r, this._path = n, this._key = a;
+})($ || ($ = {}));
+class Xe {
+  constructor(t, n, r, s) {
+    this._cachedPath = [], this.parent = t, this.data = n, this._path = r, this._key = s;
   }
   get path() {
     return this._cachedPath.length || (Array.isArray(this._key) ? this._cachedPath.push(...this._path, ...this._key) : this._cachedPath.push(...this._path, this._key)), this._cachedPath;
   }
 }
-const Aa = (e, t) => {
-  if (Ht(t))
+const Wr = (e, t) => {
+  if ($t(t))
     return { success: !0, data: t.value };
   if (!e.common.issues.length)
     throw new Error("Validation failed but no issues detected.");
@@ -1192,34 +603,34 @@ const Aa = (e, t) => {
     get error() {
       if (this._error)
         return this._error;
-      const r = new gt(e.common.issues);
-      return this._error = r, this._error;
+      const n = new at(e.common.issues);
+      return this._error = n, this._error;
     }
   };
 };
-function V(e) {
+function Z(e) {
   if (!e)
     return {};
-  const { errorMap: t, invalid_type_error: r, required_error: n, description: a } = e;
-  if (t && (r || n))
+  const { errorMap: t, invalid_type_error: n, required_error: r, description: s } = e;
+  if (t && (n || r))
     throw new Error(`Can't use "invalid_type_error" or "required_error" in conjunction with custom error map.`);
-  return t ? { errorMap: t, description: a } : { errorMap: (o, i) => {
+  return t ? { errorMap: t, description: s } : { errorMap: (o, i) => {
     const { message: l } = e;
-    return o.code === "invalid_enum_value" ? { message: l ?? i.defaultError } : typeof i.data > "u" ? { message: l ?? n ?? i.defaultError } : o.code !== "invalid_type" ? { message: i.defaultError } : { message: l ?? r ?? i.defaultError };
-  }, description: a };
+    return o.code === "invalid_enum_value" ? { message: l ?? i.defaultError } : typeof i.data > "u" ? { message: l ?? r ?? i.defaultError } : o.code !== "invalid_type" ? { message: i.defaultError } : { message: l ?? n ?? i.defaultError };
+  }, description: s };
 }
-class z {
+class J {
   get description() {
     return this._def.description;
   }
   _getType(t) {
-    return xt(t.data);
+    return ct(t.data);
   }
-  _getOrReturnCtx(t, r) {
-    return r || {
+  _getOrReturnCtx(t, n) {
+    return n || {
       common: t.parent.common,
       data: t.data,
-      parsedType: xt(t.data),
+      parsedType: ct(t.data),
       schemaErrorMap: this._def.errorMap,
       path: t.path,
       parent: t.parent
@@ -1227,11 +638,11 @@ class z {
   }
   _processInputParams(t) {
     return {
-      status: new De(),
+      status: new Oe(),
       ctx: {
         common: t.parent.common,
         data: t.data,
-        parsedType: xt(t.data),
+        parsedType: ct(t.data),
         schemaErrorMap: this._def.errorMap,
         path: t.path,
         parent: t.parent
@@ -1239,39 +650,39 @@ class z {
     };
   }
   _parseSync(t) {
-    const r = this._parse(t);
-    if (Zr(r))
+    const n = this._parse(t);
+    if (hn(n))
       throw new Error("Synchronous parse encountered promise.");
-    return r;
+    return n;
   }
   _parseAsync(t) {
-    const r = this._parse(t);
-    return Promise.resolve(r);
+    const n = this._parse(t);
+    return Promise.resolve(n);
   }
-  parse(t, r) {
-    const n = this.safeParse(t, r);
-    if (n.success)
-      return n.data;
-    throw n.error;
+  parse(t, n) {
+    const r = this.safeParse(t, n);
+    if (r.success)
+      return r.data;
+    throw r.error;
   }
-  safeParse(t, r) {
-    const n = {
+  safeParse(t, n) {
+    const r = {
       common: {
         issues: [],
-        async: (r == null ? void 0 : r.async) ?? !1,
-        contextualErrorMap: r == null ? void 0 : r.errorMap
+        async: (n == null ? void 0 : n.async) ?? !1,
+        contextualErrorMap: n == null ? void 0 : n.errorMap
       },
-      path: (r == null ? void 0 : r.path) || [],
+      path: (n == null ? void 0 : n.path) || [],
       schemaErrorMap: this._def.errorMap,
       parent: null,
       data: t,
-      parsedType: xt(t)
-    }, a = this._parseSync({ data: t, path: n.path, parent: n });
-    return Aa(n, a);
+      parsedType: ct(t)
+    }, s = this._parseSync({ data: t, path: r.path, parent: r });
+    return Wr(r, s);
   }
   "~validate"(t) {
-    var n, a;
-    const r = {
+    var r, s;
+    const n = {
       common: {
         issues: [],
         async: !!this["~standard"].async
@@ -1280,66 +691,66 @@ class z {
       schemaErrorMap: this._def.errorMap,
       parent: null,
       data: t,
-      parsedType: xt(t)
+      parsedType: ct(t)
     };
     if (!this["~standard"].async)
       try {
-        const s = this._parseSync({ data: t, path: [], parent: r });
-        return Ht(s) ? {
-          value: s.value
+        const a = this._parseSync({ data: t, path: [], parent: n });
+        return $t(a) ? {
+          value: a.value
         } : {
-          issues: r.common.issues
+          issues: n.common.issues
         };
-      } catch (s) {
-        (a = (n = s == null ? void 0 : s.message) == null ? void 0 : n.toLowerCase()) != null && a.includes("encountered") && (this["~standard"].async = !0), r.common = {
+      } catch (a) {
+        (s = (r = a == null ? void 0 : a.message) == null ? void 0 : r.toLowerCase()) != null && s.includes("encountered") && (this["~standard"].async = !0), n.common = {
           issues: [],
           async: !0
         };
       }
-    return this._parseAsync({ data: t, path: [], parent: r }).then((s) => Ht(s) ? {
-      value: s.value
+    return this._parseAsync({ data: t, path: [], parent: n }).then((a) => $t(a) ? {
+      value: a.value
     } : {
-      issues: r.common.issues
+      issues: n.common.issues
     });
   }
-  async parseAsync(t, r) {
-    const n = await this.safeParseAsync(t, r);
-    if (n.success)
-      return n.data;
-    throw n.error;
+  async parseAsync(t, n) {
+    const r = await this.safeParseAsync(t, n);
+    if (r.success)
+      return r.data;
+    throw r.error;
   }
-  async safeParseAsync(t, r) {
-    const n = {
+  async safeParseAsync(t, n) {
+    const r = {
       common: {
         issues: [],
-        contextualErrorMap: r == null ? void 0 : r.errorMap,
+        contextualErrorMap: n == null ? void 0 : n.errorMap,
         async: !0
       },
-      path: (r == null ? void 0 : r.path) || [],
+      path: (n == null ? void 0 : n.path) || [],
       schemaErrorMap: this._def.errorMap,
       parent: null,
       data: t,
-      parsedType: xt(t)
-    }, a = this._parse({ data: t, path: n.path, parent: n }), s = await (Zr(a) ? a : Promise.resolve(a));
-    return Aa(n, s);
+      parsedType: ct(t)
+    }, s = this._parse({ data: t, path: r.path, parent: r }), a = await (hn(s) ? s : Promise.resolve(s));
+    return Wr(r, a);
   }
-  refine(t, r) {
-    const n = (a) => typeof r == "string" || typeof r > "u" ? { message: r } : typeof r == "function" ? r(a) : r;
-    return this._refinement((a, s) => {
-      const o = t(a), i = () => s.addIssue({
+  refine(t, n) {
+    const r = (s) => typeof n == "string" || typeof n > "u" ? { message: n } : typeof n == "function" ? n(s) : n;
+    return this._refinement((s, a) => {
+      const o = t(s), i = () => a.addIssue({
         code: I.custom,
-        ...n(a)
+        ...r(s)
       });
       return typeof Promise < "u" && o instanceof Promise ? o.then((l) => l ? !0 : (i(), !1)) : o ? !0 : (i(), !1);
     });
   }
-  refinement(t, r) {
-    return this._refinement((n, a) => t(n) ? !0 : (a.addIssue(typeof r == "function" ? r(n, a) : r), !1));
+  refinement(t, n) {
+    return this._refinement((r, s) => t(r) ? !0 : (s.addIssue(typeof n == "function" ? n(r, s) : n), !1));
   }
   _refinement(t) {
-    return new Dt({
+    return new kt({
       schema: this,
-      typeName: C.ZodEffects,
+      typeName: R.ZodEffects,
       effect: { type: "refinement", refinement: t }
     });
   }
@@ -1350,75 +761,75 @@ class z {
     this.spa = this.safeParseAsync, this._def = t, this.parse = this.parse.bind(this), this.safeParse = this.safeParse.bind(this), this.parseAsync = this.parseAsync.bind(this), this.safeParseAsync = this.safeParseAsync.bind(this), this.spa = this.spa.bind(this), this.refine = this.refine.bind(this), this.refinement = this.refinement.bind(this), this.superRefine = this.superRefine.bind(this), this.optional = this.optional.bind(this), this.nullable = this.nullable.bind(this), this.nullish = this.nullish.bind(this), this.array = this.array.bind(this), this.promise = this.promise.bind(this), this.or = this.or.bind(this), this.and = this.and.bind(this), this.transform = this.transform.bind(this), this.brand = this.brand.bind(this), this.default = this.default.bind(this), this.catch = this.catch.bind(this), this.describe = this.describe.bind(this), this.pipe = this.pipe.bind(this), this.readonly = this.readonly.bind(this), this.isNullable = this.isNullable.bind(this), this.isOptional = this.isOptional.bind(this), this["~standard"] = {
       version: 1,
       vendor: "zod",
-      validate: (r) => this["~validate"](r)
+      validate: (n) => this["~validate"](n)
     };
   }
   optional() {
-    return tt.create(this, this._def);
+    return Ye.create(this, this._def);
   }
   nullable() {
-    return qt.create(this, this._def);
+    return St.create(this, this._def);
   }
   nullish() {
     return this.nullable().optional();
   }
   array() {
-    return et.create(this);
+    return We.create(this);
   }
   promise() {
-    return Kr.create(this, this._def);
+    return wn.create(this, this._def);
   }
   or(t) {
-    return Jr.create([this, t], this._def);
+    return gn.create([this, t], this._def);
   }
   and(t) {
-    return zr.create(this, t, this._def);
+    return yn.create(this, t, this._def);
   }
   transform(t) {
-    return new Dt({
-      ...V(this._def),
+    return new kt({
+      ...Z(this._def),
       schema: this,
-      typeName: C.ZodEffects,
+      typeName: R.ZodEffects,
       effect: { type: "transform", transform: t }
     });
   }
   default(t) {
-    const r = typeof t == "function" ? t : () => t;
-    return new Yr({
-      ...V(this._def),
+    const n = typeof t == "function" ? t : () => t;
+    return new xn({
+      ...Z(this._def),
       innerType: this,
-      defaultValue: r,
-      typeName: C.ZodDefault
+      defaultValue: n,
+      typeName: R.ZodDefault
     });
   }
   brand() {
-    return new Xs({
-      typeName: C.ZodBranded,
+    return new ga({
+      typeName: R.ZodBranded,
       type: this,
-      ...V(this._def)
+      ...Z(this._def)
     });
   }
   catch(t) {
-    const r = typeof t == "function" ? t : () => t;
-    return new Xr({
-      ...V(this._def),
+    const n = typeof t == "function" ? t : () => t;
+    return new Tn({
+      ...Z(this._def),
       innerType: this,
-      catchValue: r,
-      typeName: C.ZodCatch
+      catchValue: n,
+      typeName: R.ZodCatch
     });
   }
   describe(t) {
-    const r = this.constructor;
-    return new r({
+    const n = this.constructor;
+    return new n({
       ...this._def,
       description: t
     });
   }
   pipe(t) {
-    return aa.create(this, t);
+    return xr.create(this, t);
   }
   readonly() {
-    return Qr.create(this);
+    return kn.create(this);
   }
   isOptional() {
     return this.safeParse(void 0).success;
@@ -1427,248 +838,248 @@ class z {
     return this.safeParse(null).success;
   }
 }
-const Sl = /^c[^\s-]{8,}$/i, Il = /^[0-9a-z]+$/, Cl = /^[0-9A-HJKMNP-TV-Z]{26}$/i, Rl = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/i, El = /^[a-z0-9_-]{21}$/i, Al = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$/, Nl = /^[-+]?P(?!$)(?:(?:[-+]?\d+Y)|(?:[-+]?\d+[.,]\d+Y$))?(?:(?:[-+]?\d+M)|(?:[-+]?\d+[.,]\d+M$))?(?:(?:[-+]?\d+W)|(?:[-+]?\d+[.,]\d+W$))?(?:(?:[-+]?\d+D)|(?:[-+]?\d+[.,]\d+D$))?(?:T(?=[\d+-])(?:(?:[-+]?\d+H)|(?:[-+]?\d+[.,]\d+H$))?(?:(?:[-+]?\d+M)|(?:[-+]?\d+[.,]\d+M$))?(?:[-+]?\d+(?:[.,]\d+)?S)?)??$/, Pl = /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\-]*\.)+[A-Z]{2,}$/i, Ol = "^(\\p{Extended_Pictographic}|\\p{Emoji_Component})+$";
-let kn;
-const Ml = /^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$/, jl = /^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\/(3[0-2]|[12]?[0-9])$/, $l = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/, Dl = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))\/(12[0-8]|1[01][0-9]|[1-9]?[0-9])$/, ql = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/, Ul = /^([0-9a-zA-Z-_]{4})*(([0-9a-zA-Z-_]{2}(==)?)|([0-9a-zA-Z-_]{3}(=)?))?$/, Ws = "((\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-((0[13578]|1[02])-(0[1-9]|[12]\\d|3[01])|(0[469]|11)-(0[1-9]|[12]\\d|30)|(02)-(0[1-9]|1\\d|2[0-8])))", Ll = new RegExp(`^${Ws}$`);
-function Ks(e) {
+const Vi = /^c[^\s-]{8,}$/i, Bi = /^[0-9a-z]+$/, Fi = /^[0-9A-HJKMNP-TV-Z]{26}$/i, Gi = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/i, Ji = /^[a-z0-9_-]{21}$/i, Hi = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$/, zi = /^[-+]?P(?!$)(?:(?:[-+]?\d+Y)|(?:[-+]?\d+[.,]\d+Y$))?(?:(?:[-+]?\d+M)|(?:[-+]?\d+[.,]\d+M$))?(?:(?:[-+]?\d+W)|(?:[-+]?\d+[.,]\d+W$))?(?:(?:[-+]?\d+D)|(?:[-+]?\d+[.,]\d+D$))?(?:T(?=[\d+-])(?:(?:[-+]?\d+H)|(?:[-+]?\d+[.,]\d+H$))?(?:(?:[-+]?\d+M)|(?:[-+]?\d+[.,]\d+M$))?(?:[-+]?\d+(?:[.,]\d+)?S)?)??$/, Wi = /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\-]*\.)+[A-Z]{2,}$/i, Yi = "^(\\p{Extended_Pictographic}|\\p{Emoji_Component})+$";
+let Yn;
+const Ki = /^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$/, Xi = /^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\/(3[0-2]|[12]?[0-9])$/, Qi = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/, el = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))\/(12[0-8]|1[01][0-9]|[1-9]?[0-9])$/, tl = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/, nl = /^([0-9a-zA-Z-_]{4})*(([0-9a-zA-Z-_]{2}(==)?)|([0-9a-zA-Z-_]{3}(=)?))?$/, ha = "((\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-((0[13578]|1[02])-(0[1-9]|[12]\\d|3[01])|(0[469]|11)-(0[1-9]|[12]\\d|30)|(02)-(0[1-9]|1\\d|2[0-8])))", rl = new RegExp(`^${ha}$`);
+function fa(e) {
   let t = "[0-5]\\d";
   e.precision ? t = `${t}\\.\\d{${e.precision}}` : e.precision == null && (t = `${t}(\\.\\d+)?`);
-  const r = e.precision ? "+" : "?";
-  return `([01]\\d|2[0-3]):[0-5]\\d(:${t})${r}`;
+  const n = e.precision ? "+" : "?";
+  return `([01]\\d|2[0-3]):[0-5]\\d(:${t})${n}`;
 }
-function Fl(e) {
-  return new RegExp(`^${Ks(e)}$`);
+function sl(e) {
+  return new RegExp(`^${fa(e)}$`);
 }
-function Zl(e) {
-  let t = `${Ws}T${Ks(e)}`;
-  const r = [];
-  return r.push(e.local ? "Z?" : "Z"), e.offset && r.push("([+-]\\d{2}:?\\d{2})"), t = `${t}(${r.join("|")})`, new RegExp(`^${t}$`);
+function al(e) {
+  let t = `${ha}T${fa(e)}`;
+  const n = [];
+  return n.push(e.local ? "Z?" : "Z"), e.offset && n.push("([+-]\\d{2}:?\\d{2})"), t = `${t}(${n.join("|")})`, new RegExp(`^${t}$`);
 }
-function Vl(e, t) {
-  return !!((t === "v4" || !t) && Ml.test(e) || (t === "v6" || !t) && $l.test(e));
+function ol(e, t) {
+  return !!((t === "v4" || !t) && Ki.test(e) || (t === "v6" || !t) && Qi.test(e));
 }
-function Bl(e, t) {
-  if (!Al.test(e))
+function il(e, t) {
+  if (!Hi.test(e))
     return !1;
   try {
-    const [r] = e.split("."), n = r.replace(/-/g, "+").replace(/_/g, "/").padEnd(r.length + (4 - r.length % 4) % 4, "="), a = JSON.parse(atob(n));
-    return !(typeof a != "object" || a === null || "typ" in a && (a == null ? void 0 : a.typ) !== "JWT" || !a.alg || t && a.alg !== t);
+    const [n] = e.split("."), r = n.replace(/-/g, "+").replace(/_/g, "/").padEnd(n.length + (4 - n.length % 4) % 4, "="), s = JSON.parse(atob(r));
+    return !(typeof s != "object" || s === null || "typ" in s && (s == null ? void 0 : s.typ) !== "JWT" || !s.alg || t && s.alg !== t);
   } catch {
     return !1;
   }
 }
-function Jl(e, t) {
-  return !!((t === "v4" || !t) && jl.test(e) || (t === "v6" || !t) && Dl.test(e));
+function ll(e, t) {
+  return !!((t === "v4" || !t) && Xi.test(e) || (t === "v6" || !t) && el.test(e));
 }
-class mt extends z {
+class ze extends J {
   _parse(t) {
-    if (this._def.coerce && (t.data = String(t.data)), this._getType(t) !== O.string) {
-      const s = this._getOrReturnCtx(t);
-      return N(s, {
+    if (this._def.coerce && (t.data = String(t.data)), this._getType(t) !== A.string) {
+      const a = this._getOrReturnCtx(t);
+      return E(a, {
         code: I.invalid_type,
-        expected: O.string,
-        received: s.parsedType
-      }), L;
+        expected: A.string,
+        received: a.parsedType
+      }), D;
     }
-    const n = new De();
-    let a;
-    for (const s of this._def.checks)
-      if (s.kind === "min")
-        t.data.length < s.value && (a = this._getOrReturnCtx(t, a), N(a, {
+    const r = new Oe();
+    let s;
+    for (const a of this._def.checks)
+      if (a.kind === "min")
+        t.data.length < a.value && (s = this._getOrReturnCtx(t, s), E(s, {
           code: I.too_small,
-          minimum: s.value,
+          minimum: a.value,
           type: "string",
           inclusive: !0,
           exact: !1,
-          message: s.message
-        }), n.dirty());
-      else if (s.kind === "max")
-        t.data.length > s.value && (a = this._getOrReturnCtx(t, a), N(a, {
+          message: a.message
+        }), r.dirty());
+      else if (a.kind === "max")
+        t.data.length > a.value && (s = this._getOrReturnCtx(t, s), E(s, {
           code: I.too_big,
-          maximum: s.value,
+          maximum: a.value,
           type: "string",
           inclusive: !0,
           exact: !1,
-          message: s.message
-        }), n.dirty());
-      else if (s.kind === "length") {
-        const o = t.data.length > s.value, i = t.data.length < s.value;
-        (o || i) && (a = this._getOrReturnCtx(t, a), o ? N(a, {
+          message: a.message
+        }), r.dirty());
+      else if (a.kind === "length") {
+        const o = t.data.length > a.value, i = t.data.length < a.value;
+        (o || i) && (s = this._getOrReturnCtx(t, s), o ? E(s, {
           code: I.too_big,
-          maximum: s.value,
+          maximum: a.value,
           type: "string",
           inclusive: !0,
           exact: !0,
-          message: s.message
-        }) : i && N(a, {
+          message: a.message
+        }) : i && E(s, {
           code: I.too_small,
-          minimum: s.value,
+          minimum: a.value,
           type: "string",
           inclusive: !0,
           exact: !0,
-          message: s.message
-        }), n.dirty());
-      } else if (s.kind === "email")
-        Pl.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
+          message: a.message
+        }), r.dirty());
+      } else if (a.kind === "email")
+        Wi.test(t.data) || (s = this._getOrReturnCtx(t, s), E(s, {
           validation: "email",
           code: I.invalid_string,
-          message: s.message
-        }), n.dirty());
-      else if (s.kind === "emoji")
-        kn || (kn = new RegExp(Ol, "u")), kn.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
+          message: a.message
+        }), r.dirty());
+      else if (a.kind === "emoji")
+        Yn || (Yn = new RegExp(Yi, "u")), Yn.test(t.data) || (s = this._getOrReturnCtx(t, s), E(s, {
           validation: "emoji",
           code: I.invalid_string,
-          message: s.message
-        }), n.dirty());
-      else if (s.kind === "uuid")
-        Rl.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
+          message: a.message
+        }), r.dirty());
+      else if (a.kind === "uuid")
+        Gi.test(t.data) || (s = this._getOrReturnCtx(t, s), E(s, {
           validation: "uuid",
           code: I.invalid_string,
-          message: s.message
-        }), n.dirty());
-      else if (s.kind === "nanoid")
-        El.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
+          message: a.message
+        }), r.dirty());
+      else if (a.kind === "nanoid")
+        Ji.test(t.data) || (s = this._getOrReturnCtx(t, s), E(s, {
           validation: "nanoid",
           code: I.invalid_string,
-          message: s.message
-        }), n.dirty());
-      else if (s.kind === "cuid")
-        Sl.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
+          message: a.message
+        }), r.dirty());
+      else if (a.kind === "cuid")
+        Vi.test(t.data) || (s = this._getOrReturnCtx(t, s), E(s, {
           validation: "cuid",
           code: I.invalid_string,
-          message: s.message
-        }), n.dirty());
-      else if (s.kind === "cuid2")
-        Il.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
+          message: a.message
+        }), r.dirty());
+      else if (a.kind === "cuid2")
+        Bi.test(t.data) || (s = this._getOrReturnCtx(t, s), E(s, {
           validation: "cuid2",
           code: I.invalid_string,
-          message: s.message
-        }), n.dirty());
-      else if (s.kind === "ulid")
-        Cl.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
+          message: a.message
+        }), r.dirty());
+      else if (a.kind === "ulid")
+        Fi.test(t.data) || (s = this._getOrReturnCtx(t, s), E(s, {
           validation: "ulid",
           code: I.invalid_string,
-          message: s.message
-        }), n.dirty());
-      else if (s.kind === "url")
+          message: a.message
+        }), r.dirty());
+      else if (a.kind === "url")
         try {
           new URL(t.data);
         } catch {
-          a = this._getOrReturnCtx(t, a), N(a, {
+          s = this._getOrReturnCtx(t, s), E(s, {
             validation: "url",
             code: I.invalid_string,
-            message: s.message
-          }), n.dirty();
+            message: a.message
+          }), r.dirty();
         }
-      else s.kind === "regex" ? (s.regex.lastIndex = 0, s.regex.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
+      else a.kind === "regex" ? (a.regex.lastIndex = 0, a.regex.test(t.data) || (s = this._getOrReturnCtx(t, s), E(s, {
         validation: "regex",
         code: I.invalid_string,
-        message: s.message
-      }), n.dirty())) : s.kind === "trim" ? t.data = t.data.trim() : s.kind === "includes" ? t.data.includes(s.value, s.position) || (a = this._getOrReturnCtx(t, a), N(a, {
+        message: a.message
+      }), r.dirty())) : a.kind === "trim" ? t.data = t.data.trim() : a.kind === "includes" ? t.data.includes(a.value, a.position) || (s = this._getOrReturnCtx(t, s), E(s, {
         code: I.invalid_string,
-        validation: { includes: s.value, position: s.position },
-        message: s.message
-      }), n.dirty()) : s.kind === "toLowerCase" ? t.data = t.data.toLowerCase() : s.kind === "toUpperCase" ? t.data = t.data.toUpperCase() : s.kind === "startsWith" ? t.data.startsWith(s.value) || (a = this._getOrReturnCtx(t, a), N(a, {
+        validation: { includes: a.value, position: a.position },
+        message: a.message
+      }), r.dirty()) : a.kind === "toLowerCase" ? t.data = t.data.toLowerCase() : a.kind === "toUpperCase" ? t.data = t.data.toUpperCase() : a.kind === "startsWith" ? t.data.startsWith(a.value) || (s = this._getOrReturnCtx(t, s), E(s, {
         code: I.invalid_string,
-        validation: { startsWith: s.value },
-        message: s.message
-      }), n.dirty()) : s.kind === "endsWith" ? t.data.endsWith(s.value) || (a = this._getOrReturnCtx(t, a), N(a, {
+        validation: { startsWith: a.value },
+        message: a.message
+      }), r.dirty()) : a.kind === "endsWith" ? t.data.endsWith(a.value) || (s = this._getOrReturnCtx(t, s), E(s, {
         code: I.invalid_string,
-        validation: { endsWith: s.value },
-        message: s.message
-      }), n.dirty()) : s.kind === "datetime" ? Zl(s).test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
+        validation: { endsWith: a.value },
+        message: a.message
+      }), r.dirty()) : a.kind === "datetime" ? al(a).test(t.data) || (s = this._getOrReturnCtx(t, s), E(s, {
         code: I.invalid_string,
         validation: "datetime",
-        message: s.message
-      }), n.dirty()) : s.kind === "date" ? Ll.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
+        message: a.message
+      }), r.dirty()) : a.kind === "date" ? rl.test(t.data) || (s = this._getOrReturnCtx(t, s), E(s, {
         code: I.invalid_string,
         validation: "date",
-        message: s.message
-      }), n.dirty()) : s.kind === "time" ? Fl(s).test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
+        message: a.message
+      }), r.dirty()) : a.kind === "time" ? sl(a).test(t.data) || (s = this._getOrReturnCtx(t, s), E(s, {
         code: I.invalid_string,
         validation: "time",
-        message: s.message
-      }), n.dirty()) : s.kind === "duration" ? Nl.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
+        message: a.message
+      }), r.dirty()) : a.kind === "duration" ? zi.test(t.data) || (s = this._getOrReturnCtx(t, s), E(s, {
         validation: "duration",
         code: I.invalid_string,
-        message: s.message
-      }), n.dirty()) : s.kind === "ip" ? Vl(t.data, s.version) || (a = this._getOrReturnCtx(t, a), N(a, {
+        message: a.message
+      }), r.dirty()) : a.kind === "ip" ? ol(t.data, a.version) || (s = this._getOrReturnCtx(t, s), E(s, {
         validation: "ip",
         code: I.invalid_string,
-        message: s.message
-      }), n.dirty()) : s.kind === "jwt" ? Bl(t.data, s.alg) || (a = this._getOrReturnCtx(t, a), N(a, {
+        message: a.message
+      }), r.dirty()) : a.kind === "jwt" ? il(t.data, a.alg) || (s = this._getOrReturnCtx(t, s), E(s, {
         validation: "jwt",
         code: I.invalid_string,
-        message: s.message
-      }), n.dirty()) : s.kind === "cidr" ? Jl(t.data, s.version) || (a = this._getOrReturnCtx(t, a), N(a, {
+        message: a.message
+      }), r.dirty()) : a.kind === "cidr" ? ll(t.data, a.version) || (s = this._getOrReturnCtx(t, s), E(s, {
         validation: "cidr",
         code: I.invalid_string,
-        message: s.message
-      }), n.dirty()) : s.kind === "base64" ? ql.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
+        message: a.message
+      }), r.dirty()) : a.kind === "base64" ? tl.test(t.data) || (s = this._getOrReturnCtx(t, s), E(s, {
         validation: "base64",
         code: I.invalid_string,
-        message: s.message
-      }), n.dirty()) : s.kind === "base64url" ? Ul.test(t.data) || (a = this._getOrReturnCtx(t, a), N(a, {
+        message: a.message
+      }), r.dirty()) : a.kind === "base64url" ? nl.test(t.data) || (s = this._getOrReturnCtx(t, s), E(s, {
         validation: "base64url",
         code: I.invalid_string,
-        message: s.message
-      }), n.dirty()) : K.assertNever(s);
-    return { status: n.value, value: t.data };
+        message: a.message
+      }), r.dirty()) : W.assertNever(a);
+    return { status: r.value, value: t.data };
   }
-  _regex(t, r, n) {
-    return this.refinement((a) => t.test(a), {
-      validation: r,
+  _regex(t, n, r) {
+    return this.refinement((s) => t.test(s), {
+      validation: n,
       code: I.invalid_string,
-      ...M.errToObj(n)
+      ...$.errToObj(r)
     });
   }
   _addCheck(t) {
-    return new mt({
+    return new ze({
       ...this._def,
       checks: [...this._def.checks, t]
     });
   }
   email(t) {
-    return this._addCheck({ kind: "email", ...M.errToObj(t) });
+    return this._addCheck({ kind: "email", ...$.errToObj(t) });
   }
   url(t) {
-    return this._addCheck({ kind: "url", ...M.errToObj(t) });
+    return this._addCheck({ kind: "url", ...$.errToObj(t) });
   }
   emoji(t) {
-    return this._addCheck({ kind: "emoji", ...M.errToObj(t) });
+    return this._addCheck({ kind: "emoji", ...$.errToObj(t) });
   }
   uuid(t) {
-    return this._addCheck({ kind: "uuid", ...M.errToObj(t) });
+    return this._addCheck({ kind: "uuid", ...$.errToObj(t) });
   }
   nanoid(t) {
-    return this._addCheck({ kind: "nanoid", ...M.errToObj(t) });
+    return this._addCheck({ kind: "nanoid", ...$.errToObj(t) });
   }
   cuid(t) {
-    return this._addCheck({ kind: "cuid", ...M.errToObj(t) });
+    return this._addCheck({ kind: "cuid", ...$.errToObj(t) });
   }
   cuid2(t) {
-    return this._addCheck({ kind: "cuid2", ...M.errToObj(t) });
+    return this._addCheck({ kind: "cuid2", ...$.errToObj(t) });
   }
   ulid(t) {
-    return this._addCheck({ kind: "ulid", ...M.errToObj(t) });
+    return this._addCheck({ kind: "ulid", ...$.errToObj(t) });
   }
   base64(t) {
-    return this._addCheck({ kind: "base64", ...M.errToObj(t) });
+    return this._addCheck({ kind: "base64", ...$.errToObj(t) });
   }
   base64url(t) {
     return this._addCheck({
       kind: "base64url",
-      ...M.errToObj(t)
+      ...$.errToObj(t)
     });
   }
   jwt(t) {
-    return this._addCheck({ kind: "jwt", ...M.errToObj(t) });
+    return this._addCheck({ kind: "jwt", ...$.errToObj(t) });
   }
   ip(t) {
-    return this._addCheck({ kind: "ip", ...M.errToObj(t) });
+    return this._addCheck({ kind: "ip", ...$.errToObj(t) });
   }
   cidr(t) {
-    return this._addCheck({ kind: "cidr", ...M.errToObj(t) });
+    return this._addCheck({ kind: "cidr", ...$.errToObj(t) });
   }
   datetime(t) {
     return typeof t == "string" ? this._addCheck({
@@ -1682,7 +1093,7 @@ class mt extends z {
       precision: typeof (t == null ? void 0 : t.precision) > "u" ? null : t == null ? void 0 : t.precision,
       offset: (t == null ? void 0 : t.offset) ?? !1,
       local: (t == null ? void 0 : t.local) ?? !1,
-      ...M.errToObj(t == null ? void 0 : t.message)
+      ...$.errToObj(t == null ? void 0 : t.message)
     });
   }
   date(t) {
@@ -1696,82 +1107,82 @@ class mt extends z {
     }) : this._addCheck({
       kind: "time",
       precision: typeof (t == null ? void 0 : t.precision) > "u" ? null : t == null ? void 0 : t.precision,
-      ...M.errToObj(t == null ? void 0 : t.message)
+      ...$.errToObj(t == null ? void 0 : t.message)
     });
   }
   duration(t) {
-    return this._addCheck({ kind: "duration", ...M.errToObj(t) });
+    return this._addCheck({ kind: "duration", ...$.errToObj(t) });
   }
-  regex(t, r) {
+  regex(t, n) {
     return this._addCheck({
       kind: "regex",
       regex: t,
-      ...M.errToObj(r)
+      ...$.errToObj(n)
     });
   }
-  includes(t, r) {
+  includes(t, n) {
     return this._addCheck({
       kind: "includes",
       value: t,
-      position: r == null ? void 0 : r.position,
-      ...M.errToObj(r == null ? void 0 : r.message)
+      position: n == null ? void 0 : n.position,
+      ...$.errToObj(n == null ? void 0 : n.message)
     });
   }
-  startsWith(t, r) {
+  startsWith(t, n) {
     return this._addCheck({
       kind: "startsWith",
       value: t,
-      ...M.errToObj(r)
+      ...$.errToObj(n)
     });
   }
-  endsWith(t, r) {
+  endsWith(t, n) {
     return this._addCheck({
       kind: "endsWith",
       value: t,
-      ...M.errToObj(r)
+      ...$.errToObj(n)
     });
   }
-  min(t, r) {
+  min(t, n) {
     return this._addCheck({
       kind: "min",
       value: t,
-      ...M.errToObj(r)
+      ...$.errToObj(n)
     });
   }
-  max(t, r) {
+  max(t, n) {
     return this._addCheck({
       kind: "max",
       value: t,
-      ...M.errToObj(r)
+      ...$.errToObj(n)
     });
   }
-  length(t, r) {
+  length(t, n) {
     return this._addCheck({
       kind: "length",
       value: t,
-      ...M.errToObj(r)
+      ...$.errToObj(n)
     });
   }
   /**
    * Equivalent to `.min(1)`
    */
   nonempty(t) {
-    return this.min(1, M.errToObj(t));
+    return this.min(1, $.errToObj(t));
   }
   trim() {
-    return new mt({
+    return new ze({
       ...this._def,
       checks: [...this._def.checks, { kind: "trim" }]
     });
   }
   toLowerCase() {
-    return new mt({
+    return new ze({
       ...this._def,
       checks: [...this._def.checks, { kind: "toLowerCase" }]
     });
   }
   toUpperCase() {
-    return new mt({
+    return new ze({
       ...this._def,
       checks: [...this._def.checks, { kind: "toUpperCase" }]
     });
@@ -1826,100 +1237,100 @@ class mt extends z {
   }
   get minLength() {
     let t = null;
-    for (const r of this._def.checks)
-      r.kind === "min" && (t === null || r.value > t) && (t = r.value);
+    for (const n of this._def.checks)
+      n.kind === "min" && (t === null || n.value > t) && (t = n.value);
     return t;
   }
   get maxLength() {
     let t = null;
-    for (const r of this._def.checks)
-      r.kind === "max" && (t === null || r.value < t) && (t = r.value);
+    for (const n of this._def.checks)
+      n.kind === "max" && (t === null || n.value < t) && (t = n.value);
     return t;
   }
 }
-mt.create = (e) => new mt({
+ze.create = (e) => new ze({
   checks: [],
-  typeName: C.ZodString,
+  typeName: R.ZodString,
   coerce: (e == null ? void 0 : e.coerce) ?? !1,
-  ...V(e)
+  ...Z(e)
 });
-function zl(e, t) {
-  const r = (e.toString().split(".")[1] || "").length, n = (t.toString().split(".")[1] || "").length, a = r > n ? r : n, s = Number.parseInt(e.toFixed(a).replace(".", "")), o = Number.parseInt(t.toFixed(a).replace(".", ""));
-  return s % o / 10 ** a;
+function ul(e, t) {
+  const n = (e.toString().split(".")[1] || "").length, r = (t.toString().split(".")[1] || "").length, s = n > r ? n : r, a = Number.parseInt(e.toFixed(s).replace(".", "")), o = Number.parseInt(t.toFixed(s).replace(".", ""));
+  return a % o / 10 ** s;
 }
-class Wt extends z {
+class bt extends J {
   constructor() {
     super(...arguments), this.min = this.gte, this.max = this.lte, this.step = this.multipleOf;
   }
   _parse(t) {
-    if (this._def.coerce && (t.data = Number(t.data)), this._getType(t) !== O.number) {
-      const s = this._getOrReturnCtx(t);
-      return N(s, {
+    if (this._def.coerce && (t.data = Number(t.data)), this._getType(t) !== A.number) {
+      const a = this._getOrReturnCtx(t);
+      return E(a, {
         code: I.invalid_type,
-        expected: O.number,
-        received: s.parsedType
-      }), L;
+        expected: A.number,
+        received: a.parsedType
+      }), D;
     }
-    let n;
-    const a = new De();
-    for (const s of this._def.checks)
-      s.kind === "int" ? K.isInteger(t.data) || (n = this._getOrReturnCtx(t, n), N(n, {
+    let r;
+    const s = new Oe();
+    for (const a of this._def.checks)
+      a.kind === "int" ? W.isInteger(t.data) || (r = this._getOrReturnCtx(t, r), E(r, {
         code: I.invalid_type,
         expected: "integer",
         received: "float",
-        message: s.message
-      }), a.dirty()) : s.kind === "min" ? (s.inclusive ? t.data < s.value : t.data <= s.value) && (n = this._getOrReturnCtx(t, n), N(n, {
+        message: a.message
+      }), s.dirty()) : a.kind === "min" ? (a.inclusive ? t.data < a.value : t.data <= a.value) && (r = this._getOrReturnCtx(t, r), E(r, {
         code: I.too_small,
-        minimum: s.value,
+        minimum: a.value,
         type: "number",
-        inclusive: s.inclusive,
+        inclusive: a.inclusive,
         exact: !1,
-        message: s.message
-      }), a.dirty()) : s.kind === "max" ? (s.inclusive ? t.data > s.value : t.data >= s.value) && (n = this._getOrReturnCtx(t, n), N(n, {
+        message: a.message
+      }), s.dirty()) : a.kind === "max" ? (a.inclusive ? t.data > a.value : t.data >= a.value) && (r = this._getOrReturnCtx(t, r), E(r, {
         code: I.too_big,
-        maximum: s.value,
+        maximum: a.value,
         type: "number",
-        inclusive: s.inclusive,
+        inclusive: a.inclusive,
         exact: !1,
-        message: s.message
-      }), a.dirty()) : s.kind === "multipleOf" ? zl(t.data, s.value) !== 0 && (n = this._getOrReturnCtx(t, n), N(n, {
+        message: a.message
+      }), s.dirty()) : a.kind === "multipleOf" ? ul(t.data, a.value) !== 0 && (r = this._getOrReturnCtx(t, r), E(r, {
         code: I.not_multiple_of,
-        multipleOf: s.value,
-        message: s.message
-      }), a.dirty()) : s.kind === "finite" ? Number.isFinite(t.data) || (n = this._getOrReturnCtx(t, n), N(n, {
+        multipleOf: a.value,
+        message: a.message
+      }), s.dirty()) : a.kind === "finite" ? Number.isFinite(t.data) || (r = this._getOrReturnCtx(t, r), E(r, {
         code: I.not_finite,
-        message: s.message
-      }), a.dirty()) : K.assertNever(s);
-    return { status: a.value, value: t.data };
+        message: a.message
+      }), s.dirty()) : W.assertNever(a);
+    return { status: s.value, value: t.data };
   }
-  gte(t, r) {
-    return this.setLimit("min", t, !0, M.toString(r));
+  gte(t, n) {
+    return this.setLimit("min", t, !0, $.toString(n));
   }
-  gt(t, r) {
-    return this.setLimit("min", t, !1, M.toString(r));
+  gt(t, n) {
+    return this.setLimit("min", t, !1, $.toString(n));
   }
-  lte(t, r) {
-    return this.setLimit("max", t, !0, M.toString(r));
+  lte(t, n) {
+    return this.setLimit("max", t, !0, $.toString(n));
   }
-  lt(t, r) {
-    return this.setLimit("max", t, !1, M.toString(r));
+  lt(t, n) {
+    return this.setLimit("max", t, !1, $.toString(n));
   }
-  setLimit(t, r, n, a) {
-    return new Wt({
+  setLimit(t, n, r, s) {
+    return new bt({
       ...this._def,
       checks: [
         ...this._def.checks,
         {
           kind: t,
-          value: r,
-          inclusive: n,
-          message: M.toString(a)
+          value: n,
+          inclusive: r,
+          message: $.toString(s)
         }
       ]
     });
   }
   _addCheck(t) {
-    return new Wt({
+    return new bt({
       ...this._def,
       checks: [...this._def.checks, t]
     });
@@ -1927,7 +1338,7 @@ class Wt extends z {
   int(t) {
     return this._addCheck({
       kind: "int",
-      message: M.toString(t)
+      message: $.toString(t)
     });
   }
   positive(t) {
@@ -1935,7 +1346,7 @@ class Wt extends z {
       kind: "min",
       value: 0,
       inclusive: !1,
-      message: M.toString(t)
+      message: $.toString(t)
     });
   }
   negative(t) {
@@ -1943,7 +1354,7 @@ class Wt extends z {
       kind: "max",
       value: 0,
       inclusive: !1,
-      message: M.toString(t)
+      message: $.toString(t)
     });
   }
   nonpositive(t) {
@@ -1951,7 +1362,7 @@ class Wt extends z {
       kind: "max",
       value: 0,
       inclusive: !0,
-      message: M.toString(t)
+      message: $.toString(t)
     });
   }
   nonnegative(t) {
@@ -1959,20 +1370,20 @@ class Wt extends z {
       kind: "min",
       value: 0,
       inclusive: !0,
-      message: M.toString(t)
+      message: $.toString(t)
     });
   }
-  multipleOf(t, r) {
+  multipleOf(t, n) {
     return this._addCheck({
       kind: "multipleOf",
       value: t,
-      message: M.toString(r)
+      message: $.toString(n)
     });
   }
   finite(t) {
     return this._addCheck({
       kind: "finite",
-      message: M.toString(t)
+      message: $.toString(t)
     });
   }
   safe(t) {
@@ -1980,46 +1391,46 @@ class Wt extends z {
       kind: "min",
       inclusive: !0,
       value: Number.MIN_SAFE_INTEGER,
-      message: M.toString(t)
+      message: $.toString(t)
     })._addCheck({
       kind: "max",
       inclusive: !0,
       value: Number.MAX_SAFE_INTEGER,
-      message: M.toString(t)
+      message: $.toString(t)
     });
   }
   get minValue() {
     let t = null;
-    for (const r of this._def.checks)
-      r.kind === "min" && (t === null || r.value > t) && (t = r.value);
+    for (const n of this._def.checks)
+      n.kind === "min" && (t === null || n.value > t) && (t = n.value);
     return t;
   }
   get maxValue() {
     let t = null;
-    for (const r of this._def.checks)
-      r.kind === "max" && (t === null || r.value < t) && (t = r.value);
+    for (const n of this._def.checks)
+      n.kind === "max" && (t === null || n.value < t) && (t = n.value);
     return t;
   }
   get isInt() {
-    return !!this._def.checks.find((t) => t.kind === "int" || t.kind === "multipleOf" && K.isInteger(t.value));
+    return !!this._def.checks.find((t) => t.kind === "int" || t.kind === "multipleOf" && W.isInteger(t.value));
   }
   get isFinite() {
-    let t = null, r = null;
-    for (const n of this._def.checks) {
-      if (n.kind === "finite" || n.kind === "int" || n.kind === "multipleOf")
+    let t = null, n = null;
+    for (const r of this._def.checks) {
+      if (r.kind === "finite" || r.kind === "int" || r.kind === "multipleOf")
         return !0;
-      n.kind === "min" ? (r === null || n.value > r) && (r = n.value) : n.kind === "max" && (t === null || n.value < t) && (t = n.value);
+      r.kind === "min" ? (n === null || r.value > n) && (n = r.value) : r.kind === "max" && (t === null || r.value < t) && (t = r.value);
     }
-    return Number.isFinite(r) && Number.isFinite(t);
+    return Number.isFinite(n) && Number.isFinite(t);
   }
 }
-Wt.create = (e) => new Wt({
+bt.create = (e) => new bt({
   checks: [],
-  typeName: C.ZodNumber,
+  typeName: R.ZodNumber,
   coerce: (e == null ? void 0 : e.coerce) || !1,
-  ...V(e)
+  ...Z(e)
 });
-class fr extends z {
+class wt extends J {
   constructor() {
     super(...arguments), this.min = this.gte, this.max = this.lte;
   }
@@ -2030,66 +1441,66 @@ class fr extends z {
       } catch {
         return this._getInvalidInput(t);
       }
-    if (this._getType(t) !== O.bigint)
+    if (this._getType(t) !== A.bigint)
       return this._getInvalidInput(t);
-    let n;
-    const a = new De();
-    for (const s of this._def.checks)
-      s.kind === "min" ? (s.inclusive ? t.data < s.value : t.data <= s.value) && (n = this._getOrReturnCtx(t, n), N(n, {
+    let r;
+    const s = new Oe();
+    for (const a of this._def.checks)
+      a.kind === "min" ? (a.inclusive ? t.data < a.value : t.data <= a.value) && (r = this._getOrReturnCtx(t, r), E(r, {
         code: I.too_small,
         type: "bigint",
-        minimum: s.value,
-        inclusive: s.inclusive,
-        message: s.message
-      }), a.dirty()) : s.kind === "max" ? (s.inclusive ? t.data > s.value : t.data >= s.value) && (n = this._getOrReturnCtx(t, n), N(n, {
+        minimum: a.value,
+        inclusive: a.inclusive,
+        message: a.message
+      }), s.dirty()) : a.kind === "max" ? (a.inclusive ? t.data > a.value : t.data >= a.value) && (r = this._getOrReturnCtx(t, r), E(r, {
         code: I.too_big,
         type: "bigint",
-        maximum: s.value,
-        inclusive: s.inclusive,
-        message: s.message
-      }), a.dirty()) : s.kind === "multipleOf" ? t.data % s.value !== BigInt(0) && (n = this._getOrReturnCtx(t, n), N(n, {
+        maximum: a.value,
+        inclusive: a.inclusive,
+        message: a.message
+      }), s.dirty()) : a.kind === "multipleOf" ? t.data % a.value !== BigInt(0) && (r = this._getOrReturnCtx(t, r), E(r, {
         code: I.not_multiple_of,
-        multipleOf: s.value,
-        message: s.message
-      }), a.dirty()) : K.assertNever(s);
-    return { status: a.value, value: t.data };
+        multipleOf: a.value,
+        message: a.message
+      }), s.dirty()) : W.assertNever(a);
+    return { status: s.value, value: t.data };
   }
   _getInvalidInput(t) {
-    const r = this._getOrReturnCtx(t);
-    return N(r, {
+    const n = this._getOrReturnCtx(t);
+    return E(n, {
       code: I.invalid_type,
-      expected: O.bigint,
-      received: r.parsedType
-    }), L;
+      expected: A.bigint,
+      received: n.parsedType
+    }), D;
   }
-  gte(t, r) {
-    return this.setLimit("min", t, !0, M.toString(r));
+  gte(t, n) {
+    return this.setLimit("min", t, !0, $.toString(n));
   }
-  gt(t, r) {
-    return this.setLimit("min", t, !1, M.toString(r));
+  gt(t, n) {
+    return this.setLimit("min", t, !1, $.toString(n));
   }
-  lte(t, r) {
-    return this.setLimit("max", t, !0, M.toString(r));
+  lte(t, n) {
+    return this.setLimit("max", t, !0, $.toString(n));
   }
-  lt(t, r) {
-    return this.setLimit("max", t, !1, M.toString(r));
+  lt(t, n) {
+    return this.setLimit("max", t, !1, $.toString(n));
   }
-  setLimit(t, r, n, a) {
-    return new fr({
+  setLimit(t, n, r, s) {
+    return new wt({
       ...this._def,
       checks: [
         ...this._def.checks,
         {
           kind: t,
-          value: r,
-          inclusive: n,
-          message: M.toString(a)
+          value: n,
+          inclusive: r,
+          message: $.toString(s)
         }
       ]
     });
   }
   _addCheck(t) {
-    return new fr({
+    return new wt({
       ...this._def,
       checks: [...this._def.checks, t]
     });
@@ -2099,7 +1510,7 @@ class fr extends z {
       kind: "min",
       value: BigInt(0),
       inclusive: !1,
-      message: M.toString(t)
+      message: $.toString(t)
     });
   }
   negative(t) {
@@ -2107,7 +1518,7 @@ class fr extends z {
       kind: "max",
       value: BigInt(0),
       inclusive: !1,
-      message: M.toString(t)
+      message: $.toString(t)
     });
   }
   nonpositive(t) {
@@ -2115,7 +1526,7 @@ class fr extends z {
       kind: "max",
       value: BigInt(0),
       inclusive: !0,
-      message: M.toString(t)
+      message: $.toString(t)
     });
   }
   nonnegative(t) {
@@ -2123,427 +1534,427 @@ class fr extends z {
       kind: "min",
       value: BigInt(0),
       inclusive: !0,
-      message: M.toString(t)
+      message: $.toString(t)
     });
   }
-  multipleOf(t, r) {
+  multipleOf(t, n) {
     return this._addCheck({
       kind: "multipleOf",
       value: t,
-      message: M.toString(r)
+      message: $.toString(n)
     });
   }
   get minValue() {
     let t = null;
-    for (const r of this._def.checks)
-      r.kind === "min" && (t === null || r.value > t) && (t = r.value);
+    for (const n of this._def.checks)
+      n.kind === "min" && (t === null || n.value > t) && (t = n.value);
     return t;
   }
   get maxValue() {
     let t = null;
-    for (const r of this._def.checks)
-      r.kind === "max" && (t === null || r.value < t) && (t = r.value);
+    for (const n of this._def.checks)
+      n.kind === "max" && (t === null || n.value < t) && (t = n.value);
     return t;
   }
 }
-fr.create = (e) => new fr({
+wt.create = (e) => new wt({
   checks: [],
-  typeName: C.ZodBigInt,
+  typeName: R.ZodBigInt,
   coerce: (e == null ? void 0 : e.coerce) ?? !1,
-  ...V(e)
+  ...Z(e)
 });
-class Dn extends z {
+class fn extends J {
   _parse(t) {
-    if (this._def.coerce && (t.data = !!t.data), this._getType(t) !== O.boolean) {
-      const n = this._getOrReturnCtx(t);
-      return N(n, {
+    if (this._def.coerce && (t.data = !!t.data), this._getType(t) !== A.boolean) {
+      const r = this._getOrReturnCtx(t);
+      return E(r, {
         code: I.invalid_type,
-        expected: O.boolean,
-        received: n.parsedType
-      }), L;
+        expected: A.boolean,
+        received: r.parsedType
+      }), D;
     }
-    return ze(t.data);
+    return Ue(t.data);
   }
 }
-Dn.create = (e) => new Dn({
-  typeName: C.ZodBoolean,
+fn.create = (e) => new fn({
+  typeName: R.ZodBoolean,
   coerce: (e == null ? void 0 : e.coerce) || !1,
-  ...V(e)
+  ...Z(e)
 });
-class Vr extends z {
+class jt extends J {
   _parse(t) {
-    if (this._def.coerce && (t.data = new Date(t.data)), this._getType(t) !== O.date) {
-      const s = this._getOrReturnCtx(t);
-      return N(s, {
+    if (this._def.coerce && (t.data = new Date(t.data)), this._getType(t) !== A.date) {
+      const a = this._getOrReturnCtx(t);
+      return E(a, {
         code: I.invalid_type,
-        expected: O.date,
-        received: s.parsedType
-      }), L;
+        expected: A.date,
+        received: a.parsedType
+      }), D;
     }
     if (Number.isNaN(t.data.getTime())) {
-      const s = this._getOrReturnCtx(t);
-      return N(s, {
+      const a = this._getOrReturnCtx(t);
+      return E(a, {
         code: I.invalid_date
-      }), L;
+      }), D;
     }
-    const n = new De();
-    let a;
-    for (const s of this._def.checks)
-      s.kind === "min" ? t.data.getTime() < s.value && (a = this._getOrReturnCtx(t, a), N(a, {
+    const r = new Oe();
+    let s;
+    for (const a of this._def.checks)
+      a.kind === "min" ? t.data.getTime() < a.value && (s = this._getOrReturnCtx(t, s), E(s, {
         code: I.too_small,
-        message: s.message,
+        message: a.message,
         inclusive: !0,
         exact: !1,
-        minimum: s.value,
+        minimum: a.value,
         type: "date"
-      }), n.dirty()) : s.kind === "max" ? t.data.getTime() > s.value && (a = this._getOrReturnCtx(t, a), N(a, {
+      }), r.dirty()) : a.kind === "max" ? t.data.getTime() > a.value && (s = this._getOrReturnCtx(t, s), E(s, {
         code: I.too_big,
-        message: s.message,
+        message: a.message,
         inclusive: !0,
         exact: !1,
-        maximum: s.value,
+        maximum: a.value,
         type: "date"
-      }), n.dirty()) : K.assertNever(s);
+      }), r.dirty()) : W.assertNever(a);
     return {
-      status: n.value,
+      status: r.value,
       value: new Date(t.data.getTime())
     };
   }
   _addCheck(t) {
-    return new Vr({
+    return new jt({
       ...this._def,
       checks: [...this._def.checks, t]
     });
   }
-  min(t, r) {
+  min(t, n) {
     return this._addCheck({
       kind: "min",
       value: t.getTime(),
-      message: M.toString(r)
+      message: $.toString(n)
     });
   }
-  max(t, r) {
+  max(t, n) {
     return this._addCheck({
       kind: "max",
       value: t.getTime(),
-      message: M.toString(r)
+      message: $.toString(n)
     });
   }
   get minDate() {
     let t = null;
-    for (const r of this._def.checks)
-      r.kind === "min" && (t === null || r.value > t) && (t = r.value);
+    for (const n of this._def.checks)
+      n.kind === "min" && (t === null || n.value > t) && (t = n.value);
     return t != null ? new Date(t) : null;
   }
   get maxDate() {
     let t = null;
-    for (const r of this._def.checks)
-      r.kind === "max" && (t === null || r.value < t) && (t = r.value);
+    for (const n of this._def.checks)
+      n.kind === "max" && (t === null || n.value < t) && (t = n.value);
     return t != null ? new Date(t) : null;
   }
 }
-Vr.create = (e) => new Vr({
+jt.create = (e) => new jt({
   checks: [],
   coerce: (e == null ? void 0 : e.coerce) || !1,
-  typeName: C.ZodDate,
-  ...V(e)
+  typeName: R.ZodDate,
+  ...Z(e)
 });
-class Na extends z {
+class Yr extends J {
   _parse(t) {
-    if (this._getType(t) !== O.symbol) {
-      const n = this._getOrReturnCtx(t);
-      return N(n, {
+    if (this._getType(t) !== A.symbol) {
+      const r = this._getOrReturnCtx(t);
+      return E(r, {
         code: I.invalid_type,
-        expected: O.symbol,
-        received: n.parsedType
-      }), L;
+        expected: A.symbol,
+        received: r.parsedType
+      }), D;
     }
-    return ze(t.data);
+    return Ue(t.data);
   }
 }
-Na.create = (e) => new Na({
-  typeName: C.ZodSymbol,
-  ...V(e)
+Yr.create = (e) => new Yr({
+  typeName: R.ZodSymbol,
+  ...Z(e)
 });
-class qn extends z {
+class ir extends J {
   _parse(t) {
-    if (this._getType(t) !== O.undefined) {
-      const n = this._getOrReturnCtx(t);
-      return N(n, {
+    if (this._getType(t) !== A.undefined) {
+      const r = this._getOrReturnCtx(t);
+      return E(r, {
         code: I.invalid_type,
-        expected: O.undefined,
-        received: n.parsedType
-      }), L;
+        expected: A.undefined,
+        received: r.parsedType
+      }), D;
     }
-    return ze(t.data);
+    return Ue(t.data);
   }
 }
-qn.create = (e) => new qn({
-  typeName: C.ZodUndefined,
-  ...V(e)
+ir.create = (e) => new ir({
+  typeName: R.ZodUndefined,
+  ...Z(e)
 });
-class Br extends z {
+class mn extends J {
   _parse(t) {
-    if (this._getType(t) !== O.null) {
-      const n = this._getOrReturnCtx(t);
-      return N(n, {
+    if (this._getType(t) !== A.null) {
+      const r = this._getOrReturnCtx(t);
+      return E(r, {
         code: I.invalid_type,
-        expected: O.null,
-        received: n.parsedType
-      }), L;
+        expected: A.null,
+        received: r.parsedType
+      }), D;
     }
-    return ze(t.data);
+    return Ue(t.data);
   }
 }
-Br.create = (e) => new Br({
-  typeName: C.ZodNull,
-  ...V(e)
+mn.create = (e) => new mn({
+  typeName: R.ZodNull,
+  ...Z(e)
 });
-class hr extends z {
+class Wt extends J {
   constructor() {
     super(...arguments), this._any = !0;
   }
   _parse(t) {
-    return ze(t.data);
+    return Ue(t.data);
   }
 }
-hr.create = (e) => new hr({
-  typeName: C.ZodAny,
-  ...V(e)
+Wt.create = (e) => new Wt({
+  typeName: R.ZodAny,
+  ...Z(e)
 });
-class Un extends z {
+class lr extends J {
   constructor() {
     super(...arguments), this._unknown = !0;
   }
   _parse(t) {
-    return ze(t.data);
+    return Ue(t.data);
   }
 }
-Un.create = (e) => new Un({
-  typeName: C.ZodUnknown,
-  ...V(e)
+lr.create = (e) => new lr({
+  typeName: R.ZodUnknown,
+  ...Z(e)
 });
-class St extends z {
+class ht extends J {
   _parse(t) {
-    const r = this._getOrReturnCtx(t);
-    return N(r, {
+    const n = this._getOrReturnCtx(t);
+    return E(n, {
       code: I.invalid_type,
-      expected: O.never,
-      received: r.parsedType
-    }), L;
+      expected: A.never,
+      received: n.parsedType
+    }), D;
   }
 }
-St.create = (e) => new St({
-  typeName: C.ZodNever,
-  ...V(e)
+ht.create = (e) => new ht({
+  typeName: R.ZodNever,
+  ...Z(e)
 });
-class Pa extends z {
+class Kr extends J {
   _parse(t) {
-    if (this._getType(t) !== O.undefined) {
-      const n = this._getOrReturnCtx(t);
-      return N(n, {
+    if (this._getType(t) !== A.undefined) {
+      const r = this._getOrReturnCtx(t);
+      return E(r, {
         code: I.invalid_type,
-        expected: O.void,
-        received: n.parsedType
-      }), L;
-    }
-    return ze(t.data);
-  }
-}
-Pa.create = (e) => new Pa({
-  typeName: C.ZodVoid,
-  ...V(e)
-});
-class et extends z {
-  _parse(t) {
-    const { ctx: r, status: n } = this._processInputParams(t), a = this._def;
-    if (r.parsedType !== O.array)
-      return N(r, {
-        code: I.invalid_type,
-        expected: O.array,
+        expected: A.void,
         received: r.parsedType
-      }), L;
-    if (a.exactLength !== null) {
-      const o = r.data.length > a.exactLength.value, i = r.data.length < a.exactLength.value;
-      (o || i) && (N(r, {
+      }), D;
+    }
+    return Ue(t.data);
+  }
+}
+Kr.create = (e) => new Kr({
+  typeName: R.ZodVoid,
+  ...Z(e)
+});
+class We extends J {
+  _parse(t) {
+    const { ctx: n, status: r } = this._processInputParams(t), s = this._def;
+    if (n.parsedType !== A.array)
+      return E(n, {
+        code: I.invalid_type,
+        expected: A.array,
+        received: n.parsedType
+      }), D;
+    if (s.exactLength !== null) {
+      const o = n.data.length > s.exactLength.value, i = n.data.length < s.exactLength.value;
+      (o || i) && (E(n, {
         code: o ? I.too_big : I.too_small,
-        minimum: i ? a.exactLength.value : void 0,
-        maximum: o ? a.exactLength.value : void 0,
+        minimum: i ? s.exactLength.value : void 0,
+        maximum: o ? s.exactLength.value : void 0,
         type: "array",
         inclusive: !0,
         exact: !0,
-        message: a.exactLength.message
-      }), n.dirty());
+        message: s.exactLength.message
+      }), r.dirty());
     }
-    if (a.minLength !== null && r.data.length < a.minLength.value && (N(r, {
+    if (s.minLength !== null && n.data.length < s.minLength.value && (E(n, {
       code: I.too_small,
-      minimum: a.minLength.value,
+      minimum: s.minLength.value,
       type: "array",
       inclusive: !0,
       exact: !1,
-      message: a.minLength.message
-    }), n.dirty()), a.maxLength !== null && r.data.length > a.maxLength.value && (N(r, {
+      message: s.minLength.message
+    }), r.dirty()), s.maxLength !== null && n.data.length > s.maxLength.value && (E(n, {
       code: I.too_big,
-      maximum: a.maxLength.value,
+      maximum: s.maxLength.value,
       type: "array",
       inclusive: !0,
       exact: !1,
-      message: a.maxLength.message
-    }), n.dirty()), r.common.async)
-      return Promise.all([...r.data].map((o, i) => a.type._parseAsync(new rt(r, o, r.path, i)))).then((o) => De.mergeArray(n, o));
-    const s = [...r.data].map((o, i) => a.type._parseSync(new rt(r, o, r.path, i)));
-    return De.mergeArray(n, s);
+      message: s.maxLength.message
+    }), r.dirty()), n.common.async)
+      return Promise.all([...n.data].map((o, i) => s.type._parseAsync(new Xe(n, o, n.path, i)))).then((o) => Oe.mergeArray(r, o));
+    const a = [...n.data].map((o, i) => s.type._parseSync(new Xe(n, o, n.path, i)));
+    return Oe.mergeArray(r, a);
   }
   get element() {
     return this._def.type;
   }
-  min(t, r) {
-    return new et({
+  min(t, n) {
+    return new We({
       ...this._def,
-      minLength: { value: t, message: M.toString(r) }
+      minLength: { value: t, message: $.toString(n) }
     });
   }
-  max(t, r) {
-    return new et({
+  max(t, n) {
+    return new We({
       ...this._def,
-      maxLength: { value: t, message: M.toString(r) }
+      maxLength: { value: t, message: $.toString(n) }
     });
   }
-  length(t, r) {
-    return new et({
+  length(t, n) {
+    return new We({
       ...this._def,
-      exactLength: { value: t, message: M.toString(r) }
+      exactLength: { value: t, message: $.toString(n) }
     });
   }
   nonempty(t) {
     return this.min(1, t);
   }
 }
-et.create = (e, t) => new et({
+We.create = (e, t) => new We({
   type: e,
   minLength: null,
   maxLength: null,
   exactLength: null,
-  typeName: C.ZodArray,
-  ...V(t)
+  typeName: R.ZodArray,
+  ...Z(t)
 });
-function Gt(e) {
-  if (e instanceof ke) {
+function Nt(e) {
+  if (e instanceof ye) {
     const t = {};
-    for (const r in e.shape) {
-      const n = e.shape[r];
-      t[r] = tt.create(Gt(n));
+    for (const n in e.shape) {
+      const r = e.shape[n];
+      t[n] = Ye.create(Nt(r));
     }
-    return new ke({
+    return new ye({
       ...e._def,
       shape: () => t
     });
-  } else return e instanceof et ? new et({
+  } else return e instanceof We ? new We({
     ...e._def,
-    type: Gt(e.element)
-  }) : e instanceof tt ? tt.create(Gt(e.unwrap())) : e instanceof qt ? qt.create(Gt(e.unwrap())) : e instanceof jt ? jt.create(e.items.map((t) => Gt(t))) : e;
+    type: Nt(e.element)
+  }) : e instanceof Ye ? Ye.create(Nt(e.unwrap())) : e instanceof St ? St.create(Nt(e.unwrap())) : e instanceof xt ? xt.create(e.items.map((t) => Nt(t))) : e;
 }
-class ke extends z {
+class ye extends J {
   constructor() {
     super(...arguments), this._cached = null, this.nonstrict = this.passthrough, this.augment = this.extend;
   }
   _getCached() {
     if (this._cached !== null)
       return this._cached;
-    const t = this._def.shape(), r = K.objectKeys(t);
-    return this._cached = { shape: t, keys: r }, this._cached;
+    const t = this._def.shape(), n = W.objectKeys(t);
+    return this._cached = { shape: t, keys: n }, this._cached;
   }
   _parse(t) {
-    if (this._getType(t) !== O.object) {
+    if (this._getType(t) !== A.object) {
       const u = this._getOrReturnCtx(t);
-      return N(u, {
+      return E(u, {
         code: I.invalid_type,
-        expected: O.object,
+        expected: A.object,
         received: u.parsedType
-      }), L;
+      }), D;
     }
-    const { status: n, ctx: a } = this._processInputParams(t), { shape: s, keys: o } = this._getCached(), i = [];
-    if (!(this._def.catchall instanceof St && this._def.unknownKeys === "strip"))
-      for (const u in a.data)
+    const { status: r, ctx: s } = this._processInputParams(t), { shape: a, keys: o } = this._getCached(), i = [];
+    if (!(this._def.catchall instanceof ht && this._def.unknownKeys === "strip"))
+      for (const u in s.data)
         o.includes(u) || i.push(u);
     const l = [];
     for (const u of o) {
-      const c = s[u], d = a.data[u];
+      const c = a[u], p = s.data[u];
       l.push({
         key: { status: "valid", value: u },
-        value: c._parse(new rt(a, d, a.path, u)),
-        alwaysSet: u in a.data
+        value: c._parse(new Xe(s, p, s.path, u)),
+        alwaysSet: u in s.data
       });
     }
-    if (this._def.catchall instanceof St) {
+    if (this._def.catchall instanceof ht) {
       const u = this._def.unknownKeys;
       if (u === "passthrough")
         for (const c of i)
           l.push({
             key: { status: "valid", value: c },
-            value: { status: "valid", value: a.data[c] }
+            value: { status: "valid", value: s.data[c] }
           });
       else if (u === "strict")
-        i.length > 0 && (N(a, {
+        i.length > 0 && (E(s, {
           code: I.unrecognized_keys,
           keys: i
-        }), n.dirty());
+        }), r.dirty());
       else if (u !== "strip") throw new Error("Internal ZodObject error: invalid unknownKeys value.");
     } else {
       const u = this._def.catchall;
       for (const c of i) {
-        const d = a.data[c];
+        const p = s.data[c];
         l.push({
           key: { status: "valid", value: c },
           value: u._parse(
-            new rt(a, d, a.path, c)
+            new Xe(s, p, s.path, c)
             //, ctx.child(key), value, getParsedType(value)
           ),
-          alwaysSet: c in a.data
+          alwaysSet: c in s.data
         });
       }
     }
-    return a.common.async ? Promise.resolve().then(async () => {
+    return s.common.async ? Promise.resolve().then(async () => {
       const u = [];
       for (const c of l) {
-        const d = await c.key, m = await c.value;
+        const p = await c.key, h = await c.value;
         u.push({
-          key: d,
-          value: m,
+          key: p,
+          value: h,
           alwaysSet: c.alwaysSet
         });
       }
       return u;
-    }).then((u) => De.mergeObjectSync(n, u)) : De.mergeObjectSync(n, l);
+    }).then((u) => Oe.mergeObjectSync(r, u)) : Oe.mergeObjectSync(r, l);
   }
   get shape() {
     return this._def.shape();
   }
   strict(t) {
-    return M.errToObj, new ke({
+    return $.errToObj, new ye({
       ...this._def,
       unknownKeys: "strict",
       ...t !== void 0 ? {
-        errorMap: (r, n) => {
-          var s, o;
-          const a = ((o = (s = this._def).errorMap) == null ? void 0 : o.call(s, r, n).message) ?? n.defaultError;
-          return r.code === "unrecognized_keys" ? {
-            message: M.errToObj(t).message ?? a
+        errorMap: (n, r) => {
+          var a, o;
+          const s = ((o = (a = this._def).errorMap) == null ? void 0 : o.call(a, n, r).message) ?? r.defaultError;
+          return n.code === "unrecognized_keys" ? {
+            message: $.errToObj(t).message ?? s
           } : {
-            message: a
+            message: s
           };
         }
       } : {}
     });
   }
   strip() {
-    return new ke({
+    return new ye({
       ...this._def,
       unknownKeys: "strip"
     });
   }
   passthrough() {
-    return new ke({
+    return new ye({
       ...this._def,
       unknownKeys: "passthrough"
     });
@@ -2566,7 +1977,7 @@ class ke extends z {
   //     }) as any;
   //   };
   extend(t) {
-    return new ke({
+    return new ye({
       ...this._def,
       shape: () => ({
         ...this._def.shape(),
@@ -2580,14 +1991,14 @@ class ke extends z {
    * upgrade if you are experiencing issues.
    */
   merge(t) {
-    return new ke({
+    return new ye({
       unknownKeys: t._def.unknownKeys,
       catchall: t._def.catchall,
       shape: () => ({
         ...this._def.shape(),
         ...t._def.shape()
       }),
-      typeName: C.ZodObject
+      typeName: R.ZodObject
     });
   }
   // merge<
@@ -2625,8 +2036,8 @@ class ke extends z {
   //   }) as any;
   //   return merged;
   // }
-  setKey(t, r) {
-    return this.augment({ [t]: r });
+  setKey(t, n) {
+    return this.augment({ [t]: n });
   }
   // merge<Incoming extends AnyZodObject>(
   //   merging: Incoming
@@ -2650,184 +2061,184 @@ class ke extends z {
   //   return merged;
   // }
   catchall(t) {
-    return new ke({
+    return new ye({
       ...this._def,
       catchall: t
     });
   }
   pick(t) {
-    const r = {};
-    for (const n of K.objectKeys(t))
-      t[n] && this.shape[n] && (r[n] = this.shape[n]);
-    return new ke({
+    const n = {};
+    for (const r of W.objectKeys(t))
+      t[r] && this.shape[r] && (n[r] = this.shape[r]);
+    return new ye({
       ...this._def,
-      shape: () => r
+      shape: () => n
     });
   }
   omit(t) {
-    const r = {};
-    for (const n of K.objectKeys(this.shape))
-      t[n] || (r[n] = this.shape[n]);
-    return new ke({
+    const n = {};
+    for (const r of W.objectKeys(this.shape))
+      t[r] || (n[r] = this.shape[r]);
+    return new ye({
       ...this._def,
-      shape: () => r
+      shape: () => n
     });
   }
   /**
    * @deprecated
    */
   deepPartial() {
-    return Gt(this);
+    return Nt(this);
   }
   partial(t) {
-    const r = {};
-    for (const n of K.objectKeys(this.shape)) {
-      const a = this.shape[n];
-      t && !t[n] ? r[n] = a : r[n] = a.optional();
+    const n = {};
+    for (const r of W.objectKeys(this.shape)) {
+      const s = this.shape[r];
+      t && !t[r] ? n[r] = s : n[r] = s.optional();
     }
-    return new ke({
+    return new ye({
       ...this._def,
-      shape: () => r
+      shape: () => n
     });
   }
   required(t) {
-    const r = {};
-    for (const n of K.objectKeys(this.shape))
-      if (t && !t[n])
-        r[n] = this.shape[n];
+    const n = {};
+    for (const r of W.objectKeys(this.shape))
+      if (t && !t[r])
+        n[r] = this.shape[r];
       else {
-        let s = this.shape[n];
-        for (; s instanceof tt; )
-          s = s._def.innerType;
-        r[n] = s;
+        let a = this.shape[r];
+        for (; a instanceof Ye; )
+          a = a._def.innerType;
+        n[r] = a;
       }
-    return new ke({
+    return new ye({
       ...this._def,
-      shape: () => r
+      shape: () => n
     });
   }
   keyof() {
-    return Ys(K.objectKeys(this.shape));
+    return ma(W.objectKeys(this.shape));
   }
 }
-ke.create = (e, t) => new ke({
+ye.create = (e, t) => new ye({
   shape: () => e,
   unknownKeys: "strip",
-  catchall: St.create(),
-  typeName: C.ZodObject,
-  ...V(t)
+  catchall: ht.create(),
+  typeName: R.ZodObject,
+  ...Z(t)
 });
-ke.strictCreate = (e, t) => new ke({
+ye.strictCreate = (e, t) => new ye({
   shape: () => e,
   unknownKeys: "strict",
-  catchall: St.create(),
-  typeName: C.ZodObject,
-  ...V(t)
+  catchall: ht.create(),
+  typeName: R.ZodObject,
+  ...Z(t)
 });
-ke.lazycreate = (e, t) => new ke({
+ye.lazycreate = (e, t) => new ye({
   shape: e,
   unknownKeys: "strip",
-  catchall: St.create(),
-  typeName: C.ZodObject,
-  ...V(t)
+  catchall: ht.create(),
+  typeName: R.ZodObject,
+  ...Z(t)
 });
-class Jr extends z {
+class gn extends J {
   _parse(t) {
-    const { ctx: r } = this._processInputParams(t), n = this._def.options;
-    function a(s) {
-      for (const i of s)
+    const { ctx: n } = this._processInputParams(t), r = this._def.options;
+    function s(a) {
+      for (const i of a)
         if (i.result.status === "valid")
           return i.result;
-      for (const i of s)
+      for (const i of a)
         if (i.result.status === "dirty")
-          return r.common.issues.push(...i.ctx.common.issues), i.result;
-      const o = s.map((i) => new gt(i.ctx.common.issues));
-      return N(r, {
+          return n.common.issues.push(...i.ctx.common.issues), i.result;
+      const o = a.map((i) => new at(i.ctx.common.issues));
+      return E(n, {
         code: I.invalid_union,
         unionErrors: o
-      }), L;
+      }), D;
     }
-    if (r.common.async)
-      return Promise.all(n.map(async (s) => {
+    if (n.common.async)
+      return Promise.all(r.map(async (a) => {
         const o = {
-          ...r,
+          ...n,
           common: {
-            ...r.common,
+            ...n.common,
             issues: []
           },
           parent: null
         };
         return {
-          result: await s._parseAsync({
-            data: r.data,
-            path: r.path,
+          result: await a._parseAsync({
+            data: n.data,
+            path: n.path,
             parent: o
           }),
           ctx: o
         };
-      })).then(a);
+      })).then(s);
     {
-      let s;
+      let a;
       const o = [];
-      for (const l of n) {
+      for (const l of r) {
         const u = {
-          ...r,
+          ...n,
           common: {
-            ...r.common,
+            ...n.common,
             issues: []
           },
           parent: null
         }, c = l._parseSync({
-          data: r.data,
-          path: r.path,
+          data: n.data,
+          path: n.path,
           parent: u
         });
         if (c.status === "valid")
           return c;
-        c.status === "dirty" && !s && (s = { result: c, ctx: u }), u.common.issues.length && o.push(u.common.issues);
+        c.status === "dirty" && !a && (a = { result: c, ctx: u }), u.common.issues.length && o.push(u.common.issues);
       }
-      if (s)
-        return r.common.issues.push(...s.ctx.common.issues), s.result;
-      const i = o.map((l) => new gt(l));
-      return N(r, {
+      if (a)
+        return n.common.issues.push(...a.ctx.common.issues), a.result;
+      const i = o.map((l) => new at(l));
+      return E(n, {
         code: I.invalid_union,
         unionErrors: i
-      }), L;
+      }), D;
     }
   }
   get options() {
     return this._def.options;
   }
 }
-Jr.create = (e, t) => new Jr({
+gn.create = (e, t) => new gn({
   options: e,
-  typeName: C.ZodUnion,
-  ...V(t)
+  typeName: R.ZodUnion,
+  ...Z(t)
 });
-const lt = (e) => e instanceof Hr ? lt(e.schema) : e instanceof Dt ? lt(e.innerType()) : e instanceof Wr ? [e.value] : e instanceof $t ? e.options : e instanceof Fn ? K.objectValues(e.enum) : e instanceof Yr ? lt(e._def.innerType) : e instanceof qn ? [void 0] : e instanceof Br ? [null] : e instanceof tt ? [void 0, ...lt(e.unwrap())] : e instanceof qt ? [null, ...lt(e.unwrap())] : e instanceof Xs || e instanceof Qr ? lt(e.unwrap()) : e instanceof Xr ? lt(e._def.innerType) : [];
-class na extends z {
+const nt = (e) => e instanceof _n ? nt(e.schema) : e instanceof kt ? nt(e.innerType()) : e instanceof bn ? [e.value] : e instanceof Tt ? e.options : e instanceof cr ? W.objectValues(e.enum) : e instanceof xn ? nt(e._def.innerType) : e instanceof ir ? [void 0] : e instanceof mn ? [null] : e instanceof Ye ? [void 0, ...nt(e.unwrap())] : e instanceof St ? [null, ...nt(e.unwrap())] : e instanceof ga || e instanceof kn ? nt(e.unwrap()) : e instanceof Tn ? nt(e._def.innerType) : [];
+class wr extends J {
   _parse(t) {
-    const { ctx: r } = this._processInputParams(t);
-    if (r.parsedType !== O.object)
-      return N(r, {
+    const { ctx: n } = this._processInputParams(t);
+    if (n.parsedType !== A.object)
+      return E(n, {
         code: I.invalid_type,
-        expected: O.object,
-        received: r.parsedType
-      }), L;
-    const n = this.discriminator, a = r.data[n], s = this.optionsMap.get(a);
-    return s ? r.common.async ? s._parseAsync({
-      data: r.data,
-      path: r.path,
-      parent: r
-    }) : s._parseSync({
-      data: r.data,
-      path: r.path,
-      parent: r
-    }) : (N(r, {
+        expected: A.object,
+        received: n.parsedType
+      }), D;
+    const r = this.discriminator, s = n.data[r], a = this.optionsMap.get(s);
+    return a ? n.common.async ? a._parseAsync({
+      data: n.data,
+      path: n.path,
+      parent: n
+    }) : a._parseSync({
+      data: n.data,
+      path: n.path,
+      parent: n
+    }) : (E(n, {
       code: I.invalid_union_discriminator,
       options: Array.from(this.optionsMap.keys()),
-      path: [n]
-    }), L);
+      path: [r]
+    }), D);
   }
   get discriminator() {
     return this._def.discriminator;
@@ -2846,142 +2257,142 @@ class na extends z {
    * @param types an array of object schemas
    * @param params
    */
-  static create(t, r, n) {
-    const a = /* @__PURE__ */ new Map();
-    for (const s of r) {
-      const o = lt(s.shape[t]);
+  static create(t, n, r) {
+    const s = /* @__PURE__ */ new Map();
+    for (const a of n) {
+      const o = nt(a.shape[t]);
       if (!o.length)
         throw new Error(`A discriminator value for key \`${t}\` could not be extracted from all schema options`);
       for (const i of o) {
-        if (a.has(i))
+        if (s.has(i))
           throw new Error(`Discriminator property ${String(t)} has duplicate value ${String(i)}`);
-        a.set(i, s);
+        s.set(i, a);
       }
     }
-    return new na({
-      typeName: C.ZodDiscriminatedUnion,
+    return new wr({
+      typeName: R.ZodDiscriminatedUnion,
       discriminator: t,
-      options: r,
-      optionsMap: a,
-      ...V(n)
+      options: n,
+      optionsMap: s,
+      ...Z(r)
     });
   }
 }
-function Ln(e, t) {
-  const r = xt(e), n = xt(t);
+function ur(e, t) {
+  const n = ct(e), r = ct(t);
   if (e === t)
     return { valid: !0, data: e };
-  if (r === O.object && n === O.object) {
-    const a = K.objectKeys(t), s = K.objectKeys(e).filter((i) => a.indexOf(i) !== -1), o = { ...e, ...t };
-    for (const i of s) {
-      const l = Ln(e[i], t[i]);
+  if (n === A.object && r === A.object) {
+    const s = W.objectKeys(t), a = W.objectKeys(e).filter((i) => s.indexOf(i) !== -1), o = { ...e, ...t };
+    for (const i of a) {
+      const l = ur(e[i], t[i]);
       if (!l.valid)
         return { valid: !1 };
       o[i] = l.data;
     }
     return { valid: !0, data: o };
-  } else if (r === O.array && n === O.array) {
+  } else if (n === A.array && r === A.array) {
     if (e.length !== t.length)
       return { valid: !1 };
-    const a = [];
-    for (let s = 0; s < e.length; s++) {
-      const o = e[s], i = t[s], l = Ln(o, i);
+    const s = [];
+    for (let a = 0; a < e.length; a++) {
+      const o = e[a], i = t[a], l = ur(o, i);
       if (!l.valid)
         return { valid: !1 };
-      a.push(l.data);
+      s.push(l.data);
     }
-    return { valid: !0, data: a };
-  } else return r === O.date && n === O.date && +e == +t ? { valid: !0, data: e } : { valid: !1 };
+    return { valid: !0, data: s };
+  } else return n === A.date && r === A.date && +e == +t ? { valid: !0, data: e } : { valid: !1 };
 }
-class zr extends z {
+class yn extends J {
   _parse(t) {
-    const { status: r, ctx: n } = this._processInputParams(t), a = (s, o) => {
-      if (Ra(s) || Ra(o))
-        return L;
-      const i = Ln(s.value, o.value);
-      return i.valid ? ((Ea(s) || Ea(o)) && r.dirty(), { status: r.value, value: i.data }) : (N(n, {
+    const { status: n, ctx: r } = this._processInputParams(t), s = (a, o) => {
+      if (Hr(a) || Hr(o))
+        return D;
+      const i = ur(a.value, o.value);
+      return i.valid ? ((zr(a) || zr(o)) && n.dirty(), { status: n.value, value: i.data }) : (E(r, {
         code: I.invalid_intersection_types
-      }), L);
+      }), D);
     };
-    return n.common.async ? Promise.all([
+    return r.common.async ? Promise.all([
       this._def.left._parseAsync({
-        data: n.data,
-        path: n.path,
-        parent: n
+        data: r.data,
+        path: r.path,
+        parent: r
       }),
       this._def.right._parseAsync({
-        data: n.data,
-        path: n.path,
-        parent: n
+        data: r.data,
+        path: r.path,
+        parent: r
       })
-    ]).then(([s, o]) => a(s, o)) : a(this._def.left._parseSync({
-      data: n.data,
-      path: n.path,
-      parent: n
+    ]).then(([a, o]) => s(a, o)) : s(this._def.left._parseSync({
+      data: r.data,
+      path: r.path,
+      parent: r
     }), this._def.right._parseSync({
-      data: n.data,
-      path: n.path,
-      parent: n
+      data: r.data,
+      path: r.path,
+      parent: r
     }));
   }
 }
-zr.create = (e, t, r) => new zr({
+yn.create = (e, t, n) => new yn({
   left: e,
   right: t,
-  typeName: C.ZodIntersection,
-  ...V(r)
+  typeName: R.ZodIntersection,
+  ...Z(n)
 });
-class jt extends z {
+class xt extends J {
   _parse(t) {
-    const { status: r, ctx: n } = this._processInputParams(t);
-    if (n.parsedType !== O.array)
-      return N(n, {
+    const { status: n, ctx: r } = this._processInputParams(t);
+    if (r.parsedType !== A.array)
+      return E(r, {
         code: I.invalid_type,
-        expected: O.array,
-        received: n.parsedType
-      }), L;
-    if (n.data.length < this._def.items.length)
-      return N(n, {
+        expected: A.array,
+        received: r.parsedType
+      }), D;
+    if (r.data.length < this._def.items.length)
+      return E(r, {
         code: I.too_small,
         minimum: this._def.items.length,
         inclusive: !0,
         exact: !1,
         type: "array"
-      }), L;
-    !this._def.rest && n.data.length > this._def.items.length && (N(n, {
+      }), D;
+    !this._def.rest && r.data.length > this._def.items.length && (E(r, {
       code: I.too_big,
       maximum: this._def.items.length,
       inclusive: !0,
       exact: !1,
       type: "array"
-    }), r.dirty());
-    const s = [...n.data].map((o, i) => {
+    }), n.dirty());
+    const a = [...r.data].map((o, i) => {
       const l = this._def.items[i] || this._def.rest;
-      return l ? l._parse(new rt(n, o, n.path, i)) : null;
+      return l ? l._parse(new Xe(r, o, r.path, i)) : null;
     }).filter((o) => !!o);
-    return n.common.async ? Promise.all(s).then((o) => De.mergeArray(r, o)) : De.mergeArray(r, s);
+    return r.common.async ? Promise.all(a).then((o) => Oe.mergeArray(n, o)) : Oe.mergeArray(n, a);
   }
   get items() {
     return this._def.items;
   }
   rest(t) {
-    return new jt({
+    return new xt({
       ...this._def,
       rest: t
     });
   }
 }
-jt.create = (e, t) => {
+xt.create = (e, t) => {
   if (!Array.isArray(e))
     throw new Error("You must pass an array of schemas to z.tuple([ ... ])");
-  return new jt({
+  return new xt({
     items: e,
-    typeName: C.ZodTuple,
+    typeName: R.ZodTuple,
     rest: null,
-    ...V(t)
+    ...Z(t)
   });
 };
-class Gr extends z {
+class vn extends J {
   get keySchema() {
     return this._def.keyType;
   }
@@ -2989,40 +2400,40 @@ class Gr extends z {
     return this._def.valueType;
   }
   _parse(t) {
-    const { status: r, ctx: n } = this._processInputParams(t);
-    if (n.parsedType !== O.object)
-      return N(n, {
+    const { status: n, ctx: r } = this._processInputParams(t);
+    if (r.parsedType !== A.object)
+      return E(r, {
         code: I.invalid_type,
-        expected: O.object,
-        received: n.parsedType
-      }), L;
-    const a = [], s = this._def.keyType, o = this._def.valueType;
-    for (const i in n.data)
-      a.push({
-        key: s._parse(new rt(n, i, n.path, i)),
-        value: o._parse(new rt(n, n.data[i], n.path, i)),
-        alwaysSet: i in n.data
+        expected: A.object,
+        received: r.parsedType
+      }), D;
+    const s = [], a = this._def.keyType, o = this._def.valueType;
+    for (const i in r.data)
+      s.push({
+        key: a._parse(new Xe(r, i, r.path, i)),
+        value: o._parse(new Xe(r, r.data[i], r.path, i)),
+        alwaysSet: i in r.data
       });
-    return n.common.async ? De.mergeObjectAsync(r, a) : De.mergeObjectSync(r, a);
+    return r.common.async ? Oe.mergeObjectAsync(n, s) : Oe.mergeObjectSync(n, s);
   }
   get element() {
     return this._def.valueType;
   }
-  static create(t, r, n) {
-    return r instanceof z ? new Gr({
+  static create(t, n, r) {
+    return n instanceof J ? new vn({
       keyType: t,
-      valueType: r,
-      typeName: C.ZodRecord,
-      ...V(n)
-    }) : new Gr({
-      keyType: mt.create(),
+      valueType: n,
+      typeName: R.ZodRecord,
+      ...Z(r)
+    }) : new vn({
+      keyType: ze.create(),
       valueType: t,
-      typeName: C.ZodRecord,
-      ...V(r)
+      typeName: R.ZodRecord,
+      ...Z(n)
     });
   }
 }
-class Oa extends z {
+class Xr extends J {
   get keySchema() {
     return this._def.keyType;
   }
@@ -3030,133 +2441,133 @@ class Oa extends z {
     return this._def.valueType;
   }
   _parse(t) {
-    const { status: r, ctx: n } = this._processInputParams(t);
-    if (n.parsedType !== O.map)
-      return N(n, {
+    const { status: n, ctx: r } = this._processInputParams(t);
+    if (r.parsedType !== A.map)
+      return E(r, {
         code: I.invalid_type,
-        expected: O.map,
-        received: n.parsedType
-      }), L;
-    const a = this._def.keyType, s = this._def.valueType, o = [...n.data.entries()].map(([i, l], u) => ({
-      key: a._parse(new rt(n, i, n.path, [u, "key"])),
-      value: s._parse(new rt(n, l, n.path, [u, "value"]))
+        expected: A.map,
+        received: r.parsedType
+      }), D;
+    const s = this._def.keyType, a = this._def.valueType, o = [...r.data.entries()].map(([i, l], u) => ({
+      key: s._parse(new Xe(r, i, r.path, [u, "key"])),
+      value: a._parse(new Xe(r, l, r.path, [u, "value"]))
     }));
-    if (n.common.async) {
+    if (r.common.async) {
       const i = /* @__PURE__ */ new Map();
       return Promise.resolve().then(async () => {
         for (const l of o) {
           const u = await l.key, c = await l.value;
           if (u.status === "aborted" || c.status === "aborted")
-            return L;
-          (u.status === "dirty" || c.status === "dirty") && r.dirty(), i.set(u.value, c.value);
+            return D;
+          (u.status === "dirty" || c.status === "dirty") && n.dirty(), i.set(u.value, c.value);
         }
-        return { status: r.value, value: i };
+        return { status: n.value, value: i };
       });
     } else {
       const i = /* @__PURE__ */ new Map();
       for (const l of o) {
         const u = l.key, c = l.value;
         if (u.status === "aborted" || c.status === "aborted")
-          return L;
-        (u.status === "dirty" || c.status === "dirty") && r.dirty(), i.set(u.value, c.value);
+          return D;
+        (u.status === "dirty" || c.status === "dirty") && n.dirty(), i.set(u.value, c.value);
       }
-      return { status: r.value, value: i };
+      return { status: n.value, value: i };
     }
   }
 }
-Oa.create = (e, t, r) => new Oa({
+Xr.create = (e, t, n) => new Xr({
   valueType: t,
   keyType: e,
-  typeName: C.ZodMap,
-  ...V(r)
+  typeName: R.ZodMap,
+  ...Z(n)
 });
-class gr extends z {
+class Yt extends J {
   _parse(t) {
-    const { status: r, ctx: n } = this._processInputParams(t);
-    if (n.parsedType !== O.set)
-      return N(n, {
+    const { status: n, ctx: r } = this._processInputParams(t);
+    if (r.parsedType !== A.set)
+      return E(r, {
         code: I.invalid_type,
-        expected: O.set,
-        received: n.parsedType
-      }), L;
-    const a = this._def;
-    a.minSize !== null && n.data.size < a.minSize.value && (N(n, {
+        expected: A.set,
+        received: r.parsedType
+      }), D;
+    const s = this._def;
+    s.minSize !== null && r.data.size < s.minSize.value && (E(r, {
       code: I.too_small,
-      minimum: a.minSize.value,
+      minimum: s.minSize.value,
       type: "set",
       inclusive: !0,
       exact: !1,
-      message: a.minSize.message
-    }), r.dirty()), a.maxSize !== null && n.data.size > a.maxSize.value && (N(n, {
+      message: s.minSize.message
+    }), n.dirty()), s.maxSize !== null && r.data.size > s.maxSize.value && (E(r, {
       code: I.too_big,
-      maximum: a.maxSize.value,
+      maximum: s.maxSize.value,
       type: "set",
       inclusive: !0,
       exact: !1,
-      message: a.maxSize.message
-    }), r.dirty());
-    const s = this._def.valueType;
+      message: s.maxSize.message
+    }), n.dirty());
+    const a = this._def.valueType;
     function o(l) {
       const u = /* @__PURE__ */ new Set();
       for (const c of l) {
         if (c.status === "aborted")
-          return L;
-        c.status === "dirty" && r.dirty(), u.add(c.value);
+          return D;
+        c.status === "dirty" && n.dirty(), u.add(c.value);
       }
-      return { status: r.value, value: u };
+      return { status: n.value, value: u };
     }
-    const i = [...n.data.values()].map((l, u) => s._parse(new rt(n, l, n.path, u)));
-    return n.common.async ? Promise.all(i).then((l) => o(l)) : o(i);
+    const i = [...r.data.values()].map((l, u) => a._parse(new Xe(r, l, r.path, u)));
+    return r.common.async ? Promise.all(i).then((l) => o(l)) : o(i);
   }
-  min(t, r) {
-    return new gr({
+  min(t, n) {
+    return new Yt({
       ...this._def,
-      minSize: { value: t, message: M.toString(r) }
+      minSize: { value: t, message: $.toString(n) }
     });
   }
-  max(t, r) {
-    return new gr({
+  max(t, n) {
+    return new Yt({
       ...this._def,
-      maxSize: { value: t, message: M.toString(r) }
+      maxSize: { value: t, message: $.toString(n) }
     });
   }
-  size(t, r) {
-    return this.min(t, r).max(t, r);
+  size(t, n) {
+    return this.min(t, n).max(t, n);
   }
   nonempty(t) {
     return this.min(1, t);
   }
 }
-gr.create = (e, t) => new gr({
+Yt.create = (e, t) => new Yt({
   valueType: e,
   minSize: null,
   maxSize: null,
-  typeName: C.ZodSet,
-  ...V(t)
+  typeName: R.ZodSet,
+  ...Z(t)
 });
-class Hr extends z {
+class _n extends J {
   get schema() {
     return this._def.getter();
   }
   _parse(t) {
-    const { ctx: r } = this._processInputParams(t);
-    return this._def.getter()._parse({ data: r.data, path: r.path, parent: r });
+    const { ctx: n } = this._processInputParams(t);
+    return this._def.getter()._parse({ data: n.data, path: n.path, parent: n });
   }
 }
-Hr.create = (e, t) => new Hr({
+_n.create = (e, t) => new _n({
   getter: e,
-  typeName: C.ZodLazy,
-  ...V(t)
+  typeName: R.ZodLazy,
+  ...Z(t)
 });
-class Wr extends z {
+class bn extends J {
   _parse(t) {
     if (t.data !== this._def.value) {
-      const r = this._getOrReturnCtx(t);
-      return N(r, {
-        received: r.data,
+      const n = this._getOrReturnCtx(t);
+      return E(n, {
+        received: n.data,
         code: I.invalid_literal,
         expected: this._def.value
-      }), L;
+      }), D;
     }
     return { status: "valid", value: t.data };
   }
@@ -3164,295 +2575,295 @@ class Wr extends z {
     return this._def.value;
   }
 }
-Wr.create = (e, t) => new Wr({
+bn.create = (e, t) => new bn({
   value: e,
-  typeName: C.ZodLiteral,
-  ...V(t)
+  typeName: R.ZodLiteral,
+  ...Z(t)
 });
-function Ys(e, t) {
-  return new $t({
+function ma(e, t) {
+  return new Tt({
     values: e,
-    typeName: C.ZodEnum,
-    ...V(t)
+    typeName: R.ZodEnum,
+    ...Z(t)
   });
 }
-class $t extends z {
+class Tt extends J {
   _parse(t) {
     if (typeof t.data != "string") {
-      const r = this._getOrReturnCtx(t), n = this._def.values;
-      return N(r, {
-        expected: K.joinValues(n),
-        received: r.parsedType,
+      const n = this._getOrReturnCtx(t), r = this._def.values;
+      return E(n, {
+        expected: W.joinValues(r),
+        received: n.parsedType,
         code: I.invalid_type
-      }), L;
+      }), D;
     }
     if (this._cache || (this._cache = new Set(this._def.values)), !this._cache.has(t.data)) {
-      const r = this._getOrReturnCtx(t), n = this._def.values;
-      return N(r, {
-        received: r.data,
+      const n = this._getOrReturnCtx(t), r = this._def.values;
+      return E(n, {
+        received: n.data,
         code: I.invalid_enum_value,
-        options: n
-      }), L;
+        options: r
+      }), D;
     }
-    return ze(t.data);
+    return Ue(t.data);
   }
   get options() {
     return this._def.values;
   }
   get enum() {
     const t = {};
-    for (const r of this._def.values)
-      t[r] = r;
+    for (const n of this._def.values)
+      t[n] = n;
     return t;
   }
   get Values() {
     const t = {};
-    for (const r of this._def.values)
-      t[r] = r;
+    for (const n of this._def.values)
+      t[n] = n;
     return t;
   }
   get Enum() {
     const t = {};
-    for (const r of this._def.values)
-      t[r] = r;
+    for (const n of this._def.values)
+      t[n] = n;
     return t;
   }
-  extract(t, r = this._def) {
-    return $t.create(t, {
+  extract(t, n = this._def) {
+    return Tt.create(t, {
       ...this._def,
-      ...r
+      ...n
     });
   }
-  exclude(t, r = this._def) {
-    return $t.create(this.options.filter((n) => !t.includes(n)), {
+  exclude(t, n = this._def) {
+    return Tt.create(this.options.filter((r) => !t.includes(r)), {
       ...this._def,
-      ...r
+      ...n
     });
   }
 }
-$t.create = Ys;
-class Fn extends z {
+Tt.create = ma;
+class cr extends J {
   _parse(t) {
-    const r = K.getValidEnumValues(this._def.values), n = this._getOrReturnCtx(t);
-    if (n.parsedType !== O.string && n.parsedType !== O.number) {
-      const a = K.objectValues(r);
-      return N(n, {
-        expected: K.joinValues(a),
-        received: n.parsedType,
+    const n = W.getValidEnumValues(this._def.values), r = this._getOrReturnCtx(t);
+    if (r.parsedType !== A.string && r.parsedType !== A.number) {
+      const s = W.objectValues(n);
+      return E(r, {
+        expected: W.joinValues(s),
+        received: r.parsedType,
         code: I.invalid_type
-      }), L;
+      }), D;
     }
-    if (this._cache || (this._cache = new Set(K.getValidEnumValues(this._def.values))), !this._cache.has(t.data)) {
-      const a = K.objectValues(r);
-      return N(n, {
-        received: n.data,
+    if (this._cache || (this._cache = new Set(W.getValidEnumValues(this._def.values))), !this._cache.has(t.data)) {
+      const s = W.objectValues(n);
+      return E(r, {
+        received: r.data,
         code: I.invalid_enum_value,
-        options: a
-      }), L;
+        options: s
+      }), D;
     }
-    return ze(t.data);
+    return Ue(t.data);
   }
   get enum() {
     return this._def.values;
   }
 }
-Fn.create = (e, t) => new Fn({
+cr.create = (e, t) => new cr({
   values: e,
-  typeName: C.ZodNativeEnum,
-  ...V(t)
+  typeName: R.ZodNativeEnum,
+  ...Z(t)
 });
-class Kr extends z {
+class wn extends J {
   unwrap() {
     return this._def.type;
   }
   _parse(t) {
-    const { ctx: r } = this._processInputParams(t);
-    if (r.parsedType !== O.promise && r.common.async === !1)
-      return N(r, {
+    const { ctx: n } = this._processInputParams(t);
+    if (n.parsedType !== A.promise && n.common.async === !1)
+      return E(n, {
         code: I.invalid_type,
-        expected: O.promise,
-        received: r.parsedType
-      }), L;
-    const n = r.parsedType === O.promise ? r.data : Promise.resolve(r.data);
-    return ze(n.then((a) => this._def.type.parseAsync(a, {
-      path: r.path,
-      errorMap: r.common.contextualErrorMap
+        expected: A.promise,
+        received: n.parsedType
+      }), D;
+    const r = n.parsedType === A.promise ? n.data : Promise.resolve(n.data);
+    return Ue(r.then((s) => this._def.type.parseAsync(s, {
+      path: n.path,
+      errorMap: n.common.contextualErrorMap
     })));
   }
 }
-Kr.create = (e, t) => new Kr({
+wn.create = (e, t) => new wn({
   type: e,
-  typeName: C.ZodPromise,
-  ...V(t)
+  typeName: R.ZodPromise,
+  ...Z(t)
 });
-class Dt extends z {
+class kt extends J {
   innerType() {
     return this._def.schema;
   }
   sourceType() {
-    return this._def.schema._def.typeName === C.ZodEffects ? this._def.schema.sourceType() : this._def.schema;
+    return this._def.schema._def.typeName === R.ZodEffects ? this._def.schema.sourceType() : this._def.schema;
   }
   _parse(t) {
-    const { status: r, ctx: n } = this._processInputParams(t), a = this._def.effect || null, s = {
+    const { status: n, ctx: r } = this._processInputParams(t), s = this._def.effect || null, a = {
       addIssue: (o) => {
-        N(n, o), o.fatal ? r.abort() : r.dirty();
+        E(r, o), o.fatal ? n.abort() : n.dirty();
       },
       get path() {
-        return n.path;
+        return r.path;
       }
     };
-    if (s.addIssue = s.addIssue.bind(s), a.type === "preprocess") {
-      const o = a.transform(n.data, s);
-      if (n.common.async)
+    if (a.addIssue = a.addIssue.bind(a), s.type === "preprocess") {
+      const o = s.transform(r.data, a);
+      if (r.common.async)
         return Promise.resolve(o).then(async (i) => {
-          if (r.value === "aborted")
-            return L;
+          if (n.value === "aborted")
+            return D;
           const l = await this._def.schema._parseAsync({
             data: i,
-            path: n.path,
-            parent: n
+            path: r.path,
+            parent: r
           });
-          return l.status === "aborted" ? L : l.status === "dirty" || r.value === "dirty" ? dr(l.value) : l;
+          return l.status === "aborted" ? D : l.status === "dirty" || n.value === "dirty" ? Jt(l.value) : l;
         });
       {
-        if (r.value === "aborted")
-          return L;
+        if (n.value === "aborted")
+          return D;
         const i = this._def.schema._parseSync({
           data: o,
-          path: n.path,
-          parent: n
+          path: r.path,
+          parent: r
         });
-        return i.status === "aborted" ? L : i.status === "dirty" || r.value === "dirty" ? dr(i.value) : i;
+        return i.status === "aborted" ? D : i.status === "dirty" || n.value === "dirty" ? Jt(i.value) : i;
       }
     }
-    if (a.type === "refinement") {
+    if (s.type === "refinement") {
       const o = (i) => {
-        const l = a.refinement(i, s);
-        if (n.common.async)
+        const l = s.refinement(i, a);
+        if (r.common.async)
           return Promise.resolve(l);
         if (l instanceof Promise)
           throw new Error("Async refinement encountered during synchronous parse operation. Use .parseAsync instead.");
         return i;
       };
-      if (n.common.async === !1) {
+      if (r.common.async === !1) {
         const i = this._def.schema._parseSync({
-          data: n.data,
-          path: n.path,
-          parent: n
+          data: r.data,
+          path: r.path,
+          parent: r
         });
-        return i.status === "aborted" ? L : (i.status === "dirty" && r.dirty(), o(i.value), { status: r.value, value: i.value });
+        return i.status === "aborted" ? D : (i.status === "dirty" && n.dirty(), o(i.value), { status: n.value, value: i.value });
       } else
-        return this._def.schema._parseAsync({ data: n.data, path: n.path, parent: n }).then((i) => i.status === "aborted" ? L : (i.status === "dirty" && r.dirty(), o(i.value).then(() => ({ status: r.value, value: i.value }))));
+        return this._def.schema._parseAsync({ data: r.data, path: r.path, parent: r }).then((i) => i.status === "aborted" ? D : (i.status === "dirty" && n.dirty(), o(i.value).then(() => ({ status: n.value, value: i.value }))));
     }
-    if (a.type === "transform")
-      if (n.common.async === !1) {
+    if (s.type === "transform")
+      if (r.common.async === !1) {
         const o = this._def.schema._parseSync({
-          data: n.data,
-          path: n.path,
-          parent: n
+          data: r.data,
+          path: r.path,
+          parent: r
         });
-        if (!Ht(o))
-          return L;
-        const i = a.transform(o.value, s);
+        if (!$t(o))
+          return D;
+        const i = s.transform(o.value, a);
         if (i instanceof Promise)
           throw new Error("Asynchronous transform encountered during synchronous parse operation. Use .parseAsync instead.");
-        return { status: r.value, value: i };
+        return { status: n.value, value: i };
       } else
-        return this._def.schema._parseAsync({ data: n.data, path: n.path, parent: n }).then((o) => Ht(o) ? Promise.resolve(a.transform(o.value, s)).then((i) => ({
-          status: r.value,
+        return this._def.schema._parseAsync({ data: r.data, path: r.path, parent: r }).then((o) => $t(o) ? Promise.resolve(s.transform(o.value, a)).then((i) => ({
+          status: n.value,
           value: i
-        })) : L);
-    K.assertNever(a);
+        })) : D);
+    W.assertNever(s);
   }
 }
-Dt.create = (e, t, r) => new Dt({
+kt.create = (e, t, n) => new kt({
   schema: e,
-  typeName: C.ZodEffects,
+  typeName: R.ZodEffects,
   effect: t,
-  ...V(r)
+  ...Z(n)
 });
-Dt.createWithPreprocess = (e, t, r) => new Dt({
+kt.createWithPreprocess = (e, t, n) => new kt({
   schema: t,
   effect: { type: "preprocess", transform: e },
-  typeName: C.ZodEffects,
-  ...V(r)
+  typeName: R.ZodEffects,
+  ...Z(n)
 });
-class tt extends z {
+class Ye extends J {
   _parse(t) {
-    return this._getType(t) === O.undefined ? ze(void 0) : this._def.innerType._parse(t);
+    return this._getType(t) === A.undefined ? Ue(void 0) : this._def.innerType._parse(t);
   }
   unwrap() {
     return this._def.innerType;
   }
 }
-tt.create = (e, t) => new tt({
+Ye.create = (e, t) => new Ye({
   innerType: e,
-  typeName: C.ZodOptional,
-  ...V(t)
+  typeName: R.ZodOptional,
+  ...Z(t)
 });
-class qt extends z {
+class St extends J {
   _parse(t) {
-    return this._getType(t) === O.null ? ze(null) : this._def.innerType._parse(t);
+    return this._getType(t) === A.null ? Ue(null) : this._def.innerType._parse(t);
   }
   unwrap() {
     return this._def.innerType;
   }
 }
-qt.create = (e, t) => new qt({
+St.create = (e, t) => new St({
   innerType: e,
-  typeName: C.ZodNullable,
-  ...V(t)
+  typeName: R.ZodNullable,
+  ...Z(t)
 });
-class Yr extends z {
+class xn extends J {
   _parse(t) {
-    const { ctx: r } = this._processInputParams(t);
-    let n = r.data;
-    return r.parsedType === O.undefined && (n = this._def.defaultValue()), this._def.innerType._parse({
-      data: n,
-      path: r.path,
-      parent: r
+    const { ctx: n } = this._processInputParams(t);
+    let r = n.data;
+    return n.parsedType === A.undefined && (r = this._def.defaultValue()), this._def.innerType._parse({
+      data: r,
+      path: n.path,
+      parent: n
     });
   }
   removeDefault() {
     return this._def.innerType;
   }
 }
-Yr.create = (e, t) => new Yr({
+xn.create = (e, t) => new xn({
   innerType: e,
-  typeName: C.ZodDefault,
+  typeName: R.ZodDefault,
   defaultValue: typeof t.default == "function" ? t.default : () => t.default,
-  ...V(t)
+  ...Z(t)
 });
-class Xr extends z {
+class Tn extends J {
   _parse(t) {
-    const { ctx: r } = this._processInputParams(t), n = {
-      ...r,
+    const { ctx: n } = this._processInputParams(t), r = {
+      ...n,
       common: {
-        ...r.common,
+        ...n.common,
         issues: []
       }
-    }, a = this._def.innerType._parse({
-      data: n.data,
-      path: n.path,
+    }, s = this._def.innerType._parse({
+      data: r.data,
+      path: r.path,
       parent: {
-        ...n
+        ...r
       }
     });
-    return Zr(a) ? a.then((s) => ({
-      status: "valid",
-      value: s.status === "valid" ? s.value : this._def.catchValue({
-        get error() {
-          return new gt(n.common.issues);
-        },
-        input: n.data
-      })
-    })) : {
+    return hn(s) ? s.then((a) => ({
       status: "valid",
       value: a.status === "valid" ? a.value : this._def.catchValue({
         get error() {
-          return new gt(n.common.issues);
+          return new at(r.common.issues);
         },
-        input: n.data
+        input: r.data
+      })
+    })) : {
+      status: "valid",
+      value: s.status === "valid" ? s.value : this._def.catchValue({
+        get error() {
+          return new at(r.common.issues);
+        },
+        input: r.data
       })
     };
   }
@@ -3460,180 +2871,194 @@ class Xr extends z {
     return this._def.innerType;
   }
 }
-Xr.create = (e, t) => new Xr({
+Tn.create = (e, t) => new Tn({
   innerType: e,
-  typeName: C.ZodCatch,
+  typeName: R.ZodCatch,
   catchValue: typeof t.catch == "function" ? t.catch : () => t.catch,
-  ...V(t)
+  ...Z(t)
 });
-class Ma extends z {
+class Qr extends J {
   _parse(t) {
-    if (this._getType(t) !== O.nan) {
-      const n = this._getOrReturnCtx(t);
-      return N(n, {
+    if (this._getType(t) !== A.nan) {
+      const r = this._getOrReturnCtx(t);
+      return E(r, {
         code: I.invalid_type,
-        expected: O.nan,
-        received: n.parsedType
-      }), L;
+        expected: A.nan,
+        received: r.parsedType
+      }), D;
     }
     return { status: "valid", value: t.data };
   }
 }
-Ma.create = (e) => new Ma({
-  typeName: C.ZodNaN,
-  ...V(e)
+Qr.create = (e) => new Qr({
+  typeName: R.ZodNaN,
+  ...Z(e)
 });
-class Xs extends z {
+class ga extends J {
   _parse(t) {
-    const { ctx: r } = this._processInputParams(t), n = r.data;
+    const { ctx: n } = this._processInputParams(t), r = n.data;
     return this._def.type._parse({
-      data: n,
-      path: r.path,
-      parent: r
+      data: r,
+      path: n.path,
+      parent: n
     });
   }
   unwrap() {
     return this._def.type;
   }
 }
-class aa extends z {
+class xr extends J {
   _parse(t) {
-    const { status: r, ctx: n } = this._processInputParams(t);
-    if (n.common.async)
+    const { status: n, ctx: r } = this._processInputParams(t);
+    if (r.common.async)
       return (async () => {
-        const s = await this._def.in._parseAsync({
-          data: n.data,
-          path: n.path,
-          parent: n
+        const a = await this._def.in._parseAsync({
+          data: r.data,
+          path: r.path,
+          parent: r
         });
-        return s.status === "aborted" ? L : s.status === "dirty" ? (r.dirty(), dr(s.value)) : this._def.out._parseAsync({
-          data: s.value,
-          path: n.path,
-          parent: n
+        return a.status === "aborted" ? D : a.status === "dirty" ? (n.dirty(), Jt(a.value)) : this._def.out._parseAsync({
+          data: a.value,
+          path: r.path,
+          parent: r
         });
       })();
     {
-      const a = this._def.in._parseSync({
-        data: n.data,
-        path: n.path,
-        parent: n
+      const s = this._def.in._parseSync({
+        data: r.data,
+        path: r.path,
+        parent: r
       });
-      return a.status === "aborted" ? L : a.status === "dirty" ? (r.dirty(), {
+      return s.status === "aborted" ? D : s.status === "dirty" ? (n.dirty(), {
         status: "dirty",
-        value: a.value
+        value: s.value
       }) : this._def.out._parseSync({
-        data: a.value,
-        path: n.path,
-        parent: n
+        data: s.value,
+        path: r.path,
+        parent: r
       });
     }
   }
-  static create(t, r) {
-    return new aa({
+  static create(t, n) {
+    return new xr({
       in: t,
-      out: r,
-      typeName: C.ZodPipeline
+      out: n,
+      typeName: R.ZodPipeline
     });
   }
 }
-class Qr extends z {
+class kn extends J {
   _parse(t) {
-    const r = this._def.innerType._parse(t), n = (a) => (Ht(a) && (a.value = Object.freeze(a.value)), a);
-    return Zr(r) ? r.then((a) => n(a)) : n(r);
+    const n = this._def.innerType._parse(t), r = (s) => ($t(s) && (s.value = Object.freeze(s.value)), s);
+    return hn(n) ? n.then((s) => r(s)) : r(n);
   }
   unwrap() {
     return this._def.innerType;
   }
 }
-Qr.create = (e, t) => new Qr({
+kn.create = (e, t) => new kn({
   innerType: e,
-  typeName: C.ZodReadonly,
-  ...V(t)
+  typeName: R.ZodReadonly,
+  ...Z(t)
 });
-function ja(e, t) {
-  const r = typeof e == "function" ? e(t) : typeof e == "string" ? { message: e } : e;
-  return typeof r == "string" ? { message: r } : r;
+function es(e, t) {
+  const n = typeof e == "function" ? e(t) : typeof e == "string" ? { message: e } : e;
+  return typeof n == "string" ? { message: n } : n;
 }
-function Qs(e, t = {}, r) {
-  return e ? hr.create().superRefine((n, a) => {
-    const s = e(n);
-    if (s instanceof Promise)
-      return s.then((o) => {
+function ya(e, t = {}, n) {
+  return e ? Wt.create().superRefine((r, s) => {
+    const a = e(r);
+    if (a instanceof Promise)
+      return a.then((o) => {
         if (!o) {
-          const i = ja(t, n), l = i.fatal ?? r ?? !0;
-          a.addIssue({ code: "custom", ...i, fatal: l });
+          const i = es(t, r), l = i.fatal ?? n ?? !0;
+          s.addIssue({ code: "custom", ...i, fatal: l });
         }
       });
-    if (!s) {
-      const o = ja(t, n), i = o.fatal ?? r ?? !0;
-      a.addIssue({ code: "custom", ...o, fatal: i });
+    if (!a) {
+      const o = es(t, r), i = o.fatal ?? n ?? !0;
+      s.addIssue({ code: "custom", ...o, fatal: i });
     }
-  }) : hr.create();
+  }) : Wt.create();
 }
-var C;
+var R;
 (function(e) {
   e.ZodString = "ZodString", e.ZodNumber = "ZodNumber", e.ZodNaN = "ZodNaN", e.ZodBigInt = "ZodBigInt", e.ZodBoolean = "ZodBoolean", e.ZodDate = "ZodDate", e.ZodSymbol = "ZodSymbol", e.ZodUndefined = "ZodUndefined", e.ZodNull = "ZodNull", e.ZodAny = "ZodAny", e.ZodUnknown = "ZodUnknown", e.ZodNever = "ZodNever", e.ZodVoid = "ZodVoid", e.ZodArray = "ZodArray", e.ZodObject = "ZodObject", e.ZodUnion = "ZodUnion", e.ZodDiscriminatedUnion = "ZodDiscriminatedUnion", e.ZodIntersection = "ZodIntersection", e.ZodTuple = "ZodTuple", e.ZodRecord = "ZodRecord", e.ZodMap = "ZodMap", e.ZodSet = "ZodSet", e.ZodFunction = "ZodFunction", e.ZodLazy = "ZodLazy", e.ZodLiteral = "ZodLiteral", e.ZodEnum = "ZodEnum", e.ZodEffects = "ZodEffects", e.ZodNativeEnum = "ZodNativeEnum", e.ZodOptional = "ZodOptional", e.ZodNullable = "ZodNullable", e.ZodDefault = "ZodDefault", e.ZodCatch = "ZodCatch", e.ZodPromise = "ZodPromise", e.ZodBranded = "ZodBranded", e.ZodPipeline = "ZodPipeline", e.ZodReadonly = "ZodReadonly";
-})(C || (C = {}));
-const en = (e, t = {
+})(R || (R = {}));
+const Sn = (e, t = {
   message: `Input not instance of ${e.name}`
-}) => Qs((r) => r instanceof e, t), h = mt.create, R = Wt.create, Je = Dn.create, Gl = Br.create, eo = hr.create, Nr = Un.create;
+}) => ya((n) => n instanceof e, t), d = ze.create, T = bt.create;
+wt.create;
+const ue = fn.create;
+jt.create;
+const cl = mn.create, Pt = Wt.create, Me = lr.create;
+ht.create;
+const M = We.create, f = ye.create, se = gn.create, pt = wr.create;
+yn.create;
+const ts = xt.create, Ke = vn.create, dl = _n.create, C = bn.create, Ce = Tt.create;
+wn.create;
+const be = Ye.create;
 St.create;
-const F = et.create, y = ke.create, ge = Jr.create, Tt = na.create;
-zr.create;
-const $a = jt.create, yr = Gr.create, Hl = Hr.create, A = Wr.create, yt = $t.create;
-Kr.create;
-const Ie = tt.create;
-qt.create;
-function Wl() {
+const pl = {
+  string: (e) => ze.create({ ...e, coerce: !0 }),
+  number: (e) => bt.create({ ...e, coerce: !0 }),
+  boolean: (e) => fn.create({
+    ...e,
+    coerce: !0
+  }),
+  bigint: (e) => wt.create({ ...e, coerce: !0 }),
+  date: (e) => jt.create({ ...e, coerce: !0 })
+};
+function hl() {
   return {};
 }
-function Kl(e, t) {
-  var n, a, s;
-  const r = {
+function fl(e, t) {
+  var r, s, a;
+  const n = {
     type: "array"
   };
-  return (n = e.type) != null && n._def && ((s = (a = e.type) == null ? void 0 : a._def) == null ? void 0 : s.typeName) !== C.ZodAny && (r.items = Q(e.type._def, {
+  return (r = e.type) != null && r._def && ((a = (s = e.type) == null ? void 0 : s._def) == null ? void 0 : a.typeName) !== R.ZodAny && (n.items = Q(e.type._def, {
     ...t,
     currentPath: [...t.currentPath, "items"]
-  })), e.minLength && ae(r, "minItems", e.minLength.value, e.minLength.message, t), e.maxLength && ae(r, "maxItems", e.maxLength.value, e.maxLength.message, t), e.exactLength && (ae(r, "minItems", e.exactLength.value, e.exactLength.message, t), ae(r, "maxItems", e.exactLength.value, e.exactLength.message, t)), r;
+  })), e.minLength && re(n, "minItems", e.minLength.value, e.minLength.message, t), e.maxLength && re(n, "maxItems", e.maxLength.value, e.maxLength.message, t), e.exactLength && (re(n, "minItems", e.exactLength.value, e.exactLength.message, t), re(n, "maxItems", e.exactLength.value, e.exactLength.message, t)), n;
 }
-function Yl(e, t) {
-  const r = {
+function ml(e, t) {
+  const n = {
     type: "integer",
     format: "int64"
   };
   if (!e.checks)
-    return r;
-  for (const n of e.checks)
-    switch (n.kind) {
+    return n;
+  for (const r of e.checks)
+    switch (r.kind) {
       case "min":
-        t.target === "jsonSchema7" ? n.inclusive ? ae(r, "minimum", n.value, n.message, t) : ae(r, "exclusiveMinimum", n.value, n.message, t) : (n.inclusive || (r.exclusiveMinimum = !0), ae(r, "minimum", n.value, n.message, t));
+        t.target === "jsonSchema7" ? r.inclusive ? re(n, "minimum", r.value, r.message, t) : re(n, "exclusiveMinimum", r.value, r.message, t) : (r.inclusive || (n.exclusiveMinimum = !0), re(n, "minimum", r.value, r.message, t));
         break;
       case "max":
-        t.target === "jsonSchema7" ? n.inclusive ? ae(r, "maximum", n.value, n.message, t) : ae(r, "exclusiveMaximum", n.value, n.message, t) : (n.inclusive || (r.exclusiveMaximum = !0), ae(r, "maximum", n.value, n.message, t));
+        t.target === "jsonSchema7" ? r.inclusive ? re(n, "maximum", r.value, r.message, t) : re(n, "exclusiveMaximum", r.value, r.message, t) : (r.inclusive || (n.exclusiveMaximum = !0), re(n, "maximum", r.value, r.message, t));
         break;
       case "multipleOf":
-        ae(r, "multipleOf", n.value, n.message, t);
+        re(n, "multipleOf", r.value, r.message, t);
         break;
     }
-  return r;
+  return n;
 }
-function Xl() {
+function gl() {
   return {
     type: "boolean"
   };
 }
-function to(e, t) {
+function va(e, t) {
   return Q(e.type._def, t);
 }
-const Ql = (e, t) => Q(e.innerType._def, t);
-function ro(e, t, r) {
-  const n = r ?? t.dateStrategy;
-  if (Array.isArray(n))
+const yl = (e, t) => Q(e.innerType._def, t);
+function _a(e, t, n) {
+  const r = n ?? t.dateStrategy;
+  if (Array.isArray(r))
     return {
-      anyOf: n.map((a, s) => ro(e, t, a))
+      anyOf: r.map((s, a) => _a(e, t, s))
     };
-  switch (n) {
+  switch (r) {
     case "string":
     case "format:date-time":
       return {
@@ -3646,59 +3071,59 @@ function ro(e, t, r) {
         format: "date"
       };
     case "integer":
-      return eu(e, t);
+      return vl(e, t);
   }
 }
-const eu = (e, t) => {
-  const r = {
+const vl = (e, t) => {
+  const n = {
     type: "integer",
     format: "unix-time"
   };
   if (t.target === "openApi3")
-    return r;
-  for (const n of e.checks)
-    switch (n.kind) {
+    return n;
+  for (const r of e.checks)
+    switch (r.kind) {
       case "min":
-        ae(
-          r,
+        re(
+          n,
           "minimum",
-          n.value,
+          r.value,
           // This is in milliseconds
-          n.message,
+          r.message,
           t
         );
         break;
       case "max":
-        ae(
-          r,
+        re(
+          n,
           "maximum",
-          n.value,
+          r.value,
           // This is in milliseconds
-          n.message,
+          r.message,
           t
         );
         break;
     }
-  return r;
+  return n;
 };
-function tu(e, t) {
+function _l(e, t) {
   return {
     ...Q(e.innerType._def, t),
     default: e.defaultValue()
   };
 }
-function ru(e, t) {
+function bl(e, t) {
   return t.effectStrategy === "input" ? Q(e.schema._def, t) : {};
 }
-function nu(e) {
+function wl(e) {
   return {
     type: "string",
     enum: Array.from(e.values)
   };
 }
-const au = (e) => "type" in e && e.type === "string" ? !1 : "allOf" in e;
-function su(e, t) {
-  const r = [
+const xl = (e) => "type" in e && e.type === "string" ? !1 : "allOf" in e;
+function Tl(e, t) {
+  const n = [
     Q(e.left._def, {
       ...t,
       currentPath: [...t.currentPath, "allOf", "0"]
@@ -3707,40 +3132,40 @@ function su(e, t) {
       ...t,
       currentPath: [...t.currentPath, "allOf", "1"]
     })
-  ].filter((s) => !!s);
-  let n = t.target === "jsonSchema2019-09" ? { unevaluatedProperties: !1 } : void 0;
-  const a = [];
-  return r.forEach((s) => {
-    if (au(s))
-      a.push(...s.allOf), s.unevaluatedProperties === void 0 && (n = void 0);
+  ].filter((a) => !!a);
+  let r = t.target === "jsonSchema2019-09" ? { unevaluatedProperties: !1 } : void 0;
+  const s = [];
+  return n.forEach((a) => {
+    if (xl(a))
+      s.push(...a.allOf), a.unevaluatedProperties === void 0 && (r = void 0);
     else {
-      let o = s;
-      if ("additionalProperties" in s && s.additionalProperties === !1) {
-        const { additionalProperties: i, ...l } = s;
+      let o = a;
+      if ("additionalProperties" in a && a.additionalProperties === !1) {
+        const { additionalProperties: i, ...l } = a;
         o = l;
       } else
-        n = void 0;
-      a.push(o);
+        r = void 0;
+      s.push(o);
     }
-  }), a.length ? {
-    allOf: a,
-    ...n
+  }), s.length ? {
+    allOf: s,
+    ...r
   } : void 0;
 }
-function ou(e, t) {
-  const r = typeof e.value;
-  return r !== "bigint" && r !== "number" && r !== "boolean" && r !== "string" ? {
+function kl(e, t) {
+  const n = typeof e.value;
+  return n !== "bigint" && n !== "number" && n !== "boolean" && n !== "string" ? {
     type: Array.isArray(e.value) ? "array" : "object"
   } : t.target === "openApi3" ? {
-    type: r === "bigint" ? "integer" : r,
+    type: n === "bigint" ? "integer" : n,
     enum: [e.value]
   } : {
-    type: r === "bigint" ? "integer" : r,
+    type: n === "bigint" ? "integer" : n,
     const: e.value
   };
 }
-let Tn;
-const We = {
+let Kn;
+const Ve = {
   /**
    * `c` was changed to `[cC]` to replicate /i flag
    */
@@ -3762,7 +3187,7 @@ const We = {
    * Fix in Zod:
    * https://github.com/colinhacks/zod/commit/9340fd51e48576a75adc919bff65dbc4a5d4c99b
    */
-  emoji: () => (Tn === void 0 && (Tn = RegExp("^(\\p{Extended_Pictographic}|\\p{Emoji_Component})+$", "u")), Tn),
+  emoji: () => (Kn === void 0 && (Kn = RegExp("^(\\p{Extended_Pictographic}|\\p{Emoji_Component})+$", "u")), Kn),
   /**
    * Unused
    */
@@ -3782,205 +3207,205 @@ const We = {
   nanoid: /^[a-zA-Z0-9_-]{21}$/,
   jwt: /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$/
 };
-function no(e, t) {
-  const r = {
+function ba(e, t) {
+  const n = {
     type: "string"
   };
   if (e.checks)
-    for (const n of e.checks)
-      switch (n.kind) {
+    for (const r of e.checks)
+      switch (r.kind) {
         case "min":
-          ae(r, "minLength", typeof r.minLength == "number" ? Math.max(r.minLength, n.value) : n.value, n.message, t);
+          re(n, "minLength", typeof n.minLength == "number" ? Math.max(n.minLength, r.value) : r.value, r.message, t);
           break;
         case "max":
-          ae(r, "maxLength", typeof r.maxLength == "number" ? Math.min(r.maxLength, n.value) : n.value, n.message, t);
+          re(n, "maxLength", typeof n.maxLength == "number" ? Math.min(n.maxLength, r.value) : r.value, r.message, t);
           break;
         case "email":
           switch (t.emailStrategy) {
             case "format:email":
-              Ke(r, "email", n.message, t);
+              Be(n, "email", r.message, t);
               break;
             case "format:idn-email":
-              Ke(r, "idn-email", n.message, t);
+              Be(n, "idn-email", r.message, t);
               break;
             case "pattern:zod":
-              $e(r, We.email, n.message, t);
+              Re(n, Ve.email, r.message, t);
               break;
           }
           break;
         case "url":
-          Ke(r, "uri", n.message, t);
+          Be(n, "uri", r.message, t);
           break;
         case "uuid":
-          Ke(r, "uuid", n.message, t);
+          Be(n, "uuid", r.message, t);
           break;
         case "regex":
-          $e(r, n.regex, n.message, t);
+          Re(n, r.regex, r.message, t);
           break;
         case "cuid":
-          $e(r, We.cuid, n.message, t);
+          Re(n, Ve.cuid, r.message, t);
           break;
         case "cuid2":
-          $e(r, We.cuid2, n.message, t);
+          Re(n, Ve.cuid2, r.message, t);
           break;
         case "startsWith":
-          $e(r, RegExp(`^${Sn(n.value, t)}`), n.message, t);
+          Re(n, RegExp(`^${Xn(r.value, t)}`), r.message, t);
           break;
         case "endsWith":
-          $e(r, RegExp(`${Sn(n.value, t)}$`), n.message, t);
+          Re(n, RegExp(`${Xn(r.value, t)}$`), r.message, t);
           break;
         case "datetime":
-          Ke(r, "date-time", n.message, t);
+          Be(n, "date-time", r.message, t);
           break;
         case "date":
-          Ke(r, "date", n.message, t);
+          Be(n, "date", r.message, t);
           break;
         case "time":
-          Ke(r, "time", n.message, t);
+          Be(n, "time", r.message, t);
           break;
         case "duration":
-          Ke(r, "duration", n.message, t);
+          Be(n, "duration", r.message, t);
           break;
         case "length":
-          ae(r, "minLength", typeof r.minLength == "number" ? Math.max(r.minLength, n.value) : n.value, n.message, t), ae(r, "maxLength", typeof r.maxLength == "number" ? Math.min(r.maxLength, n.value) : n.value, n.message, t);
+          re(n, "minLength", typeof n.minLength == "number" ? Math.max(n.minLength, r.value) : r.value, r.message, t), re(n, "maxLength", typeof n.maxLength == "number" ? Math.min(n.maxLength, r.value) : r.value, r.message, t);
           break;
         case "includes": {
-          $e(r, RegExp(Sn(n.value, t)), n.message, t);
+          Re(n, RegExp(Xn(r.value, t)), r.message, t);
           break;
         }
         case "ip": {
-          n.version !== "v6" && Ke(r, "ipv4", n.message, t), n.version !== "v4" && Ke(r, "ipv6", n.message, t);
+          r.version !== "v6" && Be(n, "ipv4", r.message, t), r.version !== "v4" && Be(n, "ipv6", r.message, t);
           break;
         }
         case "base64url":
-          $e(r, We.base64url, n.message, t);
+          Re(n, Ve.base64url, r.message, t);
           break;
         case "jwt":
-          $e(r, We.jwt, n.message, t);
+          Re(n, Ve.jwt, r.message, t);
           break;
         case "cidr": {
-          n.version !== "v6" && $e(r, We.ipv4Cidr, n.message, t), n.version !== "v4" && $e(r, We.ipv6Cidr, n.message, t);
+          r.version !== "v6" && Re(n, Ve.ipv4Cidr, r.message, t), r.version !== "v4" && Re(n, Ve.ipv6Cidr, r.message, t);
           break;
         }
         case "emoji":
-          $e(r, We.emoji(), n.message, t);
+          Re(n, Ve.emoji(), r.message, t);
           break;
         case "ulid": {
-          $e(r, We.ulid, n.message, t);
+          Re(n, Ve.ulid, r.message, t);
           break;
         }
         case "base64": {
           switch (t.base64Strategy) {
             case "format:binary": {
-              Ke(r, "binary", n.message, t);
+              Be(n, "binary", r.message, t);
               break;
             }
             case "contentEncoding:base64": {
-              ae(r, "contentEncoding", "base64", n.message, t);
+              re(n, "contentEncoding", "base64", r.message, t);
               break;
             }
             case "pattern:zod": {
-              $e(r, We.base64, n.message, t);
+              Re(n, Ve.base64, r.message, t);
               break;
             }
           }
           break;
         }
         case "nanoid":
-          $e(r, We.nanoid, n.message, t);
+          Re(n, Ve.nanoid, r.message, t);
       }
-  return r;
+  return n;
 }
-function Sn(e, t) {
-  return t.patternStrategy === "escape" ? lu(e) : e;
+function Xn(e, t) {
+  return t.patternStrategy === "escape" ? Il(e) : e;
 }
-const iu = new Set("ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvxyz0123456789");
-function lu(e) {
+const Sl = new Set("ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvxyz0123456789");
+function Il(e) {
   let t = "";
-  for (let r = 0; r < e.length; r++)
-    iu.has(e[r]) || (t += "\\"), t += e[r];
+  for (let n = 0; n < e.length; n++)
+    Sl.has(e[n]) || (t += "\\"), t += e[n];
   return t;
 }
-function Ke(e, t, r, n) {
-  var a;
-  e.format || (a = e.anyOf) != null && a.some((s) => s.format) ? (e.anyOf || (e.anyOf = []), e.format && (e.anyOf.push({
+function Be(e, t, n, r) {
+  var s;
+  e.format || (s = e.anyOf) != null && s.some((a) => a.format) ? (e.anyOf || (e.anyOf = []), e.format && (e.anyOf.push({
     format: e.format,
-    ...e.errorMessage && n.errorMessages && {
+    ...e.errorMessage && r.errorMessages && {
       errorMessage: { format: e.errorMessage.format }
     }
   }), delete e.format, e.errorMessage && (delete e.errorMessage.format, Object.keys(e.errorMessage).length === 0 && delete e.errorMessage)), e.anyOf.push({
     format: t,
-    ...r && n.errorMessages && { errorMessage: { format: r } }
-  })) : ae(e, "format", t, r, n);
+    ...n && r.errorMessages && { errorMessage: { format: n } }
+  })) : re(e, "format", t, n, r);
 }
-function $e(e, t, r, n) {
-  var a;
-  e.pattern || (a = e.allOf) != null && a.some((s) => s.pattern) ? (e.allOf || (e.allOf = []), e.pattern && (e.allOf.push({
+function Re(e, t, n, r) {
+  var s;
+  e.pattern || (s = e.allOf) != null && s.some((a) => a.pattern) ? (e.allOf || (e.allOf = []), e.pattern && (e.allOf.push({
     pattern: e.pattern,
-    ...e.errorMessage && n.errorMessages && {
+    ...e.errorMessage && r.errorMessages && {
       errorMessage: { pattern: e.errorMessage.pattern }
     }
   }), delete e.pattern, e.errorMessage && (delete e.errorMessage.pattern, Object.keys(e.errorMessage).length === 0 && delete e.errorMessage)), e.allOf.push({
-    pattern: Da(t, n),
-    ...r && n.errorMessages && { errorMessage: { pattern: r } }
-  })) : ae(e, "pattern", Da(t, n), r, n);
+    pattern: ns(t, r),
+    ...n && r.errorMessages && { errorMessage: { pattern: n } }
+  })) : re(e, "pattern", ns(t, r), n, r);
 }
-function Da(e, t) {
+function ns(e, t) {
   var l;
   if (!t.applyRegexFlags || !e.flags)
     return e.source;
-  const r = {
+  const n = {
     i: e.flags.includes("i"),
     m: e.flags.includes("m"),
     s: e.flags.includes("s")
     // `.` matches newlines
-  }, n = r.i ? e.source.toLowerCase() : e.source;
-  let a = "", s = !1, o = !1, i = !1;
-  for (let u = 0; u < n.length; u++) {
-    if (s) {
-      a += n[u], s = !1;
+  }, r = n.i ? e.source.toLowerCase() : e.source;
+  let s = "", a = !1, o = !1, i = !1;
+  for (let u = 0; u < r.length; u++) {
+    if (a) {
+      s += r[u], a = !1;
       continue;
     }
-    if (r.i) {
+    if (n.i) {
       if (o) {
-        if (n[u].match(/[a-z]/)) {
-          i ? (a += n[u], a += `${n[u - 2]}-${n[u]}`.toUpperCase(), i = !1) : n[u + 1] === "-" && ((l = n[u + 2]) != null && l.match(/[a-z]/)) ? (a += n[u], i = !0) : a += `${n[u]}${n[u].toUpperCase()}`;
+        if (r[u].match(/[a-z]/)) {
+          i ? (s += r[u], s += `${r[u - 2]}-${r[u]}`.toUpperCase(), i = !1) : r[u + 1] === "-" && ((l = r[u + 2]) != null && l.match(/[a-z]/)) ? (s += r[u], i = !0) : s += `${r[u]}${r[u].toUpperCase()}`;
           continue;
         }
-      } else if (n[u].match(/[a-z]/)) {
-        a += `[${n[u]}${n[u].toUpperCase()}]`;
+      } else if (r[u].match(/[a-z]/)) {
+        s += `[${r[u]}${r[u].toUpperCase()}]`;
         continue;
       }
     }
-    if (r.m) {
-      if (n[u] === "^") {
-        a += `(^|(?<=[\r
+    if (n.m) {
+      if (r[u] === "^") {
+        s += `(^|(?<=[\r
 ]))`;
         continue;
-      } else if (n[u] === "$") {
-        a += `($|(?=[\r
+      } else if (r[u] === "$") {
+        s += `($|(?=[\r
 ]))`;
         continue;
       }
     }
-    if (r.s && n[u] === ".") {
-      a += o ? `${n[u]}\r
-` : `[${n[u]}\r
+    if (n.s && r[u] === ".") {
+      s += o ? `${r[u]}\r
+` : `[${r[u]}\r
 ]`;
       continue;
     }
-    a += n[u], n[u] === "\\" ? s = !0 : o && n[u] === "]" ? o = !1 : !o && n[u] === "[" && (o = !0);
+    s += r[u], r[u] === "\\" ? a = !0 : o && r[u] === "]" ? o = !1 : !o && r[u] === "[" && (o = !0);
   }
   try {
-    new RegExp(a);
+    new RegExp(s);
   } catch {
     return console.warn(`Could not convert regex pattern at ${t.currentPath.join("/")} to a flag-independent form! Falling back to the flag-ignorant source`), e.source;
   }
-  return a;
+  return s;
 }
-function ao(e, t) {
-  var n, a, s, o, i, l;
-  if (t.target === "openAi" && console.warn("Warning: OpenAI may not support records in schemas! Try an array of key-value pairs instead."), t.target === "openApi3" && ((n = e.keyType) == null ? void 0 : n._def.typeName) === C.ZodEnum)
+function wa(e, t) {
+  var r, s, a, o, i, l;
+  if (t.target === "openAi" && console.warn("Warning: OpenAI may not support records in schemas! Try an array of key-value pairs instead."), t.target === "openApi3" && ((r = e.keyType) == null ? void 0 : r._def.typeName) === R.ZodEnum)
     return {
       type: "object",
       required: e.keyType._def.values,
@@ -3993,7 +3418,7 @@ function ao(e, t) {
       }), {}),
       additionalProperties: t.rejectedAdditionalProperties
     };
-  const r = {
+  const n = {
     type: "object",
     additionalProperties: Q(e.valueType._def, {
       ...t,
@@ -4001,38 +3426,38 @@ function ao(e, t) {
     }) ?? t.allowedAdditionalProperties
   };
   if (t.target === "openApi3")
-    return r;
-  if (((a = e.keyType) == null ? void 0 : a._def.typeName) === C.ZodString && ((s = e.keyType._def.checks) != null && s.length)) {
-    const { type: u, ...c } = no(e.keyType._def, t);
+    return n;
+  if (((s = e.keyType) == null ? void 0 : s._def.typeName) === R.ZodString && ((a = e.keyType._def.checks) != null && a.length)) {
+    const { type: u, ...c } = ba(e.keyType._def, t);
     return {
-      ...r,
+      ...n,
       propertyNames: c
     };
   } else {
-    if (((o = e.keyType) == null ? void 0 : o._def.typeName) === C.ZodEnum)
+    if (((o = e.keyType) == null ? void 0 : o._def.typeName) === R.ZodEnum)
       return {
-        ...r,
+        ...n,
         propertyNames: {
           enum: e.keyType._def.values
         }
       };
-    if (((i = e.keyType) == null ? void 0 : i._def.typeName) === C.ZodBranded && e.keyType._def.type._def.typeName === C.ZodString && ((l = e.keyType._def.type._def.checks) != null && l.length)) {
-      const { type: u, ...c } = to(e.keyType._def, t);
+    if (((i = e.keyType) == null ? void 0 : i._def.typeName) === R.ZodBranded && e.keyType._def.type._def.typeName === R.ZodString && ((l = e.keyType._def.type._def.checks) != null && l.length)) {
+      const { type: u, ...c } = va(e.keyType._def, t);
       return {
-        ...r,
+        ...n,
         propertyNames: c
       };
     }
   }
-  return r;
+  return n;
 }
-function uu(e, t) {
+function Cl(e, t) {
   if (t.mapStrategy === "record")
-    return ao(e, t);
-  const r = Q(e.keyType._def, {
+    return wa(e, t);
+  const n = Q(e.keyType._def, {
     ...t,
     currentPath: [...t.currentPath, "items", "items", "0"]
-  }) || {}, n = Q(e.valueType._def, {
+  }) || {}, r = Q(e.valueType._def, {
     ...t,
     currentPath: [...t.currentPath, "items", "items", "1"]
   }) || {};
@@ -4041,25 +3466,25 @@ function uu(e, t) {
     maxItems: 125,
     items: {
       type: "array",
-      items: [r, n],
+      items: [n, r],
       minItems: 2,
       maxItems: 2
     }
   };
 }
-function cu(e) {
-  const t = e.values, n = Object.keys(e.values).filter((s) => typeof t[t[s]] != "number").map((s) => t[s]), a = Array.from(new Set(n.map((s) => typeof s)));
+function Rl(e) {
+  const t = e.values, r = Object.keys(e.values).filter((a) => typeof t[t[a]] != "number").map((a) => t[a]), s = Array.from(new Set(r.map((a) => typeof a)));
   return {
-    type: a.length === 1 ? a[0] === "string" ? "string" : "number" : ["string", "number"],
-    enum: n
+    type: s.length === 1 ? s[0] === "string" ? "string" : "number" : ["string", "number"],
+    enum: r
   };
 }
-function du() {
+function El() {
   return {
     not: {}
   };
 }
-function pu(e) {
+function Al(e) {
   return e.target === "openApi3" ? {
     enum: ["null"],
     nullable: !0
@@ -4067,139 +3492,139 @@ function pu(e) {
     type: "null"
   };
 }
-const tn = {
+const In = {
   ZodString: "string",
   ZodNumber: "number",
   ZodBigInt: "integer",
   ZodBoolean: "boolean",
   ZodNull: "null"
 };
-function mu(e, t) {
+function Ol(e, t) {
   if (t.target === "openApi3")
-    return qa(e, t);
-  const r = e.options instanceof Map ? Array.from(e.options.values()) : e.options;
-  if (r.every((n) => n._def.typeName in tn && (!n._def.checks || !n._def.checks.length))) {
-    const n = r.reduce((a, s) => {
-      const o = tn[s._def.typeName];
-      return o && !a.includes(o) ? [...a, o] : a;
+    return rs(e, t);
+  const n = e.options instanceof Map ? Array.from(e.options.values()) : e.options;
+  if (n.every((r) => r._def.typeName in In && (!r._def.checks || !r._def.checks.length))) {
+    const r = n.reduce((s, a) => {
+      const o = In[a._def.typeName];
+      return o && !s.includes(o) ? [...s, o] : s;
     }, []);
     return {
-      type: n.length > 1 ? n : n[0]
+      type: r.length > 1 ? r : r[0]
     };
-  } else if (r.every((n) => n._def.typeName === "ZodLiteral" && !n.description)) {
-    const n = r.reduce((a, s) => {
-      const o = typeof s._def.value;
+  } else if (n.every((r) => r._def.typeName === "ZodLiteral" && !r.description)) {
+    const r = n.reduce((s, a) => {
+      const o = typeof a._def.value;
       switch (o) {
         case "string":
         case "number":
         case "boolean":
-          return [...a, o];
+          return [...s, o];
         case "bigint":
-          return [...a, "integer"];
+          return [...s, "integer"];
         case "object":
-          if (s._def.value === null)
-            return [...a, "null"];
+          if (a._def.value === null)
+            return [...s, "null"];
         case "symbol":
         case "undefined":
         case "function":
         default:
-          return a;
+          return s;
       }
     }, []);
-    if (n.length === r.length) {
-      const a = n.filter((s, o, i) => i.indexOf(s) === o);
+    if (r.length === n.length) {
+      const s = r.filter((a, o, i) => i.indexOf(a) === o);
       return {
-        type: a.length > 1 ? a : a[0],
-        enum: r.reduce((s, o) => s.includes(o._def.value) ? s : [...s, o._def.value], [])
+        type: s.length > 1 ? s : s[0],
+        enum: n.reduce((a, o) => a.includes(o._def.value) ? a : [...a, o._def.value], [])
       };
     }
-  } else if (r.every((n) => n._def.typeName === "ZodEnum"))
+  } else if (n.every((r) => r._def.typeName === "ZodEnum"))
     return {
       type: "string",
-      enum: r.reduce((n, a) => [
-        ...n,
-        ...a._def.values.filter((s) => !n.includes(s))
+      enum: n.reduce((r, s) => [
+        ...r,
+        ...s._def.values.filter((a) => !r.includes(a))
       ], [])
     };
-  return qa(e, t);
+  return rs(e, t);
 }
-const qa = (e, t) => {
-  const r = (e.options instanceof Map ? Array.from(e.options.values()) : e.options).map((n, a) => Q(n._def, {
+const rs = (e, t) => {
+  const n = (e.options instanceof Map ? Array.from(e.options.values()) : e.options).map((r, s) => Q(r._def, {
     ...t,
-    currentPath: [...t.currentPath, "anyOf", `${a}`]
-  })).filter((n) => !!n && (!t.strictUnions || typeof n == "object" && Object.keys(n).length > 0));
-  return r.length ? { anyOf: r } : void 0;
+    currentPath: [...t.currentPath, "anyOf", `${s}`]
+  })).filter((r) => !!r && (!t.strictUnions || typeof r == "object" && Object.keys(r).length > 0));
+  return n.length ? { anyOf: n } : void 0;
 };
-function fu(e, t) {
+function Ml(e, t) {
   if (["ZodString", "ZodNumber", "ZodBigInt", "ZodBoolean", "ZodNull"].includes(e.innerType._def.typeName) && (!e.innerType._def.checks || !e.innerType._def.checks.length))
     return t.target === "openApi3" ? {
-      type: tn[e.innerType._def.typeName],
+      type: In[e.innerType._def.typeName],
       nullable: !0
     } : {
       type: [
-        tn[e.innerType._def.typeName],
+        In[e.innerType._def.typeName],
         "null"
       ]
     };
   if (t.target === "openApi3") {
-    const n = Q(e.innerType._def, {
+    const r = Q(e.innerType._def, {
       ...t,
       currentPath: [...t.currentPath]
     });
-    return n && "$ref" in n ? { allOf: [n], nullable: !0 } : n && { ...n, nullable: !0 };
+    return r && "$ref" in r ? { allOf: [r], nullable: !0 } : r && { ...r, nullable: !0 };
   }
-  const r = Q(e.innerType._def, {
+  const n = Q(e.innerType._def, {
     ...t,
     currentPath: [...t.currentPath, "anyOf", "0"]
   });
-  return r && { anyOf: [r, { type: "null" }] };
+  return n && { anyOf: [n, { type: "null" }] };
 }
-function hu(e, t) {
-  const r = {
+function Nl(e, t) {
+  const n = {
     type: "number"
   };
   if (!e.checks)
-    return r;
-  for (const n of e.checks)
-    switch (n.kind) {
+    return n;
+  for (const r of e.checks)
+    switch (r.kind) {
       case "int":
-        r.type = "integer", Hs(r, "type", n.message, t);
+        n.type = "integer", pa(n, "type", r.message, t);
         break;
       case "min":
-        t.target === "jsonSchema7" ? n.inclusive ? ae(r, "minimum", n.value, n.message, t) : ae(r, "exclusiveMinimum", n.value, n.message, t) : (n.inclusive || (r.exclusiveMinimum = !0), ae(r, "minimum", n.value, n.message, t));
+        t.target === "jsonSchema7" ? r.inclusive ? re(n, "minimum", r.value, r.message, t) : re(n, "exclusiveMinimum", r.value, r.message, t) : (r.inclusive || (n.exclusiveMinimum = !0), re(n, "minimum", r.value, r.message, t));
         break;
       case "max":
-        t.target === "jsonSchema7" ? n.inclusive ? ae(r, "maximum", n.value, n.message, t) : ae(r, "exclusiveMaximum", n.value, n.message, t) : (n.inclusive || (r.exclusiveMaximum = !0), ae(r, "maximum", n.value, n.message, t));
+        t.target === "jsonSchema7" ? r.inclusive ? re(n, "maximum", r.value, r.message, t) : re(n, "exclusiveMaximum", r.value, r.message, t) : (r.inclusive || (n.exclusiveMaximum = !0), re(n, "maximum", r.value, r.message, t));
         break;
       case "multipleOf":
-        ae(r, "multipleOf", n.value, n.message, t);
+        re(n, "multipleOf", r.value, r.message, t);
         break;
     }
-  return r;
+  return n;
 }
-function gu(e, t) {
-  const r = t.target === "openAi", n = {
+function Pl(e, t) {
+  const n = t.target === "openAi", r = {
     type: "object",
     properties: {}
-  }, a = [], s = e.shape();
-  for (const i in s) {
-    let l = s[i];
+  }, s = [], a = e.shape();
+  for (const i in a) {
+    let l = a[i];
     if (l === void 0 || l._def === void 0)
       continue;
-    let u = vu(l);
-    u && r && (l instanceof tt && (l = l._def.innerType), l.isNullable() || (l = l.nullable()), u = !1);
+    let u = jl(l);
+    u && n && (l instanceof Ye && (l = l._def.innerType), l.isNullable() || (l = l.nullable()), u = !1);
     const c = Q(l._def, {
       ...t,
       currentPath: [...t.currentPath, "properties", i],
       propertyPath: [...t.currentPath, "properties", i]
     });
-    c !== void 0 && (n.properties[i] = c, u || a.push(i));
+    c !== void 0 && (r.properties[i] = c, u || s.push(i));
   }
-  a.length && (n.required = a);
-  const o = yu(e, t);
-  return o !== void 0 && (n.additionalProperties = o), n;
+  s.length && (r.required = s);
+  const o = $l(e, t);
+  return o !== void 0 && (r.additionalProperties = o), r;
 }
-function yu(e, t) {
+function $l(e, t) {
   if (e.catchall._def.typeName !== "ZodNever")
     return Q(e.catchall._def, {
       ...t,
@@ -4214,50 +3639,50 @@ function yu(e, t) {
       return t.removeAdditionalStrategy === "strict" ? t.allowedAdditionalProperties : t.rejectedAdditionalProperties;
   }
 }
-function vu(e) {
+function jl(e) {
   try {
     return e.isOptional();
   } catch {
     return !0;
   }
 }
-const _u = (e, t) => {
-  var n;
-  if (t.currentPath.toString() === ((n = t.propertyPath) == null ? void 0 : n.toString()))
+const Dl = (e, t) => {
+  var r;
+  if (t.currentPath.toString() === ((r = t.propertyPath) == null ? void 0 : r.toString()))
     return Q(e.innerType._def, t);
-  const r = Q(e.innerType._def, {
+  const n = Q(e.innerType._def, {
     ...t,
     currentPath: [...t.currentPath, "anyOf", "1"]
   });
-  return r ? {
+  return n ? {
     anyOf: [
       {
         not: {}
       },
-      r
+      n
     ]
   } : {};
-}, bu = (e, t) => {
+}, ql = (e, t) => {
   if (t.pipeStrategy === "input")
     return Q(e.in._def, t);
   if (t.pipeStrategy === "output")
     return Q(e.out._def, t);
-  const r = Q(e.in._def, {
+  const n = Q(e.in._def, {
     ...t,
     currentPath: [...t.currentPath, "allOf", "0"]
-  }), n = Q(e.out._def, {
+  }), r = Q(e.out._def, {
     ...t,
-    currentPath: [...t.currentPath, "allOf", r ? "1" : "0"]
+    currentPath: [...t.currentPath, "allOf", n ? "1" : "0"]
   });
   return {
-    allOf: [r, n].filter((a) => a !== void 0)
+    allOf: [n, r].filter((s) => s !== void 0)
   };
 };
-function wu(e, t) {
+function Ul(e, t) {
   return Q(e.type._def, t);
 }
-function xu(e, t) {
-  const n = {
+function Ll(e, t) {
+  const r = {
     type: "array",
     uniqueItems: !0,
     items: Q(e.valueType._def, {
@@ -4265,16 +3690,16 @@ function xu(e, t) {
       currentPath: [...t.currentPath, "items"]
     })
   };
-  return e.minSize && ae(n, "minItems", e.minSize.value, e.minSize.message, t), e.maxSize && ae(n, "maxItems", e.maxSize.value, e.maxSize.message, t), n;
+  return e.minSize && re(r, "minItems", e.minSize.value, e.minSize.message, t), e.maxSize && re(r, "maxItems", e.maxSize.value, e.maxSize.message, t), r;
 }
-function ku(e, t) {
+function Zl(e, t) {
   return e.rest ? {
     type: "array",
     minItems: e.items.length,
-    items: e.items.map((r, n) => Q(r._def, {
+    items: e.items.map((n, r) => Q(n._def, {
       ...t,
-      currentPath: [...t.currentPath, "items", `${n}`]
-    })).reduce((r, n) => n === void 0 ? r : [...r, n], []),
+      currentPath: [...t.currentPath, "items", `${r}`]
+    })).reduce((n, r) => r === void 0 ? n : [...n, r], []),
     additionalItems: Q(e.rest._def, {
       ...t,
       currentPath: [...t.currentPath, "additionalItems"]
@@ -4283,8322 +3708,951 @@ function ku(e, t) {
     type: "array",
     minItems: e.items.length,
     maxItems: e.items.length,
-    items: e.items.map((r, n) => Q(r._def, {
+    items: e.items.map((n, r) => Q(n._def, {
       ...t,
-      currentPath: [...t.currentPath, "items", `${n}`]
-    })).reduce((r, n) => n === void 0 ? r : [...r, n], [])
+      currentPath: [...t.currentPath, "items", `${r}`]
+    })).reduce((n, r) => r === void 0 ? n : [...n, r], [])
   };
 }
-function Tu() {
+function Vl() {
   return {
     not: {}
   };
 }
-function Su() {
+function Bl() {
   return {};
 }
-const Iu = (e, t) => Q(e.innerType._def, t), Cu = (e, t, r) => {
+const Fl = (e, t) => Q(e.innerType._def, t), Gl = (e, t, n) => {
   switch (t) {
-    case C.ZodString:
-      return no(e, r);
-    case C.ZodNumber:
-      return hu(e, r);
-    case C.ZodObject:
-      return gu(e, r);
-    case C.ZodBigInt:
-      return Yl(e, r);
-    case C.ZodBoolean:
-      return Xl();
-    case C.ZodDate:
-      return ro(e, r);
-    case C.ZodUndefined:
-      return Tu();
-    case C.ZodNull:
-      return pu(r);
-    case C.ZodArray:
-      return Kl(e, r);
-    case C.ZodUnion:
-    case C.ZodDiscriminatedUnion:
-      return mu(e, r);
-    case C.ZodIntersection:
-      return su(e, r);
-    case C.ZodTuple:
-      return ku(e, r);
-    case C.ZodRecord:
-      return ao(e, r);
-    case C.ZodLiteral:
-      return ou(e, r);
-    case C.ZodEnum:
-      return nu(e);
-    case C.ZodNativeEnum:
-      return cu(e);
-    case C.ZodNullable:
-      return fu(e, r);
-    case C.ZodOptional:
-      return _u(e, r);
-    case C.ZodMap:
-      return uu(e, r);
-    case C.ZodSet:
-      return xu(e, r);
-    case C.ZodLazy:
+    case R.ZodString:
+      return ba(e, n);
+    case R.ZodNumber:
+      return Nl(e, n);
+    case R.ZodObject:
+      return Pl(e, n);
+    case R.ZodBigInt:
+      return ml(e, n);
+    case R.ZodBoolean:
+      return gl();
+    case R.ZodDate:
+      return _a(e, n);
+    case R.ZodUndefined:
+      return Vl();
+    case R.ZodNull:
+      return Al(n);
+    case R.ZodArray:
+      return fl(e, n);
+    case R.ZodUnion:
+    case R.ZodDiscriminatedUnion:
+      return Ol(e, n);
+    case R.ZodIntersection:
+      return Tl(e, n);
+    case R.ZodTuple:
+      return Zl(e, n);
+    case R.ZodRecord:
+      return wa(e, n);
+    case R.ZodLiteral:
+      return kl(e, n);
+    case R.ZodEnum:
+      return wl(e);
+    case R.ZodNativeEnum:
+      return Rl(e);
+    case R.ZodNullable:
+      return Ml(e, n);
+    case R.ZodOptional:
+      return Dl(e, n);
+    case R.ZodMap:
+      return Cl(e, n);
+    case R.ZodSet:
+      return Ll(e, n);
+    case R.ZodLazy:
       return () => e.getter()._def;
-    case C.ZodPromise:
-      return wu(e, r);
-    case C.ZodNaN:
-    case C.ZodNever:
-      return du();
-    case C.ZodEffects:
-      return ru(e, r);
-    case C.ZodAny:
-      return Wl();
-    case C.ZodUnknown:
-      return Su();
-    case C.ZodDefault:
-      return tu(e, r);
-    case C.ZodBranded:
-      return to(e, r);
-    case C.ZodReadonly:
-      return Iu(e, r);
-    case C.ZodCatch:
-      return Ql(e, r);
-    case C.ZodPipeline:
-      return bu(e, r);
-    case C.ZodFunction:
-    case C.ZodVoid:
-    case C.ZodSymbol:
+    case R.ZodPromise:
+      return Ul(e, n);
+    case R.ZodNaN:
+    case R.ZodNever:
+      return El();
+    case R.ZodEffects:
+      return bl(e, n);
+    case R.ZodAny:
+      return hl();
+    case R.ZodUnknown:
+      return Bl();
+    case R.ZodDefault:
+      return _l(e, n);
+    case R.ZodBranded:
+      return va(e, n);
+    case R.ZodReadonly:
+      return Fl(e, n);
+    case R.ZodCatch:
+      return yl(e, n);
+    case R.ZodPipeline:
+      return ql(e, n);
+    case R.ZodFunction:
+    case R.ZodVoid:
+    case R.ZodSymbol:
       return;
     default:
-      return /* @__PURE__ */ ((n) => {
+      return /* @__PURE__ */ ((r) => {
       })();
   }
 };
-function Q(e, t, r = !1) {
+function Q(e, t, n = !1) {
   var i;
-  const n = t.seen.get(e);
+  const r = t.seen.get(e);
   if (t.override) {
-    const l = (i = t.override) == null ? void 0 : i.call(t, e, t, n, r);
-    if (l !== _l)
+    const l = (i = t.override) == null ? void 0 : i.call(t, e, t, r, n);
+    if (l !== ji)
       return l;
   }
-  if (n && !r) {
-    const l = Ru(n, t);
+  if (r && !n) {
+    const l = Jl(r, t);
     if (l !== void 0)
       return l;
   }
-  const a = { def: e, path: t.currentPath, jsonSchema: void 0 };
-  t.seen.set(e, a);
-  const s = Cu(e, e.typeName, t), o = typeof s == "function" ? Q(s(), t) : s;
-  if (o && Au(e, t, o), t.postProcess) {
+  const s = { def: e, path: t.currentPath, jsonSchema: void 0 };
+  t.seen.set(e, s);
+  const a = Gl(e, e.typeName, t), o = typeof a == "function" ? Q(a(), t) : a;
+  if (o && zl(e, t, o), t.postProcess) {
     const l = t.postProcess(o, e, t);
-    return a.jsonSchema = o, l;
+    return s.jsonSchema = o, l;
   }
-  return a.jsonSchema = o, o;
+  return s.jsonSchema = o, o;
 }
-const Ru = (e, t) => {
+const Jl = (e, t) => {
   switch (t.$refStrategy) {
     case "root":
       return { $ref: e.path.join("/") };
     case "relative":
-      return { $ref: Eu(t.currentPath, e.path) };
+      return { $ref: Hl(t.currentPath, e.path) };
     case "none":
     case "seen":
-      return e.path.length < t.currentPath.length && e.path.every((r, n) => t.currentPath[n] === r) ? (console.warn(`Recursive reference detected at ${t.currentPath.join("/")}! Defaulting to any`), {}) : t.$refStrategy === "seen" ? {} : void 0;
+      return e.path.length < t.currentPath.length && e.path.every((n, r) => t.currentPath[r] === n) ? (console.warn(`Recursive reference detected at ${t.currentPath.join("/")}! Defaulting to any`), {}) : t.$refStrategy === "seen" ? {} : void 0;
   }
-}, Eu = (e, t) => {
-  let r = 0;
-  for (; r < e.length && r < t.length && e[r] === t[r]; r++)
+}, Hl = (e, t) => {
+  let n = 0;
+  for (; n < e.length && n < t.length && e[n] === t[n]; n++)
     ;
-  return [(e.length - r).toString(), ...t.slice(r)].join("/");
-}, Au = (e, t, r) => (e.description && (r.description = e.description, t.markdownDescription && (r.markdownDescription = e.description)), r), Nu = (e, t) => {
-  const r = wl(t), n = typeof t == "object" && t.definitions ? Object.entries(t.definitions).reduce((l, [u, c]) => ({
+  return [(e.length - n).toString(), ...t.slice(n)].join("/");
+}, zl = (e, t, n) => (e.description && (n.description = e.description, t.markdownDescription && (n.markdownDescription = e.description)), n), Wl = (e, t) => {
+  const n = qi(t), r = typeof t == "object" && t.definitions ? Object.entries(t.definitions).reduce((l, [u, c]) => ({
     ...l,
     [u]: Q(c._def, {
-      ...r,
-      currentPath: [...r.basePath, r.definitionPath, u]
-    }, !0) ?? {}
-  }), {}) : void 0, a = typeof t == "string" ? t : (t == null ? void 0 : t.nameStrategy) === "title" || t == null ? void 0 : t.name, s = Q(e._def, a === void 0 ? r : {
-    ...r,
-    currentPath: [...r.basePath, r.definitionPath, a]
-  }, !1) ?? {}, o = typeof t == "object" && t.name !== void 0 && t.nameStrategy === "title" ? t.name : void 0;
-  o !== void 0 && (s.title = o);
-  const i = a === void 0 ? n ? {
-    ...s,
-    [r.definitionPath]: n
-  } : s : {
-    $ref: [
-      ...r.$refStrategy === "relative" ? [] : r.basePath,
-      r.definitionPath,
-      a
-    ].join("/"),
-    [r.definitionPath]: {
       ...n,
-      [a]: s
+      currentPath: [...n.basePath, n.definitionPath, u]
+    }, !0) ?? {}
+  }), {}) : void 0, s = typeof t == "string" ? t : (t == null ? void 0 : t.nameStrategy) === "title" || t == null ? void 0 : t.name, a = Q(e._def, s === void 0 ? n : {
+    ...n,
+    currentPath: [...n.basePath, n.definitionPath, s]
+  }, !1) ?? {}, o = typeof t == "object" && t.name !== void 0 && t.nameStrategy === "title" ? t.name : void 0;
+  o !== void 0 && (a.title = o);
+  const i = s === void 0 ? r ? {
+    ...a,
+    [n.definitionPath]: r
+  } : a : {
+    $ref: [
+      ...n.$refStrategy === "relative" ? [] : n.basePath,
+      n.definitionPath,
+      s
+    ].join("/"),
+    [n.definitionPath]: {
+      ...r,
+      [s]: a
     }
   };
-  return r.target === "jsonSchema7" ? i.$schema = "http://json-schema.org/draft-07/schema#" : (r.target === "jsonSchema2019-09" || r.target === "openAi") && (i.$schema = "https://json-schema.org/draft/2019-09/schema#"), r.target === "openAi" && ("anyOf" in i || "oneOf" in i || "allOf" in i || "type" in i && Array.isArray(i.type)) && console.warn("Warning: OpenAI may not support schemas with unions as roots! Try wrapping it in an object property."), i;
+  return n.target === "jsonSchema7" ? i.$schema = "http://json-schema.org/draft-07/schema#" : (n.target === "jsonSchema2019-09" || n.target === "openAi") && (i.$schema = "https://json-schema.org/draft/2019-09/schema#"), n.target === "openAi" && ("anyOf" in i || "oneOf" in i || "allOf" in i || "type" in i && Array.isArray(i.type)) && console.warn("Warning: OpenAI may not support schemas with unions as roots! Try wrapping it in an object property."), i;
 };
-var vr = {
-  code: "0",
-  name: "text",
-  parse: (e) => {
-    if (typeof e != "string")
-      throw new Error('"text" parts expect a string value.');
-    return { type: "text", value: e };
-  }
-}, _r = {
-  code: "3",
-  name: "error",
-  parse: (e) => {
-    if (typeof e != "string")
-      throw new Error('"error" parts expect a string value.');
-    return { type: "error", value: e };
-  }
-}, br = {
-  code: "4",
-  name: "assistant_message",
-  parse: (e) => {
-    if (e == null || typeof e != "object" || !("id" in e) || !("role" in e) || !("content" in e) || typeof e.id != "string" || typeof e.role != "string" || e.role !== "assistant" || !Array.isArray(e.content) || !e.content.every(
-      (t) => t != null && typeof t == "object" && "type" in t && t.type === "text" && "text" in t && t.text != null && typeof t.text == "object" && "value" in t.text && typeof t.text.value == "string"
-    ))
-      throw new Error(
-        '"assistant_message" parts expect an object with an "id", "role", and "content" property.'
-      );
-    return {
-      type: "assistant_message",
-      value: e
-    };
-  }
-}, wr = {
-  code: "5",
-  name: "assistant_control_data",
-  parse: (e) => {
-    if (e == null || typeof e != "object" || !("threadId" in e) || !("messageId" in e) || typeof e.threadId != "string" || typeof e.messageId != "string")
-      throw new Error(
-        '"assistant_control_data" parts expect an object with a "threadId" and "messageId" property.'
-      );
-    return {
-      type: "assistant_control_data",
-      value: {
-        threadId: e.threadId,
-        messageId: e.messageId
-      }
-    };
-  }
-}, xr = {
-  code: "6",
-  name: "data_message",
-  parse: (e) => {
-    if (e == null || typeof e != "object" || !("role" in e) || !("data" in e) || typeof e.role != "string" || e.role !== "data")
-      throw new Error(
-        '"data_message" parts expect an object with a "role" and "data" property.'
-      );
-    return {
-      type: "data_message",
-      value: e
-    };
-  }
-}, so = [
-  vr,
-  _r,
-  br,
-  wr,
-  xr
-], Pu = {
-  [vr.code]: vr,
-  [_r.code]: _r,
-  [br.code]: br,
-  [wr.code]: wr,
-  [xr.code]: xr
-};
-vr.name + "", vr.code, _r.name + "", _r.code, br.name + "", br.code, wr.name + "", wr.code, xr.name + "", xr.code;
-var Ou = so.map((e) => e.code), uh = (e) => {
-  const t = e.indexOf(":");
-  if (t === -1)
-    throw new Error("Failed to parse stream string. No separator found.");
-  const r = e.slice(0, t);
-  if (!Ou.includes(r))
-    throw new Error(`Failed to parse stream string. Invalid code ${r}.`);
-  const n = r, a = e.slice(t + 1), s = JSON.parse(a);
-  return Pu[n].parse(s);
-};
-function zt(e, t) {
-  const r = so.find((n) => n.name === e);
-  if (!r)
-    throw new Error(`Invalid stream part type: ${e}`);
-  return `${r.code}:${JSON.stringify(t)}
-`;
+function Se(...e) {
+  return e.reduce(
+    (t, n) => ({
+      ...t,
+      ...n ?? {}
+    }),
+    {}
+  );
 }
-function Mu(e) {
-  const t = ["ROOT"];
-  let r = -1, n = null;
-  function a(l, u, c) {
+async function Tr(e) {
+  return e == null ? Promise.resolve() : new Promise((t) => setTimeout(t, e));
+}
+function xa() {
+  let e = "", t, n = [], r, s;
+  function a(l, u) {
+    if (l === "") {
+      o(u);
+      return;
+    }
+    if (l.startsWith(":"))
+      return;
+    const c = l.indexOf(":");
+    if (c === -1) {
+      i(l, "");
+      return;
+    }
+    const p = l.slice(0, c), h = c + 1, g = h < l.length && l[h] === " " ? l.slice(h + 1) : l.slice(h);
+    i(p, g);
+  }
+  function o(l) {
+    n.length > 0 && (l.enqueue({
+      event: t,
+      data: n.join(`
+`),
+      id: r,
+      retry: s
+    }), n = [], t = void 0, s = void 0);
+  }
+  function i(l, u) {
     switch (l) {
-      case '"': {
-        r = u, t.pop(), t.push(c), t.push("INSIDE_STRING");
+      case "event":
+        t = u;
         break;
-      }
-      case "f":
-      case "t":
-      case "n": {
-        r = u, n = u, t.pop(), t.push(c), t.push("INSIDE_LITERAL");
+      case "data":
+        n.push(u);
         break;
-      }
-      case "-": {
-        t.pop(), t.push(c), t.push("INSIDE_NUMBER");
+      case "id":
+        r = u;
         break;
-      }
-      case "0":
-      case "1":
-      case "2":
-      case "3":
-      case "4":
-      case "5":
-      case "6":
-      case "7":
-      case "8":
-      case "9": {
-        r = u, t.pop(), t.push(c), t.push("INSIDE_NUMBER");
+      case "retry":
+        const c = parseInt(u, 10);
+        isNaN(c) || (s = c);
         break;
-      }
-      case "{": {
-        r = u, t.pop(), t.push(c), t.push("INSIDE_OBJECT_START");
-        break;
-      }
-      case "[": {
-        r = u, t.pop(), t.push(c), t.push("INSIDE_ARRAY_START");
-        break;
-      }
     }
   }
-  function s(l, u) {
-    switch (l) {
-      case ",": {
-        t.pop(), t.push("INSIDE_OBJECT_AFTER_COMMA");
-        break;
-      }
-      case "}": {
-        r = u, t.pop();
-        break;
-      }
+  return new TransformStream({
+    transform(l, u) {
+      const { lines: c, incompleteLine: p } = Yl(e, l);
+      e = p;
+      for (let h = 0; h < c.length; h++)
+        a(c[h], u);
+    },
+    flush(l) {
+      a(e, l), o(l);
     }
-  }
-  function o(l, u) {
-    switch (l) {
-      case ",": {
-        t.pop(), t.push("INSIDE_ARRAY_AFTER_COMMA");
-        break;
-      }
-      case "]": {
-        r = u, t.pop();
-        break;
-      }
-    }
-  }
-  for (let l = 0; l < e.length; l++) {
-    const u = e[l];
-    switch (t[t.length - 1]) {
-      case "ROOT":
-        a(u, l, "FINISH");
-        break;
-      case "INSIDE_OBJECT_START": {
-        switch (u) {
-          case '"': {
-            t.pop(), t.push("INSIDE_OBJECT_KEY");
-            break;
-          }
-          case "}": {
-            r = l, t.pop();
-            break;
-          }
-        }
-        break;
-      }
-      case "INSIDE_OBJECT_AFTER_COMMA": {
-        switch (u) {
-          case '"': {
-            t.pop(), t.push("INSIDE_OBJECT_KEY");
-            break;
-          }
-        }
-        break;
-      }
-      case "INSIDE_OBJECT_KEY": {
-        switch (u) {
-          case '"': {
-            t.pop(), t.push("INSIDE_OBJECT_AFTER_KEY");
-            break;
-          }
-        }
-        break;
-      }
-      case "INSIDE_OBJECT_AFTER_KEY": {
-        switch (u) {
-          case ":": {
-            t.pop(), t.push("INSIDE_OBJECT_BEFORE_VALUE");
-            break;
-          }
-        }
-        break;
-      }
-      case "INSIDE_OBJECT_BEFORE_VALUE": {
-        a(u, l, "INSIDE_OBJECT_AFTER_VALUE");
-        break;
-      }
-      case "INSIDE_OBJECT_AFTER_VALUE": {
-        s(u, l);
-        break;
-      }
-      case "INSIDE_STRING": {
-        switch (u) {
-          case '"': {
-            t.pop(), r = l;
-            break;
-          }
-          case "\\": {
-            t.push("INSIDE_STRING_ESCAPE");
-            break;
-          }
-          default:
-            r = l;
-        }
-        break;
-      }
-      case "INSIDE_ARRAY_START": {
-        switch (u) {
-          case "]": {
-            r = l, t.pop();
-            break;
-          }
-          default: {
-            r = l, a(u, l, "INSIDE_ARRAY_AFTER_VALUE");
-            break;
-          }
-        }
-        break;
-      }
-      case "INSIDE_ARRAY_AFTER_VALUE": {
-        switch (u) {
-          case ",": {
-            t.pop(), t.push("INSIDE_ARRAY_AFTER_COMMA");
-            break;
-          }
-          case "]": {
-            r = l, t.pop();
-            break;
-          }
-          default: {
-            r = l;
-            break;
-          }
-        }
-        break;
-      }
-      case "INSIDE_ARRAY_AFTER_COMMA": {
-        a(u, l, "INSIDE_ARRAY_AFTER_VALUE");
-        break;
-      }
-      case "INSIDE_STRING_ESCAPE": {
-        t.pop(), r = l;
-        break;
-      }
-      case "INSIDE_NUMBER": {
-        switch (u) {
-          case "0":
-          case "1":
-          case "2":
-          case "3":
-          case "4":
-          case "5":
-          case "6":
-          case "7":
-          case "8":
-          case "9": {
-            r = l;
-            break;
-          }
-          case "e":
-          case "E":
-          case "-":
-          case ".":
-            break;
-          case ",": {
-            t.pop(), t[t.length - 1] === "INSIDE_ARRAY_AFTER_VALUE" && o(u, l), t[t.length - 1] === "INSIDE_OBJECT_AFTER_VALUE" && s(u, l);
-            break;
-          }
-          case "}": {
-            t.pop(), t[t.length - 1] === "INSIDE_OBJECT_AFTER_VALUE" && s(u, l);
-            break;
-          }
-          case "]": {
-            t.pop(), t[t.length - 1] === "INSIDE_ARRAY_AFTER_VALUE" && o(u, l);
-            break;
-          }
-          default: {
-            t.pop();
-            break;
-          }
-        }
-        break;
-      }
-      case "INSIDE_LITERAL": {
-        const d = e.substring(n, l + 1);
-        !"false".startsWith(d) && !"true".startsWith(d) && !"null".startsWith(d) ? (t.pop(), t[t.length - 1] === "INSIDE_OBJECT_AFTER_VALUE" ? s(u, l) : t[t.length - 1] === "INSIDE_ARRAY_AFTER_VALUE" && o(u, l)) : r = l;
-        break;
-      }
-    }
-  }
-  let i = e.slice(0, r + 1);
-  for (let l = t.length - 1; l >= 0; l--)
-    switch (t[l]) {
-      case "INSIDE_STRING": {
-        i += '"';
-        break;
-      }
-      case "INSIDE_OBJECT_KEY":
-      case "INSIDE_OBJECT_AFTER_KEY":
-      case "INSIDE_OBJECT_AFTER_COMMA":
-      case "INSIDE_OBJECT_START":
-      case "INSIDE_OBJECT_BEFORE_VALUE":
-      case "INSIDE_OBJECT_AFTER_VALUE": {
-        i += "}";
-        break;
-      }
-      case "INSIDE_ARRAY_START":
-      case "INSIDE_ARRAY_AFTER_COMMA":
-      case "INSIDE_ARRAY_AFTER_VALUE": {
-        i += "]";
-        break;
-      }
-      case "INSIDE_LITERAL": {
-        const c = e.substring(n, e.length);
-        "true".startsWith(c) ? i += "true".slice(c.length) : "false".startsWith(c) ? i += "false".slice(c.length) : "null".startsWith(c) && (i += "null".slice(c.length));
-      }
-    }
-  return i;
+  });
 }
-function oo(e) {
-  if (e === void 0)
-    return { value: void 0, state: "undefined-input" };
-  let t = Ot({ text: e });
-  return t.success ? { value: t.value, state: "successful-parse" } : (t = Ot({ text: Mu(e) }), t.success ? { value: t.value, state: "repaired-parse" } : { value: void 0, state: "failed-parse" });
+function Yl(e, t) {
+  const n = [];
+  let r = e;
+  for (let s = 0; s < t.length; ) {
+    const a = t[s++];
+    a === `
+` ? (n.push(r), r = "") : a === "\r" ? (n.push(r), r = "", t[s] === `
+` && s++) : r += a;
+  }
+  return { lines: n, incompleteLine: r };
 }
-var ju = {
-  code: "0",
-  name: "text",
-  parse: (e) => {
-    if (typeof e != "string")
-      throw new Error('"text" parts expect a string value.');
-    return { type: "text", value: e };
-  }
-}, $u = {
-  code: "2",
-  name: "data",
-  parse: (e) => {
-    if (!Array.isArray(e))
-      throw new Error('"data" parts expect an array value.');
-    return { type: "data", value: e };
-  }
-}, Du = {
-  code: "3",
-  name: "error",
-  parse: (e) => {
-    if (typeof e != "string")
-      throw new Error('"error" parts expect a string value.');
-    return { type: "error", value: e };
-  }
-}, qu = {
-  code: "8",
-  name: "message_annotations",
-  parse: (e) => {
-    if (!Array.isArray(e))
-      throw new Error('"message_annotations" parts expect an array value.');
-    return { type: "message_annotations", value: e };
-  }
-}, Uu = {
-  code: "9",
-  name: "tool_call",
-  parse: (e) => {
-    if (e == null || typeof e != "object" || !("toolCallId" in e) || typeof e.toolCallId != "string" || !("toolName" in e) || typeof e.toolName != "string" || !("args" in e) || typeof e.args != "object")
-      throw new Error(
-        '"tool_call" parts expect an object with a "toolCallId", "toolName", and "args" property.'
-      );
-    return {
-      type: "tool_call",
-      value: e
-    };
-  }
-}, Lu = {
-  code: "a",
-  name: "tool_result",
-  parse: (e) => {
-    if (e == null || typeof e != "object" || !("toolCallId" in e) || typeof e.toolCallId != "string" || !("result" in e))
-      throw new Error(
-        '"tool_result" parts expect an object with a "toolCallId" and a "result" property.'
-      );
-    return {
-      type: "tool_result",
-      value: e
-    };
-  }
-}, Fu = {
-  code: "b",
-  name: "tool_call_streaming_start",
-  parse: (e) => {
-    if (e == null || typeof e != "object" || !("toolCallId" in e) || typeof e.toolCallId != "string" || !("toolName" in e) || typeof e.toolName != "string")
-      throw new Error(
-        '"tool_call_streaming_start" parts expect an object with a "toolCallId" and "toolName" property.'
-      );
-    return {
-      type: "tool_call_streaming_start",
-      value: e
-    };
-  }
-}, Zu = {
-  code: "c",
-  name: "tool_call_delta",
-  parse: (e) => {
-    if (e == null || typeof e != "object" || !("toolCallId" in e) || typeof e.toolCallId != "string" || !("argsTextDelta" in e) || typeof e.argsTextDelta != "string")
-      throw new Error(
-        '"tool_call_delta" parts expect an object with a "toolCallId" and "argsTextDelta" property.'
-      );
-    return {
-      type: "tool_call_delta",
-      value: e
-    };
-  }
-}, Vu = {
-  code: "d",
-  name: "finish_message",
-  parse: (e) => {
-    if (e == null || typeof e != "object" || !("finishReason" in e) || typeof e.finishReason != "string")
-      throw new Error(
-        '"finish_message" parts expect an object with a "finishReason" property.'
-      );
-    const t = {
-      finishReason: e.finishReason
-    };
-    return "usage" in e && e.usage != null && typeof e.usage == "object" && "promptTokens" in e.usage && "completionTokens" in e.usage && (t.usage = {
-      promptTokens: typeof e.usage.promptTokens == "number" ? e.usage.promptTokens : Number.NaN,
-      completionTokens: typeof e.usage.completionTokens == "number" ? e.usage.completionTokens : Number.NaN
-    }), {
-      type: "finish_message",
-      value: t
-    };
-  }
-}, Bu = {
-  code: "e",
-  name: "finish_step",
-  parse: (e) => {
-    if (e == null || typeof e != "object" || !("finishReason" in e) || typeof e.finishReason != "string")
-      throw new Error(
-        '"finish_step" parts expect an object with a "finishReason" property.'
-      );
-    const t = {
-      finishReason: e.finishReason,
-      isContinued: !1
-    };
-    return "usage" in e && e.usage != null && typeof e.usage == "object" && "promptTokens" in e.usage && "completionTokens" in e.usage && (t.usage = {
-      promptTokens: typeof e.usage.promptTokens == "number" ? e.usage.promptTokens : Number.NaN,
-      completionTokens: typeof e.usage.completionTokens == "number" ? e.usage.completionTokens : Number.NaN
-    }), "isContinued" in e && typeof e.isContinued == "boolean" && (t.isContinued = e.isContinued), {
-      type: "finish_step",
-      value: t
-    };
-  }
-}, Ju = {
-  code: "f",
-  name: "start_step",
-  parse: (e) => {
-    if (e == null || typeof e != "object" || !("messageId" in e) || typeof e.messageId != "string")
-      throw new Error(
-        '"start_step" parts expect an object with an "id" property.'
-      );
-    return {
-      type: "start_step",
-      value: {
-        messageId: e.messageId
-      }
-    };
-  }
-}, zu = {
-  code: "g",
-  name: "reasoning",
-  parse: (e) => {
-    if (typeof e != "string")
-      throw new Error('"reasoning" parts expect a string value.');
-    return { type: "reasoning", value: e };
-  }
-}, Gu = {
-  code: "h",
-  name: "source",
-  parse: (e) => {
-    if (e == null || typeof e != "object")
-      throw new Error('"source" parts expect a Source object.');
-    return {
-      type: "source",
-      value: e
-    };
-  }
-}, Hu = {
-  code: "i",
-  name: "redacted_reasoning",
-  parse: (e) => {
-    if (e == null || typeof e != "object" || !("data" in e) || typeof e.data != "string")
-      throw new Error(
-        '"redacted_reasoning" parts expect an object with a "data" property.'
-      );
-    return { type: "redacted_reasoning", value: { data: e.data } };
-  }
-}, Wu = {
-  code: "j",
-  name: "reasoning_signature",
-  parse: (e) => {
-    if (e == null || typeof e != "object" || !("signature" in e) || typeof e.signature != "string")
-      throw new Error(
-        '"reasoning_signature" parts expect an object with a "signature" property.'
-      );
-    return {
-      type: "reasoning_signature",
-      value: { signature: e.signature }
-    };
-  }
-}, Ku = {
-  code: "k",
-  name: "file",
-  parse: (e) => {
-    if (e == null || typeof e != "object" || !("data" in e) || typeof e.data != "string" || !("mimeType" in e) || typeof e.mimeType != "string")
-      throw new Error(
-        '"file" parts expect an object with a "data" and "mimeType" property.'
-      );
-    return { type: "file", value: e };
-  }
-}, dn = [
-  ju,
-  $u,
-  Du,
-  qu,
-  Uu,
-  Lu,
-  Fu,
-  Zu,
-  Vu,
-  Bu,
-  Ju,
-  zu,
-  Gu,
-  Hu,
-  Wu,
-  Ku
-], Yu = Object.fromEntries(
-  dn.map((e) => [e.code, e])
-);
-Object.fromEntries(
-  dn.map((e) => [e.name, e.code])
-);
-var Xu = dn.map((e) => e.code), Qu = (e) => {
-  const t = e.indexOf(":");
-  if (t === -1)
-    throw new Error("Failed to parse stream string. No separator found.");
-  const r = e.slice(0, t);
-  if (!Xu.includes(r))
-    throw new Error(`Failed to parse stream string. Invalid code ${r}.`);
-  const n = r, a = e.slice(t + 1), s = JSON.parse(a);
-  return Yu[n].parse(s);
-};
-function pe(e, t) {
-  const r = dn.find((n) => n.name === e);
-  if (!r)
-    throw new Error(`Invalid stream part type: ${e}`);
-  return `${r.code}:${JSON.stringify(t)}
-`;
+function tn(e) {
+  const t = {};
+  return e.headers.forEach((n, r) => {
+    t[r] = n;
+  }), t;
 }
-var ec = 10;
-function tc(e, t) {
-  const r = new Uint8Array(t);
-  let n = 0;
-  for (const a of e)
-    r.set(a, n), n += a.length;
-  return e.length = 0, r;
+var nn = ({
+  prefix: e,
+  size: t = 16,
+  alphabet: n = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+  separator: r = "-"
+} = {}) => {
+  const s = () => {
+    const a = n.length, o = new Array(t);
+    for (let i = 0; i < t; i++)
+      o[i] = n[Math.random() * a | 0];
+    return o.join("");
+  };
+  if (e == null)
+    return s;
+  if (n.includes(r))
+    throw new _r({
+      argument: "separator",
+      message: `The separator "${r}" must not be part of the alphabet "${n}".`
+    });
+  return () => `${e}${r}${s()}`;
+}, st = nn();
+function Kl(e) {
+  return e == null ? "unknown error" : typeof e == "string" ? e : e instanceof Error ? e.message : JSON.stringify(e);
 }
-async function ch({
-  stream: e,
-  onTextPart: t,
-  onReasoningPart: r,
-  onReasoningSignaturePart: n,
-  onRedactedReasoningPart: a,
-  onSourcePart: s,
-  onFilePart: o,
-  onDataPart: i,
-  onErrorPart: l,
-  onToolCallStreamingStartPart: u,
-  onToolCallDeltaPart: c,
-  onToolCallPart: d,
-  onToolResultPart: m,
-  onMessageAnnotationsPart: _,
-  onFinishMessagePart: v,
-  onFinishStepPart: g,
-  onStartStepPart: p
+function Xl(e) {
+  return Object.fromEntries(
+    Object.entries(e).filter(([t, n]) => n != null)
+  );
+}
+function cn(e) {
+  return e instanceof Error && (e.name === "AbortError" || e.name === "TimeoutError");
+}
+function Ql({
+  mediaType: e,
+  url: t,
+  supportedUrls: n
 }) {
-  const f = e.getReader(), w = new TextDecoder(), k = [];
-  let b = 0;
-  for (; ; ) {
-    const { value: x } = await f.read();
-    if (x && (k.push(x), b += x.length, x[x.length - 1] !== ec))
-      continue;
-    if (k.length === 0)
-      break;
-    const S = tc(k, b);
-    b = 0;
-    const $ = w.decode(S, { stream: !0 }).split(`
-`).filter((E) => E !== "").map(Qu);
-    for (const { type: E, value: P } of $)
-      switch (E) {
-        case "text":
-          await (t == null ? void 0 : t(P));
-          break;
-        case "reasoning":
-          await (r == null ? void 0 : r(P));
-          break;
-        case "reasoning_signature":
-          await (n == null ? void 0 : n(P));
-          break;
-        case "redacted_reasoning":
-          await (a == null ? void 0 : a(P));
-          break;
-        case "file":
-          await (o == null ? void 0 : o(P));
-          break;
-        case "source":
-          await (s == null ? void 0 : s(P));
-          break;
-        case "data":
-          await (i == null ? void 0 : i(P));
-          break;
-        case "error":
-          await (l == null ? void 0 : l(P));
-          break;
-        case "message_annotations":
-          await (_ == null ? void 0 : _(P));
-          break;
-        case "tool_call_streaming_start":
-          await (u == null ? void 0 : u(P));
-          break;
-        case "tool_call_delta":
-          await (c == null ? void 0 : c(P));
-          break;
-        case "tool_call":
-          await (d == null ? void 0 : d(P));
-          break;
-        case "tool_result":
-          await (m == null ? void 0 : m(P));
-          break;
-        case "finish_message":
-          await (v == null ? void 0 : v(P));
-          break;
-        case "finish_step":
-          await (g == null ? void 0 : g(P));
-          break;
-        case "start_step":
-          await (p == null ? void 0 : p(P));
-          break;
-        default: {
-          const G = E;
-          throw new Error(`Unknown stream part type: ${G}`);
-        }
-      }
-  }
+  return t = t.toLowerCase(), e = e.toLowerCase(), Object.entries(n).map(([r, s]) => {
+    const a = r.toLowerCase();
+    return a === "*" || a === "*/*" ? { mediaTypePrefix: "", regexes: s } : { mediaTypePrefix: a.replace(/\*/, ""), regexes: s };
+  }).filter(({ mediaTypePrefix: r }) => e.startsWith(r)).flatMap(({ regexes: r }) => r).some((r) => r.test(t));
 }
-async function dh({
-  stream: e,
-  onTextPart: t
+function $n({
+  apiKey: e,
+  environmentVariableName: t,
+  apiKeyParameterName: n = "apiKey",
+  description: r
 }) {
-  const r = e.pipeThrough(new TextDecoderStream()).getReader();
-  for (; ; ) {
-    const { done: n, value: a } = await r.read();
-    if (n)
-      break;
-    await t(a);
+  if (typeof e == "string")
+    return e;
+  if (e != null)
+    throw new ln({
+      message: `${r} API key must be a string.`
+    });
+  if (typeof process > "u")
+    throw new ln({
+      message: `${r} API key is missing. Pass it using the '${n}' parameter. Environment variables is not supported in this environment.`
+    });
+  if (e = process.env[t], e == null)
+    throw new ln({
+      message: `${r} API key is missing. Pass it using the '${n}' parameter or the ${t} environment variable.`
+    });
+  if (typeof e != "string")
+    throw new ln({
+      message: `${r} API key must be a string. The value of the ${t} environment variable is not a string.`
+    });
+  return e;
+}
+var eu = /"__proto__"\s*:/, tu = /"constructor"\s*:/;
+function nu(e) {
+  const t = JSON.parse(e);
+  return t === null || typeof t != "object" || eu.test(e) === !1 && tu.test(e) === !1 ? t : ru(t);
+}
+function ru(e) {
+  let t = [e];
+  for (; t.length; ) {
+    const n = t;
+    t = [];
+    for (const r of n) {
+      if (Object.prototype.hasOwnProperty.call(r, "__proto__"))
+        throw new SyntaxError("Object contains forbidden prototype property");
+      if (Object.prototype.hasOwnProperty.call(r, "constructor") && Object.prototype.hasOwnProperty.call(r.constructor, "prototype"))
+        throw new SyntaxError("Object contains forbidden prototype property");
+      for (const s in r) {
+        const a = r[s];
+        a && typeof a == "object" && t.push(a);
+      }
+    }
+  }
+  return e;
+}
+function kr(e) {
+  const { stackTraceLimit: t } = Error;
+  Error.stackTraceLimit = 0;
+  try {
+    return nu(e);
+  } finally {
+    Error.stackTraceLimit = t;
   }
 }
-function rc(e) {
-  return e == null ? void 0 : e.reduce((t, r) => {
-    var n;
-    return Math.max(t, (n = r.step) != null ? n : 0);
-  }, 0);
+var Cn = Symbol.for("vercel.ai.validator");
+function su(e) {
+  return { [Cn]: !0, validate: e };
 }
-function rn(e, t) {
-  if (e === t)
-    return !0;
-  if (e == null || t == null)
-    return !1;
-  if (typeof e != "object" && typeof t != "object")
-    return e === t;
-  if (e.constructor !== t.constructor)
-    return !1;
-  if (e instanceof Date && t instanceof Date)
-    return e.getTime() === t.getTime();
-  if (Array.isArray(e)) {
-    if (e.length !== t.length)
-      return !1;
-    for (let a = 0; a < e.length; a++)
-      if (!rn(e[a], t[a]))
-        return !1;
-    return !0;
+function au(e) {
+  return typeof e == "object" && e !== null && Cn in e && e[Cn] === !0 && "validate" in e;
+}
+function ou(e) {
+  return au(e) ? e : iu(e);
+}
+function iu(e) {
+  return su(async (t) => {
+    const n = await e["~standard"].validate(t);
+    return n.issues == null ? { success: !0, value: n.value } : {
+      success: !1,
+      error: new De({
+        value: t,
+        cause: n.issues
+      })
+    };
+  });
+}
+async function Ta({
+  value: e,
+  schema: t
+}) {
+  const n = await ot({ value: e, schema: t });
+  if (!n.success)
+    throw De.wrap({ value: e, cause: n.error });
+  return n.value;
+}
+async function ot({
+  value: e,
+  schema: t
+}) {
+  const n = ou(t);
+  try {
+    if (n.validate == null)
+      return { success: !0, value: e, rawValue: e };
+    const r = await n.validate(e);
+    return r.success ? { success: !0, value: r.value, rawValue: e } : {
+      success: !1,
+      error: De.wrap({ value: e, cause: r.error }),
+      rawValue: e
+    };
+  } catch (r) {
+    return {
+      success: !1,
+      error: De.wrap({ value: e, cause: r }),
+      rawValue: e
+    };
   }
-  const r = Object.keys(e), n = Object.keys(t);
-  if (r.length !== n.length)
-    return !1;
-  for (const a of r)
-    if (!n.includes(a) || !rn(e[a], t[a]))
-      return !1;
-  return !0;
 }
-function nc(e, t) {
-  var r;
-  const n = (r = t == null ? void 0 : t.useReferences) != null ? r : !1;
-  return io(
-    Nu(e, {
-      $refStrategy: n ? "root" : "none",
+async function lu({
+  text: e,
+  schema: t
+}) {
+  try {
+    const n = kr(e);
+    return t == null ? n : Ta({ value: n, schema: t });
+  } catch (n) {
+    throw zt.isInstance(n) || De.isInstance(n) ? n : new zt({ text: e, cause: n });
+  }
+}
+async function It({
+  text: e,
+  schema: t
+}) {
+  try {
+    const n = kr(e);
+    return t == null ? { success: !0, value: n, rawValue: n } : await ot({ value: n, schema: t });
+  } catch (n) {
+    return {
+      success: !1,
+      error: zt.isInstance(n) ? n : new zt({ text: e, cause: n }),
+      rawValue: void 0
+    };
+  }
+}
+function ss(e) {
+  try {
+    return kr(e), !0;
+  } catch {
+    return !1;
+  }
+}
+function Sr({
+  stream: e,
+  schema: t
+}) {
+  return e.pipeThrough(new TextDecoderStream()).pipeThrough(xa()).pipeThrough(
+    new TransformStream({
+      async transform({ data: n }, r) {
+        n !== "[DONE]" && r.enqueue(await It({ text: n, schema: t }));
+      }
+    })
+  );
+}
+async function qe({
+  provider: e,
+  providerOptions: t,
+  schema: n
+}) {
+  if ((t == null ? void 0 : t[e]) == null)
+    return;
+  const r = await ot({
+    value: t[e],
+    schema: n
+  });
+  if (!r.success)
+    throw new _r({
+      argument: "providerOptions",
+      message: `invalid ${e} provider options`,
+      cause: r.error
+    });
+  return r.value;
+}
+var uu = () => globalThis.fetch, Ie = async ({
+  url: e,
+  headers: t,
+  body: n,
+  failedResponseHandler: r,
+  successfulResponseHandler: s,
+  abortSignal: a,
+  fetch: o
+}) => ka({
+  url: e,
+  headers: {
+    "Content-Type": "application/json",
+    ...t
+  },
+  body: {
+    content: JSON.stringify(n),
+    values: n
+  },
+  failedResponseHandler: r,
+  successfulResponseHandler: s,
+  abortSignal: a,
+  fetch: o
+}), cu = async ({
+  url: e,
+  headers: t,
+  formData: n,
+  failedResponseHandler: r,
+  successfulResponseHandler: s,
+  abortSignal: a,
+  fetch: o
+}) => ka({
+  url: e,
+  headers: t,
+  body: {
+    content: n,
+    values: Object.fromEntries(n.entries())
+  },
+  failedResponseHandler: r,
+  successfulResponseHandler: s,
+  abortSignal: a,
+  fetch: o
+}), ka = async ({
+  url: e,
+  headers: t = {},
+  body: n,
+  successfulResponseHandler: r,
+  failedResponseHandler: s,
+  abortSignal: a,
+  fetch: o = uu()
+}) => {
+  try {
+    const i = await o(e, {
+      method: "POST",
+      headers: Xl(t),
+      body: n.content,
+      signal: a
+    }), l = tn(i);
+    if (!i.ok) {
+      let u;
+      try {
+        u = await s({
+          response: i,
+          url: e,
+          requestBodyValues: n.values
+        });
+      } catch (c) {
+        throw cn(c) || $e.isInstance(c) ? c : new $e({
+          message: "Failed to process error response",
+          cause: c,
+          statusCode: i.status,
+          url: e,
+          responseHeaders: l,
+          requestBodyValues: n.values
+        });
+      }
+      throw u.value;
+    }
+    try {
+      return await r({
+        response: i,
+        url: e,
+        requestBodyValues: n.values
+      });
+    } catch (u) {
+      throw u instanceof Error && (cn(u) || $e.isInstance(u)) ? u : new $e({
+        message: "Failed to process successful response",
+        cause: u,
+        statusCode: i.status,
+        url: e,
+        responseHeaders: l,
+        requestBodyValues: n.values
+      });
+    }
+  } catch (i) {
+    if (cn(i))
+      throw i;
+    if (i instanceof TypeError && i.message === "fetch failed") {
+      const l = i.cause;
+      if (l != null)
+        throw new $e({
+          message: `Cannot connect to API: ${l.message}`,
+          cause: l,
+          url: e,
+          requestBodyValues: n.values,
+          isRetryable: !0
+          // retry when network error
+        });
+    }
+    throw i;
+  }
+};
+async function Rn(e) {
+  return typeof e == "function" && (e = e()), Promise.resolve(e);
+}
+var jn = ({
+  errorSchema: e,
+  errorToMessage: t,
+  isRetryable: n
+}) => async ({ response: r, url: s, requestBodyValues: a }) => {
+  const o = await r.text(), i = tn(r);
+  if (o.trim() === "")
+    return {
+      responseHeaders: i,
+      value: new $e({
+        message: r.statusText,
+        url: s,
+        requestBodyValues: a,
+        statusCode: r.status,
+        responseHeaders: i,
+        responseBody: o,
+        isRetryable: n == null ? void 0 : n(r)
+      })
+    };
+  try {
+    const l = await lu({
+      text: o,
+      schema: e
+    });
+    return {
+      responseHeaders: i,
+      value: new $e({
+        message: t(l),
+        url: s,
+        requestBodyValues: a,
+        statusCode: r.status,
+        responseHeaders: i,
+        responseBody: o,
+        data: l,
+        isRetryable: n == null ? void 0 : n(r, l)
+      })
+    };
+  } catch {
+    return {
+      responseHeaders: i,
+      value: new $e({
+        message: r.statusText,
+        url: s,
+        requestBodyValues: a,
+        statusCode: r.status,
+        responseHeaders: i,
+        responseBody: o,
+        isRetryable: n == null ? void 0 : n(r)
+      })
+    };
+  }
+}, Ut = (e) => async ({ response: t }) => {
+  const n = tn(t);
+  if (t.body == null)
+    throw new ki({});
+  return {
+    responseHeaders: n,
+    value: Sr({
+      stream: t.body,
+      schema: e
+    })
+  };
+}, Fe = (e) => async ({ response: t, url: n, requestBodyValues: r }) => {
+  const s = await t.text(), a = await It({
+    text: s,
+    schema: e
+  }), o = tn(t);
+  if (!a.success)
+    throw new $e({
+      message: "Invalid JSON response",
+      cause: a.error,
+      statusCode: t.status,
+      responseHeaders: o,
+      responseBody: s,
+      url: n,
+      requestBodyValues: r
+    });
+  return {
+    responseHeaders: o,
+    value: a.value,
+    rawValue: a.rawValue
+  };
+}, du = () => async ({ response: e, url: t, requestBodyValues: n }) => {
+  const r = tn(e);
+  if (!e.body)
+    throw new $e({
+      message: "Response body is empty",
+      url: t,
+      requestBodyValues: n,
+      statusCode: e.status,
+      responseHeaders: r,
+      responseBody: void 0
+    });
+  try {
+    const s = await e.arrayBuffer();
+    return {
+      responseHeaders: r,
+      value: new Uint8Array(s)
+    };
+  } catch (s) {
+    throw new $e({
+      message: "Failed to read response as array buffer",
+      url: t,
+      requestBodyValues: n,
+      statusCode: e.status,
+      responseHeaders: r,
+      responseBody: void 0,
+      cause: s
+    });
+  }
+};
+function pu(e, t) {
+  var n;
+  const r = (n = void 0) != null ? n : !1;
+  return Ir(
+    Wl(e, {
+      $refStrategy: r ? "root" : "none",
       target: "jsonSchema7"
       // note: openai mode breaks various gemini conversions
     }),
     {
-      validate: (a) => {
-        const s = e.safeParse(a);
-        return s.success ? { success: !0, value: s.data } : { success: !1, error: s.error };
+      validate: (s) => {
+        const a = e.safeParse(s);
+        return a.success ? { success: !0, value: a.data } : { success: !1, error: a.error };
       }
     }
   );
 }
-var Zn = Symbol.for("vercel.ai.schema");
-function io(e, {
+var dr = Symbol.for("vercel.ai.schema");
+function Ir(e, {
   validate: t
 } = {}) {
   return {
-    [Zn]: !0,
+    [dr]: !0,
     _type: void 0,
     // should never be used directly
-    [Fr]: !0,
+    [Cn]: !0,
     jsonSchema: e,
     validate: t
   };
 }
-function ac(e) {
-  return typeof e == "object" && e !== null && Zn in e && e[Zn] === !0 && "jsonSchema" in e && "validate" in e;
+function hu(e) {
+  return typeof e == "object" && e !== null && dr in e && e[dr] === !0 && "jsonSchema" in e && "validate" in e;
 }
-function Kt(e) {
-  return ac(e) ? e : nc(e);
-}
-var sc = typeof globalThis == "object" ? globalThis : typeof self == "object" ? self : typeof window == "object" ? window : typeof global == "object" ? global : {}, Nt = "1.9.0", Ua = /^(\d+)\.(\d+)\.(\d+)(-(.+))?$/;
-function oc(e) {
-  var t = /* @__PURE__ */ new Set([e]), r = /* @__PURE__ */ new Set(), n = e.match(Ua);
-  if (!n)
-    return function() {
-      return !1;
-    };
-  var a = {
-    major: +n[1],
-    minor: +n[2],
-    patch: +n[3],
-    prerelease: n[4]
-  };
-  if (a.prerelease != null)
-    return function(l) {
-      return l === e;
-    };
-  function s(i) {
-    return r.add(i), !1;
-  }
-  function o(i) {
-    return t.add(i), !0;
-  }
-  return function(l) {
-    if (t.has(l))
-      return !0;
-    if (r.has(l))
-      return !1;
-    var u = l.match(Ua);
-    if (!u)
-      return s(l);
-    var c = {
-      major: +u[1],
-      minor: +u[2],
-      patch: +u[3],
-      prerelease: u[4]
-    };
-    return c.prerelease != null || a.major !== c.major ? s(l) : a.major === 0 ? a.minor === c.minor && a.patch <= c.patch ? o(l) : s(l) : a.minor <= c.minor ? o(l) : s(l);
-  };
-}
-var ic = oc(Nt), lc = Nt.split(".")[0], kr = Symbol.for("opentelemetry.js.api." + lc), Tr = sc;
-function Pr(e, t, r, n) {
-  var a;
-  n === void 0 && (n = !1);
-  var s = Tr[kr] = (a = Tr[kr]) !== null && a !== void 0 ? a : {
-    version: Nt
-  };
-  if (!n && s[e]) {
-    var o = new Error("@opentelemetry/api: Attempted duplicate registration of API: " + e);
-    return r.error(o.stack || o.message), !1;
-  }
-  if (s.version !== Nt) {
-    var o = new Error("@opentelemetry/api: Registration of version v" + s.version + " for " + e + " does not match previously registered API v" + Nt);
-    return r.error(o.stack || o.message), !1;
-  }
-  return s[e] = t, r.debug("@opentelemetry/api: Registered a global for " + e + " v" + Nt + "."), !0;
-}
-function Ut(e) {
-  var t, r, n = (t = Tr[kr]) === null || t === void 0 ? void 0 : t.version;
-  if (!(!n || !ic(n)))
-    return (r = Tr[kr]) === null || r === void 0 ? void 0 : r[e];
-}
-function Or(e, t) {
-  t.debug("@opentelemetry/api: Unregistering a global for " + e + " v" + Nt + ".");
-  var r = Tr[kr];
-  r && delete r[e];
-}
-var uc = function(e, t) {
-  var r = typeof Symbol == "function" && e[Symbol.iterator];
-  if (!r) return e;
-  var n = r.call(e), a, s = [], o;
-  try {
-    for (; (t === void 0 || t-- > 0) && !(a = n.next()).done; ) s.push(a.value);
-  } catch (i) {
-    o = { error: i };
-  } finally {
-    try {
-      a && !a.done && (r = n.return) && r.call(n);
-    } finally {
-      if (o) throw o.error;
-    }
-  }
-  return s;
-}, cc = function(e, t, r) {
-  if (r || arguments.length === 2) for (var n = 0, a = t.length, s; n < a; n++)
-    (s || !(n in t)) && (s || (s = Array.prototype.slice.call(t, 0, n)), s[n] = t[n]);
-  return e.concat(s || Array.prototype.slice.call(t));
-}, dc = (
-  /** @class */
-  function() {
-    function e(t) {
-      this._namespace = t.namespace || "DiagComponentLogger";
-    }
-    return e.prototype.debug = function() {
-      for (var t = [], r = 0; r < arguments.length; r++)
-        t[r] = arguments[r];
-      return cr("debug", this._namespace, t);
-    }, e.prototype.error = function() {
-      for (var t = [], r = 0; r < arguments.length; r++)
-        t[r] = arguments[r];
-      return cr("error", this._namespace, t);
-    }, e.prototype.info = function() {
-      for (var t = [], r = 0; r < arguments.length; r++)
-        t[r] = arguments[r];
-      return cr("info", this._namespace, t);
-    }, e.prototype.warn = function() {
-      for (var t = [], r = 0; r < arguments.length; r++)
-        t[r] = arguments[r];
-      return cr("warn", this._namespace, t);
-    }, e.prototype.verbose = function() {
-      for (var t = [], r = 0; r < arguments.length; r++)
-        t[r] = arguments[r];
-      return cr("verbose", this._namespace, t);
-    }, e;
-  }()
-);
-function cr(e, t, r) {
-  var n = Ut("diag");
-  if (n)
-    return r.unshift(t), n[e].apply(n, cc([], uc(r), !1));
-}
-var Ve;
-(function(e) {
-  e[e.NONE = 0] = "NONE", e[e.ERROR = 30] = "ERROR", e[e.WARN = 50] = "WARN", e[e.INFO = 60] = "INFO", e[e.DEBUG = 70] = "DEBUG", e[e.VERBOSE = 80] = "VERBOSE", e[e.ALL = 9999] = "ALL";
-})(Ve || (Ve = {}));
-function pc(e, t) {
-  e < Ve.NONE ? e = Ve.NONE : e > Ve.ALL && (e = Ve.ALL), t = t || {};
-  function r(n, a) {
-    var s = t[n];
-    return typeof s == "function" && e >= a ? s.bind(t) : function() {
-    };
-  }
-  return {
-    error: r("error", Ve.ERROR),
-    warn: r("warn", Ve.WARN),
-    info: r("info", Ve.INFO),
-    debug: r("debug", Ve.DEBUG),
-    verbose: r("verbose", Ve.VERBOSE)
-  };
-}
-var mc = function(e, t) {
-  var r = typeof Symbol == "function" && e[Symbol.iterator];
-  if (!r) return e;
-  var n = r.call(e), a, s = [], o;
-  try {
-    for (; (t === void 0 || t-- > 0) && !(a = n.next()).done; ) s.push(a.value);
-  } catch (i) {
-    o = { error: i };
-  } finally {
-    try {
-      a && !a.done && (r = n.return) && r.call(n);
-    } finally {
-      if (o) throw o.error;
-    }
-  }
-  return s;
-}, fc = function(e, t, r) {
-  if (r || arguments.length === 2) for (var n = 0, a = t.length, s; n < a; n++)
-    (s || !(n in t)) && (s || (s = Array.prototype.slice.call(t, 0, n)), s[n] = t[n]);
-  return e.concat(s || Array.prototype.slice.call(t));
-}, hc = "diag", nt = (
-  /** @class */
-  function() {
-    function e() {
-      function t(a) {
-        return function() {
-          for (var s = [], o = 0; o < arguments.length; o++)
-            s[o] = arguments[o];
-          var i = Ut("diag");
-          if (i)
-            return i[a].apply(i, fc([], mc(s), !1));
-        };
-      }
-      var r = this, n = function(a, s) {
-        var o, i, l;
-        if (s === void 0 && (s = { logLevel: Ve.INFO }), a === r) {
-          var u = new Error("Cannot use diag as the logger for itself. Please use a DiagLogger implementation like ConsoleDiagLogger or a custom implementation");
-          return r.error((o = u.stack) !== null && o !== void 0 ? o : u.message), !1;
-        }
-        typeof s == "number" && (s = {
-          logLevel: s
-        });
-        var c = Ut("diag"), d = pc((i = s.logLevel) !== null && i !== void 0 ? i : Ve.INFO, a);
-        if (c && !s.suppressOverrideMessage) {
-          var m = (l = new Error().stack) !== null && l !== void 0 ? l : "<failed to generate stacktrace>";
-          c.warn("Current logger will be overwritten from " + m), d.warn("Current logger will overwrite one already registered from " + m);
-        }
-        return Pr("diag", d, r, !0);
-      };
-      r.setLogger = n, r.disable = function() {
-        Or(hc, r);
-      }, r.createComponentLogger = function(a) {
-        return new dc(a);
-      }, r.verbose = t("verbose"), r.debug = t("debug"), r.info = t("info"), r.warn = t("warn"), r.error = t("error");
-    }
-    return e.instance = function() {
-      return this._instance || (this._instance = new e()), this._instance;
-    }, e;
-  }()
-), gc = function(e, t) {
-  var r = typeof Symbol == "function" && e[Symbol.iterator];
-  if (!r) return e;
-  var n = r.call(e), a, s = [], o;
-  try {
-    for (; (t === void 0 || t-- > 0) && !(a = n.next()).done; ) s.push(a.value);
-  } catch (i) {
-    o = { error: i };
-  } finally {
-    try {
-      a && !a.done && (r = n.return) && r.call(n);
-    } finally {
-      if (o) throw o.error;
-    }
-  }
-  return s;
-}, yc = function(e) {
-  var t = typeof Symbol == "function" && Symbol.iterator, r = t && e[t], n = 0;
-  if (r) return r.call(e);
-  if (e && typeof e.length == "number") return {
-    next: function() {
-      return e && n >= e.length && (e = void 0), { value: e && e[n++], done: !e };
-    }
-  };
-  throw new TypeError(t ? "Object is not iterable." : "Symbol.iterator is not defined.");
-}, vc = (
-  /** @class */
-  function() {
-    function e(t) {
-      this._entries = t ? new Map(t) : /* @__PURE__ */ new Map();
-    }
-    return e.prototype.getEntry = function(t) {
-      var r = this._entries.get(t);
-      if (r)
-        return Object.assign({}, r);
-    }, e.prototype.getAllEntries = function() {
-      return Array.from(this._entries.entries()).map(function(t) {
-        var r = gc(t, 2), n = r[0], a = r[1];
-        return [n, a];
-      });
-    }, e.prototype.setEntry = function(t, r) {
-      var n = new e(this._entries);
-      return n._entries.set(t, r), n;
-    }, e.prototype.removeEntry = function(t) {
-      var r = new e(this._entries);
-      return r._entries.delete(t), r;
-    }, e.prototype.removeEntries = function() {
-      for (var t, r, n = [], a = 0; a < arguments.length; a++)
-        n[a] = arguments[a];
-      var s = new e(this._entries);
-      try {
-        for (var o = yc(n), i = o.next(); !i.done; i = o.next()) {
-          var l = i.value;
-          s._entries.delete(l);
-        }
-      } catch (u) {
-        t = { error: u };
-      } finally {
-        try {
-          i && !i.done && (r = o.return) && r.call(o);
-        } finally {
-          if (t) throw t.error;
-        }
-      }
-      return s;
-    }, e.prototype.clear = function() {
-      return new e();
-    }, e;
-  }()
-);
-nt.instance();
-function _c(e) {
-  return e === void 0 && (e = {}), new vc(new Map(Object.entries(e)));
-}
-function lo(e) {
-  return Symbol.for(e);
-}
-var bc = (
-  /** @class */
-  /* @__PURE__ */ function() {
-    function e(t) {
-      var r = this;
-      r._currentContext = t ? new Map(t) : /* @__PURE__ */ new Map(), r.getValue = function(n) {
-        return r._currentContext.get(n);
-      }, r.setValue = function(n, a) {
-        var s = new e(r._currentContext);
-        return s._currentContext.set(n, a), s;
-      }, r.deleteValue = function(n) {
-        var a = new e(r._currentContext);
-        return a._currentContext.delete(n), a;
-      };
-    }
-    return e;
-  }()
-), wc = new bc(), Zt = /* @__PURE__ */ function() {
-  var e = function(t, r) {
-    return e = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(n, a) {
-      n.__proto__ = a;
-    } || function(n, a) {
-      for (var s in a) Object.prototype.hasOwnProperty.call(a, s) && (n[s] = a[s]);
-    }, e(t, r);
-  };
-  return function(t, r) {
-    if (typeof r != "function" && r !== null)
-      throw new TypeError("Class extends value " + String(r) + " is not a constructor or null");
-    e(t, r);
-    function n() {
-      this.constructor = t;
-    }
-    t.prototype = r === null ? Object.create(r) : (n.prototype = r.prototype, new n());
-  };
-}(), xc = (
-  /** @class */
-  function() {
-    function e() {
-    }
-    return e.prototype.createGauge = function(t, r) {
-      return Pc;
-    }, e.prototype.createHistogram = function(t, r) {
-      return Oc;
-    }, e.prototype.createCounter = function(t, r) {
-      return Nc;
-    }, e.prototype.createUpDownCounter = function(t, r) {
-      return Mc;
-    }, e.prototype.createObservableGauge = function(t, r) {
-      return $c;
-    }, e.prototype.createObservableCounter = function(t, r) {
-      return jc;
-    }, e.prototype.createObservableUpDownCounter = function(t, r) {
-      return Dc;
-    }, e.prototype.addBatchObservableCallback = function(t, r) {
-    }, e.prototype.removeBatchObservableCallback = function(t) {
-    }, e;
-  }()
-), pn = (
-  /** @class */
-  /* @__PURE__ */ function() {
-    function e() {
-    }
-    return e;
-  }()
-), kc = (
-  /** @class */
-  function(e) {
-    Zt(t, e);
-    function t() {
-      return e !== null && e.apply(this, arguments) || this;
-    }
-    return t.prototype.add = function(r, n) {
-    }, t;
-  }(pn)
-), Tc = (
-  /** @class */
-  function(e) {
-    Zt(t, e);
-    function t() {
-      return e !== null && e.apply(this, arguments) || this;
-    }
-    return t.prototype.add = function(r, n) {
-    }, t;
-  }(pn)
-), Sc = (
-  /** @class */
-  function(e) {
-    Zt(t, e);
-    function t() {
-      return e !== null && e.apply(this, arguments) || this;
-    }
-    return t.prototype.record = function(r, n) {
-    }, t;
-  }(pn)
-), Ic = (
-  /** @class */
-  function(e) {
-    Zt(t, e);
-    function t() {
-      return e !== null && e.apply(this, arguments) || this;
-    }
-    return t.prototype.record = function(r, n) {
-    }, t;
-  }(pn)
-), sa = (
-  /** @class */
-  function() {
-    function e() {
-    }
-    return e.prototype.addCallback = function(t) {
-    }, e.prototype.removeCallback = function(t) {
-    }, e;
-  }()
-), Cc = (
-  /** @class */
-  function(e) {
-    Zt(t, e);
-    function t() {
-      return e !== null && e.apply(this, arguments) || this;
-    }
-    return t;
-  }(sa)
-), Rc = (
-  /** @class */
-  function(e) {
-    Zt(t, e);
-    function t() {
-      return e !== null && e.apply(this, arguments) || this;
-    }
-    return t;
-  }(sa)
-), Ec = (
-  /** @class */
-  function(e) {
-    Zt(t, e);
-    function t() {
-      return e !== null && e.apply(this, arguments) || this;
-    }
-    return t;
-  }(sa)
-), Ac = new xc(), Nc = new kc(), Pc = new Sc(), Oc = new Ic(), Mc = new Tc(), jc = new Cc(), $c = new Rc(), Dc = new Ec(), qc = {
-  get: function(e, t) {
-    if (e != null)
-      return e[t];
-  },
-  keys: function(e) {
-    return e == null ? [] : Object.keys(e);
-  }
-}, Uc = {
-  set: function(e, t, r) {
-    e != null && (e[t] = r);
-  }
-}, Lc = function(e, t) {
-  var r = typeof Symbol == "function" && e[Symbol.iterator];
-  if (!r) return e;
-  var n = r.call(e), a, s = [], o;
-  try {
-    for (; (t === void 0 || t-- > 0) && !(a = n.next()).done; ) s.push(a.value);
-  } catch (i) {
-    o = { error: i };
-  } finally {
-    try {
-      a && !a.done && (r = n.return) && r.call(n);
-    } finally {
-      if (o) throw o.error;
-    }
-  }
-  return s;
-}, Fc = function(e, t, r) {
-  if (r || arguments.length === 2) for (var n = 0, a = t.length, s; n < a; n++)
-    (s || !(n in t)) && (s || (s = Array.prototype.slice.call(t, 0, n)), s[n] = t[n]);
-  return e.concat(s || Array.prototype.slice.call(t));
-}, Zc = (
-  /** @class */
-  function() {
-    function e() {
-    }
-    return e.prototype.active = function() {
-      return wc;
-    }, e.prototype.with = function(t, r, n) {
-      for (var a = [], s = 3; s < arguments.length; s++)
-        a[s - 3] = arguments[s];
-      return r.call.apply(r, Fc([n], Lc(a), !1));
-    }, e.prototype.bind = function(t, r) {
-      return r;
-    }, e.prototype.enable = function() {
-      return this;
-    }, e.prototype.disable = function() {
-      return this;
-    }, e;
-  }()
-), Vc = function(e, t) {
-  var r = typeof Symbol == "function" && e[Symbol.iterator];
-  if (!r) return e;
-  var n = r.call(e), a, s = [], o;
-  try {
-    for (; (t === void 0 || t-- > 0) && !(a = n.next()).done; ) s.push(a.value);
-  } catch (i) {
-    o = { error: i };
-  } finally {
-    try {
-      a && !a.done && (r = n.return) && r.call(n);
-    } finally {
-      if (o) throw o.error;
-    }
-  }
-  return s;
-}, Bc = function(e, t, r) {
-  if (r || arguments.length === 2) for (var n = 0, a = t.length, s; n < a; n++)
-    (s || !(n in t)) && (s || (s = Array.prototype.slice.call(t, 0, n)), s[n] = t[n]);
-  return e.concat(s || Array.prototype.slice.call(t));
-}, In = "context", Jc = new Zc(), mn = (
-  /** @class */
-  function() {
-    function e() {
-    }
-    return e.getInstance = function() {
-      return this._instance || (this._instance = new e()), this._instance;
-    }, e.prototype.setGlobalContextManager = function(t) {
-      return Pr(In, t, nt.instance());
-    }, e.prototype.active = function() {
-      return this._getContextManager().active();
-    }, e.prototype.with = function(t, r, n) {
-      for (var a, s = [], o = 3; o < arguments.length; o++)
-        s[o - 3] = arguments[o];
-      return (a = this._getContextManager()).with.apply(a, Bc([t, r, n], Vc(s), !1));
-    }, e.prototype.bind = function(t, r) {
-      return this._getContextManager().bind(t, r);
-    }, e.prototype._getContextManager = function() {
-      return Ut(In) || Jc;
-    }, e.prototype.disable = function() {
-      this._getContextManager().disable(), Or(In, nt.instance());
-    }, e;
-  }()
-), Vn;
-(function(e) {
-  e[e.NONE = 0] = "NONE", e[e.SAMPLED = 1] = "SAMPLED";
-})(Vn || (Vn = {}));
-var uo = "0000000000000000", co = "00000000000000000000000000000000", zc = {
-  traceId: co,
-  spanId: uo,
-  traceFlags: Vn.NONE
-}, pr = (
-  /** @class */
-  function() {
-    function e(t) {
-      t === void 0 && (t = zc), this._spanContext = t;
-    }
-    return e.prototype.spanContext = function() {
-      return this._spanContext;
-    }, e.prototype.setAttribute = function(t, r) {
-      return this;
-    }, e.prototype.setAttributes = function(t) {
-      return this;
-    }, e.prototype.addEvent = function(t, r) {
-      return this;
-    }, e.prototype.addLink = function(t) {
-      return this;
-    }, e.prototype.addLinks = function(t) {
-      return this;
-    }, e.prototype.setStatus = function(t) {
-      return this;
-    }, e.prototype.updateName = function(t) {
-      return this;
-    }, e.prototype.end = function(t) {
-    }, e.prototype.isRecording = function() {
-      return !1;
-    }, e.prototype.recordException = function(t, r) {
-    }, e;
-  }()
-), oa = lo("OpenTelemetry Context Key SPAN");
-function ia(e) {
-  return e.getValue(oa) || void 0;
-}
-function Gc() {
-  return ia(mn.getInstance().active());
-}
-function la(e, t) {
-  return e.setValue(oa, t);
-}
-function Hc(e) {
-  return e.deleteValue(oa);
-}
-function Wc(e, t) {
-  return la(e, new pr(t));
-}
-function po(e) {
-  var t;
-  return (t = ia(e)) === null || t === void 0 ? void 0 : t.spanContext();
-}
-var Kc = /^([0-9a-f]{32})$/i, Yc = /^[0-9a-f]{16}$/i;
-function Xc(e) {
-  return Kc.test(e) && e !== co;
-}
-function Qc(e) {
-  return Yc.test(e) && e !== uo;
-}
-function mo(e) {
-  return Xc(e.traceId) && Qc(e.spanId);
-}
-function ed(e) {
-  return new pr(e);
-}
-var Cn = mn.getInstance(), fo = (
-  /** @class */
-  function() {
-    function e() {
-    }
-    return e.prototype.startSpan = function(t, r, n) {
-      n === void 0 && (n = Cn.active());
-      var a = !!(r != null && r.root);
-      if (a)
-        return new pr();
-      var s = n && po(n);
-      return td(s) && mo(s) ? new pr(s) : new pr();
-    }, e.prototype.startActiveSpan = function(t, r, n, a) {
-      var s, o, i;
-      if (!(arguments.length < 2)) {
-        arguments.length === 2 ? i = r : arguments.length === 3 ? (s = r, i = n) : (s = r, o = n, i = a);
-        var l = o ?? Cn.active(), u = this.startSpan(t, s, l), c = la(l, u);
-        return Cn.with(c, i, void 0, u);
-      }
-    }, e;
-  }()
-);
-function td(e) {
-  return typeof e == "object" && typeof e.spanId == "string" && typeof e.traceId == "string" && typeof e.traceFlags == "number";
-}
-var rd = new fo(), nd = (
-  /** @class */
-  function() {
-    function e(t, r, n, a) {
-      this._provider = t, this.name = r, this.version = n, this.options = a;
-    }
-    return e.prototype.startSpan = function(t, r, n) {
-      return this._getTracer().startSpan(t, r, n);
-    }, e.prototype.startActiveSpan = function(t, r, n, a) {
-      var s = this._getTracer();
-      return Reflect.apply(s.startActiveSpan, s, arguments);
-    }, e.prototype._getTracer = function() {
-      if (this._delegate)
-        return this._delegate;
-      var t = this._provider.getDelegateTracer(this.name, this.version, this.options);
-      return t ? (this._delegate = t, this._delegate) : rd;
-    }, e;
-  }()
-), ad = (
-  /** @class */
-  function() {
-    function e() {
-    }
-    return e.prototype.getTracer = function(t, r, n) {
-      return new fo();
-    }, e;
-  }()
-), sd = new ad(), La = (
-  /** @class */
-  function() {
-    function e() {
-    }
-    return e.prototype.getTracer = function(t, r, n) {
-      var a;
-      return (a = this.getDelegateTracer(t, r, n)) !== null && a !== void 0 ? a : new nd(this, t, r, n);
-    }, e.prototype.getDelegate = function() {
-      var t;
-      return (t = this._delegate) !== null && t !== void 0 ? t : sd;
-    }, e.prototype.setDelegate = function(t) {
-      this._delegate = t;
-    }, e.prototype.getDelegateTracer = function(t, r, n) {
-      var a;
-      return (a = this._delegate) === null || a === void 0 ? void 0 : a.getTracer(t, r, n);
-    }, e;
-  }()
-), nn;
-(function(e) {
-  e[e.UNSET = 0] = "UNSET", e[e.OK = 1] = "OK", e[e.ERROR = 2] = "ERROR";
-})(nn || (nn = {}));
-mn.getInstance();
-nt.instance();
-var od = (
-  /** @class */
-  function() {
-    function e() {
-    }
-    return e.prototype.getMeter = function(t, r, n) {
-      return Ac;
-    }, e;
-  }()
-), id = new od(), Rn = "metrics", ld = (
-  /** @class */
-  function() {
-    function e() {
-    }
-    return e.getInstance = function() {
-      return this._instance || (this._instance = new e()), this._instance;
-    }, e.prototype.setGlobalMeterProvider = function(t) {
-      return Pr(Rn, t, nt.instance());
-    }, e.prototype.getMeterProvider = function() {
-      return Ut(Rn) || id;
-    }, e.prototype.getMeter = function(t, r, n) {
-      return this.getMeterProvider().getMeter(t, r, n);
-    }, e.prototype.disable = function() {
-      Or(Rn, nt.instance());
-    }, e;
-  }()
-);
-ld.getInstance();
-var ud = (
-  /** @class */
-  function() {
-    function e() {
-    }
-    return e.prototype.inject = function(t, r) {
-    }, e.prototype.extract = function(t, r) {
-      return t;
-    }, e.prototype.fields = function() {
-      return [];
-    }, e;
-  }()
-), ua = lo("OpenTelemetry Baggage Key");
-function ho(e) {
-  return e.getValue(ua) || void 0;
-}
-function cd() {
-  return ho(mn.getInstance().active());
-}
-function dd(e, t) {
-  return e.setValue(ua, t);
-}
-function pd(e) {
-  return e.deleteValue(ua);
-}
-var En = "propagation", md = new ud(), fd = (
-  /** @class */
-  function() {
-    function e() {
-      this.createBaggage = _c, this.getBaggage = ho, this.getActiveBaggage = cd, this.setBaggage = dd, this.deleteBaggage = pd;
-    }
-    return e.getInstance = function() {
-      return this._instance || (this._instance = new e()), this._instance;
-    }, e.prototype.setGlobalPropagator = function(t) {
-      return Pr(En, t, nt.instance());
-    }, e.prototype.inject = function(t, r, n) {
-      return n === void 0 && (n = Uc), this._getGlobalPropagator().inject(t, r, n);
-    }, e.prototype.extract = function(t, r, n) {
-      return n === void 0 && (n = qc), this._getGlobalPropagator().extract(t, r, n);
-    }, e.prototype.fields = function() {
-      return this._getGlobalPropagator().fields();
-    }, e.prototype.disable = function() {
-      Or(En, nt.instance());
-    }, e.prototype._getGlobalPropagator = function() {
-      return Ut(En) || md;
-    }, e;
-  }()
-);
-fd.getInstance();
-var An = "trace", hd = (
-  /** @class */
-  function() {
-    function e() {
-      this._proxyTracerProvider = new La(), this.wrapSpanContext = ed, this.isSpanContextValid = mo, this.deleteSpan = Hc, this.getSpan = ia, this.getActiveSpan = Gc, this.getSpanContext = po, this.setSpan = la, this.setSpanContext = Wc;
-    }
-    return e.getInstance = function() {
-      return this._instance || (this._instance = new e()), this._instance;
-    }, e.prototype.setGlobalTracerProvider = function(t) {
-      var r = Pr(An, this._proxyTracerProvider, nt.instance());
-      return r && this._proxyTracerProvider.setDelegate(t), r;
-    }, e.prototype.getTracerProvider = function() {
-      return Ut(An) || this._proxyTracerProvider;
-    }, e.prototype.getTracer = function(t, r) {
-      return this.getTracerProvider().getTracer(t, r);
-    }, e.prototype.disable = function() {
-      Or(An, nt.instance()), this._proxyTracerProvider = new La();
-    }, e;
-  }()
-), gd = hd.getInstance(), yd = Object.defineProperty, ca = (e, t) => {
-  for (var r in t)
-    yd(e, r, { get: t[r], enumerable: !0 });
-};
-function go({
-  execute: e,
-  onError: t = () => "An error occurred."
-  // mask error messages for safety by default
-}) {
-  let r;
-  const n = [], a = new ReadableStream({
-    start(i) {
-      r = i;
-    }
-  });
-  function s(i) {
-    try {
-      r.enqueue(i);
-    } catch {
-    }
-  }
-  try {
-    const i = e({
-      write(l) {
-        s(l);
-      },
-      writeData(l) {
-        s(pe("data", [l]));
-      },
-      writeMessageAnnotation(l) {
-        s(pe("message_annotations", [l]));
-      },
-      writeSource(l) {
-        s(pe("source", l));
-      },
-      merge(l) {
-        n.push(
-          (async () => {
-            const u = l.getReader();
-            for (; ; ) {
-              const { done: c, value: d } = await u.read();
-              if (c)
-                break;
-              s(d);
-            }
-          })().catch((u) => {
-            s(pe("error", t(u)));
-          })
-        );
-      },
-      onError: t
-    });
-    i && n.push(
-      i.catch((l) => {
-        s(pe("error", t(l)));
-      })
-    );
-  } catch (i) {
-    s(pe("error", t(i)));
-  }
-  return new Promise(async (i) => {
-    for (; n.length > 0; )
-      await n.shift();
-    i();
-  }).finally(() => {
-    try {
-      r.close();
-    } catch {
-    }
-  }), a;
-}
-function Lt(e, {
-  contentType: t,
-  dataStreamVersion: r
-}) {
-  const n = new Headers(e ?? {});
-  return n.has("Content-Type") || n.set("Content-Type", t), r !== void 0 && n.set("X-Vercel-AI-Data-Stream", r), n;
-}
-function ph({
-  status: e,
-  statusText: t,
-  headers: r,
-  execute: n,
-  onError: a
-}) {
-  return new Response(
-    go({ execute: n, onError: a }).pipeThrough(new TextEncoderStream()),
-    {
-      status: e,
-      statusText: t,
-      headers: Lt(r, {
-        contentType: "text/plain; charset=utf-8",
-        dataStreamVersion: "v1"
-      })
-    }
-  );
-}
-function an(e, {
-  contentType: t,
-  dataStreamVersion: r
-}) {
-  const n = {};
-  if (e != null)
-    for (const [a, s] of Object.entries(e))
-      n[a] = s;
-  return n["Content-Type"] == null && (n["Content-Type"] = t), r !== void 0 && (n["X-Vercel-AI-Data-Stream"] = r), n;
-}
-function sn({
-  response: e,
-  status: t,
-  statusText: r,
-  headers: n,
-  stream: a
-}) {
-  e.writeHead(t ?? 200, r, n);
-  const s = a.getReader();
-  (async () => {
-    try {
-      for (; ; ) {
-        const { done: i, value: l } = await s.read();
-        if (i)
-          break;
-        e.write(l);
-      }
-    } catch (i) {
-      throw i;
-    } finally {
-      e.end();
-    }
-  })();
-}
-function mh(e, {
-  status: t,
-  statusText: r,
-  headers: n,
-  execute: a,
-  onError: s
-}) {
-  sn({
-    response: e,
-    status: t,
-    statusText: r,
-    headers: an(n, {
-      contentType: "text/plain; charset=utf-8",
-      dataStreamVersion: "v1"
-    }),
-    stream: go({ execute: a, onError: s }).pipeThrough(
-      new TextEncoderStream()
-    )
-  });
-}
-var yo = "AI_InvalidArgumentError", vo = `vercel.ai.error.${yo}`, vd = Symbol.for(vo), _o, ne = class extends j {
-  constructor({
-    parameter: e,
-    value: t,
-    message: r
-  }) {
-    super({
-      name: yo,
-      message: `Invalid argument for parameter ${e}: ${r}`
-    }), this[_o] = !0, this.parameter = e, this.value = t;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, vo);
-  }
-};
-_o = vd;
-var bo = "AI_RetryError", wo = `vercel.ai.error.${bo}`, _d = Symbol.for(wo), xo, Fa = class extends j {
-  constructor({
-    message: e,
-    reason: t,
-    errors: r
-  }) {
-    super({ name: bo, message: e }), this[xo] = !0, this.reason = t, this.errors = r, this.lastError = r[r.length - 1];
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, wo);
-  }
-};
-xo = _d;
-var bd = ({
-  maxRetries: e = 2,
-  initialDelayInMs: t = 2e3,
-  backoffFactor: r = 2
-} = {}) => async (n) => ko(n, {
-  maxRetries: e,
-  delayInMs: t,
-  backoffFactor: r
-});
-async function ko(e, {
-  maxRetries: t,
-  delayInMs: r,
-  backoffFactor: n
-}, a = []) {
-  try {
-    return await e();
-  } catch (s) {
-    if (Ur(s) || t === 0)
-      throw s;
-    const o = sl(s), i = [...a, s], l = i.length;
-    if (l > t)
-      throw new Fa({
-        message: `Failed after ${l} attempts. Last error: ${o}`,
-        reason: "maxRetriesExceeded",
-        errors: i
-      });
-    if (s instanceof Error && Be.isInstance(s) && s.isRetryable === !0 && l <= t)
-      return await Qn(r), ko(
-        e,
-        { maxRetries: t, delayInMs: n * r, backoffFactor: n },
-        i
-      );
-    throw l === 1 ? s : new Fa({
-      message: `Failed after ${l} attempts with non-retryable error: '${o}'`,
-      reason: "errorNotRetryable",
-      errors: i
-    });
-  }
-}
-function _t({
-  maxRetries: e
-}) {
-  if (e != null) {
-    if (!Number.isInteger(e))
-      throw new ne({
-        parameter: "maxRetries",
-        value: e,
-        message: "maxRetries must be an integer"
-      });
-    if (e < 0)
-      throw new ne({
-        parameter: "maxRetries",
-        value: e,
-        message: "maxRetries must be >= 0"
-      });
-  }
-  const t = e ?? 2;
-  return {
-    maxRetries: t,
-    retry: bd({ maxRetries: t })
-  };
-}
-function Oe({
-  operationId: e,
-  telemetry: t
-}) {
-  return {
-    // standardized operation and resource name:
-    "operation.name": `${e}${(t == null ? void 0 : t.functionId) != null ? ` ${t.functionId}` : ""}`,
-    "resource.name": t == null ? void 0 : t.functionId,
-    // detailed, AI SDK specific data:
-    "ai.operationId": e,
-    "ai.telemetry.functionId": t == null ? void 0 : t.functionId
-  };
-}
-function tr({
-  model: e,
-  settings: t,
-  telemetry: r,
-  headers: n
-}) {
-  var a;
-  return {
-    "ai.model.provider": e.provider,
-    "ai.model.id": e.modelId,
-    // settings:
-    ...Object.entries(t).reduce((s, [o, i]) => (s[`ai.settings.${o}`] = i, s), {}),
-    // add metadata as attributes:
-    ...Object.entries((a = r == null ? void 0 : r.metadata) != null ? a : {}).reduce(
-      (s, [o, i]) => (s[`ai.telemetry.metadata.${o}`] = i, s),
-      {}
-    ),
-    // request headers
-    ...Object.entries(n ?? {}).reduce((s, [o, i]) => (i !== void 0 && (s[`ai.request.headers.${o}`] = i), s), {})
-  };
-}
-var wd = {
-  startSpan() {
-    return qr;
-  },
-  startActiveSpan(e, t, r, n) {
-    if (typeof t == "function")
-      return t(qr);
-    if (typeof r == "function")
-      return r(qr);
-    if (typeof n == "function")
-      return n(qr);
-  }
-}, qr = {
-  spanContext() {
-    return xd;
-  },
-  setAttribute() {
-    return this;
-  },
-  setAttributes() {
-    return this;
-  },
-  addEvent() {
-    return this;
-  },
-  addLink() {
-    return this;
-  },
-  addLinks() {
-    return this;
-  },
-  setStatus() {
-    return this;
-  },
-  updateName() {
-    return this;
-  },
-  end() {
-    return this;
-  },
-  isRecording() {
-    return !1;
-  },
-  recordException() {
-    return this;
-  }
-}, xd = {
-  traceId: "",
-  spanId: "",
-  traceFlags: 0
-};
-function rr({
-  isEnabled: e = !1,
-  tracer: t
-} = {}) {
-  return e ? t || gd.getTracer("ai") : wd;
-}
-function Me({
-  name: e,
-  tracer: t,
-  attributes: r,
-  fn: n,
-  endWhenDone: a = !0
-}) {
-  return t.startActiveSpan(e, { attributes: r }, async (s) => {
-    try {
-      const o = await n(s);
-      return a && s.end(), o;
-    } catch (o) {
-      try {
-        o instanceof Error ? (s.recordException({
-          name: o.name,
-          message: o.message,
-          stack: o.stack
-        }), s.setStatus({
-          code: nn.ERROR,
-          message: o.message
-        })) : s.setStatus({ code: nn.ERROR });
-      } finally {
-        s.end();
-      }
-      throw o;
-    }
-  });
-}
-function W({
-  telemetry: e,
-  attributes: t
-}) {
-  return (e == null ? void 0 : e.isEnabled) !== !0 ? {} : Object.entries(t).reduce((r, [n, a]) => {
-    if (a === void 0)
-      return r;
-    if (typeof a == "object" && "input" in a && typeof a.input == "function") {
-      if ((e == null ? void 0 : e.recordInputs) === !1)
-        return r;
-      const s = a.input();
-      return s === void 0 ? r : { ...r, [n]: s };
-    }
-    if (typeof a == "object" && "output" in a && typeof a.output == "function") {
-      if ((e == null ? void 0 : e.recordOutputs) === !1)
-        return r;
-      const s = a.output();
-      return s === void 0 ? r : { ...r, [n]: s };
-    }
-    return { ...r, [n]: a };
-  }, {});
-}
-async function fh({
-  model: e,
-  value: t,
-  maxRetries: r,
-  abortSignal: n,
-  headers: a,
-  experimental_telemetry: s
-}) {
-  const { maxRetries: o, retry: i } = _t({ maxRetries: r }), l = tr({
-    model: e,
-    telemetry: s,
-    headers: a,
-    settings: { maxRetries: o }
-  }), u = rr(s);
-  return Me({
-    name: "ai.embed",
-    attributes: W({
-      telemetry: s,
-      attributes: {
-        ...Oe({ operationId: "ai.embed", telemetry: s }),
-        ...l,
-        "ai.value": { input: () => JSON.stringify(t) }
-      }
-    }),
-    tracer: u,
-    fn: async (c) => {
-      const { embedding: d, usage: m, rawResponse: _ } = await i(
-        () => (
-          // nested spans to align with the embedMany telemetry data:
-          Me({
-            name: "ai.embed.doEmbed",
-            attributes: W({
-              telemetry: s,
-              attributes: {
-                ...Oe({
-                  operationId: "ai.embed.doEmbed",
-                  telemetry: s
-                }),
-                ...l,
-                // specific settings that only make sense on the outer level:
-                "ai.values": { input: () => [JSON.stringify(t)] }
-              }
-            }),
-            tracer: u,
-            fn: async (v) => {
-              var g;
-              const p = await e.doEmbed({
-                values: [t],
-                abortSignal: n,
-                headers: a
-              }), f = p.embeddings[0], w = (g = p.usage) != null ? g : { tokens: NaN };
-              return v.setAttributes(
-                W({
-                  telemetry: s,
-                  attributes: {
-                    "ai.embeddings": {
-                      output: () => p.embeddings.map(
-                        (k) => JSON.stringify(k)
-                      )
-                    },
-                    "ai.usage.tokens": w.tokens
-                  }
-                })
-              ), {
-                embedding: f,
-                usage: w,
-                rawResponse: p.rawResponse
-              };
-            }
-          })
-        )
-      );
-      return c.setAttributes(
-        W({
-          telemetry: s,
-          attributes: {
-            "ai.embedding": { output: () => JSON.stringify(d) },
-            "ai.usage.tokens": m.tokens
-          }
-        })
-      ), new kd({ value: t, embedding: d, usage: m, rawResponse: _ });
-    }
-  });
-}
-var kd = class {
-  constructor(e) {
-    this.value = e.value, this.embedding = e.embedding, this.usage = e.usage, this.rawResponse = e.rawResponse;
-  }
-};
-function Td(e, t) {
-  if (t <= 0)
-    throw new Error("chunkSize must be greater than 0");
-  const r = [];
-  for (let n = 0; n < e.length; n += t)
-    r.push(e.slice(n, n + t));
-  return r;
-}
-async function hh({
-  model: e,
-  values: t,
-  maxRetries: r,
-  abortSignal: n,
-  headers: a,
-  experimental_telemetry: s
-}) {
-  const { maxRetries: o, retry: i } = _t({ maxRetries: r }), l = tr({
-    model: e,
-    telemetry: s,
-    headers: a,
-    settings: { maxRetries: o }
-  }), u = rr(s);
-  return Me({
-    name: "ai.embedMany",
-    attributes: W({
-      telemetry: s,
-      attributes: {
-        ...Oe({ operationId: "ai.embedMany", telemetry: s }),
-        ...l,
-        // specific settings that only make sense on the outer level:
-        "ai.values": {
-          input: () => t.map((c) => JSON.stringify(c))
-        }
-      }
-    }),
-    tracer: u,
-    fn: async (c) => {
-      const d = e.maxEmbeddingsPerCall;
-      if (d == null) {
-        const { embeddings: g, usage: p } = await i(() => Me({
-          name: "ai.embedMany.doEmbed",
-          attributes: W({
-            telemetry: s,
-            attributes: {
-              ...Oe({
-                operationId: "ai.embedMany.doEmbed",
-                telemetry: s
-              }),
-              ...l,
-              // specific settings that only make sense on the outer level:
-              "ai.values": {
-                input: () => t.map((f) => JSON.stringify(f))
-              }
-            }
-          }),
-          tracer: u,
-          fn: async (f) => {
-            var w;
-            const k = await e.doEmbed({
-              values: t,
-              abortSignal: n,
-              headers: a
-            }), b = k.embeddings, x = (w = k.usage) != null ? w : { tokens: NaN };
-            return f.setAttributes(
-              W({
-                telemetry: s,
-                attributes: {
-                  "ai.embeddings": {
-                    output: () => b.map((S) => JSON.stringify(S))
-                  },
-                  "ai.usage.tokens": x.tokens
-                }
-              })
-            ), { embeddings: b, usage: x };
-          }
-        }));
-        return c.setAttributes(
-          W({
-            telemetry: s,
-            attributes: {
-              "ai.embeddings": {
-                output: () => g.map((f) => JSON.stringify(f))
-              },
-              "ai.usage.tokens": p.tokens
-            }
-          })
-        ), new Za({ values: t, embeddings: g, usage: p });
-      }
-      const m = Td(t, d), _ = [];
-      let v = 0;
-      for (const g of m) {
-        const { embeddings: p, usage: f } = await i(() => Me({
-          name: "ai.embedMany.doEmbed",
-          attributes: W({
-            telemetry: s,
-            attributes: {
-              ...Oe({
-                operationId: "ai.embedMany.doEmbed",
-                telemetry: s
-              }),
-              ...l,
-              // specific settings that only make sense on the outer level:
-              "ai.values": {
-                input: () => g.map((w) => JSON.stringify(w))
-              }
-            }
-          }),
-          tracer: u,
-          fn: async (w) => {
-            var k;
-            const b = await e.doEmbed({
-              values: g,
-              abortSignal: n,
-              headers: a
-            }), x = b.embeddings, S = (k = b.usage) != null ? k : { tokens: NaN };
-            return w.setAttributes(
-              W({
-                telemetry: s,
-                attributes: {
-                  "ai.embeddings": {
-                    output: () => x.map(($) => JSON.stringify($))
-                  },
-                  "ai.usage.tokens": S.tokens
-                }
-              })
-            ), { embeddings: x, usage: S };
-          }
-        }));
-        _.push(...p), v += f.tokens;
-      }
-      return c.setAttributes(
-        W({
-          telemetry: s,
-          attributes: {
-            "ai.embeddings": {
-              output: () => _.map((g) => JSON.stringify(g))
-            },
-            "ai.usage.tokens": v
-          }
-        })
-      ), new Za({
-        values: t,
-        embeddings: _,
-        usage: { tokens: v }
-      });
-    }
-  });
-}
-var Za = class {
-  constructor(e) {
-    this.values = e.values, this.embeddings = e.embeddings, this.usage = e.usage;
-  }
-}, To = "AI_NoImageGeneratedError", So = `vercel.ai.error.${To}`, Sd = Symbol.for(So), Io, Id = class extends j {
-  constructor({
-    message: e = "No image generated.",
-    cause: t,
-    responses: r
-  }) {
-    super({ name: To, message: e, cause: t }), this[Io] = !0, this.responses = r;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, So);
-  }
-};
-Io = Sd;
-var fn = class {
-  constructor({
-    data: e,
-    mimeType: t
-  }) {
-    const r = e instanceof Uint8Array;
-    this.base64Data = r ? void 0 : e, this.uint8ArrayData = r ? e : void 0, this.mimeType = t;
-  }
-  // lazy conversion with caching to avoid unnecessary conversion overhead:
-  get base64() {
-    return this.base64Data == null && (this.base64Data = Mt(this.uint8ArrayData)), this.base64Data;
-  }
-  // lazy conversion with caching to avoid unnecessary conversion overhead:
-  get uint8Array() {
-    return this.uint8ArrayData == null && (this.uint8ArrayData = cn(this.base64Data)), this.uint8ArrayData;
-  }
-}, Cd = class extends fn {
-  constructor(e) {
-    super(e), this.type = "file";
-  }
-}, Co = [
-  {
-    mimeType: "image/gif",
-    bytesPrefix: [71, 73, 70],
-    base64Prefix: "R0lG"
-  },
-  {
-    mimeType: "image/png",
-    bytesPrefix: [137, 80, 78, 71],
-    base64Prefix: "iVBORw"
-  },
-  {
-    mimeType: "image/jpeg",
-    bytesPrefix: [255, 216],
-    base64Prefix: "/9j/"
-  },
-  {
-    mimeType: "image/webp",
-    bytesPrefix: [82, 73, 70, 70],
-    base64Prefix: "UklGRg"
-  },
-  {
-    mimeType: "image/bmp",
-    bytesPrefix: [66, 77],
-    base64Prefix: "Qk"
-  },
-  {
-    mimeType: "image/tiff",
-    bytesPrefix: [73, 73, 42, 0],
-    base64Prefix: "SUkqAA"
-  },
-  {
-    mimeType: "image/tiff",
-    bytesPrefix: [77, 77, 0, 42],
-    base64Prefix: "TU0AKg"
-  },
-  {
-    mimeType: "image/avif",
-    bytesPrefix: [
-      0,
-      0,
-      0,
-      32,
-      102,
-      116,
-      121,
-      112,
-      97,
-      118,
-      105,
-      102
-    ],
-    base64Prefix: "AAAAIGZ0eXBhdmlm"
-  },
-  {
-    mimeType: "image/heic",
-    bytesPrefix: [
-      0,
-      0,
-      0,
-      32,
-      102,
-      116,
-      121,
-      112,
-      104,
-      101,
-      105,
-      99
-    ],
-    base64Prefix: "AAAAIGZ0eXBoZWlj"
-  }
-], Ro = [
-  {
-    mimeType: "audio/mpeg",
-    bytesPrefix: [255, 251],
-    base64Prefix: "//s="
-  },
-  {
-    mimeType: "audio/wav",
-    bytesPrefix: [82, 73, 70, 70],
-    base64Prefix: "UklGR"
-  },
-  {
-    mimeType: "audio/ogg",
-    bytesPrefix: [79, 103, 103, 83],
-    base64Prefix: "T2dnUw"
-  },
-  {
-    mimeType: "audio/flac",
-    bytesPrefix: [102, 76, 97, 67],
-    base64Prefix: "ZkxhQw"
-  },
-  {
-    mimeType: "audio/aac",
-    bytesPrefix: [64, 21, 0, 0],
-    base64Prefix: "QBUA"
-  },
-  {
-    mimeType: "audio/mp4",
-    bytesPrefix: [102, 116, 121, 112],
-    base64Prefix: "ZnR5cA"
-  }
-], Rd = (e) => {
-  const t = typeof e == "string" ? cn(e) : e, r = (t[6] & 127) << 21 | (t[7] & 127) << 14 | (t[8] & 127) << 7 | t[9] & 127;
-  return t.slice(r + 10);
-};
-function Ed(e) {
-  return typeof e == "string" && e.startsWith("SUQz") || typeof e != "string" && e.length > 10 && e[0] === 73 && // 'I'
-  e[1] === 68 && // 'D'
-  e[2] === 51 ? Rd(e) : e;
-}
-function hn({
-  data: e,
-  signatures: t
-}) {
-  const r = Ed(e);
-  for (const n of t)
-    if (typeof r == "string" ? r.startsWith(n.base64Prefix) : r.length >= n.bytesPrefix.length && n.bytesPrefix.every(
-      (a, s) => r[s] === a
-    ))
-      return n.mimeType;
-}
-async function gh({
-  model: e,
-  prompt: t,
-  n: r = 1,
-  size: n,
-  aspectRatio: a,
-  seed: s,
-  providerOptions: o,
-  maxRetries: i,
-  abortSignal: l,
-  headers: u
-}) {
-  var c;
-  const { retry: d } = _t({ maxRetries: i }), m = (c = e.maxImagesPerCall) != null ? c : 1, _ = Math.ceil(r / m), v = Array.from({ length: _ }, (k, b) => {
-    if (b < _ - 1)
-      return m;
-    const x = r % m;
-    return x === 0 ? m : x;
-  }), g = await Promise.all(
-    v.map(
-      async (k) => d(
-        () => e.doGenerate({
-          prompt: t,
-          n: k,
-          abortSignal: l,
-          headers: u,
-          size: n,
-          aspectRatio: a,
-          seed: s,
-          providerOptions: o ?? {}
-        })
-      )
-    )
-  ), p = [], f = [], w = [];
-  for (const k of g)
-    p.push(
-      ...k.images.map(
-        (b) => {
-          var x;
-          return new fn({
-            data: b,
-            mimeType: (x = hn({
-              data: b,
-              signatures: Co
-            })) != null ? x : "image/png"
-          });
-        }
-      )
-    ), f.push(...k.warnings), w.push(k.response);
-  if (!p.length)
-    throw new Id({ responses: w });
-  return new Ad({ images: p, warnings: f, responses: w });
-}
-var Ad = class {
-  constructor(e) {
-    this.images = e.images, this.warnings = e.warnings, this.responses = e.responses;
-  }
-  get image() {
-    return this.images[0];
-  }
-}, Eo = "AI_NoObjectGeneratedError", Ao = `vercel.ai.error.${Eo}`, Nd = Symbol.for(Ao), No, dt = class extends j {
-  constructor({
-    message: e = "No object generated.",
-    cause: t,
-    text: r,
-    response: n,
-    usage: a,
-    finishReason: s
-  }) {
-    super({ name: Eo, message: e, cause: t }), this[No] = !0, this.text = r, this.response = n, this.usage = a, this.finishReason = s;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, Ao);
-  }
-};
-No = Nd;
-var Po = "AI_DownloadError", Oo = `vercel.ai.error.${Po}`, Pd = Symbol.for(Oo), Mo, Nn = class extends j {
-  constructor({
-    url: e,
-    statusCode: t,
-    statusText: r,
-    cause: n,
-    message: a = n == null ? `Failed to download ${e}: ${t} ${r}` : `Failed to download ${e}: ${n}`
-  }) {
-    super({ name: Po, message: a, cause: n }), this[Mo] = !0, this.url = e, this.statusCode = t, this.statusText = r;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, Oo);
-  }
-};
-Mo = Pd;
-async function jo({ url: e }) {
-  var t;
-  const r = e.toString();
-  try {
-    const n = await fetch(r);
-    if (!n.ok)
-      throw new Nn({
-        url: r,
-        statusCode: n.status,
-        statusText: n.statusText
-      });
-    return {
-      data: new Uint8Array(await n.arrayBuffer()),
-      mimeType: (t = n.headers.get("content-type")) != null ? t : void 0
-    };
-  } catch (n) {
-    throw Nn.isInstance(n) ? n : new Nn({ url: r, cause: n });
-  }
-}
-var $o = "AI_InvalidDataContentError", Do = `vercel.ai.error.${$o}`, Od = Symbol.for(Do), qo, Va = class extends j {
-  constructor({
-    content: e,
-    cause: t,
-    message: r = `Invalid data content. Expected a base64 string, Uint8Array, ArrayBuffer, or Buffer, but got ${typeof e}.`
-  }) {
-    super({ name: $o, message: r, cause: t }), this[qo] = !0, this.content = e;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, Do);
-  }
-};
-qo = Od;
-var Uo = ge([
-  h(),
-  en(Uint8Array),
-  en(ArrayBuffer),
-  Qs(
-    // Buffer might not be available in some environments such as CloudFlare:
-    (e) => {
-      var t, r;
-      return (r = (t = globalThis.Buffer) == null ? void 0 : t.isBuffer(e)) != null ? r : !1;
-    },
-    { message: "Must be a Buffer" }
-  )
-]);
-function gn(e) {
-  return typeof e == "string" ? e : e instanceof ArrayBuffer ? Mt(new Uint8Array(e)) : Mt(e);
-}
-function Sr(e) {
-  if (e instanceof Uint8Array)
-    return e;
-  if (typeof e == "string")
-    try {
-      return cn(e);
-    } catch (t) {
-      throw new Va({
-        message: "Invalid data content. Content string is not a base64-encoded media.",
-        content: e,
-        cause: t
-      });
-    }
-  if (e instanceof ArrayBuffer)
-    return new Uint8Array(e);
-  throw new Va({ content: e });
-}
-function Md(e) {
-  try {
-    return new TextDecoder().decode(e);
-  } catch {
-    throw new Error("Error decoding Uint8Array to text");
-  }
-}
-var Lo = "AI_InvalidMessageRoleError", Fo = `vercel.ai.error.${Lo}`, jd = Symbol.for(Fo), Zo, $d = class extends j {
-  constructor({
-    role: e,
-    message: t = `Invalid message role: '${e}'. Must be one of: "system", "user", "assistant", "tool".`
-  }) {
-    super({ name: Lo, message: t }), this[Zo] = !0, this.role = e;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, Fo);
-  }
-};
-Zo = jd;
-function Dd(e) {
-  try {
-    const [t, r] = e.split(",");
-    return {
-      mimeType: t.split(";")[0].split(":")[1],
-      base64Content: r
-    };
-  } catch {
-    return {
-      mimeType: void 0,
-      base64Content: void 0
-    };
-  }
-}
-async function Yt({
-  prompt: e,
-  modelSupportsImageUrls: t = !0,
-  modelSupportsUrl: r = () => !1,
-  downloadImplementation: n = jo
-}) {
-  const a = await Ud(
-    e.messages,
-    n,
-    t,
-    r
-  );
-  return [
-    ...e.system != null ? [{ role: "system", content: e.system }] : [],
-    ...e.messages.map(
-      (s) => qd(s, a)
-    )
-  ];
-}
-function qd(e, t) {
-  var r, n, a, s, o, i;
-  const l = e.role;
-  switch (l) {
-    case "system":
-      return {
-        role: "system",
-        content: e.content,
-        providerMetadata: (r = e.providerOptions) != null ? r : e.experimental_providerMetadata
-      };
-    case "user":
-      return typeof e.content == "string" ? {
-        role: "user",
-        content: [{ type: "text", text: e.content }],
-        providerMetadata: (n = e.providerOptions) != null ? n : e.experimental_providerMetadata
-      } : {
-        role: "user",
-        content: e.content.map((u) => Ld(u, t)).filter((u) => u.type !== "text" || u.text !== ""),
-        providerMetadata: (a = e.providerOptions) != null ? a : e.experimental_providerMetadata
-      };
-    case "assistant":
-      return typeof e.content == "string" ? {
-        role: "assistant",
-        content: [{ type: "text", text: e.content }],
-        providerMetadata: (s = e.providerOptions) != null ? s : e.experimental_providerMetadata
-      } : {
-        role: "assistant",
-        content: e.content.filter(
-          // remove empty text parts:
-          (u) => u.type !== "text" || u.text !== ""
-        ).map((u) => {
-          var c;
-          const d = (c = u.providerOptions) != null ? c : u.experimental_providerMetadata;
-          switch (u.type) {
-            case "file":
-              return {
-                type: "file",
-                data: u.data instanceof URL ? u.data : gn(u.data),
-                filename: u.filename,
-                mimeType: u.mimeType,
-                providerMetadata: d
-              };
-            case "reasoning":
-              return {
-                type: "reasoning",
-                text: u.text,
-                signature: u.signature,
-                providerMetadata: d
-              };
-            case "redacted-reasoning":
-              return {
-                type: "redacted-reasoning",
-                data: u.data,
-                providerMetadata: d
-              };
-            case "text":
-              return {
-                type: "text",
-                text: u.text,
-                providerMetadata: d
-              };
-            case "tool-call":
-              return {
-                type: "tool-call",
-                toolCallId: u.toolCallId,
-                toolName: u.toolName,
-                args: u.args,
-                providerMetadata: d
-              };
-          }
-        }),
-        providerMetadata: (o = e.providerOptions) != null ? o : e.experimental_providerMetadata
-      };
-    case "tool":
-      return {
-        role: "tool",
-        content: e.content.map((u) => {
-          var c;
-          return {
-            type: "tool-result",
-            toolCallId: u.toolCallId,
-            toolName: u.toolName,
-            result: u.result,
-            content: u.experimental_content,
-            isError: u.isError,
-            providerMetadata: (c = u.providerOptions) != null ? c : u.experimental_providerMetadata
-          };
-        }),
-        providerMetadata: (i = e.providerOptions) != null ? i : e.experimental_providerMetadata
-      };
-    default: {
-      const u = l;
-      throw new $d({ role: u });
-    }
-  }
-}
-async function Ud(e, t, r, n) {
-  const a = e.filter((o) => o.role === "user").map((o) => o.content).filter(
-    (o) => Array.isArray(o)
-  ).flat().filter(
-    (o) => o.type === "image" || o.type === "file"
-  ).filter(
-    (o) => !(o.type === "image" && r === !0)
-  ).map((o) => o.type === "image" ? o.image : o.data).map(
-    (o) => (
-      // support string urls:
-      typeof o == "string" && (o.startsWith("http:") || o.startsWith("https:")) ? new URL(o) : o
-    )
-  ).filter((o) => o instanceof URL).filter((o) => !n(o)), s = await Promise.all(
-    a.map(async (o) => ({
-      url: o,
-      data: await t({ url: o })
-    }))
-  );
-  return Object.fromEntries(
-    s.map(({ url: o, data: i }) => [o.toString(), i])
-  );
-}
-function Ld(e, t) {
-  var r, n, a, s;
-  if (e.type === "text")
-    return {
-      type: "text",
-      text: e.text,
-      providerMetadata: (r = e.providerOptions) != null ? r : e.experimental_providerMetadata
-    };
-  let o = e.mimeType, i, l, u;
-  const c = e.type;
-  switch (c) {
-    case "image":
-      i = e.image;
-      break;
-    case "file":
-      i = e.data;
-      break;
-    default:
-      throw new Error(`Unsupported part type: ${c}`);
-  }
-  try {
-    l = typeof i == "string" ? new URL(i) : i;
-  } catch {
-    l = i;
-  }
-  if (l instanceof URL)
-    if (l.protocol === "data:") {
-      const { mimeType: d, base64Content: m } = Dd(
-        l.toString()
-      );
-      if (d == null || m == null)
-        throw new Error(`Invalid data URL format in part ${c}`);
-      o = d, u = Sr(m);
-    } else {
-      const d = t[l.toString()];
-      d ? (u = d.data, o ?? (o = d.mimeType)) : u = l;
-    }
-  else
-    u = Sr(l);
-  switch (c) {
-    case "image":
-      return u instanceof Uint8Array && (o = (n = hn({
-        data: u,
-        signatures: Co
-      })) != null ? n : o), {
-        type: "image",
-        image: u,
-        mimeType: o,
-        providerMetadata: (a = e.providerOptions) != null ? a : e.experimental_providerMetadata
-      };
-    case "file": {
-      if (o == null)
-        throw new Error("Mime type is missing for file part");
-      return {
-        type: "file",
-        data: u instanceof Uint8Array ? gn(u) : u,
-        filename: e.filename,
-        mimeType: o,
-        providerMetadata: (s = e.providerOptions) != null ? s : e.experimental_providerMetadata
-      };
-    }
-  }
-}
-function Xt({
-  maxTokens: e,
-  temperature: t,
-  topP: r,
-  topK: n,
-  presencePenalty: a,
-  frequencyPenalty: s,
-  stopSequences: o,
-  seed: i
-}) {
-  if (e != null) {
-    if (!Number.isInteger(e))
-      throw new ne({
-        parameter: "maxTokens",
-        value: e,
-        message: "maxTokens must be an integer"
-      });
-    if (e < 1)
-      throw new ne({
-        parameter: "maxTokens",
-        value: e,
-        message: "maxTokens must be >= 1"
-      });
-  }
-  if (t != null && typeof t != "number")
-    throw new ne({
-      parameter: "temperature",
-      value: t,
-      message: "temperature must be a number"
-    });
-  if (r != null && typeof r != "number")
-    throw new ne({
-      parameter: "topP",
-      value: r,
-      message: "topP must be a number"
-    });
-  if (n != null && typeof n != "number")
-    throw new ne({
-      parameter: "topK",
-      value: n,
-      message: "topK must be a number"
-    });
-  if (a != null && typeof a != "number")
-    throw new ne({
-      parameter: "presencePenalty",
-      value: a,
-      message: "presencePenalty must be a number"
-    });
-  if (s != null && typeof s != "number")
-    throw new ne({
-      parameter: "frequencyPenalty",
-      value: s,
-      message: "frequencyPenalty must be a number"
-    });
-  if (i != null && !Number.isInteger(i))
-    throw new ne({
-      parameter: "seed",
-      value: i,
-      message: "seed must be an integer"
-    });
-  return {
-    maxTokens: e,
-    // TODO v5 remove default 0 for temperature
-    temperature: t ?? 0,
-    topP: r,
-    topK: n,
-    presencePenalty: a,
-    frequencyPenalty: s,
-    stopSequences: o != null && o.length > 0 ? o : void 0,
-    seed: i
-  };
-}
-function Ba(e) {
-  var t, r, n;
-  const a = [];
-  for (const s of e) {
-    let o;
-    try {
-      o = new URL(s.url);
-    } catch {
-      throw new Error(`Invalid URL: ${s.url}`);
-    }
-    switch (o.protocol) {
-      case "http:":
-      case "https:": {
-        if ((t = s.contentType) != null && t.startsWith("image/"))
-          a.push({ type: "image", image: o });
-        else {
-          if (!s.contentType)
-            throw new Error(
-              "If the attachment is not an image, it must specify a content type"
-            );
-          a.push({
-            type: "file",
-            data: o,
-            mimeType: s.contentType
-          });
-        }
-        break;
-      }
-      case "data:": {
-        let i, l, u;
-        try {
-          [i, l] = s.url.split(","), u = i.split(";")[0].split(":")[1];
-        } catch {
-          throw new Error(`Error processing data URL: ${s.url}`);
-        }
-        if (u == null || l == null)
-          throw new Error(`Invalid data URL format: ${s.url}`);
-        if ((r = s.contentType) != null && r.startsWith("image/"))
-          a.push({
-            type: "image",
-            image: Sr(l)
-          });
-        else if ((n = s.contentType) != null && n.startsWith("text/"))
-          a.push({
-            type: "text",
-            text: Md(
-              Sr(l)
-            )
-          });
-        else {
-          if (!s.contentType)
-            throw new Error(
-              "If the attachment is not an image or text, it must specify a content type"
-            );
-          a.push({
-            type: "file",
-            data: l,
-            mimeType: s.contentType
-          });
-        }
-        break;
-      }
-      default:
-        throw new Error(`Unsupported URL protocol: ${o.protocol}`);
-    }
-  }
-  return a;
-}
-var Vo = "AI_MessageConversionError", Bo = `vercel.ai.error.${Vo}`, Fd = Symbol.for(Bo), Jo, Pn = class extends j {
-  constructor({
-    originalMessage: e,
-    message: t
-  }) {
-    super({ name: Vo, message: t }), this[Jo] = !0, this.originalMessage = e;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, Bo);
-  }
-};
-Jo = Fd;
-function Zd(e, t) {
-  var r, n;
-  const a = (r = t == null ? void 0 : t.tools) != null ? r : {}, s = [];
-  for (let o = 0; o < e.length; o++) {
-    const i = e[o], l = o === e.length - 1, { role: u, content: c, experimental_attachments: d } = i;
-    switch (u) {
-      case "system": {
-        s.push({
-          role: "system",
-          content: c
-        });
-        break;
-      }
-      case "user": {
-        if (i.parts == null)
-          s.push({
-            role: "user",
-            content: d ? [
-              { type: "text", text: c },
-              ...Ba(d)
-            ] : c
-          });
-        else {
-          const m = i.parts.filter((_) => _.type === "text").map((_) => ({
-            type: "text",
-            text: _.text
-          }));
-          s.push({
-            role: "user",
-            content: d ? [...m, ...Ba(d)] : m
-          });
-        }
-        break;
-      }
-      case "assistant": {
-        if (i.parts != null) {
-          let v = function() {
-            const w = [];
-            for (const b of f)
-              switch (b.type) {
-                case "file":
-                case "text": {
-                  w.push(b);
-                  break;
-                }
-                case "reasoning": {
-                  for (const x of b.details)
-                    switch (x.type) {
-                      case "text":
-                        w.push({
-                          type: "reasoning",
-                          text: x.text,
-                          signature: x.signature
-                        });
-                        break;
-                      case "redacted":
-                        w.push({
-                          type: "redacted-reasoning",
-                          data: x.data
-                        });
-                        break;
-                    }
-                  break;
-                }
-                case "tool-invocation":
-                  w.push({
-                    type: "tool-call",
-                    toolCallId: b.toolInvocation.toolCallId,
-                    toolName: b.toolInvocation.toolName,
-                    args: b.toolInvocation.args
-                  });
-                  break;
-                default: {
-                  const x = b;
-                  throw new Error(`Unsupported part: ${x}`);
-                }
-              }
-            s.push({
-              role: "assistant",
-              content: w
-            });
-            const k = f.filter(
-              (b) => b.type === "tool-invocation"
-            ).map((b) => b.toolInvocation);
-            k.length > 0 && s.push({
-              role: "tool",
-              content: k.map(
-                (b) => {
-                  if (!("result" in b))
-                    throw new Pn({
-                      originalMessage: i,
-                      message: "ToolInvocation must have a result: " + JSON.stringify(b)
-                    });
-                  const { toolCallId: x, toolName: S, result: $ } = b, E = a[S];
-                  return (E == null ? void 0 : E.experimental_toToolResultContent) != null ? {
-                    type: "tool-result",
-                    toolCallId: x,
-                    toolName: S,
-                    result: E.experimental_toToolResultContent($),
-                    experimental_content: E.experimental_toToolResultContent($)
-                  } : {
-                    type: "tool-result",
-                    toolCallId: x,
-                    toolName: S,
-                    result: $
-                  };
-                }
-              )
-            }), f = [], p = !1, g++;
-          }, g = 0, p = !1, f = [];
-          for (const w of i.parts)
-            switch (w.type) {
-              case "text": {
-                p && v(), f.push(w);
-                break;
-              }
-              case "file":
-              case "reasoning": {
-                f.push(w);
-                break;
-              }
-              case "tool-invocation": {
-                ((n = w.toolInvocation.step) != null ? n : 0) !== g && v(), f.push(w), p = !0;
-                break;
-              }
-            }
-          v();
-          break;
-        }
-        const m = i.toolInvocations;
-        if (m == null || m.length === 0) {
-          s.push({ role: "assistant", content: c });
-          break;
-        }
-        const _ = m.reduce((v, g) => {
-          var p;
-          return Math.max(v, (p = g.step) != null ? p : 0);
-        }, 0);
-        for (let v = 0; v <= _; v++) {
-          const g = m.filter(
-            (p) => {
-              var f;
-              return ((f = p.step) != null ? f : 0) === v;
-            }
-          );
-          g.length !== 0 && (s.push({
-            role: "assistant",
-            content: [
-              ...l && c && v === 0 ? [{ type: "text", text: c }] : [],
-              ...g.map(
-                ({ toolCallId: p, toolName: f, args: w }) => ({
-                  type: "tool-call",
-                  toolCallId: p,
-                  toolName: f,
-                  args: w
-                })
-              )
-            ]
-          }), s.push({
-            role: "tool",
-            content: g.map((p) => {
-              if (!("result" in p))
-                throw new Pn({
-                  originalMessage: i,
-                  message: "ToolInvocation must have a result: " + JSON.stringify(p)
-                });
-              const { toolCallId: f, toolName: w, result: k } = p, b = a[w];
-              return (b == null ? void 0 : b.experimental_toToolResultContent) != null ? {
-                type: "tool-result",
-                toolCallId: f,
-                toolName: w,
-                result: b.experimental_toToolResultContent(k),
-                experimental_content: b.experimental_toToolResultContent(k)
-              } : {
-                type: "tool-result",
-                toolCallId: f,
-                toolName: w,
-                result: k
-              };
-            })
-          }));
-        }
-        c && !l && s.push({ role: "assistant", content: c });
-        break;
-      }
-      case "data":
-        break;
-      default: {
-        const m = u;
-        throw new Pn({
-          originalMessage: i,
-          message: `Unsupported role: ${m}`
-        });
-      }
-    }
-  }
-  return s;
-}
-var Bn = Hl(
-  () => ge([
-    Gl(),
-    h(),
-    R(),
-    Je(),
-    yr(h(), Bn),
-    F(Bn)
-  ])
-), ve = yr(
-  h(),
-  yr(h(), Bn)
-), Vd = F(
-  ge([
-    y({ type: A("text"), text: h() }),
-    y({
-      type: A("image"),
-      data: h(),
-      mimeType: h().optional()
-    })
-  ])
-), zo = y({
-  type: A("text"),
-  text: h(),
-  providerOptions: ve.optional(),
-  experimental_providerMetadata: ve.optional()
-}), Bd = y({
-  type: A("image"),
-  image: ge([Uo, en(URL)]),
-  mimeType: h().optional(),
-  providerOptions: ve.optional(),
-  experimental_providerMetadata: ve.optional()
-}), Go = y({
-  type: A("file"),
-  data: ge([Uo, en(URL)]),
-  filename: h().optional(),
-  mimeType: h(),
-  providerOptions: ve.optional(),
-  experimental_providerMetadata: ve.optional()
-}), Jd = y({
-  type: A("reasoning"),
-  text: h(),
-  providerOptions: ve.optional(),
-  experimental_providerMetadata: ve.optional()
-}), zd = y({
-  type: A("redacted-reasoning"),
-  data: h(),
-  providerOptions: ve.optional(),
-  experimental_providerMetadata: ve.optional()
-}), Gd = y({
-  type: A("tool-call"),
-  toolCallId: h(),
-  toolName: h(),
-  args: Nr(),
-  providerOptions: ve.optional(),
-  experimental_providerMetadata: ve.optional()
-}), Hd = y({
-  type: A("tool-result"),
-  toolCallId: h(),
-  toolName: h(),
-  result: Nr(),
-  content: Vd.optional(),
-  isError: Je().optional(),
-  providerOptions: ve.optional(),
-  experimental_providerMetadata: ve.optional()
-}), Wd = y({
-  role: A("system"),
-  content: h(),
-  providerOptions: ve.optional(),
-  experimental_providerMetadata: ve.optional()
-}), Kd = y({
-  role: A("user"),
-  content: ge([
-    h(),
-    F(ge([zo, Bd, Go]))
-  ]),
-  providerOptions: ve.optional(),
-  experimental_providerMetadata: ve.optional()
-}), Yd = y({
-  role: A("assistant"),
-  content: ge([
-    h(),
-    F(
-      ge([
-        zo,
-        Go,
-        Jd,
-        zd,
-        Gd
-      ])
-    )
-  ]),
-  providerOptions: ve.optional(),
-  experimental_providerMetadata: ve.optional()
-}), Xd = y({
-  role: A("tool"),
-  content: F(Hd),
-  providerOptions: ve.optional(),
-  experimental_providerMetadata: ve.optional()
-}), Qd = ge([
-  Wd,
-  Kd,
-  Yd,
-  Xd
-]);
-function Qt({
-  prompt: e,
-  tools: t
-}) {
-  if (e.prompt == null && e.messages == null)
-    throw new ut({
-      prompt: e,
-      message: "prompt or messages must be defined"
-    });
-  if (e.prompt != null && e.messages != null)
-    throw new ut({
-      prompt: e,
-      message: "prompt and messages cannot be defined at the same time"
-    });
-  if (e.system != null && typeof e.system != "string")
-    throw new ut({
-      prompt: e,
-      message: "system must be a string"
-    });
-  if (e.prompt != null) {
-    if (typeof e.prompt != "string")
-      throw new ut({
-        prompt: e,
-        message: "prompt must be a string"
-      });
-    return {
-      type: "prompt",
-      system: e.system,
-      messages: [
-        {
-          role: "user",
-          content: e.prompt
-        }
-      ]
-    };
-  }
-  if (e.messages != null) {
-    const n = ep(e.messages) === "ui-messages" ? Zd(e.messages, {
-      tools: t
-    }) : e.messages;
-    if (n.length === 0)
-      throw new ut({
-        prompt: e,
-        message: "messages must not be empty"
-      });
-    const a = ht({
-      value: n,
-      schema: F(Qd)
-    });
-    if (!a.success)
-      throw new ut({
-        prompt: e,
-        message: [
-          "message must be a CoreMessage or a UI message",
-          `Validation error: ${a.error.message}`
-        ].join(`
-`),
-        cause: a.error
-      });
-    return {
-      type: "messages",
-      messages: n,
-      system: e.system
-    };
-  }
-  throw new Error("unreachable");
-}
-function ep(e) {
-  if (!Array.isArray(e))
-    throw new ut({
-      prompt: e,
-      message: [
-        "messages must be an array of CoreMessage or UIMessage",
-        `Received non-array value: ${JSON.stringify(e)}`
-      ].join(`
-`),
-      cause: e
-    });
-  if (e.length === 0)
-    return "messages";
-  const t = e.map(tp);
-  if (t.some((n) => n === "has-ui-specific-parts"))
-    return "ui-messages";
-  const r = t.findIndex(
-    (n) => n !== "has-core-specific-parts" && n !== "message"
-  );
-  if (r === -1)
-    return "messages";
-  throw new ut({
-    prompt: e,
-    message: [
-      "messages must be an array of CoreMessage or UIMessage",
-      `Received message of type: "${t[r]}" at index ${r}`,
-      `messages[${r}]: ${JSON.stringify(e[r])}`
-    ].join(`
-`),
-    cause: e
-  });
-}
-function tp(e) {
-  return typeof e == "object" && e !== null && (e.role === "function" || // UI-only role
-  e.role === "data" || // UI-only role
-  "toolInvocations" in e || // UI-specific field
-  "parts" in e || // UI-specific field
-  "experimental_attachments" in e) ? "has-ui-specific-parts" : typeof e == "object" && e !== null && "content" in e && (Array.isArray(e.content) || // Core messages can have array content
-  "experimental_providerMetadata" in e || "providerOptions" in e) ? "has-core-specific-parts" : typeof e == "object" && e !== null && "role" in e && "content" in e && typeof e.content == "string" && ["system", "user", "assistant", "tool"].includes(e.role) ? "message" : "other";
-}
-function ct({
-  promptTokens: e,
-  completionTokens: t
-}) {
-  return {
-    promptTokens: e,
-    completionTokens: t,
-    totalTokens: e + t
-  };
-}
-function Ho(e, t) {
-  return {
-    promptTokens: e.promptTokens + t.promptTokens,
-    completionTokens: e.completionTokens + t.completionTokens,
-    totalTokens: e.totalTokens + t.totalTokens
-  };
-}
-var rp = "JSON schema:", np = "You MUST answer with a JSON object that matches the JSON schema above.", ap = "You MUST answer with JSON.";
-function Ir({
-  prompt: e,
-  schema: t,
-  schemaPrefix: r = t != null ? rp : void 0,
-  schemaSuffix: n = t != null ? np : ap
-}) {
-  return [
-    e != null && e.length > 0 ? e : void 0,
-    e != null && e.length > 0 ? "" : void 0,
-    // add a newline if prompt is not null
-    r,
-    t != null ? JSON.stringify(t) : void 0,
-    n
-  ].filter((a) => a != null).join(`
-`);
-}
-function Pt(e) {
-  const t = e.pipeThrough(new TransformStream());
-  return t[Symbol.asyncIterator] = () => {
-    const r = t.getReader();
-    return {
-      async next() {
-        const { done: n, value: a } = await r.read();
-        return n ? { done: !0, value: void 0 } : { done: !1, value: a };
-      }
-    };
-  }, t;
-}
-var sp = {
-  type: "no-schema",
-  jsonSchema: void 0,
-  validatePartialResult({ value: e, textDelta: t }) {
-    return { success: !0, value: { partial: e, textDelta: t } };
-  },
-  validateFinalResult(e, t) {
-    return e === void 0 ? {
-      success: !1,
-      error: new dt({
-        message: "No object generated: response did not match schema.",
-        text: t.text,
-        response: t.response,
-        usage: t.usage,
-        finishReason: t.finishReason
-      })
-    } : { success: !0, value: e };
-  },
-  createElementStream() {
-    throw new se({
-      functionality: "element streams in no-schema mode"
-    });
-  }
-}, op = (e) => ({
-  type: "object",
-  jsonSchema: e.jsonSchema,
-  validatePartialResult({ value: t, textDelta: r }) {
-    return {
-      success: !0,
-      value: {
-        // Note: currently no validation of partial results:
-        partial: t,
-        textDelta: r
-      }
-    };
-  },
-  validateFinalResult(t) {
-    return ht({ value: t, schema: e });
-  },
-  createElementStream() {
-    throw new se({
-      functionality: "element streams in object mode"
-    });
-  }
-}), ip = (e) => {
-  const { $schema: t, ...r } = e.jsonSchema;
-  return {
-    type: "enum",
-    // wrap in object that contains array of elements, since most LLMs will not
-    // be able to generate an array directly:
-    // possible future optimization: use arrays directly when model supports grammar-guided generation
-    jsonSchema: {
-      $schema: "http://json-schema.org/draft-07/schema#",
-      type: "object",
-      properties: {
-        elements: { type: "array", items: r }
-      },
-      required: ["elements"],
-      additionalProperties: !1
-    },
-    validatePartialResult({ value: n, latestObject: a, isFirstDelta: s, isFinalDelta: o }) {
-      var i;
-      if (!jn(n) || !xa(n.elements))
-        return {
-          success: !1,
-          error: new ft({
-            value: n,
-            cause: "value must be an object that contains an array of elements"
-          })
-        };
-      const l = n.elements, u = [];
-      for (let m = 0; m < l.length; m++) {
-        const _ = l[m], v = ht({ value: _, schema: e });
-        if (!(m === l.length - 1 && !o)) {
-          if (!v.success)
-            return v;
-          u.push(v.value);
-        }
-      }
-      const c = (i = a == null ? void 0 : a.length) != null ? i : 0;
-      let d = "";
-      return s && (d += "["), c > 0 && (d += ","), d += u.slice(c).map((m) => JSON.stringify(m)).join(","), o && (d += "]"), {
-        success: !0,
-        value: {
-          partial: u,
-          textDelta: d
-        }
-      };
-    },
-    validateFinalResult(n) {
-      if (!jn(n) || !xa(n.elements))
-        return {
-          success: !1,
-          error: new ft({
-            value: n,
-            cause: "value must be an object that contains an array of elements"
-          })
-        };
-      const a = n.elements;
-      for (const s of a) {
-        const o = ht({ value: s, schema: e });
-        if (!o.success)
-          return o;
-      }
-      return { success: !0, value: a };
-    },
-    createElementStream(n) {
-      let a = 0;
-      return Pt(
-        n.pipeThrough(
-          new TransformStream({
-            transform(s, o) {
-              switch (s.type) {
-                case "object": {
-                  const i = s.object;
-                  for (; a < i.length; a++)
-                    o.enqueue(i[a]);
-                  break;
-                }
-                case "text-delta":
-                case "finish":
-                case "error":
-                  break;
-                default: {
-                  const i = s;
-                  throw new Error(
-                    `Unsupported chunk type: ${i}`
-                  );
-                }
-              }
-            }
-          })
-        )
-      );
-    }
-  };
-}, lp = (e) => ({
-  type: "enum",
-  // wrap in object that contains result, since most LLMs will not
-  // be able to generate an enum value directly:
-  // possible future optimization: use enums directly when model supports top-level enums
-  jsonSchema: {
-    $schema: "http://json-schema.org/draft-07/schema#",
-    type: "object",
-    properties: {
-      result: { type: "string", enum: e }
-    },
-    required: ["result"],
+function Dt(e) {
+  return e == null ? Ir({
+    properties: {},
     additionalProperties: !1
-  },
-  validateFinalResult(t) {
-    if (!jn(t) || typeof t.result != "string")
-      return {
-        success: !1,
-        error: new ft({
-          value: t,
-          cause: 'value must be an object that contains a string in the "result" property.'
-        })
-      };
-    const r = t.result;
-    return e.includes(r) ? { success: !0, value: r } : {
-      success: !1,
-      error: new ft({
-        value: t,
-        cause: "value must be a string in the enum"
-      })
-    };
-  },
-  validatePartialResult() {
-    throw new se({
-      functionality: "partial results in enum mode"
-    });
-  },
-  createElementStream() {
-    throw new se({
-      functionality: "element streams in enum mode"
-    });
-  }
-});
-function Wo({
-  output: e,
-  schema: t,
-  enumValues: r
-}) {
-  switch (e) {
-    case "object":
-      return op(Kt(t));
-    case "array":
-      return ip(Kt(t));
-    case "enum":
-      return lp(r);
-    case "no-schema":
-      return sp;
-    default: {
-      const n = e;
-      throw new Error(`Unsupported output: ${n}`);
-    }
-  }
+  }) : hu(e) ? e : pu(e);
 }
-function Ko({
-  output: e,
-  mode: t,
-  schema: r,
-  schemaName: n,
-  schemaDescription: a,
-  enumValues: s
-}) {
-  if (e != null && e !== "object" && e !== "array" && e !== "enum" && e !== "no-schema")
-    throw new ne({
-      parameter: "output",
-      value: e,
-      message: "Invalid output type."
-    });
-  if (e === "no-schema") {
-    if (t === "auto" || t === "tool")
-      throw new ne({
-        parameter: "mode",
-        value: t,
-        message: 'Mode must be "json" for no-schema output.'
-      });
-    if (r != null)
-      throw new ne({
-        parameter: "schema",
-        value: r,
-        message: "Schema is not supported for no-schema output."
-      });
-    if (a != null)
-      throw new ne({
-        parameter: "schemaDescription",
-        value: a,
-        message: "Schema description is not supported for no-schema output."
-      });
-    if (n != null)
-      throw new ne({
-        parameter: "schemaName",
-        value: n,
-        message: "Schema name is not supported for no-schema output."
-      });
-    if (s != null)
-      throw new ne({
-        parameter: "enumValues",
-        value: s,
-        message: "Enum values are not supported for no-schema output."
-      });
-  }
-  if (e === "object") {
-    if (r == null)
-      throw new ne({
-        parameter: "schema",
-        value: r,
-        message: "Schema is required for object output."
-      });
-    if (s != null)
-      throw new ne({
-        parameter: "enumValues",
-        value: s,
-        message: "Enum values are not supported for object output."
-      });
-  }
-  if (e === "array") {
-    if (r == null)
-      throw new ne({
-        parameter: "schema",
-        value: r,
-        message: "Element schema is required for array output."
-      });
-    if (s != null)
-      throw new ne({
-        parameter: "enumValues",
-        value: s,
-        message: "Enum values are not supported for array output."
-      });
-  }
-  if (e === "enum") {
-    if (r != null)
-      throw new ne({
-        parameter: "schema",
-        value: r,
-        message: "Schema is not supported for enum output."
-      });
-    if (a != null)
-      throw new ne({
-        parameter: "schemaDescription",
-        value: a,
-        message: "Schema description is not supported for enum output."
-      });
-    if (n != null)
-      throw new ne({
-        parameter: "schemaName",
-        value: n,
-        message: "Schema name is not supported for enum output."
-      });
-    if (s == null)
-      throw new ne({
-        parameter: "enumValues",
-        value: s,
-        message: "Enum values are required for enum output."
-      });
-    for (const o of s)
-      if (typeof o != "string")
-        throw new ne({
-          parameter: "enumValues",
-          value: o,
-          message: "Enum values must be strings."
-        });
-  }
+var { btoa: fu, atob: mu } = globalThis;
+function Dn(e) {
+  const t = e.replace(/-/g, "+").replace(/_/g, "/"), n = mu(t);
+  return Uint8Array.from(n, (r) => r.codePointAt(0));
 }
-function yn(e) {
-  const t = e.map((r) => ({
-    ...r,
-    content: typeof r.content == "string" ? r.content : r.content.map(up)
-  }));
-  return JSON.stringify(t);
+function Sa(e) {
+  let t = "";
+  for (let n = 0; n < e.length; n++)
+    t += String.fromCodePoint(e[n]);
+  return fu(t);
 }
-function up(e) {
-  return e.type === "image" ? {
-    ...e,
-    image: e.image instanceof Uint8Array ? gn(e.image) : e.image
-  } : e;
+function vt(e) {
+  return e instanceof Uint8Array ? Sa(e) : e;
 }
-var cp = Ft({ prefix: "aiobj", size: 24 });
-async function yh({
-  model: e,
-  enum: t,
-  // rename bc enum is reserved by typescript
-  schema: r,
-  schemaName: n,
-  schemaDescription: a,
-  mode: s,
-  output: o = "object",
-  system: i,
-  prompt: l,
-  messages: u,
-  maxRetries: c,
-  abortSignal: d,
-  headers: m,
-  experimental_repairText: _,
-  experimental_telemetry: v,
-  experimental_providerMetadata: g,
-  providerOptions: p = g,
-  _internal: {
-    generateId: f = cp,
-    currentDate: w = () => /* @__PURE__ */ new Date()
-  } = {},
-  ...k
-}) {
-  Ko({
-    output: o,
-    mode: s,
-    schema: r,
-    schemaName: n,
-    schemaDescription: a,
-    enumValues: t
-  });
-  const { maxRetries: b, retry: x } = _t({ maxRetries: c }), S = Wo({
-    output: o,
-    schema: r,
-    enumValues: t
-  });
-  S.type === "no-schema" && s === void 0 && (s = "json");
-  const $ = tr({
-    model: e,
-    telemetry: v,
-    headers: m,
-    settings: { ...k, maxRetries: b }
-  }), E = rr(v);
-  return Me({
-    name: "ai.generateObject",
-    attributes: W({
-      telemetry: v,
-      attributes: {
-        ...Oe({
-          operationId: "ai.generateObject",
-          telemetry: v
-        }),
-        ...$,
-        // specific settings that only make sense on the outer level:
-        "ai.prompt": {
-          input: () => JSON.stringify({ system: i, prompt: l, messages: u })
-        },
-        "ai.schema": S.jsonSchema != null ? { input: () => JSON.stringify(S.jsonSchema) } : void 0,
-        "ai.schema.name": n,
-        "ai.schema.description": a,
-        "ai.settings.output": S.type,
-        "ai.settings.mode": s
-      }
-    }),
-    tracer: E,
-    fn: async (P) => {
-      var G, ce, be, me;
-      (s === "auto" || s == null) && (s = e.defaultObjectGenerationMode);
-      let ie, de, ye, fe, H, ue, Y, U, Ce;
-      switch (s) {
-        case "json": {
-          const ee = Qt({
-            prompt: {
-              system: S.jsonSchema == null ? Ir({ prompt: i }) : e.supportsStructuredOutputs ? i : Ir({
-                prompt: i,
-                schema: S.jsonSchema
-              }),
-              prompt: l,
-              messages: u
-            },
-            tools: void 0
-          }), oe = await Yt({
-            prompt: ee,
-            modelSupportsImageUrls: e.supportsImageUrls,
-            modelSupportsUrl: (G = e.supportsUrl) == null ? void 0 : G.bind(e)
-            // support 'this' context
-          }), re = await x(
-            () => Me({
-              name: "ai.generateObject.doGenerate",
-              attributes: W({
-                telemetry: v,
-                attributes: {
-                  ...Oe({
-                    operationId: "ai.generateObject.doGenerate",
-                    telemetry: v
-                  }),
-                  ...$,
-                  "ai.prompt.format": {
-                    input: () => ee.type
-                  },
-                  "ai.prompt.messages": {
-                    input: () => JSON.stringify(oe)
-                  },
-                  "ai.settings.mode": s,
-                  // standardized gen-ai llm span attributes:
-                  "gen_ai.system": e.provider,
-                  "gen_ai.request.model": e.modelId,
-                  "gen_ai.request.frequency_penalty": k.frequencyPenalty,
-                  "gen_ai.request.max_tokens": k.maxTokens,
-                  "gen_ai.request.presence_penalty": k.presencePenalty,
-                  "gen_ai.request.temperature": k.temperature,
-                  "gen_ai.request.top_k": k.topK,
-                  "gen_ai.request.top_p": k.topP
-                }
-              }),
-              tracer: E,
-              fn: async (te) => {
-                var q, he, Ae, Ne, je, B;
-                const D = await e.doGenerate({
-                  mode: {
-                    type: "object-json",
-                    schema: S.jsonSchema,
-                    name: n,
-                    description: a
-                  },
-                  ...Xt(k),
-                  inputFormat: ee.type,
-                  prompt: oe,
-                  providerMetadata: p,
-                  abortSignal: d,
-                  headers: m
-                }), Z = {
-                  id: (he = (q = D.response) == null ? void 0 : q.id) != null ? he : f(),
-                  timestamp: (Ne = (Ae = D.response) == null ? void 0 : Ae.timestamp) != null ? Ne : w(),
-                  modelId: (B = (je = D.response) == null ? void 0 : je.modelId) != null ? B : e.modelId
-                };
-                if (D.text === void 0)
-                  throw new dt({
-                    message: "No object generated: the model did not return a response.",
-                    response: Z,
-                    usage: ct(D.usage),
-                    finishReason: D.finishReason
-                  });
-                return te.setAttributes(
-                  W({
-                    telemetry: v,
-                    attributes: {
-                      "ai.response.finishReason": D.finishReason,
-                      "ai.response.object": { output: () => D.text },
-                      "ai.response.id": Z.id,
-                      "ai.response.model": Z.modelId,
-                      "ai.response.timestamp": Z.timestamp.toISOString(),
-                      "ai.usage.promptTokens": D.usage.promptTokens,
-                      "ai.usage.completionTokens": D.usage.completionTokens,
-                      // standardized gen-ai llm span attributes:
-                      "gen_ai.response.finish_reasons": [D.finishReason],
-                      "gen_ai.response.id": Z.id,
-                      "gen_ai.response.model": Z.modelId,
-                      "gen_ai.usage.prompt_tokens": D.usage.promptTokens,
-                      "gen_ai.usage.completion_tokens": D.usage.completionTokens
-                    }
-                  })
-                ), { ...D, objectText: D.text, responseData: Z };
-              }
-            })
-          );
-          ie = re.objectText, de = re.finishReason, ye = re.usage, fe = re.warnings, H = re.rawResponse, U = re.logprobs, Ce = re.providerMetadata, Y = (ce = re.request) != null ? ce : {}, ue = re.responseData;
-          break;
-        }
-        case "tool": {
-          const ee = Qt({
-            prompt: { system: i, prompt: l, messages: u },
-            tools: void 0
-          }), oe = await Yt({
-            prompt: ee,
-            modelSupportsImageUrls: e.supportsImageUrls,
-            modelSupportsUrl: (be = e.supportsUrl) == null ? void 0 : be.bind(e)
-            // support 'this' context,
-          }), re = ee.type, te = await x(
-            () => Me({
-              name: "ai.generateObject.doGenerate",
-              attributes: W({
-                telemetry: v,
-                attributes: {
-                  ...Oe({
-                    operationId: "ai.generateObject.doGenerate",
-                    telemetry: v
-                  }),
-                  ...$,
-                  "ai.prompt.format": {
-                    input: () => re
-                  },
-                  "ai.prompt.messages": {
-                    input: () => yn(oe)
-                  },
-                  "ai.settings.mode": s,
-                  // standardized gen-ai llm span attributes:
-                  "gen_ai.system": e.provider,
-                  "gen_ai.request.model": e.modelId,
-                  "gen_ai.request.frequency_penalty": k.frequencyPenalty,
-                  "gen_ai.request.max_tokens": k.maxTokens,
-                  "gen_ai.request.presence_penalty": k.presencePenalty,
-                  "gen_ai.request.temperature": k.temperature,
-                  "gen_ai.request.top_k": k.topK,
-                  "gen_ai.request.top_p": k.topP
-                }
-              }),
-              tracer: E,
-              fn: async (q) => {
-                var he, Ae, Ne, je, B, D, Z, we;
-                const X = await e.doGenerate({
-                  mode: {
-                    type: "object-tool",
-                    tool: {
-                      type: "function",
-                      name: n ?? "json",
-                      description: a ?? "Respond with a JSON object.",
-                      parameters: S.jsonSchema
-                    }
-                  },
-                  ...Xt(k),
-                  inputFormat: re,
-                  prompt: oe,
-                  providerMetadata: p,
-                  abortSignal: d,
-                  headers: m
-                }), T = (Ae = (he = X.toolCalls) == null ? void 0 : he[0]) == null ? void 0 : Ae.args, le = {
-                  id: (je = (Ne = X.response) == null ? void 0 : Ne.id) != null ? je : f(),
-                  timestamp: (D = (B = X.response) == null ? void 0 : B.timestamp) != null ? D : w(),
-                  modelId: (we = (Z = X.response) == null ? void 0 : Z.modelId) != null ? we : e.modelId
-                };
-                if (T === void 0)
-                  throw new dt({
-                    message: "No object generated: the tool was not called.",
-                    response: le,
-                    usage: ct(X.usage),
-                    finishReason: X.finishReason
-                  });
-                return q.setAttributes(
-                  W({
-                    telemetry: v,
-                    attributes: {
-                      "ai.response.finishReason": X.finishReason,
-                      "ai.response.object": { output: () => T },
-                      "ai.response.id": le.id,
-                      "ai.response.model": le.modelId,
-                      "ai.response.timestamp": le.timestamp.toISOString(),
-                      "ai.usage.promptTokens": X.usage.promptTokens,
-                      "ai.usage.completionTokens": X.usage.completionTokens,
-                      // standardized gen-ai llm span attributes:
-                      "gen_ai.response.finish_reasons": [X.finishReason],
-                      "gen_ai.response.id": le.id,
-                      "gen_ai.response.model": le.modelId,
-                      "gen_ai.usage.input_tokens": X.usage.promptTokens,
-                      "gen_ai.usage.output_tokens": X.usage.completionTokens
-                    }
-                  })
-                ), { ...X, objectText: T, responseData: le };
-              }
-            })
-          );
-          ie = te.objectText, de = te.finishReason, ye = te.usage, fe = te.warnings, H = te.rawResponse, U = te.logprobs, Ce = te.providerMetadata, Y = (me = te.request) != null ? me : {}, ue = te.responseData;
-          break;
-        }
-        case void 0:
-          throw new Error(
-            "Model does not have a default object generation mode."
-          );
-        default: {
-          const ee = s;
-          throw new Error(`Unsupported mode: ${ee}`);
-        }
-      }
-      function qe(ee) {
-        const oe = Ot({ text: ee });
-        if (!oe.success)
-          throw new dt({
-            message: "No object generated: could not parse the response.",
-            cause: oe.error,
-            text: ee,
-            response: ue,
-            usage: ct(ye),
-            finishReason: de
-          });
-        const re = S.validateFinalResult(
-          oe.value,
-          {
-            text: ee,
-            response: ue,
-            usage: ct(ye)
-          }
-        );
-        if (!re.success)
-          throw new dt({
-            message: "No object generated: response did not match schema.",
-            cause: re.error,
-            text: ee,
-            response: ue,
-            usage: ct(ye),
-            finishReason: de
-          });
-        return re.value;
-      }
-      let Re;
-      try {
-        Re = qe(ie);
-      } catch (ee) {
-        if (_ != null && dt.isInstance(ee) && (mr.isInstance(ee.cause) || ft.isInstance(ee.cause))) {
-          const oe = await _({
-            text: ie,
-            error: ee.cause
-          });
-          if (oe === null)
-            throw ee;
-          Re = qe(oe);
-        } else
-          throw ee;
-      }
-      return P.setAttributes(
-        W({
-          telemetry: v,
-          attributes: {
-            "ai.response.finishReason": de,
-            "ai.response.object": {
-              output: () => JSON.stringify(Re)
-            },
-            "ai.usage.promptTokens": ye.promptTokens,
-            "ai.usage.completionTokens": ye.completionTokens
-          }
-        })
-      ), new dp({
-        object: Re,
-        finishReason: de,
-        usage: ct(ye),
-        warnings: fe,
-        request: Y,
-        response: {
-          ...ue,
-          headers: H == null ? void 0 : H.headers,
-          body: H == null ? void 0 : H.body
-        },
-        logprobs: U,
-        providerMetadata: Ce
-      });
-    }
-  });
+function qn(e) {
+  return e == null ? void 0 : e.replace(/\/$/, "");
 }
-var dp = class {
-  constructor(e) {
-    this.object = e.object, this.finishReason = e.finishReason, this.usage = e.usage, this.warnings = e.warnings, this.providerMetadata = e.providerMetadata, this.experimental_providerMetadata = e.providerMetadata, this.response = e.response, this.request = e.request, this.logprobs = e.logprobs;
-  }
-  toJsonResponse(e) {
-    var t;
-    return new Response(JSON.stringify(this.object), {
-      status: (t = e == null ? void 0 : e.status) != null ? t : 200,
-      headers: Lt(e == null ? void 0 : e.headers, {
-        contentType: "application/json; charset=utf-8"
-      })
-    });
-  }
-}, xe = class {
-  constructor() {
-    this.status = { type: "pending" }, this._resolve = void 0, this._reject = void 0;
-  }
-  get value() {
-    return this.promise ? this.promise : (this.promise = new Promise((e, t) => {
-      this.status.type === "resolved" ? e(this.status.value) : this.status.type === "rejected" && t(this.status.error), this._resolve = e, this._reject = t;
-    }), this.promise);
-  }
-  resolve(e) {
-    var t;
-    this.status = { type: "resolved", value: e }, this.promise && ((t = this._resolve) == null || t.call(this, e));
-  }
-  reject(e) {
-    var t;
-    this.status = { type: "rejected", error: e }, this.promise && ((t = this._reject) == null || t.call(this, e));
-  }
-};
-function Ja() {
-  let e, t;
-  return {
-    promise: new Promise((n, a) => {
-      e = n, t = a;
-    }),
-    resolve: e,
-    reject: t
-  };
-}
-function Yo() {
-  let e = [], t = null, r = !1, n = Ja();
-  const a = async () => {
-    if (r && e.length === 0) {
-      t == null || t.close();
-      return;
-    }
-    if (e.length === 0)
-      return n = Ja(), await n.promise, a();
-    try {
-      const { value: s, done: o } = await e[0].read();
-      o ? (e.shift(), e.length > 0 ? await a() : r && (t == null || t.close())) : t == null || t.enqueue(s);
-    } catch (s) {
-      t == null || t.error(s), e.shift(), r && e.length === 0 && (t == null || t.close());
-    }
-  };
-  return {
-    stream: new ReadableStream({
-      start(s) {
-        t = s;
-      },
-      pull: a,
-      async cancel() {
-        for (const s of e)
-          await s.cancel();
-        e = [], r = !0;
-      }
-    }),
-    addStream: (s) => {
-      if (r)
-        throw new Error("Cannot add inner stream: outer stream is closed");
-      e.push(s.getReader()), n.resolve();
-    },
-    /**
-     * Gracefully close the outer stream. This will let the inner streams
-     * finish processing and then close the outer stream.
-     */
-    close: () => {
-      r = !0, n.resolve(), e.length === 0 && (t == null || t.close());
-    },
-    /**
-     * Immediately close the outer stream. This will cancel all inner streams
-     * and close the outer stream.
-     */
-    terminate: () => {
-      r = !0, n.resolve(), e.forEach((s) => s.cancel()), e = [], t == null || t.close();
-    }
-  };
-}
-function Xo() {
-  var e, t;
-  return (t = (e = globalThis == null ? void 0 : globalThis.performance) == null ? void 0 : e.now()) != null ? t : Date.now();
-}
-var pp = Ft({ prefix: "aiobj", size: 24 });
-function vh({
-  model: e,
-  schema: t,
-  schemaName: r,
-  schemaDescription: n,
-  mode: a,
-  output: s = "object",
-  system: o,
-  prompt: i,
-  messages: l,
-  maxRetries: u,
-  abortSignal: c,
-  headers: d,
-  experimental_telemetry: m,
-  experimental_providerMetadata: _,
-  providerOptions: v = _,
-  onError: g,
-  onFinish: p,
-  _internal: {
-    generateId: f = pp,
-    currentDate: w = () => /* @__PURE__ */ new Date(),
-    now: k = Xo
-  } = {},
-  ...b
-}) {
-  Ko({
-    output: s,
-    mode: a,
-    schema: t,
-    schemaName: r,
-    schemaDescription: n
-  });
-  const x = Wo({ output: s, schema: t });
-  return x.type === "no-schema" && a === void 0 && (a = "json"), new mp({
-    model: e,
-    telemetry: m,
-    headers: d,
-    settings: b,
-    maxRetries: u,
-    abortSignal: c,
-    outputStrategy: x,
-    system: o,
-    prompt: i,
-    messages: l,
-    schemaName: r,
-    schemaDescription: n,
-    providerOptions: v,
-    mode: a,
-    onError: g,
-    onFinish: p,
-    generateId: f,
-    currentDate: w,
-    now: k
-  });
-}
-var mp = class {
-  constructor({
-    model: e,
-    headers: t,
-    telemetry: r,
-    settings: n,
-    maxRetries: a,
-    abortSignal: s,
-    outputStrategy: o,
-    system: i,
-    prompt: l,
-    messages: u,
-    schemaName: c,
-    schemaDescription: d,
-    providerOptions: m,
-    mode: _,
-    onError: v,
-    onFinish: g,
-    generateId: p,
-    currentDate: f,
-    now: w
-  }) {
-    this.objectPromise = new xe(), this.usagePromise = new xe(), this.providerMetadataPromise = new xe(), this.warningsPromise = new xe(), this.requestPromise = new xe(), this.responsePromise = new xe();
-    const { maxRetries: k, retry: b } = _t({
-      maxRetries: a
-    }), x = tr({
-      model: e,
-      telemetry: r,
-      headers: t,
-      settings: { ...n, maxRetries: k }
-    }), S = rr(r), $ = this, E = Yo(), P = new TransformStream({
-      transform(G, ce) {
-        ce.enqueue(G), G.type === "error" && (v == null || v({ error: G.error }));
-      }
-    });
-    this.baseStream = E.stream.pipeThrough(P), Me({
-      name: "ai.streamObject",
-      attributes: W({
-        telemetry: r,
-        attributes: {
-          ...Oe({
-            operationId: "ai.streamObject",
-            telemetry: r
-          }),
-          ...x,
-          // specific settings that only make sense on the outer level:
-          "ai.prompt": {
-            input: () => JSON.stringify({ system: i, prompt: l, messages: u })
-          },
-          "ai.schema": o.jsonSchema != null ? { input: () => JSON.stringify(o.jsonSchema) } : void 0,
-          "ai.schema.name": c,
-          "ai.schema.description": d,
-          "ai.settings.output": o.type,
-          "ai.settings.mode": _
-        }
-      }),
-      tracer: S,
-      endWhenDone: !1,
-      fn: async (G) => {
-        var ce, be;
-        (_ === "auto" || _ == null) && (_ = e.defaultObjectGenerationMode);
-        let me, ie;
-        switch (_) {
-          case "json": {
-            const B = Qt({
-              prompt: {
-                system: o.jsonSchema == null ? Ir({ prompt: i }) : e.supportsStructuredOutputs ? i : Ir({
-                  prompt: i,
-                  schema: o.jsonSchema
-                }),
-                prompt: l,
-                messages: u
-              },
-              tools: void 0
-            });
-            me = {
-              mode: {
-                type: "object-json",
-                schema: o.jsonSchema,
-                name: c,
-                description: d
-              },
-              ...Xt(n),
-              inputFormat: B.type,
-              prompt: await Yt({
-                prompt: B,
-                modelSupportsImageUrls: e.supportsImageUrls,
-                modelSupportsUrl: (ce = e.supportsUrl) == null ? void 0 : ce.bind(e)
-                // support 'this' context
-              }),
-              providerMetadata: m,
-              abortSignal: s,
-              headers: t
-            }, ie = {
-              transform: (D, Z) => {
-                switch (D.type) {
-                  case "text-delta":
-                    Z.enqueue(D.textDelta);
-                    break;
-                  case "response-metadata":
-                  case "finish":
-                  case "error":
-                    Z.enqueue(D);
-                    break;
-                }
-              }
-            };
-            break;
-          }
-          case "tool": {
-            const B = Qt({
-              prompt: { system: i, prompt: l, messages: u },
-              tools: void 0
-            });
-            me = {
-              mode: {
-                type: "object-tool",
-                tool: {
-                  type: "function",
-                  name: c ?? "json",
-                  description: d ?? "Respond with a JSON object.",
-                  parameters: o.jsonSchema
-                }
-              },
-              ...Xt(n),
-              inputFormat: B.type,
-              prompt: await Yt({
-                prompt: B,
-                modelSupportsImageUrls: e.supportsImageUrls,
-                modelSupportsUrl: (be = e.supportsUrl) == null ? void 0 : be.bind(e)
-                // support 'this' context,
-              }),
-              providerMetadata: m,
-              abortSignal: s,
-              headers: t
-            }, ie = {
-              transform(D, Z) {
-                switch (D.type) {
-                  case "tool-call-delta":
-                    Z.enqueue(D.argsTextDelta);
-                    break;
-                  case "response-metadata":
-                  case "finish":
-                  case "error":
-                    Z.enqueue(D);
-                    break;
-                }
-              }
-            };
-            break;
-          }
-          case void 0:
-            throw new Error(
-              "Model does not have a default object generation mode."
-            );
-          default: {
-            const B = _;
-            throw new Error(`Unsupported mode: ${B}`);
-          }
-        }
-        const {
-          result: { stream: de, warnings: ye, rawResponse: fe, request: H },
-          doStreamSpan: ue,
-          startTimestampMs: Y
-        } = await b(
-          () => Me({
-            name: "ai.streamObject.doStream",
-            attributes: W({
-              telemetry: r,
-              attributes: {
-                ...Oe({
-                  operationId: "ai.streamObject.doStream",
-                  telemetry: r
-                }),
-                ...x,
-                "ai.prompt.format": {
-                  input: () => me.inputFormat
-                },
-                "ai.prompt.messages": {
-                  input: () => yn(me.prompt)
-                },
-                "ai.settings.mode": _,
-                // standardized gen-ai llm span attributes:
-                "gen_ai.system": e.provider,
-                "gen_ai.request.model": e.modelId,
-                "gen_ai.request.frequency_penalty": n.frequencyPenalty,
-                "gen_ai.request.max_tokens": n.maxTokens,
-                "gen_ai.request.presence_penalty": n.presencePenalty,
-                "gen_ai.request.temperature": n.temperature,
-                "gen_ai.request.top_k": n.topK,
-                "gen_ai.request.top_p": n.topP
-              }
-            }),
-            tracer: S,
-            endWhenDone: !1,
-            fn: async (B) => ({
-              startTimestampMs: w(),
-              doStreamSpan: B,
-              result: await e.doStream(me)
-            })
-          })
-        );
-        $.requestPromise.resolve(H ?? {});
-        let U, Ce, qe, Re, ee, oe = "", re = "", te = {
-          id: p(),
-          timestamp: f(),
-          modelId: e.modelId
-        }, q, he, Ae = !0, Ne = !0;
-        const je = de.pipeThrough(new TransformStream(ie)).pipeThrough(
-          new TransformStream({
-            async transform(B, D) {
-              var Z, we, X;
-              if (Ae) {
-                const T = w() - Y;
-                Ae = !1, ue.addEvent("ai.stream.firstChunk", {
-                  "ai.stream.msToFirstChunk": T
-                }), ue.setAttributes({
-                  "ai.stream.msToFirstChunk": T
-                });
-              }
-              if (typeof B == "string") {
-                oe += B, re += B;
-                const { value: T, state: le } = oo(oe);
-                if (T !== void 0 && !rn(q, T)) {
-                  const Ee = o.validatePartialResult({
-                    value: T,
-                    textDelta: re,
-                    latestObject: he,
-                    isFirstDelta: Ne,
-                    isFinalDelta: le === "successful-parse"
-                  });
-                  Ee.success && !rn(
-                    he,
-                    Ee.value.partial
-                  ) && (q = T, he = Ee.value.partial, D.enqueue({
-                    type: "object",
-                    object: he
-                  }), D.enqueue({
-                    type: "text-delta",
-                    textDelta: Ee.value.textDelta
-                  }), re = "", Ne = !1);
-                }
-                return;
-              }
-              switch (B.type) {
-                case "response-metadata": {
-                  te = {
-                    id: (Z = B.id) != null ? Z : te.id,
-                    timestamp: (we = B.timestamp) != null ? we : te.timestamp,
-                    modelId: (X = B.modelId) != null ? X : te.modelId
-                  };
-                  break;
-                }
-                case "finish": {
-                  re !== "" && D.enqueue({ type: "text-delta", textDelta: re }), Ce = B.finishReason, U = ct(B.usage), qe = B.providerMetadata, D.enqueue({ ...B, usage: U, response: te }), $.usagePromise.resolve(U), $.providerMetadataPromise.resolve(qe), $.responsePromise.resolve({
-                    ...te,
-                    headers: fe == null ? void 0 : fe.headers
-                  });
-                  const T = o.validateFinalResult(
-                    q,
-                    {
-                      text: oe,
-                      response: te,
-                      usage: U
-                    }
-                  );
-                  T.success ? (Re = T.value, $.objectPromise.resolve(Re)) : (ee = new dt({
-                    message: "No object generated: response did not match schema.",
-                    cause: T.error,
-                    text: oe,
-                    response: te,
-                    usage: U,
-                    finishReason: Ce
-                  }), $.objectPromise.reject(ee));
-                  break;
-                }
-                default: {
-                  D.enqueue(B);
-                  break;
-                }
-              }
-            },
-            // invoke onFinish callback and resolve toolResults promise when the stream is about to close:
-            async flush(B) {
-              try {
-                const D = U ?? {
-                  promptTokens: NaN,
-                  completionTokens: NaN,
-                  totalTokens: NaN
-                };
-                ue.setAttributes(
-                  W({
-                    telemetry: r,
-                    attributes: {
-                      "ai.response.finishReason": Ce,
-                      "ai.response.object": {
-                        output: () => JSON.stringify(Re)
-                      },
-                      "ai.response.id": te.id,
-                      "ai.response.model": te.modelId,
-                      "ai.response.timestamp": te.timestamp.toISOString(),
-                      "ai.usage.promptTokens": D.promptTokens,
-                      "ai.usage.completionTokens": D.completionTokens,
-                      // standardized gen-ai llm span attributes:
-                      "gen_ai.response.finish_reasons": [Ce],
-                      "gen_ai.response.id": te.id,
-                      "gen_ai.response.model": te.modelId,
-                      "gen_ai.usage.input_tokens": D.promptTokens,
-                      "gen_ai.usage.output_tokens": D.completionTokens
-                    }
-                  })
-                ), ue.end(), G.setAttributes(
-                  W({
-                    telemetry: r,
-                    attributes: {
-                      "ai.usage.promptTokens": D.promptTokens,
-                      "ai.usage.completionTokens": D.completionTokens,
-                      "ai.response.object": {
-                        output: () => JSON.stringify(Re)
-                      }
-                    }
-                  })
-                ), await (g == null ? void 0 : g({
-                  usage: D,
-                  object: Re,
-                  error: ee,
-                  response: {
-                    ...te,
-                    headers: fe == null ? void 0 : fe.headers
-                  },
-                  warnings: ye,
-                  providerMetadata: qe,
-                  experimental_providerMetadata: qe
-                }));
-              } catch (D) {
-                B.enqueue({ type: "error", error: D });
-              } finally {
-                G.end();
-              }
-            }
-          })
-        );
-        E.addStream(je);
-      }
-    }).catch((G) => {
-      E.addStream(
-        new ReadableStream({
-          start(ce) {
-            ce.enqueue({ type: "error", error: G }), ce.close();
-          }
-        })
-      );
-    }).finally(() => {
-      E.close();
-    }), this.outputStrategy = o;
-  }
-  get object() {
-    return this.objectPromise.value;
-  }
-  get usage() {
-    return this.usagePromise.value;
-  }
-  get experimental_providerMetadata() {
-    return this.providerMetadataPromise.value;
-  }
-  get providerMetadata() {
-    return this.providerMetadataPromise.value;
-  }
-  get warnings() {
-    return this.warningsPromise.value;
-  }
-  get request() {
-    return this.requestPromise.value;
-  }
-  get response() {
-    return this.responsePromise.value;
-  }
-  get partialObjectStream() {
-    return Pt(
-      this.baseStream.pipeThrough(
-        new TransformStream({
-          transform(e, t) {
-            switch (e.type) {
-              case "object":
-                t.enqueue(e.object);
-                break;
-              case "text-delta":
-              case "finish":
-              case "error":
-                break;
-              default: {
-                const r = e;
-                throw new Error(`Unsupported chunk type: ${r}`);
-              }
-            }
-          }
-        })
-      )
-    );
-  }
-  get elementStream() {
-    return this.outputStrategy.createElementStream(this.baseStream);
-  }
-  get textStream() {
-    return Pt(
-      this.baseStream.pipeThrough(
-        new TransformStream({
-          transform(e, t) {
-            switch (e.type) {
-              case "text-delta":
-                t.enqueue(e.textDelta);
-                break;
-              case "object":
-              case "finish":
-              case "error":
-                break;
-              default: {
-                const r = e;
-                throw new Error(`Unsupported chunk type: ${r}`);
-              }
-            }
-          }
-        })
-      )
-    );
-  }
-  get fullStream() {
-    return Pt(this.baseStream);
-  }
-  pipeTextStreamToResponse(e, t) {
-    sn({
-      response: e,
-      status: t == null ? void 0 : t.status,
-      statusText: t == null ? void 0 : t.statusText,
-      headers: an(t == null ? void 0 : t.headers, {
-        contentType: "text/plain; charset=utf-8"
-      }),
-      stream: this.textStream.pipeThrough(new TextEncoderStream())
-    });
-  }
-  toTextStreamResponse(e) {
-    var t;
-    return new Response(this.textStream.pipeThrough(new TextEncoderStream()), {
-      status: (t = e == null ? void 0 : e.status) != null ? t : 200,
-      headers: Lt(e == null ? void 0 : e.headers, {
-        contentType: "text/plain; charset=utf-8"
-      })
-    });
-  }
-}, Qo = "AI_NoOutputSpecifiedError", ei = `vercel.ai.error.${Qo}`, fp = Symbol.for(ei), ti, ri = class extends j {
-  // used in isInstance
-  constructor({ message: e = "No output specified." } = {}) {
-    super({ name: Qo, message: e }), this[ti] = !0;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, ei);
-  }
-};
-ti = fp;
-var ni = "AI_ToolExecutionError", ai = `vercel.ai.error.${ni}`, hp = Symbol.for(ai), si, oi = class extends j {
-  constructor({
-    toolArgs: e,
-    toolName: t,
-    toolCallId: r,
-    cause: n,
-    message: a = `Error executing tool ${t}: ${Rr(n)}`
-  }) {
-    super({ name: ni, message: a, cause: n }), this[si] = !0, this.toolArgs = e, this.toolName = t, this.toolCallId = r;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, ai);
-  }
-};
-si = hp;
-function gp(e) {
-  return e != null && Object.keys(e).length > 0;
-}
-function ii({
-  tools: e,
-  toolChoice: t,
-  activeTools: r
-}) {
-  return gp(e) ? {
-    tools: (r != null ? Object.entries(e).filter(
-      ([a]) => r.includes(a)
-    ) : Object.entries(e)).map(([a, s]) => {
-      const o = s.type;
-      switch (o) {
-        case void 0:
-        case "function":
-          return {
-            type: "function",
-            name: a,
-            description: s.description,
-            parameters: Kt(s.parameters).jsonSchema
-          };
-        case "provider-defined":
-          return {
-            type: "provider-defined",
-            name: a,
-            id: s.id,
-            args: s.args
-          };
-        default: {
-          const i = o;
-          throw new Error(`Unsupported tool type: ${i}`);
-        }
-      }
-    }),
-    toolChoice: t == null ? { type: "auto" } : typeof t == "string" ? { type: t } : { type: "tool", toolName: t.toolName }
-  } : {
-    tools: void 0,
-    toolChoice: void 0
-  };
-}
-var yp = /^([\s\S]*?)(\s+)(\S*)$/;
-function li(e) {
-  const t = e.match(yp);
-  return t ? { prefix: t[1], whitespace: t[2], suffix: t[3] } : void 0;
-}
-function vp(e) {
-  const t = li(e);
-  return t ? t.prefix + t.whitespace : e;
-}
-var ui = "AI_InvalidToolArgumentsError", ci = `vercel.ai.error.${ui}`, _p = Symbol.for(ci), di, pi = class extends j {
-  constructor({
-    toolArgs: e,
-    toolName: t,
-    cause: r,
-    message: n = `Invalid arguments for tool ${t}: ${Rr(
-      r
-    )}`
-  }) {
-    super({ name: ui, message: n, cause: r }), this[di] = !0, this.toolArgs = e, this.toolName = t;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, ci);
-  }
-};
-di = _p;
-var mi = "AI_NoSuchToolError", fi = `vercel.ai.error.${mi}`, bp = Symbol.for(fi), hi, Jn = class extends j {
-  constructor({
-    toolName: e,
-    availableTools: t = void 0,
-    message: r = `Model tried to call unavailable tool '${e}'. ${t === void 0 ? "No tools are available." : `Available tools: ${t.join(", ")}.`}`
-  }) {
-    super({ name: mi, message: r }), this[hi] = !0, this.toolName = e, this.availableTools = t;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, fi);
-  }
-};
-hi = bp;
-var gi = "AI_ToolCallRepairError", yi = `vercel.ai.error.${gi}`, wp = Symbol.for(yi), vi, xp = class extends j {
-  constructor({
-    cause: e,
-    originalError: t,
-    message: r = `Error repairing tool call: ${Rr(e)}`
-  }) {
-    super({ name: gi, message: r, cause: e }), this[vi] = !0, this.originalError = t;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, yi);
-  }
-};
-vi = wp;
-async function _i({
-  toolCall: e,
-  tools: t,
-  repairToolCall: r,
-  system: n,
-  messages: a
-}) {
-  if (t == null)
-    throw new Jn({ toolName: e.toolName });
-  try {
-    return await za({ toolCall: e, tools: t });
-  } catch (s) {
-    if (r == null || !(Jn.isInstance(s) || pi.isInstance(s)))
-      throw s;
-    let o = null;
-    try {
-      o = await r({
-        toolCall: e,
-        tools: t,
-        parameterSchema: ({ toolName: i }) => Kt(t[i].parameters).jsonSchema,
-        system: n,
-        messages: a,
-        error: s
-      });
-    } catch (i) {
-      throw new xp({
-        cause: i,
-        originalError: s
-      });
-    }
-    if (o == null)
-      throw s;
-    return await za({ toolCall: o, tools: t });
-  }
-}
-async function za({
-  toolCall: e,
-  tools: t
-}) {
-  const r = e.toolName, n = t[r];
-  if (n == null)
-    throw new Jn({
-      toolName: e.toolName,
-      availableTools: Object.keys(t)
-    });
-  const a = Kt(n.parameters), s = e.args.trim() === "" ? ht({ value: {}, schema: a }) : Ot({ text: e.args, schema: a });
-  if (s.success === !1)
-    throw new pi({
-      toolName: r,
-      toolArgs: e.args,
-      cause: s.error
-    });
-  return {
-    type: "tool-call",
-    toolCallId: e.toolCallId,
-    toolName: r,
-    args: s.value
-  };
-}
-function zn(e) {
-  const t = e.filter((r) => r.type === "text").map((r) => r.text).join("");
-  return t.length > 0 ? t : void 0;
-}
-function Gn({
-  text: e = "",
-  files: t,
-  reasoning: r,
-  tools: n,
-  toolCalls: a,
-  toolResults: s,
-  messageId: o,
-  generateMessageId: i
-}) {
-  const l = [], u = [];
-  return r.length > 0 && u.push(
-    ...r.map(
-      (c) => c.type === "text" ? { ...c, type: "reasoning" } : { ...c, type: "redacted-reasoning" }
-    )
-  ), t.length > 0 && u.push(
-    ...t.map((c) => ({
-      type: "file",
-      data: c.base64,
-      mimeType: c.mimeType
-    }))
-  ), e.length > 0 && u.push({ type: "text", text: e }), a.length > 0 && u.push(...a), u.length > 0 && l.push({
-    role: "assistant",
-    content: u,
-    id: o
-  }), s.length > 0 && l.push({
-    role: "tool",
-    id: i(),
-    content: s.map((c) => {
-      const d = n[c.toolName];
-      return (d == null ? void 0 : d.experimental_toToolResultContent) != null ? {
-        type: "tool-result",
-        toolCallId: c.toolCallId,
-        toolName: c.toolName,
-        result: d.experimental_toToolResultContent(c.result),
-        experimental_content: d.experimental_toToolResultContent(
-          c.result
-        )
-      } : {
-        type: "tool-result",
-        toolCallId: c.toolCallId,
-        toolName: c.toolName,
-        result: c.result
-      };
-    })
-  }), l;
-}
-var kp = Ft({
-  prefix: "aitxt",
-  size: 24
-}), Tp = Ft({
-  prefix: "msg",
-  size: 24
-});
-async function _h({
-  model: e,
-  tools: t,
-  toolChoice: r,
-  system: n,
-  prompt: a,
-  messages: s,
-  maxRetries: o,
-  abortSignal: i,
-  headers: l,
-  maxSteps: u = 1,
-  experimental_generateMessageId: c = Tp,
-  experimental_output: d,
-  experimental_continueSteps: m = !1,
-  experimental_telemetry: _,
-  experimental_providerMetadata: v,
-  providerOptions: g = v,
-  experimental_activeTools: p,
-  experimental_prepareStep: f,
-  experimental_repairToolCall: w,
-  _internal: {
-    generateId: k = kp,
-    currentDate: b = () => /* @__PURE__ */ new Date()
-  } = {},
-  onStepFinish: x,
-  ...S
-}) {
-  var $;
-  if (u < 1)
-    throw new ne({
-      parameter: "maxSteps",
-      value: u,
-      message: "maxSteps must be at least 1"
-    });
-  const { maxRetries: E, retry: P } = _t({ maxRetries: o }), G = tr({
-    model: e,
-    telemetry: _,
-    headers: l,
-    settings: { ...S, maxRetries: E }
-  }), ce = Qt({
-    prompt: {
-      system: ($ = d == null ? void 0 : d.injectIntoSystemPrompt({ system: n, model: e })) != null ? $ : n,
-      prompt: a,
-      messages: s
-    },
-    tools: t
-  }), be = rr(_);
-  return Me({
-    name: "ai.generateText",
-    attributes: W({
-      telemetry: _,
-      attributes: {
-        ...Oe({
-          operationId: "ai.generateText",
-          telemetry: _
-        }),
-        ...G,
-        // model:
-        "ai.model.provider": e.provider,
-        "ai.model.id": e.modelId,
-        // specific settings that only make sense on the outer level:
-        "ai.prompt": {
-          input: () => JSON.stringify({ system: n, prompt: a, messages: s })
-        },
-        "ai.settings.maxSteps": u
-      }
-    }),
-    tracer: be,
-    fn: async (me) => {
-      var ie, de, ye, fe, H, ue, Y, U, Ce, qe, Re, ee, oe, re;
-      const te = Xt(S);
-      let q, he = [], Ae = [], Ne = [], je = 0;
-      const B = [];
-      let D = "";
-      const Z = [], we = [];
-      let X = {
-        completionTokens: 0,
-        promptTokens: 0,
-        totalTokens: 0
-      }, T = "initial";
-      do {
-        const le = je === 0 ? ce.type : "messages", Ee = [
-          ...ce.messages,
-          ...B
-        ], Te = await (f == null ? void 0 : f({
-          model: e,
-          steps: we,
-          maxSteps: u,
-          stepNumber: je
-        })), Vt = (ie = Te == null ? void 0 : Te.toolChoice) != null ? ie : r, _n = (de = Te == null ? void 0 : Te.experimental_activeTools) != null ? de : p, Ue = (ye = Te == null ? void 0 : Te.model) != null ? ye : e, nr = await Yt({
-          prompt: {
-            type: le,
-            system: ce.system,
-            messages: Ee
-          },
-          modelSupportsImageUrls: Ue.supportsImageUrls,
-          modelSupportsUrl: (fe = Ue.supportsUrl) == null ? void 0 : fe.bind(Ue)
-          // support 'this' context
-        }), bt = {
-          type: "regular",
-          ...ii({
-            tools: t,
-            toolChoice: Vt,
-            activeTools: _n
-          })
-        };
-        q = await P(
-          () => Me({
-            name: "ai.generateText.doGenerate",
-            attributes: W({
-              telemetry: _,
-              attributes: {
-                ...Oe({
-                  operationId: "ai.generateText.doGenerate",
-                  telemetry: _
-                }),
-                ...G,
-                // model:
-                "ai.model.provider": Ue.provider,
-                "ai.model.id": Ue.modelId,
-                // prompt:
-                "ai.prompt.format": { input: () => le },
-                "ai.prompt.messages": {
-                  input: () => yn(nr)
-                },
-                "ai.prompt.tools": {
-                  // convert the language model level tools:
-                  input: () => {
-                    var Ze;
-                    return (Ze = bt.tools) == null ? void 0 : Ze.map((Ge) => JSON.stringify(Ge));
-                  }
-                },
-                "ai.prompt.toolChoice": {
-                  input: () => bt.toolChoice != null ? JSON.stringify(bt.toolChoice) : void 0
-                },
-                // standardized gen-ai llm span attributes:
-                "gen_ai.system": Ue.provider,
-                "gen_ai.request.model": Ue.modelId,
-                "gen_ai.request.frequency_penalty": S.frequencyPenalty,
-                "gen_ai.request.max_tokens": S.maxTokens,
-                "gen_ai.request.presence_penalty": S.presencePenalty,
-                "gen_ai.request.stop_sequences": S.stopSequences,
-                "gen_ai.request.temperature": S.temperature,
-                "gen_ai.request.top_k": S.topK,
-                "gen_ai.request.top_p": S.topP
-              }
-            }),
-            tracer: be,
-            fn: async (Ze) => {
-              var Ge, sr, jr, or, Ye, Bt;
-              const Pe = await Ue.doGenerate({
-                mode: bt,
-                ...te,
-                inputFormat: le,
-                responseFormat: d == null ? void 0 : d.responseFormat({ model: e }),
-                prompt: nr,
-                providerMetadata: g,
-                abortSignal: i,
-                headers: l
-              }), it = {
-                id: (sr = (Ge = Pe.response) == null ? void 0 : Ge.id) != null ? sr : k(),
-                timestamp: (or = (jr = Pe.response) == null ? void 0 : jr.timestamp) != null ? or : b(),
-                modelId: (Bt = (Ye = Pe.response) == null ? void 0 : Ye.modelId) != null ? Bt : Ue.modelId
-              };
-              return Ze.setAttributes(
-                W({
-                  telemetry: _,
-                  attributes: {
-                    "ai.response.finishReason": Pe.finishReason,
-                    "ai.response.text": {
-                      output: () => Pe.text
-                    },
-                    "ai.response.toolCalls": {
-                      output: () => JSON.stringify(Pe.toolCalls)
-                    },
-                    "ai.response.id": it.id,
-                    "ai.response.model": it.modelId,
-                    "ai.response.timestamp": it.timestamp.toISOString(),
-                    "ai.usage.promptTokens": Pe.usage.promptTokens,
-                    "ai.usage.completionTokens": Pe.usage.completionTokens,
-                    // standardized gen-ai llm span attributes:
-                    "gen_ai.response.finish_reasons": [Pe.finishReason],
-                    "gen_ai.response.id": it.id,
-                    "gen_ai.response.model": it.modelId,
-                    "gen_ai.usage.input_tokens": Pe.usage.promptTokens,
-                    "gen_ai.usage.output_tokens": Pe.usage.completionTokens
-                  }
-                })
-              ), { ...Pe, response: it };
-            }
-          })
-        ), he = await Promise.all(
-          ((H = q.toolCalls) != null ? H : []).map(
-            (Ze) => _i({
-              toolCall: Ze,
-              tools: t,
-              repairToolCall: w,
-              system: n,
-              messages: Ee
-            })
-          )
-        ), Ae = t == null ? [] : await Sp({
-          toolCalls: he,
-          tools: t,
-          tracer: be,
-          telemetry: _,
-          messages: Ee,
-          abortSignal: i
-        });
-        const ar = ct(
-          q.usage
-        );
-        X = Ho(X, ar);
-        let st = "done";
-        ++je < u && (m && q.finishReason === "length" && // only use continue when there are no tool calls:
-        he.length === 0 ? st = "continue" : (
-          // there are tool calls:
-          he.length > 0 && // all current tool calls have results:
-          Ae.length === he.length && (st = "tool-result")
-        ));
-        const It = (ue = q.text) != null ? ue : "", Mr = T === "continue" && // only for continue steps
-        D.trimEnd() !== D ? It.trimStart() : It, ot = st === "continue" ? vp(Mr) : Mr;
-        if (D = st === "continue" || T === "continue" ? D + ot : ot, Ne = Ga(
-          q.reasoning
-        ), Z.push(...(Y = q.sources) != null ? Y : []), T === "continue") {
-          const Ze = B[B.length - 1];
-          typeof Ze.content == "string" ? Ze.content += ot : Ze.content.push({
-            text: ot,
-            type: "text"
-          });
-        } else
-          B.push(
-            ...Gn({
-              text: D,
-              files: On(q.files),
-              reasoning: Ga(q.reasoning),
-              tools: t ?? {},
-              toolCalls: he,
-              toolResults: Ae,
-              messageId: c(),
-              generateMessageId: c
-            })
-          );
-        const Ct = {
-          stepType: T,
-          text: ot,
-          // TODO v5: rename reasoning to reasoningText (and use reasoning for composite array)
-          reasoning: zn(Ne),
-          reasoningDetails: Ne,
-          files: On(q.files),
-          sources: (U = q.sources) != null ? U : [],
-          toolCalls: he,
-          toolResults: Ae,
-          finishReason: q.finishReason,
-          usage: ar,
-          warnings: q.warnings,
-          logprobs: q.logprobs,
-          request: (Ce = q.request) != null ? Ce : {},
-          response: {
-            ...q.response,
-            headers: (qe = q.rawResponse) == null ? void 0 : qe.headers,
-            body: (Re = q.rawResponse) == null ? void 0 : Re.body,
-            // deep clone msgs to avoid mutating past messages in multi-step:
-            messages: structuredClone(B)
-          },
-          providerMetadata: q.providerMetadata,
-          experimental_providerMetadata: q.providerMetadata,
-          isContinued: st === "continue"
-        };
-        we.push(Ct), await (x == null ? void 0 : x(Ct)), T = st;
-      } while (T !== "done");
-      return me.setAttributes(
-        W({
-          telemetry: _,
-          attributes: {
-            "ai.response.finishReason": q.finishReason,
-            "ai.response.text": {
-              output: () => q.text
-            },
-            "ai.response.toolCalls": {
-              output: () => JSON.stringify(q.toolCalls)
-            },
-            "ai.usage.promptTokens": q.usage.promptTokens,
-            "ai.usage.completionTokens": q.usage.completionTokens
-          }
-        })
-      ), new Ip({
-        text: D,
-        files: On(q.files),
-        reasoning: zn(Ne),
-        reasoningDetails: Ne,
-        sources: Z,
-        outputResolver: () => {
-          if (d == null)
-            throw new ri();
-          return d.parseOutput(
-            { text: D },
-            {
-              response: q.response,
-              usage: X,
-              finishReason: q.finishReason
-            }
-          );
-        },
-        toolCalls: he,
-        toolResults: Ae,
-        finishReason: q.finishReason,
-        usage: X,
-        warnings: q.warnings,
-        request: (ee = q.request) != null ? ee : {},
-        response: {
-          ...q.response,
-          headers: (oe = q.rawResponse) == null ? void 0 : oe.headers,
-          body: (re = q.rawResponse) == null ? void 0 : re.body,
-          messages: B
-        },
-        logprobs: q.logprobs,
-        steps: we,
-        providerMetadata: q.providerMetadata
-      });
-    }
-  });
-}
-async function Sp({
-  toolCalls: e,
-  tools: t,
-  tracer: r,
-  telemetry: n,
-  messages: a,
-  abortSignal: s
-}) {
-  return (await Promise.all(
-    e.map(async ({ toolCallId: i, toolName: l, args: u }) => {
-      const c = t[l];
-      if ((c == null ? void 0 : c.execute) == null)
-        return;
-      const d = await Me({
-        name: "ai.toolCall",
-        attributes: W({
-          telemetry: n,
-          attributes: {
-            ...Oe({
-              operationId: "ai.toolCall",
-              telemetry: n
-            }),
-            "ai.toolCall.name": l,
-            "ai.toolCall.id": i,
-            "ai.toolCall.args": {
-              output: () => JSON.stringify(u)
-            }
-          }
-        }),
-        tracer: r,
-        fn: async (m) => {
-          try {
-            const _ = await c.execute(u, {
-              toolCallId: i,
-              messages: a,
-              abortSignal: s
-            });
-            try {
-              m.setAttributes(
-                W({
-                  telemetry: n,
-                  attributes: {
-                    "ai.toolCall.result": {
-                      output: () => JSON.stringify(_)
-                    }
-                  }
-                })
-              );
-            } catch {
-            }
-            return _;
-          } catch (_) {
-            throw new oi({
-              toolCallId: i,
-              toolName: l,
-              toolArgs: u,
-              cause: _
-            });
-          }
-        }
-      });
-      return {
-        type: "tool-result",
-        toolCallId: i,
-        toolName: l,
-        args: u,
-        result: d
-      };
-    })
-  )).filter(
-    (i) => i != null
-  );
-}
-var Ip = class {
-  constructor(e) {
-    this.text = e.text, this.files = e.files, this.reasoning = e.reasoning, this.reasoningDetails = e.reasoningDetails, this.toolCalls = e.toolCalls, this.toolResults = e.toolResults, this.finishReason = e.finishReason, this.usage = e.usage, this.warnings = e.warnings, this.request = e.request, this.response = e.response, this.steps = e.steps, this.experimental_providerMetadata = e.providerMetadata, this.providerMetadata = e.providerMetadata, this.logprobs = e.logprobs, this.outputResolver = e.outputResolver, this.sources = e.sources;
-  }
-  get experimental_output() {
-    return this.outputResolver();
-  }
-};
-function Ga(e) {
-  return e == null ? [] : typeof e == "string" ? [{ type: "text", text: e }] : e;
-}
-function On(e) {
-  var t;
-  return (t = e == null ? void 0 : e.map((r) => new fn(r))) != null ? t : [];
-}
-var Cp = {};
-ca(Cp, {
-  object: () => Op,
-  text: () => Pp
-});
-var bi = "AI_InvalidStreamPartError", wi = `vercel.ai.error.${bi}`, Rp = Symbol.for(wi), xi, Ep = class extends j {
-  constructor({
-    chunk: e,
-    message: t
-  }) {
-    super({ name: bi, message: t }), this[xi] = !0, this.chunk = e;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, wi);
-  }
-};
-xi = Rp;
-var Ap = "AI_MCPClientError", ki = `vercel.ai.error.${Ap}`, Np = Symbol.for(ki), Ti, Se = class extends j {
-  constructor({
-    name: e = "MCPClientError",
-    message: t,
-    cause: r
-  }) {
-    super({ name: e, message: t, cause: r }), this[Ti] = !0;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, ki);
-  }
-};
-Ti = Np;
-var Pp = () => ({
-  type: "text",
-  responseFormat: () => ({ type: "text" }),
-  injectIntoSystemPrompt({ system: e }) {
-    return e;
-  },
-  parsePartial({ text: e }) {
-    return { partial: e };
-  },
-  parseOutput({ text: e }) {
-    return e;
-  }
-}), Op = ({
-  schema: e
-}) => {
-  const t = Kt(e);
-  return {
-    type: "object",
-    responseFormat: ({ model: r }) => ({
-      type: "json",
-      schema: r.supportsStructuredOutputs ? t.jsonSchema : void 0
-    }),
-    injectIntoSystemPrompt({ system: r, model: n }) {
-      return n.supportsStructuredOutputs ? r : Ir({
-        prompt: r,
-        schema: t.jsonSchema
-      });
-    },
-    parsePartial({ text: r }) {
-      const n = oo(r);
-      switch (n.state) {
-        case "failed-parse":
-        case "undefined-input":
-          return;
-        case "repaired-parse":
-        case "successful-parse":
-          return {
-            // Note: currently no validation of partial results:
-            partial: n.value
-          };
-        default: {
-          const a = n.state;
-          throw new Error(`Unsupported parse state: ${a}`);
-        }
-      }
-    },
-    parseOutput({ text: r }, n) {
-      const a = Ot({ text: r });
-      if (!a.success)
-        throw new dt({
-          message: "No object generated: could not parse the response.",
-          cause: a.error,
-          text: r,
-          response: n.response,
-          usage: n.usage,
-          finishReason: n.finishReason
-        });
-      const s = ht({
-        value: a.value,
-        schema: t
-      });
-      if (!s.success)
-        throw new dt({
-          message: "No object generated: response did not match schema.",
-          cause: s.error,
-          text: r,
-          response: n.response,
-          usage: n.usage,
-          finishReason: n.finishReason
-        });
-      return s.value;
-    }
-  };
-}, Mp = {
-  word: /\S+\s+/m,
-  line: /\n+/m
-};
-function bh({
-  delayInMs: e = 10,
-  chunking: t = "word",
-  _internal: { delay: r = Qn } = {}
-} = {}) {
-  let n;
-  if (typeof t == "function")
-    n = (a) => {
-      const s = t(a);
-      if (s == null)
-        return null;
-      if (!s.length)
-        throw new Error("Chunking function must return a non-empty string.");
-      if (!a.startsWith(s))
-        throw new Error(
-          `Chunking function must return a match that is a prefix of the buffer. Received: "${s}" expected to start with "${a}"`
-        );
-      return s;
-    };
-  else {
-    const a = typeof t == "string" ? Mp[t] : t;
-    if (a == null)
-      throw new Kn({
-        argument: "chunking",
-        message: `Chunking must be "word" or "line" or a RegExp. Received: ${t}`
-      });
-    n = (s) => {
-      const o = a.exec(s);
-      return o ? s.slice(0, o.index) + (o == null ? void 0 : o[0]) : null;
-    };
-  }
-  return () => {
-    let a = "";
-    return new TransformStream({
-      async transform(s, o) {
-        if (s.type !== "text-delta") {
-          a.length > 0 && (o.enqueue({ type: "text-delta", textDelta: a }), a = ""), o.enqueue(s);
-          return;
-        }
-        a += s.textDelta;
-        let i;
-        for (; (i = n(a)) != null; )
-          o.enqueue({ type: "text-delta", textDelta: i }), a = a.slice(i.length), await r(e);
-      }
-    });
-  };
-}
-function Si(e) {
-  return e === void 0 ? [] : Array.isArray(e) ? e : [e];
-}
-async function jp({
-  stream: e,
-  onError: t
-}) {
-  const r = e.getReader();
-  try {
-    for (; ; ) {
-      const { done: n } = await r.read();
-      if (n)
-        break;
-    }
-  } catch (n) {
-    t == null || t(n);
-  } finally {
-    r.releaseLock();
-  }
-}
-function da(e, t) {
-  const r = e.getReader(), n = t.getReader();
-  let a, s, o = !1, i = !1;
-  async function l(c) {
-    try {
-      a == null && (a = r.read());
-      const d = await a;
-      a = void 0, d.done ? c.close() : c.enqueue(d.value);
-    } catch (d) {
-      c.error(d);
-    }
-  }
-  async function u(c) {
-    try {
-      s == null && (s = n.read());
-      const d = await s;
-      s = void 0, d.done ? c.close() : c.enqueue(d.value);
-    } catch (d) {
-      c.error(d);
-    }
-  }
-  return new ReadableStream({
-    async pull(c) {
-      try {
-        if (o) {
-          await u(c);
-          return;
-        }
-        if (i) {
-          await l(c);
-          return;
-        }
-        a == null && (a = r.read()), s == null && (s = n.read());
-        const { result: d, reader: m } = await Promise.race([
-          a.then((_) => ({ result: _, reader: r })),
-          s.then((_) => ({ result: _, reader: n }))
-        ]);
-        d.done || c.enqueue(d.value), m === r ? (a = void 0, d.done && (await u(c), o = !0)) : (s = void 0, d.done && (i = !0, await l(c)));
-      } catch (d) {
-        c.error(d);
-      }
-    },
-    cancel() {
-      r.cancel(), n.cancel();
-    }
-  });
-}
-function $p({
-  tools: e,
-  generatorStream: t,
-  toolCallStreaming: r,
-  tracer: n,
-  telemetry: a,
-  system: s,
-  messages: o,
-  abortSignal: i,
-  repairToolCall: l
-}) {
-  let u = null;
-  const c = new ReadableStream({
-    start(f) {
-      u = f;
-    }
-  }), d = {}, m = /* @__PURE__ */ new Set();
-  let _ = !1, v;
-  function g() {
-    _ && m.size === 0 && (v != null && u.enqueue(v), u.close());
-  }
-  const p = new TransformStream({
-    async transform(f, w) {
-      const k = f.type;
-      switch (k) {
-        case "text-delta":
-        case "reasoning":
-        case "reasoning-signature":
-        case "redacted-reasoning":
-        case "source":
-        case "response-metadata":
-        case "error": {
-          w.enqueue(f);
-          break;
-        }
-        case "file": {
-          w.enqueue(
-            new Cd({
-              data: f.data,
-              mimeType: f.mimeType
-            })
-          );
-          break;
-        }
-        case "tool-call-delta": {
-          r && (d[f.toolCallId] || (w.enqueue({
-            type: "tool-call-streaming-start",
-            toolCallId: f.toolCallId,
-            toolName: f.toolName
-          }), d[f.toolCallId] = !0), w.enqueue({
-            type: "tool-call-delta",
-            toolCallId: f.toolCallId,
-            toolName: f.toolName,
-            argsTextDelta: f.argsTextDelta
-          }));
-          break;
-        }
-        case "tool-call": {
-          try {
-            const b = await _i({
-              toolCall: f,
-              tools: e,
-              repairToolCall: l,
-              system: s,
-              messages: o
-            });
-            w.enqueue(b);
-            const x = e[b.toolName];
-            if (x.execute != null) {
-              const S = kt();
-              m.add(S), Me({
-                name: "ai.toolCall",
-                attributes: W({
-                  telemetry: a,
-                  attributes: {
-                    ...Oe({
-                      operationId: "ai.toolCall",
-                      telemetry: a
-                    }),
-                    "ai.toolCall.name": b.toolName,
-                    "ai.toolCall.id": b.toolCallId,
-                    "ai.toolCall.args": {
-                      output: () => JSON.stringify(b.args)
-                    }
-                  }
-                }),
-                tracer: n,
-                fn: async ($) => x.execute(b.args, {
-                  toolCallId: b.toolCallId,
-                  messages: o,
-                  abortSignal: i
-                }).then(
-                  (E) => {
-                    u.enqueue({
-                      ...b,
-                      type: "tool-result",
-                      result: E
-                    }), m.delete(S), g();
-                    try {
-                      $.setAttributes(
-                        W({
-                          telemetry: a,
-                          attributes: {
-                            "ai.toolCall.result": {
-                              output: () => JSON.stringify(E)
-                            }
-                          }
-                        })
-                      );
-                    } catch {
-                    }
-                  },
-                  (E) => {
-                    u.enqueue({
-                      type: "error",
-                      error: new oi({
-                        toolCallId: b.toolCallId,
-                        toolName: b.toolName,
-                        toolArgs: b.args,
-                        cause: E
-                      })
-                    }), m.delete(S), g();
-                  }
-                )
-              });
-            }
-          } catch (b) {
-            u.enqueue({
-              type: "error",
-              error: b
-            });
-          }
-          break;
-        }
-        case "finish": {
-          v = {
-            type: "finish",
-            finishReason: f.finishReason,
-            logprobs: f.logprobs,
-            usage: ct(f.usage),
-            experimental_providerMetadata: f.providerMetadata
-          };
-          break;
-        }
-        default: {
-          const b = k;
-          throw new Error(`Unhandled chunk type: ${b}`);
-        }
-      }
-    },
-    flush() {
-      _ = !0, g();
-    }
-  });
-  return new ReadableStream({
-    async start(f) {
-      return Promise.all([
-        t.pipeThrough(p).pipeTo(
-          new WritableStream({
-            write(w) {
-              f.enqueue(w);
-            },
-            close() {
-            }
-          })
-        ),
-        c.pipeTo(
-          new WritableStream({
-            write(w) {
-              f.enqueue(w);
-            },
-            close() {
-              f.close();
-            }
-          })
-        )
-      ]);
-    }
-  });
-}
-var Dp = Ft({
-  prefix: "aitxt",
-  size: 24
-}), qp = Ft({
-  prefix: "msg",
-  size: 24
-});
-function wh({
-  model: e,
-  tools: t,
-  toolChoice: r,
-  system: n,
-  prompt: a,
-  messages: s,
-  maxRetries: o,
-  abortSignal: i,
-  headers: l,
-  maxSteps: u = 1,
-  experimental_generateMessageId: c = qp,
-  experimental_output: d,
-  experimental_continueSteps: m = !1,
-  experimental_telemetry: _,
-  experimental_providerMetadata: v,
-  providerOptions: g = v,
-  experimental_toolCallStreaming: p = !1,
-  toolCallStreaming: f = p,
-  experimental_activeTools: w,
-  experimental_repairToolCall: k,
-  experimental_transform: b,
-  onChunk: x,
-  onError: S,
-  onFinish: $,
-  onStepFinish: E,
-  _internal: {
-    now: P = Xo,
-    generateId: G = Dp,
-    currentDate: ce = () => /* @__PURE__ */ new Date()
-  } = {},
-  ...be
-}) {
-  return new Lp({
-    model: e,
-    telemetry: _,
-    headers: l,
-    settings: be,
-    maxRetries: o,
-    abortSignal: i,
-    system: n,
-    prompt: a,
-    messages: s,
-    tools: t,
-    toolChoice: r,
-    toolCallStreaming: f,
-    transforms: Si(b),
-    activeTools: w,
-    repairToolCall: k,
-    maxSteps: u,
-    output: d,
-    continueSteps: m,
-    providerOptions: g,
-    onChunk: x,
-    onError: S,
-    onFinish: $,
-    onStepFinish: E,
-    now: P,
-    currentDate: ce,
-    generateId: G,
-    generateMessageId: c
-  });
-}
-function Up(e) {
-  if (!e)
-    return new TransformStream({
-      transform(s, o) {
-        o.enqueue({ part: s, partialOutput: void 0 });
-      }
-    });
-  let t = "", r = "", n = "";
-  function a({
-    controller: s,
-    partialOutput: o = void 0
-  }) {
-    s.enqueue({
-      part: { type: "text-delta", textDelta: r },
-      partialOutput: o
-    }), r = "";
-  }
-  return new TransformStream({
-    transform(s, o) {
-      if (s.type === "step-finish" && a({ controller: o }), s.type !== "text-delta") {
-        o.enqueue({ part: s, partialOutput: void 0 });
-        return;
-      }
-      t += s.textDelta, r += s.textDelta;
-      const i = e.parsePartial({ text: t });
-      if (i != null) {
-        const l = JSON.stringify(i.partial);
-        l !== n && (a({ controller: o, partialOutput: i.partial }), n = l);
-      }
-    },
-    flush(s) {
-      r.length > 0 && a({ controller: s });
-    }
-  });
-}
-var Lp = class {
-  constructor({
-    model: e,
-    telemetry: t,
-    headers: r,
-    settings: n,
-    maxRetries: a,
-    abortSignal: s,
-    system: o,
-    prompt: i,
-    messages: l,
-    tools: u,
-    toolChoice: c,
-    toolCallStreaming: d,
-    transforms: m,
-    activeTools: _,
-    repairToolCall: v,
-    maxSteps: g,
-    output: p,
-    continueSteps: f,
-    providerOptions: w,
-    now: k,
-    currentDate: b,
-    generateId: x,
-    generateMessageId: S,
-    onChunk: $,
-    onError: E,
-    onFinish: P,
-    onStepFinish: G
-  }) {
-    this.warningsPromise = new xe(), this.usagePromise = new xe(), this.finishReasonPromise = new xe(), this.providerMetadataPromise = new xe(), this.textPromise = new xe(), this.reasoningPromise = new xe(), this.reasoningDetailsPromise = new xe(), this.sourcesPromise = new xe(), this.filesPromise = new xe(), this.toolCallsPromise = new xe(), this.toolResultsPromise = new xe(), this.requestPromise = new xe(), this.responsePromise = new xe(), this.stepsPromise = new xe();
-    var ce;
-    if (g < 1)
-      throw new ne({
-        parameter: "maxSteps",
-        value: g,
-        message: "maxSteps must be at least 1"
-      });
-    this.output = p;
-    let be = "", me = "", ie = "", de = [], ye = [], fe, H = [];
-    const ue = [], Y = {
-      id: x(),
-      timestamp: b(),
-      modelId: e.modelId,
-      messages: []
-    };
-    let U = [], Ce = [], qe, Re, ee = "initial";
-    const oe = [];
-    let re;
-    const te = new TransformStream({
-      async transform(we, X) {
-        X.enqueue(we);
-        const { part: T } = we;
-        if ((T.type === "text-delta" || T.type === "reasoning" || T.type === "source" || T.type === "tool-call" || T.type === "tool-result" || T.type === "tool-call-streaming-start" || T.type === "tool-call-delta") && await ($ == null ? void 0 : $({ chunk: T })), T.type === "error" && await (E == null ? void 0 : E({ error: T.error })), T.type === "text-delta" && (be += T.textDelta, me += T.textDelta, ie += T.textDelta), T.type === "reasoning" && (fe == null ? (fe = { type: "text", text: T.textDelta }, de.push(fe)) : fe.text += T.textDelta), T.type === "reasoning-signature") {
-          if (fe == null)
-            throw new j({
-              name: "InvalidStreamPart",
-              message: "reasoning-signature without reasoning"
-            });
-          fe.signature = T.signature, fe = void 0;
-        }
-        if (T.type === "redacted-reasoning" && de.push({ type: "redacted", data: T.data }), T.type === "file" && ye.push(T), T.type === "source" && (ue.push(T.source), H.push(T.source)), T.type === "tool-call" && U.push(T), T.type === "tool-result" && Ce.push(T), T.type === "step-finish") {
-          const le = Gn({
-            text: me,
-            files: ye,
-            reasoning: de,
-            tools: u ?? {},
-            toolCalls: U,
-            toolResults: Ce,
-            messageId: T.messageId,
-            generateMessageId: S
-          }), Ee = oe.length;
-          let Te = "done";
-          Ee + 1 < g && (f && T.finishReason === "length" && // only use continue when there are no tool calls:
-          U.length === 0 ? Te = "continue" : (
-            // there are tool calls:
-            U.length > 0 && // all current tool calls have results:
-            Ce.length === U.length && (Te = "tool-result")
-          ));
-          const Vt = {
-            stepType: ee,
-            text: be,
-            reasoning: zn(de),
-            reasoningDetails: de,
-            files: ye,
-            sources: H,
-            toolCalls: U,
-            toolResults: Ce,
-            finishReason: T.finishReason,
-            usage: T.usage,
-            warnings: T.warnings,
-            logprobs: T.logprobs,
-            request: T.request,
-            response: {
-              ...T.response,
-              messages: [...Y.messages, ...le]
-            },
-            providerMetadata: T.experimental_providerMetadata,
-            experimental_providerMetadata: T.experimental_providerMetadata,
-            isContinued: T.isContinued
-          };
-          await (G == null ? void 0 : G(Vt)), oe.push(Vt), U = [], Ce = [], be = "", H = [], de = [], ye = [], fe = void 0, Te !== "done" && (ee = Te), Te !== "continue" && (Y.messages.push(...le), me = "");
-        }
-        T.type === "finish" && (Y.id = T.response.id, Y.timestamp = T.response.timestamp, Y.modelId = T.response.modelId, Y.headers = T.response.headers, Re = T.usage, qe = T.finishReason);
-      },
-      async flush(we) {
-        var X;
-        try {
-          if (oe.length === 0)
-            return;
-          const T = oe[oe.length - 1];
-          Z.warningsPromise.resolve(T.warnings), Z.requestPromise.resolve(T.request), Z.responsePromise.resolve(T.response), Z.toolCallsPromise.resolve(T.toolCalls), Z.toolResultsPromise.resolve(T.toolResults), Z.providerMetadataPromise.resolve(
-            T.experimental_providerMetadata
-          ), Z.reasoningPromise.resolve(T.reasoning), Z.reasoningDetailsPromise.resolve(T.reasoningDetails);
-          const le = qe ?? "unknown", Ee = Re ?? {
-            completionTokens: NaN,
-            promptTokens: NaN,
-            totalTokens: NaN
-          };
-          Z.finishReasonPromise.resolve(le), Z.usagePromise.resolve(Ee), Z.textPromise.resolve(ie), Z.sourcesPromise.resolve(ue), Z.filesPromise.resolve(T.files), Z.stepsPromise.resolve(oe), await (P == null ? void 0 : P({
-            finishReason: le,
-            logprobs: void 0,
-            usage: Ee,
-            text: ie,
-            reasoning: T.reasoning,
-            reasoningDetails: T.reasoningDetails,
-            files: T.files,
-            sources: T.sources,
-            toolCalls: T.toolCalls,
-            toolResults: T.toolResults,
-            request: (X = T.request) != null ? X : {},
-            response: T.response,
-            warnings: T.warnings,
-            providerMetadata: T.providerMetadata,
-            experimental_providerMetadata: T.experimental_providerMetadata,
-            steps: oe
-          })), re.setAttributes(
-            W({
-              telemetry: t,
-              attributes: {
-                "ai.response.finishReason": le,
-                "ai.response.text": { output: () => ie },
-                "ai.response.toolCalls": {
-                  output: () => {
-                    var Te;
-                    return (Te = T.toolCalls) != null && Te.length ? JSON.stringify(T.toolCalls) : void 0;
-                  }
-                },
-                "ai.usage.promptTokens": Ee.promptTokens,
-                "ai.usage.completionTokens": Ee.completionTokens
-              }
-            })
-          );
-        } catch (T) {
-          we.error(T);
-        } finally {
-          re.end();
-        }
-      }
-    }), q = Yo();
-    this.addStream = q.addStream, this.closeStream = q.close;
-    let he = q.stream;
-    for (const we of m)
-      he = he.pipeThrough(
-        we({
-          tools: u,
-          stopStream() {
-            q.terminate();
-          }
-        })
-      );
-    this.baseStream = he.pipeThrough(Up(p)).pipeThrough(te);
-    const { maxRetries: Ae, retry: Ne } = _t({
-      maxRetries: a
-    }), je = rr(t), B = tr({
-      model: e,
-      telemetry: t,
-      headers: r,
-      settings: { ...n, maxRetries: Ae }
-    }), D = Qt({
-      prompt: {
-        system: (ce = p == null ? void 0 : p.injectIntoSystemPrompt({ system: o, model: e })) != null ? ce : o,
-        prompt: i,
-        messages: l
-      },
-      tools: u
-    }), Z = this;
-    Me({
-      name: "ai.streamText",
-      attributes: W({
-        telemetry: t,
-        attributes: {
-          ...Oe({ operationId: "ai.streamText", telemetry: t }),
-          ...B,
-          // specific settings that only make sense on the outer level:
-          "ai.prompt": {
-            input: () => JSON.stringify({ system: o, prompt: i, messages: l })
-          },
-          "ai.settings.maxSteps": g
-        }
-      }),
-      tracer: je,
-      endWhenDone: !1,
-      fn: async (we) => {
-        re = we;
-        async function X({
-          currentStep: T,
-          responseMessages: le,
-          usage: Ee,
-          stepType: Te,
-          previousStepText: Vt,
-          hasLeadingWhitespace: _n,
-          messageId: Ue
-        }) {
-          var nr;
-          const bt = le.length === 0 ? D.type : "messages", ar = [
-            ...D.messages,
-            ...le
-          ], st = await Yt({
-            prompt: {
-              type: bt,
-              system: D.system,
-              messages: ar
-            },
-            modelSupportsImageUrls: e.supportsImageUrls,
-            modelSupportsUrl: (nr = e.supportsUrl) == null ? void 0 : nr.bind(e)
-            // support 'this' context
-          }), It = {
-            type: "regular",
-            ...ii({ tools: u, toolChoice: c, activeTools: _ })
-          }, {
-            result: { stream: Mr, warnings: ot, rawResponse: Ct, request: Ze },
-            doStreamSpan: Ge,
-            startTimestampMs: sr
-          } = await Ne(
-            () => Me({
-              name: "ai.streamText.doStream",
-              attributes: W({
-                telemetry: t,
-                attributes: {
-                  ...Oe({
-                    operationId: "ai.streamText.doStream",
-                    telemetry: t
-                  }),
-                  ...B,
-                  "ai.prompt.format": {
-                    input: () => bt
-                  },
-                  "ai.prompt.messages": {
-                    input: () => yn(st)
-                  },
-                  "ai.prompt.tools": {
-                    // convert the language model level tools:
-                    input: () => {
-                      var J;
-                      return (J = It.tools) == null ? void 0 : J.map((_e) => JSON.stringify(_e));
-                    }
-                  },
-                  "ai.prompt.toolChoice": {
-                    input: () => It.toolChoice != null ? JSON.stringify(It.toolChoice) : void 0
-                  },
-                  // standardized gen-ai llm span attributes:
-                  "gen_ai.system": e.provider,
-                  "gen_ai.request.model": e.modelId,
-                  "gen_ai.request.frequency_penalty": n.frequencyPenalty,
-                  "gen_ai.request.max_tokens": n.maxTokens,
-                  "gen_ai.request.presence_penalty": n.presencePenalty,
-                  "gen_ai.request.stop_sequences": n.stopSequences,
-                  "gen_ai.request.temperature": n.temperature,
-                  "gen_ai.request.top_k": n.topK,
-                  "gen_ai.request.top_p": n.topP
-                }
-              }),
-              tracer: je,
-              endWhenDone: !1,
-              fn: async (J) => ({
-                startTimestampMs: k(),
-                // get before the call
-                doStreamSpan: J,
-                result: await e.doStream({
-                  mode: It,
-                  ...Xt(n),
-                  inputFormat: bt,
-                  responseFormat: p == null ? void 0 : p.responseFormat({ model: e }),
-                  prompt: st,
-                  providerMetadata: w,
-                  abortSignal: s,
-                  headers: r
-                })
-              })
-            })
-          ), jr = $p({
-            tools: u,
-            generatorStream: Mr,
-            toolCallStreaming: d,
-            tracer: je,
-            telemetry: t,
-            system: o,
-            messages: ar,
-            repairToolCall: v,
-            abortSignal: s
-          }), or = Ze ?? {}, Ye = [], Bt = [], Pe = [], it = [];
-          let Rt, Et = "unknown", wt = {
-            promptTokens: 0,
-            completionTokens: 0,
-            totalTokens: 0
-          }, ir, ga = !0, lr = "", ya = Te === "continue" ? Vt : "", bn, He = {
-            id: x(),
-            timestamp: b(),
-            modelId: e.modelId
-          }, Jt = "", va = !1, _a = !0, ba = !1;
-          async function wn({
-            controller: J,
-            chunk: _e
-          }) {
-            J.enqueue(_e), lr += _e.textDelta, ya += _e.textDelta, va = !0, ba = _e.textDelta.trimEnd() !== _e.textDelta;
-          }
-          Z.addStream(
-            jr.pipeThrough(
-              new TransformStream({
-                async transform(J, _e) {
-                  var Xe, ur, At;
-                  if (ga) {
-                    const Qe = k() - sr;
-                    ga = !1, Ge.addEvent("ai.stream.firstChunk", {
-                      "ai.response.msToFirstChunk": Qe
-                    }), Ge.setAttributes({
-                      "ai.response.msToFirstChunk": Qe
-                    }), _e.enqueue({
-                      type: "step-start",
-                      messageId: Ue,
-                      request: or,
-                      warnings: ot ?? []
-                    });
-                  }
-                  if (J.type === "text-delta" && J.textDelta.length === 0)
-                    return;
-                  const wa = J.type;
-                  switch (wa) {
-                    case "text-delta": {
-                      if (f) {
-                        const Qe = _a && _n ? J.textDelta.trimStart() : J.textDelta;
-                        if (Qe.length === 0)
-                          break;
-                        _a = !1, Jt += Qe;
-                        const $r = li(Jt);
-                        $r != null && (Jt = $r.suffix, await wn({
-                          controller: _e,
-                          chunk: {
-                            type: "text-delta",
-                            textDelta: $r.prefix + $r.whitespace
-                          }
-                        }));
-                      } else
-                        await wn({ controller: _e, chunk: J });
-                      break;
-                    }
-                    case "reasoning": {
-                      _e.enqueue(J), Rt == null ? (Rt = {
-                        type: "text",
-                        text: J.textDelta
-                      }, Pe.push(Rt)) : Rt.text += J.textDelta;
-                      break;
-                    }
-                    case "reasoning-signature": {
-                      if (_e.enqueue(J), Rt == null)
-                        throw new Ep({
-                          chunk: J,
-                          message: "reasoning-signature without reasoning"
-                        });
-                      Rt.signature = J.signature, Rt = void 0;
-                      break;
-                    }
-                    case "redacted-reasoning": {
-                      _e.enqueue(J), Pe.push({
-                        type: "redacted",
-                        data: J.data
-                      });
-                      break;
-                    }
-                    case "tool-call": {
-                      _e.enqueue(J), Ye.push(J);
-                      break;
-                    }
-                    case "tool-result": {
-                      _e.enqueue(J), Bt.push(J);
-                      break;
-                    }
-                    case "response-metadata": {
-                      He = {
-                        id: (Xe = J.id) != null ? Xe : He.id,
-                        timestamp: (ur = J.timestamp) != null ? ur : He.timestamp,
-                        modelId: (At = J.modelId) != null ? At : He.modelId
-                      };
-                      break;
-                    }
-                    case "finish": {
-                      wt = J.usage, Et = J.finishReason, ir = J.experimental_providerMetadata, bn = J.logprobs;
-                      const Qe = k() - sr;
-                      Ge.addEvent("ai.stream.finish"), Ge.setAttributes({
-                        "ai.response.msToFinish": Qe,
-                        "ai.response.avgCompletionTokensPerSecond": 1e3 * wt.completionTokens / Qe
-                      });
-                      break;
-                    }
-                    case "file": {
-                      it.push(J), _e.enqueue(J);
-                      break;
-                    }
-                    case "source":
-                    case "tool-call-streaming-start":
-                    case "tool-call-delta": {
-                      _e.enqueue(J);
-                      break;
-                    }
-                    case "error": {
-                      _e.enqueue(J), Et = "error";
-                      break;
-                    }
-                    default: {
-                      const Qe = wa;
-                      throw new Error(`Unknown chunk type: ${Qe}`);
-                    }
-                  }
-                },
-                // invoke onFinish callback and resolve toolResults promise when the stream is about to close:
-                async flush(J) {
-                  const _e = Ye.length > 0 ? JSON.stringify(Ye) : void 0;
-                  let Xe = "done";
-                  T + 1 < g && (f && Et === "length" && // only use continue when there are no tool calls:
-                  Ye.length === 0 ? Xe = "continue" : (
-                    // there are tool calls:
-                    Ye.length > 0 && // all current tool calls have results:
-                    Bt.length === Ye.length && (Xe = "tool-result")
-                  )), f && Jt.length > 0 && (Xe !== "continue" || // when the next step is a regular step, publish the buffer
-                  Te === "continue" && !va) && (await wn({
-                    controller: J,
-                    chunk: {
-                      type: "text-delta",
-                      textDelta: Jt
-                    }
-                  }), Jt = "");
-                  try {
-                    Ge.setAttributes(
-                      W({
-                        telemetry: t,
-                        attributes: {
-                          "ai.response.finishReason": Et,
-                          "ai.response.text": { output: () => lr },
-                          "ai.response.toolCalls": {
-                            output: () => _e
-                          },
-                          "ai.response.id": He.id,
-                          "ai.response.model": He.modelId,
-                          "ai.response.timestamp": He.timestamp.toISOString(),
-                          "ai.usage.promptTokens": wt.promptTokens,
-                          "ai.usage.completionTokens": wt.completionTokens,
-                          // standardized gen-ai llm span attributes:
-                          "gen_ai.response.finish_reasons": [Et],
-                          "gen_ai.response.id": He.id,
-                          "gen_ai.response.model": He.modelId,
-                          "gen_ai.usage.input_tokens": wt.promptTokens,
-                          "gen_ai.usage.output_tokens": wt.completionTokens
-                        }
-                      })
-                    );
-                  } catch {
-                  } finally {
-                    Ge.end();
-                  }
-                  J.enqueue({
-                    type: "step-finish",
-                    finishReason: Et,
-                    usage: wt,
-                    providerMetadata: ir,
-                    experimental_providerMetadata: ir,
-                    logprobs: bn,
-                    request: or,
-                    response: {
-                      ...He,
-                      headers: Ct == null ? void 0 : Ct.headers
-                    },
-                    warnings: ot,
-                    isContinued: Xe === "continue",
-                    messageId: Ue
-                  });
-                  const ur = Ho(Ee, wt);
-                  if (Xe === "done")
-                    J.enqueue({
-                      type: "finish",
-                      finishReason: Et,
-                      usage: ur,
-                      providerMetadata: ir,
-                      experimental_providerMetadata: ir,
-                      logprobs: bn,
-                      response: {
-                        ...He,
-                        headers: Ct == null ? void 0 : Ct.headers
-                      }
-                    }), Z.closeStream();
-                  else {
-                    if (Te === "continue") {
-                      const At = le[le.length - 1];
-                      typeof At.content == "string" ? At.content += lr : At.content.push({
-                        text: lr,
-                        type: "text"
-                      });
-                    } else
-                      le.push(
-                        ...Gn({
-                          text: lr,
-                          files: it,
-                          reasoning: Pe,
-                          tools: u ?? {},
-                          toolCalls: Ye,
-                          toolResults: Bt,
-                          messageId: Ue,
-                          generateMessageId: S
-                        })
-                      );
-                    await X({
-                      currentStep: T + 1,
-                      responseMessages: le,
-                      usage: ur,
-                      stepType: Xe,
-                      previousStepText: ya,
-                      hasLeadingWhitespace: ba,
-                      messageId: (
-                        // keep the same id when continuing a step:
-                        Xe === "continue" ? Ue : S()
-                      )
-                    });
-                  }
-                }
-              })
-            )
-          );
-        }
-        await X({
-          currentStep: 0,
-          responseMessages: [],
-          usage: {
-            promptTokens: 0,
-            completionTokens: 0,
-            totalTokens: 0
-          },
-          previousStepText: "",
-          stepType: "initial",
-          hasLeadingWhitespace: !1,
-          messageId: S()
-        });
-      }
-    }).catch((we) => {
-      Z.addStream(
-        new ReadableStream({
-          start(X) {
-            X.enqueue({ type: "error", error: we }), X.close();
-          }
-        })
-      ), Z.closeStream();
-    });
-  }
-  get warnings() {
-    return this.warningsPromise.value;
-  }
-  get usage() {
-    return this.usagePromise.value;
-  }
-  get finishReason() {
-    return this.finishReasonPromise.value;
-  }
-  get experimental_providerMetadata() {
-    return this.providerMetadataPromise.value;
-  }
-  get providerMetadata() {
-    return this.providerMetadataPromise.value;
-  }
-  get text() {
-    return this.textPromise.value;
-  }
-  get reasoning() {
-    return this.reasoningPromise.value;
-  }
-  get reasoningDetails() {
-    return this.reasoningDetailsPromise.value;
-  }
-  get sources() {
-    return this.sourcesPromise.value;
-  }
-  get files() {
-    return this.filesPromise.value;
-  }
-  get toolCalls() {
-    return this.toolCallsPromise.value;
-  }
-  get toolResults() {
-    return this.toolResultsPromise.value;
-  }
-  get request() {
-    return this.requestPromise.value;
-  }
-  get response() {
-    return this.responsePromise.value;
-  }
-  get steps() {
-    return this.stepsPromise.value;
-  }
-  /**
-  Split out a new stream from the original stream.
-  The original stream is replaced to allow for further splitting,
-  since we do not know how many times the stream will be split.
-  
-  Note: this leads to buffering the stream content on the server.
-  However, the LLM results are expected to be small enough to not cause issues.
-     */
-  teeStream() {
-    const [e, t] = this.baseStream.tee();
-    return this.baseStream = t, e;
-  }
-  get textStream() {
-    return Pt(
-      this.teeStream().pipeThrough(
-        new TransformStream({
-          transform({ part: e }, t) {
-            e.type === "text-delta" && t.enqueue(e.textDelta);
-          }
-        })
-      )
-    );
-  }
-  get fullStream() {
-    return Pt(
-      this.teeStream().pipeThrough(
-        new TransformStream({
-          transform({ part: e }, t) {
-            t.enqueue(e);
-          }
-        })
-      )
-    );
-  }
-  async consumeStream(e) {
-    var t;
-    try {
-      await jp({
-        stream: this.fullStream,
-        onError: e == null ? void 0 : e.onError
-      });
-    } catch (r) {
-      (t = e == null ? void 0 : e.onError) == null || t.call(e, r);
-    }
-  }
-  get experimental_partialOutputStream() {
-    if (this.output == null)
-      throw new ri();
-    return Pt(
-      this.teeStream().pipeThrough(
-        new TransformStream({
-          transform({ partialOutput: e }, t) {
-            e != null && t.enqueue(e);
-          }
-        })
-      )
-    );
-  }
-  toDataStreamInternal({
-    getErrorMessage: e = () => "An error occurred.",
-    // mask error messages for safety by default
-    sendUsage: t = !0,
-    sendReasoning: r = !1,
-    sendSources: n = !1,
-    experimental_sendFinish: a = !0
-  }) {
-    return this.fullStream.pipeThrough(
-      new TransformStream({
-        transform: async (s, o) => {
-          const i = s.type;
-          switch (i) {
-            case "text-delta": {
-              o.enqueue(pe("text", s.textDelta));
-              break;
-            }
-            case "reasoning": {
-              r && o.enqueue(
-                pe("reasoning", s.textDelta)
-              );
-              break;
-            }
-            case "redacted-reasoning": {
-              r && o.enqueue(
-                pe("redacted_reasoning", {
-                  data: s.data
-                })
-              );
-              break;
-            }
-            case "reasoning-signature": {
-              r && o.enqueue(
-                pe("reasoning_signature", {
-                  signature: s.signature
-                })
-              );
-              break;
-            }
-            case "file": {
-              o.enqueue(
-                pe("file", {
-                  mimeType: s.mimeType,
-                  data: s.base64
-                })
-              );
-              break;
-            }
-            case "source": {
-              n && o.enqueue(
-                pe("source", s.source)
-              );
-              break;
-            }
-            case "tool-call-streaming-start": {
-              o.enqueue(
-                pe("tool_call_streaming_start", {
-                  toolCallId: s.toolCallId,
-                  toolName: s.toolName
-                })
-              );
-              break;
-            }
-            case "tool-call-delta": {
-              o.enqueue(
-                pe("tool_call_delta", {
-                  toolCallId: s.toolCallId,
-                  argsTextDelta: s.argsTextDelta
-                })
-              );
-              break;
-            }
-            case "tool-call": {
-              o.enqueue(
-                pe("tool_call", {
-                  toolCallId: s.toolCallId,
-                  toolName: s.toolName,
-                  args: s.args
-                })
-              );
-              break;
-            }
-            case "tool-result": {
-              o.enqueue(
-                pe("tool_result", {
-                  toolCallId: s.toolCallId,
-                  result: s.result
-                })
-              );
-              break;
-            }
-            case "error": {
-              o.enqueue(
-                pe("error", e(s.error))
-              );
-              break;
-            }
-            case "step-start": {
-              o.enqueue(
-                pe("start_step", {
-                  messageId: s.messageId
-                })
-              );
-              break;
-            }
-            case "step-finish": {
-              o.enqueue(
-                pe("finish_step", {
-                  finishReason: s.finishReason,
-                  usage: t ? {
-                    promptTokens: s.usage.promptTokens,
-                    completionTokens: s.usage.completionTokens
-                  } : void 0,
-                  isContinued: s.isContinued
-                })
-              );
-              break;
-            }
-            case "finish": {
-              a && o.enqueue(
-                pe("finish_message", {
-                  finishReason: s.finishReason,
-                  usage: t ? {
-                    promptTokens: s.usage.promptTokens,
-                    completionTokens: s.usage.completionTokens
-                  } : void 0
-                })
-              );
-              break;
-            }
-            default: {
-              const l = i;
-              throw new Error(`Unknown chunk type: ${l}`);
-            }
-          }
-        }
-      })
-    );
-  }
-  pipeDataStreamToResponse(e, {
-    status: t,
-    statusText: r,
-    headers: n,
-    data: a,
-    getErrorMessage: s,
-    sendUsage: o,
-    sendReasoning: i,
-    sendSources: l,
-    experimental_sendFinish: u
-  } = {}) {
-    sn({
-      response: e,
-      status: t,
-      statusText: r,
-      headers: an(n, {
-        contentType: "text/plain; charset=utf-8",
-        dataStreamVersion: "v1"
-      }),
-      stream: this.toDataStream({
-        data: a,
-        getErrorMessage: s,
-        sendUsage: o,
-        sendReasoning: i,
-        sendSources: l,
-        experimental_sendFinish: u
-      })
-    });
-  }
-  pipeTextStreamToResponse(e, t) {
-    sn({
-      response: e,
-      status: t == null ? void 0 : t.status,
-      statusText: t == null ? void 0 : t.statusText,
-      headers: an(t == null ? void 0 : t.headers, {
-        contentType: "text/plain; charset=utf-8"
-      }),
-      stream: this.textStream.pipeThrough(new TextEncoderStream())
-    });
-  }
-  // TODO breaking change 5.0: remove pipeThrough(new TextEncoderStream())
-  toDataStream(e) {
-    const t = this.toDataStreamInternal({
-      getErrorMessage: e == null ? void 0 : e.getErrorMessage,
-      sendUsage: e == null ? void 0 : e.sendUsage,
-      sendReasoning: e == null ? void 0 : e.sendReasoning,
-      sendSources: e == null ? void 0 : e.sendSources,
-      experimental_sendFinish: e == null ? void 0 : e.experimental_sendFinish
-    }).pipeThrough(new TextEncoderStream());
-    return e != null && e.data ? da(e == null ? void 0 : e.data.stream, t) : t;
-  }
-  mergeIntoDataStream(e, t) {
-    e.merge(
-      this.toDataStreamInternal({
-        getErrorMessage: e.onError,
-        sendUsage: t == null ? void 0 : t.sendUsage,
-        sendReasoning: t == null ? void 0 : t.sendReasoning,
-        sendSources: t == null ? void 0 : t.sendSources,
-        experimental_sendFinish: t == null ? void 0 : t.experimental_sendFinish
-      })
-    );
-  }
-  toDataStreamResponse({
-    headers: e,
-    status: t,
-    statusText: r,
-    data: n,
-    getErrorMessage: a,
-    sendUsage: s,
-    sendReasoning: o,
-    sendSources: i,
-    experimental_sendFinish: l
-  } = {}) {
-    return new Response(
-      this.toDataStream({
-        data: n,
-        getErrorMessage: a,
-        sendUsage: s,
-        sendReasoning: o,
-        sendSources: i,
-        experimental_sendFinish: l
-      }),
-      {
-        status: t,
-        statusText: r,
-        headers: Lt(e, {
-          contentType: "text/plain; charset=utf-8",
-          dataStreamVersion: "v1"
-        })
-      }
-    );
-  }
-  toTextStreamResponse(e) {
-    var t;
-    return new Response(this.textStream.pipeThrough(new TextEncoderStream()), {
-      status: (t = e == null ? void 0 : e.status) != null ? t : 200,
-      headers: Lt(e == null ? void 0 : e.headers, {
-        contentType: "text/plain; charset=utf-8"
-      })
-    });
-  }
-}, Fp = class extends j {
-  constructor(e) {
-    super({
-      name: "AI_NoSpeechGeneratedError",
-      message: "No speech audio generated."
-    }), this.responses = e.responses;
-  }
-}, Zp = class extends fn {
-  constructor({
-    data: e,
-    mimeType: t
-  }) {
-    super({ data: e, mimeType: t });
-    let r = "mp3";
-    if (t) {
-      const n = t.split("/");
-      n.length === 2 && t !== "audio/mpeg" && (r = n[1]);
-    }
-    if (!r)
-      throw new Error(
-        "Audio format must be provided or determinable from mimeType"
-      );
-    this.format = r;
-  }
-};
-async function xh({
-  model: e,
-  text: t,
-  voice: r,
-  outputFormat: n,
-  instructions: a,
-  speed: s,
-  providerOptions: o = {},
-  maxRetries: i,
-  abortSignal: l,
-  headers: u
-}) {
-  var c;
-  const { retry: d } = _t({ maxRetries: i }), m = await d(
-    () => e.doGenerate({
-      text: t,
-      voice: r,
-      outputFormat: n,
-      instructions: a,
-      speed: s,
-      abortSignal: l,
-      headers: u,
-      providerOptions: o
-    })
-  );
-  if (!m.audio || m.audio.length === 0)
-    throw new Fp({ responses: [m.response] });
-  return new Vp({
-    audio: new Zp({
-      data: m.audio,
-      mimeType: (c = hn({
-        data: m.audio,
-        signatures: Ro
-      })) != null ? c : "audio/mp3"
-    }),
-    warnings: m.warnings,
-    responses: [m.response],
-    providerMetadata: m.providerMetadata
-  });
-}
-var Vp = class {
-  constructor(e) {
-    var t;
-    this.audio = e.audio, this.warnings = e.warnings, this.responses = e.responses, this.providerMetadata = (t = e.providerMetadata) != null ? t : {};
-  }
-}, Bp = class extends j {
-  constructor(e) {
-    super({
-      name: "AI_NoTranscriptGeneratedError",
-      message: "No transcript generated."
-    }), this.responses = e.responses;
-  }
-};
-async function kh({
-  model: e,
-  audio: t,
-  providerOptions: r = {},
-  maxRetries: n,
-  abortSignal: a,
-  headers: s
-}) {
-  const { retry: o } = _t({ maxRetries: n }), i = t instanceof URL ? (await jo({ url: t })).data : Sr(t), l = await o(
-    () => {
-      var u;
-      return e.doGenerate({
-        audio: i,
-        abortSignal: a,
-        headers: s,
-        providerOptions: r,
-        mediaType: (u = hn({
-          data: i,
-          signatures: Ro
-        })) != null ? u : "audio/wav"
-      });
-    }
-  );
-  if (!l.text)
-    throw new Bp({ responses: [l.response] });
-  return new Jp({
-    text: l.text,
-    segments: l.segments,
-    language: l.language,
-    durationInSeconds: l.durationInSeconds,
-    warnings: l.warnings,
-    responses: [l.response],
-    providerMetadata: l.providerMetadata
-  });
-}
-var Jp = class {
-  constructor(e) {
-    var t;
-    this.text = e.text, this.segments = e.segments, this.language = e.language, this.durationInSeconds = e.durationInSeconds, this.warnings = e.warnings, this.responses = e.responses, this.providerMetadata = (t = e.providerMetadata) != null ? t : {};
-  }
-};
-function Ii(e, t) {
-  if (e === void 0 && t === void 0)
-    return;
-  if (e === void 0)
-    return t;
-  if (t === void 0)
-    return e;
-  const r = { ...e };
-  for (const n in t)
-    if (Object.prototype.hasOwnProperty.call(t, n)) {
-      const a = t[n];
-      if (a === void 0)
-        continue;
-      const s = n in e ? e[n] : void 0, o = a !== null && typeof a == "object" && !Array.isArray(a) && !(a instanceof Date) && !(a instanceof RegExp), i = s != null && typeof s == "object" && !Array.isArray(s) && !(s instanceof Date) && !(s instanceof RegExp);
-      o && i ? r[n] = Ii(
-        s,
-        a
-      ) : r[n] = a;
-    }
-  return r;
-}
-function Th({
-  settings: e
-}) {
-  return {
-    middlewareVersion: "v1",
-    transformParams: async ({ params: t }) => {
-      var r;
-      return {
-        ...e,
-        ...t,
-        providerMetadata: Ii(
-          e.providerMetadata,
-          t.providerMetadata
-        ),
-        // special case for temperature 0
-        // TODO remove when temperature defaults to undefined
-        temperature: t.temperature === 0 || t.temperature == null ? (r = e.temperature) != null ? r : 0 : t.temperature
-      };
-    }
-  };
-}
-function zp(e, t) {
-  if (t.length === 0)
-    return null;
-  const r = e.indexOf(t);
-  if (r !== -1)
-    return r;
-  for (let n = e.length - 1; n >= 0; n--) {
-    const a = e.substring(n);
-    if (t.startsWith(a))
-      return n;
-  }
-  return null;
-}
-function Sh({
-  tagName: e,
-  separator: t = `
-`,
-  startWithReasoning: r = !1
-}) {
-  const n = `<${e}>`, a = `</${e}>`;
-  return {
-    middlewareVersion: "v1",
-    wrapGenerate: async ({ doGenerate: s }) => {
-      const { text: o, ...i } = await s();
-      if (o == null)
-        return { text: o, ...i };
-      const l = r ? n + o : o, u = new RegExp(`${n}(.*?)${a}`, "gs"), c = Array.from(l.matchAll(u));
-      if (!c.length)
-        return { text: l, ...i };
-      const d = c.map((_) => _[1]).join(t);
-      let m = l;
-      for (let _ = c.length - 1; _ >= 0; _--) {
-        const v = c[_], g = m.slice(0, v.index), p = m.slice(
-          v.index + v[0].length
-        );
-        m = g + (g.length > 0 && p.length > 0 ? t : "") + p;
-      }
-      return { ...i, text: m, reasoning: d };
-    },
-    wrapStream: async ({ doStream: s }) => {
-      const { stream: o, ...i } = await s();
-      let l = !0, u = !0, c = !1, d = r, m = "";
-      return {
-        stream: o.pipeThrough(
-          new TransformStream({
-            transform: (_, v) => {
-              if (_.type !== "text-delta") {
-                v.enqueue(_);
-                return;
-              }
-              m += _.textDelta;
-              function g(p) {
-                if (p.length > 0) {
-                  const f = c && (d ? !l : !u) ? t : "";
-                  v.enqueue({
-                    type: d ? "reasoning" : "text-delta",
-                    textDelta: f + p
-                  }), c = !1, d ? l = !1 : u = !1;
-                }
-              }
-              do {
-                const p = d ? a : n, f = zp(m, p);
-                if (f == null) {
-                  g(m), m = "";
-                  break;
-                }
-                if (g(m.slice(0, f)), f + p.length <= m.length)
-                  m = m.slice(f + p.length), d = !d, c = !0;
-                else {
-                  m = m.slice(f);
-                  break;
-                }
-              } while (!0);
-            }
-          })
-        ),
-        ...i
-      };
-    }
-  };
-}
-function Ih() {
-  return {
-    middlewareVersion: "v1",
-    wrapStream: async ({ doGenerate: e }) => {
-      const t = await e();
-      return {
-        stream: new ReadableStream({
-          start(n) {
-            if (n.enqueue({ type: "response-metadata", ...t.response }), t.reasoning)
-              if (typeof t.reasoning == "string")
-                n.enqueue({
-                  type: "reasoning",
-                  textDelta: t.reasoning
-                });
-              else
-                for (const a of t.reasoning)
-                  switch (a.type) {
-                    case "text": {
-                      n.enqueue({
-                        type: "reasoning",
-                        textDelta: a.text
-                      }), a.signature != null && n.enqueue({
-                        type: "reasoning-signature",
-                        signature: a.signature
-                      });
-                      break;
-                    }
-                    case "redacted": {
-                      n.enqueue({
-                        type: "redacted-reasoning",
-                        data: a.data
-                      });
-                      break;
-                    }
-                  }
-            if (t.text && n.enqueue({
-              type: "text-delta",
-              textDelta: t.text
-            }), t.toolCalls)
-              for (const a of t.toolCalls)
-                n.enqueue({
-                  type: "tool-call-delta",
-                  toolCallType: "function",
-                  toolCallId: a.toolCallId,
-                  toolName: a.toolName,
-                  argsTextDelta: a.args
-                }), n.enqueue({
-                  type: "tool-call",
-                  ...a
-                });
-            n.enqueue({
-              type: "finish",
-              finishReason: t.finishReason,
-              usage: t.usage,
-              logprobs: t.logprobs,
-              providerMetadata: t.providerMetadata
-            }), n.close();
-          }
-        }),
-        rawCall: t.rawCall,
-        rawResponse: t.rawResponse,
-        warnings: t.warnings
-      };
-    }
-  };
-}
-var Gp = ({
-  model: e,
-  middleware: t,
-  modelId: r,
-  providerId: n
-}) => Si(t).reverse().reduce((a, s) => Hp({ model: a, middleware: s, modelId: r, providerId: n }), e), Hp = ({
-  model: e,
-  middleware: { transformParams: t, wrapGenerate: r, wrapStream: n },
-  modelId: a,
-  providerId: s
-}) => {
-  var o;
-  async function i({
-    params: l,
-    type: u
-  }) {
-    return t ? await t({ params: l, type: u }) : l;
-  }
-  return {
-    specificationVersion: "v1",
-    provider: s ?? e.provider,
-    modelId: a ?? e.modelId,
-    defaultObjectGenerationMode: e.defaultObjectGenerationMode,
-    supportsImageUrls: e.supportsImageUrls,
-    supportsUrl: (o = e.supportsUrl) == null ? void 0 : o.bind(e),
-    supportsStructuredOutputs: e.supportsStructuredOutputs,
-    async doGenerate(l) {
-      const u = await i({ params: l, type: "generate" }), c = async () => e.doGenerate(u);
-      return r ? r({
-        doGenerate: c,
-        doStream: async () => e.doStream(u),
-        params: u,
-        model: e
-      }) : c();
-    },
-    async doStream(l) {
-      const u = await i({ params: l, type: "stream" }), c = async () => e.doGenerate(u), d = async () => e.doStream(u);
-      return n ? n({ doGenerate: c, doStream: d, params: u, model: e }) : d();
-    }
-  };
-}, Ch = Gp;
-function Rh({
-  messages: e,
-  message: t
-}) {
-  return [
-    ...e.length > 0 && e[e.length - 1].id === t.id ? e.slice(0, -1) : e,
-    t
-  ];
-}
-function Eh({
-  messages: e,
-  responseMessages: t,
-  _internal: { currentDate: r = () => /* @__PURE__ */ new Date() } = {}
-}) {
-  var n, a, s, o;
-  const i = structuredClone(e);
-  for (const l of t) {
-    const u = l.role, c = i[i.length - 1], d = c.role === "assistant";
-    switch (u) {
-      case "assistant": {
-        let m = function(p) {
-          return (typeof l.content == "string" ? [] : l.content.filter((f) => f.type === "tool-call")).map((f) => ({
-            state: "call",
-            step: p,
-            args: f.args,
-            toolCallId: f.toolCallId,
-            toolName: f.toolName
-          }));
-        };
-        const _ = [{ type: "step-start" }];
-        let v = "", g;
-        if (typeof l.content == "string")
-          v = l.content, _.push({
-            type: "text",
-            text: l.content
-          });
-        else {
-          let p;
-          for (const f of l.content)
-            switch (f.type) {
-              case "text": {
-                p = void 0, v += f.text, _.push({
-                  type: "text",
-                  text: f.text
-                });
-                break;
-              }
-              case "reasoning": {
-                p == null && (p = {
-                  type: "reasoning",
-                  reasoning: "",
-                  details: []
-                }, _.push(p)), g = (g ?? "") + f.text, p.reasoning += f.text, p.details.push({
-                  type: "text",
-                  text: f.text,
-                  signature: f.signature
-                });
-                break;
-              }
-              case "redacted-reasoning": {
-                p == null && (p = {
-                  type: "reasoning",
-                  reasoning: "",
-                  details: []
-                }, _.push(p)), p.details.push({
-                  type: "redacted",
-                  data: f.data
-                });
-                break;
-              }
-              case "tool-call":
-                break;
-              case "file":
-                if (f.data instanceof URL)
-                  throw new j({
-                    name: "InvalidAssistantFileData",
-                    message: "File data cannot be a URL"
-                  });
-                _.push({
-                  type: "file",
-                  mimeType: f.mimeType,
-                  data: gn(f.data)
-                });
-                break;
-            }
-        }
-        if (d) {
-          const p = rc(
-            c.toolInvocations
-          );
-          (n = c.parts) != null || (c.parts = []), c.content = v, c.reasoning = g, c.parts.push(..._), c.toolInvocations = [
-            ...(a = c.toolInvocations) != null ? a : [],
-            ...m(p === void 0 ? 0 : p + 1)
-          ], m(p === void 0 ? 0 : p + 1).map((f) => ({
-            type: "tool-invocation",
-            toolInvocation: f
-          })).forEach((f) => {
-            c.parts.push(f);
-          });
-        } else
-          i.push({
-            role: "assistant",
-            id: l.id,
-            createdAt: r(),
-            // generate a createdAt date for the message, will be overridden by the client
-            content: v,
-            reasoning: g,
-            toolInvocations: m(0),
-            parts: [
-              ..._,
-              ...m(0).map((p) => ({
-                type: "tool-invocation",
-                toolInvocation: p
-              }))
-            ]
-          });
-        break;
-      }
-      case "tool": {
-        if ((s = c.toolInvocations) != null || (c.toolInvocations = []), c.role !== "assistant")
-          throw new Error(
-            `Tool result must follow an assistant message: ${c.role}`
-          );
-        (o = c.parts) != null || (c.parts = []);
-        for (const m of l.content) {
-          const _ = c.toolInvocations.find(
-            (p) => p.toolCallId === m.toolCallId
-          ), v = c.parts.find(
-            (p) => p.type === "tool-invocation" && p.toolInvocation.toolCallId === m.toolCallId
-          );
-          if (!_)
-            throw new Error("Tool call not found in previous message");
-          _.state = "result";
-          const g = _;
-          g.result = m.result, v ? v.toolInvocation = g : c.parts.push({
-            type: "tool-invocation",
-            toolInvocation: g
-          });
-        }
-        break;
-      }
-      default: {
-        const m = u;
-        throw new Error(`Unsupported message role: ${m}`);
-      }
-    }
-  }
-  return i;
-}
-function Wp({
-  languageModels: e,
-  textEmbeddingModels: t,
-  imageModels: r,
-  fallbackProvider: n
-}) {
-  return {
-    languageModel(a) {
-      if (e != null && a in e)
-        return e[a];
-      if (n)
-        return n.languageModel(a);
-      throw new pt({ modelId: a, modelType: "languageModel" });
-    },
-    textEmbeddingModel(a) {
-      if (t != null && a in t)
-        return t[a];
-      if (n)
-        return n.textEmbeddingModel(a);
-      throw new pt({ modelId: a, modelType: "textEmbeddingModel" });
-    },
-    imageModel(a) {
-      if (r != null && a in r)
-        return r[a];
-      if (n != null && n.imageModel)
-        return n.imageModel(a);
-      throw new pt({ modelId: a, modelType: "imageModel" });
-    }
-  };
-}
-var Ah = Wp, Ci = "AI_NoSuchProviderError", Ri = `vercel.ai.error.${Ci}`, Kp = Symbol.for(Ri), Ei, Yp = class extends pt {
-  constructor({
-    modelId: e,
-    modelType: t,
-    providerId: r,
-    availableProviders: n,
-    message: a = `No such provider: ${r} (available providers: ${n.join()})`
-  }) {
-    super({ errorName: Ci, modelId: e, modelType: t, message: a }), this[Ei] = !0, this.providerId = r, this.availableProviders = n;
-  }
-  static isInstance(e) {
-    return j.hasMarker(e, Ri);
-  }
-};
-Ei = Kp;
-function Xp(e, {
-  separator: t = ":"
-} = {}) {
-  const r = new Qp({
-    separator: t
-  });
-  for (const [n, a] of Object.entries(e))
-    r.registerProvider({ id: n, provider: a });
-  return r;
-}
-var Nh = Xp, Qp = class {
-  constructor({ separator: e }) {
-    this.providers = {}, this.separator = e;
-  }
-  registerProvider({
-    id: e,
-    provider: t
-  }) {
-    this.providers[e] = t;
-  }
-  getProvider(e) {
-    const t = this.providers[e];
-    if (t == null)
-      throw new Yp({
-        modelId: e,
-        modelType: "languageModel",
-        providerId: e,
-        availableProviders: Object.keys(this.providers)
-      });
-    return t;
-  }
-  splitId(e, t) {
-    const r = e.indexOf(this.separator);
-    if (r === -1)
-      throw new pt({
-        modelId: e,
-        modelType: t,
-        message: `Invalid ${t} id for registry: ${e} (must be in the format "providerId${this.separator}modelId")`
-      });
-    return [e.slice(0, r), e.slice(r + this.separator.length)];
-  }
-  languageModel(e) {
-    var t, r;
-    const [n, a] = this.splitId(e, "languageModel"), s = (r = (t = this.getProvider(n)).languageModel) == null ? void 0 : r.call(t, a);
-    if (s == null)
-      throw new pt({ modelId: e, modelType: "languageModel" });
-    return s;
-  }
-  textEmbeddingModel(e) {
-    var t;
-    const [r, n] = this.splitId(e, "textEmbeddingModel"), a = this.getProvider(r), s = (t = a.textEmbeddingModel) == null ? void 0 : t.call(a, n);
-    if (s == null)
-      throw new pt({
-        modelId: e,
-        modelType: "textEmbeddingModel"
-      });
-    return s;
-  }
-  imageModel(e) {
-    var t;
-    const [r, n] = this.splitId(e, "imageModel"), a = this.getProvider(r), s = (t = a.imageModel) == null ? void 0 : t.call(a, n);
-    if (s == null)
-      throw new pt({ modelId: e, modelType: "imageModel" });
-    return s;
-  }
-};
-function Ph(e) {
-  return e;
-}
-var Ai = "2024-11-05", em = [
-  Ai,
-  "2024-10-07"
-], tm = y({
-  name: h(),
-  version: h()
-}).passthrough(), pa = y({
-  _meta: Ie(y({}).passthrough())
-}).passthrough(), Cr = pa, rm = y({
-  method: h(),
-  params: Ie(pa)
-}), nm = y({
-  experimental: Ie(y({}).passthrough()),
-  logging: Ie(y({}).passthrough()),
-  prompts: Ie(
-    y({
-      listChanged: Ie(Je())
-    }).passthrough()
-  ),
-  resources: Ie(
-    y({
-      subscribe: Ie(Je()),
-      listChanged: Ie(Je())
-    }).passthrough()
-  ),
-  tools: Ie(
-    y({
-      listChanged: Ie(Je())
-    }).passthrough()
-  )
-}).passthrough(), am = Cr.extend({
-  protocolVersion: h(),
-  capabilities: nm,
-  serverInfo: tm,
-  instructions: Ie(h())
-}), sm = Cr.extend({
-  nextCursor: Ie(h())
-}), om = y({
-  name: h(),
-  description: Ie(h()),
-  inputSchema: y({
-    type: A("object"),
-    properties: Ie(y({}).passthrough())
-  }).passthrough()
-}).passthrough(), im = sm.extend({
-  tools: F(om)
-}), lm = y({
-  type: A("text"),
-  text: h()
-}).passthrough(), um = y({
-  type: A("image"),
-  data: h().base64(),
-  mimeType: h()
-}).passthrough(), Ni = y({
-  /**
-   * The URI of this resource.
-   */
-  uri: h(),
-  /**
-   * The MIME type of this resource, if known.
-   */
-  mimeType: Ie(h())
-}).passthrough(), cm = Ni.extend({
-  text: h()
-}), dm = Ni.extend({
-  blob: h().base64()
-}), pm = y({
-  type: A("resource"),
-  resource: ge([cm, dm])
-}).passthrough(), mm = Cr.extend({
-  content: F(
-    ge([lm, um, pm])
-  ),
-  isError: Je().default(!1).optional()
-}).or(
-  Cr.extend({
-    toolResult: Nr()
+var gu = f({
+  type: C("error"),
+  error: f({
+    type: d(),
+    message: d()
   })
-), vn = "2.0", fm = y({
-  jsonrpc: A(vn),
-  id: ge([h(), R().int()])
-}).merge(rm).strict(), hm = y({
-  jsonrpc: A(vn),
-  id: ge([h(), R().int()]),
-  result: Cr
-}).strict(), gm = y({
-  jsonrpc: A(vn),
-  id: ge([h(), R().int()]),
-  error: y({
-    code: R().int(),
-    message: h(),
-    data: Ie(Nr())
-  })
-}).strict(), ym = y({
-  jsonrpc: A(vn)
-}).merge(
-  y({
-    method: h(),
-    params: Ie(pa)
-  })
-).strict(), vm = ge([
-  fm,
-  ym,
-  hm,
-  gm
-]), _m = class {
-  constructor({
-    url: e,
-    headers: t
-  }) {
-    this.connected = !1, this.url = new URL(e), this.headers = t;
-  }
-  async start() {
-    return new Promise((e, t) => {
-      if (this.connected)
-        return e();
-      this.abortController = new AbortController(), (async () => {
-        var n, a, s;
-        try {
-          const o = new Headers(this.headers);
-          o.set("Accept", "text/event-stream");
-          const i = await fetch(this.url.href, {
-            headers: o,
-            signal: (n = this.abortController) == null ? void 0 : n.signal
-          });
-          if (!i.ok || !i.body) {
-            const d = new Se({
-              message: `MCP SSE Transport Error: ${i.status} ${i.statusText}`
-            });
-            return (a = this.onerror) == null || a.call(this, d), t(d);
-          }
-          const u = i.body.pipeThrough(new TextDecoderStream()).pipeThrough(zs()).getReader(), c = async () => {
-            var d, m, _;
-            try {
-              for (; ; ) {
-                const { done: v, value: g } = await u.read();
-                if (v) {
-                  if (this.connected)
-                    throw this.connected = !1, new Se({
-                      message: "MCP SSE Transport Error: Connection closed unexpectedly"
-                    });
-                  return;
-                }
-                const { event: p, data: f } = g;
-                if (p === "endpoint") {
-                  if (this.endpoint = new URL(f, this.url), this.endpoint.origin !== this.url.origin)
-                    throw new Se({
-                      message: `MCP SSE Transport Error: Endpoint origin does not match connection origin: ${this.endpoint.origin}`
-                    });
-                  this.connected = !0, e();
-                } else if (p === "message")
-                  try {
-                    const w = vm.parse(
-                      JSON.parse(f)
-                    );
-                    (d = this.onmessage) == null || d.call(this, w);
-                  } catch (w) {
-                    const k = new Se({
-                      message: "MCP SSE Transport Error: Failed to parse message",
-                      cause: w
-                    });
-                    (m = this.onerror) == null || m.call(this, k);
-                  }
-              }
-            } catch (v) {
-              if (v instanceof Error && v.name === "AbortError")
-                return;
-              (_ = this.onerror) == null || _.call(this, v), t(v);
-            }
-          };
-          this.sseConnection = {
-            close: () => u.cancel()
-          }, c();
-        } catch (o) {
-          if (o instanceof Error && o.name === "AbortError")
-            return;
-          (s = this.onerror) == null || s.call(this, o), t(o);
-        }
-      })();
-    });
-  }
-  async close() {
-    var e, t, r;
-    this.connected = !1, (e = this.sseConnection) == null || e.close(), (t = this.abortController) == null || t.abort(), (r = this.onclose) == null || r.call(this);
-  }
-  async send(e) {
-    var t, r, n;
-    if (!this.endpoint || !this.connected)
-      throw new Se({
-        message: "MCP SSE Transport Error: Not connected"
-      });
-    try {
-      const a = new Headers(this.headers);
-      a.set("Content-Type", "application/json");
-      const s = {
-        method: "POST",
-        headers: a,
-        body: JSON.stringify(e),
-        signal: (t = this.abortController) == null ? void 0 : t.signal
-      }, o = await fetch(this.endpoint, s);
-      if (!o.ok) {
-        const i = await o.text().catch(() => null), l = new Se({
-          message: `MCP SSE Transport Error: POSTing to endpoint (HTTP ${o.status}): ${i}`
-        });
-        (r = this.onerror) == null || r.call(this, l);
-        return;
-      }
-    } catch (a) {
-      (n = this.onerror) == null || n.call(this, a);
-      return;
-    }
-  }
-};
-function bm(e) {
-  if (e.type !== "sse")
-    throw new Se({
-      message: "Unsupported or invalid transport configuration. If you are using a custom transport, make sure it implements the MCPTransport interface."
-    });
-  return new _m(e);
-}
-function wm(e) {
-  return "start" in e && typeof e.start == "function" && "send" in e && typeof e.send == "function" && "close" in e && typeof e.close == "function";
-}
-var xm = "1.0.0";
-async function Oh(e) {
-  const t = new km(e);
-  return await t.init(), t;
-}
-var km = class {
-  constructor({
-    transport: e,
-    name: t = "ai-sdk-mcp-client",
-    onUncaughtError: r
-  }) {
-    this.requestMessageId = 0, this.responseHandlers = /* @__PURE__ */ new Map(), this.serverCapabilities = {}, this.isClosed = !0, this.onUncaughtError = r, wm(e) ? this.transport = e : this.transport = bm(e), this.transport.onclose = () => this.onClose(), this.transport.onerror = (n) => this.onError(n), this.transport.onmessage = (n) => {
-      if ("method" in n) {
-        this.onError(
-          new Se({
-            message: "Unsupported message type"
-          })
-        );
-        return;
-      }
-      this.onResponse(n);
-    }, this.clientInfo = {
-      name: t,
-      version: xm
-    };
-  }
-  async init() {
-    try {
-      await this.transport.start(), this.isClosed = !1;
-      const e = await this.request({
-        request: {
-          method: "initialize",
-          params: {
-            protocolVersion: Ai,
-            capabilities: {},
-            clientInfo: this.clientInfo
-          }
-        },
-        resultSchema: am
-      });
-      if (e === void 0)
-        throw new Se({
-          message: "Server sent invalid initialize result"
-        });
-      if (!em.includes(e.protocolVersion))
-        throw new Se({
-          message: `Server's protocol version is not supported: ${e.protocolVersion}`
-        });
-      return this.serverCapabilities = e.capabilities, await this.notification({
-        method: "notifications/initialized"
-      }), this;
-    } catch (e) {
-      throw await this.close(), e;
-    }
-  }
-  async close() {
-    var e;
-    this.isClosed || (await ((e = this.transport) == null ? void 0 : e.close()), this.onClose());
-  }
-  assertCapability(e) {
-    switch (e) {
-      case "initialize":
-        break;
-      case "tools/list":
-      case "tools/call":
-        if (!this.serverCapabilities.tools)
-          throw new Se({
-            message: "Server does not support tools"
-          });
-        break;
-      default:
-        throw new Se({
-          message: `Unsupported method: ${e}`
-        });
-    }
-  }
-  async request({
-    request: e,
-    resultSchema: t,
-    options: r
-  }) {
-    return new Promise((n, a) => {
-      if (this.isClosed)
-        return a(
-          new Se({
-            message: "Attempted to send a request from a closed client"
-          })
-        );
-      this.assertCapability(e.method);
-      const s = r == null ? void 0 : r.signal;
-      s == null || s.throwIfAborted();
-      const o = this.requestMessageId++, i = {
-        ...e,
-        jsonrpc: "2.0",
-        id: o
-      }, l = () => {
-        this.responseHandlers.delete(o);
-      };
-      this.responseHandlers.set(o, (u) => {
-        if (s != null && s.aborted)
-          return a(
-            new Se({
-              message: "Request was aborted",
-              cause: s.reason
-            })
-          );
-        if (u instanceof Error)
-          return a(u);
-        try {
-          const c = t.parse(u.result);
-          n(c);
-        } catch (c) {
-          const d = new Se({
-            message: "Failed to parse server response",
-            cause: c
-          });
-          a(d);
-        }
-      }), this.transport.send(i).catch((u) => {
-        l(), a(u);
-      });
-    });
-  }
-  async listTools({
-    params: e,
-    options: t
-  } = {}) {
-    try {
-      return this.request({
-        request: { method: "tools/list", params: e },
-        resultSchema: im,
-        options: t
-      });
-    } catch (r) {
-      throw r;
-    }
-  }
-  async callTool({
-    name: e,
-    args: t,
-    options: r
-  }) {
-    try {
-      return this.request({
-        request: { method: "tools/call", params: { name: e, arguments: t } },
-        resultSchema: mm,
-        options: {
-          signal: r == null ? void 0 : r.abortSignal
-        }
-      });
-    } catch (n) {
-      throw n;
-    }
-  }
-  async notification(e) {
-    const t = {
-      ...e,
-      jsonrpc: "2.0"
-    };
-    await this.transport.send(t);
-  }
-  /**
-   * Returns a set of AI SDK tools from the MCP server
-   * @returns A record of tool names to their implementations
-   */
-  async tools({
-    schemas: e = "automatic"
-  } = {}) {
-    var t;
-    const r = {};
-    try {
-      const n = await this.listTools();
-      for (const { name: a, description: s, inputSchema: o } of n.tools) {
-        if (e !== "automatic" && !(a in e))
-          continue;
-        const i = e === "automatic" ? io({
-          ...o,
-          properties: (t = o.properties) != null ? t : {},
-          additionalProperties: !1
-        }) : e[a].parameters, l = this, u = {
-          description: s,
-          parameters: i,
-          execute: async (c, d) => {
-            var m;
-            return (m = d == null ? void 0 : d.abortSignal) == null || m.throwIfAborted(), l.callTool({
-              name: a,
-              args: c,
-              options: d
-            });
-          }
-        };
-        r[a] = u;
-      }
-      return r;
-    } catch (n) {
-      throw n;
-    }
-  }
-  onClose() {
-    if (this.isClosed)
-      return;
-    this.isClosed = !0;
-    const e = new Se({
-      message: "Connection closed"
-    });
-    for (const t of this.responseHandlers.values())
-      t(e);
-    this.responseHandlers.clear();
-  }
-  onError(e) {
-    this.onUncaughtError && this.onUncaughtError(e);
-  }
-  onResponse(e) {
-    const t = Number(e.id), r = this.responseHandlers.get(t);
-    if (r === void 0)
-      throw new Se({
-        message: `Protocol error: Received a response for an unknown message ID: ${JSON.stringify(
-          e
-        )}`
-      });
-    this.responseHandlers.delete(t), r(
-      "result" in e ? e : new Se({
-        message: e.error.message,
-        cause: e.error
-      })
-    );
-  }
-};
-function Mh(e, t, r) {
-  if (e.length !== t.length)
-    throw new ne({
-      parameter: "vector1,vector2",
-      value: { vector1Length: e.length, vector2Length: t.length },
-      message: "Vectors must have the same length"
-    });
-  const n = e.length;
-  if (n === 0) {
-    if (r != null && r.throwErrorForEmptyVectors)
-      throw new ne({
-        parameter: "vector1",
-        value: e,
-        message: "Vectors cannot be empty"
-      });
-    return 0;
-  }
-  let a = 0, s = 0, o = 0;
-  for (let i = 0; i < n; i++) {
-    const l = e[i], u = t[i];
-    a += l * l, s += u * u, o += l * u;
-  }
-  return a === 0 || s === 0 ? 0 : o / (Math.sqrt(a) * Math.sqrt(s));
-}
-function jh({
-  chunks: e,
-  initialDelayInMs: t = 0,
-  chunkDelayInMs: r = 0,
-  _internal: n
-}) {
-  var a;
-  const s = (a = n == null ? void 0 : n.delay) != null ? a : Qn;
-  let o = 0;
-  return new ReadableStream({
-    async pull(i) {
-      o < e.length ? (await s(o === 0 ? t : r), i.enqueue(e[o++])) : i.close();
-    }
-  });
-}
-function $h({ threadId: e, messageId: t }, r) {
-  const n = new ReadableStream({
-    async start(a) {
-      var s;
-      const o = new TextEncoder(), i = (d) => {
-        a.enqueue(
-          o.encode(
-            zt("assistant_message", d)
-          )
-        );
-      }, l = (d) => {
-        a.enqueue(
-          o.encode(
-            zt("data_message", d)
-          )
-        );
-      }, u = (d) => {
-        a.enqueue(
-          o.encode(zt("error", d))
-        );
-      }, c = async (d) => {
-        var m, _;
-        let v;
-        for await (const g of d)
-          switch (g.event) {
-            case "thread.message.created": {
-              a.enqueue(
-                o.encode(
-                  zt("assistant_message", {
-                    id: g.data.id,
-                    role: "assistant",
-                    content: [{ type: "text", text: { value: "" } }]
-                  })
-                )
-              );
-              break;
-            }
-            case "thread.message.delta": {
-              const p = (m = g.data.delta.content) == null ? void 0 : m[0];
-              (p == null ? void 0 : p.type) === "text" && ((_ = p.text) == null ? void 0 : _.value) != null && a.enqueue(
-                o.encode(
-                  zt("text", p.text.value)
-                )
-              );
-              break;
-            }
-            case "thread.run.completed":
-            case "thread.run.requires_action": {
-              v = g.data;
-              break;
-            }
-          }
-        return v;
-      };
-      a.enqueue(
-        o.encode(
-          zt("assistant_control_data", {
-            threadId: e,
-            messageId: t
-          })
-        )
-      );
-      try {
-        await r({
-          sendMessage: i,
-          sendDataMessage: l,
-          forwardStream: c
-        });
-      } catch (d) {
-        u((s = d.message) != null ? s : `${d}`);
-      } finally {
-        a.close();
-      }
-    },
-    pull(a) {
-    },
-    cancel() {
-    }
-  });
-  return new Response(n, {
-    status: 200,
-    headers: {
-      "Content-Type": "text/plain; charset=utf-8"
-    }
-  });
-}
-var Tm = {};
-ca(Tm, {
-  mergeIntoDataStream: () => Cm,
-  toDataStream: () => Sm,
-  toDataStreamResponse: () => Im
-});
-function Pi(e = {}) {
-  const t = new TextEncoder();
-  let r = "";
-  return new TransformStream({
-    async start() {
-      e.onStart && await e.onStart();
-    },
-    async transform(n, a) {
-      a.enqueue(t.encode(n)), r += n, e.onToken && await e.onToken(n), e.onText && typeof n == "string" && await e.onText(n);
-    },
-    async flush() {
-      e.onCompletion && await e.onCompletion(r), e.onFinal && await e.onFinal(r);
-    }
-  });
-}
-function ma(e, t) {
-  return e.pipeThrough(
-    new TransformStream({
-      transform: async (r, n) => {
-        var a;
-        if (typeof r == "string") {
-          n.enqueue(r);
-          return;
-        }
-        if ("event" in r) {
-          r.event === "on_chat_model_stream" && Ha(
-            (a = r.data) == null ? void 0 : a.chunk,
-            n
-          );
-          return;
-        }
-        Ha(r, n);
-      }
-    })
-  ).pipeThrough(Pi(t)).pipeThrough(new TextDecoderStream()).pipeThrough(
-    new TransformStream({
-      transform: async (r, n) => {
-        n.enqueue(pe("text", r));
-      }
-    })
-  );
-}
-function Sm(e, t) {
-  return ma(e, t).pipeThrough(
-    new TextEncoderStream()
-  );
-}
-function Im(e, t) {
-  var r;
-  const n = ma(
-    e,
-    t == null ? void 0 : t.callbacks
-  ).pipeThrough(new TextEncoderStream()), a = t == null ? void 0 : t.data, s = t == null ? void 0 : t.init, o = a ? da(a.stream, n) : n;
-  return new Response(o, {
-    status: (r = s == null ? void 0 : s.status) != null ? r : 200,
-    statusText: s == null ? void 0 : s.statusText,
-    headers: Lt(s == null ? void 0 : s.headers, {
-      contentType: "text/plain; charset=utf-8",
-      dataStreamVersion: "v1"
-    })
-  });
-}
-function Cm(e, t) {
-  t.dataStream.merge(ma(e, t.callbacks));
-}
-function Ha(e, t) {
-  if (typeof e.content == "string")
-    t.enqueue(e.content);
-  else {
-    const r = e.content;
-    for (const n of r)
-      n.type === "text" && t.enqueue(n.text);
-  }
-}
-var Rm = {};
-ca(Rm, {
-  mergeIntoDataStream: () => Nm,
-  toDataStream: () => Em,
-  toDataStreamResponse: () => Am
-});
-function fa(e, t) {
-  const r = Pm();
-  return nl(e[Symbol.asyncIterator]()).pipeThrough(
-    new TransformStream({
-      async transform(n, a) {
-        a.enqueue(r(n.delta));
-      }
-    })
-  ).pipeThrough(Pi(t)).pipeThrough(new TextDecoderStream()).pipeThrough(
-    new TransformStream({
-      transform: async (n, a) => {
-        a.enqueue(pe("text", n));
-      }
-    })
-  );
-}
-function Em(e, t) {
-  return fa(e, t).pipeThrough(
-    new TextEncoderStream()
-  );
-}
-function Am(e, t = {}) {
-  var r;
-  const { init: n, data: a, callbacks: s } = t, o = fa(e, s).pipeThrough(
-    new TextEncoderStream()
-  ), i = a ? da(a.stream, o) : o;
-  return new Response(i, {
-    status: (r = n == null ? void 0 : n.status) != null ? r : 200,
-    statusText: n == null ? void 0 : n.statusText,
-    headers: Lt(n == null ? void 0 : n.headers, {
-      contentType: "text/plain; charset=utf-8",
-      dataStreamVersion: "v1"
-    })
-  });
-}
-function Nm(e, t) {
-  t.dataStream.merge(fa(e, t.callbacks));
-}
-function Pm() {
-  let e = !0;
-  return (t) => (e && (t = t.trimStart(), t && (e = !1)), t);
-}
-var Om = 15 * 1e3, Dh = class {
-  constructor() {
-    this.encoder = new TextEncoder(), this.controller = null, this.isClosed = !1, this.warningTimeout = null;
-    const e = this;
-    this.stream = new ReadableStream({
-      start: async (t) => {
-        e.controller = t, process.env.NODE_ENV === "development" && (e.warningTimeout = setTimeout(() => {
-          console.warn(
-            "The data stream is hanging. Did you forget to close it with `data.close()`?"
-          );
-        }, Om));
-      },
-      pull: (t) => {
-      },
-      cancel: (t) => {
-        this.isClosed = !0;
-      }
-    });
-  }
-  async close() {
-    if (this.isClosed)
-      throw new Error("Data Stream has already been closed.");
-    if (!this.controller)
-      throw new Error("Stream controller is not initialized.");
-    this.controller.close(), this.isClosed = !0, this.warningTimeout && clearTimeout(this.warningTimeout);
-  }
-  append(e) {
-    if (this.isClosed)
-      throw new Error("Data Stream has already been closed.");
-    if (!this.controller)
-      throw new Error("Stream controller is not initialized.");
-    this.controller.enqueue(
-      this.encoder.encode(pe("data", [e]))
-    );
-  }
-  appendMessageAnnotation(e) {
-    if (this.isClosed)
-      throw new Error("Data Stream has already been closed.");
-    if (!this.controller)
-      throw new Error("Stream controller is not initialized.");
-    this.controller.enqueue(
-      this.encoder.encode(pe("message_annotations", [e]))
-    );
-  }
-}, Mm = y({
-  type: A("error"),
-  error: y({
-    type: h(),
-    message: h()
-  })
-}), Wa = ta({
-  errorSchema: Mm,
+}), as = jn({
+  errorSchema: gu,
   errorToMessage: (e) => e.error.message
+}), yu = f({
+  /**
+  Include reasoning content in requests sent to the model. Defaults to `true`.
+  
+  If you are experiencing issues with the model handling requests involving
+    */
+  sendReasoning: ue().optional(),
+  thinking: f({
+    type: se([C("enabled"), C("disabled")]),
+    budgetTokens: T().optional()
+  }).optional()
 });
-function jm(e) {
-  var t;
-  const r = (t = e.tools) != null && t.length ? e.tools : void 0, n = [], a = /* @__PURE__ */ new Set();
-  if (r == null)
-    return { tools: void 0, tool_choice: void 0, toolWarnings: n, betas: a };
+function vu({
+  tools: e,
+  toolChoice: t
+}) {
+  e = e != null && e.length ? e : void 0;
+  const n = [], r = /* @__PURE__ */ new Set();
+  if (e == null)
+    return { tools: void 0, toolChoice: void 0, toolWarnings: n, betas: r };
   const s = [];
-  for (const l of r)
-    switch (l.type) {
+  for (const o of e)
+    switch (o.type) {
       case "function":
         s.push({
-          name: l.name,
-          description: l.description,
-          input_schema: l.parameters
+          name: o.name,
+          description: o.description,
+          input_schema: o.parameters
         });
         break;
       case "provider-defined":
-        switch (l.id) {
+        switch (o.id) {
           case "anthropic.computer_20250124":
-            a.add("computer-use-2025-01-24"), s.push({
-              name: l.name,
+            r.add("computer-use-2025-01-24"), s.push({
+              name: o.name,
               type: "computer_20250124",
-              display_width_px: l.args.displayWidthPx,
-              display_height_px: l.args.displayHeightPx,
-              display_number: l.args.displayNumber
+              display_width_px: o.args.displayWidthPx,
+              display_height_px: o.args.displayHeightPx,
+              display_number: o.args.displayNumber
             });
             break;
           case "anthropic.computer_20241022":
-            a.add("computer-use-2024-10-22"), s.push({
-              name: l.name,
+            r.add("computer-use-2024-10-22"), s.push({
+              name: o.name,
               type: "computer_20241022",
-              display_width_px: l.args.displayWidthPx,
-              display_height_px: l.args.displayHeightPx,
-              display_number: l.args.displayNumber
+              display_width_px: o.args.displayWidthPx,
+              display_height_px: o.args.displayHeightPx,
+              display_number: o.args.displayNumber
             });
             break;
           case "anthropic.text_editor_20250124":
-            a.add("computer-use-2025-01-24"), s.push({
-              name: l.name,
+            r.add("computer-use-2025-01-24"), s.push({
+              name: o.name,
               type: "text_editor_20250124"
             });
             break;
           case "anthropic.text_editor_20241022":
-            a.add("computer-use-2024-10-22"), s.push({
-              name: l.name,
+            r.add("computer-use-2024-10-22"), s.push({
+              name: o.name,
               type: "text_editor_20241022"
             });
             break;
           case "anthropic.bash_20250124":
-            a.add("computer-use-2025-01-24"), s.push({
-              name: l.name,
+            r.add("computer-use-2025-01-24"), s.push({
+              name: o.name,
               type: "bash_20250124"
             });
             break;
           case "anthropic.bash_20241022":
-            a.add("computer-use-2024-10-22"), s.push({
-              name: l.name,
+            r.add("computer-use-2024-10-22"), s.push({
+              name: o.name,
               type: "bash_20241022"
             });
             break;
           default:
-            n.push({ type: "unsupported-tool", tool: l });
+            n.push({ type: "unsupported-tool", tool: o });
             break;
         }
         break;
       default:
-        n.push({ type: "unsupported-tool", tool: l });
+        n.push({ type: "unsupported-tool", tool: o });
         break;
     }
-  const o = e.toolChoice;
-  if (o == null)
+  if (t == null)
     return {
       tools: s,
-      tool_choice: void 0,
+      toolChoice: void 0,
       toolWarnings: n,
-      betas: a
+      betas: r
     };
-  const i = o.type;
-  switch (i) {
+  const a = t.type;
+  switch (a) {
     case "auto":
       return {
         tools: s,
-        tool_choice: { type: "auto" },
+        toolChoice: { type: "auto" },
         toolWarnings: n,
-        betas: a
+        betas: r
       };
     case "required":
       return {
         tools: s,
-        tool_choice: { type: "any" },
+        toolChoice: { type: "any" },
         toolWarnings: n,
-        betas: a
+        betas: r
       };
     case "none":
-      return { tools: void 0, tool_choice: void 0, toolWarnings: n, betas: a };
+      return { tools: void 0, toolChoice: void 0, toolWarnings: n, betas: r };
     case "tool":
       return {
         tools: s,
-        tool_choice: { type: "tool", name: o.toolName },
+        toolChoice: { type: "tool", name: t.toolName },
         toolWarnings: n,
-        betas: a
+        betas: r
       };
     default: {
-      const l = i;
-      throw new se({
-        functionality: `Unsupported tool choice type: ${l}`
+      const o = a;
+      throw new he({
+        functionality: `tool choice type: ${o}`
       });
     }
   }
 }
-function $m({
+async function _u({
   prompt: e,
   sendReasoning: t,
-  warnings: r
+  warnings: n
 }) {
-  var n, a, s, o;
-  const i = /* @__PURE__ */ new Set(), l = Dm(e);
-  let u;
-  const c = [];
-  function d(m) {
-    var _;
-    const v = m == null ? void 0 : m.anthropic;
-    return (_ = v == null ? void 0 : v.cacheControl) != null ? _ : v == null ? void 0 : v.cache_control;
+  var r, s, a;
+  const o = /* @__PURE__ */ new Set(), i = bu(e);
+  let l;
+  const u = [];
+  function c(p) {
+    var h;
+    const g = p == null ? void 0 : p.anthropic;
+    return (h = g == null ? void 0 : g.cacheControl) != null ? h : g == null ? void 0 : g.cache_control;
   }
-  for (let m = 0; m < l.length; m++) {
-    const _ = l[m], v = m === l.length - 1, g = _.type;
-    switch (g) {
+  for (let p = 0; p < i.length; p++) {
+    const h = i[p], g = p === i.length - 1, v = h.type;
+    switch (v) {
       case "system": {
-        if (u != null)
-          throw new se({
+        if (l != null)
+          throw new he({
             functionality: "Multiple system messages that are separated by user/assistant messages"
           });
-        u = _.messages.map(({ content: p, providerMetadata: f }) => ({
+        l = h.messages.map(({ content: y, providerOptions: m }) => ({
           type: "text",
-          text: p,
-          cache_control: d(f)
+          text: y,
+          cache_control: c(m)
         }));
         break;
       }
       case "user": {
-        const p = [];
-        for (const f of _.messages) {
-          const { role: w, content: k } = f;
-          switch (w) {
+        const y = [];
+        for (const m of h.messages) {
+          const { role: b, content: S } = m;
+          switch (b) {
             case "user": {
-              for (let b = 0; b < k.length; b++) {
-                const x = k[b], S = b === k.length - 1, $ = (n = d(x.providerMetadata)) != null ? n : S ? d(f.providerMetadata) : void 0;
+              for (let w = 0; w < S.length; w++) {
+                const x = S[w], _ = w === S.length - 1, k = (r = c(x.providerOptions)) != null ? r : _ ? c(m.providerOptions) : void 0;
                 switch (x.type) {
                   case "text": {
-                    p.push({
+                    y.push({
                       type: "text",
                       text: x.text,
-                      cache_control: $
-                    });
-                    break;
-                  }
-                  case "image": {
-                    p.push({
-                      type: "image",
-                      source: x.image instanceof URL ? {
-                        type: "url",
-                        url: x.image.toString()
-                      } : {
-                        type: "base64",
-                        media_type: (a = x.mimeType) != null ? a : "image/jpeg",
-                        data: Mt(x.image)
-                      },
-                      cache_control: $
+                      cache_control: k
                     });
                     break;
                   }
                   case "file": {
-                    if (x.mimeType !== "application/pdf")
-                      throw new se({
-                        functionality: "Non-PDF files in user messages"
+                    if (x.mediaType.startsWith("image/"))
+                      y.push({
+                        type: "image",
+                        source: x.data instanceof URL ? {
+                          type: "url",
+                          url: x.data.toString()
+                        } : {
+                          type: "base64",
+                          media_type: x.mediaType === "image/*" ? "image/jpeg" : x.mediaType,
+                          data: vt(x.data)
+                        },
+                        cache_control: k
                       });
-                    i.add("pdfs-2024-09-25"), p.push({
-                      type: "document",
-                      source: x.data instanceof URL ? {
-                        type: "url",
-                        url: x.data.toString()
-                      } : {
-                        type: "base64",
-                        media_type: "application/pdf",
-                        data: x.data
-                      },
-                      cache_control: $
-                    });
+                    else if (x.mediaType === "application/pdf")
+                      o.add("pdfs-2024-09-25"), y.push({
+                        type: "document",
+                        source: x.data instanceof URL ? {
+                          type: "url",
+                          url: x.data.toString()
+                        } : {
+                          type: "base64",
+                          media_type: "application/pdf",
+                          data: vt(x.data)
+                        },
+                        cache_control: k
+                      });
+                    else
+                      throw new he({
+                        functionality: `media type: ${x.mediaType}`
+                      });
                     break;
                   }
                 }
@@ -12606,14 +4660,14 @@ function $m({
               break;
             }
             case "tool": {
-              for (let b = 0; b < k.length; b++) {
-                const x = k[b], S = b === k.length - 1, $ = (s = d(x.providerMetadata)) != null ? s : S ? d(f.providerMetadata) : void 0, E = x.content != null ? x.content.map((P) => {
-                  var G;
-                  switch (P.type) {
+              for (let w = 0; w < S.length; w++) {
+                const x = S[w], _ = w === S.length - 1, k = (s = c(x.providerOptions)) != null ? s : _ ? c(m.providerOptions) : void 0, O = x.content != null ? x.content.map((N) => {
+                  var q;
+                  switch (N.type) {
                     case "text":
                       return {
                         type: "text",
-                        text: P.text,
+                        text: N.text,
                         cache_control: void 0
                       };
                     case "image":
@@ -12621,130 +4675,140 @@ function $m({
                         type: "image",
                         source: {
                           type: "base64",
-                          media_type: (G = P.mimeType) != null ? G : "image/jpeg",
-                          data: P.data
+                          media_type: (q = N.mediaType) != null ? q : "image/jpeg",
+                          data: N.data
                         },
                         cache_control: void 0
                       };
                   }
                 }) : JSON.stringify(x.result);
-                p.push({
+                y.push({
                   type: "tool_result",
                   tool_use_id: x.toolCallId,
-                  content: E,
+                  content: O,
                   is_error: x.isError,
-                  cache_control: $
+                  cache_control: k
                 });
               }
               break;
             }
             default: {
-              const b = w;
-              throw new Error(`Unsupported role: ${b}`);
+              const w = b;
+              throw new Error(`Unsupported role: ${w}`);
             }
           }
         }
-        c.push({ role: "user", content: p });
+        u.push({ role: "user", content: y });
         break;
       }
       case "assistant": {
-        const p = [];
-        for (let f = 0; f < _.messages.length; f++) {
-          const w = _.messages[f], k = f === _.messages.length - 1, { content: b } = w;
-          for (let x = 0; x < b.length; x++) {
-            const S = b[x], $ = x === b.length - 1, E = (o = d(S.providerMetadata)) != null ? o : $ ? d(w.providerMetadata) : void 0;
-            switch (S.type) {
+        const y = [];
+        for (let m = 0; m < h.messages.length; m++) {
+          const b = h.messages[m], S = m === h.messages.length - 1, { content: w } = b;
+          for (let x = 0; x < w.length; x++) {
+            const _ = w[x], k = x === w.length - 1, O = (a = c(_.providerOptions)) != null ? a : k ? c(b.providerOptions) : void 0;
+            switch (_.type) {
               case "text": {
-                p.push({
+                y.push({
                   type: "text",
                   text: (
                     // trim the last text part if it's the last message in the block
                     // because Anthropic does not allow trailing whitespace
                     // in pre-filled assistant responses
-                    v && k && $ ? S.text.trim() : S.text
+                    g && S && k ? _.text.trim() : _.text
                   ),
-                  cache_control: E
+                  cache_control: O
                 });
                 break;
               }
               case "reasoning": {
-                t ? p.push({
-                  type: "thinking",
-                  thinking: S.text,
-                  signature: S.signature,
-                  cache_control: E
-                }) : r.push({
-                  type: "other",
-                  message: "sending reasoning content is disabled for this model"
-                });
-                break;
-              }
-              case "redacted-reasoning": {
-                p.push({
-                  type: "redacted_thinking",
-                  data: S.data,
-                  cache_control: E
-                });
+                if (t) {
+                  const N = await qe({
+                    provider: "anthropic",
+                    providerOptions: _.providerOptions,
+                    schema: ku
+                  });
+                  N != null ? N.signature != null ? y.push({
+                    type: "thinking",
+                    thinking: _.text,
+                    signature: N.signature,
+                    cache_control: O
+                  }) : N.redactedData != null ? y.push({
+                    type: "redacted_thinking",
+                    data: N.redactedData,
+                    cache_control: O
+                  }) : n.push({
+                    type: "other",
+                    message: "unsupported reasoning metadata"
+                  }) : n.push({
+                    type: "other",
+                    message: "unsupported reasoning metadata"
+                  });
+                } else
+                  n.push({
+                    type: "other",
+                    message: "sending reasoning content is disabled for this model"
+                  });
                 break;
               }
               case "tool-call": {
-                p.push({
+                y.push({
                   type: "tool_use",
-                  id: S.toolCallId,
-                  name: S.toolName,
-                  input: S.args,
-                  cache_control: E
+                  id: _.toolCallId,
+                  name: _.toolName,
+                  input: _.args,
+                  cache_control: O
                 });
                 break;
               }
             }
           }
         }
-        c.push({ role: "assistant", content: p });
+        u.push({ role: "assistant", content: y });
         break;
       }
       default: {
-        const p = g;
-        throw new Error(`Unsupported type: ${p}`);
+        const y = v;
+        throw new Error(`content type: ${y}`);
       }
     }
   }
   return {
-    prompt: { system: u, messages: c },
-    betas: i
+    prompt: { system: l, messages: u },
+    betas: o
   };
 }
-function Dm(e) {
+function bu(e) {
   const t = [];
-  let r;
-  for (const n of e) {
-    const { role: a } = n;
-    switch (a) {
+  let n;
+  for (const r of e) {
+    const { role: s } = r;
+    switch (s) {
       case "system": {
-        (r == null ? void 0 : r.type) !== "system" && (r = { type: "system", messages: [] }, t.push(r)), r.messages.push(n);
+        (n == null ? void 0 : n.type) !== "system" && (n = { type: "system", messages: [] }, t.push(n)), n.messages.push(r);
         break;
       }
       case "assistant": {
-        (r == null ? void 0 : r.type) !== "assistant" && (r = { type: "assistant", messages: [] }, t.push(r)), r.messages.push(n);
+        (n == null ? void 0 : n.type) !== "assistant" && (n = { type: "assistant", messages: [] }, t.push(n)), n.messages.push(r);
         break;
       }
       case "user": {
-        (r == null ? void 0 : r.type) !== "user" && (r = { type: "user", messages: [] }, t.push(r)), r.messages.push(n);
+        (n == null ? void 0 : n.type) !== "user" && (n = { type: "user", messages: [] }, t.push(n)), n.messages.push(r);
         break;
       }
       case "tool": {
-        (r == null ? void 0 : r.type) !== "user" && (r = { type: "user", messages: [] }, t.push(r)), r.messages.push(n);
+        (n == null ? void 0 : n.type) !== "user" && (n = { type: "user", messages: [] }, t.push(n)), n.messages.push(r);
         break;
       }
       default: {
-        const s = a;
-        throw new Error(`Unsupported role: ${s}`);
+        const a = s;
+        throw new Error(`Unsupported role: ${a}`);
       }
     }
   }
   return t;
 }
-function Ka(e) {
+function os(e) {
   switch (e) {
     case "end_turn":
     case "stop_sequence":
@@ -12757,9 +4821,9 @@ function Ka(e) {
       return "unknown";
   }
 }
-var qm = class {
-  constructor(e, t, r) {
-    this.specificationVersion = "v1", this.defaultObjectGenerationMode = "tool", this.modelId = e, this.settings = t, this.config = r;
+var wu = class {
+  constructor(e, t) {
+    this.specificationVersion = "v2", this.modelId = e, this.config = t;
   }
   supportsUrl(e) {
     return e.protocol === "https:";
@@ -12767,558 +4831,560 @@ var qm = class {
   get provider() {
     return this.config.provider;
   }
-  get supportsImageUrls() {
-    return this.config.supportsImageUrls;
+  get supportedUrls() {
+    var e, t, n;
+    return (n = (t = (e = this.config).supportedUrls) == null ? void 0 : t.call(e)) != null ? n : {};
   }
   async getArgs({
-    mode: e,
-    prompt: t,
-    maxTokens: r = 4096,
+    prompt: e,
+    maxOutputTokens: t = 4096,
     // 4096: max model output tokens TODO update default in v5
     temperature: n,
-    topP: a,
+    topP: r,
     topK: s,
-    frequencyPenalty: o,
-    presencePenalty: i,
-    stopSequences: l,
-    responseFormat: u,
-    seed: c,
-    providerMetadata: d
+    frequencyPenalty: a,
+    presencePenalty: o,
+    stopSequences: i,
+    responseFormat: l,
+    seed: u,
+    tools: c,
+    toolChoice: p,
+    providerOptions: h
   }) {
-    var m, _, v;
-    const g = e.type, p = [];
-    o != null && p.push({
+    var g, v, y;
+    const m = [];
+    a != null && m.push({
       type: "unsupported-setting",
       setting: "frequencyPenalty"
-    }), i != null && p.push({
+    }), o != null && m.push({
       type: "unsupported-setting",
       setting: "presencePenalty"
-    }), c != null && p.push({
+    }), u != null && m.push({
       type: "unsupported-setting",
       setting: "seed"
-    }), u != null && u.type !== "text" && p.push({
+    }), l != null && l.type !== "text" && m.push({
       type: "unsupported-setting",
       setting: "responseFormat",
       details: "JSON response format is not supported."
     });
-    const { prompt: f, betas: w } = $m({
-      prompt: t,
-      sendReasoning: (m = this.settings.sendReasoning) != null ? m : !0,
-      warnings: p
-    }), k = un({
+    const b = await qe({
       provider: "anthropic",
-      providerOptions: d,
-      schema: Fm
-    }), b = ((_ = k == null ? void 0 : k.thinking) == null ? void 0 : _.type) === "enabled", x = (v = k == null ? void 0 : k.thinking) == null ? void 0 : v.budgetTokens, S = {
+      providerOptions: h,
+      schema: yu
+    }), { prompt: S, betas: w } = await _u({
+      prompt: e,
+      sendReasoning: (g = b == null ? void 0 : b.sendReasoning) != null ? g : !0,
+      warnings: m
+    }), x = ((v = b == null ? void 0 : b.thinking) == null ? void 0 : v.type) === "enabled", _ = (y = b == null ? void 0 : b.thinking) == null ? void 0 : y.budgetTokens, k = {
       // model id:
       model: this.modelId,
       // standardized settings:
-      max_tokens: r,
+      max_tokens: t,
       temperature: n,
       top_k: s,
-      top_p: a,
-      stop_sequences: l,
+      top_p: r,
+      stop_sequences: i,
       // provider specific settings:
-      ...b && {
-        thinking: { type: "enabled", budget_tokens: x }
+      ...x && {
+        thinking: { type: "enabled", budget_tokens: _ }
       },
       // prompt:
-      system: f.system,
-      messages: f.messages
+      system: S.system,
+      messages: S.messages
     };
-    if (b) {
-      if (x == null)
-        throw new se({
+    if (x) {
+      if (_ == null)
+        throw new he({
           functionality: "thinking requires a budget"
         });
-      S.temperature != null && (S.temperature = void 0, p.push({
+      k.temperature != null && (k.temperature = void 0, m.push({
         type: "unsupported-setting",
         setting: "temperature",
         details: "temperature is not supported when thinking is enabled"
-      })), s != null && (S.top_k = void 0, p.push({
+      })), s != null && (k.top_k = void 0, m.push({
         type: "unsupported-setting",
         setting: "topK",
         details: "topK is not supported when thinking is enabled"
-      })), a != null && (S.top_p = void 0, p.push({
+      })), r != null && (k.top_p = void 0, m.push({
         type: "unsupported-setting",
         setting: "topP",
         details: "topP is not supported when thinking is enabled"
-      })), S.max_tokens = r + x;
+      })), k.max_tokens = t + _;
     }
-    switch (g) {
-      case "regular": {
-        const {
-          tools: $,
-          tool_choice: E,
-          toolWarnings: P,
-          betas: G
-        } = jm(e);
-        return {
-          args: { ...S, tools: $, tool_choice: E },
-          warnings: [...p, ...P],
-          betas: /* @__PURE__ */ new Set([...w, ...G])
-        };
-      }
-      case "object-json":
-        throw new se({
-          functionality: "json-mode object generation"
-        });
-      case "object-tool": {
-        const { name: $, description: E, parameters: P } = e.tool;
-        return {
-          args: {
-            ...S,
-            tools: [{ name: $, description: E, input_schema: P }],
-            tool_choice: { type: "tool", name: $ }
-          },
-          warnings: p,
-          betas: w
-        };
-      }
-      default: {
-        const $ = g;
-        throw new Error(`Unsupported type: ${$}`);
-      }
-    }
+    const {
+      tools: O,
+      toolChoice: N,
+      toolWarnings: q,
+      betas: L
+    } = vu({ tools: c, toolChoice: p });
+    return {
+      args: {
+        ...k,
+        tools: O,
+        tool_choice: N
+      },
+      warnings: [...m, ...q],
+      betas: /* @__PURE__ */ new Set([...w, ...L])
+    };
   }
   async getHeaders({
     betas: e,
     headers: t
   }) {
-    return Le(
-      await hl(this.config.headers),
+    return Se(
+      await Rn(this.config.headers),
       e.size > 0 ? { "anthropic-beta": Array.from(e).join(",") } : {},
       t
     );
   }
   buildRequestUrl(e) {
-    var t, r, n;
-    return (n = (r = (t = this.config).buildRequestUrl) == null ? void 0 : r.call(t, this.config.baseURL, e)) != null ? n : `${this.config.baseURL}/messages`;
+    var t, n, r;
+    return (r = (n = (t = this.config).buildRequestUrl) == null ? void 0 : n.call(t, this.config.baseURL, e)) != null ? r : `${this.config.baseURL}/messages`;
   }
   transformRequestBody(e) {
-    var t, r, n;
-    return (n = (r = (t = this.config).transformRequestBody) == null ? void 0 : r.call(t, e)) != null ? n : e;
+    var t, n, r;
+    return (r = (n = (t = this.config).transformRequestBody) == null ? void 0 : n.call(t, e)) != null ? r : e;
   }
   async doGenerate(e) {
-    var t, r, n, a;
-    const { args: s, warnings: o, betas: i } = await this.getArgs(e), {
+    var t, n, r, s;
+    const { args: a, warnings: o, betas: i } = await this.getArgs(e), {
       responseHeaders: l,
       value: u,
       rawValue: c
-    } = await Fe({
+    } = await Ie({
       url: this.buildRequestUrl(!1),
       headers: await this.getHeaders({ betas: i, headers: e.headers }),
-      body: this.transformRequestBody(s),
-      failedResponseHandler: Wa,
-      successfulResponseHandler: vt(
-        Um
+      body: this.transformRequestBody(a),
+      failedResponseHandler: as,
+      successfulResponseHandler: Fe(
+        xu
       ),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
-    }), { messages: d, ...m } = s;
-    let _ = "";
-    for (const p of u.content)
-      p.type === "text" && (_ += p.text);
-    let v;
-    if (u.content.some((p) => p.type === "tool_use")) {
-      v = [];
-      for (const p of u.content)
-        p.type === "tool_use" && v.push({
-          toolCallType: "function",
-          toolCallId: p.id,
-          toolName: p.name,
-          args: JSON.stringify(p.input)
-        });
-    }
-    const g = u.content.filter(
-      (p) => p.type === "redacted_thinking" || p.type === "thinking"
-    ).map(
-      (p) => p.type === "thinking" ? {
-        type: "text",
-        text: p.thinking,
-        signature: p.signature
-      } : {
-        type: "redacted",
-        data: p.data
+    }), p = [];
+    for (const h of u.content)
+      switch (h.type) {
+        case "text": {
+          p.push({ type: "text", text: h.text });
+          break;
+        }
+        case "thinking": {
+          p.push({
+            type: "reasoning",
+            text: h.thinking,
+            providerMetadata: {
+              anthropic: {
+                signature: h.signature
+              }
+            }
+          });
+          break;
+        }
+        case "redacted_thinking": {
+          p.push({
+            type: "reasoning",
+            text: "",
+            providerMetadata: {
+              anthropic: {
+                redactedData: h.data
+              }
+            }
+          });
+          break;
+        }
+        case "tool_use": {
+          p.push({
+            type: "tool-call",
+            toolCallType: "function",
+            toolCallId: h.id,
+            toolName: h.name,
+            args: JSON.stringify(h.input)
+          });
+          break;
+        }
       }
-    );
     return {
-      text: _,
-      reasoning: g.length > 0 ? g : void 0,
-      toolCalls: v,
-      finishReason: Ka(u.stop_reason),
+      content: p,
+      finishReason: os(u.stop_reason),
       usage: {
-        promptTokens: u.usage.input_tokens,
-        completionTokens: u.usage.output_tokens
+        inputTokens: u.usage.input_tokens,
+        outputTokens: u.usage.output_tokens,
+        totalTokens: u.usage.input_tokens + u.usage.output_tokens,
+        cachedInputTokens: (t = u.usage.cache_read_input_tokens) != null ? t : void 0
       },
-      rawCall: { rawPrompt: d, rawSettings: m },
-      rawResponse: {
+      request: { body: a },
+      response: {
+        id: (n = u.id) != null ? n : void 0,
+        modelId: (r = u.model) != null ? r : void 0,
         headers: l,
         body: c
-      },
-      response: {
-        id: (t = u.id) != null ? t : void 0,
-        modelId: (r = u.model) != null ? r : void 0
       },
       warnings: o,
       providerMetadata: {
         anthropic: {
-          cacheCreationInputTokens: (n = u.usage.cache_creation_input_tokens) != null ? n : null,
-          cacheReadInputTokens: (a = u.usage.cache_read_input_tokens) != null ? a : null
+          cacheCreationInputTokens: (s = u.usage.cache_creation_input_tokens) != null ? s : null
         }
-      },
-      request: { body: JSON.stringify(s) }
+      }
     };
   }
   async doStream(e) {
-    const { args: t, warnings: r, betas: n } = await this.getArgs(e), a = { ...t, stream: !0 }, { responseHeaders: s, value: o } = await Fe({
+    const { args: t, warnings: n, betas: r } = await this.getArgs(e), s = { ...t, stream: !0 }, { responseHeaders: a, value: o } = await Ie({
       url: this.buildRequestUrl(!0),
-      headers: await this.getHeaders({ betas: n, headers: e.headers }),
-      body: this.transformRequestBody(a),
-      failedResponseHandler: Wa,
-      successfulResponseHandler: Ar(
-        Lm
+      headers: await this.getHeaders({ betas: r, headers: e.headers }),
+      body: this.transformRequestBody(s),
+      failedResponseHandler: as,
+      successfulResponseHandler: Ut(
+        Tu
       ),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
-    }), { messages: i, ...l } = t;
-    let u = "unknown";
-    const c = {
-      promptTokens: Number.NaN,
-      completionTokens: Number.NaN
-    }, d = {};
-    let m, _;
+    });
+    let i = "unknown";
+    const l = {
+      inputTokens: void 0,
+      outputTokens: void 0,
+      totalTokens: void 0
+    }, u = {};
+    let c, p;
     return {
       stream: o.pipeThrough(
         new TransformStream({
-          transform(v, g) {
-            var p, f, w, k;
-            if (!v.success) {
-              g.enqueue({ type: "error", error: v.error });
+          start(h) {
+            h.enqueue({ type: "stream-start", warnings: n });
+          },
+          transform(h, g) {
+            var v, y, m, b, S, w;
+            if (!h.success) {
+              g.enqueue({ type: "error", error: h.error });
               return;
             }
-            const b = v.value;
-            switch (b.type) {
+            const x = h.value;
+            switch (x.type) {
               case "ping":
                 return;
               case "content_block_start": {
-                const x = b.content_block.type;
-                switch (_ = x, x) {
+                const _ = x.content_block.type;
+                switch (p = _, _) {
                   case "text":
                   case "thinking":
                     return;
                   case "redacted_thinking": {
                     g.enqueue({
-                      type: "redacted-reasoning",
-                      data: b.content_block.data
-                    });
+                      type: "reasoning",
+                      text: "",
+                      providerMetadata: {
+                        anthropic: {
+                          redactedData: x.content_block.data
+                        }
+                      }
+                    }), g.enqueue({ type: "reasoning-part-finish" });
                     return;
                   }
                   case "tool_use": {
-                    d[b.index] = {
-                      toolCallId: b.content_block.id,
-                      toolName: b.content_block.name,
+                    u[x.index] = {
+                      toolCallId: x.content_block.id,
+                      toolName: x.content_block.name,
                       jsonText: ""
                     };
                     return;
                   }
                   default: {
-                    const S = x;
+                    const k = _;
                     throw new Error(
-                      `Unsupported content block type: ${S}`
+                      `Unsupported content block type: ${k}`
                     );
                   }
                 }
               }
               case "content_block_stop": {
-                if (d[b.index] != null) {
-                  const x = d[b.index];
+                if (u[x.index] != null) {
+                  const _ = u[x.index];
                   g.enqueue({
                     type: "tool-call",
                     toolCallType: "function",
-                    toolCallId: x.toolCallId,
-                    toolName: x.toolName,
-                    args: x.jsonText
-                  }), delete d[b.index];
+                    toolCallId: _.toolCallId,
+                    toolName: _.toolName,
+                    args: _.jsonText
+                  }), delete u[x.index];
                 }
-                _ = void 0;
+                p = void 0;
                 return;
               }
               case "content_block_delta": {
-                const x = b.delta.type;
-                switch (x) {
+                const _ = x.delta.type;
+                switch (_) {
                   case "text_delta": {
                     g.enqueue({
-                      type: "text-delta",
-                      textDelta: b.delta.text
+                      type: "text",
+                      text: x.delta.text
                     });
                     return;
                   }
                   case "thinking_delta": {
                     g.enqueue({
                       type: "reasoning",
-                      textDelta: b.delta.thinking
+                      text: x.delta.thinking
                     });
                     return;
                   }
                   case "signature_delta": {
-                    _ === "thinking" && g.enqueue({
-                      type: "reasoning-signature",
-                      signature: b.delta.signature
-                    });
+                    p === "thinking" && (g.enqueue({
+                      type: "reasoning",
+                      text: "",
+                      providerMetadata: {
+                        anthropic: {
+                          signature: x.delta.signature
+                        }
+                      }
+                    }), g.enqueue({ type: "reasoning-part-finish" }));
                     return;
                   }
                   case "input_json_delta": {
-                    const S = d[b.index];
+                    const k = u[x.index];
                     g.enqueue({
                       type: "tool-call-delta",
                       toolCallType: "function",
-                      toolCallId: S.toolCallId,
-                      toolName: S.toolName,
-                      argsTextDelta: b.delta.partial_json
-                    }), S.jsonText += b.delta.partial_json;
+                      toolCallId: k.toolCallId,
+                      toolName: k.toolName,
+                      argsTextDelta: x.delta.partial_json
+                    }), k.jsonText += x.delta.partial_json;
                     return;
                   }
                   default: {
-                    const S = x;
+                    const k = _;
                     throw new Error(
-                      `Unsupported delta type: ${S}`
+                      `Unsupported delta type: ${k}`
                     );
                   }
                 }
               }
               case "message_start": {
-                c.promptTokens = b.message.usage.input_tokens, c.completionTokens = b.message.usage.output_tokens, m = {
+                l.inputTokens = x.message.usage.input_tokens, l.cachedInputTokens = (v = x.message.usage.cache_read_input_tokens) != null ? v : void 0, c = {
                   anthropic: {
-                    cacheCreationInputTokens: (p = b.message.usage.cache_creation_input_tokens) != null ? p : null,
-                    cacheReadInputTokens: (f = b.message.usage.cache_read_input_tokens) != null ? f : null
+                    cacheCreationInputTokens: (y = x.message.usage.cache_creation_input_tokens) != null ? y : null
                   }
                 }, g.enqueue({
                   type: "response-metadata",
-                  id: (w = b.message.id) != null ? w : void 0,
-                  modelId: (k = b.message.model) != null ? k : void 0
+                  id: (m = x.message.id) != null ? m : void 0,
+                  modelId: (b = x.message.model) != null ? b : void 0
                 });
                 return;
               }
               case "message_delta": {
-                c.completionTokens = b.usage.output_tokens, u = Ka(b.delta.stop_reason);
+                l.outputTokens = x.usage.output_tokens, l.totalTokens = ((S = l.inputTokens) != null ? S : 0) + ((w = x.usage.output_tokens) != null ? w : 0), i = os(x.delta.stop_reason);
                 return;
               }
               case "message_stop": {
                 g.enqueue({
                   type: "finish",
-                  finishReason: u,
-                  usage: c,
-                  providerMetadata: m
+                  finishReason: i,
+                  usage: l,
+                  providerMetadata: c
                 });
                 return;
               }
               case "error": {
-                g.enqueue({ type: "error", error: b.error });
+                g.enqueue({ type: "error", error: x.error });
                 return;
               }
               default: {
-                const x = b;
-                throw new Error(`Unsupported chunk type: ${x}`);
+                const _ = x;
+                throw new Error(`Unsupported chunk type: ${_}`);
               }
             }
           }
         })
       ),
-      rawCall: { rawPrompt: i, rawSettings: l },
-      rawResponse: { headers: s },
-      warnings: r,
-      request: { body: JSON.stringify(a) }
+      request: { body: s },
+      response: { headers: a }
     };
   }
-}, Um = y({
-  type: A("message"),
-  id: h().nullish(),
-  model: h().nullish(),
-  content: F(
-    Tt("type", [
-      y({
-        type: A("text"),
-        text: h()
+}, xu = f({
+  type: C("message"),
+  id: d().nullish(),
+  model: d().nullish(),
+  content: M(
+    pt("type", [
+      f({
+        type: C("text"),
+        text: d()
       }),
-      y({
-        type: A("thinking"),
-        thinking: h(),
-        signature: h()
+      f({
+        type: C("thinking"),
+        thinking: d(),
+        signature: d()
       }),
-      y({
-        type: A("redacted_thinking"),
-        data: h()
+      f({
+        type: C("redacted_thinking"),
+        data: d()
       }),
-      y({
-        type: A("tool_use"),
-        id: h(),
-        name: h(),
-        input: Nr()
+      f({
+        type: C("tool_use"),
+        id: d(),
+        name: d(),
+        input: Me()
       })
     ])
   ),
-  stop_reason: h().nullish(),
-  usage: y({
-    input_tokens: R(),
-    output_tokens: R(),
-    cache_creation_input_tokens: R().nullish(),
-    cache_read_input_tokens: R().nullish()
+  stop_reason: d().nullish(),
+  usage: f({
+    input_tokens: T(),
+    output_tokens: T(),
+    cache_creation_input_tokens: T().nullish(),
+    cache_read_input_tokens: T().nullish()
   })
-}), Lm = Tt("type", [
-  y({
-    type: A("message_start"),
-    message: y({
-      id: h().nullish(),
-      model: h().nullish(),
-      usage: y({
-        input_tokens: R(),
-        output_tokens: R(),
-        cache_creation_input_tokens: R().nullish(),
-        cache_read_input_tokens: R().nullish()
+}), Tu = pt("type", [
+  f({
+    type: C("message_start"),
+    message: f({
+      id: d().nullish(),
+      model: d().nullish(),
+      usage: f({
+        input_tokens: T(),
+        output_tokens: T(),
+        cache_creation_input_tokens: T().nullish(),
+        cache_read_input_tokens: T().nullish()
       })
     })
   }),
-  y({
-    type: A("content_block_start"),
-    index: R(),
-    content_block: Tt("type", [
-      y({
-        type: A("text"),
-        text: h()
+  f({
+    type: C("content_block_start"),
+    index: T(),
+    content_block: pt("type", [
+      f({
+        type: C("text"),
+        text: d()
       }),
-      y({
-        type: A("thinking"),
-        thinking: h()
+      f({
+        type: C("thinking"),
+        thinking: d()
       }),
-      y({
-        type: A("tool_use"),
-        id: h(),
-        name: h()
+      f({
+        type: C("tool_use"),
+        id: d(),
+        name: d()
       }),
-      y({
-        type: A("redacted_thinking"),
-        data: h()
+      f({
+        type: C("redacted_thinking"),
+        data: d()
       })
     ])
   }),
-  y({
-    type: A("content_block_delta"),
-    index: R(),
-    delta: Tt("type", [
-      y({
-        type: A("input_json_delta"),
-        partial_json: h()
+  f({
+    type: C("content_block_delta"),
+    index: T(),
+    delta: pt("type", [
+      f({
+        type: C("input_json_delta"),
+        partial_json: d()
       }),
-      y({
-        type: A("text_delta"),
-        text: h()
+      f({
+        type: C("text_delta"),
+        text: d()
       }),
-      y({
-        type: A("thinking_delta"),
-        thinking: h()
+      f({
+        type: C("thinking_delta"),
+        thinking: d()
       }),
-      y({
-        type: A("signature_delta"),
-        signature: h()
+      f({
+        type: C("signature_delta"),
+        signature: d()
       })
     ])
   }),
-  y({
-    type: A("content_block_stop"),
-    index: R()
+  f({
+    type: C("content_block_stop"),
+    index: T()
   }),
-  y({
-    type: A("error"),
-    error: y({
-      type: h(),
-      message: h()
+  f({
+    type: C("error"),
+    error: f({
+      type: d(),
+      message: d()
     })
   }),
-  y({
-    type: A("message_delta"),
-    delta: y({ stop_reason: h().nullish() }),
-    usage: y({ output_tokens: R() })
+  f({
+    type: C("message_delta"),
+    delta: f({ stop_reason: d().nullish() }),
+    usage: f({ output_tokens: T() })
   }),
-  y({
-    type: A("message_stop")
+  f({
+    type: C("message_stop")
   }),
-  y({
-    type: A("ping")
+  f({
+    type: C("ping")
   })
-]), Fm = y({
-  thinking: y({
-    type: ge([A("enabled"), A("disabled")]),
-    budgetTokens: R().optional()
-  }).optional()
-}), Zm = y({
-  command: h(),
-  restart: Je().optional()
+]), ku = f({
+  signature: d().optional(),
+  redactedData: d().optional()
+}), Su = f({
+  command: d(),
+  restart: ue().optional()
 });
-function Vm(e = {}) {
+function Iu(e = {}) {
   return {
     type: "provider-defined",
     id: "anthropic.bash_20241022",
     args: {},
-    parameters: Zm,
+    parameters: Su,
     execute: e.execute,
     experimental_toToolResultContent: e.experimental_toToolResultContent
   };
 }
-var Bm = y({
-  command: h(),
-  restart: Je().optional()
+var Cu = f({
+  command: d(),
+  restart: ue().optional()
 });
-function Jm(e = {}) {
+function Ru(e = {}) {
   return {
     type: "provider-defined",
     id: "anthropic.bash_20250124",
     args: {},
-    parameters: Bm,
+    parameters: Cu,
     execute: e.execute,
     experimental_toToolResultContent: e.experimental_toToolResultContent
   };
 }
-var zm = y({
-  command: yt(["view", "create", "str_replace", "insert", "undo_edit"]),
-  path: h(),
-  file_text: h().optional(),
-  insert_line: R().int().optional(),
-  new_str: h().optional(),
-  old_str: h().optional(),
-  view_range: F(R().int()).optional()
+var Eu = f({
+  command: Ce(["view", "create", "str_replace", "insert", "undo_edit"]),
+  path: d(),
+  file_text: d().optional(),
+  insert_line: T().int().optional(),
+  new_str: d().optional(),
+  old_str: d().optional(),
+  view_range: M(T().int()).optional()
 });
-function Gm(e = {}) {
+function Au(e = {}) {
   return {
     type: "provider-defined",
     id: "anthropic.text_editor_20241022",
     args: {},
-    parameters: zm,
+    parameters: Eu,
     execute: e.execute,
     experimental_toToolResultContent: e.experimental_toToolResultContent
   };
 }
-var Hm = y({
-  command: yt(["view", "create", "str_replace", "insert", "undo_edit"]),
-  path: h(),
-  file_text: h().optional(),
-  insert_line: R().int().optional(),
-  new_str: h().optional(),
-  old_str: h().optional(),
-  view_range: F(R().int()).optional()
+var Ou = f({
+  command: Ce(["view", "create", "str_replace", "insert", "undo_edit"]),
+  path: d(),
+  file_text: d().optional(),
+  insert_line: T().int().optional(),
+  new_str: d().optional(),
+  old_str: d().optional(),
+  view_range: M(T().int()).optional()
 });
-function Wm(e = {}) {
+function Mu(e = {}) {
   return {
     type: "provider-defined",
     id: "anthropic.text_editor_20250124",
     args: {},
-    parameters: Hm,
+    parameters: Ou,
     execute: e.execute,
     experimental_toToolResultContent: e.experimental_toToolResultContent
   };
 }
-var Km = y({
-  action: yt([
+var Nu = f({
+  action: Ce([
     "key",
     "type",
     "mouse_move",
@@ -13330,10 +5396,10 @@ var Km = y({
     "screenshot",
     "cursor_position"
   ]),
-  coordinate: F(R().int()).optional(),
-  text: h().optional()
+  coordinate: M(T().int()).optional(),
+  text: d().optional()
 });
-function Ym(e) {
+function Pu(e) {
   return {
     type: "provider-defined",
     id: "anthropic.computer_20241022",
@@ -13342,13 +5408,13 @@ function Ym(e) {
       displayHeightPx: e.displayHeightPx,
       displayNumber: e.displayNumber
     },
-    parameters: Km,
+    parameters: Nu,
     execute: e.execute,
     experimental_toToolResultContent: e.experimental_toToolResultContent
   };
 }
-var Xm = y({
-  action: yt([
+var $u = f({
+  action: Ce([
     "key",
     "hold_key",
     "type",
@@ -13366,14 +5432,14 @@ var Xm = y({
     "wait",
     "screenshot"
   ]),
-  coordinate: $a([R().int(), R().int()]).optional(),
-  duration: R().optional(),
-  scroll_amount: R().optional(),
-  scroll_direction: yt(["up", "down", "left", "right"]).optional(),
-  start_coordinate: $a([R().int(), R().int()]).optional(),
-  text: h().optional()
+  coordinate: ts([T().int(), T().int()]).optional(),
+  duration: T().optional(),
+  scroll_amount: T().optional(),
+  scroll_direction: Ce(["up", "down", "left", "right"]).optional(),
+  start_coordinate: ts([T().int(), T().int()]).optional(),
+  text: d().optional()
 });
-function Qm(e) {
+function ju(e) {
   return {
     type: "provider-defined",
     id: "anthropic.computer_20250124",
@@ -13382,86 +5448,1531 @@ function Qm(e) {
       displayHeightPx: e.displayHeightPx,
       displayNumber: e.displayNumber
     },
-    parameters: Xm,
+    parameters: $u,
     execute: e.execute,
     experimental_toToolResultContent: e.experimental_toToolResultContent
   };
 }
-var ef = {
-  bash_20241022: Vm,
-  bash_20250124: Jm,
-  textEditor_20241022: Gm,
-  textEditor_20250124: Wm,
-  computer_20241022: Ym,
-  computer_20250124: Qm
+var Du = {
+  bash_20241022: Iu,
+  bash_20250124: Ru,
+  textEditor_20241022: Au,
+  textEditor_20250124: Mu,
+  computer_20241022: Pu,
+  computer_20250124: ju
 };
-function tf(e = {}) {
+function qu(e = {}) {
   var t;
-  const r = (t = ra(e.baseURL)) != null ? t : "https://api.anthropic.com/v1", n = () => ({
+  const n = (t = qn(e.baseURL)) != null ? t : "https://api.anthropic.com/v1", r = () => ({
     "anthropic-version": "2023-06-01",
-    "x-api-key": ea({
+    "x-api-key": $n({
       apiKey: e.apiKey,
       environmentVariableName: "ANTHROPIC_API_KEY",
       description: "Anthropic"
     }),
     ...e.headers
-  }), a = (o, i = {}) => new qm(o, i, {
+  }), s = (o) => new wu(o, {
     provider: "anthropic.messages",
-    baseURL: r,
-    headers: n,
+    baseURL: n,
+    headers: r,
     fetch: e.fetch,
-    supportsImageUrls: !0
-  }), s = function(o, i) {
+    supportedUrls: () => ({
+      "image/*": [/^https?:\/\/.*$/]
+    })
+  }), a = function(o) {
     if (new.target)
       throw new Error(
         "The Anthropic model function cannot be called with the new keyword."
       );
-    return a(o, i);
+    return s(o);
   };
-  return s.languageModel = a, s.chat = a, s.messages = a, s.textEmbeddingModel = (o) => {
-    throw new pt({ modelId: o, modelType: "textEmbeddingModel" });
-  }, s.tools = ef, s;
+  return a.languageModel = s, a.chat = s, a.messages = s, a.textEmbeddingModel = (o) => {
+    throw new je({ modelId: o, modelType: "textEmbeddingModel" });
+  }, a.imageModel = (o) => {
+    throw new je({ modelId: o, modelType: "imageModel" });
+  }, a.tools = Du, a;
 }
-tf();
-function rf(e) {
-  const t = [];
-  for (let r = 0; r < e.length; r++) {
-    const { role: n, content: a } = e[r], s = r === e.length - 1;
-    switch (n) {
+qu();
+var Uu = f({
+  error: f({
+    code: T().nullable(),
+    message: d(),
+    status: d()
+  })
+}), pr = jn({
+  errorSchema: Uu,
+  errorToMessage: (e) => e.error.message
+}), Lu = f({
+  /**
+   * Optional. Optional reduced dimension for the output embedding.
+   * If set, excessive values in the output embedding are truncated from the end.
+   */
+  outputDimensionality: T().optional(),
+  /**
+   * Optional. Specifies the task type for generating embeddings.
+   * Supported task types:
+   * - SEMANTIC_SIMILARITY: Optimized for text similarity.
+   * - CLASSIFICATION: Optimized for text classification.
+   * - CLUSTERING: Optimized for clustering texts based on similarity.
+   * - RETRIEVAL_DOCUMENT: Optimized for document retrieval.
+   * - RETRIEVAL_QUERY: Optimized for query-based retrieval.
+   * - QUESTION_ANSWERING: Optimized for answering questions.
+   * - FACT_VERIFICATION: Optimized for verifying factual information.
+   * - CODE_RETRIEVAL_QUERY: Optimized for retrieving code blocks based on natural language queries.
+   */
+  taskType: Ce([
+    "SEMANTIC_SIMILARITY",
+    "CLASSIFICATION",
+    "CLUSTERING",
+    "RETRIEVAL_DOCUMENT",
+    "RETRIEVAL_QUERY",
+    "QUESTION_ANSWERING",
+    "FACT_VERIFICATION",
+    "CODE_RETRIEVAL_QUERY"
+  ]).optional()
+}), Zu = class {
+  constructor(e, t) {
+    this.specificationVersion = "v2", this.maxEmbeddingsPerCall = 2048, this.supportsParallelCalls = !0, this.modelId = e, this.config = t;
+  }
+  get provider() {
+    return this.config.provider;
+  }
+  async doEmbed({
+    values: e,
+    headers: t,
+    abortSignal: n,
+    providerOptions: r
+  }) {
+    const s = await qe({
+      provider: "google",
+      providerOptions: r,
+      schema: Lu
+    });
+    if (e.length > this.maxEmbeddingsPerCall)
+      throw new br({
+        provider: this.provider,
+        modelId: this.modelId,
+        maxEmbeddingsPerCall: this.maxEmbeddingsPerCall,
+        values: e
+      });
+    const a = Se(
+      await Rn(this.config.headers),
+      t
+    ), {
+      responseHeaders: o,
+      value: i,
+      rawValue: l
+    } = await Ie({
+      url: `${this.config.baseURL}/models/${this.modelId}:batchEmbedContents`,
+      headers: a,
+      body: {
+        requests: e.map((u) => ({
+          model: `models/${this.modelId}`,
+          content: { role: "user", parts: [{ text: u }] },
+          outputDimensionality: s == null ? void 0 : s.outputDimensionality,
+          taskType: s == null ? void 0 : s.taskType
+        }))
+      },
+      failedResponseHandler: pr,
+      successfulResponseHandler: Fe(
+        Vu
+      ),
+      abortSignal: n,
+      fetch: this.config.fetch
+    });
+    return {
+      embeddings: i.embeddings.map((u) => u.values),
+      usage: void 0,
+      response: { headers: o, body: l }
+    };
+  }
+}, Vu = f({
+  embeddings: M(f({ values: M(T()) }))
+});
+function He(e) {
+  if (e == null || Bu(e))
+    return;
+  if (typeof e == "boolean")
+    return { type: "boolean", properties: {} };
+  const {
+    type: t,
+    description: n,
+    required: r,
+    properties: s,
+    items: a,
+    allOf: o,
+    anyOf: i,
+    oneOf: l,
+    format: u,
+    const: c,
+    minLength: p,
+    enum: h
+  } = e, g = {};
+  if (n && (g.description = n), r && (g.required = r), u && (g.format = u), c !== void 0 && (g.enum = [c]), t && (Array.isArray(t) ? t.includes("null") ? (g.type = t.filter((v) => v !== "null")[0], g.nullable = !0) : g.type = t : t === "null" ? g.type = "null" : g.type = t), h !== void 0 && (g.enum = h), s != null && (g.properties = Object.entries(s).reduce(
+    (v, [y, m]) => (v[y] = He(m), v),
+    {}
+  )), a && (g.items = Array.isArray(a) ? a.map(He) : He(a)), o && (g.allOf = o.map(He)), i)
+    if (i.some(
+      (v) => typeof v == "object" && (v == null ? void 0 : v.type) === "null"
+    )) {
+      const v = i.filter(
+        (y) => !(typeof y == "object" && (y == null ? void 0 : y.type) === "null")
+      );
+      if (v.length === 1) {
+        const y = He(v[0]);
+        typeof y == "object" && (g.nullable = !0, Object.assign(g, y));
+      } else
+        g.anyOf = v.map(He), g.nullable = !0;
+    } else
+      g.anyOf = i.map(He);
+  return l && (g.oneOf = l.map(He)), p !== void 0 && (g.minLength = p), g;
+}
+function Bu(e) {
+  return e != null && typeof e == "object" && e.type === "object" && (e.properties == null || Object.keys(e.properties).length === 0);
+}
+function Fu(e) {
+  const t = [], n = [];
+  let r = !0;
+  for (const { role: s, content: a } of e)
+    switch (s) {
       case "system": {
-        t.push({ role: "system", content: a });
+        if (!r)
+          throw new he({
+            functionality: "system messages are only supported at the beginning of the conversation"
+          });
+        t.push({ text: a });
+        break;
+      }
+      case "user": {
+        r = !1;
+        const o = [];
+        for (const i of a)
+          switch (i.type) {
+            case "text": {
+              o.push({ text: i.text });
+              break;
+            }
+            case "file": {
+              const l = i.mediaType === "image/*" ? "image/jpeg" : i.mediaType;
+              o.push(
+                i.data instanceof URL ? {
+                  fileData: {
+                    mimeType: l,
+                    fileUri: i.data.toString()
+                  }
+                } : {
+                  inlineData: {
+                    mimeType: l,
+                    data: vt(i.data)
+                  }
+                }
+              );
+              break;
+            }
+          }
+        n.push({ role: "user", parts: o });
+        break;
+      }
+      case "assistant": {
+        r = !1, n.push({
+          role: "model",
+          parts: a.map((o) => {
+            switch (o.type) {
+              case "text":
+                return o.text.length === 0 ? void 0 : { text: o.text };
+              case "file": {
+                if (o.mediaType !== "image/png")
+                  throw new he({
+                    functionality: "Only PNG images are supported in assistant messages"
+                  });
+                if (o.data instanceof URL)
+                  throw new he({
+                    functionality: "File data URLs in assistant messages are not supported"
+                  });
+                return {
+                  inlineData: {
+                    mimeType: o.mediaType,
+                    data: vt(o.data)
+                  }
+                };
+              }
+              case "tool-call":
+                return {
+                  functionCall: {
+                    name: o.toolName,
+                    args: o.args
+                  }
+                };
+            }
+          }).filter((o) => o !== void 0)
+        });
+        break;
+      }
+      case "tool": {
+        r = !1, n.push({
+          role: "user",
+          parts: a.map((o) => ({
+            functionResponse: {
+              name: o.toolName,
+              response: {
+                name: o.toolName,
+                content: o.result
+              }
+            }
+          }))
+        });
+        break;
+      }
+    }
+  return {
+    systemInstruction: t.length > 0 ? { parts: t } : void 0,
+    contents: n
+  };
+}
+function is(e) {
+  return e.includes("/") ? e : `models/${e}`;
+}
+var Gu = f({
+  /**
+   * The mode of the predictor to be used in dynamic retrieval.
+   */
+  mode: Ce(["MODE_UNSPECIFIED", "MODE_DYNAMIC"]).optional(),
+  /**
+   * The threshold to be used in dynamic retrieval. If not set, a system default
+   * value is used.
+   */
+  dynamicThreshold: T().optional()
+}), Ju = f({
+  responseModalities: M(Ce(["TEXT", "IMAGE"])).optional(),
+  thinkingConfig: f({
+    thinkingBudget: T().optional()
+  }).optional(),
+  /**
+  Optional.
+  The name of the cached content used as context to serve the prediction.
+  Format: cachedContents/{cachedContent}
+     */
+  cachedContent: d().optional(),
+  /**
+   * Optional. Enable structured output. Default is true.
+   *
+   * This is useful when the JSON Schema contains elements that are
+   * not supported by the OpenAPI schema version that
+   * Google Generative AI uses. You can use this to disable
+   * structured outputs if you need to.
+   */
+  structuredOutputs: ue().optional(),
+  /**
+  Optional. A list of unique safety settings for blocking unsafe content.
+   */
+  safetySettings: M(
+    f({
+      category: Ce([
+        "HARM_CATEGORY_UNSPECIFIED",
+        "HARM_CATEGORY_HATE_SPEECH",
+        "HARM_CATEGORY_DANGEROUS_CONTENT",
+        "HARM_CATEGORY_HARASSMENT",
+        "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+        "HARM_CATEGORY_CIVIC_INTEGRITY"
+      ]),
+      threshold: Ce([
+        "HARM_BLOCK_THRESHOLD_UNSPECIFIED",
+        "BLOCK_LOW_AND_ABOVE",
+        "BLOCK_MEDIUM_AND_ABOVE",
+        "BLOCK_ONLY_HIGH",
+        "BLOCK_NONE",
+        "OFF"
+      ])
+    })
+  ).optional(),
+  threshold: Ce([
+    "HARM_BLOCK_THRESHOLD_UNSPECIFIED",
+    "BLOCK_LOW_AND_ABOVE",
+    "BLOCK_MEDIUM_AND_ABOVE",
+    "BLOCK_ONLY_HIGH",
+    "BLOCK_NONE",
+    "OFF"
+  ]).optional(),
+  /**
+   * Optional. Enables timestamp understanding for audio-only files.
+   *
+   * https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/audio-understanding
+   */
+  audioTimestamp: ue().optional(),
+  /**
+  Optional. When enabled, the model will use Google search to ground the response.
+  
+  @see https://cloud.google.com/vertex-ai/generative-ai/docs/grounding/overview
+   */
+  useSearchGrounding: ue().optional(),
+  /**
+  Optional. Specifies the dynamic retrieval configuration.
+  
+  @note Dynamic retrieval is only compatible with Gemini 1.5 Flash.
+  
+  @see https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/ground-with-google-search#dynamic-retrieval
+   */
+  dynamicRetrievalConfig: Gu.optional()
+});
+function Hu({
+  tools: e,
+  toolChoice: t,
+  useSearchGrounding: n,
+  dynamicRetrievalConfig: r,
+  modelId: s
+}) {
+  var a;
+  e = e != null && e.length ? e : void 0;
+  const o = [], i = s.includes("gemini-2"), l = s.includes("gemini-1.5-flash") && !s.includes("-8b");
+  if (n)
+    return {
+      tools: i ? { googleSearch: {} } : {
+        googleSearchRetrieval: !l || !r ? {} : { dynamicRetrievalConfig: r }
+      },
+      toolConfig: void 0,
+      toolWarnings: o
+    };
+  if (e == null)
+    return { tools: void 0, toolConfig: void 0, toolWarnings: o };
+  const u = [];
+  for (const p of e)
+    p.type === "provider-defined" ? o.push({ type: "unsupported-tool", tool: p }) : u.push({
+      name: p.name,
+      description: (a = p.description) != null ? a : "",
+      parameters: He(p.parameters)
+    });
+  if (t == null)
+    return {
+      tools: { functionDeclarations: u },
+      toolConfig: void 0,
+      toolWarnings: o
+    };
+  const c = t.type;
+  switch (c) {
+    case "auto":
+      return {
+        tools: { functionDeclarations: u },
+        toolConfig: { functionCallingConfig: { mode: "AUTO" } },
+        toolWarnings: o
+      };
+    case "none":
+      return {
+        tools: { functionDeclarations: u },
+        toolConfig: { functionCallingConfig: { mode: "NONE" } },
+        toolWarnings: o
+      };
+    case "required":
+      return {
+        tools: { functionDeclarations: u },
+        toolConfig: { functionCallingConfig: { mode: "ANY" } },
+        toolWarnings: o
+      };
+    case "tool":
+      return {
+        tools: { functionDeclarations: u },
+        toolConfig: {
+          functionCallingConfig: {
+            mode: "ANY",
+            allowedFunctionNames: [t.toolName]
+          }
+        },
+        toolWarnings: o
+      };
+    default: {
+      const p = c;
+      throw new he({
+        functionality: `tool choice type: ${p}`
+      });
+    }
+  }
+}
+function ls({
+  finishReason: e,
+  hasToolCalls: t
+}) {
+  switch (e) {
+    case "STOP":
+      return t ? "tool-calls" : "stop";
+    case "MAX_TOKENS":
+      return "length";
+    case "IMAGE_SAFETY":
+    case "RECITATION":
+    case "SAFETY":
+    case "BLOCKLIST":
+    case "PROHIBITED_CONTENT":
+    case "SPII":
+      return "content-filter";
+    case "FINISH_REASON_UNSPECIFIED":
+    case "OTHER":
+      return "other";
+    case "MALFORMED_FUNCTION_CALL":
+      return "error";
+    default:
+      return "unknown";
+  }
+}
+var zu = class {
+  constructor(e, t) {
+    this.specificationVersion = "v2", this.modelId = e, this.config = t;
+  }
+  get provider() {
+    return this.config.provider;
+  }
+  get supportedUrls() {
+    var e, t, n;
+    return (n = (t = (e = this.config).supportedUrls) == null ? void 0 : t.call(e)) != null ? n : {};
+  }
+  async getArgs({
+    prompt: e,
+    maxOutputTokens: t,
+    temperature: n,
+    topP: r,
+    topK: s,
+    frequencyPenalty: a,
+    presencePenalty: o,
+    stopSequences: i,
+    responseFormat: l,
+    seed: u,
+    tools: c,
+    toolChoice: p,
+    providerOptions: h
+  }) {
+    var g, v;
+    const y = [], m = await qe({
+      provider: "google",
+      providerOptions: h,
+      schema: Ju
+    }), { contents: b, systemInstruction: S } = Fu(e), {
+      tools: w,
+      toolConfig: x,
+      toolWarnings: _
+    } = Hu({
+      tools: c,
+      toolChoice: p,
+      useSearchGrounding: (g = m == null ? void 0 : m.useSearchGrounding) != null ? g : !1,
+      dynamicRetrievalConfig: m == null ? void 0 : m.dynamicRetrievalConfig,
+      modelId: this.modelId
+    });
+    return {
+      args: {
+        generationConfig: {
+          // standardized settings:
+          maxOutputTokens: t,
+          temperature: n,
+          topK: s,
+          topP: r,
+          frequencyPenalty: a,
+          presencePenalty: o,
+          stopSequences: i,
+          seed: u,
+          // response format:
+          responseMimeType: (l == null ? void 0 : l.type) === "json" ? "application/json" : void 0,
+          responseSchema: (l == null ? void 0 : l.type) === "json" && l.schema != null && // Google GenAI does not support all OpenAPI Schema features,
+          // so this is needed as an escape hatch:
+          // TODO convert into provider option
+          ((v = m == null ? void 0 : m.structuredOutputs) == null || v) ? He(l.schema) : void 0,
+          ...(m == null ? void 0 : m.audioTimestamp) && {
+            audioTimestamp: m.audioTimestamp
+          },
+          // provider options:
+          responseModalities: m == null ? void 0 : m.responseModalities,
+          thinkingConfig: m == null ? void 0 : m.thinkingConfig
+        },
+        contents: b,
+        systemInstruction: S,
+        safetySettings: m == null ? void 0 : m.safetySettings,
+        tools: w,
+        toolConfig: x,
+        cachedContent: m == null ? void 0 : m.cachedContent
+      },
+      warnings: [...y, ..._]
+    };
+  }
+  async doGenerate(e) {
+    var t, n, r, s, a, o, i, l, u;
+    const { args: c, warnings: p } = await this.getArgs(e), h = JSON.stringify(c), g = Se(
+      await Rn(this.config.headers),
+      e.headers
+    ), {
+      responseHeaders: v,
+      value: y,
+      rawValue: m
+    } = await Ie({
+      url: `${this.config.baseURL}/${is(
+        this.modelId
+      )}:generateContent`,
+      headers: g,
+      body: c,
+      failedResponseHandler: pr,
+      successfulResponseHandler: Fe(Qu),
+      abortSignal: e.abortSignal,
+      fetch: this.config.fetch
+    }), b = y.candidates[0], S = [], w = b.content == null || typeof b.content != "object" || !("parts" in b.content) ? [] : (t = b.content.parts) != null ? t : [];
+    for (const k of w)
+      "text" in k && k.text.length > 0 ? S.push({ type: "text", text: k.text }) : "functionCall" in k ? S.push({
+        type: "tool-call",
+        toolCallType: "function",
+        toolCallId: this.config.generateId(),
+        toolName: k.functionCall.name,
+        args: JSON.stringify(k.functionCall.args)
+      }) : "inlineData" in k && S.push({
+        type: "file",
+        data: k.inlineData.data,
+        mediaType: k.inlineData.mimeType
+      });
+    const x = (n = us({
+      groundingMetadata: b.groundingMetadata,
+      generateId: this.config.generateId
+    })) != null ? n : [];
+    for (const k of x)
+      S.push(k);
+    const _ = y.usageMetadata;
+    return {
+      content: S,
+      finishReason: ls({
+        finishReason: b.finishReason,
+        hasToolCalls: S.some((k) => k.type === "tool-call")
+      }),
+      usage: {
+        inputTokens: (r = _ == null ? void 0 : _.promptTokenCount) != null ? r : void 0,
+        outputTokens: (s = _ == null ? void 0 : _.candidatesTokenCount) != null ? s : void 0,
+        totalTokens: (a = _ == null ? void 0 : _.totalTokenCount) != null ? a : void 0,
+        reasoningTokens: (o = _ == null ? void 0 : _.thoughtsTokenCount) != null ? o : void 0,
+        cachedInputTokens: (i = _ == null ? void 0 : _.cachedContentTokenCount) != null ? i : void 0
+      },
+      warnings: p,
+      providerMetadata: {
+        google: {
+          groundingMetadata: (l = b.groundingMetadata) != null ? l : null,
+          safetyRatings: (u = b.safetyRatings) != null ? u : null
+        }
+      },
+      request: { body: h },
+      response: {
+        // TODO timestamp, model id, id
+        headers: v,
+        body: m
+      }
+    };
+  }
+  async doStream(e) {
+    const { args: t, warnings: n } = await this.getArgs(e), r = JSON.stringify(t), s = Se(
+      await Rn(this.config.headers),
+      e.headers
+    ), { responseHeaders: a, value: o } = await Ie({
+      url: `${this.config.baseURL}/${is(
+        this.modelId
+      )}:streamGenerateContent?alt=sse`,
+      headers: s,
+      body: t,
+      failedResponseHandler: pr,
+      successfulResponseHandler: Ut(ec),
+      abortSignal: e.abortSignal,
+      fetch: this.config.fetch
+    });
+    let i = "unknown";
+    const l = {
+      inputTokens: void 0,
+      outputTokens: void 0,
+      totalTokens: void 0
+    };
+    let u;
+    const c = this.config.generateId;
+    let p = !1;
+    return {
+      stream: o.pipeThrough(
+        new TransformStream({
+          start(h) {
+            h.enqueue({ type: "stream-start", warnings: n });
+          },
+          transform(h, g) {
+            var v, y, m, b, S, w, x, _, k;
+            if (!h.success) {
+              g.enqueue({ type: "error", error: h.error });
+              return;
+            }
+            const O = h.value, N = O.usageMetadata;
+            N != null && (l.inputTokens = (v = N.promptTokenCount) != null ? v : void 0, l.outputTokens = (y = N.candidatesTokenCount) != null ? y : void 0, l.totalTokens = (m = N.totalTokenCount) != null ? m : void 0, l.reasoningTokens = (b = N.thoughtsTokenCount) != null ? b : void 0, l.cachedInputTokens = (S = N.cachedContentTokenCount) != null ? S : void 0);
+            const q = (w = O.candidates) == null ? void 0 : w[0];
+            if (q == null)
+              return;
+            const L = q.content;
+            if (L != null) {
+              const ee = Yu(L.parts);
+              ee != null && g.enqueue(ee);
+              const ae = Ku(L.parts);
+              if (ae != null)
+                for (const ce of ae)
+                  g.enqueue({
+                    type: "file",
+                    mediaType: ce.inlineData.mimeType,
+                    data: ce.inlineData.data
+                  });
+              const fe = Wu({
+                parts: L.parts,
+                generateId: c
+              });
+              if (fe != null)
+                for (const ce of fe)
+                  g.enqueue({
+                    type: "tool-call-delta",
+                    toolCallType: "function",
+                    toolCallId: ce.toolCallId,
+                    toolName: ce.toolName,
+                    argsTextDelta: ce.args
+                  }), g.enqueue({
+                    type: "tool-call",
+                    toolCallType: "function",
+                    toolCallId: ce.toolCallId,
+                    toolName: ce.toolName,
+                    args: ce.args
+                  }), p = !0;
+            }
+            if (q.finishReason != null) {
+              i = ls({
+                finishReason: q.finishReason,
+                hasToolCalls: p
+              });
+              const ee = (x = us({
+                groundingMetadata: q.groundingMetadata,
+                generateId: c
+              })) != null ? x : [];
+              for (const ae of ee)
+                g.enqueue(ae);
+              u = {
+                google: {
+                  groundingMetadata: (_ = q.groundingMetadata) != null ? _ : null,
+                  safetyRatings: (k = q.safetyRatings) != null ? k : null
+                }
+              };
+            }
+          },
+          flush(h) {
+            h.enqueue({
+              type: "finish",
+              finishReason: i,
+              usage: l,
+              providerMetadata: u
+            });
+          }
+        })
+      ),
+      response: { headers: a },
+      request: { body: r }
+    };
+  }
+};
+function Wu({
+  parts: e,
+  generateId: t
+}) {
+  const n = e == null ? void 0 : e.filter(
+    (r) => "functionCall" in r
+  );
+  return n == null || n.length === 0 ? void 0 : n.map((r) => ({
+    type: "tool-call",
+    toolCallType: "function",
+    toolCallId: t(),
+    toolName: r.functionCall.name,
+    args: JSON.stringify(r.functionCall.args)
+  }));
+}
+function Yu(e) {
+  const t = e == null ? void 0 : e.filter((n) => "text" in n);
+  return t == null || t.length === 0 ? void 0 : {
+    type: "text",
+    text: t.map((n) => n.text).join("")
+  };
+}
+function Ku(e) {
+  return e == null ? void 0 : e.filter(
+    (t) => "inlineData" in t
+  );
+}
+function us({
+  groundingMetadata: e,
+  generateId: t
+}) {
+  var n;
+  return (n = e == null ? void 0 : e.groundingChunks) == null ? void 0 : n.filter(
+    (r) => r.web != null
+  ).map((r) => ({
+    type: "source",
+    sourceType: "url",
+    id: t(),
+    url: r.web.uri,
+    title: r.web.title
+  }));
+}
+var Ia = f({
+  role: d(),
+  parts: M(
+    se([
+      f({
+        text: d()
+      }),
+      f({
+        functionCall: f({
+          name: d(),
+          args: Me()
+        })
+      }),
+      f({
+        inlineData: f({
+          mimeType: d(),
+          data: d()
+        })
+      })
+    ])
+  ).nullish()
+}), Xu = f({
+  web: f({ uri: d(), title: d() }).nullish(),
+  retrievedContext: f({ uri: d(), title: d() }).nullish()
+}), Ca = f({
+  webSearchQueries: M(d()).nullish(),
+  retrievalQueries: M(d()).nullish(),
+  searchEntryPoint: f({ renderedContent: d() }).nullish(),
+  groundingChunks: M(Xu).nullish(),
+  groundingSupports: M(
+    f({
+      segment: f({
+        startIndex: T().nullish(),
+        endIndex: T().nullish(),
+        text: d().nullish()
+      }),
+      segment_text: d().nullish(),
+      groundingChunkIndices: M(T()).nullish(),
+      supportChunkIndices: M(T()).nullish(),
+      confidenceScores: M(T()).nullish(),
+      confidenceScore: M(T()).nullish()
+    })
+  ).nullish(),
+  retrievalMetadata: se([
+    f({
+      webDynamicRetrievalScore: T()
+    }),
+    f({})
+  ]).nullish()
+}), Ra = f({
+  category: d().nullish(),
+  probability: d().nullish(),
+  probabilityScore: T().nullish(),
+  severity: d().nullish(),
+  severityScore: T().nullish(),
+  blocked: ue().nullish()
+}), Ea = f({
+  cachedContentTokenCount: T().nullish(),
+  thoughtsTokenCount: T().nullish(),
+  promptTokenCount: T().nullish(),
+  candidatesTokenCount: T().nullish(),
+  totalTokenCount: T().nullish()
+}), Qu = f({
+  candidates: M(
+    f({
+      content: Ia.nullish().or(f({}).strict()),
+      finishReason: d().nullish(),
+      safetyRatings: M(Ra).nullish(),
+      groundingMetadata: Ca.nullish()
+    })
+  ),
+  usageMetadata: Ea.nullish()
+}), ec = f({
+  candidates: M(
+    f({
+      content: Ia.nullish(),
+      finishReason: d().nullish(),
+      safetyRatings: M(Ra).nullish(),
+      groundingMetadata: Ca.nullish()
+    })
+  ).nullish(),
+  usageMetadata: Ea.nullish()
+});
+function tc(e = {}) {
+  var t;
+  const n = (t = qn(e.baseURL)) != null ? t : "https://generativelanguage.googleapis.com/v1beta", r = () => ({
+    "x-goog-api-key": $n({
+      apiKey: e.apiKey,
+      environmentVariableName: "GOOGLE_GENERATIVE_AI_API_KEY",
+      description: "Google Generative AI"
+    }),
+    ...e.headers
+  }), s = (i) => {
+    var l;
+    return new zu(i, {
+      provider: "google.generative-ai",
+      baseURL: n,
+      headers: r,
+      generateId: (l = e.generateId) != null ? l : st,
+      supportedUrls: () => ({
+        "*": [
+          // HTTP URLs:
+          /^https?:\/\/.*$/
+        ]
+      }),
+      fetch: e.fetch
+    });
+  }, a = (i) => new Zu(i, {
+    provider: "google.generative-ai",
+    baseURL: n,
+    headers: r,
+    fetch: e.fetch
+  }), o = function(i) {
+    if (new.target)
+      throw new Error(
+        "The Google Generative AI model function cannot be called with the new keyword."
+      );
+    return s(i);
+  };
+  return o.languageModel = s, o.chat = s, o.generativeAI = s, o.embedding = a, o.textEmbedding = a, o.textEmbeddingModel = a, o.imageModel = (i) => {
+    throw new je({ modelId: i, modelType: "imageModel" });
+  }, o;
+}
+tc();
+function nc(e) {
+  const t = [];
+  for (let n = 0; n < e.length; n++) {
+    const { role: r, content: s } = e[n], a = n === e.length - 1;
+    switch (r) {
+      case "system": {
+        t.push({ role: "system", content: s });
         break;
       }
       case "user": {
         t.push({
           role: "user",
-          content: a.map((o) => {
-            var i;
+          content: s.map((o) => {
             switch (o.type) {
               case "text":
                 return { type: "text", text: o.text };
-              case "image":
-                return {
-                  type: "image_url",
-                  image_url: o.image instanceof URL ? o.image.toString() : `data:${(i = o.mimeType) != null ? i : "image/jpeg"};base64,${Mt(o.image)}`
-                };
-              case "file": {
-                if (!(o.data instanceof URL))
-                  throw new se({
-                    functionality: "File content parts in user messages"
-                  });
-                switch (o.mimeType) {
-                  case "application/pdf":
+              case "file":
+                if (o.mediaType.startsWith("image/")) {
+                  const i = o.mediaType === "image/*" ? "image/jpeg" : o.mediaType;
+                  return {
+                    type: "image_url",
+                    image_url: o.data instanceof URL ? o.data.toString() : `data:${i};base64,${o.data}`
+                  };
+                } else {
+                  if (o.mediaType === "application/pdf")
                     return {
                       type: "document_url",
                       document_url: o.data.toString()
                     };
-                  default:
-                    throw new se({
-                      functionality: "Only PDF files are supported in user messages"
-                    });
+                  throw new he({
+                    functionality: "Only images and PDF file parts are supported"
+                  });
                 }
+            }
+          })
+        });
+        break;
+      }
+      case "assistant": {
+        let o = "";
+        const i = [];
+        for (const l of s)
+          switch (l.type) {
+            case "text": {
+              o += l.text;
+              break;
+            }
+            case "tool-call": {
+              i.push({
+                id: l.toolCallId,
+                type: "function",
+                function: {
+                  name: l.toolName,
+                  arguments: JSON.stringify(l.args)
+                }
+              });
+              break;
+            }
+          }
+        t.push({
+          role: "assistant",
+          content: o,
+          prefix: a ? !0 : void 0,
+          tool_calls: i.length > 0 ? i : void 0
+        });
+        break;
+      }
+      case "tool": {
+        for (const o of s)
+          t.push({
+            role: "tool",
+            name: o.toolName,
+            content: JSON.stringify(o.result),
+            tool_call_id: o.toolCallId
+          });
+        break;
+      }
+      default: {
+        const o = r;
+        throw new Error(`Unsupported role: ${o}`);
+      }
+    }
+  }
+  return t;
+}
+function cs({
+  id: e,
+  model: t,
+  created: n
+}) {
+  return {
+    id: e ?? void 0,
+    modelId: t ?? void 0,
+    timestamp: n != null ? new Date(n * 1e3) : void 0
+  };
+}
+function ds(e) {
+  switch (e) {
+    case "stop":
+      return "stop";
+    case "length":
+    case "model_length":
+      return "length";
+    case "tool_calls":
+      return "tool-calls";
+    default:
+      return "unknown";
+  }
+}
+var rc = f({
+  /**
+  Whether to inject a safety prompt before all conversations.
+  
+  Defaults to `false`.
+     */
+  safePrompt: ue().optional(),
+  documentImageLimit: T().optional(),
+  documentPageLimit: T().optional()
+}), sc = f({
+  object: C("error"),
+  message: d(),
+  type: d(),
+  param: d().nullable(),
+  code: d().nullable()
+}), hr = jn({
+  errorSchema: sc,
+  errorToMessage: (e) => e.message
+});
+function ac({
+  tools: e,
+  toolChoice: t
+}) {
+  e = e != null && e.length ? e : void 0;
+  const n = [];
+  if (e == null)
+    return { tools: void 0, toolChoice: void 0, toolWarnings: n };
+  const r = [];
+  for (const a of e)
+    a.type === "provider-defined" ? n.push({ type: "unsupported-tool", tool: a }) : r.push({
+      type: "function",
+      function: {
+        name: a.name,
+        description: a.description,
+        parameters: a.parameters
+      }
+    });
+  if (t == null)
+    return { tools: r, toolChoice: void 0, toolWarnings: n };
+  const s = t.type;
+  switch (s) {
+    case "auto":
+    case "none":
+      return { tools: r, toolChoice: s, toolWarnings: n };
+    case "required":
+      return { tools: r, toolChoice: "any", toolWarnings: n };
+    case "tool":
+      return {
+        tools: r.filter(
+          (a) => a.function.name === t.toolName
+        ),
+        toolChoice: "any",
+        toolWarnings: n
+      };
+    default: {
+      const a = s;
+      throw new he({
+        functionality: `tool choice type: ${a}`
+      });
+    }
+  }
+}
+var oc = class {
+  constructor(e, t) {
+    this.specificationVersion = "v2", this.supportedUrls = {
+      "application/pdf": [/^https:\/\/.*$/]
+    }, this.modelId = e, this.config = t;
+  }
+  get provider() {
+    return this.config.provider;
+  }
+  async getArgs({
+    prompt: e,
+    maxOutputTokens: t,
+    temperature: n,
+    topP: r,
+    topK: s,
+    frequencyPenalty: a,
+    presencePenalty: o,
+    stopSequences: i,
+    responseFormat: l,
+    seed: u,
+    providerOptions: c,
+    tools: p,
+    toolChoice: h
+  }) {
+    var g;
+    const v = [], y = (g = await qe({
+      provider: "mistral",
+      providerOptions: c,
+      schema: rc
+    })) != null ? g : {};
+    s != null && v.push({
+      type: "unsupported-setting",
+      setting: "topK"
+    }), a != null && v.push({
+      type: "unsupported-setting",
+      setting: "frequencyPenalty"
+    }), o != null && v.push({
+      type: "unsupported-setting",
+      setting: "presencePenalty"
+    }), i != null && v.push({
+      type: "unsupported-setting",
+      setting: "stopSequences"
+    }), l != null && l.type === "json" && l.schema != null && v.push({
+      type: "unsupported-setting",
+      setting: "responseFormat",
+      details: "JSON response format schema is not supported"
+    });
+    const m = {
+      // model id:
+      model: this.modelId,
+      // model specific settings:
+      safe_prompt: y.safePrompt,
+      // standardized settings:
+      max_tokens: t,
+      temperature: n,
+      top_p: r,
+      random_seed: u,
+      // response format:
+      response_format: (l == null ? void 0 : l.type) === "json" ? { type: "json_object" } : void 0,
+      // mistral-specific provider options:
+      document_image_limit: y.documentImageLimit,
+      document_page_limit: y.documentPageLimit,
+      // messages:
+      messages: nc(e)
+    }, {
+      tools: b,
+      toolChoice: S,
+      toolWarnings: w
+    } = ac({
+      tools: p,
+      toolChoice: h
+    });
+    return {
+      args: {
+        ...m,
+        tools: b,
+        tool_choice: S
+      },
+      warnings: [...v, ...w]
+    };
+  }
+  async doGenerate(e) {
+    const { args: t, warnings: n } = await this.getArgs(e), {
+      responseHeaders: r,
+      value: s,
+      rawValue: a
+    } = await Ie({
+      url: `${this.config.baseURL}/chat/completions`,
+      headers: Se(this.config.headers(), e.headers),
+      body: t,
+      failedResponseHandler: hr,
+      successfulResponseHandler: Fe(
+        ic
+      ),
+      abortSignal: e.abortSignal,
+      fetch: this.config.fetch
+    }), o = s.choices[0], i = [];
+    let l = ps(o.message.content);
+    const u = t.messages[t.messages.length - 1];
+    if (u.role === "assistant" && (l != null && l.startsWith(u.content)) && (l = l.slice(u.content.length)), l != null && l.length > 0 && i.push({ type: "text", text: l }), o.message.tool_calls != null)
+      for (const c of o.message.tool_calls)
+        i.push({
+          type: "tool-call",
+          toolCallType: "function",
+          toolCallId: c.id,
+          toolName: c.function.name,
+          args: c.function.arguments
+        });
+    return {
+      content: i,
+      finishReason: ds(o.finish_reason),
+      usage: {
+        inputTokens: s.usage.prompt_tokens,
+        outputTokens: s.usage.completion_tokens,
+        totalTokens: s.usage.total_tokens
+      },
+      request: { body: t },
+      response: {
+        ...cs(s),
+        headers: r,
+        body: a
+      },
+      warnings: n
+    };
+  }
+  async doStream(e) {
+    const { args: t, warnings: n } = await this.getArgs(e), r = { ...t, stream: !0 }, { responseHeaders: s, value: a } = await Ie({
+      url: `${this.config.baseURL}/chat/completions`,
+      headers: Se(this.config.headers(), e.headers),
+      body: r,
+      failedResponseHandler: hr,
+      successfulResponseHandler: Ut(
+        lc
+      ),
+      abortSignal: e.abortSignal,
+      fetch: this.config.fetch
+    });
+    let o = "unknown";
+    const i = {
+      inputTokens: void 0,
+      outputTokens: void 0,
+      totalTokens: void 0
+    };
+    let l = 0, u = !1;
+    return {
+      stream: a.pipeThrough(
+        new TransformStream({
+          start(c) {
+            c.enqueue({ type: "stream-start", warnings: n });
+          },
+          transform(c, p) {
+            if (!c.success) {
+              p.enqueue({ type: "error", error: c.error });
+              return;
+            }
+            l++;
+            const h = c.value;
+            l === 1 && p.enqueue({
+              type: "response-metadata",
+              ...cs(h)
+            }), h.usage != null && (i.inputTokens = h.usage.prompt_tokens, i.outputTokens = h.usage.completion_tokens, i.totalTokens = h.usage.total_tokens);
+            const g = h.choices[0];
+            if ((g == null ? void 0 : g.finish_reason) != null && (o = ds(g.finish_reason)), (g == null ? void 0 : g.delta) == null)
+              return;
+            const v = g.delta, y = ps(v.content);
+            if (l <= 2) {
+              const m = r.messages[r.messages.length - 1];
+              if (m.role === "assistant" && y === m.content.trimEnd()) {
+                y.length < m.content.length && (u = !0);
+                return;
               }
+            }
+            if (y != null && (p.enqueue({
+              type: "text",
+              text: u ? y.trimStart() : y
+            }), u = !1), v.tool_calls != null)
+              for (const m of v.tool_calls)
+                p.enqueue({
+                  type: "tool-call-delta",
+                  toolCallType: "function",
+                  toolCallId: m.id,
+                  toolName: m.function.name,
+                  argsTextDelta: m.function.arguments
+                }), p.enqueue({
+                  type: "tool-call",
+                  toolCallType: "function",
+                  toolCallId: m.id,
+                  toolName: m.function.name,
+                  args: m.function.arguments
+                });
+          },
+          flush(c) {
+            c.enqueue({ type: "finish", finishReason: o, usage: i });
+          }
+        })
+      ),
+      request: { body: r },
+      response: { headers: s }
+    };
+  }
+};
+function ps(e) {
+  if (typeof e == "string")
+    return e;
+  if (e == null)
+    return;
+  const t = [];
+  for (const n of e) {
+    const { type: r } = n;
+    switch (r) {
+      case "text":
+        t.push(n.text);
+        break;
+      case "image_url":
+      case "reference":
+        break;
+      default: {
+        const s = r;
+        throw new Error(`Unsupported type: ${s}`);
+      }
+    }
+  }
+  return t.length ? t.join("") : void 0;
+}
+var Aa = se([
+  d(),
+  M(
+    pt("type", [
+      f({
+        type: C("text"),
+        text: d()
+      }),
+      f({
+        type: C("image_url"),
+        image_url: se([
+          d(),
+          f({
+            url: d(),
+            detail: d().nullable()
+          })
+        ])
+      }),
+      f({
+        type: C("reference"),
+        reference_ids: M(T())
+      })
+    ])
+  )
+]).nullish(), Oa = f({
+  prompt_tokens: T(),
+  completion_tokens: T(),
+  total_tokens: T()
+}), ic = f({
+  id: d().nullish(),
+  created: T().nullish(),
+  model: d().nullish(),
+  choices: M(
+    f({
+      message: f({
+        role: C("assistant"),
+        content: Aa,
+        tool_calls: M(
+          f({
+            id: d(),
+            function: f({ name: d(), arguments: d() })
+          })
+        ).nullish()
+      }),
+      index: T(),
+      finish_reason: d().nullish()
+    })
+  ),
+  object: C("chat.completion"),
+  usage: Oa
+}), lc = f({
+  id: d().nullish(),
+  created: T().nullish(),
+  model: d().nullish(),
+  choices: M(
+    f({
+      delta: f({
+        role: Ce(["assistant"]).optional(),
+        content: Aa,
+        tool_calls: M(
+          f({
+            id: d(),
+            function: f({ name: d(), arguments: d() })
+          })
+        ).nullish()
+      }),
+      finish_reason: d().nullish(),
+      index: T()
+    })
+  ),
+  usage: Oa.nullish()
+}), uc = class {
+  constructor(e, t) {
+    this.specificationVersion = "v2", this.maxEmbeddingsPerCall = 32, this.supportsParallelCalls = !1, this.modelId = e, this.config = t;
+  }
+  get provider() {
+    return this.config.provider;
+  }
+  async doEmbed({
+    values: e,
+    abortSignal: t,
+    headers: n
+  }) {
+    if (e.length > this.maxEmbeddingsPerCall)
+      throw new br({
+        provider: this.provider,
+        modelId: this.modelId,
+        maxEmbeddingsPerCall: this.maxEmbeddingsPerCall,
+        values: e
+      });
+    const {
+      responseHeaders: r,
+      value: s,
+      rawValue: a
+    } = await Ie({
+      url: `${this.config.baseURL}/embeddings`,
+      headers: Se(this.config.headers(), n),
+      body: {
+        model: this.modelId,
+        input: e,
+        encoding_format: "float"
+      },
+      failedResponseHandler: hr,
+      successfulResponseHandler: Fe(
+        cc
+      ),
+      abortSignal: t,
+      fetch: this.config.fetch
+    });
+    return {
+      embeddings: s.data.map((o) => o.embedding),
+      usage: s.usage ? { tokens: s.usage.prompt_tokens } : void 0,
+      response: { headers: r, body: a }
+    };
+  }
+}, cc = f({
+  data: M(f({ embedding: M(T()) })),
+  usage: f({ prompt_tokens: T() }).nullish()
+});
+function dc(e = {}) {
+  var t;
+  const n = (t = qn(e.baseURL)) != null ? t : "https://api.mistral.ai/v1", r = () => ({
+    Authorization: `Bearer ${$n({
+      apiKey: e.apiKey,
+      environmentVariableName: "MISTRAL_API_KEY",
+      description: "Mistral"
+    })}`,
+    ...e.headers
+  }), s = (i) => new oc(i, {
+    provider: "mistral.chat",
+    baseURL: n,
+    headers: r,
+    fetch: e.fetch
+  }), a = (i) => new uc(i, {
+    provider: "mistral.embedding",
+    baseURL: n,
+    headers: r,
+    fetch: e.fetch
+  }), o = function(i) {
+    if (new.target)
+      throw new Error(
+        "The Mistral model function cannot be called with the new keyword."
+      );
+    return s(i);
+  };
+  return o.languageModel = s, o.chat = s, o.embedding = a, o.textEmbedding = a, o.textEmbeddingModel = a, o.imageModel = (i) => {
+    throw new je({ modelId: i, modelType: "imageModel" });
+  }, o;
+}
+dc();
+function pc({
+  prompt: e,
+  systemMessageMode: t = "system"
+}) {
+  const n = [], r = [];
+  for (const { role: s, content: a } of e)
+    switch (s) {
+      case "system": {
+        switch (t) {
+          case "system": {
+            n.push({ role: "system", content: a });
+            break;
+          }
+          case "developer": {
+            n.push({ role: "developer", content: a });
+            break;
+          }
+          case "remove": {
+            r.push({
+              type: "other",
+              message: "system messages are removed for this model"
+            });
+            break;
+          }
+          default: {
+            const o = t;
+            throw new Error(
+              `Unsupported system message mode: ${o}`
+            );
+          }
+        }
+        break;
+      }
+      case "user": {
+        if (a.length === 1 && a[0].type === "text") {
+          n.push({ role: "user", content: a[0].text });
+          break;
+        }
+        n.push({
+          role: "user",
+          content: a.map((o, i) => {
+            var l, u, c;
+            switch (o.type) {
+              case "text":
+                return { type: "text", text: o.text };
+              case "file":
+                if (o.mediaType.startsWith("image/")) {
+                  const p = o.mediaType === "image/*" ? "image/jpeg" : o.mediaType;
+                  return {
+                    type: "image_url",
+                    image_url: {
+                      url: o.data instanceof URL ? o.data.toString() : `data:${p};base64,${vt(o.data)}`,
+                      // OpenAI specific extension: image detail
+                      detail: (u = (l = o.providerOptions) == null ? void 0 : l.openai) == null ? void 0 : u.imageDetail
+                    }
+                  };
+                } else if (o.mediaType.startsWith("audio/")) {
+                  if (o.data instanceof URL)
+                    throw new he({
+                      functionality: "audio file parts with URLs"
+                    });
+                  switch (o.mediaType) {
+                    case "audio/wav":
+                      return {
+                        type: "input_audio",
+                        input_audio: {
+                          data: vt(o.data),
+                          format: "wav"
+                        }
+                      };
+                    case "audio/mp3":
+                    case "audio/mpeg":
+                      return {
+                        type: "input_audio",
+                        input_audio: {
+                          data: vt(o.data),
+                          format: "mp3"
+                        }
+                      };
+                    default:
+                      throw new he({
+                        functionality: `audio content parts with media type ${o.mediaType}`
+                      });
+                  }
+                } else if (o.mediaType === "application/pdf") {
+                  if (o.data instanceof URL)
+                    throw new he({
+                      functionality: "PDF file parts with URLs"
+                    });
+                  return {
+                    type: "file",
+                    file: {
+                      filename: (c = o.filename) != null ? c : `part-${i}.pdf`,
+                      file_data: `data:application/pdf;base64,${o.data}`
+                    }
+                  };
+                } else
+                  throw new he({
+                    functionality: `file part media type ${o.mediaType}`
+                  });
             }
           })
         });
@@ -13488,655 +6999,41 @@ function rf(e) {
               break;
             }
           }
-        t.push({
+        n.push({
           role: "assistant",
           content: o,
-          prefix: s ? !0 : void 0,
           tool_calls: i.length > 0 ? i : void 0
         });
         break;
       }
       case "tool": {
         for (const o of a)
-          t.push({
+          n.push({
             role: "tool",
-            name: o.toolName,
-            content: JSON.stringify(o.result),
-            tool_call_id: o.toolCallId
+            tool_call_id: o.toolCallId,
+            content: JSON.stringify(o.result)
           });
         break;
       }
       default: {
-        const o = n;
+        const o = s;
         throw new Error(`Unsupported role: ${o}`);
       }
     }
-  }
-  return t;
+  return { messages: n, warnings: r };
 }
-function Ya(e) {
-  switch (e) {
-    case "stop":
-      return "stop";
-    case "length":
-    case "model_length":
-      return "length";
-    case "tool_calls":
-      return "tool-calls";
-    default:
-      return "unknown";
-  }
-}
-var nf = y({
-  object: A("error"),
-  message: h(),
-  type: h(),
-  param: h().nullable(),
-  code: h().nullable()
-}), Hn = ta({
-  errorSchema: nf,
-  errorToMessage: (e) => e.message
-});
-function Xa({
+function En({
   id: e,
   model: t,
-  created: r
+  created: n
 }) {
   return {
     id: e ?? void 0,
     modelId: t ?? void 0,
-    timestamp: r != null ? new Date(r * 1e3) : void 0
+    timestamp: n != null ? new Date(n * 1e3) : void 0
   };
 }
-function af(e) {
-  var t;
-  const r = (t = e.tools) != null && t.length ? e.tools : void 0, n = [];
-  if (r == null)
-    return { tools: void 0, tool_choice: void 0, toolWarnings: n };
-  const a = [];
-  for (const i of r)
-    i.type === "provider-defined" ? n.push({ type: "unsupported-tool", tool: i }) : a.push({
-      type: "function",
-      function: {
-        name: i.name,
-        description: i.description,
-        parameters: i.parameters
-      }
-    });
-  const s = e.toolChoice;
-  if (s == null)
-    return { tools: a, tool_choice: void 0, toolWarnings: n };
-  const o = s.type;
-  switch (o) {
-    case "auto":
-    case "none":
-      return { tools: a, tool_choice: o, toolWarnings: n };
-    case "required":
-      return { tools: a, tool_choice: "any", toolWarnings: n };
-    case "tool":
-      return {
-        tools: a.filter(
-          (i) => i.function.name === s.toolName
-        ),
-        tool_choice: "any",
-        toolWarnings: n
-      };
-    default: {
-      const i = o;
-      throw new se({
-        functionality: `Unsupported tool choice type: ${i}`
-      });
-    }
-  }
-}
-var sf = class {
-  constructor(e, t, r) {
-    this.specificationVersion = "v1", this.defaultObjectGenerationMode = "json", this.supportsImageUrls = !1, this.modelId = e, this.settings = t, this.config = r;
-  }
-  get provider() {
-    return this.config.provider;
-  }
-  supportsUrl(e) {
-    return e.protocol === "https:";
-  }
-  getArgs({
-    mode: e,
-    prompt: t,
-    maxTokens: r,
-    temperature: n,
-    topP: a,
-    topK: s,
-    frequencyPenalty: o,
-    presencePenalty: i,
-    stopSequences: l,
-    responseFormat: u,
-    seed: c,
-    providerMetadata: d
-  }) {
-    var m, _;
-    const v = e.type, g = [];
-    s != null && g.push({
-      type: "unsupported-setting",
-      setting: "topK"
-    }), o != null && g.push({
-      type: "unsupported-setting",
-      setting: "frequencyPenalty"
-    }), i != null && g.push({
-      type: "unsupported-setting",
-      setting: "presencePenalty"
-    }), l != null && g.push({
-      type: "unsupported-setting",
-      setting: "stopSequences"
-    }), u != null && u.type === "json" && u.schema != null && g.push({
-      type: "unsupported-setting",
-      setting: "responseFormat",
-      details: "JSON response format schema is not supported"
-    });
-    const p = {
-      // model id:
-      model: this.modelId,
-      // model specific settings:
-      safe_prompt: this.settings.safePrompt,
-      // standardized settings:
-      max_tokens: r,
-      temperature: n,
-      top_p: a,
-      random_seed: c,
-      // response format:
-      response_format: (u == null ? void 0 : u.type) === "json" ? { type: "json_object" } : void 0,
-      // mistral-specific provider options:
-      document_image_limit: (m = d == null ? void 0 : d.mistral) == null ? void 0 : m.documentImageLimit,
-      document_page_limit: (_ = d == null ? void 0 : d.mistral) == null ? void 0 : _.documentPageLimit,
-      // messages:
-      messages: rf(t)
-    };
-    switch (v) {
-      case "regular": {
-        const { tools: f, tool_choice: w, toolWarnings: k } = af(e);
-        return {
-          args: { ...p, tools: f, tool_choice: w },
-          warnings: [...g, ...k]
-        };
-      }
-      case "object-json":
-        return {
-          args: {
-            ...p,
-            response_format: { type: "json_object" }
-          },
-          warnings: g
-        };
-      case "object-tool":
-        return {
-          args: {
-            ...p,
-            tool_choice: "any",
-            tools: [{ type: "function", function: e.tool }]
-          },
-          warnings: g
-        };
-      default: {
-        const f = v;
-        throw new Error(`Unsupported type: ${f}`);
-      }
-    }
-  }
-  async doGenerate(e) {
-    var t;
-    const { args: r, warnings: n } = this.getArgs(e), {
-      responseHeaders: a,
-      value: s,
-      rawValue: o
-    } = await Fe({
-      url: `${this.config.baseURL}/chat/completions`,
-      headers: Le(this.config.headers(), e.headers),
-      body: r,
-      failedResponseHandler: Hn,
-      successfulResponseHandler: vt(
-        of
-      ),
-      abortSignal: e.abortSignal,
-      fetch: this.config.fetch
-    }), { messages: i, ...l } = r, u = s.choices[0];
-    let c = Qa(u.message.content);
-    const d = i[i.length - 1];
-    return d.role === "assistant" && (c != null && c.startsWith(d.content)) && (c = c.slice(d.content.length)), {
-      text: c,
-      toolCalls: (t = u.message.tool_calls) == null ? void 0 : t.map((m) => ({
-        toolCallType: "function",
-        toolCallId: m.id,
-        toolName: m.function.name,
-        args: m.function.arguments
-      })),
-      finishReason: Ya(u.finish_reason),
-      usage: {
-        promptTokens: s.usage.prompt_tokens,
-        completionTokens: s.usage.completion_tokens
-      },
-      rawCall: { rawPrompt: i, rawSettings: l },
-      rawResponse: {
-        headers: a,
-        body: o
-      },
-      request: { body: JSON.stringify(r) },
-      response: Xa(s),
-      warnings: n
-    };
-  }
-  async doStream(e) {
-    const { args: t, warnings: r } = this.getArgs(e), n = { ...t, stream: !0 }, { responseHeaders: a, value: s } = await Fe({
-      url: `${this.config.baseURL}/chat/completions`,
-      headers: Le(this.config.headers(), e.headers),
-      body: n,
-      failedResponseHandler: Hn,
-      successfulResponseHandler: Ar(
-        lf
-      ),
-      abortSignal: e.abortSignal,
-      fetch: this.config.fetch
-    }), { messages: o, ...i } = t;
-    let l = "unknown", u = {
-      promptTokens: Number.NaN,
-      completionTokens: Number.NaN
-    }, c = 0, d = !1;
-    return {
-      stream: s.pipeThrough(
-        new TransformStream({
-          transform(m, _) {
-            if (!m.success) {
-              _.enqueue({ type: "error", error: m.error });
-              return;
-            }
-            c++;
-            const v = m.value;
-            c === 1 && _.enqueue({
-              type: "response-metadata",
-              ...Xa(v)
-            }), v.usage != null && (u = {
-              promptTokens: v.usage.prompt_tokens,
-              completionTokens: v.usage.completion_tokens
-            });
-            const g = v.choices[0];
-            if ((g == null ? void 0 : g.finish_reason) != null && (l = Ya(g.finish_reason)), (g == null ? void 0 : g.delta) == null)
-              return;
-            const p = g.delta, f = Qa(p.content);
-            if (c <= 2) {
-              const w = o[o.length - 1];
-              if (w.role === "assistant" && f === w.content.trimEnd()) {
-                f.length < w.content.length && (d = !0);
-                return;
-              }
-            }
-            if (f != null && (_.enqueue({
-              type: "text-delta",
-              textDelta: d ? f.trimStart() : f
-            }), d = !1), p.tool_calls != null)
-              for (const w of p.tool_calls)
-                _.enqueue({
-                  type: "tool-call-delta",
-                  toolCallType: "function",
-                  toolCallId: w.id,
-                  toolName: w.function.name,
-                  argsTextDelta: w.function.arguments
-                }), _.enqueue({
-                  type: "tool-call",
-                  toolCallType: "function",
-                  toolCallId: w.id,
-                  toolName: w.function.name,
-                  args: w.function.arguments
-                });
-          },
-          flush(m) {
-            m.enqueue({ type: "finish", finishReason: l, usage: u });
-          }
-        })
-      ),
-      rawCall: { rawPrompt: o, rawSettings: i },
-      rawResponse: { headers: a },
-      request: { body: JSON.stringify(n) },
-      warnings: r
-    };
-  }
-};
-function Qa(e) {
-  if (typeof e == "string")
-    return e;
-  if (e == null)
-    return;
-  const t = [];
-  for (const r of e) {
-    const { type: n } = r;
-    switch (n) {
-      case "text":
-        t.push(r.text);
-        break;
-      case "image_url":
-      case "reference":
-        break;
-      default: {
-        const a = n;
-        throw new Error(`Unsupported type: ${a}`);
-      }
-    }
-  }
-  return t.length ? t.join("") : void 0;
-}
-var Oi = ge([
-  h(),
-  F(
-    Tt("type", [
-      y({
-        type: A("text"),
-        text: h()
-      }),
-      y({
-        type: A("image_url"),
-        image_url: ge([
-          h(),
-          y({
-            url: h(),
-            detail: h().nullable()
-          })
-        ])
-      }),
-      y({
-        type: A("reference"),
-        reference_ids: F(R())
-      })
-    ])
-  )
-]).nullish(), of = y({
-  id: h().nullish(),
-  created: R().nullish(),
-  model: h().nullish(),
-  choices: F(
-    y({
-      message: y({
-        role: A("assistant"),
-        content: Oi,
-        tool_calls: F(
-          y({
-            id: h(),
-            function: y({ name: h(), arguments: h() })
-          })
-        ).nullish()
-      }),
-      index: R(),
-      finish_reason: h().nullish()
-    })
-  ),
-  object: A("chat.completion"),
-  usage: y({
-    prompt_tokens: R(),
-    completion_tokens: R()
-  })
-}), lf = y({
-  id: h().nullish(),
-  created: R().nullish(),
-  model: h().nullish(),
-  choices: F(
-    y({
-      delta: y({
-        role: yt(["assistant"]).optional(),
-        content: Oi,
-        tool_calls: F(
-          y({
-            id: h(),
-            function: y({ name: h(), arguments: h() })
-          })
-        ).nullish()
-      }),
-      finish_reason: h().nullish(),
-      index: R()
-    })
-  ),
-  usage: y({
-    prompt_tokens: R(),
-    completion_tokens: R()
-  }).nullish()
-}), uf = class {
-  constructor(e, t, r) {
-    this.specificationVersion = "v1", this.modelId = e, this.settings = t, this.config = r;
-  }
-  get provider() {
-    return this.config.provider;
-  }
-  get maxEmbeddingsPerCall() {
-    var e;
-    return (e = this.settings.maxEmbeddingsPerCall) != null ? e : 32;
-  }
-  get supportsParallelCalls() {
-    var e;
-    return (e = this.settings.supportsParallelCalls) != null ? e : !1;
-  }
-  async doEmbed({
-    values: e,
-    abortSignal: t,
-    headers: r
-  }) {
-    if (e.length > this.maxEmbeddingsPerCall)
-      throw new Ds({
-        provider: this.provider,
-        modelId: this.modelId,
-        maxEmbeddingsPerCall: this.maxEmbeddingsPerCall,
-        values: e
-      });
-    const { responseHeaders: n, value: a } = await Fe({
-      url: `${this.config.baseURL}/embeddings`,
-      headers: Le(this.config.headers(), r),
-      body: {
-        model: this.modelId,
-        input: e,
-        encoding_format: "float"
-      },
-      failedResponseHandler: Hn,
-      successfulResponseHandler: vt(
-        cf
-      ),
-      abortSignal: t,
-      fetch: this.config.fetch
-    });
-    return {
-      embeddings: a.data.map((s) => s.embedding),
-      usage: a.usage ? { tokens: a.usage.prompt_tokens } : void 0,
-      rawResponse: { headers: n }
-    };
-  }
-}, cf = y({
-  data: F(y({ embedding: F(R()) })),
-  usage: y({ prompt_tokens: R() }).nullish()
-});
-function df(e = {}) {
-  var t;
-  const r = (t = ra(e.baseURL)) != null ? t : "https://api.mistral.ai/v1", n = () => ({
-    Authorization: `Bearer ${ea({
-      apiKey: e.apiKey,
-      environmentVariableName: "MISTRAL_API_KEY",
-      description: "Mistral"
-    })}`,
-    ...e.headers
-  }), a = (i, l = {}) => new sf(i, l, {
-    provider: "mistral.chat",
-    baseURL: r,
-    headers: n,
-    fetch: e.fetch
-  }), s = (i, l = {}) => new uf(i, l, {
-    provider: "mistral.embedding",
-    baseURL: r,
-    headers: n,
-    fetch: e.fetch
-  }), o = function(i, l) {
-    if (new.target)
-      throw new Error(
-        "The Mistral model function cannot be called with the new keyword."
-      );
-    return a(i, l);
-  };
-  return o.languageModel = a, o.chat = a, o.embedding = s, o.textEmbedding = s, o.textEmbeddingModel = s, o;
-}
-df();
-function pf({
-  prompt: e,
-  useLegacyFunctionCalling: t = !1,
-  systemMessageMode: r = "system"
-}) {
-  const n = [], a = [];
-  for (const { role: s, content: o } of e)
-    switch (s) {
-      case "system": {
-        switch (r) {
-          case "system": {
-            n.push({ role: "system", content: o });
-            break;
-          }
-          case "developer": {
-            n.push({ role: "developer", content: o });
-            break;
-          }
-          case "remove": {
-            a.push({
-              type: "other",
-              message: "system messages are removed for this model"
-            });
-            break;
-          }
-          default: {
-            const i = r;
-            throw new Error(
-              `Unsupported system message mode: ${i}`
-            );
-          }
-        }
-        break;
-      }
-      case "user": {
-        if (o.length === 1 && o[0].type === "text") {
-          n.push({ role: "user", content: o[0].text });
-          break;
-        }
-        n.push({
-          role: "user",
-          content: o.map((i, l) => {
-            var u, c, d, m;
-            switch (i.type) {
-              case "text":
-                return { type: "text", text: i.text };
-              case "image":
-                return {
-                  type: "image_url",
-                  image_url: {
-                    url: i.image instanceof URL ? i.image.toString() : `data:${(u = i.mimeType) != null ? u : "image/jpeg"};base64,${Mt(i.image)}`,
-                    // OpenAI specific extension: image detail
-                    detail: (d = (c = i.providerMetadata) == null ? void 0 : c.openai) == null ? void 0 : d.imageDetail
-                  }
-                };
-              case "file": {
-                if (i.data instanceof URL)
-                  throw new se({
-                    functionality: "'File content parts with URL data' functionality not supported."
-                  });
-                switch (i.mimeType) {
-                  case "audio/wav":
-                    return {
-                      type: "input_audio",
-                      input_audio: { data: i.data, format: "wav" }
-                    };
-                  case "audio/mp3":
-                  case "audio/mpeg":
-                    return {
-                      type: "input_audio",
-                      input_audio: { data: i.data, format: "mp3" }
-                    };
-                  case "application/pdf":
-                    return {
-                      type: "file",
-                      file: {
-                        filename: (m = i.filename) != null ? m : `part-${l}.pdf`,
-                        file_data: `data:application/pdf;base64,${i.data}`
-                      }
-                    };
-                  default:
-                    throw new se({
-                      functionality: `File content part type ${i.mimeType} in user messages`
-                    });
-                }
-              }
-            }
-          })
-        });
-        break;
-      }
-      case "assistant": {
-        let i = "";
-        const l = [];
-        for (const u of o)
-          switch (u.type) {
-            case "text": {
-              i += u.text;
-              break;
-            }
-            case "tool-call": {
-              l.push({
-                id: u.toolCallId,
-                type: "function",
-                function: {
-                  name: u.toolName,
-                  arguments: JSON.stringify(u.args)
-                }
-              });
-              break;
-            }
-          }
-        if (t) {
-          if (l.length > 1)
-            throw new se({
-              functionality: "useLegacyFunctionCalling with multiple tool calls in one message"
-            });
-          n.push({
-            role: "assistant",
-            content: i,
-            function_call: l.length > 0 ? l[0].function : void 0
-          });
-        } else
-          n.push({
-            role: "assistant",
-            content: i,
-            tool_calls: l.length > 0 ? l : void 0
-          });
-        break;
-      }
-      case "tool": {
-        for (const i of o)
-          t ? n.push({
-            role: "function",
-            name: i.toolName,
-            content: JSON.stringify(i.result)
-          }) : n.push({
-            role: "tool",
-            tool_call_id: i.toolCallId,
-            content: JSON.stringify(i.result)
-          });
-        break;
-      }
-      default: {
-        const i = s;
-        throw new Error(`Unsupported role: ${i}`);
-      }
-    }
-  return { messages: n, warnings: a };
-}
-function es(e) {
-  var t, r;
-  return (r = (t = e == null ? void 0 : e.content) == null ? void 0 : t.map(({ token: n, logprob: a, top_logprobs: s }) => ({
-    token: n,
-    logprob: a,
-    topLogprobs: s ? s.map(({ token: o, logprob: i }) => ({
-      token: o,
-      logprob: i
-    })) : []
-  }))) != null ? r : void 0;
-}
-function on(e) {
+function An(e) {
   switch (e) {
     case "stop":
       return "stop";
@@ -14151,665 +7048,536 @@ function on(e) {
       return "unknown";
   }
 }
-var ha = y({
-  error: y({
-    message: h(),
+var hc = f({
+  /**
+   * Modify the likelihood of specified tokens appearing in the completion.
+   *
+   * Accepts a JSON object that maps tokens (specified by their token ID in
+   * the GPT tokenizer) to an associated bias value from -100 to 100.
+   */
+  logitBias: Ke(pl.number(), T()).optional(),
+  /**
+   * Return the log probabilities of the tokens.
+   *
+   * Setting to true will return the log probabilities of the tokens that
+   * were generated.
+   *
+   * Setting to a number will return the log probabilities of the top n
+   * tokens that were generated.
+   */
+  logprobs: se([ue(), T()]).optional(),
+  /**
+   * Whether to enable parallel function calling during tool use. Default to true.
+   */
+  parallelToolCalls: ue().optional(),
+  /**
+   * A unique identifier representing your end-user, which can help OpenAI to
+   * monitor and detect abuse.
+   */
+  user: d().optional(),
+  /**
+   * Reasoning effort for reasoning models. Defaults to `medium`.
+   */
+  reasoningEffort: Ce(["low", "medium", "high"]).optional(),
+  /**
+   * Maximum number of completion tokens to generate. Useful for reasoning models.
+   */
+  maxCompletionTokens: T().optional(),
+  /**
+   * Whether to enable persistence in responses API.
+   */
+  store: ue().optional(),
+  /**
+   * Metadata to associate with the request.
+   */
+  metadata: Ke(d()).optional(),
+  /**
+   * Parameters for prediction mode.
+   */
+  prediction: Ke(Pt()).optional(),
+  /**
+   * Whether to use structured outputs.
+   *
+   * @default true
+   */
+  structuredOutputs: ue().optional()
+}), Cr = f({
+  error: f({
+    message: d(),
     // The additional information below is handled loosely to support
     // OpenAI-compatible providers that have slightly different error
     // responses:
-    type: h().nullish(),
-    param: eo().nullish(),
-    code: ge([h(), R()]).nullish()
+    type: d().nullish(),
+    param: Pt().nullish(),
+    code: se([d(), T()]).nullish()
   })
-}), at = ta({
-  errorSchema: ha,
+}), Qe = jn({
+  errorSchema: Cr,
   errorToMessage: (e) => e.error.message
 });
-function ln({
-  id: e,
-  model: t,
-  created: r
+function fc({
+  tools: e,
+  toolChoice: t,
+  structuredOutputs: n
 }) {
-  return {
-    id: e ?? void 0,
-    modelId: t ?? void 0,
-    timestamp: r != null ? new Date(r * 1e3) : void 0
-  };
-}
-function mf({
-  mode: e,
-  useLegacyFunctionCalling: t = !1,
-  structuredOutputs: r
-}) {
-  var n;
-  const a = (n = e.tools) != null && n.length ? e.tools : void 0, s = [];
-  if (a == null)
-    return { tools: void 0, tool_choice: void 0, toolWarnings: s };
-  const o = e.toolChoice;
-  if (t) {
-    const u = [];
-    for (const d of a)
-      d.type === "provider-defined" ? s.push({ type: "unsupported-tool", tool: d }) : u.push({
-        name: d.name,
-        description: d.description,
-        parameters: d.parameters
-      });
-    if (o == null)
-      return {
-        functions: u,
-        function_call: void 0,
-        toolWarnings: s
-      };
-    switch (o.type) {
-      case "auto":
-      case "none":
-      case void 0:
-        return {
-          functions: u,
-          function_call: void 0,
-          toolWarnings: s
-        };
-      case "required":
-        throw new se({
-          functionality: "useLegacyFunctionCalling and toolChoice: required"
-        });
-      default:
-        return {
-          functions: u,
-          function_call: { name: o.toolName },
-          toolWarnings: s
-        };
-    }
-  }
-  const i = [];
-  for (const u of a)
-    u.type === "provider-defined" ? s.push({ type: "unsupported-tool", tool: u }) : i.push({
+  e = e != null && e.length ? e : void 0;
+  const r = [];
+  if (e == null)
+    return { tools: void 0, toolChoice: void 0, toolWarnings: r };
+  const s = [];
+  for (const o of e)
+    o.type === "provider-defined" ? r.push({ type: "unsupported-tool", tool: o }) : s.push({
       type: "function",
       function: {
-        name: u.name,
-        description: u.description,
-        parameters: u.parameters,
-        strict: r ? !0 : void 0
+        name: o.name,
+        description: o.description,
+        parameters: o.parameters,
+        strict: n ? !0 : void 0
       }
     });
-  if (o == null)
-    return { tools: i, tool_choice: void 0, toolWarnings: s };
-  const l = o.type;
-  switch (l) {
+  if (t == null)
+    return { tools: s, toolChoice: void 0, toolWarnings: r };
+  const a = t.type;
+  switch (a) {
     case "auto":
     case "none":
     case "required":
-      return { tools: i, tool_choice: l, toolWarnings: s };
+      return { tools: s, toolChoice: a, toolWarnings: r };
     case "tool":
       return {
-        tools: i,
-        tool_choice: {
+        tools: s,
+        toolChoice: {
           type: "function",
           function: {
-            name: o.toolName
+            name: t.toolName
           }
         },
-        toolWarnings: s
+        toolWarnings: r
       };
     default: {
-      const u = l;
-      throw new se({
-        functionality: `Unsupported tool choice type: ${u}`
+      const o = a;
+      throw new he({
+        functionality: `tool choice type: ${o}`
       });
     }
   }
 }
-var ff = class {
-  constructor(e, t, r) {
-    this.specificationVersion = "v1", this.modelId = e, this.settings = t, this.config = r;
-  }
-  get supportsStructuredOutputs() {
-    var e;
-    return (e = this.settings.structuredOutputs) != null ? e : Wn(this.modelId);
-  }
-  get defaultObjectGenerationMode() {
-    return yf(this.modelId) ? "tool" : this.supportsStructuredOutputs ? "json" : "tool";
+var mc = class {
+  constructor(e, t) {
+    this.specificationVersion = "v2", this.supportedUrls = {
+      "image/*": [/^https?:\/\/.*$/]
+    }, this.modelId = e, this.config = t;
   }
   get provider() {
     return this.config.provider;
   }
-  get supportsImageUrls() {
-    return !this.settings.downloadImages;
-  }
-  getArgs({
-    mode: e,
-    prompt: t,
-    maxTokens: r,
+  async getArgs({
+    prompt: e,
+    maxOutputTokens: t,
     temperature: n,
-    topP: a,
+    topP: r,
     topK: s,
-    frequencyPenalty: o,
-    presencePenalty: i,
-    stopSequences: l,
-    responseFormat: u,
-    seed: c,
-    providerMetadata: d
+    frequencyPenalty: a,
+    presencePenalty: o,
+    stopSequences: i,
+    responseFormat: l,
+    seed: u,
+    tools: c,
+    toolChoice: p,
+    providerOptions: h
   }) {
-    var m, _, v, g, p, f, w, k;
-    const b = e.type, x = [];
-    s != null && x.push({
+    var g, v, y;
+    const m = [], b = (g = await qe({
+      provider: "openai",
+      providerOptions: h,
+      schema: hc
+    })) != null ? g : {}, S = (v = b.structuredOutputs) != null ? v : !0;
+    s != null && m.push({
       type: "unsupported-setting",
       setting: "topK"
-    }), (u == null ? void 0 : u.type) === "json" && u.schema != null && !this.supportsStructuredOutputs && x.push({
+    }), (l == null ? void 0 : l.type) === "json" && l.schema != null && !S && m.push({
       type: "unsupported-setting",
       setting: "responseFormat",
       details: "JSON response format schema is only supported with structuredOutputs"
     });
-    const S = this.settings.useLegacyFunctionCalling;
-    if (S && this.settings.parallelToolCalls === !0)
-      throw new se({
-        functionality: "useLegacyFunctionCalling with parallelToolCalls"
-      });
-    if (S && this.supportsStructuredOutputs)
-      throw new se({
-        functionality: "structuredOutputs with useLegacyFunctionCalling"
-      });
-    const { messages: $, warnings: E } = pf(
+    const { messages: w, warnings: x } = pc(
       {
-        prompt: t,
-        useLegacyFunctionCalling: S,
-        systemMessageMode: vf(this.modelId)
+        prompt: e,
+        systemMessageMode: vc(this.modelId)
       }
     );
-    x.push(...E);
-    const P = {
+    m.push(...x);
+    const _ = {
       // model id:
       model: this.modelId,
       // model specific settings:
-      logit_bias: this.settings.logitBias,
-      logprobs: this.settings.logprobs === !0 || typeof this.settings.logprobs == "number" ? !0 : void 0,
-      top_logprobs: typeof this.settings.logprobs == "number" ? this.settings.logprobs : typeof this.settings.logprobs == "boolean" && this.settings.logprobs ? 0 : void 0,
-      user: this.settings.user,
-      parallel_tool_calls: this.settings.parallelToolCalls,
+      logit_bias: b.logitBias,
+      logprobs: b.logprobs === !0 || typeof b.logprobs == "number" ? !0 : void 0,
+      top_logprobs: typeof b.logprobs == "number" ? b.logprobs : typeof b.logprobs == "boolean" && b.logprobs ? 0 : void 0,
+      user: b.user,
+      parallel_tool_calls: b.parallelToolCalls,
       // standardized settings:
-      max_tokens: r,
+      max_tokens: t,
       temperature: n,
-      top_p: a,
-      frequency_penalty: o,
-      presence_penalty: i,
-      response_format: (u == null ? void 0 : u.type) === "json" ? this.supportsStructuredOutputs && u.schema != null ? {
-        type: "json_schema",
-        json_schema: {
-          schema: u.schema,
-          strict: !0,
-          name: (m = u.name) != null ? m : "response",
-          description: u.description
-        }
-      } : { type: "json_object" } : void 0,
-      stop: l,
-      seed: c,
+      top_p: r,
+      frequency_penalty: a,
+      presence_penalty: o,
+      response_format: (l == null ? void 0 : l.type) === "json" ? (
+        // TODO convert into provider option
+        S && l.schema != null ? {
+          type: "json_schema",
+          json_schema: {
+            schema: l.schema,
+            strict: !0,
+            name: (y = l.name) != null ? y : "response",
+            description: l.description
+          }
+        } : { type: "json_object" }
+      ) : void 0,
+      stop: i,
+      seed: u,
       // openai specific settings:
-      // TODO remove in next major version; we auto-map maxTokens now
-      max_completion_tokens: (_ = d == null ? void 0 : d.openai) == null ? void 0 : _.maxCompletionTokens,
-      store: (v = d == null ? void 0 : d.openai) == null ? void 0 : v.store,
-      metadata: (g = d == null ? void 0 : d.openai) == null ? void 0 : g.metadata,
-      prediction: (p = d == null ? void 0 : d.openai) == null ? void 0 : p.prediction,
-      reasoning_effort: (w = (f = d == null ? void 0 : d.openai) == null ? void 0 : f.reasoningEffort) != null ? w : this.settings.reasoningEffort,
+      // TODO remove in next major version; we auto-map maxOutputTokens now
+      max_completion_tokens: b.maxCompletionTokens,
+      store: b.store,
+      metadata: b.metadata,
+      prediction: b.prediction,
+      reasoning_effort: b.reasoningEffort,
       // messages:
-      messages: $
+      messages: w
     };
-    switch (Wn(this.modelId) ? (P.temperature != null && (P.temperature = void 0, x.push({
+    Na(this.modelId) ? (_.temperature != null && (_.temperature = void 0, m.push({
       type: "unsupported-setting",
       setting: "temperature",
       details: "temperature is not supported for reasoning models"
-    })), P.top_p != null && (P.top_p = void 0, x.push({
+    })), _.top_p != null && (_.top_p = void 0, m.push({
       type: "unsupported-setting",
       setting: "topP",
       details: "topP is not supported for reasoning models"
-    })), P.frequency_penalty != null && (P.frequency_penalty = void 0, x.push({
+    })), _.frequency_penalty != null && (_.frequency_penalty = void 0, m.push({
       type: "unsupported-setting",
       setting: "frequencyPenalty",
       details: "frequencyPenalty is not supported for reasoning models"
-    })), P.presence_penalty != null && (P.presence_penalty = void 0, x.push({
+    })), _.presence_penalty != null && (_.presence_penalty = void 0, m.push({
       type: "unsupported-setting",
       setting: "presencePenalty",
       details: "presencePenalty is not supported for reasoning models"
-    })), P.logit_bias != null && (P.logit_bias = void 0, x.push({
+    })), _.logit_bias != null && (_.logit_bias = void 0, m.push({
       type: "other",
       message: "logitBias is not supported for reasoning models"
-    })), P.logprobs != null && (P.logprobs = void 0, x.push({
+    })), _.logprobs != null && (_.logprobs = void 0, m.push({
       type: "other",
       message: "logprobs is not supported for reasoning models"
-    })), P.top_logprobs != null && (P.top_logprobs = void 0, x.push({
+    })), _.top_logprobs != null && (_.top_logprobs = void 0, m.push({
       type: "other",
       message: "topLogprobs is not supported for reasoning models"
-    })), P.max_tokens != null && (P.max_completion_tokens == null && (P.max_completion_tokens = P.max_tokens), P.max_tokens = void 0)) : (this.modelId.startsWith("gpt-4o-search-preview") || this.modelId.startsWith("gpt-4o-mini-search-preview")) && P.temperature != null && (P.temperature = void 0, x.push({
+    })), _.max_tokens != null && (_.max_completion_tokens == null && (_.max_completion_tokens = _.max_tokens), _.max_tokens = void 0)) : (this.modelId.startsWith("gpt-4o-search-preview") || this.modelId.startsWith("gpt-4o-mini-search-preview")) && _.temperature != null && (_.temperature = void 0, m.push({
       type: "unsupported-setting",
       setting: "temperature",
       details: "temperature is not supported for the search preview models and has been removed."
-    })), b) {
-      case "regular": {
-        const { tools: G, tool_choice: ce, functions: be, function_call: me, toolWarnings: ie } = mf({
-          mode: e,
-          useLegacyFunctionCalling: S,
-          structuredOutputs: this.supportsStructuredOutputs
-        });
-        return {
-          args: {
-            ...P,
-            tools: G,
-            tool_choice: ce,
-            functions: be,
-            function_call: me
-          },
-          warnings: [...x, ...ie]
-        };
-      }
-      case "object-json":
-        return {
-          args: {
-            ...P,
-            response_format: this.supportsStructuredOutputs && e.schema != null ? {
-              type: "json_schema",
-              json_schema: {
-                schema: e.schema,
-                strict: !0,
-                name: (k = e.name) != null ? k : "response",
-                description: e.description
-              }
-            } : { type: "json_object" }
-          },
-          warnings: x
-        };
-      case "object-tool":
-        return {
-          args: S ? {
-            ...P,
-            function_call: {
-              name: e.tool.name
-            },
-            functions: [
-              {
-                name: e.tool.name,
-                description: e.tool.description,
-                parameters: e.tool.parameters
-              }
-            ]
-          } : {
-            ...P,
-            tool_choice: {
-              type: "function",
-              function: { name: e.tool.name }
-            },
-            tools: [
-              {
-                type: "function",
-                function: {
-                  name: e.tool.name,
-                  description: e.tool.description,
-                  parameters: e.tool.parameters,
-                  strict: this.supportsStructuredOutputs ? !0 : void 0
-                }
-              }
-            ]
-          },
-          warnings: x
-        };
-      default: {
-        const G = b;
-        throw new Error(`Unsupported type: ${G}`);
-      }
-    }
+    }));
+    const {
+      tools: k,
+      toolChoice: O,
+      toolWarnings: N
+    } = fc({
+      tools: c,
+      toolChoice: p,
+      structuredOutputs: S
+    });
+    return {
+      args: {
+        ..._,
+        tools: k,
+        tool_choice: O
+      },
+      warnings: [...m, ...N]
+    };
   }
   async doGenerate(e) {
-    var t, r, n, a, s, o, i, l;
-    const { args: u, warnings: c } = this.getArgs(e), {
-      responseHeaders: d,
-      value: m,
-      rawValue: _
-    } = await Fe({
+    var t, n, r, s, a, o, i, l, u, c, p, h, g;
+    const { args: v, warnings: y } = await this.getArgs(e), {
+      responseHeaders: m,
+      value: b,
+      rawValue: S
+    } = await Ie({
       url: this.config.url({
         path: "/chat/completions",
         modelId: this.modelId
       }),
-      headers: Le(this.config.headers(), e.headers),
-      body: u,
-      failedResponseHandler: at,
-      successfulResponseHandler: vt(
-        hf
+      headers: Se(this.config.headers(), e.headers),
+      body: v,
+      failedResponseHandler: Qe,
+      successfulResponseHandler: Fe(
+        gc
       ),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
-    }), { messages: v, ...g } = u, p = m.choices[0], f = (t = m.usage) == null ? void 0 : t.completion_tokens_details, w = (r = m.usage) == null ? void 0 : r.prompt_tokens_details, k = { openai: {} };
-    return (f == null ? void 0 : f.reasoning_tokens) != null && (k.openai.reasoningTokens = f == null ? void 0 : f.reasoning_tokens), (f == null ? void 0 : f.accepted_prediction_tokens) != null && (k.openai.acceptedPredictionTokens = f == null ? void 0 : f.accepted_prediction_tokens), (f == null ? void 0 : f.rejected_prediction_tokens) != null && (k.openai.rejectedPredictionTokens = f == null ? void 0 : f.rejected_prediction_tokens), (w == null ? void 0 : w.cached_tokens) != null && (k.openai.cachedPromptTokens = w == null ? void 0 : w.cached_tokens), {
-      text: (n = p.message.content) != null ? n : void 0,
-      toolCalls: this.settings.useLegacyFunctionCalling && p.message.function_call ? [
-        {
-          toolCallType: "function",
-          toolCallId: kt(),
-          toolName: p.message.function_call.name,
-          args: p.message.function_call.arguments
-        }
-      ] : (a = p.message.tool_calls) == null ? void 0 : a.map((b) => {
-        var x;
-        return {
-          toolCallType: "function",
-          toolCallId: (x = b.id) != null ? x : kt(),
-          toolName: b.function.name,
-          args: b.function.arguments
-        };
-      }),
-      finishReason: on(p.finish_reason),
+    }), w = b.choices[0], x = [], _ = w.message.content;
+    _ != null && _.length > 0 && x.push({ type: "text", text: _ });
+    for (const q of (t = w.message.tool_calls) != null ? t : [])
+      x.push({
+        type: "tool-call",
+        toolCallType: "function",
+        toolCallId: (n = q.id) != null ? n : st(),
+        toolName: q.function.name,
+        args: q.function.arguments
+      });
+    const k = (r = b.usage) == null ? void 0 : r.completion_tokens_details, O = (s = b.usage) == null ? void 0 : s.prompt_tokens_details, N = { openai: {} };
+    return (k == null ? void 0 : k.accepted_prediction_tokens) != null && (N.openai.acceptedPredictionTokens = k == null ? void 0 : k.accepted_prediction_tokens), (k == null ? void 0 : k.rejected_prediction_tokens) != null && (N.openai.rejectedPredictionTokens = k == null ? void 0 : k.rejected_prediction_tokens), ((a = w.logprobs) == null ? void 0 : a.content) != null && (N.openai.logprobs = w.logprobs.content), {
+      content: x,
+      finishReason: An(w.finish_reason),
       usage: {
-        promptTokens: (o = (s = m.usage) == null ? void 0 : s.prompt_tokens) != null ? o : NaN,
-        completionTokens: (l = (i = m.usage) == null ? void 0 : i.completion_tokens) != null ? l : NaN
+        inputTokens: (i = (o = b.usage) == null ? void 0 : o.prompt_tokens) != null ? i : void 0,
+        outputTokens: (u = (l = b.usage) == null ? void 0 : l.completion_tokens) != null ? u : void 0,
+        totalTokens: (p = (c = b.usage) == null ? void 0 : c.total_tokens) != null ? p : void 0,
+        reasoningTokens: (h = k == null ? void 0 : k.reasoning_tokens) != null ? h : void 0,
+        cachedInputTokens: (g = O == null ? void 0 : O.cached_tokens) != null ? g : void 0
       },
-      rawCall: { rawPrompt: v, rawSettings: g },
-      rawResponse: { headers: d, body: _ },
-      request: { body: JSON.stringify(u) },
-      response: ln(m),
-      warnings: c,
-      logprobs: es(p.logprobs),
-      providerMetadata: k
+      request: { body: v },
+      response: {
+        ...En(b),
+        headers: m,
+        body: S
+      },
+      warnings: y,
+      providerMetadata: N
     };
   }
   async doStream(e) {
-    if (this.settings.simulateStreaming) {
-      const g = await this.doGenerate(e);
-      return {
-        stream: new ReadableStream({
-          start(f) {
-            if (f.enqueue({ type: "response-metadata", ...g.response }), g.text && f.enqueue({
-              type: "text-delta",
-              textDelta: g.text
-            }), g.toolCalls)
-              for (const w of g.toolCalls)
-                f.enqueue({
-                  type: "tool-call-delta",
-                  toolCallType: "function",
-                  toolCallId: w.toolCallId,
-                  toolName: w.toolName,
-                  argsTextDelta: w.args
-                }), f.enqueue({
-                  type: "tool-call",
-                  ...w
-                });
-            f.enqueue({
-              type: "finish",
-              finishReason: g.finishReason,
-              usage: g.usage,
-              logprobs: g.logprobs,
-              providerMetadata: g.providerMetadata
-            }), f.close();
-          }
-        }),
-        rawCall: g.rawCall,
-        rawResponse: g.rawResponse,
-        warnings: g.warnings
-      };
-    }
-    const { args: t, warnings: r } = this.getArgs(e), n = {
+    const { args: t, warnings: n } = await this.getArgs(e), r = {
       ...t,
       stream: !0,
-      // only include stream_options when in strict compatibility mode:
-      stream_options: this.config.compatibility === "strict" ? { include_usage: !0 } : void 0
-    }, { responseHeaders: a, value: s } = await Fe({
+      stream_options: {
+        include_usage: !0
+      }
+    }, { responseHeaders: s, value: a } = await Ie({
       url: this.config.url({
         path: "/chat/completions",
         modelId: this.modelId
       }),
-      headers: Le(this.config.headers(), e.headers),
-      body: n,
-      failedResponseHandler: at,
-      successfulResponseHandler: Ar(
-        gf
+      headers: Se(this.config.headers(), e.headers),
+      body: r,
+      failedResponseHandler: Qe,
+      successfulResponseHandler: Ut(
+        yc
       ),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
-    }), { messages: o, ...i } = t, l = [];
-    let u = "unknown", c = {
-      promptTokens: void 0,
-      completionTokens: void 0
-    }, d, m = !0;
-    const { useLegacyFunctionCalling: _ } = this.settings, v = { openai: {} };
+    }), o = [];
+    let i = "unknown";
+    const l = {
+      inputTokens: void 0,
+      outputTokens: void 0,
+      totalTokens: void 0
+    };
+    let u = !0;
+    const c = { openai: {} };
     return {
-      stream: s.pipeThrough(
+      stream: a.pipeThrough(
         new TransformStream({
-          transform(g, p) {
-            var f, w, k, b, x, S, $, E, P, G, ce, be;
-            if (!g.success) {
-              u = "error", p.enqueue({ type: "error", error: g.error });
+          start(p) {
+            p.enqueue({ type: "stream-start", warnings: n });
+          },
+          transform(p, h) {
+            var g, v, y, m, b, S, w, x, _, k, O, N, q, L, ee, ae, fe, ce, ve, te, ge, Pe, we, Y;
+            if (!p.success) {
+              i = "error", h.enqueue({ type: "error", error: p.error });
               return;
             }
-            const me = g.value;
-            if ("error" in me) {
-              u = "error", p.enqueue({ type: "error", error: me.error });
+            const ne = p.value;
+            if ("error" in ne) {
+              i = "error", h.enqueue({ type: "error", error: ne.error });
               return;
             }
-            if (m && (m = !1, p.enqueue({
+            u && (u = !1, h.enqueue({
               type: "response-metadata",
-              ...ln(me)
-            })), me.usage != null) {
-              const {
-                prompt_tokens: H,
-                completion_tokens: ue,
-                prompt_tokens_details: Y,
-                completion_tokens_details: U
-              } = me.usage;
-              c = {
-                promptTokens: H ?? void 0,
-                completionTokens: ue ?? void 0
-              }, (U == null ? void 0 : U.reasoning_tokens) != null && (v.openai.reasoningTokens = U == null ? void 0 : U.reasoning_tokens), (U == null ? void 0 : U.accepted_prediction_tokens) != null && (v.openai.acceptedPredictionTokens = U == null ? void 0 : U.accepted_prediction_tokens), (U == null ? void 0 : U.rejected_prediction_tokens) != null && (v.openai.rejectedPredictionTokens = U == null ? void 0 : U.rejected_prediction_tokens), (Y == null ? void 0 : Y.cached_tokens) != null && (v.openai.cachedPromptTokens = Y == null ? void 0 : Y.cached_tokens);
-            }
-            const ie = me.choices[0];
-            if ((ie == null ? void 0 : ie.finish_reason) != null && (u = on(ie.finish_reason)), (ie == null ? void 0 : ie.delta) == null)
+              ...En(ne)
+            })), ne.usage != null && (l.inputTokens = (g = ne.usage.prompt_tokens) != null ? g : void 0, l.outputTokens = (v = ne.usage.completion_tokens) != null ? v : void 0, l.totalTokens = (y = ne.usage.total_tokens) != null ? y : void 0, l.reasoningTokens = (b = (m = ne.usage.completion_tokens_details) == null ? void 0 : m.reasoning_tokens) != null ? b : void 0, l.cachedInputTokens = (w = (S = ne.usage.prompt_tokens_details) == null ? void 0 : S.cached_tokens) != null ? w : void 0, ((x = ne.usage.completion_tokens_details) == null ? void 0 : x.accepted_prediction_tokens) != null && (c.openai.acceptedPredictionTokens = (_ = ne.usage.completion_tokens_details) == null ? void 0 : _.accepted_prediction_tokens), ((k = ne.usage.completion_tokens_details) == null ? void 0 : k.rejected_prediction_tokens) != null && (c.openai.rejectedPredictionTokens = (O = ne.usage.completion_tokens_details) == null ? void 0 : O.rejected_prediction_tokens));
+            const oe = ne.choices[0];
+            if ((oe == null ? void 0 : oe.finish_reason) != null && (i = An(oe.finish_reason)), ((N = oe == null ? void 0 : oe.logprobs) == null ? void 0 : N.content) != null && (c.openai.logprobs = oe.logprobs.content), (oe == null ? void 0 : oe.delta) == null)
               return;
-            const de = ie.delta;
-            de.content != null && p.enqueue({
-              type: "text-delta",
-              textDelta: de.content
-            });
-            const ye = es(
-              ie == null ? void 0 : ie.logprobs
-            );
-            ye != null && ye.length && (d === void 0 && (d = []), d.push(...ye));
-            const fe = _ && de.function_call != null ? [
-              {
-                type: "function",
-                id: kt(),
-                function: de.function_call,
-                index: 0
-              }
-            ] : de.tool_calls;
-            if (fe != null)
-              for (const H of fe) {
-                const ue = H.index;
-                if (l[ue] == null) {
-                  if (H.type !== "function")
-                    throw new xn({
-                      data: H,
+            const H = oe.delta;
+            if (H.content != null && h.enqueue({
+              type: "text",
+              text: H.content
+            }), H.tool_calls != null)
+              for (const V of H.tool_calls) {
+                const ie = V.index;
+                if (o[ie] == null) {
+                  if (V.type !== "function")
+                    throw new Wn({
+                      data: V,
                       message: "Expected 'function' type."
                     });
-                  if (H.id == null)
-                    throw new xn({
-                      data: H,
+                  if (V.id == null)
+                    throw new Wn({
+                      data: V,
                       message: "Expected 'id' to be a string."
                     });
-                  if (((f = H.function) == null ? void 0 : f.name) == null)
-                    throw new xn({
-                      data: H,
+                  if (((q = V.function) == null ? void 0 : q.name) == null)
+                    throw new Wn({
+                      data: V,
                       message: "Expected 'function.name' to be a string."
                     });
-                  l[ue] = {
-                    id: H.id,
+                  o[ie] = {
+                    id: V.id,
                     type: "function",
                     function: {
-                      name: H.function.name,
-                      arguments: (w = H.function.arguments) != null ? w : ""
+                      name: V.function.name,
+                      arguments: (L = V.function.arguments) != null ? L : ""
                     },
                     hasFinished: !1
                   };
-                  const U = l[ue];
-                  ((k = U.function) == null ? void 0 : k.name) != null && ((b = U.function) == null ? void 0 : b.arguments) != null && (U.function.arguments.length > 0 && p.enqueue({
+                  const U = o[ie];
+                  ((ee = U.function) == null ? void 0 : ee.name) != null && ((ae = U.function) == null ? void 0 : ae.arguments) != null && (U.function.arguments.length > 0 && h.enqueue({
                     type: "tool-call-delta",
                     toolCallType: "function",
                     toolCallId: U.id,
                     toolName: U.function.name,
                     argsTextDelta: U.function.arguments
-                  }), Sa(U.function.arguments) && (p.enqueue({
+                  }), ss(U.function.arguments) && (h.enqueue({
                     type: "tool-call",
                     toolCallType: "function",
-                    toolCallId: (x = U.id) != null ? x : kt(),
+                    toolCallId: (fe = U.id) != null ? fe : st(),
                     toolName: U.function.name,
                     args: U.function.arguments
                   }), U.hasFinished = !0));
                   continue;
                 }
-                const Y = l[ue];
-                Y.hasFinished || (((S = H.function) == null ? void 0 : S.arguments) != null && (Y.function.arguments += (E = ($ = H.function) == null ? void 0 : $.arguments) != null ? E : ""), p.enqueue({
+                const K = o[ie];
+                K.hasFinished || (((ce = V.function) == null ? void 0 : ce.arguments) != null && (K.function.arguments += (te = (ve = V.function) == null ? void 0 : ve.arguments) != null ? te : ""), h.enqueue({
                   type: "tool-call-delta",
                   toolCallType: "function",
-                  toolCallId: Y.id,
-                  toolName: Y.function.name,
-                  argsTextDelta: (P = H.function.arguments) != null ? P : ""
-                }), ((G = Y.function) == null ? void 0 : G.name) != null && ((ce = Y.function) == null ? void 0 : ce.arguments) != null && Sa(Y.function.arguments) && (p.enqueue({
+                  toolCallId: K.id,
+                  toolName: K.function.name,
+                  argsTextDelta: (ge = V.function.arguments) != null ? ge : ""
+                }), ((Pe = K.function) == null ? void 0 : Pe.name) != null && ((we = K.function) == null ? void 0 : we.arguments) != null && ss(K.function.arguments) && (h.enqueue({
                   type: "tool-call",
                   toolCallType: "function",
-                  toolCallId: (be = Y.id) != null ? be : kt(),
-                  toolName: Y.function.name,
-                  args: Y.function.arguments
-                }), Y.hasFinished = !0));
+                  toolCallId: (Y = K.id) != null ? Y : st(),
+                  toolName: K.function.name,
+                  args: K.function.arguments
+                }), K.hasFinished = !0));
               }
           },
-          flush(g) {
-            var p, f;
-            g.enqueue({
+          flush(p) {
+            p.enqueue({
               type: "finish",
-              finishReason: u,
-              logprobs: d,
-              usage: {
-                promptTokens: (p = c.promptTokens) != null ? p : NaN,
-                completionTokens: (f = c.completionTokens) != null ? f : NaN
-              },
-              ...v != null ? { providerMetadata: v } : {}
+              finishReason: i,
+              usage: l,
+              ...c != null ? { providerMetadata: c } : {}
             });
           }
         })
       ),
-      rawCall: { rawPrompt: o, rawSettings: i },
-      rawResponse: { headers: a },
-      request: { body: JSON.stringify(n) },
-      warnings: r
+      request: { body: r },
+      response: { headers: s }
     };
   }
-}, Mi = y({
-  prompt_tokens: R().nullish(),
-  completion_tokens: R().nullish(),
-  prompt_tokens_details: y({
-    cached_tokens: R().nullish()
+}, Ma = f({
+  prompt_tokens: T().nullish(),
+  completion_tokens: T().nullish(),
+  total_tokens: T().nullish(),
+  prompt_tokens_details: f({
+    cached_tokens: T().nullish()
   }).nullish(),
-  completion_tokens_details: y({
-    reasoning_tokens: R().nullish(),
-    accepted_prediction_tokens: R().nullish(),
-    rejected_prediction_tokens: R().nullish()
+  completion_tokens_details: f({
+    reasoning_tokens: T().nullish(),
+    accepted_prediction_tokens: T().nullish(),
+    rejected_prediction_tokens: T().nullish()
   }).nullish()
-}).nullish(), hf = y({
-  id: h().nullish(),
-  created: R().nullish(),
-  model: h().nullish(),
-  choices: F(
-    y({
-      message: y({
-        role: A("assistant").nullish(),
-        content: h().nullish(),
-        function_call: y({
-          arguments: h(),
-          name: h()
-        }).nullish(),
-        tool_calls: F(
-          y({
-            id: h().nullish(),
-            type: A("function"),
-            function: y({
-              name: h(),
-              arguments: h()
+}).nullish(), gc = f({
+  id: d().nullish(),
+  created: T().nullish(),
+  model: d().nullish(),
+  choices: M(
+    f({
+      message: f({
+        role: C("assistant").nullish(),
+        content: d().nullish(),
+        tool_calls: M(
+          f({
+            id: d().nullish(),
+            type: C("function"),
+            function: f({
+              name: d(),
+              arguments: d()
             })
           })
         ).nullish()
       }),
-      index: R(),
-      logprobs: y({
-        content: F(
-          y({
-            token: h(),
-            logprob: R(),
-            top_logprobs: F(
-              y({
-                token: h(),
-                logprob: R()
+      index: T(),
+      logprobs: f({
+        content: M(
+          f({
+            token: d(),
+            logprob: T(),
+            top_logprobs: M(
+              f({
+                token: d(),
+                logprob: T()
               })
             )
           })
-        ).nullable()
+        ).nullish()
       }).nullish(),
-      finish_reason: h().nullish()
+      finish_reason: d().nullish()
     })
   ),
-  usage: Mi
-}), gf = ge([
-  y({
-    id: h().nullish(),
-    created: R().nullish(),
-    model: h().nullish(),
-    choices: F(
-      y({
-        delta: y({
-          role: yt(["assistant"]).nullish(),
-          content: h().nullish(),
-          function_call: y({
-            name: h().optional(),
-            arguments: h().optional()
-          }).nullish(),
-          tool_calls: F(
-            y({
-              index: R(),
-              id: h().nullish(),
-              type: A("function").nullish(),
-              function: y({
-                name: h().nullish(),
-                arguments: h().nullish()
+  usage: Ma
+}), yc = se([
+  f({
+    id: d().nullish(),
+    created: T().nullish(),
+    model: d().nullish(),
+    choices: M(
+      f({
+        delta: f({
+          role: Ce(["assistant"]).nullish(),
+          content: d().nullish(),
+          tool_calls: M(
+            f({
+              index: T(),
+              id: d().nullish(),
+              type: C("function").nullish(),
+              function: f({
+                name: d().nullish(),
+                arguments: d().nullish()
               })
             })
           ).nullish()
         }).nullish(),
-        logprobs: y({
-          content: F(
-            y({
-              token: h(),
-              logprob: R(),
-              top_logprobs: F(
-                y({
-                  token: h(),
-                  logprob: R()
+        logprobs: f({
+          content: M(
+            f({
+              token: d(),
+              logprob: T(),
+              top_logprobs: M(
+                f({
+                  token: d(),
+                  logprob: T()
                 })
               )
             })
-          ).nullable()
+          ).nullish()
         }).nullish(),
-        finish_reason: h().nullish(),
-        index: R()
+        finish_reason: d().nullish(),
+        index: T()
       })
     ),
-    usage: Mi
+    usage: Ma
   }),
-  ha
+  Cr
 ]);
-function Wn(e) {
+function Na(e) {
   return e.startsWith("o");
 }
-function yf(e) {
-  return e.startsWith("gpt-4o-audio-preview");
+function vc(e) {
+  var t, n;
+  return Na(e) ? (n = (t = _c[e]) == null ? void 0 : t.systemMessageMode) != null ? n : "developer" : "system";
 }
-function vf(e) {
-  var t, r;
-  return Wn(e) ? (r = (t = _f[e]) == null ? void 0 : t.systemMessageMode) != null ? r : "developer" : "system";
-}
-var _f = {
+var _c = {
   "o1-mini": {
     systemMessageMode: "remove"
   },
@@ -14841,378 +7609,403 @@ var _f = {
     systemMessageMode: "developer"
   }
 };
-function bf({
+function bc({
   prompt: e,
-  inputFormat: t,
-  user: r = "user",
+  user: t = "user",
   assistant: n = "assistant"
 }) {
-  if (t === "prompt" && e.length === 1 && e[0].role === "user" && e[0].content.length === 1 && e[0].content[0].type === "text")
-    return { prompt: e[0].content[0].text };
-  let a = "";
-  e[0].role === "system" && (a += `${e[0].content}
+  let r = "";
+  e[0].role === "system" && (r += `${e[0].content}
 
 `, e = e.slice(1));
-  for (const { role: s, content: o } of e)
+  for (const { role: s, content: a } of e)
     switch (s) {
       case "system":
-        throw new ut({
+        throw new gt({
           message: "Unexpected system message in prompt: ${content}",
           prompt: e
         });
       case "user": {
-        const i = o.map((l) => {
-          switch (l.type) {
+        const o = a.map((i) => {
+          switch (i.type) {
             case "text":
-              return l.text;
-            case "image":
-              throw new se({
-                functionality: "images"
-              });
+              return i.text;
           }
-        }).join("");
-        a += `${r}:
-${i}
+        }).filter(Boolean).join("");
+        r += `${t}:
+${o}
 
 `;
         break;
       }
       case "assistant": {
-        const i = o.map((l) => {
-          switch (l.type) {
+        const o = a.map((i) => {
+          switch (i.type) {
             case "text":
-              return l.text;
+              return i.text;
             case "tool-call":
-              throw new se({
+              throw new he({
                 functionality: "tool-call messages"
               });
           }
         }).join("");
-        a += `${n}:
-${i}
+        r += `${n}:
+${o}
 
 `;
         break;
       }
       case "tool":
-        throw new se({
+        throw new he({
           functionality: "tool messages"
         });
       default: {
-        const i = s;
-        throw new Error(`Unsupported role: ${i}`);
+        const o = s;
+        throw new Error(`Unsupported role: ${o}`);
       }
     }
-  return a += `${n}:
+  return r += `${n}:
 `, {
-    prompt: a,
+    prompt: r,
     stopSequences: [`
-${r}:`]
+${t}:`]
   };
 }
-function ts(e) {
-  return e == null ? void 0 : e.tokens.map((t, r) => ({
-    token: t,
-    logprob: e.token_logprobs[r],
-    topLogprobs: e.top_logprobs ? Object.entries(e.top_logprobs[r]).map(
-      ([n, a]) => ({
-        token: n,
-        logprob: a
-      })
-    ) : []
-  }));
-}
-var wf = class {
-  constructor(e, t, r) {
-    this.specificationVersion = "v1", this.defaultObjectGenerationMode = void 0, this.modelId = e, this.settings = t, this.config = r;
+var hs = f({
+  /**
+  Echo back the prompt in addition to the completion.
+     */
+  echo: ue().optional(),
+  /**
+  Modify the likelihood of specified tokens appearing in the completion.
+  
+  Accepts a JSON object that maps tokens (specified by their token ID in
+  the GPT tokenizer) to an associated bias value from -100 to 100. You
+  can use this tokenizer tool to convert text to token IDs. Mathematically,
+  the bias is added to the logits generated by the model prior to sampling.
+  The exact effect will vary per model, but values between -1 and 1 should
+  decrease or increase likelihood of selection; values like -100 or 100
+  should result in a ban or exclusive selection of the relevant token.
+  
+  As an example, you can pass {"50256": -100} to prevent the <|endoftext|>
+  token from being generated.
+   */
+  logitBias: Ke(d(), T()).optional(),
+  /**
+  The suffix that comes after a completion of inserted text.
+   */
+  suffix: d().optional(),
+  /**
+  A unique identifier representing your end-user, which can help OpenAI to
+  monitor and detect abuse. Learn more.
+   */
+  user: d().optional(),
+  /**
+  Return the log probabilities of the tokens. Including logprobs will increase
+  the response size and can slow down response times. However, it can
+  be useful to better understand how the model is behaving.
+  Setting to true will return the log probabilities of the tokens that
+  were generated.
+  Setting to a number will return the log probabilities of the top n
+  tokens that were generated.
+     */
+  logprobs: se([ue(), T()]).optional()
+}), wc = class {
+  constructor(e, t) {
+    this.specificationVersion = "v2", this.supportedUrls = {
+      // No URLs are supported for completion models.
+    }, this.modelId = e, this.config = t;
+  }
+  get providerOptionsName() {
+    return this.config.provider.split(".")[0].trim();
   }
   get provider() {
     return this.config.provider;
   }
-  getArgs({
-    mode: e,
-    inputFormat: t,
-    prompt: r,
-    maxTokens: n,
-    temperature: a,
-    topP: s,
-    topK: o,
-    frequencyPenalty: i,
-    presencePenalty: l,
-    stopSequences: u,
-    responseFormat: c,
-    seed: d
+  async getArgs({
+    prompt: e,
+    maxOutputTokens: t,
+    temperature: n,
+    topP: r,
+    topK: s,
+    frequencyPenalty: a,
+    presencePenalty: o,
+    stopSequences: i,
+    responseFormat: l,
+    tools: u,
+    toolChoice: c,
+    seed: p,
+    providerOptions: h
   }) {
-    var m;
-    const _ = e.type, v = [];
-    o != null && v.push({
-      type: "unsupported-setting",
-      setting: "topK"
-    }), c != null && c.type !== "text" && v.push({
+    const g = [], v = {
+      ...await qe({
+        provider: "openai",
+        providerOptions: h,
+        schema: hs
+      }),
+      ...await qe({
+        provider: this.providerOptionsName,
+        providerOptions: h,
+        schema: hs
+      })
+    };
+    s != null && g.push({ type: "unsupported-setting", setting: "topK" }), u != null && u.length && g.push({ type: "unsupported-setting", setting: "tools" }), c != null && g.push({ type: "unsupported-setting", setting: "toolChoice" }), l != null && l.type !== "text" && g.push({
       type: "unsupported-setting",
       setting: "responseFormat",
       details: "JSON response format is not supported."
     });
-    const { prompt: g, stopSequences: p } = bf({ prompt: r, inputFormat: t }), f = [...p ?? [], ...u ?? []], w = {
-      // model id:
-      model: this.modelId,
-      // model specific settings:
-      echo: this.settings.echo,
-      logit_bias: this.settings.logitBias,
-      logprobs: typeof this.settings.logprobs == "number" ? this.settings.logprobs : typeof this.settings.logprobs == "boolean" && this.settings.logprobs ? 0 : void 0,
-      suffix: this.settings.suffix,
-      user: this.settings.user,
-      // standardized settings:
-      max_tokens: n,
-      temperature: a,
-      top_p: s,
-      frequency_penalty: i,
-      presence_penalty: l,
-      seed: d,
-      // prompt:
-      prompt: g,
-      // stop sequences:
-      stop: f.length > 0 ? f : void 0
+    const { prompt: y, stopSequences: m } = bc({ prompt: e }), b = [...m ?? [], ...i ?? []];
+    return {
+      args: {
+        // model id:
+        model: this.modelId,
+        // model specific settings:
+        echo: v.echo,
+        logit_bias: v.logitBias,
+        logprobs: (v == null ? void 0 : v.logprobs) === !0 ? 0 : (v == null ? void 0 : v.logprobs) === !1 || v == null ? void 0 : v.logprobs,
+        suffix: v.suffix,
+        user: v.user,
+        // standardized settings:
+        max_tokens: t,
+        temperature: n,
+        top_p: r,
+        frequency_penalty: a,
+        presence_penalty: o,
+        seed: p,
+        // prompt:
+        prompt: y,
+        // stop sequences:
+        stop: b.length > 0 ? b : void 0
+      },
+      warnings: g
     };
-    switch (_) {
-      case "regular": {
-        if ((m = e.tools) != null && m.length)
-          throw new se({
-            functionality: "tools"
-          });
-        if (e.toolChoice)
-          throw new se({
-            functionality: "toolChoice"
-          });
-        return { args: w, warnings: v };
-      }
-      case "object-json":
-        throw new se({
-          functionality: "object-json mode"
-        });
-      case "object-tool":
-        throw new se({
-          functionality: "object-tool mode"
-        });
-      default: {
-        const k = _;
-        throw new Error(`Unsupported type: ${k}`);
-      }
-    }
   }
   async doGenerate(e) {
-    const { args: t, warnings: r } = this.getArgs(e), {
-      responseHeaders: n,
-      value: a,
-      rawValue: s
-    } = await Fe({
+    var t, n, r;
+    const { args: s, warnings: a } = await this.getArgs(e), {
+      responseHeaders: o,
+      value: i,
+      rawValue: l
+    } = await Ie({
       url: this.config.url({
         path: "/completions",
         modelId: this.modelId
       }),
-      headers: Le(this.config.headers(), e.headers),
-      body: t,
-      failedResponseHandler: at,
-      successfulResponseHandler: vt(
-        xf
+      headers: Se(this.config.headers(), e.headers),
+      body: s,
+      failedResponseHandler: Qe,
+      successfulResponseHandler: Fe(
+        xc
       ),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
-    }), { prompt: o, ...i } = t, l = a.choices[0];
-    return {
-      text: l.text,
+    }), u = i.choices[0], c = { openai: {} };
+    return u.logprobs != null && (c.openai.logprobs = u.logprobs), {
+      content: [{ type: "text", text: u.text }],
       usage: {
-        promptTokens: a.usage.prompt_tokens,
-        completionTokens: a.usage.completion_tokens
+        inputTokens: (t = i.usage) == null ? void 0 : t.prompt_tokens,
+        outputTokens: (n = i.usage) == null ? void 0 : n.completion_tokens,
+        totalTokens: (r = i.usage) == null ? void 0 : r.total_tokens
       },
-      finishReason: on(l.finish_reason),
-      logprobs: ts(l.logprobs),
-      rawCall: { rawPrompt: o, rawSettings: i },
-      rawResponse: { headers: n, body: s },
-      response: ln(a),
-      warnings: r,
-      request: { body: JSON.stringify(t) }
+      finishReason: An(u.finish_reason),
+      request: { body: s },
+      response: {
+        ...En(i),
+        headers: o,
+        body: l
+      },
+      providerMetadata: c,
+      warnings: a
     };
   }
   async doStream(e) {
-    const { args: t, warnings: r } = this.getArgs(e), n = {
+    const { args: t, warnings: n } = await this.getArgs(e), r = {
       ...t,
       stream: !0,
-      // only include stream_options when in strict compatibility mode:
-      stream_options: this.config.compatibility === "strict" ? { include_usage: !0 } : void 0
-    }, { responseHeaders: a, value: s } = await Fe({
+      stream_options: {
+        include_usage: !0
+      }
+    }, { responseHeaders: s, value: a } = await Ie({
       url: this.config.url({
         path: "/completions",
         modelId: this.modelId
       }),
-      headers: Le(this.config.headers(), e.headers),
-      body: n,
-      failedResponseHandler: at,
-      successfulResponseHandler: Ar(
-        kf
+      headers: Se(this.config.headers(), e.headers),
+      body: r,
+      failedResponseHandler: Qe,
+      successfulResponseHandler: Ut(
+        Tc
       ),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
-    }), { prompt: o, ...i } = t;
-    let l = "unknown", u = {
-      promptTokens: Number.NaN,
-      completionTokens: Number.NaN
-    }, c, d = !0;
+    });
+    let o = "unknown";
+    const i = { openai: {} }, l = {
+      inputTokens: void 0,
+      outputTokens: void 0,
+      totalTokens: void 0
+    };
+    let u = !0;
     return {
-      stream: s.pipeThrough(
+      stream: a.pipeThrough(
         new TransformStream({
-          transform(m, _) {
-            if (!m.success) {
-              l = "error", _.enqueue({ type: "error", error: m.error });
-              return;
-            }
-            const v = m.value;
-            if ("error" in v) {
-              l = "error", _.enqueue({ type: "error", error: v.error });
-              return;
-            }
-            d && (d = !1, _.enqueue({
-              type: "response-metadata",
-              ...ln(v)
-            })), v.usage != null && (u = {
-              promptTokens: v.usage.prompt_tokens,
-              completionTokens: v.usage.completion_tokens
-            });
-            const g = v.choices[0];
-            (g == null ? void 0 : g.finish_reason) != null && (l = on(g.finish_reason)), (g == null ? void 0 : g.text) != null && _.enqueue({
-              type: "text-delta",
-              textDelta: g.text
-            });
-            const p = ts(
-              g == null ? void 0 : g.logprobs
-            );
-            p != null && p.length && (c === void 0 && (c = []), c.push(...p));
+          start(c) {
+            c.enqueue({ type: "stream-start", warnings: n });
           },
-          flush(m) {
-            m.enqueue({
+          transform(c, p) {
+            if (!c.success) {
+              o = "error", p.enqueue({ type: "error", error: c.error });
+              return;
+            }
+            const h = c.value;
+            if ("error" in h) {
+              o = "error", p.enqueue({ type: "error", error: h.error });
+              return;
+            }
+            u && (u = !1, p.enqueue({
+              type: "response-metadata",
+              ...En(h)
+            })), h.usage != null && (l.inputTokens = h.usage.prompt_tokens, l.outputTokens = h.usage.completion_tokens, l.totalTokens = h.usage.total_tokens);
+            const g = h.choices[0];
+            (g == null ? void 0 : g.finish_reason) != null && (o = An(g.finish_reason)), (g == null ? void 0 : g.logprobs) != null && (i.openai.logprobs = g.logprobs), (g == null ? void 0 : g.text) != null && p.enqueue({
+              type: "text",
+              text: g.text
+            });
+          },
+          flush(c) {
+            c.enqueue({
               type: "finish",
-              finishReason: l,
-              logprobs: c,
-              usage: u
+              finishReason: o,
+              providerMetadata: i,
+              usage: l
             });
           }
         })
       ),
-      rawCall: { rawPrompt: o, rawSettings: i },
-      rawResponse: { headers: a },
-      warnings: r,
-      request: { body: JSON.stringify(n) }
+      request: { body: r },
+      response: { headers: s }
     };
   }
-}, xf = y({
-  id: h().nullish(),
-  created: R().nullish(),
-  model: h().nullish(),
-  choices: F(
-    y({
-      text: h(),
-      finish_reason: h(),
-      logprobs: y({
-        tokens: F(h()),
-        token_logprobs: F(R()),
-        top_logprobs: F(yr(h(), R())).nullable()
+}, Pa = f({
+  prompt_tokens: T(),
+  completion_tokens: T(),
+  total_tokens: T()
+}), xc = f({
+  id: d().nullish(),
+  created: T().nullish(),
+  model: d().nullish(),
+  choices: M(
+    f({
+      text: d(),
+      finish_reason: d(),
+      logprobs: f({
+        tokens: M(d()),
+        token_logprobs: M(T()),
+        top_logprobs: M(Ke(d(), T())).nullish()
       }).nullish()
     })
   ),
-  usage: y({
-    prompt_tokens: R(),
-    completion_tokens: R()
-  })
-}), kf = ge([
-  y({
-    id: h().nullish(),
-    created: R().nullish(),
-    model: h().nullish(),
-    choices: F(
-      y({
-        text: h(),
-        finish_reason: h().nullish(),
-        index: R(),
-        logprobs: y({
-          tokens: F(h()),
-          token_logprobs: F(R()),
-          top_logprobs: F(yr(h(), R())).nullable()
+  usage: Pa.nullish()
+}), Tc = se([
+  f({
+    id: d().nullish(),
+    created: T().nullish(),
+    model: d().nullish(),
+    choices: M(
+      f({
+        text: d(),
+        finish_reason: d().nullish(),
+        index: T(),
+        logprobs: f({
+          tokens: M(d()),
+          token_logprobs: M(T()),
+          top_logprobs: M(Ke(d(), T())).nullish()
         }).nullish()
       })
     ),
-    usage: y({
-      prompt_tokens: R(),
-      completion_tokens: R()
-    }).nullish()
+    usage: Pa.nullish()
   }),
-  ha
-]), Tf = class {
-  constructor(e, t, r) {
-    this.specificationVersion = "v1", this.modelId = e, this.settings = t, this.config = r;
+  Cr
+]), kc = f({
+  /**
+  The number of dimensions the resulting output embeddings should have.
+  Only supported in text-embedding-3 and later models.
+     */
+  dimensions: T().optional(),
+  /**
+  A unique identifier representing your end-user, which can help OpenAI to
+  monitor and detect abuse. Learn more.
+  */
+  user: d().optional()
+}), Sc = class {
+  constructor(e, t) {
+    this.specificationVersion = "v2", this.maxEmbeddingsPerCall = 2048, this.supportsParallelCalls = !0, this.modelId = e, this.config = t;
   }
   get provider() {
     return this.config.provider;
   }
-  get maxEmbeddingsPerCall() {
-    var e;
-    return (e = this.settings.maxEmbeddingsPerCall) != null ? e : 2048;
-  }
-  get supportsParallelCalls() {
-    var e;
-    return (e = this.settings.supportsParallelCalls) != null ? e : !0;
-  }
   async doEmbed({
     values: e,
     headers: t,
-    abortSignal: r
+    abortSignal: n,
+    providerOptions: r
   }) {
+    var s;
     if (e.length > this.maxEmbeddingsPerCall)
-      throw new Ds({
+      throw new br({
         provider: this.provider,
         modelId: this.modelId,
         maxEmbeddingsPerCall: this.maxEmbeddingsPerCall,
         values: e
       });
-    const { responseHeaders: n, value: a } = await Fe({
+    const a = (s = await qe({
+      provider: "openai",
+      providerOptions: r,
+      schema: kc
+    })) != null ? s : {}, {
+      responseHeaders: o,
+      value: i,
+      rawValue: l
+    } = await Ie({
       url: this.config.url({
         path: "/embeddings",
         modelId: this.modelId
       }),
-      headers: Le(this.config.headers(), t),
+      headers: Se(this.config.headers(), t),
       body: {
         model: this.modelId,
         input: e,
         encoding_format: "float",
-        dimensions: this.settings.dimensions,
-        user: this.settings.user
+        dimensions: a.dimensions,
+        user: a.user
       },
-      failedResponseHandler: at,
-      successfulResponseHandler: vt(
-        Sf
+      failedResponseHandler: Qe,
+      successfulResponseHandler: Fe(
+        Ic
       ),
-      abortSignal: r,
+      abortSignal: n,
       fetch: this.config.fetch
     });
     return {
-      embeddings: a.data.map((s) => s.embedding),
-      usage: a.usage ? { tokens: a.usage.prompt_tokens } : void 0,
-      rawResponse: { headers: n }
+      embeddings: i.data.map((u) => u.embedding),
+      usage: i.usage ? { tokens: i.usage.prompt_tokens } : void 0,
+      response: { headers: o, body: l }
     };
   }
-}, Sf = y({
-  data: F(y({ embedding: F(R()) })),
-  usage: y({ prompt_tokens: R() }).nullish()
-}), If = {
+}, Ic = f({
+  data: M(f({ embedding: M(T()) })),
+  usage: f({ prompt_tokens: T() }).nullish()
+}), Cc = {
   "dall-e-3": 1,
   "dall-e-2": 10,
   "gpt-image-1": 10
-}, Cf = /* @__PURE__ */ new Set(["gpt-image-1"]), Rf = class {
-  constructor(e, t, r) {
-    this.modelId = e, this.settings = t, this.config = r, this.specificationVersion = "v1";
+}, Rc = /* @__PURE__ */ new Set(["gpt-image-1"]), Ec = class {
+  constructor(e, t) {
+    this.modelId = e, this.config = t, this.specificationVersion = "v2";
   }
   get maxImagesPerCall() {
-    var e, t;
-    return (t = (e = this.settings.maxImagesPerCall) != null ? e : If[this.modelId]) != null ? t : 1;
+    var e;
+    return (e = Cc[this.modelId]) != null ? e : 1;
   }
   get provider() {
     return this.config.provider;
@@ -15220,60 +8013,105 @@ var wf = class {
   async doGenerate({
     prompt: e,
     n: t,
-    size: r,
-    aspectRatio: n,
-    seed: a,
-    providerOptions: s,
+    size: n,
+    aspectRatio: r,
+    seed: s,
+    providerOptions: a,
     headers: o,
     abortSignal: i
   }) {
-    var l, u, c, d;
-    const m = [];
-    n != null && m.push({
+    var l, u, c, p;
+    const h = [];
+    r != null && h.push({
       type: "unsupported-setting",
       setting: "aspectRatio",
       details: "This model does not support aspect ratio. Use `size` instead."
-    }), a != null && m.push({ type: "unsupported-setting", setting: "seed" });
-    const _ = (c = (u = (l = this.config._internal) == null ? void 0 : l.currentDate) == null ? void 0 : u.call(l)) != null ? c : /* @__PURE__ */ new Date(), { value: v, responseHeaders: g } = await Fe({
+    }), s != null && h.push({ type: "unsupported-setting", setting: "seed" });
+    const g = (c = (u = (l = this.config._internal) == null ? void 0 : l.currentDate) == null ? void 0 : u.call(l)) != null ? c : /* @__PURE__ */ new Date(), { value: v, responseHeaders: y } = await Ie({
       url: this.config.url({
         path: "/images/generations",
         modelId: this.modelId
       }),
-      headers: Le(this.config.headers(), o),
+      headers: Se(this.config.headers(), o),
       body: {
         model: this.modelId,
         prompt: e,
         n: t,
-        size: r,
-        ...(d = s.openai) != null ? d : {},
-        ...Cf.has(this.modelId) ? {} : { response_format: "b64_json" }
+        size: n,
+        ...(p = a.openai) != null ? p : {},
+        ...Rc.has(this.modelId) ? {} : { response_format: "b64_json" }
       },
-      failedResponseHandler: at,
-      successfulResponseHandler: vt(
-        Ef
+      failedResponseHandler: Qe,
+      successfulResponseHandler: Fe(
+        Ac
       ),
       abortSignal: i,
       fetch: this.config.fetch
     });
     return {
-      images: v.data.map((p) => p.b64_json),
-      warnings: m,
+      images: v.data.map((m) => m.b64_json),
+      warnings: h,
       response: {
-        timestamp: _,
+        timestamp: g,
         modelId: this.modelId,
-        headers: g
+        headers: y
+      },
+      providerMetadata: {
+        openai: {
+          images: v.data.map(
+            (m) => m.revised_prompt ? {
+              revisedPrompt: m.revised_prompt
+            } : null
+          )
+        }
       }
     };
   }
-}, Ef = y({
-  data: F(y({ b64_json: h() }))
-}), Af = y({
-  include: F(h()).nullish(),
-  language: h().nullish(),
-  prompt: h().nullish(),
-  temperature: R().min(0).max(1).nullish().default(0),
-  timestampGranularities: F(yt(["word", "segment"])).nullish().default(["segment"])
-}), rs = {
+}, Ac = f({
+  data: M(
+    f({ b64_json: d(), revised_prompt: d().optional() })
+  )
+}), Oc = f({});
+function Mc({
+  searchContextSize: e,
+  userLocation: t
+} = {}) {
+  return {
+    type: "provider-defined",
+    id: "openai.web_search_preview",
+    args: {
+      searchContextSize: e,
+      userLocation: t
+    },
+    parameters: Oc
+  };
+}
+var Nc = {
+  webSearchPreview: Mc
+}, Pc = f({
+  /**
+   * Additional information to include in the transcription response.
+   */
+  include: M(d()).optional(),
+  /**
+   * The language of the input audio in ISO-639-1 format.
+   */
+  language: d().optional(),
+  /**
+   * An optional text to guide the model's style or continue a previous audio segment.
+   */
+  prompt: d().optional(),
+  /**
+   * The sampling temperature, between 0 and 1.
+   * @default 0
+   */
+  temperature: T().min(0).max(1).default(0).optional(),
+  /**
+   * The timestamp granularities to populate for this transcription.
+   * @default ['segment']
+   */
+  timestampGranularities: M(Ce(["word", "segment"])).default(["segment"]).optional()
+}), fs = {
   afrikaans: "af",
   arabic: "ar",
   armenian: "hy",
@@ -15331,111 +8169,108 @@ var wf = class {
   urdu: "ur",
   vietnamese: "vi",
   welsh: "cy"
-}, Nf = class {
+}, $c = class {
   constructor(e, t) {
     this.modelId = e, this.config = t, this.specificationVersion = "v1";
   }
   get provider() {
     return this.config.provider;
   }
-  getArgs({
+  async getArgs({
     audio: e,
     mediaType: t,
-    providerOptions: r
+    providerOptions: n
   }) {
-    var n, a, s, o, i;
-    const l = [], u = un({
+    const r = [], s = await qe({
       provider: "openai",
-      providerOptions: r,
-      schema: Af
-    }), c = new FormData(), d = e instanceof Uint8Array ? new Blob([e]) : new Blob([cn(e)]);
-    if (c.append("model", this.modelId), c.append("file", new File([d], "audio", { type: t })), u) {
-      const m = {
-        include: (n = u.include) != null ? n : void 0,
-        language: (a = u.language) != null ? a : void 0,
-        prompt: (s = u.prompt) != null ? s : void 0,
-        temperature: (o = u.temperature) != null ? o : void 0,
-        timestamp_granularities: (i = u.timestampGranularities) != null ? i : void 0
+      providerOptions: n,
+      schema: Pc
+    }), a = new FormData(), o = e instanceof Uint8Array ? new Blob([e]) : new Blob([Dn(e)]);
+    if (a.append("model", this.modelId), a.append("file", new File([o], "audio", { type: t })), s) {
+      const i = {
+        include: s.include,
+        language: s.language,
+        prompt: s.prompt,
+        temperature: s.temperature,
+        timestamp_granularities: s.timestampGranularities
       };
-      for (const _ in m) {
-        const v = m[_];
-        v !== void 0 && c.append(_, String(v));
-      }
+      for (const [l, u] of Object.entries(i))
+        u != null && a.append(l, String(u));
     }
     return {
-      formData: c,
-      warnings: l
+      formData: a,
+      warnings: r
     };
   }
   async doGenerate(e) {
-    var t, r, n, a, s, o;
-    const i = (n = (r = (t = this.config._internal) == null ? void 0 : t.currentDate) == null ? void 0 : r.call(t)) != null ? n : /* @__PURE__ */ new Date(), { formData: l, warnings: u } = this.getArgs(e), {
+    var t, n, r, s, a, o;
+    const i = (r = (n = (t = this.config._internal) == null ? void 0 : t.currentDate) == null ? void 0 : n.call(t)) != null ? r : /* @__PURE__ */ new Date(), { formData: l, warnings: u } = await this.getArgs(e), {
       value: c,
-      responseHeaders: d,
-      rawValue: m
-    } = await fl({
+      responseHeaders: p,
+      rawValue: h
+    } = await cu({
       url: this.config.url({
         path: "/audio/transcriptions",
         modelId: this.modelId
       }),
-      headers: Le(this.config.headers(), e.headers),
+      headers: Se(this.config.headers(), e.headers),
       formData: l,
-      failedResponseHandler: at,
-      successfulResponseHandler: vt(
-        Pf
+      failedResponseHandler: Qe,
+      successfulResponseHandler: Fe(
+        jc
       ),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
-    }), _ = c.language != null && c.language in rs ? rs[c.language] : void 0;
+    }), g = c.language != null && c.language in fs ? fs[c.language] : void 0;
     return {
       text: c.text,
-      segments: (s = (a = c.words) == null ? void 0 : a.map((v) => ({
+      segments: (a = (s = c.words) == null ? void 0 : s.map((v) => ({
         text: v.word,
         startSecond: v.start,
         endSecond: v.end
-      }))) != null ? s : [],
-      language: _,
+      }))) != null ? a : [],
+      language: g,
       durationInSeconds: (o = c.duration) != null ? o : void 0,
       warnings: u,
       response: {
         timestamp: i,
         modelId: this.modelId,
-        headers: d,
-        body: m
+        headers: p,
+        body: h
       }
     };
   }
-}, Pf = y({
-  text: h(),
-  language: h().nullish(),
-  duration: R().nullish(),
-  words: F(
-    y({
-      word: h(),
-      start: R(),
-      end: R()
+}, jc = f({
+  text: d(),
+  language: d().nullish(),
+  duration: T().nullish(),
+  words: M(
+    f({
+      word: d(),
+      start: T(),
+      end: T()
     })
   ).nullish()
 });
-function Of({
+function Dc({
   prompt: e,
   systemMessageMode: t
 }) {
-  const r = [], n = [];
-  for (const { role: a, content: s } of e)
-    switch (a) {
+  const n = [], r = [];
+  for (const { role: s, content: a } of e)
+    switch (s) {
       case "system": {
         switch (t) {
           case "system": {
-            r.push({ role: "system", content: s });
+            n.push({ role: "system", content: a });
             break;
           }
           case "developer": {
-            r.push({ role: "developer", content: s });
+            n.push({ role: "developer", content: a });
             break;
           }
           case "remove": {
-            n.push({
+            r.push({
               type: "other",
               message: "system messages are removed for this model"
             });
@@ -15451,55 +8286,53 @@ function Of({
         break;
       }
       case "user": {
-        r.push({
+        n.push({
           role: "user",
-          content: s.map((o, i) => {
-            var l, u, c, d;
+          content: a.map((o, i) => {
+            var l, u, c;
             switch (o.type) {
               case "text":
                 return { type: "input_text", text: o.text };
-              case "image":
-                return {
-                  type: "input_image",
-                  image_url: o.image instanceof URL ? o.image.toString() : `data:${(l = o.mimeType) != null ? l : "image/jpeg"};base64,${Mt(o.image)}`,
-                  // OpenAI specific extension: image detail
-                  detail: (c = (u = o.providerMetadata) == null ? void 0 : u.openai) == null ? void 0 : c.imageDetail
-                };
-              case "file": {
-                if (o.data instanceof URL)
-                  throw new se({
-                    functionality: "File URLs in user messages"
-                  });
-                switch (o.mimeType) {
-                  case "application/pdf":
-                    return {
-                      type: "input_file",
-                      filename: (d = o.filename) != null ? d : `part-${i}.pdf`,
-                      file_data: `data:application/pdf;base64,${o.data}`
-                    };
-                  default:
-                    throw new se({
-                      functionality: "Only PDF files are supported in user messages"
+              case "file":
+                if (o.mediaType.startsWith("image/")) {
+                  const p = o.mediaType === "image/*" ? "image/jpeg" : o.mediaType;
+                  return {
+                    type: "input_image",
+                    image_url: o.data instanceof URL ? o.data.toString() : `data:${p};base64,${o.data}`,
+                    // OpenAI specific extension: image detail
+                    detail: (u = (l = o.providerOptions) == null ? void 0 : l.openai) == null ? void 0 : u.imageDetail
+                  };
+                } else if (o.mediaType === "application/pdf") {
+                  if (o.data instanceof URL)
+                    throw new he({
+                      functionality: "PDF file parts with URLs"
                     });
-                }
-              }
+                  return {
+                    type: "input_file",
+                    filename: (c = o.filename) != null ? c : `part-${i}.pdf`,
+                    file_data: `data:application/pdf;base64,${o.data}`
+                  };
+                } else
+                  throw new he({
+                    functionality: `file part media type ${o.mediaType}`
+                  });
             }
           })
         });
         break;
       }
       case "assistant": {
-        for (const o of s)
+        for (const o of a)
           switch (o.type) {
             case "text": {
-              r.push({
+              n.push({
                 role: "assistant",
                 content: [{ type: "output_text", text: o.text }]
               });
               break;
             }
             case "tool-call": {
-              r.push({
+              n.push({
                 type: "function_call",
                 call_id: o.toolCallId,
                 name: o.toolName,
@@ -15511,8 +8344,8 @@ function Of({
         break;
       }
       case "tool": {
-        for (const o of s)
-          r.push({
+        for (const o of a)
+          n.push({
             type: "function_call_output",
             call_id: o.toolCallId,
             output: JSON.stringify(o.result)
@@ -15520,13 +8353,13 @@ function Of({
         break;
       }
       default: {
-        const o = a;
+        const o = s;
         throw new Error(`Unsupported role: ${o}`);
       }
     }
-  return { messages: r, warnings: n };
+  return { messages: n, warnings: r };
 }
-function ns({
+function ms({
   finishReason: e,
   hasToolCalls: t
 }) {
@@ -15542,568 +8375,524 @@ function ns({
       return t ? "tool-calls" : "unknown";
   }
 }
-function Mf({
-  mode: e,
-  strict: t
+function qc({
+  tools: e,
+  toolChoice: t,
+  strict: n
 }) {
-  var r;
-  const n = (r = e.tools) != null && r.length ? e.tools : void 0, a = [];
-  if (n == null)
-    return { tools: void 0, tool_choice: void 0, toolWarnings: a };
-  const s = e.toolChoice, o = [];
-  for (const l of n)
-    switch (l.type) {
+  e = e != null && e.length ? e : void 0;
+  const r = [];
+  if (e == null)
+    return { tools: void 0, toolChoice: void 0, toolWarnings: r };
+  const s = [];
+  for (const o of e)
+    switch (o.type) {
       case "function":
-        o.push({
+        s.push({
           type: "function",
-          name: l.name,
-          description: l.description,
-          parameters: l.parameters,
-          strict: t ? !0 : void 0
+          name: o.name,
+          description: o.description,
+          parameters: o.parameters,
+          strict: n ? !0 : void 0
         });
         break;
       case "provider-defined":
-        switch (l.id) {
+        switch (o.id) {
           case "openai.web_search_preview":
-            o.push({
+            s.push({
               type: "web_search_preview",
-              search_context_size: l.args.searchContextSize,
-              user_location: l.args.userLocation
+              search_context_size: o.args.searchContextSize,
+              user_location: o.args.userLocation
             });
             break;
           default:
-            a.push({ type: "unsupported-tool", tool: l });
+            r.push({ type: "unsupported-tool", tool: o });
             break;
         }
         break;
       default:
-        a.push({ type: "unsupported-tool", tool: l });
+        r.push({ type: "unsupported-tool", tool: o });
         break;
     }
-  if (s == null)
-    return { tools: o, tool_choice: void 0, toolWarnings: a };
-  const i = s.type;
-  switch (i) {
+  if (t == null)
+    return { tools: s, toolChoice: void 0, toolWarnings: r };
+  const a = t.type;
+  switch (a) {
     case "auto":
     case "none":
     case "required":
-      return { tools: o, tool_choice: i, toolWarnings: a };
+      return { tools: s, toolChoice: a, toolWarnings: r };
     case "tool":
-      return s.toolName === "web_search_preview" ? {
-        tools: o,
-        tool_choice: {
-          type: "web_search_preview"
-        },
-        toolWarnings: a
-      } : {
-        tools: o,
-        tool_choice: {
-          type: "function",
-          name: s.toolName
-        },
-        toolWarnings: a
+      return {
+        tools: s,
+        toolChoice: t.toolName === "web_search_preview" ? { type: "web_search_preview" } : { type: "function", name: t.toolName },
+        toolWarnings: r
       };
     default: {
-      const l = i;
-      throw new se({
-        functionality: `Unsupported tool choice type: ${l}`
+      const o = a;
+      throw new he({
+        functionality: `tool choice type: ${o}`
       });
     }
   }
 }
-var jf = class {
+var Uc = class {
   constructor(e, t) {
-    this.specificationVersion = "v1", this.defaultObjectGenerationMode = "json", this.supportsStructuredOutputs = !0, this.modelId = e, this.config = t;
+    this.specificationVersion = "v2", this.supportedUrls = {
+      "image/*": [/^https?:\/\/.*$/]
+    }, this.modelId = e, this.config = t;
   }
   get provider() {
     return this.config.provider;
   }
-  getArgs({
-    mode: e,
-    maxTokens: t,
-    temperature: r,
+  async getArgs({
+    maxOutputTokens: e,
+    temperature: t,
     stopSequences: n,
-    topP: a,
+    topP: r,
     topK: s,
-    presencePenalty: o,
-    frequencyPenalty: i,
-    seed: l,
-    prompt: u,
-    providerMetadata: c,
-    responseFormat: d
+    presencePenalty: a,
+    frequencyPenalty: o,
+    seed: i,
+    prompt: l,
+    providerOptions: u,
+    tools: c,
+    toolChoice: p,
+    responseFormat: h
   }) {
-    var m, _, v;
-    const g = [], p = Qf(this.modelId), f = e.type;
-    s != null && g.push({
-      type: "unsupported-setting",
-      setting: "topK"
-    }), l != null && g.push({
-      type: "unsupported-setting",
-      setting: "seed"
-    }), o != null && g.push({
+    var g, v;
+    const y = [], m = rd(this.modelId);
+    s != null && y.push({ type: "unsupported-setting", setting: "topK" }), i != null && y.push({ type: "unsupported-setting", setting: "seed" }), a != null && y.push({
       type: "unsupported-setting",
       setting: "presencePenalty"
-    }), i != null && g.push({
+    }), o != null && y.push({
       type: "unsupported-setting",
       setting: "frequencyPenalty"
-    }), n != null && g.push({
-      type: "unsupported-setting",
-      setting: "stopSequences"
+    }), n != null && y.push({ type: "unsupported-setting", setting: "stopSequences" });
+    const { messages: b, warnings: S } = Dc({
+      prompt: l,
+      systemMessageMode: m.systemMessageMode
     });
-    const { messages: w, warnings: k } = Of({
-      prompt: u,
-      systemMessageMode: p.systemMessageMode
-    });
-    g.push(...k);
-    const b = un({
+    y.push(...S);
+    const w = await qe({
       provider: "openai",
-      providerOptions: c,
-      schema: eh
-    }), x = (m = b == null ? void 0 : b.strictSchemas) != null ? m : !0, S = {
+      providerOptions: u,
+      schema: sd
+    }), x = (g = w == null ? void 0 : w.strictSchemas) != null ? g : !0, _ = {
       model: this.modelId,
-      input: w,
-      temperature: r,
-      top_p: a,
-      max_output_tokens: t,
-      ...(d == null ? void 0 : d.type) === "json" && {
+      input: b,
+      temperature: t,
+      top_p: r,
+      max_output_tokens: e,
+      ...(h == null ? void 0 : h.type) === "json" && {
         text: {
-          format: d.schema != null ? {
+          format: h.schema != null ? {
             type: "json_schema",
             strict: x,
-            name: (_ = d.name) != null ? _ : "response",
-            description: d.description,
-            schema: d.schema
+            name: (v = h.name) != null ? v : "response",
+            description: h.description,
+            schema: h.schema
           } : { type: "json_object" }
         }
       },
       // provider options:
-      metadata: b == null ? void 0 : b.metadata,
-      parallel_tool_calls: b == null ? void 0 : b.parallelToolCalls,
-      previous_response_id: b == null ? void 0 : b.previousResponseId,
-      store: b == null ? void 0 : b.store,
-      user: b == null ? void 0 : b.user,
-      instructions: b == null ? void 0 : b.instructions,
+      metadata: w == null ? void 0 : w.metadata,
+      parallel_tool_calls: w == null ? void 0 : w.parallelToolCalls,
+      previous_response_id: w == null ? void 0 : w.previousResponseId,
+      store: w == null ? void 0 : w.store,
+      user: w == null ? void 0 : w.user,
+      instructions: w == null ? void 0 : w.instructions,
       // model-specific settings:
-      ...p.isReasoningModel && ((b == null ? void 0 : b.reasoningEffort) != null || (b == null ? void 0 : b.reasoningSummary) != null) && {
+      ...m.isReasoningModel && ((w == null ? void 0 : w.reasoningEffort) != null || (w == null ? void 0 : w.reasoningSummary) != null) && {
         reasoning: {
-          ...(b == null ? void 0 : b.reasoningEffort) != null && {
-            effort: b.reasoningEffort
+          ...(w == null ? void 0 : w.reasoningEffort) != null && {
+            effort: w.reasoningEffort
           },
-          ...(b == null ? void 0 : b.reasoningSummary) != null && {
-            summary: b.reasoningSummary
+          ...(w == null ? void 0 : w.reasoningSummary) != null && {
+            summary: w.reasoningSummary
           }
         }
       },
-      ...p.requiredAutoTruncation && {
+      ...m.requiredAutoTruncation && {
         truncation: "auto"
       }
     };
-    switch (p.isReasoningModel && (S.temperature != null && (S.temperature = void 0, g.push({
+    m.isReasoningModel && (_.temperature != null && (_.temperature = void 0, y.push({
       type: "unsupported-setting",
       setting: "temperature",
       details: "temperature is not supported for reasoning models"
-    })), S.top_p != null && (S.top_p = void 0, g.push({
+    })), _.top_p != null && (_.top_p = void 0, y.push({
       type: "unsupported-setting",
       setting: "topP",
       details: "topP is not supported for reasoning models"
-    }))), f) {
-      case "regular": {
-        const { tools: $, tool_choice: E, toolWarnings: P } = Mf({
-          mode: e,
-          strict: x
-          // TODO support provider options on tools
-        });
-        return {
-          args: {
-            ...S,
-            tools: $,
-            tool_choice: E
-          },
-          warnings: [...g, ...P]
-        };
-      }
-      case "object-json":
-        return {
-          args: {
-            ...S,
-            text: {
-              format: e.schema != null ? {
-                type: "json_schema",
-                strict: x,
-                name: (v = e.name) != null ? v : "response",
-                description: e.description,
-                schema: e.schema
-              } : { type: "json_object" }
-            }
-          },
-          warnings: g
-        };
-      case "object-tool":
-        return {
-          args: {
-            ...S,
-            tool_choice: { type: "function", name: e.tool.name },
-            tools: [
-              {
-                type: "function",
-                name: e.tool.name,
-                description: e.tool.description,
-                parameters: e.tool.parameters,
-                strict: x
-              }
-            ]
-          },
-          warnings: g
-        };
-      default: {
-        const $ = f;
-        throw new Error(`Unsupported type: ${$}`);
-      }
-    }
+    })));
+    const {
+      tools: k,
+      toolChoice: O,
+      toolWarnings: N
+    } = qc({
+      tools: c,
+      toolChoice: p,
+      strict: x
+    });
+    return {
+      args: {
+        ..._,
+        tools: k,
+        tool_choice: O
+      },
+      warnings: [...y, ...N]
+    };
   }
   async doGenerate(e) {
-    var t, r, n, a, s, o, i;
-    const { args: l, warnings: u } = this.getArgs(e), {
-      responseHeaders: c,
-      value: d,
-      rawValue: m
-    } = await Fe({
+    var t, n, r, s, a, o, i, l;
+    const { args: u, warnings: c } = await this.getArgs(e), {
+      responseHeaders: p,
+      value: h,
+      rawValue: g
+    } = await Ie({
       url: this.config.url({
         path: "/responses",
         modelId: this.modelId
       }),
-      headers: Le(this.config.headers(), e.headers),
-      body: l,
-      failedResponseHandler: at,
-      successfulResponseHandler: vt(
-        y({
-          id: h(),
-          created_at: R(),
-          model: h(),
-          output: F(
-            Tt("type", [
-              y({
-                type: A("message"),
-                role: A("assistant"),
-                content: F(
-                  y({
-                    type: A("output_text"),
-                    text: h(),
-                    annotations: F(
-                      y({
-                        type: A("url_citation"),
-                        start_index: R(),
-                        end_index: R(),
-                        url: h(),
-                        title: h()
+      headers: Se(this.config.headers(), e.headers),
+      body: u,
+      failedResponseHandler: Qe,
+      successfulResponseHandler: Fe(
+        f({
+          id: d(),
+          created_at: T(),
+          model: d(),
+          output: M(
+            pt("type", [
+              f({
+                type: C("message"),
+                role: C("assistant"),
+                content: M(
+                  f({
+                    type: C("output_text"),
+                    text: d(),
+                    annotations: M(
+                      f({
+                        type: C("url_citation"),
+                        start_index: T(),
+                        end_index: T(),
+                        url: d(),
+                        title: d()
                       })
                     )
                   })
                 )
               }),
-              y({
-                type: A("function_call"),
-                call_id: h(),
-                name: h(),
-                arguments: h()
+              f({
+                type: C("function_call"),
+                call_id: d(),
+                name: d(),
+                arguments: d()
               }),
-              y({
-                type: A("web_search_call")
+              f({
+                type: C("web_search_call")
               }),
-              y({
-                type: A("computer_call")
+              f({
+                type: C("computer_call")
               }),
-              y({
-                type: A("reasoning"),
-                summary: F(
-                  y({
-                    type: A("summary_text"),
-                    text: h()
+              f({
+                type: C("reasoning"),
+                summary: M(
+                  f({
+                    type: C("summary_text"),
+                    text: d()
                   })
                 )
               })
             ])
           ),
-          incomplete_details: y({ reason: h() }).nullable(),
-          usage: ji
+          incomplete_details: f({ reason: d() }).nullable(),
+          usage: $a
         })
       ),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
-    }), _ = d.output.filter((p) => p.type === "message").flatMap((p) => p.content).filter((p) => p.type === "output_text"), v = d.output.filter((p) => p.type === "function_call").map((p) => ({
-      toolCallType: "function",
-      toolCallId: p.call_id,
-      toolName: p.name,
-      args: p.arguments
-    })), g = (r = (t = d.output.find((p) => p.type === "reasoning")) == null ? void 0 : t.summary) != null ? r : null;
+    }), v = [];
+    for (const y of h.output)
+      switch (y.type) {
+        case "reasoning": {
+          v.push({
+            type: "reasoning",
+            text: y.summary.map((m) => m.text).join()
+          });
+          break;
+        }
+        case "message": {
+          for (const m of y.content) {
+            v.push({
+              type: "text",
+              text: m.text
+            });
+            for (const b of m.annotations)
+              v.push({
+                type: "source",
+                sourceType: "url",
+                id: (r = (n = (t = this.config).generateId) == null ? void 0 : n.call(t)) != null ? r : st(),
+                url: b.url,
+                title: b.title
+              });
+          }
+          break;
+        }
+        case "function_call": {
+          v.push({
+            type: "tool-call",
+            toolCallType: "function",
+            toolCallId: y.call_id,
+            toolName: y.name,
+            args: y.arguments
+          });
+          break;
+        }
+      }
     return {
-      text: _.map((p) => p.text).join(`
-`),
-      sources: _.flatMap(
-        (p) => p.annotations.map((f) => {
-          var w, k, b;
-          return {
-            sourceType: "url",
-            id: (b = (k = (w = this.config).generateId) == null ? void 0 : k.call(w)) != null ? b : kt(),
-            url: f.url,
-            title: f.title
-          };
-        })
-      ),
-      finishReason: ns({
-        finishReason: (n = d.incomplete_details) == null ? void 0 : n.reason,
-        hasToolCalls: v.length > 0
+      content: v,
+      finishReason: ms({
+        finishReason: (s = h.incomplete_details) == null ? void 0 : s.reason,
+        hasToolCalls: v.some((y) => y.type === "tool-call")
       }),
-      toolCalls: v.length > 0 ? v : void 0,
-      reasoning: g ? g.map((p) => ({
-        type: "text",
-        text: p.text
-      })) : void 0,
       usage: {
-        promptTokens: d.usage.input_tokens,
-        completionTokens: d.usage.output_tokens
+        inputTokens: h.usage.input_tokens,
+        outputTokens: h.usage.output_tokens,
+        totalTokens: h.usage.input_tokens + h.usage.output_tokens,
+        reasoningTokens: (o = (a = h.usage.output_tokens_details) == null ? void 0 : a.reasoning_tokens) != null ? o : void 0,
+        cachedInputTokens: (l = (i = h.usage.input_tokens_details) == null ? void 0 : i.cached_tokens) != null ? l : void 0
       },
-      rawCall: {
-        rawPrompt: void 0,
-        rawSettings: {}
-      },
-      rawResponse: {
-        headers: c,
-        body: m
-      },
-      request: {
-        body: JSON.stringify(l)
-      },
+      request: { body: u },
       response: {
-        id: d.id,
-        timestamp: new Date(d.created_at * 1e3),
-        modelId: d.model
+        id: h.id,
+        timestamp: new Date(h.created_at * 1e3),
+        modelId: h.model,
+        headers: p,
+        body: g
       },
       providerMetadata: {
         openai: {
-          responseId: d.id,
-          cachedPromptTokens: (s = (a = d.usage.input_tokens_details) == null ? void 0 : a.cached_tokens) != null ? s : null,
-          reasoningTokens: (i = (o = d.usage.output_tokens_details) == null ? void 0 : o.reasoning_tokens) != null ? i : null
+          responseId: h.id
         }
       },
-      warnings: u
+      warnings: c
     };
   }
   async doStream(e) {
-    const { args: t, warnings: r } = this.getArgs(e), { responseHeaders: n, value: a } = await Fe({
+    const { args: t, warnings: n } = await this.getArgs(e), { responseHeaders: r, value: s } = await Ie({
       url: this.config.url({
         path: "/responses",
         modelId: this.modelId
       }),
-      headers: Le(this.config.headers(), e.headers),
+      headers: Se(this.config.headers(), e.headers),
       body: {
         ...t,
         stream: !0
       },
-      failedResponseHandler: at,
-      successfulResponseHandler: Ar(
-        Bf
+      failedResponseHandler: Qe,
+      successfulResponseHandler: Ut(
+        zc
       ),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
-    }), s = this;
-    let o = "unknown", i = NaN, l = NaN, u = null, c = null, d = null;
-    const m = {};
-    let _ = !1;
+    }), a = this;
+    let o = "unknown";
+    const i = {
+      inputTokens: void 0,
+      outputTokens: void 0,
+      totalTokens: void 0
+    };
+    let l = null;
+    const u = {};
+    let c = !1;
     return {
-      stream: a.pipeThrough(
+      stream: s.pipeThrough(
         new TransformStream({
-          transform(v, g) {
-            var p, f, w, k, b, x, S, $;
-            if (!v.success) {
-              o = "error", g.enqueue({ type: "error", error: v.error });
+          start(p) {
+            p.enqueue({ type: "stream-start", warnings: n });
+          },
+          transform(p, h) {
+            var g, v, y, m, b, S, w, x;
+            if (!p.success) {
+              o = "error", h.enqueue({ type: "error", error: p.error });
               return;
             }
-            const E = v.value;
-            if (Kf(E))
-              E.item.type === "function_call" && (m[E.output_index] = {
-                toolName: E.item.name,
-                toolCallId: E.item.call_id
-              }, g.enqueue({
+            const _ = p.value;
+            if (ed(_))
+              _.item.type === "function_call" && (u[_.output_index] = {
+                toolName: _.item.name,
+                toolCallId: _.item.call_id
+              }, h.enqueue({
                 type: "tool-call-delta",
                 toolCallType: "function",
-                toolCallId: E.item.call_id,
-                toolName: E.item.name,
-                argsTextDelta: E.item.arguments
+                toolCallId: _.item.call_id,
+                toolName: _.item.name,
+                argsTextDelta: _.item.arguments
               }));
-            else if (Wf(E)) {
-              const P = m[E.output_index];
-              P != null && g.enqueue({
+            else if (Qc(_)) {
+              const k = u[_.output_index];
+              k != null && h.enqueue({
                 type: "tool-call-delta",
                 toolCallType: "function",
-                toolCallId: P.toolCallId,
-                toolName: P.toolName,
-                argsTextDelta: E.delta
+                toolCallId: k.toolCallId,
+                toolName: k.toolName,
+                argsTextDelta: _.delta
               });
-            } else Hf(E) ? (d = E.response.id, g.enqueue({
+            } else Xc(_) ? (l = _.response.id, h.enqueue({
               type: "response-metadata",
-              id: E.response.id,
-              timestamp: new Date(E.response.created_at * 1e3),
-              modelId: E.response.model
-            })) : Jf(E) ? g.enqueue({
-              type: "text-delta",
-              textDelta: E.delta
-            }) : Xf(E) ? g.enqueue({
+              id: _.response.id,
+              timestamp: new Date(_.response.created_at * 1e3),
+              modelId: _.response.model
+            })) : Wc(_) ? h.enqueue({
+              type: "text",
+              text: _.delta
+            }) : nd(_) ? h.enqueue({
               type: "reasoning",
-              textDelta: E.delta
-            }) : zf(E) && E.item.type === "function_call" ? (m[E.output_index] = void 0, _ = !0, g.enqueue({
+              text: _.delta
+            }) : Yc(_) && _.item.type === "function_call" ? (u[_.output_index] = void 0, c = !0, h.enqueue({
               type: "tool-call",
               toolCallType: "function",
-              toolCallId: E.item.call_id,
-              toolName: E.item.name,
-              args: E.item.arguments
-            })) : Gf(E) ? (o = ns({
-              finishReason: (p = E.response.incomplete_details) == null ? void 0 : p.reason,
-              hasToolCalls: _
-            }), i = E.response.usage.input_tokens, l = E.response.usage.output_tokens, u = (w = (f = E.response.usage.input_tokens_details) == null ? void 0 : f.cached_tokens) != null ? w : u, c = (b = (k = E.response.usage.output_tokens_details) == null ? void 0 : k.reasoning_tokens) != null ? b : c) : Yf(E) && g.enqueue({
+              toolCallId: _.item.call_id,
+              toolName: _.item.name,
+              args: _.item.arguments
+            })) : Kc(_) ? (o = ms({
+              finishReason: (g = _.response.incomplete_details) == null ? void 0 : g.reason,
+              hasToolCalls: c
+            }), i.inputTokens = _.response.usage.input_tokens, i.outputTokens = _.response.usage.output_tokens, i.totalTokens = _.response.usage.input_tokens + _.response.usage.output_tokens, i.reasoningTokens = (y = (v = _.response.usage.output_tokens_details) == null ? void 0 : v.reasoning_tokens) != null ? y : void 0, i.cachedInputTokens = (b = (m = _.response.usage.input_tokens_details) == null ? void 0 : m.cached_tokens) != null ? b : void 0) : td(_) && h.enqueue({
               type: "source",
-              source: {
-                sourceType: "url",
-                id: ($ = (S = (x = s.config).generateId) == null ? void 0 : S.call(x)) != null ? $ : kt(),
-                url: E.annotation.url,
-                title: E.annotation.title
-              }
+              sourceType: "url",
+              id: (x = (w = (S = a.config).generateId) == null ? void 0 : w.call(S)) != null ? x : st(),
+              url: _.annotation.url,
+              title: _.annotation.title
             });
           },
-          flush(v) {
-            v.enqueue({
+          flush(p) {
+            p.enqueue({
               type: "finish",
               finishReason: o,
-              usage: { promptTokens: i, completionTokens: l },
-              ...(u != null || c != null) && {
-                providerMetadata: {
-                  openai: {
-                    responseId: d,
-                    cachedPromptTokens: u,
-                    reasoningTokens: c
-                  }
+              usage: i,
+              providerMetadata: {
+                openai: {
+                  responseId: l
                 }
               }
             });
           }
         })
       ),
-      rawCall: {
-        rawPrompt: void 0,
-        rawSettings: {}
-      },
-      rawResponse: { headers: n },
-      request: { body: JSON.stringify(t) },
-      warnings: r
+      request: { body: t },
+      response: { headers: r }
     };
   }
-}, ji = y({
-  input_tokens: R(),
-  input_tokens_details: y({ cached_tokens: R().nullish() }).nullish(),
-  output_tokens: R(),
-  output_tokens_details: y({ reasoning_tokens: R().nullish() }).nullish()
-}), $f = y({
-  type: A("response.output_text.delta"),
-  delta: h()
-}), Df = y({
-  type: yt(["response.completed", "response.incomplete"]),
-  response: y({
-    incomplete_details: y({ reason: h() }).nullish(),
-    usage: ji
+}, $a = f({
+  input_tokens: T(),
+  input_tokens_details: f({ cached_tokens: T().nullish() }).nullish(),
+  output_tokens: T(),
+  output_tokens_details: f({ reasoning_tokens: T().nullish() }).nullish()
+}), Lc = f({
+  type: C("response.output_text.delta"),
+  delta: d()
+}), Zc = f({
+  type: Ce(["response.completed", "response.incomplete"]),
+  response: f({
+    incomplete_details: f({ reason: d() }).nullish(),
+    usage: $a
   })
-}), qf = y({
-  type: A("response.created"),
-  response: y({
-    id: h(),
-    created_at: R(),
-    model: h()
+}), Vc = f({
+  type: C("response.created"),
+  response: f({
+    id: d(),
+    created_at: T(),
+    model: d()
   })
-}), Uf = y({
-  type: A("response.output_item.done"),
-  output_index: R(),
-  item: Tt("type", [
-    y({
-      type: A("message")
+}), Bc = f({
+  type: C("response.output_item.done"),
+  output_index: T(),
+  item: pt("type", [
+    f({
+      type: C("message")
     }),
-    y({
-      type: A("function_call"),
-      id: h(),
-      call_id: h(),
-      name: h(),
-      arguments: h(),
-      status: A("completed")
+    f({
+      type: C("function_call"),
+      id: d(),
+      call_id: d(),
+      name: d(),
+      arguments: d(),
+      status: C("completed")
     })
   ])
-}), Lf = y({
-  type: A("response.function_call_arguments.delta"),
-  item_id: h(),
-  output_index: R(),
-  delta: h()
-}), Ff = y({
-  type: A("response.output_item.added"),
-  output_index: R(),
-  item: Tt("type", [
-    y({
-      type: A("message")
+}), Fc = f({
+  type: C("response.function_call_arguments.delta"),
+  item_id: d(),
+  output_index: T(),
+  delta: d()
+}), Gc = f({
+  type: C("response.output_item.added"),
+  output_index: T(),
+  item: pt("type", [
+    f({
+      type: C("message")
     }),
-    y({
-      type: A("function_call"),
-      id: h(),
-      call_id: h(),
-      name: h(),
-      arguments: h()
+    f({
+      type: C("function_call"),
+      id: d(),
+      call_id: d(),
+      name: d(),
+      arguments: d()
     })
   ])
-}), Zf = y({
-  type: A("response.output_text.annotation.added"),
-  annotation: y({
-    type: A("url_citation"),
-    url: h(),
-    title: h()
+}), Jc = f({
+  type: C("response.output_text.annotation.added"),
+  annotation: f({
+    type: C("url_citation"),
+    url: d(),
+    title: d()
   })
-}), Vf = y({
-  type: A("response.reasoning_summary_text.delta"),
-  item_id: h(),
-  output_index: R(),
-  summary_index: R(),
-  delta: h()
-}), Bf = ge([
-  $f,
-  Df,
-  qf,
-  Uf,
-  Lf,
-  Ff,
-  Zf,
-  Vf,
-  y({ type: h() }).passthrough()
+}), Hc = f({
+  type: C("response.reasoning_summary_text.delta"),
+  item_id: d(),
+  output_index: T(),
+  summary_index: T(),
+  delta: d()
+}), zc = se([
+  Lc,
+  Zc,
+  Vc,
+  Bc,
+  Fc,
+  Gc,
+  Jc,
+  Hc,
+  f({ type: d() }).passthrough()
   // fallback for unknown chunks
 ]);
-function Jf(e) {
+function Wc(e) {
   return e.type === "response.output_text.delta";
 }
-function zf(e) {
+function Yc(e) {
   return e.type === "response.output_item.done";
 }
-function Gf(e) {
+function Kc(e) {
   return e.type === "response.completed" || e.type === "response.incomplete";
 }
-function Hf(e) {
+function Xc(e) {
   return e.type === "response.created";
 }
-function Wf(e) {
+function Qc(e) {
   return e.type === "response.function_call_arguments.delta";
 }
-function Kf(e) {
+function ed(e) {
   return e.type === "response.output_item.added";
 }
-function Yf(e) {
+function td(e) {
   return e.type === "response.output_text.annotation.added";
 }
-function Xf(e) {
+function nd(e) {
   return e.type === "response.reasoning_summary_text.delta";
 }
-function Qf(e) {
+function rd(e) {
   return e.startsWith("o") ? e.startsWith("o1-mini") || e.startsWith("o1-preview") ? {
     isReasoningModel: !0,
     systemMessageMode: "remove",
@@ -16118,72 +8907,55 @@ function Qf(e) {
     requiredAutoTruncation: !1
   };
 }
-var eh = y({
-  metadata: eo().nullish(),
-  parallelToolCalls: Je().nullish(),
-  previousResponseId: h().nullish(),
-  store: Je().nullish(),
-  user: h().nullish(),
-  reasoningEffort: h().nullish(),
-  strictSchemas: Je().nullish(),
-  instructions: h().nullish(),
-  reasoningSummary: h().nullish()
-}), th = y({});
-function rh({
-  searchContextSize: e,
-  userLocation: t
-} = {}) {
-  return {
-    type: "provider-defined",
-    id: "openai.web_search_preview",
-    args: {
-      searchContextSize: e,
-      userLocation: t
-    },
-    parameters: th
-  };
-}
-var nh = {
-  webSearchPreview: rh
-}, ah = y({
-  instructions: h().nullish(),
-  speed: R().min(0.25).max(4).default(1).nullish()
-}), sh = class {
+var sd = f({
+  metadata: Pt().nullish(),
+  parallelToolCalls: ue().nullish(),
+  previousResponseId: d().nullish(),
+  store: ue().nullish(),
+  user: d().nullish(),
+  reasoningEffort: d().nullish(),
+  strictSchemas: ue().nullish(),
+  instructions: d().nullish(),
+  reasoningSummary: d().nullish()
+}), ad = f({
+  instructions: d().nullish(),
+  speed: T().min(0.25).max(4).default(1).nullish()
+}), od = class {
   constructor(e, t) {
     this.modelId = e, this.config = t, this.specificationVersion = "v1";
   }
   get provider() {
     return this.config.provider;
   }
-  getArgs({
+  async getArgs({
     text: e,
     voice: t = "alloy",
-    outputFormat: r = "mp3",
-    speed: n,
-    instructions: a,
-    providerOptions: s
+    outputFormat: n = "mp3",
+    speed: r,
+    instructions: s,
+    providerOptions: a
   }) {
-    const o = [], i = un({
+    const o = [], i = await qe({
       provider: "openai",
-      providerOptions: s,
-      schema: ah
+      providerOptions: a,
+      schema: ad
     }), l = {
       model: this.modelId,
       input: e,
       voice: t,
       response_format: "mp3",
-      speed: n,
-      instructions: a
+      speed: r,
+      instructions: s
     };
-    if (r && (["mp3", "opus", "aac", "flac", "wav", "pcm"].includes(r) ? l.response_format = r : o.push({
+    if (n && (["mp3", "opus", "aac", "flac", "wav", "pcm"].includes(n) ? l.response_format = n : o.push({
       type: "unsupported-setting",
       setting: "outputFormat",
-      details: `Unsupported output format: ${r}. Using mp3 instead.`
+      details: `Unsupported output format: ${n}. Using mp3 instead.`
     })), i) {
       const u = {};
       for (const c in u) {
-        const d = u[c];
-        d !== void 0 && (l[c] = d);
+        const p = u[c];
+        p !== void 0 && (l[c] = p);
       }
     }
     return {
@@ -16192,20 +8964,20 @@ var nh = {
     };
   }
   async doGenerate(e) {
-    var t, r, n;
-    const a = (n = (r = (t = this.config._internal) == null ? void 0 : t.currentDate) == null ? void 0 : r.call(t)) != null ? n : /* @__PURE__ */ new Date(), { requestBody: s, warnings: o } = this.getArgs(e), {
+    var t, n, r;
+    const s = (r = (n = (t = this.config._internal) == null ? void 0 : t.currentDate) == null ? void 0 : n.call(t)) != null ? r : /* @__PURE__ */ new Date(), { requestBody: a, warnings: o } = await this.getArgs(e), {
       value: i,
       responseHeaders: l,
       rawValue: u
-    } = await Fe({
+    } = await Ie({
       url: this.config.url({
         path: "/audio/speech",
         modelId: this.modelId
       }),
-      headers: Le(this.config.headers(), e.headers),
-      body: s,
-      failedResponseHandler: at,
-      successfulResponseHandler: gl(),
+      headers: Se(this.config.headers(), e.headers),
+      body: a,
+      failedResponseHandler: Qe,
+      successfulResponseHandler: du(),
       abortSignal: e.abortSignal,
       fetch: this.config.fetch
     });
@@ -16213,10 +8985,10 @@ var nh = {
       audio: i,
       warnings: o,
       request: {
-        body: JSON.stringify(s)
+        body: JSON.stringify(a)
       },
       response: {
-        timestamp: a,
+        timestamp: s,
         modelId: this.modelId,
         headers: l,
         body: u
@@ -16224,10 +8996,10 @@ var nh = {
     };
   }
 };
-function oh(e = {}) {
-  var t, r, n;
-  const a = (t = ra(e.baseURL)) != null ? t : "https://api.openai.com/v1", s = (r = e.compatibility) != null ? r : "compatible", o = (n = e.name) != null ? n : "openai", i = () => ({
-    Authorization: `Bearer ${ea({
+function id(e = {}) {
+  var t, n;
+  const r = (t = qn(e.baseURL)) != null ? t : "https://api.openai.com/v1", s = (n = e.name) != null ? n : "openai", a = () => ({
+    Authorization: `Bearer ${$n({
       apiKey: e.apiKey,
       environmentVariableName: "OPENAI_API_KEY",
       description: "OpenAI"
@@ -16235,139 +9007,7719 @@ function oh(e = {}) {
     "OpenAI-Organization": e.organization,
     "OpenAI-Project": e.project,
     ...e.headers
-  }), l = (f, w = {}) => new ff(f, w, {
-    provider: `${o}.chat`,
-    url: ({ path: k }) => `${a}${k}`,
-    headers: i,
-    compatibility: s,
+  }), o = (y) => new mc(y, {
+    provider: `${s}.chat`,
+    url: ({ path: m }) => `${r}${m}`,
+    headers: a,
     fetch: e.fetch
-  }), u = (f, w = {}) => new wf(f, w, {
-    provider: `${o}.completion`,
-    url: ({ path: k }) => `${a}${k}`,
-    headers: i,
-    compatibility: s,
+  }), i = (y) => new wc(y, {
+    provider: `${s}.completion`,
+    url: ({ path: m }) => `${r}${m}`,
+    headers: a,
     fetch: e.fetch
-  }), c = (f, w = {}) => new Tf(f, w, {
-    provider: `${o}.embedding`,
-    url: ({ path: k }) => `${a}${k}`,
-    headers: i,
+  }), l = (y) => new Sc(y, {
+    provider: `${s}.embedding`,
+    url: ({ path: m }) => `${r}${m}`,
+    headers: a,
     fetch: e.fetch
-  }), d = (f, w = {}) => new Rf(f, w, {
-    provider: `${o}.image`,
-    url: ({ path: k }) => `${a}${k}`,
-    headers: i,
+  }), u = (y) => new Ec(y, {
+    provider: `${s}.image`,
+    url: ({ path: m }) => `${r}${m}`,
+    headers: a,
     fetch: e.fetch
-  }), m = (f) => new Nf(f, {
-    provider: `${o}.transcription`,
-    url: ({ path: w }) => `${a}${w}`,
-    headers: i,
+  }), c = (y) => new $c(y, {
+    provider: `${s}.transcription`,
+    url: ({ path: m }) => `${r}${m}`,
+    headers: a,
     fetch: e.fetch
-  }), _ = (f) => new sh(f, {
-    provider: `${o}.speech`,
-    url: ({ path: w }) => `${a}${w}`,
-    headers: i,
+  }), p = (y) => new od(y, {
+    provider: `${s}.speech`,
+    url: ({ path: m }) => `${r}${m}`,
+    headers: a,
     fetch: e.fetch
-  }), v = (f, w) => {
+  }), h = (y) => {
     if (new.target)
       throw new Error(
         "The OpenAI model function cannot be called with the new keyword."
       );
-    return f === "gpt-3.5-turbo-instruct" ? u(
-      f,
-      w
-    ) : l(f, w);
-  }, g = (f) => new jf(f, {
-    provider: `${o}.responses`,
-    url: ({ path: w }) => `${a}${w}`,
-    headers: i,
+    return y === "gpt-3.5-turbo-instruct" ? i(y) : o(y);
+  }, g = (y) => new Uc(y, {
+    provider: `${s}.responses`,
+    url: ({ path: m }) => `${r}${m}`,
+    headers: a,
     fetch: e.fetch
-  }), p = function(f, w) {
-    return v(f, w);
+  }), v = function(y) {
+    return h(y);
   };
-  return p.languageModel = v, p.chat = l, p.completion = u, p.responses = g, p.embedding = c, p.textEmbedding = c, p.textEmbeddingModel = c, p.image = d, p.imageModel = d, p.transcription = m, p.transcriptionModel = m, p.speech = _, p.speechModel = _, p.tools = nh, p;
+  return v.languageModel = h, v.chat = o, v.completion = i, v.responses = g, v.embedding = l, v.textEmbedding = l, v.textEmbeddingModel = l, v.image = u, v.imageModel = u, v.transcription = c, v.transcriptionModel = c, v.speech = p, v.speechModel = p, v.tools = Nc, v;
 }
-oh({
-  compatibility: "strict"
-  // strict for OpenAI API
+id();
+var ld = typeof globalThis == "object" ? globalThis : typeof self == "object" ? self : typeof window == "object" ? window : typeof global == "object" ? global : {}, yt = "1.9.0", gs = /^(\d+)\.(\d+)\.(\d+)(-(.+))?$/;
+function ud(e) {
+  var t = /* @__PURE__ */ new Set([e]), n = /* @__PURE__ */ new Set(), r = e.match(gs);
+  if (!r)
+    return function() {
+      return !1;
+    };
+  var s = {
+    major: +r[1],
+    minor: +r[2],
+    patch: +r[3],
+    prerelease: r[4]
+  };
+  if (s.prerelease != null)
+    return function(l) {
+      return l === e;
+    };
+  function a(i) {
+    return n.add(i), !1;
+  }
+  function o(i) {
+    return t.add(i), !0;
+  }
+  return function(l) {
+    if (t.has(l))
+      return !0;
+    if (n.has(l))
+      return !1;
+    var u = l.match(gs);
+    if (!u)
+      return a(l);
+    var c = {
+      major: +u[1],
+      minor: +u[2],
+      patch: +u[3],
+      prerelease: u[4]
+    };
+    return c.prerelease != null || s.major !== c.major ? a(l) : s.major === 0 ? s.minor === c.minor && s.patch <= c.patch ? o(l) : a(l) : s.minor <= c.minor ? o(l) : a(l);
+  };
+}
+var cd = ud(yt), dd = yt.split(".")[0], Kt = Symbol.for("opentelemetry.js.api." + dd), Xt = ld;
+function rn(e, t, n, r) {
+  var s;
+  r === void 0 && (r = !1);
+  var a = Xt[Kt] = (s = Xt[Kt]) !== null && s !== void 0 ? s : {
+    version: yt
+  };
+  if (!r && a[e]) {
+    var o = new Error("@opentelemetry/api: Attempted duplicate registration of API: " + e);
+    return n.error(o.stack || o.message), !1;
+  }
+  if (a.version !== yt) {
+    var o = new Error("@opentelemetry/api: Registration of version v" + a.version + " for " + e + " does not match previously registered API v" + yt);
+    return n.error(o.stack || o.message), !1;
+  }
+  return a[e] = t, n.debug("@opentelemetry/api: Registered a global for " + e + " v" + yt + "."), !0;
+}
+function Ct(e) {
+  var t, n, r = (t = Xt[Kt]) === null || t === void 0 ? void 0 : t.version;
+  if (!(!r || !cd(r)))
+    return (n = Xt[Kt]) === null || n === void 0 ? void 0 : n[e];
+}
+function sn(e, t) {
+  t.debug("@opentelemetry/api: Unregistering a global for " + e + " v" + yt + ".");
+  var n = Xt[Kt];
+  n && delete n[e];
+}
+var pd = function(e, t) {
+  var n = typeof Symbol == "function" && e[Symbol.iterator];
+  if (!n) return e;
+  var r = n.call(e), s, a = [], o;
+  try {
+    for (; (t === void 0 || t-- > 0) && !(s = r.next()).done; ) a.push(s.value);
+  } catch (i) {
+    o = { error: i };
+  } finally {
+    try {
+      s && !s.done && (n = r.return) && n.call(r);
+    } finally {
+      if (o) throw o.error;
+    }
+  }
+  return a;
+}, hd = function(e, t, n) {
+  if (n || arguments.length === 2) for (var r = 0, s = t.length, a; r < s; r++)
+    (a || !(r in t)) && (a || (a = Array.prototype.slice.call(t, 0, r)), a[r] = t[r]);
+  return e.concat(a || Array.prototype.slice.call(t));
+}, fd = (
+  /** @class */
+  function() {
+    function e(t) {
+      this._namespace = t.namespace || "DiagComponentLogger";
+    }
+    return e.prototype.debug = function() {
+      for (var t = [], n = 0; n < arguments.length; n++)
+        t[n] = arguments[n];
+      return Ft("debug", this._namespace, t);
+    }, e.prototype.error = function() {
+      for (var t = [], n = 0; n < arguments.length; n++)
+        t[n] = arguments[n];
+      return Ft("error", this._namespace, t);
+    }, e.prototype.info = function() {
+      for (var t = [], n = 0; n < arguments.length; n++)
+        t[n] = arguments[n];
+      return Ft("info", this._namespace, t);
+    }, e.prototype.warn = function() {
+      for (var t = [], n = 0; n < arguments.length; n++)
+        t[n] = arguments[n];
+      return Ft("warn", this._namespace, t);
+    }, e.prototype.verbose = function() {
+      for (var t = [], n = 0; n < arguments.length; n++)
+        t[n] = arguments[n];
+      return Ft("verbose", this._namespace, t);
+    }, e;
+  }()
+);
+function Ft(e, t, n) {
+  var r = Ct("diag");
+  if (r)
+    return n.unshift(t), r[e].apply(r, hd([], pd(n), !1));
+}
+var Ne;
+(function(e) {
+  e[e.NONE = 0] = "NONE", e[e.ERROR = 30] = "ERROR", e[e.WARN = 50] = "WARN", e[e.INFO = 60] = "INFO", e[e.DEBUG = 70] = "DEBUG", e[e.VERBOSE = 80] = "VERBOSE", e[e.ALL = 9999] = "ALL";
+})(Ne || (Ne = {}));
+function md(e, t) {
+  e < Ne.NONE ? e = Ne.NONE : e > Ne.ALL && (e = Ne.ALL), t = t || {};
+  function n(r, s) {
+    var a = t[r];
+    return typeof a == "function" && e >= s ? a.bind(t) : function() {
+    };
+  }
+  return {
+    error: n("error", Ne.ERROR),
+    warn: n("warn", Ne.WARN),
+    info: n("info", Ne.INFO),
+    debug: n("debug", Ne.DEBUG),
+    verbose: n("verbose", Ne.VERBOSE)
+  };
+}
+var gd = function(e, t) {
+  var n = typeof Symbol == "function" && e[Symbol.iterator];
+  if (!n) return e;
+  var r = n.call(e), s, a = [], o;
+  try {
+    for (; (t === void 0 || t-- > 0) && !(s = r.next()).done; ) a.push(s.value);
+  } catch (i) {
+    o = { error: i };
+  } finally {
+    try {
+      s && !s.done && (n = r.return) && n.call(r);
+    } finally {
+      if (o) throw o.error;
+    }
+  }
+  return a;
+}, yd = function(e, t, n) {
+  if (n || arguments.length === 2) for (var r = 0, s = t.length, a; r < s; r++)
+    (a || !(r in t)) && (a || (a = Array.prototype.slice.call(t, 0, r)), a[r] = t[r]);
+  return e.concat(a || Array.prototype.slice.call(t));
+}, vd = "diag", et = (
+  /** @class */
+  function() {
+    function e() {
+      function t(s) {
+        return function() {
+          for (var a = [], o = 0; o < arguments.length; o++)
+            a[o] = arguments[o];
+          var i = Ct("diag");
+          if (i)
+            return i[s].apply(i, yd([], gd(a), !1));
+        };
+      }
+      var n = this, r = function(s, a) {
+        var o, i, l;
+        if (a === void 0 && (a = { logLevel: Ne.INFO }), s === n) {
+          var u = new Error("Cannot use diag as the logger for itself. Please use a DiagLogger implementation like ConsoleDiagLogger or a custom implementation");
+          return n.error((o = u.stack) !== null && o !== void 0 ? o : u.message), !1;
+        }
+        typeof a == "number" && (a = {
+          logLevel: a
+        });
+        var c = Ct("diag"), p = md((i = a.logLevel) !== null && i !== void 0 ? i : Ne.INFO, s);
+        if (c && !a.suppressOverrideMessage) {
+          var h = (l = new Error().stack) !== null && l !== void 0 ? l : "<failed to generate stacktrace>";
+          c.warn("Current logger will be overwritten from " + h), p.warn("Current logger will overwrite one already registered from " + h);
+        }
+        return rn("diag", p, n, !0);
+      };
+      n.setLogger = r, n.disable = function() {
+        sn(vd, n);
+      }, n.createComponentLogger = function(s) {
+        return new fd(s);
+      }, n.verbose = t("verbose"), n.debug = t("debug"), n.info = t("info"), n.warn = t("warn"), n.error = t("error");
+    }
+    return e.instance = function() {
+      return this._instance || (this._instance = new e()), this._instance;
+    }, e;
+  }()
+), _d = function(e, t) {
+  var n = typeof Symbol == "function" && e[Symbol.iterator];
+  if (!n) return e;
+  var r = n.call(e), s, a = [], o;
+  try {
+    for (; (t === void 0 || t-- > 0) && !(s = r.next()).done; ) a.push(s.value);
+  } catch (i) {
+    o = { error: i };
+  } finally {
+    try {
+      s && !s.done && (n = r.return) && n.call(r);
+    } finally {
+      if (o) throw o.error;
+    }
+  }
+  return a;
+}, bd = function(e) {
+  var t = typeof Symbol == "function" && Symbol.iterator, n = t && e[t], r = 0;
+  if (n) return n.call(e);
+  if (e && typeof e.length == "number") return {
+    next: function() {
+      return e && r >= e.length && (e = void 0), { value: e && e[r++], done: !e };
+    }
+  };
+  throw new TypeError(t ? "Object is not iterable." : "Symbol.iterator is not defined.");
+}, wd = (
+  /** @class */
+  function() {
+    function e(t) {
+      this._entries = t ? new Map(t) : /* @__PURE__ */ new Map();
+    }
+    return e.prototype.getEntry = function(t) {
+      var n = this._entries.get(t);
+      if (n)
+        return Object.assign({}, n);
+    }, e.prototype.getAllEntries = function() {
+      return Array.from(this._entries.entries()).map(function(t) {
+        var n = _d(t, 2), r = n[0], s = n[1];
+        return [r, s];
+      });
+    }, e.prototype.setEntry = function(t, n) {
+      var r = new e(this._entries);
+      return r._entries.set(t, n), r;
+    }, e.prototype.removeEntry = function(t) {
+      var n = new e(this._entries);
+      return n._entries.delete(t), n;
+    }, e.prototype.removeEntries = function() {
+      for (var t, n, r = [], s = 0; s < arguments.length; s++)
+        r[s] = arguments[s];
+      var a = new e(this._entries);
+      try {
+        for (var o = bd(r), i = o.next(); !i.done; i = o.next()) {
+          var l = i.value;
+          a._entries.delete(l);
+        }
+      } catch (u) {
+        t = { error: u };
+      } finally {
+        try {
+          i && !i.done && (n = o.return) && n.call(o);
+        } finally {
+          if (t) throw t.error;
+        }
+      }
+      return a;
+    }, e.prototype.clear = function() {
+      return new e();
+    }, e;
+  }()
+);
+et.instance();
+function xd(e) {
+  return e === void 0 && (e = {}), new wd(new Map(Object.entries(e)));
+}
+function ja(e) {
+  return Symbol.for(e);
+}
+var Td = (
+  /** @class */
+  /* @__PURE__ */ function() {
+    function e(t) {
+      var n = this;
+      n._currentContext = t ? new Map(t) : /* @__PURE__ */ new Map(), n.getValue = function(r) {
+        return n._currentContext.get(r);
+      }, n.setValue = function(r, s) {
+        var a = new e(n._currentContext);
+        return a._currentContext.set(r, s), a;
+      }, n.deleteValue = function(r) {
+        var s = new e(n._currentContext);
+        return s._currentContext.delete(r), s;
+      };
+    }
+    return e;
+  }()
+), kd = new Td(), Et = /* @__PURE__ */ function() {
+  var e = function(t, n) {
+    return e = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(r, s) {
+      r.__proto__ = s;
+    } || function(r, s) {
+      for (var a in s) Object.prototype.hasOwnProperty.call(s, a) && (r[a] = s[a]);
+    }, e(t, n);
+  };
+  return function(t, n) {
+    if (typeof n != "function" && n !== null)
+      throw new TypeError("Class extends value " + String(n) + " is not a constructor or null");
+    e(t, n);
+    function r() {
+      this.constructor = t;
+    }
+    t.prototype = n === null ? Object.create(n) : (r.prototype = n.prototype, new r());
+  };
+}(), Sd = (
+  /** @class */
+  function() {
+    function e() {
+    }
+    return e.prototype.createGauge = function(t, n) {
+      return $d;
+    }, e.prototype.createHistogram = function(t, n) {
+      return jd;
+    }, e.prototype.createCounter = function(t, n) {
+      return Pd;
+    }, e.prototype.createUpDownCounter = function(t, n) {
+      return Dd;
+    }, e.prototype.createObservableGauge = function(t, n) {
+      return Ud;
+    }, e.prototype.createObservableCounter = function(t, n) {
+      return qd;
+    }, e.prototype.createObservableUpDownCounter = function(t, n) {
+      return Ld;
+    }, e.prototype.addBatchObservableCallback = function(t, n) {
+    }, e.prototype.removeBatchObservableCallback = function(t) {
+    }, e;
+  }()
+), Un = (
+  /** @class */
+  /* @__PURE__ */ function() {
+    function e() {
+    }
+    return e;
+  }()
+), Id = (
+  /** @class */
+  function(e) {
+    Et(t, e);
+    function t() {
+      return e !== null && e.apply(this, arguments) || this;
+    }
+    return t.prototype.add = function(n, r) {
+    }, t;
+  }(Un)
+), Cd = (
+  /** @class */
+  function(e) {
+    Et(t, e);
+    function t() {
+      return e !== null && e.apply(this, arguments) || this;
+    }
+    return t.prototype.add = function(n, r) {
+    }, t;
+  }(Un)
+), Rd = (
+  /** @class */
+  function(e) {
+    Et(t, e);
+    function t() {
+      return e !== null && e.apply(this, arguments) || this;
+    }
+    return t.prototype.record = function(n, r) {
+    }, t;
+  }(Un)
+), Ed = (
+  /** @class */
+  function(e) {
+    Et(t, e);
+    function t() {
+      return e !== null && e.apply(this, arguments) || this;
+    }
+    return t.prototype.record = function(n, r) {
+    }, t;
+  }(Un)
+), Rr = (
+  /** @class */
+  function() {
+    function e() {
+    }
+    return e.prototype.addCallback = function(t) {
+    }, e.prototype.removeCallback = function(t) {
+    }, e;
+  }()
+), Ad = (
+  /** @class */
+  function(e) {
+    Et(t, e);
+    function t() {
+      return e !== null && e.apply(this, arguments) || this;
+    }
+    return t;
+  }(Rr)
+), Od = (
+  /** @class */
+  function(e) {
+    Et(t, e);
+    function t() {
+      return e !== null && e.apply(this, arguments) || this;
+    }
+    return t;
+  }(Rr)
+), Md = (
+  /** @class */
+  function(e) {
+    Et(t, e);
+    function t() {
+      return e !== null && e.apply(this, arguments) || this;
+    }
+    return t;
+  }(Rr)
+), Nd = new Sd(), Pd = new Id(), $d = new Rd(), jd = new Ed(), Dd = new Cd(), qd = new Ad(), Ud = new Od(), Ld = new Md(), Zd = {
+  get: function(e, t) {
+    if (e != null)
+      return e[t];
+  },
+  keys: function(e) {
+    return e == null ? [] : Object.keys(e);
+  }
+}, Vd = {
+  set: function(e, t, n) {
+    e != null && (e[t] = n);
+  }
+}, Bd = function(e, t) {
+  var n = typeof Symbol == "function" && e[Symbol.iterator];
+  if (!n) return e;
+  var r = n.call(e), s, a = [], o;
+  try {
+    for (; (t === void 0 || t-- > 0) && !(s = r.next()).done; ) a.push(s.value);
+  } catch (i) {
+    o = { error: i };
+  } finally {
+    try {
+      s && !s.done && (n = r.return) && n.call(r);
+    } finally {
+      if (o) throw o.error;
+    }
+  }
+  return a;
+}, Fd = function(e, t, n) {
+  if (n || arguments.length === 2) for (var r = 0, s = t.length, a; r < s; r++)
+    (a || !(r in t)) && (a || (a = Array.prototype.slice.call(t, 0, r)), a[r] = t[r]);
+  return e.concat(a || Array.prototype.slice.call(t));
+}, Gd = (
+  /** @class */
+  function() {
+    function e() {
+    }
+    return e.prototype.active = function() {
+      return kd;
+    }, e.prototype.with = function(t, n, r) {
+      for (var s = [], a = 3; a < arguments.length; a++)
+        s[a - 3] = arguments[a];
+      return n.call.apply(n, Fd([r], Bd(s), !1));
+    }, e.prototype.bind = function(t, n) {
+      return n;
+    }, e.prototype.enable = function() {
+      return this;
+    }, e.prototype.disable = function() {
+      return this;
+    }, e;
+  }()
+), Jd = function(e, t) {
+  var n = typeof Symbol == "function" && e[Symbol.iterator];
+  if (!n) return e;
+  var r = n.call(e), s, a = [], o;
+  try {
+    for (; (t === void 0 || t-- > 0) && !(s = r.next()).done; ) a.push(s.value);
+  } catch (i) {
+    o = { error: i };
+  } finally {
+    try {
+      s && !s.done && (n = r.return) && n.call(r);
+    } finally {
+      if (o) throw o.error;
+    }
+  }
+  return a;
+}, Hd = function(e, t, n) {
+  if (n || arguments.length === 2) for (var r = 0, s = t.length, a; r < s; r++)
+    (a || !(r in t)) && (a || (a = Array.prototype.slice.call(t, 0, r)), a[r] = t[r]);
+  return e.concat(a || Array.prototype.slice.call(t));
+}, Qn = "context", zd = new Gd(), Ln = (
+  /** @class */
+  function() {
+    function e() {
+    }
+    return e.getInstance = function() {
+      return this._instance || (this._instance = new e()), this._instance;
+    }, e.prototype.setGlobalContextManager = function(t) {
+      return rn(Qn, t, et.instance());
+    }, e.prototype.active = function() {
+      return this._getContextManager().active();
+    }, e.prototype.with = function(t, n, r) {
+      for (var s, a = [], o = 3; o < arguments.length; o++)
+        a[o - 3] = arguments[o];
+      return (s = this._getContextManager()).with.apply(s, Hd([t, n, r], Jd(a), !1));
+    }, e.prototype.bind = function(t, n) {
+      return this._getContextManager().bind(t, n);
+    }, e.prototype._getContextManager = function() {
+      return Ct(Qn) || zd;
+    }, e.prototype.disable = function() {
+      this._getContextManager().disable(), sn(Qn, et.instance());
+    }, e;
+  }()
+), fr;
+(function(e) {
+  e[e.NONE = 0] = "NONE", e[e.SAMPLED = 1] = "SAMPLED";
+})(fr || (fr = {}));
+var Da = "0000000000000000", qa = "00000000000000000000000000000000", Wd = {
+  traceId: qa,
+  spanId: Da,
+  traceFlags: fr.NONE
+}, Ht = (
+  /** @class */
+  function() {
+    function e(t) {
+      t === void 0 && (t = Wd), this._spanContext = t;
+    }
+    return e.prototype.spanContext = function() {
+      return this._spanContext;
+    }, e.prototype.setAttribute = function(t, n) {
+      return this;
+    }, e.prototype.setAttributes = function(t) {
+      return this;
+    }, e.prototype.addEvent = function(t, n) {
+      return this;
+    }, e.prototype.addLink = function(t) {
+      return this;
+    }, e.prototype.addLinks = function(t) {
+      return this;
+    }, e.prototype.setStatus = function(t) {
+      return this;
+    }, e.prototype.updateName = function(t) {
+      return this;
+    }, e.prototype.end = function(t) {
+    }, e.prototype.isRecording = function() {
+      return !1;
+    }, e.prototype.recordException = function(t, n) {
+    }, e;
+  }()
+), Er = ja("OpenTelemetry Context Key SPAN");
+function Ar(e) {
+  return e.getValue(Er) || void 0;
+}
+function Yd() {
+  return Ar(Ln.getInstance().active());
+}
+function Or(e, t) {
+  return e.setValue(Er, t);
+}
+function Kd(e) {
+  return e.deleteValue(Er);
+}
+function Xd(e, t) {
+  return Or(e, new Ht(t));
+}
+function Ua(e) {
+  var t;
+  return (t = Ar(e)) === null || t === void 0 ? void 0 : t.spanContext();
+}
+var Qd = /^([0-9a-f]{32})$/i, ep = /^[0-9a-f]{16}$/i;
+function tp(e) {
+  return Qd.test(e) && e !== qa;
+}
+function np(e) {
+  return ep.test(e) && e !== Da;
+}
+function La(e) {
+  return tp(e.traceId) && np(e.spanId);
+}
+function rp(e) {
+  return new Ht(e);
+}
+var er = Ln.getInstance(), Za = (
+  /** @class */
+  function() {
+    function e() {
+    }
+    return e.prototype.startSpan = function(t, n, r) {
+      r === void 0 && (r = er.active());
+      var s = !!(n != null && n.root);
+      if (s)
+        return new Ht();
+      var a = r && Ua(r);
+      return sp(a) && La(a) ? new Ht(a) : new Ht();
+    }, e.prototype.startActiveSpan = function(t, n, r, s) {
+      var a, o, i;
+      if (!(arguments.length < 2)) {
+        arguments.length === 2 ? i = n : arguments.length === 3 ? (a = n, i = r) : (a = n, o = r, i = s);
+        var l = o ?? er.active(), u = this.startSpan(t, a, l), c = Or(l, u);
+        return er.with(c, i, void 0, u);
+      }
+    }, e;
+  }()
+);
+function sp(e) {
+  return typeof e == "object" && typeof e.spanId == "string" && typeof e.traceId == "string" && typeof e.traceFlags == "number";
+}
+var ap = new Za(), op = (
+  /** @class */
+  function() {
+    function e(t, n, r, s) {
+      this._provider = t, this.name = n, this.version = r, this.options = s;
+    }
+    return e.prototype.startSpan = function(t, n, r) {
+      return this._getTracer().startSpan(t, n, r);
+    }, e.prototype.startActiveSpan = function(t, n, r, s) {
+      var a = this._getTracer();
+      return Reflect.apply(a.startActiveSpan, a, arguments);
+    }, e.prototype._getTracer = function() {
+      if (this._delegate)
+        return this._delegate;
+      var t = this._provider.getDelegateTracer(this.name, this.version, this.options);
+      return t ? (this._delegate = t, this._delegate) : ap;
+    }, e;
+  }()
+), ip = (
+  /** @class */
+  function() {
+    function e() {
+    }
+    return e.prototype.getTracer = function(t, n, r) {
+      return new Za();
+    }, e;
+  }()
+), lp = new ip(), ys = (
+  /** @class */
+  function() {
+    function e() {
+    }
+    return e.prototype.getTracer = function(t, n, r) {
+      var s;
+      return (s = this.getDelegateTracer(t, n, r)) !== null && s !== void 0 ? s : new op(this, t, n, r);
+    }, e.prototype.getDelegate = function() {
+      var t;
+      return (t = this._delegate) !== null && t !== void 0 ? t : lp;
+    }, e.prototype.setDelegate = function(t) {
+      this._delegate = t;
+    }, e.prototype.getDelegateTracer = function(t, n, r) {
+      var s;
+      return (s = this._delegate) === null || s === void 0 ? void 0 : s.getTracer(t, n, r);
+    }, e;
+  }()
+), On;
+(function(e) {
+  e[e.UNSET = 0] = "UNSET", e[e.OK = 1] = "OK", e[e.ERROR = 2] = "ERROR";
+})(On || (On = {}));
+Ln.getInstance();
+et.instance();
+var up = (
+  /** @class */
+  function() {
+    function e() {
+    }
+    return e.prototype.getMeter = function(t, n, r) {
+      return Nd;
+    }, e;
+  }()
+), cp = new up(), tr = "metrics", dp = (
+  /** @class */
+  function() {
+    function e() {
+    }
+    return e.getInstance = function() {
+      return this._instance || (this._instance = new e()), this._instance;
+    }, e.prototype.setGlobalMeterProvider = function(t) {
+      return rn(tr, t, et.instance());
+    }, e.prototype.getMeterProvider = function() {
+      return Ct(tr) || cp;
+    }, e.prototype.getMeter = function(t, n, r) {
+      return this.getMeterProvider().getMeter(t, n, r);
+    }, e.prototype.disable = function() {
+      sn(tr, et.instance());
+    }, e;
+  }()
+);
+dp.getInstance();
+var pp = (
+  /** @class */
+  function() {
+    function e() {
+    }
+    return e.prototype.inject = function(t, n) {
+    }, e.prototype.extract = function(t, n) {
+      return t;
+    }, e.prototype.fields = function() {
+      return [];
+    }, e;
+  }()
+), Mr = ja("OpenTelemetry Baggage Key");
+function Va(e) {
+  return e.getValue(Mr) || void 0;
+}
+function hp() {
+  return Va(Ln.getInstance().active());
+}
+function fp(e, t) {
+  return e.setValue(Mr, t);
+}
+function mp(e) {
+  return e.deleteValue(Mr);
+}
+var nr = "propagation", gp = new pp(), yp = (
+  /** @class */
+  function() {
+    function e() {
+      this.createBaggage = xd, this.getBaggage = Va, this.getActiveBaggage = hp, this.setBaggage = fp, this.deleteBaggage = mp;
+    }
+    return e.getInstance = function() {
+      return this._instance || (this._instance = new e()), this._instance;
+    }, e.prototype.setGlobalPropagator = function(t) {
+      return rn(nr, t, et.instance());
+    }, e.prototype.inject = function(t, n, r) {
+      return r === void 0 && (r = Vd), this._getGlobalPropagator().inject(t, n, r);
+    }, e.prototype.extract = function(t, n, r) {
+      return r === void 0 && (r = Zd), this._getGlobalPropagator().extract(t, n, r);
+    }, e.prototype.fields = function() {
+      return this._getGlobalPropagator().fields();
+    }, e.prototype.disable = function() {
+      sn(nr, et.instance());
+    }, e.prototype._getGlobalPropagator = function() {
+      return Ct(nr) || gp;
+    }, e;
+  }()
+);
+yp.getInstance();
+var rr = "trace", vp = (
+  /** @class */
+  function() {
+    function e() {
+      this._proxyTracerProvider = new ys(), this.wrapSpanContext = rp, this.isSpanContextValid = La, this.deleteSpan = Kd, this.getSpan = Ar, this.getActiveSpan = Yd, this.getSpanContext = Ua, this.setSpan = Or, this.setSpanContext = Xd;
+    }
+    return e.getInstance = function() {
+      return this._instance || (this._instance = new e()), this._instance;
+    }, e.prototype.setGlobalTracerProvider = function(t) {
+      var n = rn(rr, this._proxyTracerProvider, et.instance());
+      return n && this._proxyTracerProvider.setDelegate(t), n;
+    }, e.prototype.getTracerProvider = function() {
+      return Ct(rr) || this._proxyTracerProvider;
+    }, e.prototype.getTracer = function(t, n) {
+      return this.getTracerProvider().getTracer(t, n);
+    }, e.prototype.disable = function() {
+      sn(rr, et.instance()), this._proxyTracerProvider = new ys();
+    }, e;
+  }()
+), _p = vp.getInstance(), bp = Object.defineProperty, wp = (e, t) => {
+  for (var n in t)
+    bp(e, n, { get: t[n], enumerable: !0 });
+}, Ba = "AI_InvalidArgumentError", Fa = `vercel.ai.error.${Ba}`, xp = Symbol.for(Fa), Ga, le = class extends j {
+  constructor({
+    parameter: e,
+    value: t,
+    message: n
+  }) {
+    super({
+      name: Ba,
+      message: `Invalid argument for parameter ${e}: ${n}`
+    }), this[Ga] = !0, this.parameter = e, this.value = t;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, Fa);
+  }
+};
+Ga = xp;
+var Ja = "AI_InvalidStreamPartError", Ha = `vercel.ai.error.${Ja}`, Tp = Symbol.for(Ha), za, kf = class extends j {
+  constructor({
+    chunk: e,
+    message: t
+  }) {
+    super({ name: Ja, message: t }), this[za] = !0, this.chunk = e;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, Ha);
+  }
+};
+za = Tp;
+var Wa = "AI_InvalidToolArgumentsError", Ya = `vercel.ai.error.${Wa}`, kp = Symbol.for(Ya), Ka, Xa = class extends j {
+  constructor({
+    toolArgs: e,
+    toolName: t,
+    cause: n,
+    message: r = `Invalid arguments for tool ${t}: ${en(
+      n
+    )}`
+  }) {
+    super({ name: Wa, message: r, cause: n }), this[Ka] = !0, this.toolArgs = e, this.toolName = t;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, Ya);
+  }
+};
+Ka = kp;
+var Sp = "AI_MCPClientError", Qa = `vercel.ai.error.${Sp}`, Ip = Symbol.for(Qa), eo, _e = class extends j {
+  constructor({
+    name: e = "MCPClientError",
+    message: t,
+    cause: n
+  }) {
+    super({ name: e, message: t, cause: n }), this[eo] = !0;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, Qa);
+  }
+};
+eo = Ip;
+var to = "AI_NoImageGeneratedError", no = `vercel.ai.error.${to}`, Cp = Symbol.for(no), ro, Rp = class extends j {
+  constructor({
+    message: e = "No image generated.",
+    cause: t,
+    responses: n
+  }) {
+    super({ name: to, message: e, cause: t }), this[ro] = !0, this.responses = n;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, no);
+  }
+};
+ro = Cp;
+var so = "AI_NoObjectGeneratedError", ao = `vercel.ai.error.${so}`, Ep = Symbol.for(ao), oo, dt = class extends j {
+  constructor({
+    message: e = "No object generated.",
+    cause: t,
+    text: n,
+    response: r,
+    usage: s,
+    finishReason: a
+  }) {
+    super({ name: so, message: e, cause: t }), this[oo] = !0, this.text = n, this.response = r, this.usage = s, this.finishReason = a;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, ao);
+  }
+};
+oo = Ep;
+var io = "AI_NoOutputSpecifiedError", lo = `vercel.ai.error.${io}`, Ap = Symbol.for(lo), uo, co = class extends j {
+  // used in isInstance
+  constructor({ message: e = "No output specified." } = {}) {
+    super({ name: io, message: e }), this[uo] = !0;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, lo);
+  }
+};
+uo = Ap;
+var po = "AI_NoSuchToolError", ho = `vercel.ai.error.${po}`, Op = Symbol.for(ho), fo, mr = class extends j {
+  constructor({
+    toolName: e,
+    availableTools: t = void 0,
+    message: n = `Model tried to call unavailable tool '${e}'. ${t === void 0 ? "No tools are available." : `Available tools: ${t.join(", ")}.`}`
+  }) {
+    super({ name: po, message: n }), this[fo] = !0, this.toolName = e, this.availableTools = t;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, ho);
+  }
+};
+fo = Op;
+var mo = "AI_ToolCallRepairError", go = `vercel.ai.error.${mo}`, Mp = Symbol.for(go), yo, Np = class extends j {
+  constructor({
+    cause: e,
+    originalError: t,
+    message: n = `Error repairing tool call: ${en(e)}`
+  }) {
+    super({ name: mo, message: n, cause: e }), this[yo] = !0, this.originalError = t;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, go);
+  }
+};
+yo = Mp;
+var vo = "AI_ToolExecutionError", _o = `vercel.ai.error.${vo}`, Pp = Symbol.for(_o), bo, wo = class extends j {
+  constructor({
+    toolArgs: e,
+    toolName: t,
+    toolCallId: n,
+    cause: r,
+    message: s = `Error executing tool ${t}: ${en(r)}`
+  }) {
+    super({ name: vo, message: s, cause: r }), this[bo] = !0, this.toolArgs = e, this.toolName = t, this.toolCallId = n;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, _o);
+  }
+};
+bo = Pp;
+var xo = "AI_InvalidDataContentError", To = `vercel.ai.error.${xo}`, $p = Symbol.for(To), ko, vs = class extends j {
+  constructor({
+    content: e,
+    cause: t,
+    message: n = `Invalid data content. Expected a base64 string, Uint8Array, ArrayBuffer, or Buffer, but got ${typeof e}.`
+  }) {
+    super({ name: xo, message: n, cause: t }), this[ko] = !0, this.content = e;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, To);
+  }
+};
+ko = $p;
+var So = "AI_InvalidMessageRoleError", Io = `vercel.ai.error.${So}`, jp = Symbol.for(Io), Co, Dp = class extends j {
+  constructor({
+    role: e,
+    message: t = `Invalid message role: '${e}'. Must be one of: "system", "user", "assistant", "tool".`
+  }) {
+    super({ name: So, message: t }), this[Co] = !0, this.role = e;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, Io);
+  }
+};
+Co = jp;
+var Ro = "AI_MessageConversionError", Eo = `vercel.ai.error.${Ro}`, qp = Symbol.for(Eo), Ao, _s = class extends j {
+  constructor({
+    originalMessage: e,
+    message: t
+  }) {
+    super({ name: Ro, message: t }), this[Ao] = !0, this.originalMessage = e;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, Eo);
+  }
+};
+Ao = qp;
+var Oo = "AI_DownloadError", Mo = `vercel.ai.error.${Oo}`, Up = Symbol.for(Mo), No, sr = class extends j {
+  constructor({
+    url: e,
+    statusCode: t,
+    statusText: n,
+    cause: r,
+    message: s = r == null ? `Failed to download ${e}: ${t} ${n}` : `Failed to download ${e}: ${r}`
+  }) {
+    super({ name: Oo, message: s, cause: r }), this[No] = !0, this.url = e, this.statusCode = t, this.statusText = n;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, Mo);
+  }
+};
+No = Up;
+var Po = "AI_RetryError", $o = `vercel.ai.error.${Po}`, Lp = Symbol.for($o), jo, bs = class extends j {
+  constructor({
+    message: e,
+    reason: t,
+    errors: n
+  }) {
+    super({ name: Po, message: e }), this[jo] = !0, this.reason = t, this.errors = n, this.lastError = n[n.length - 1];
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, $o);
+  }
+};
+jo = Lp;
+function an(e, t) {
+  const n = new Headers(e ?? {});
+  for (const [r, s] of Object.entries(t))
+    n.has(r) || n.set(r, s);
+  return n;
+}
+function Do({
+  status: e,
+  statusText: t,
+  headers: n,
+  textStream: r
+}) {
+  return new Response(r.pipeThrough(new TextEncoderStream()), {
+    status: e ?? 200,
+    statusText: t,
+    headers: an(n, {
+      "content-type": "text/plain; charset=utf-8"
+    })
+  });
+}
+function qo({
+  response: e,
+  status: t,
+  statusText: n,
+  headers: r,
+  stream: s
+}) {
+  e.writeHead(t ?? 200, n, r);
+  const a = s.getReader();
+  (async () => {
+    try {
+      for (; ; ) {
+        const { done: i, value: l } = await a.read();
+        if (i)
+          break;
+        e.write(l);
+      }
+    } catch (i) {
+      throw i;
+    } finally {
+      e.end();
+    }
+  })();
+}
+function Uo({
+  response: e,
+  status: t,
+  statusText: n,
+  headers: r,
+  textStream: s
+}) {
+  qo({
+    response: e,
+    status: t,
+    statusText: n,
+    headers: Object.fromEntries(
+      an(r, {
+        "content-type": "text/plain; charset=utf-8"
+      }).entries()
+    ),
+    stream: s.pipeThrough(new TextEncoderStream())
+  });
+}
+function Sf({
+  messages: e,
+  message: t
+}) {
+  return [
+    ...e.length > 0 && e[e.length - 1].id === t.id ? e.slice(0, -1) : e,
+    t
+  ];
+}
+var Lo = se([
+  f({
+    type: C("text"),
+    text: d()
+  }),
+  f({
+    type: C("error"),
+    errorText: d()
+  }),
+  f({
+    type: C("tool-call-streaming-start"),
+    toolCallId: d(),
+    toolName: d()
+  }),
+  f({
+    type: C("tool-call-delta"),
+    toolCallId: d(),
+    argsTextDelta: d()
+  }),
+  f({
+    type: C("tool-call"),
+    toolCallId: d(),
+    toolName: d(),
+    args: Me()
+  }),
+  f({
+    type: C("tool-result"),
+    toolCallId: d(),
+    result: Me(),
+    providerMetadata: Pt().optional()
+  }),
+  f({
+    type: C("reasoning"),
+    text: d(),
+    providerMetadata: Ke(Pt()).optional()
+  }),
+  f({
+    type: C("source"),
+    sourceType: C("url"),
+    id: d(),
+    url: d(),
+    title: d().optional(),
+    providerMetadata: Pt().optional()
+    // Use z.any() for generic metadata
+  }),
+  f({
+    type: C("file"),
+    url: d(),
+    mediaType: d()
+  }),
+  f({
+    type: d().startsWith("data-"),
+    id: d().optional(),
+    data: Me()
+  }),
+  f({
+    type: C("metadata"),
+    value: f({ metadata: Me() })
+  }),
+  f({
+    type: C("start-step"),
+    metadata: Me().optional()
+  }),
+  f({
+    type: C("finish-step"),
+    metadata: Me().optional()
+  }),
+  f({
+    type: C("start"),
+    messageId: d().optional(),
+    metadata: Me().optional()
+  }),
+  f({
+    type: C("finish"),
+    metadata: Me().optional()
+  }),
+  f({
+    type: C("reasoning-part-finish")
+  })
+]);
+async function Zn({
+  stream: e,
+  onError: t
+}) {
+  const n = e.getReader();
+  try {
+    for (; ; ) {
+      const { done: r } = await n.read();
+      if (r)
+        break;
+    }
+  } catch (r) {
+    t == null || t(r);
+  } finally {
+    n.releaseLock();
+  }
+}
+function Mn(e, t) {
+  if (e === void 0 && t === void 0)
+    return;
+  if (e === void 0)
+    return t;
+  if (t === void 0)
+    return e;
+  const n = { ...e };
+  for (const r in t)
+    if (Object.prototype.hasOwnProperty.call(t, r)) {
+      const s = t[r];
+      if (s === void 0)
+        continue;
+      const a = r in e ? e[r] : void 0, o = s !== null && typeof s == "object" && !Array.isArray(s) && !(s instanceof Date) && !(s instanceof RegExp), i = a != null && typeof a == "object" && !Array.isArray(a) && !(a instanceof Date) && !(a instanceof RegExp);
+      o && i ? n[r] = Mn(
+        a,
+        s
+      ) : n[r] = s;
+    }
+  return n;
+}
+function Zp(e) {
+  const t = ["ROOT"];
+  let n = -1, r = null;
+  function s(l, u, c) {
+    switch (l) {
+      case '"': {
+        n = u, t.pop(), t.push(c), t.push("INSIDE_STRING");
+        break;
+      }
+      case "f":
+      case "t":
+      case "n": {
+        n = u, r = u, t.pop(), t.push(c), t.push("INSIDE_LITERAL");
+        break;
+      }
+      case "-": {
+        t.pop(), t.push(c), t.push("INSIDE_NUMBER");
+        break;
+      }
+      case "0":
+      case "1":
+      case "2":
+      case "3":
+      case "4":
+      case "5":
+      case "6":
+      case "7":
+      case "8":
+      case "9": {
+        n = u, t.pop(), t.push(c), t.push("INSIDE_NUMBER");
+        break;
+      }
+      case "{": {
+        n = u, t.pop(), t.push(c), t.push("INSIDE_OBJECT_START");
+        break;
+      }
+      case "[": {
+        n = u, t.pop(), t.push(c), t.push("INSIDE_ARRAY_START");
+        break;
+      }
+    }
+  }
+  function a(l, u) {
+    switch (l) {
+      case ",": {
+        t.pop(), t.push("INSIDE_OBJECT_AFTER_COMMA");
+        break;
+      }
+      case "}": {
+        n = u, t.pop();
+        break;
+      }
+    }
+  }
+  function o(l, u) {
+    switch (l) {
+      case ",": {
+        t.pop(), t.push("INSIDE_ARRAY_AFTER_COMMA");
+        break;
+      }
+      case "]": {
+        n = u, t.pop();
+        break;
+      }
+    }
+  }
+  for (let l = 0; l < e.length; l++) {
+    const u = e[l];
+    switch (t[t.length - 1]) {
+      case "ROOT":
+        s(u, l, "FINISH");
+        break;
+      case "INSIDE_OBJECT_START": {
+        switch (u) {
+          case '"': {
+            t.pop(), t.push("INSIDE_OBJECT_KEY");
+            break;
+          }
+          case "}": {
+            n = l, t.pop();
+            break;
+          }
+        }
+        break;
+      }
+      case "INSIDE_OBJECT_AFTER_COMMA": {
+        switch (u) {
+          case '"': {
+            t.pop(), t.push("INSIDE_OBJECT_KEY");
+            break;
+          }
+        }
+        break;
+      }
+      case "INSIDE_OBJECT_KEY": {
+        switch (u) {
+          case '"': {
+            t.pop(), t.push("INSIDE_OBJECT_AFTER_KEY");
+            break;
+          }
+        }
+        break;
+      }
+      case "INSIDE_OBJECT_AFTER_KEY": {
+        switch (u) {
+          case ":": {
+            t.pop(), t.push("INSIDE_OBJECT_BEFORE_VALUE");
+            break;
+          }
+        }
+        break;
+      }
+      case "INSIDE_OBJECT_BEFORE_VALUE": {
+        s(u, l, "INSIDE_OBJECT_AFTER_VALUE");
+        break;
+      }
+      case "INSIDE_OBJECT_AFTER_VALUE": {
+        a(u, l);
+        break;
+      }
+      case "INSIDE_STRING": {
+        switch (u) {
+          case '"': {
+            t.pop(), n = l;
+            break;
+          }
+          case "\\": {
+            t.push("INSIDE_STRING_ESCAPE");
+            break;
+          }
+          default:
+            n = l;
+        }
+        break;
+      }
+      case "INSIDE_ARRAY_START": {
+        switch (u) {
+          case "]": {
+            n = l, t.pop();
+            break;
+          }
+          default: {
+            n = l, s(u, l, "INSIDE_ARRAY_AFTER_VALUE");
+            break;
+          }
+        }
+        break;
+      }
+      case "INSIDE_ARRAY_AFTER_VALUE": {
+        switch (u) {
+          case ",": {
+            t.pop(), t.push("INSIDE_ARRAY_AFTER_COMMA");
+            break;
+          }
+          case "]": {
+            n = l, t.pop();
+            break;
+          }
+          default: {
+            n = l;
+            break;
+          }
+        }
+        break;
+      }
+      case "INSIDE_ARRAY_AFTER_COMMA": {
+        s(u, l, "INSIDE_ARRAY_AFTER_VALUE");
+        break;
+      }
+      case "INSIDE_STRING_ESCAPE": {
+        t.pop(), n = l;
+        break;
+      }
+      case "INSIDE_NUMBER": {
+        switch (u) {
+          case "0":
+          case "1":
+          case "2":
+          case "3":
+          case "4":
+          case "5":
+          case "6":
+          case "7":
+          case "8":
+          case "9": {
+            n = l;
+            break;
+          }
+          case "e":
+          case "E":
+          case "-":
+          case ".":
+            break;
+          case ",": {
+            t.pop(), t[t.length - 1] === "INSIDE_ARRAY_AFTER_VALUE" && o(u, l), t[t.length - 1] === "INSIDE_OBJECT_AFTER_VALUE" && a(u, l);
+            break;
+          }
+          case "}": {
+            t.pop(), t[t.length - 1] === "INSIDE_OBJECT_AFTER_VALUE" && a(u, l);
+            break;
+          }
+          case "]": {
+            t.pop(), t[t.length - 1] === "INSIDE_ARRAY_AFTER_VALUE" && o(u, l);
+            break;
+          }
+          default: {
+            t.pop();
+            break;
+          }
+        }
+        break;
+      }
+      case "INSIDE_LITERAL": {
+        const p = e.substring(r, l + 1);
+        !"false".startsWith(p) && !"true".startsWith(p) && !"null".startsWith(p) ? (t.pop(), t[t.length - 1] === "INSIDE_OBJECT_AFTER_VALUE" ? a(u, l) : t[t.length - 1] === "INSIDE_ARRAY_AFTER_VALUE" && o(u, l)) : n = l;
+        break;
+      }
+    }
+  }
+  let i = e.slice(0, n + 1);
+  for (let l = t.length - 1; l >= 0; l--)
+    switch (t[l]) {
+      case "INSIDE_STRING": {
+        i += '"';
+        break;
+      }
+      case "INSIDE_OBJECT_KEY":
+      case "INSIDE_OBJECT_AFTER_KEY":
+      case "INSIDE_OBJECT_AFTER_COMMA":
+      case "INSIDE_OBJECT_START":
+      case "INSIDE_OBJECT_BEFORE_VALUE":
+      case "INSIDE_OBJECT_AFTER_VALUE": {
+        i += "}";
+        break;
+      }
+      case "INSIDE_ARRAY_START":
+      case "INSIDE_ARRAY_AFTER_COMMA":
+      case "INSIDE_ARRAY_AFTER_VALUE": {
+        i += "]";
+        break;
+      }
+      case "INSIDE_LITERAL": {
+        const c = e.substring(r, e.length);
+        "true".startsWith(c) ? i += "true".slice(c.length) : "false".startsWith(c) ? i += "false".slice(c.length) : "null".startsWith(c) && (i += "null".slice(c.length));
+      }
+    }
+  return i;
+}
+async function Nr(e) {
+  if (e === void 0)
+    return { value: void 0, state: "undefined-input" };
+  let t = await It({ text: e });
+  return t.success ? { value: t.value, state: "successful-parse" } : (t = await It({ text: Zp(e) }), t.success ? { value: t.value, state: "repaired-parse" } : { value: void 0, state: "failed-parse" });
+}
+function Nn(e) {
+  return e == null ? void 0 : e.reduce((t, n) => {
+    var r;
+    return Math.max(t, (r = n.step) != null ? r : 0);
+  }, 0);
+}
+function qt(e) {
+  return e.parts.filter(
+    (t) => t.type === "tool-invocation"
+  ).map((t) => t.toolInvocation);
+}
+function Pr({
+  lastMessage: e,
+  newMessageId: t = "no-id"
+} = {}) {
+  var n;
+  const r = (e == null ? void 0 : e.role) === "assistant", s = r ? 1 + ((n = Nn(qt(e))) != null ? n : 0) : 0;
+  return {
+    message: r ? structuredClone(e) : {
+      id: t,
+      metadata: {},
+      role: "assistant",
+      parts: []
+    },
+    activeTextPart: void 0,
+    activeReasoningPart: void 0,
+    partialToolCalls: {},
+    step: s
+  };
+}
+function $r({
+  stream: e,
+  onToolCall: t,
+  messageMetadataSchema: n,
+  runUpdateMessageJob: r
+}) {
+  return e.pipeThrough(
+    new TransformStream({
+      async transform(s, a) {
+        await r(async ({ state: o, write: i }) => {
+          function l(c, p) {
+            const h = o.message.parts.find(
+              (g) => g.type === "tool-invocation" && g.toolInvocation.toolCallId === c
+            );
+            h != null ? h.toolInvocation = p : o.message.parts.push({
+              type: "tool-invocation",
+              toolInvocation: p
+            });
+          }
+          async function u(c) {
+            if (c != null) {
+              const p = o.message.metadata != null ? Mn(o.message.metadata, c) : c;
+              n != null && await Ta({
+                value: p,
+                schema: n
+              }), o.message.metadata = p;
+            }
+          }
+          switch (s.type) {
+            case "text": {
+              o.activeTextPart == null ? (o.activeTextPart = {
+                type: "text",
+                text: s.text
+              }, o.message.parts.push(o.activeTextPart)) : o.activeTextPart.text += s.text, i();
+              break;
+            }
+            case "reasoning": {
+              o.activeReasoningPart == null ? (o.activeReasoningPart = {
+                type: "reasoning",
+                text: s.text,
+                providerMetadata: s.providerMetadata
+              }, o.message.parts.push(o.activeReasoningPart)) : (o.activeReasoningPart.text += s.text, o.activeReasoningPart.providerMetadata = s.providerMetadata), i();
+              break;
+            }
+            case "reasoning-part-finish": {
+              o.activeReasoningPart != null && (o.activeReasoningPart = void 0);
+              break;
+            }
+            case "file": {
+              o.message.parts.push({
+                type: "file",
+                mediaType: s.mediaType,
+                url: s.url
+              }), i();
+              break;
+            }
+            case "source": {
+              o.message.parts.push({
+                type: "source",
+                source: {
+                  sourceType: "url",
+                  id: s.id,
+                  url: s.url,
+                  title: s.title,
+                  providerMetadata: s.providerMetadata
+                }
+              }), i();
+              break;
+            }
+            case "tool-call-streaming-start": {
+              const c = qt(o.message);
+              o.partialToolCalls[s.toolCallId] = {
+                text: "",
+                step: o.step,
+                toolName: s.toolName,
+                index: c.length
+              }, l(s.toolCallId, {
+                state: "partial-call",
+                step: o.step,
+                toolCallId: s.toolCallId,
+                toolName: s.toolName,
+                args: void 0
+              }), i();
+              break;
+            }
+            case "tool-call-delta": {
+              const c = o.partialToolCalls[s.toolCallId];
+              c.text += s.argsTextDelta;
+              const { value: p } = await Nr(
+                c.text
+              );
+              l(s.toolCallId, {
+                state: "partial-call",
+                step: c.step,
+                toolCallId: s.toolCallId,
+                toolName: c.toolName,
+                args: p
+              }), i();
+              break;
+            }
+            case "tool-call": {
+              if (l(s.toolCallId, {
+                state: "call",
+                step: o.step,
+                toolCallId: s.toolCallId,
+                toolName: s.toolName,
+                args: s.args
+              }), i(), t) {
+                const c = await t({
+                  toolCall: s
+                });
+                c != null && (l(s.toolCallId, {
+                  state: "result",
+                  step: o.step,
+                  toolCallId: s.toolCallId,
+                  toolName: s.toolName,
+                  args: s.args,
+                  result: c
+                }), i());
+              }
+              break;
+            }
+            case "tool-result": {
+              const c = qt(o.message);
+              if (c == null)
+                throw new Error("tool_result must be preceded by a tool_call");
+              const p = c.findIndex(
+                (h) => h.toolCallId === s.toolCallId
+              );
+              if (p === -1)
+                throw new Error(
+                  "tool_result must be preceded by a tool_call with the same toolCallId"
+                );
+              l(s.toolCallId, {
+                ...c[p],
+                state: "result",
+                result: s.result
+              }), i();
+              break;
+            }
+            case "start-step": {
+              o.message.parts.push({ type: "step-start" }), await u(s.metadata), i();
+              break;
+            }
+            case "finish-step": {
+              o.step += 1, o.activeTextPart = void 0, o.activeReasoningPart = void 0, await u(s.metadata), s.metadata != null && i();
+              break;
+            }
+            case "start": {
+              s.messageId != null && (o.message.id = s.messageId), await u(s.metadata), (s.messageId != null || s.metadata != null) && i();
+              break;
+            }
+            case "finish": {
+              await u(s.metadata), s.metadata != null && i();
+              break;
+            }
+            case "metadata": {
+              await u(s.metadata), s.metadata != null && i();
+              break;
+            }
+            case "error":
+              throw new Error(s.errorText);
+            default:
+              if (s.type.startsWith("data-")) {
+                const c = s.id != null ? o.message.parts.find(
+                  (p) => s.type === p.type && s.id === p.id
+                ) : void 0;
+                c != null ? c.value = Mn(
+                  c.data,
+                  s.data
+                ) : o.message.parts.push({
+                  type: s.type,
+                  id: s.id,
+                  value: s.data
+                }), i();
+              }
+          }
+          a.enqueue(s);
+        });
+      }
+    })
+  );
+}
+function Vp({
+  stream: e
+}) {
+  return e.pipeThrough(
+    new TransformStream({
+      start(t) {
+        t.enqueue({ type: "start" }), t.enqueue({ type: "start-step" });
+      },
+      async transform(t, n) {
+        n.enqueue({ type: "text", text: t });
+      },
+      async flush(t) {
+        t.enqueue({ type: "finish-step" }), t.enqueue({ type: "finish" });
+      }
+    })
+  );
+}
+var Zo = () => fetch;
+async function Vo({
+  api: e,
+  body: t,
+  streamProtocol: n = "ui-message",
+  credentials: r,
+  headers: s,
+  abortController: a,
+  fetch: o = Zo(),
+  requestType: i = "generate"
+}) {
+  var l, u, c;
+  const p = i === "resume" ? await o(`${e}?chatId=${t.id}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      ...s
+    },
+    signal: (l = a == null ? void 0 : a()) == null ? void 0 : l.signal,
+    credentials: r
+  }) : await o(e, {
+    method: "POST",
+    body: JSON.stringify(t),
+    headers: {
+      "Content-Type": "application/json",
+      ...s
+    },
+    signal: (u = a == null ? void 0 : a()) == null ? void 0 : u.signal,
+    credentials: r
+  });
+  if (!p.ok)
+    throw new Error(
+      (c = await p.text()) != null ? c : "Failed to fetch the chat response."
+    );
+  if (!p.body)
+    throw new Error("The response body is empty.");
+  return n === "text" ? Vp({
+    stream: p.body.pipeThrough(new TextDecoderStream())
+  }) : Sr({
+    stream: p.body,
+    schema: Lo
+  }).pipeThrough(
+    new TransformStream({
+      async transform(h, g) {
+        if (!h.success)
+          throw h.error;
+        g.enqueue(h.value);
+      }
+    })
+  );
+}
+async function Bp({
+  stream: e,
+  onUpdate: t,
+  onFinish: n,
+  onToolCall: r,
+  generateId: s,
+  lastMessage: a,
+  messageMetadataSchema: o
+}) {
+  const i = Pr({
+    lastMessage: a,
+    newMessageId: s()
+  });
+  await Zn({
+    stream: $r({
+      stream: e,
+      onToolCall: r,
+      messageMetadataSchema: o,
+      runUpdateMessageJob: async (u) => {
+        await u({
+          state: i,
+          write: () => {
+            t({ message: i.message });
+          }
+        });
+      }
+    }),
+    onError: (u) => {
+      throw u;
+    }
+  }), n == null || n({ message: i.message });
+}
+async function If({
+  api: e,
+  body: t,
+  streamProtocol: n = "ui-message",
+  credentials: r,
+  headers: s,
+  abortController: a,
+  onUpdate: o,
+  onFinish: i,
+  onToolCall: l,
+  generateId: u,
+  fetch: c = Zo(),
+  lastMessage: p,
+  requestType: h = "generate",
+  messageMetadataSchema: g
+}) {
+  const v = await Vo({
+    api: e,
+    body: t,
+    streamProtocol: n,
+    credentials: r,
+    headers: s,
+    abortController: a,
+    fetch: c,
+    requestType: h
+  });
+  await Bp({
+    stream: v,
+    onUpdate: o,
+    onFinish: i,
+    onToolCall: l,
+    generateId: u,
+    lastMessage: p,
+    messageMetadataSchema: g
+  });
+}
+async function Fp({
+  stream: e,
+  onTextPart: t
+}) {
+  const n = e.pipeThrough(new TextDecoderStream()).getReader();
+  for (; ; ) {
+    const { done: r, value: s } = await n.read();
+    if (r)
+      break;
+    await t(s);
+  }
+}
+var Gp = () => fetch;
+async function Cf({
+  api: e,
+  prompt: t,
+  credentials: n,
+  headers: r,
+  body: s,
+  streamProtocol: a = "data",
+  setCompletion: o,
+  setLoading: i,
+  setError: l,
+  setAbortController: u,
+  onFinish: c,
+  onError: p,
+  fetch: h = Gp()
+}) {
+  var g;
+  try {
+    i(!0), l(void 0);
+    const v = new AbortController();
+    u(v), o("");
+    const y = await h(e, {
+      method: "POST",
+      body: JSON.stringify({
+        prompt: t,
+        ...s
+      }),
+      credentials: n,
+      headers: {
+        "Content-Type": "application/json",
+        ...r
+      },
+      signal: v.signal
+    }).catch((b) => {
+      throw b;
+    });
+    if (!y.ok)
+      throw new Error(
+        (g = await y.text()) != null ? g : "Failed to fetch the chat response."
+      );
+    if (!y.body)
+      throw new Error("The response body is empty.");
+    let m = "";
+    switch (a) {
+      case "text": {
+        await Fp({
+          stream: y.body,
+          onTextPart: (b) => {
+            m += b, o(m);
+          }
+        });
+        break;
+      }
+      case "data": {
+        await Zn({
+          stream: Sr({
+            stream: y.body,
+            schema: Lo
+          }).pipeThrough(
+            new TransformStream({
+              async transform(b) {
+                if (!b.success)
+                  throw b.error;
+                const S = b.value;
+                if (S.type === "text")
+                  m += S.text, o(m);
+                else if (S.type === "error")
+                  throw new Error(S.errorText);
+              }
+            })
+          ),
+          onError: (b) => {
+            throw b;
+          }
+        });
+        break;
+      }
+      default: {
+        const b = a;
+        throw new Error(`Unknown stream protocol: ${b}`);
+      }
+    }
+    return c && c(t, m), u(null), m;
+  } catch (v) {
+    if (v.name === "AbortError")
+      return u(null), null;
+    v instanceof Error && p && p(v), l(v);
+  } finally {
+    i(!1);
+  }
+}
+var ws = class {
+  constructor() {
+    this.queue = [], this.isProcessing = !1;
+  }
+  async processQueue() {
+    if (!this.isProcessing) {
+      for (this.isProcessing = !0; this.queue.length > 0; )
+        await this.queue[0](), this.queue.shift();
+      this.isProcessing = !1;
+    }
+  }
+  async run(e) {
+    return new Promise((t, n) => {
+      this.queue.push(async () => {
+        try {
+          await e(), t();
+        } catch (r) {
+          n(r);
+        }
+      }), this.processQueue();
+    });
+  }
+};
+function Jp({
+  originalMaxToolInvocationStep: e,
+  originalMessageCount: t,
+  maxSteps: n,
+  messages: r
+}) {
+  var s;
+  const a = r[r.length - 1];
+  return (
+    // check if the feature is enabled:
+    n > 1 && // ensure there is a last message:
+    a != null && // ensure we actually have new steps (to prevent infinite loops in case of errors):
+    (r.length > t || Nn(qt(a)) !== e) && // check that next step is possible:
+    Bo(a) && // limit the number of automatic steps:
+    ((s = Nn(qt(a))) != null ? s : 0) < n
+  );
+}
+function Bo(e) {
+  if (e.role !== "assistant")
+    return !1;
+  const t = e.parts.reduce((r, s, a) => s.type === "step-start" ? a : r, -1), n = e.parts.slice(t + 1).filter((r) => r.type === "tool-invocation");
+  return n.length > 0 && n.every((r) => "result" in r.toolInvocation);
+}
+function Hp({
+  messages: e,
+  toolCallId: t,
+  toolResult: n
+}) {
+  const s = e[e.length - 1].parts.find(
+    (a) => a.type === "tool-invocation" && a.toolInvocation.toolCallId === t
+  );
+  s != null && (s.toolInvocation = {
+    ...s.toolInvocation,
+    state: "result",
+    result: n
+  });
+}
+var zp = class {
+  constructor({
+    chats: e = {},
+    generateId: t,
+    messageMetadataSchema: n,
+    transport: r,
+    maxSteps: s = 1
+  }) {
+    this.chats = new Map(
+      Object.entries(e).map(([a, o]) => [
+        a,
+        {
+          messages: [...o.messages],
+          status: "ready",
+          activeResponse: void 0,
+          error: void 0,
+          jobExecutor: new ws()
+        }
+      ])
+    ), this.maxSteps = s, this.transport = r, this.subscribers = /* @__PURE__ */ new Set(), this.generateId = t ?? st, this.messageMetadataSchema = n;
+  }
+  hasChat(e) {
+    return this.chats.has(e);
+  }
+  addChat(e, t) {
+    this.chats.set(e, {
+      messages: t,
+      status: "ready",
+      jobExecutor: new ws()
+    });
+  }
+  getChats() {
+    return Array.from(this.chats.entries());
+  }
+  get chatCount() {
+    return this.chats.size;
+  }
+  getStatus(e) {
+    return this.getChat(e).status;
+  }
+  setStatus({
+    id: e,
+    status: t,
+    error: n
+  }) {
+    const r = this.getChat(e);
+    r.status !== t && (r.status = t, r.error = n, this.emit({ type: "chat-status-changed", chatId: e, error: n }));
+  }
+  getError(e) {
+    return this.getChat(e).error;
+  }
+  getMessages(e) {
+    return this.getChat(e).messages;
+  }
+  getLastMessage(e) {
+    const t = this.getChat(e);
+    return t.messages[t.messages.length - 1];
+  }
+  subscribe(e) {
+    return this.subscribers.add(e), () => this.subscribers.delete(e);
+  }
+  setMessages({
+    id: e,
+    messages: t
+  }) {
+    this.getChat(e).messages = [...t], this.emit({ type: "chat-messages-changed", chatId: e });
+  }
+  removeAssistantResponse(e) {
+    const t = this.getChat(e), n = t.messages[t.messages.length - 1];
+    if (n == null)
+      throw new Error("Cannot remove assistant response from empty chat");
+    if (n.role !== "assistant")
+      throw new Error("Last message is not an assistant message");
+    this.setMessages({ id: e, messages: t.messages.slice(0, -1) });
+  }
+  async submitMessage({
+    chatId: e,
+    message: t,
+    headers: n,
+    body: r,
+    onError: s,
+    onToolCall: a,
+    onFinish: o
+  }) {
+    var i;
+    const u = this.getChat(e).messages;
+    await this.triggerRequest({
+      chatId: e,
+      messages: u.concat({
+        ...t,
+        id: (i = t.id) != null ? i : this.generateId()
+      }),
+      headers: n,
+      body: r,
+      requestType: "generate",
+      onError: s,
+      onToolCall: a,
+      onFinish: o
+    });
+  }
+  async resubmitLastUserMessage({
+    chatId: e,
+    headers: t,
+    body: n,
+    onError: r,
+    onToolCall: s,
+    onFinish: a
+  }) {
+    const o = this.getChat(e).messages, i = o[o.length - 1].role === "assistant" ? o.slice(0, -1) : o;
+    if (i.length !== 0)
+      return this.triggerRequest({
+        chatId: e,
+        requestType: "generate",
+        messages: i,
+        headers: t,
+        body: n,
+        onError: r,
+        onToolCall: s,
+        onFinish: a
+      });
+  }
+  async resumeStream({
+    chatId: e,
+    headers: t,
+    body: n,
+    onError: r,
+    onToolCall: s,
+    onFinish: a
+  }) {
+    const i = this.getChat(e).messages;
+    return this.triggerRequest({
+      chatId: e,
+      messages: i,
+      requestType: "resume",
+      headers: t,
+      body: n,
+      onError: r,
+      onToolCall: s,
+      onFinish: a
+    });
+  }
+  async addToolResult({
+    chatId: e,
+    toolCallId: t,
+    result: n
+  }) {
+    const r = this.getChat(e);
+    r.jobExecutor.run(async () => {
+      const s = r.messages;
+      if (Hp({
+        messages: s,
+        toolCallId: t,
+        toolResult: n
+      }), this.setMessages({ id: e, messages: s }), r.status === "submitted" || r.status === "streaming")
+        return;
+      const a = s[s.length - 1];
+      Bo(a) && await this.triggerRequest({
+        messages: s,
+        requestType: "generate",
+        chatId: e
+      });
+    });
+  }
+  async stopStream({ chatId: e }) {
+    var t;
+    const n = this.getChat(e);
+    n.status !== "streaming" && n.status !== "submitted" || (t = n.activeResponse) != null && t.abortController && (n.activeResponse.abortController.abort(), n.activeResponse.abortController = void 0);
+  }
+  emit(e) {
+    for (const t of this.subscribers)
+      t.onChatChanged(e);
+  }
+  getChat(e) {
+    if (!this.hasChat(e))
+      throw new Error(`chat '${e}' not found`);
+    return this.chats.get(e);
+  }
+  async triggerRequest({
+    chatId: e,
+    messages: t,
+    requestType: n,
+    headers: r,
+    body: s,
+    onError: a,
+    onToolCall: o,
+    onFinish: i
+  }) {
+    const l = this, u = this.getChat(e);
+    this.setMessages({ id: e, messages: t }), this.setStatus({ id: e, status: "submitted", error: void 0 });
+    const c = t.length, p = Nn(
+      qt(t[t.length - 1])
+    );
+    try {
+      const g = {
+        state: Pr({
+          lastMessage: t[t.length - 1],
+          newMessageId: l.generateId()
+        }),
+        abortController: new AbortController()
+      };
+      u.activeResponse = g;
+      const v = await l.transport.submitMessages({
+        chatId: e,
+        messages: t,
+        body: s,
+        headers: r,
+        abortController: g.abortController,
+        requestType: n
+      }), y = (m) => (
+        // serialize the job execution to avoid race conditions:
+        u.jobExecutor.run(
+          () => m({
+            state: g.state,
+            write: () => {
+              l.setStatus({ id: e, status: "streaming" });
+              const S = [
+                ...g.state.message.id === t[t.length - 1].id ? t.slice(0, t.length - 1) : t,
+                g.state.message
+              ];
+              l.setMessages({
+                id: e,
+                messages: S
+              });
+            }
+          })
+        )
+      );
+      await Zn({
+        stream: $r({
+          stream: v,
+          onToolCall: o,
+          messageMetadataSchema: l.messageMetadataSchema,
+          runUpdateMessageJob: y
+        }),
+        onError: (m) => {
+          throw m;
+        }
+      }), i == null || i({ message: g.state.message }), this.setStatus({ id: e, status: "ready" });
+    } catch (g) {
+      if (g.name === "AbortError")
+        return this.setStatus({ id: e, status: "ready" }), null;
+      a && g instanceof Error && a(g), this.setStatus({ id: e, status: "error", error: g });
+    } finally {
+      u.activeResponse = void 0;
+    }
+    const h = l.getMessages(e);
+    Jp({
+      originalMaxToolInvocationStep: p,
+      originalMessageCount: c,
+      maxSteps: l.maxSteps,
+      messages: h
+    }) && await l.triggerRequest({
+      chatId: e,
+      requestType: n,
+      onError: a,
+      onToolCall: o,
+      onFinish: i,
+      headers: r,
+      body: s,
+      messages: h
+    });
+  }
+}, Wp = class {
+  constructor({
+    api: e,
+    credentials: t,
+    headers: n,
+    body: r,
+    streamProtocol: s,
+    fetch: a,
+    prepareRequestBody: o
+  }) {
+    this.api = e, this.credentials = t, this.headers = n, this.body = r, this.streamProtocol = s, this.fetch = a, this.prepareRequestBody = o;
+  }
+  submitMessages({
+    chatId: e,
+    messages: t,
+    abortController: n,
+    body: r,
+    headers: s,
+    requestType: a
+  }) {
+    var o, i;
+    return Vo({
+      api: this.api,
+      headers: {
+        ...this.headers,
+        ...s
+      },
+      body: (i = (o = this.prepareRequestBody) == null ? void 0 : o.call(this, {
+        id: e,
+        // TODO change to chatId
+        messages: t,
+        ...this.body,
+        ...r
+      })) != null ? i : {
+        id: e,
+        // TODO change to chatId
+        messages: t,
+        ...this.body,
+        ...r
+      },
+      streamProtocol: this.streamProtocol,
+      credentials: this.credentials,
+      abortController: () => n,
+      fetch: this.fetch,
+      requestType: a
+    });
+  }
+};
+async function Rf(e) {
+  if (e == null)
+    return [];
+  if (!globalThis.FileList || !(e instanceof globalThis.FileList))
+    throw new Error("FileList is not supported in the current environment");
+  return Promise.all(
+    Array.from(e).map(async (t) => {
+      const { name: n, type: r } = t, s = await new Promise((a, o) => {
+        const i = new FileReader();
+        i.onload = (l) => {
+          var u;
+          a((u = l.target) == null ? void 0 : u.result);
+        }, i.onerror = (l) => o(l), i.readAsDataURL(t);
+      });
+      return {
+        type: "file",
+        mediaType: r,
+        filename: n,
+        url: s
+      };
+    })
+  );
+}
+function Yp(e, t) {
+  var n, r;
+  const s = (n = t == null ? void 0 : t.tools) != null ? n : {}, a = [];
+  for (const o of e)
+    switch (o.role) {
+      case "system": {
+        a.push({
+          role: "system",
+          content: o.parts.map((i) => i.type === "text" ? i.text : "").join("")
+        });
+        break;
+      }
+      case "user": {
+        a.push({
+          role: "user",
+          content: o.parts.filter(
+            (i) => i.type === "text" || i.type === "file"
+          ).map(
+            (i) => i.type === "file" ? {
+              type: "file",
+              mediaType: i.mediaType,
+              filename: i.filename,
+              data: i.url
+            } : i
+          )
+        });
+        break;
+      }
+      case "assistant": {
+        if (o.parts != null) {
+          let i = function() {
+            const p = [];
+            for (const g of c)
+              switch (g.type) {
+                case "text": {
+                  p.push(g);
+                  break;
+                }
+                case "file": {
+                  p.push({
+                    type: "file",
+                    mediaType: g.mediaType,
+                    data: g.url
+                  });
+                  break;
+                }
+                case "reasoning": {
+                  p.push({
+                    type: "reasoning",
+                    text: g.text,
+                    providerOptions: g.providerMetadata
+                  });
+                  break;
+                }
+                case "tool-invocation":
+                  p.push({
+                    type: "tool-call",
+                    toolCallId: g.toolInvocation.toolCallId,
+                    toolName: g.toolInvocation.toolName,
+                    args: g.toolInvocation.args
+                  });
+                  break;
+                default: {
+                  const v = g;
+                  throw new Error(`Unsupported part: ${v}`);
+                }
+              }
+            a.push({
+              role: "assistant",
+              content: p
+            });
+            const h = c.filter(
+              (g) => g.type === "tool-invocation"
+            ).map((g) => g.toolInvocation);
+            h.length > 0 && a.push({
+              role: "tool",
+              content: h.map(
+                (g) => {
+                  if (!("result" in g))
+                    throw new _s({
+                      originalMessage: o,
+                      message: "ToolInvocation must have a result: " + JSON.stringify(g)
+                    });
+                  const { toolCallId: v, toolName: y, result: m } = g, b = s[y];
+                  return (b == null ? void 0 : b.experimental_toToolResultContent) != null ? {
+                    type: "tool-result",
+                    toolCallId: v,
+                    toolName: y,
+                    result: b.experimental_toToolResultContent(m),
+                    experimental_content: b.experimental_toToolResultContent(m)
+                  } : {
+                    type: "tool-result",
+                    toolCallId: v,
+                    toolName: y,
+                    result: m
+                  };
+                }
+              )
+            }), c = [], u = !1, l++;
+          }, l = 0, u = !1, c = [];
+          for (const p of o.parts)
+            switch (p.type) {
+              case "text": {
+                u && i(), c.push(p);
+                break;
+              }
+              case "file":
+              case "reasoning": {
+                c.push(p);
+                break;
+              }
+              case "tool-invocation": {
+                ((r = p.toolInvocation.step) != null ? r : 0) !== l && i(), c.push(p), u = !0;
+                break;
+              }
+            }
+          i();
+          break;
+        }
+        break;
+      }
+      default: {
+        const i = o.role;
+        throw new _s({
+          originalMessage: o,
+          message: `Unsupported role: ${i}`
+        });
+      }
+    }
+  return a;
+}
+var Ef = Yp;
+function Af({
+  api: e,
+  fetch: t,
+  streamProtocol: n = "ui-message",
+  credentials: r,
+  headers: s,
+  body: a,
+  prepareRequestBody: o,
+  generateId: i = st,
+  messageMetadataSchema: l,
+  maxSteps: u = 1,
+  chats: c
+}) {
+  return new zp({
+    transport: new Wp({
+      api: e,
+      fetch: t,
+      streamProtocol: n,
+      credentials: r,
+      headers: s,
+      body: a,
+      prepareRequestBody: o
+    }),
+    generateId: i,
+    messageMetadataSchema: l,
+    maxSteps: u,
+    chats: c
+  });
+}
+function Of({
+  execute: e,
+  onError: t = () => "An error occurred."
+  // mask error messages for safety by default
+}) {
+  let n;
+  const r = [], s = new ReadableStream({
+    start(i) {
+      n = i;
+    }
+  });
+  function a(i) {
+    try {
+      n.enqueue(i);
+    } catch {
+    }
+  }
+  try {
+    const i = e({
+      write(l) {
+        a(l);
+      },
+      merge(l) {
+        r.push(
+          (async () => {
+            const u = l.getReader();
+            for (; ; ) {
+              const { done: c, value: p } = await u.read();
+              if (c)
+                break;
+              a(p);
+            }
+          })().catch((u) => {
+            a({ type: "error", errorText: t(u) });
+          })
+        );
+      },
+      onError: t
+    });
+    i && r.push(
+      i.catch((l) => {
+        a({ type: "error", errorText: t(l) });
+      })
+    );
+  } catch (i) {
+    a({ type: "error", errorText: t(i) });
+  }
+  return new Promise(async (i) => {
+    for (; r.length > 0; )
+      await r.shift();
+    i();
+  }).finally(() => {
+    try {
+      n.close();
+    } catch {
+    }
+  }), s;
+}
+var Fo = {
+  "content-type": "text/event-stream",
+  "cache-control": "no-cache",
+  connection: "keep-alive",
+  "x-vercel-ai-ui-message-stream": "v1",
+  "x-accel-buffering": "no"
+  // disable nginx buffering
+}, Go = class extends TransformStream {
+  constructor() {
+    super({
+      transform(e, t) {
+        t.enqueue(`data: ${JSON.stringify(e)}
+
+`);
+      },
+      flush(e) {
+        e.enqueue(`data: [DONE]
+
+`);
+      }
+    });
+  }
+};
+function Kp({
+  status: e,
+  statusText: t,
+  headers: n,
+  stream: r
+}) {
+  return new Response(
+    r.pipeThrough(new Go()).pipeThrough(new TextEncoderStream()),
+    {
+      status: e,
+      statusText: t,
+      headers: an(n, Fo)
+    }
+  );
+}
+function Xp({
+  response: e,
+  status: t,
+  statusText: n,
+  headers: r,
+  stream: s
+}) {
+  qo({
+    response: e,
+    status: t,
+    statusText: n,
+    headers: Object.fromEntries(
+      an(r, Fo).entries()
+    ),
+    stream: s.pipeThrough(new Go()).pipeThrough(new TextEncoderStream())
+  });
+}
+function Mf(e) {
+  const [t, n] = e.split(",");
+  if (t.split(";")[0].split(":")[1] == null || n == null)
+    throw new Error("Invalid data URL format");
+  try {
+    return window.atob(n);
+  } catch {
+    throw new Error("Error decoding data URL");
+  }
+}
+function Pn(e, t) {
+  if (e === t)
+    return !0;
+  if (e == null || t == null)
+    return !1;
+  if (typeof e != "object" && typeof t != "object")
+    return e === t;
+  if (e.constructor !== t.constructor)
+    return !1;
+  if (e instanceof Date && t instanceof Date)
+    return e.getTime() === t.getTime();
+  if (Array.isArray(e)) {
+    if (e.length !== t.length)
+      return !1;
+    for (let s = 0; s < e.length; s++)
+      if (!Pn(e[s], t[s]))
+        return !1;
+    return !0;
+  }
+  const n = Object.keys(e), r = Object.keys(t);
+  if (n.length !== r.length)
+    return !1;
+  for (const s of n)
+    if (!r.includes(s) || !Pn(e[s], t[s]))
+      return !1;
+  return !0;
+}
+function Nf(e, t) {
+  if (e.length !== t.length)
+    throw new le({
+      parameter: "vector1,vector2",
+      value: { vector1Length: e.length, vector2Length: t.length },
+      message: "Vectors must have the same length"
+    });
+  const n = e.length;
+  if (n === 0)
+    return 0;
+  let r = 0, s = 0, a = 0;
+  for (let o = 0; o < n; o++) {
+    const i = e[o], l = t[o];
+    r += i * i, s += l * l, a += i * l;
+  }
+  return r === 0 || s === 0 ? 0 : a / (Math.sqrt(r) * Math.sqrt(s));
+}
+function Pf({
+  chunks: e,
+  initialDelayInMs: t = 0,
+  chunkDelayInMs: n = 0,
+  _internal: r
+}) {
+  var s;
+  const a = (s = r == null ? void 0 : r.delay) != null ? s : Tr;
+  let o = 0;
+  return new ReadableStream({
+    async pull(i) {
+      o < e.length ? (await a(o === 0 ? t : n), i.enqueue(e[o++])) : i.close();
+    }
+  });
+}
+var Qp = ({
+  maxRetries: e = 2,
+  initialDelayInMs: t = 2e3,
+  backoffFactor: n = 2
+} = {}) => async (r) => Jo(r, {
+  maxRetries: e,
+  delayInMs: t,
+  backoffFactor: n
 });
+async function Jo(e, {
+  maxRetries: t,
+  delayInMs: n,
+  backoffFactor: r
+}, s = []) {
+  try {
+    return await e();
+  } catch (a) {
+    if (cn(a) || t === 0)
+      throw a;
+    const o = Kl(a), i = [...s, a], l = i.length;
+    if (l > t)
+      throw new bs({
+        message: `Failed after ${l} attempts. Last error: ${o}`,
+        reason: "maxRetriesExceeded",
+        errors: i
+      });
+    if (a instanceof Error && $e.isInstance(a) && a.isRetryable === !0 && l <= t)
+      return await Tr(n), Jo(
+        e,
+        { maxRetries: t, delayInMs: r * n, backoffFactor: r },
+        i
+      );
+    throw l === 1 ? a : new bs({
+      message: `Failed after ${l} attempts with non-retryable error: '${o}'`,
+      reason: "errorNotRetryable",
+      errors: i
+    });
+  }
+}
+function it({
+  maxRetries: e
+}) {
+  if (e != null) {
+    if (!Number.isInteger(e))
+      throw new le({
+        parameter: "maxRetries",
+        value: e,
+        message: "maxRetries must be an integer"
+      });
+    if (e < 0)
+      throw new le({
+        parameter: "maxRetries",
+        value: e,
+        message: "maxRetries must be >= 0"
+      });
+  }
+  const t = e ?? 2;
+  return {
+    maxRetries: t,
+    retry: Qp({ maxRetries: t })
+  };
+}
+function Ee({
+  operationId: e,
+  telemetry: t
+}) {
+  return {
+    // standardized operation and resource name:
+    "operation.name": `${e}${(t == null ? void 0 : t.functionId) != null ? ` ${t.functionId}` : ""}`,
+    "resource.name": t == null ? void 0 : t.functionId,
+    // detailed, AI SDK specific data:
+    "ai.operationId": e,
+    "ai.telemetry.functionId": t == null ? void 0 : t.functionId
+  };
+}
+function Lt({
+  model: e,
+  settings: t,
+  telemetry: n,
+  headers: r
+}) {
+  var s;
+  return {
+    "ai.model.provider": e.provider,
+    "ai.model.id": e.modelId,
+    // settings:
+    ...Object.entries(t).reduce((a, [o, i]) => (a[`ai.settings.${o}`] = i, a), {}),
+    // add metadata as attributes:
+    ...Object.entries((s = n == null ? void 0 : n.metadata) != null ? s : {}).reduce(
+      (a, [o, i]) => (a[`ai.telemetry.metadata.${o}`] = i, a),
+      {}
+    ),
+    // request headers
+    ...Object.entries(r ?? {}).reduce((a, [o, i]) => (i !== void 0 && (a[`ai.request.headers.${o}`] = i), a), {})
+  };
+}
+var eh = {
+  startSpan() {
+    return un;
+  },
+  startActiveSpan(e, t, n, r) {
+    if (typeof t == "function")
+      return t(un);
+    if (typeof n == "function")
+      return n(un);
+    if (typeof r == "function")
+      return r(un);
+  }
+}, un = {
+  spanContext() {
+    return th;
+  },
+  setAttribute() {
+    return this;
+  },
+  setAttributes() {
+    return this;
+  },
+  addEvent() {
+    return this;
+  },
+  addLink() {
+    return this;
+  },
+  addLinks() {
+    return this;
+  },
+  setStatus() {
+    return this;
+  },
+  updateName() {
+    return this;
+  },
+  end() {
+    return this;
+  },
+  isRecording() {
+    return !1;
+  },
+  recordException() {
+    return this;
+  }
+}, th = {
+  traceId: "",
+  spanId: "",
+  traceFlags: 0
+};
+function Zt({
+  isEnabled: e = !1,
+  tracer: t
+} = {}) {
+  return e ? t || _p.getTracer("ai") : eh;
+}
+function Ae({
+  name: e,
+  tracer: t,
+  attributes: n,
+  fn: r,
+  endWhenDone: s = !0
+}) {
+  return t.startActiveSpan(e, { attributes: n }, async (a) => {
+    try {
+      const o = await r(a);
+      return s && a.end(), o;
+    } catch (o) {
+      try {
+        o instanceof Error ? (a.recordException({
+          name: o.name,
+          message: o.message,
+          stack: o.stack
+        }), a.setStatus({
+          code: On.ERROR,
+          message: o.message
+        })) : a.setStatus({ code: On.ERROR });
+      } finally {
+        a.end();
+      }
+      throw o;
+    }
+  });
+}
+function X({
+  telemetry: e,
+  attributes: t
+}) {
+  return (e == null ? void 0 : e.isEnabled) !== !0 ? {} : Object.entries(t).reduce((n, [r, s]) => {
+    if (s === void 0)
+      return n;
+    if (typeof s == "object" && "input" in s && typeof s.input == "function") {
+      if ((e == null ? void 0 : e.recordInputs) === !1)
+        return n;
+      const a = s.input();
+      return a === void 0 ? n : { ...n, [r]: a };
+    }
+    if (typeof s == "object" && "output" in s && typeof s.output == "function") {
+      if ((e == null ? void 0 : e.recordOutputs) === !1)
+        return n;
+      const a = s.output();
+      return a === void 0 ? n : { ...n, [r]: a };
+    }
+    return { ...n, [r]: s };
+  }, {});
+}
+async function $f({
+  model: e,
+  value: t,
+  providerOptions: n,
+  maxRetries: r,
+  abortSignal: s,
+  headers: a,
+  experimental_telemetry: o
+}) {
+  const { maxRetries: i, retry: l } = it({ maxRetries: r }), u = Lt({
+    model: e,
+    telemetry: o,
+    headers: a,
+    settings: { maxRetries: i }
+  }), c = Zt(o);
+  return Ae({
+    name: "ai.embed",
+    attributes: X({
+      telemetry: o,
+      attributes: {
+        ...Ee({ operationId: "ai.embed", telemetry: o }),
+        ...u,
+        "ai.value": { input: () => JSON.stringify(t) }
+      }
+    }),
+    tracer: c,
+    fn: async (p) => {
+      const { embedding: h, usage: g, response: v } = await l(
+        () => (
+          // nested spans to align with the embedMany telemetry data:
+          Ae({
+            name: "ai.embed.doEmbed",
+            attributes: X({
+              telemetry: o,
+              attributes: {
+                ...Ee({
+                  operationId: "ai.embed.doEmbed",
+                  telemetry: o
+                }),
+                ...u,
+                // specific settings that only make sense on the outer level:
+                "ai.values": { input: () => [JSON.stringify(t)] }
+              }
+            }),
+            tracer: c,
+            fn: async (y) => {
+              var m;
+              const b = await e.doEmbed({
+                values: [t],
+                abortSignal: s,
+                headers: a,
+                providerOptions: n
+              }), S = b.embeddings[0], w = (m = b.usage) != null ? m : { tokens: NaN };
+              return y.setAttributes(
+                X({
+                  telemetry: o,
+                  attributes: {
+                    "ai.embeddings": {
+                      output: () => b.embeddings.map(
+                        (x) => JSON.stringify(x)
+                      )
+                    },
+                    "ai.usage.tokens": w.tokens
+                  }
+                })
+              ), {
+                embedding: S,
+                usage: w,
+                response: b.response
+              };
+            }
+          })
+        )
+      );
+      return p.setAttributes(
+        X({
+          telemetry: o,
+          attributes: {
+            "ai.embedding": { output: () => JSON.stringify(h) },
+            "ai.usage.tokens": g.tokens
+          }
+        })
+      ), new nh({
+        value: t,
+        embedding: h,
+        usage: g,
+        response: v
+      });
+    }
+  });
+}
+var nh = class {
+  constructor(e) {
+    this.value = e.value, this.embedding = e.embedding, this.usage = e.usage, this.response = e.response;
+  }
+};
+function xs(e, t) {
+  if (t <= 0)
+    throw new Error("chunkSize must be greater than 0");
+  const n = [];
+  for (let r = 0; r < e.length; r += t)
+    n.push(e.slice(r, r + t));
+  return n;
+}
+async function jf({
+  model: e,
+  values: t,
+  maxParallelCalls: n = 1 / 0,
+  maxRetries: r,
+  abortSignal: s,
+  headers: a,
+  providerOptions: o,
+  experimental_telemetry: i
+}) {
+  const { maxRetries: l, retry: u } = it({ maxRetries: r }), c = Lt({
+    model: e,
+    telemetry: i,
+    headers: a,
+    settings: { maxRetries: l }
+  }), p = Zt(i);
+  return Ae({
+    name: "ai.embedMany",
+    attributes: X({
+      telemetry: i,
+      attributes: {
+        ...Ee({ operationId: "ai.embedMany", telemetry: i }),
+        ...c,
+        // specific settings that only make sense on the outer level:
+        "ai.values": {
+          input: () => t.map((h) => JSON.stringify(h))
+        }
+      }
+    }),
+    tracer: p,
+    fn: async (h) => {
+      const [g, v] = await Promise.all([
+        e.maxEmbeddingsPerCall,
+        e.supportsParallelCalls
+      ]);
+      if (g == null || g === 1 / 0) {
+        const { embeddings: x, usage: _, response: k } = await u(() => Ae({
+          name: "ai.embedMany.doEmbed",
+          attributes: X({
+            telemetry: i,
+            attributes: {
+              ...Ee({
+                operationId: "ai.embedMany.doEmbed",
+                telemetry: i
+              }),
+              ...c,
+              // specific settings that only make sense on the outer level:
+              "ai.values": {
+                input: () => t.map((O) => JSON.stringify(O))
+              }
+            }
+          }),
+          tracer: p,
+          fn: async (O) => {
+            var N;
+            const q = await e.doEmbed({
+              values: t,
+              abortSignal: s,
+              headers: a,
+              providerOptions: o
+            }), L = q.embeddings, ee = (N = q.usage) != null ? N : { tokens: NaN };
+            return O.setAttributes(
+              X({
+                telemetry: i,
+                attributes: {
+                  "ai.embeddings": {
+                    output: () => L.map((ae) => JSON.stringify(ae))
+                  },
+                  "ai.usage.tokens": ee.tokens
+                }
+              })
+            ), {
+              embeddings: L,
+              usage: ee,
+              response: q.response
+            };
+          }
+        }));
+        return h.setAttributes(
+          X({
+            telemetry: i,
+            attributes: {
+              "ai.embeddings": {
+                output: () => x.map((O) => JSON.stringify(O))
+              },
+              "ai.usage.tokens": _.tokens
+            }
+          })
+        ), new Ts({
+          values: t,
+          embeddings: x,
+          usage: _,
+          responses: [k]
+        });
+      }
+      const y = xs(t, g), m = [], b = [];
+      let S = 0;
+      const w = xs(
+        y,
+        v ? n : 1
+      );
+      for (const x of w) {
+        const _ = await Promise.all(
+          x.map((k) => u(() => Ae({
+            name: "ai.embedMany.doEmbed",
+            attributes: X({
+              telemetry: i,
+              attributes: {
+                ...Ee({
+                  operationId: "ai.embedMany.doEmbed",
+                  telemetry: i
+                }),
+                ...c,
+                // specific settings that only make sense on the outer level:
+                "ai.values": {
+                  input: () => k.map((O) => JSON.stringify(O))
+                }
+              }
+            }),
+            tracer: p,
+            fn: async (O) => {
+              var N;
+              const q = await e.doEmbed({
+                values: k,
+                abortSignal: s,
+                headers: a,
+                providerOptions: o
+              }), L = q.embeddings, ee = (N = q.usage) != null ? N : { tokens: NaN };
+              return O.setAttributes(
+                X({
+                  telemetry: i,
+                  attributes: {
+                    "ai.embeddings": {
+                      output: () => L.map(
+                        (ae) => JSON.stringify(ae)
+                      )
+                    },
+                    "ai.usage.tokens": ee.tokens
+                  }
+                })
+              ), {
+                embeddings: L,
+                usage: ee,
+                response: q.response
+              };
+            }
+          })))
+        );
+        for (const k of _)
+          m.push(...k.embeddings), b.push(k.response), S += k.usage.tokens;
+      }
+      return h.setAttributes(
+        X({
+          telemetry: i,
+          attributes: {
+            "ai.embeddings": {
+              output: () => m.map((x) => JSON.stringify(x))
+            },
+            "ai.usage.tokens": S
+          }
+        })
+      ), new Ts({
+        values: t,
+        embeddings: m,
+        usage: { tokens: S },
+        responses: b
+      });
+    }
+  });
+}
+var Ts = class {
+  constructor(e) {
+    this.values = e.values, this.embeddings = e.embeddings, this.usage = e.usage, this.responses = e.responses;
+  }
+}, Ho = [
+  {
+    mediaType: "image/gif",
+    bytesPrefix: [71, 73, 70],
+    base64Prefix: "R0lG"
+  },
+  {
+    mediaType: "image/png",
+    bytesPrefix: [137, 80, 78, 71],
+    base64Prefix: "iVBORw"
+  },
+  {
+    mediaType: "image/jpeg",
+    bytesPrefix: [255, 216],
+    base64Prefix: "/9j/"
+  },
+  {
+    mediaType: "image/webp",
+    bytesPrefix: [82, 73, 70, 70],
+    base64Prefix: "UklGRg"
+  },
+  {
+    mediaType: "image/bmp",
+    bytesPrefix: [66, 77],
+    base64Prefix: "Qk"
+  },
+  {
+    mediaType: "image/tiff",
+    bytesPrefix: [73, 73, 42, 0],
+    base64Prefix: "SUkqAA"
+  },
+  {
+    mediaType: "image/tiff",
+    bytesPrefix: [77, 77, 0, 42],
+    base64Prefix: "TU0AKg"
+  },
+  {
+    mediaType: "image/avif",
+    bytesPrefix: [
+      0,
+      0,
+      0,
+      32,
+      102,
+      116,
+      121,
+      112,
+      97,
+      118,
+      105,
+      102
+    ],
+    base64Prefix: "AAAAIGZ0eXBhdmlm"
+  },
+  {
+    mediaType: "image/heic",
+    bytesPrefix: [
+      0,
+      0,
+      0,
+      32,
+      102,
+      116,
+      121,
+      112,
+      104,
+      101,
+      105,
+      99
+    ],
+    base64Prefix: "AAAAIGZ0eXBoZWlj"
+  }
+], zo = [
+  {
+    mediaType: "audio/mpeg",
+    bytesPrefix: [255, 251],
+    base64Prefix: "//s="
+  },
+  {
+    mediaType: "audio/wav",
+    bytesPrefix: [82, 73, 70, 70],
+    base64Prefix: "UklGR"
+  },
+  {
+    mediaType: "audio/ogg",
+    bytesPrefix: [79, 103, 103, 83],
+    base64Prefix: "T2dnUw"
+  },
+  {
+    mediaType: "audio/flac",
+    bytesPrefix: [102, 76, 97, 67],
+    base64Prefix: "ZkxhQw"
+  },
+  {
+    mediaType: "audio/aac",
+    bytesPrefix: [64, 21, 0, 0],
+    base64Prefix: "QBUA"
+  },
+  {
+    mediaType: "audio/mp4",
+    bytesPrefix: [102, 116, 121, 112],
+    base64Prefix: "ZnR5cA"
+  }
+], rh = (e) => {
+  const t = typeof e == "string" ? Dn(e) : e, n = (t[6] & 127) << 21 | (t[7] & 127) << 14 | (t[8] & 127) << 7 | t[9] & 127;
+  return t.slice(n + 10);
+};
+function sh(e) {
+  return typeof e == "string" && e.startsWith("SUQz") || typeof e != "string" && e.length > 10 && e[0] === 73 && // 'I'
+  e[1] === 68 && // 'D'
+  e[2] === 51 ? rh(e) : e;
+}
+function Vn({
+  data: e,
+  signatures: t
+}) {
+  const n = sh(e);
+  for (const r of t)
+    if (typeof n == "string" ? n.startsWith(r.base64Prefix) : n.length >= r.bytesPrefix.length && r.bytesPrefix.every(
+      (s, a) => n[a] === s
+    ))
+      return r.mediaType;
+}
+var Bn = class {
+  constructor({
+    data: e,
+    mediaType: t
+  }) {
+    const n = e instanceof Uint8Array;
+    this.base64Data = n ? void 0 : e, this.uint8ArrayData = n ? e : void 0, this.mediaType = t;
+  }
+  // lazy conversion with caching to avoid unnecessary conversion overhead:
+  get base64() {
+    return this.base64Data == null && (this.base64Data = Sa(this.uint8ArrayData)), this.base64Data;
+  }
+  // lazy conversion with caching to avoid unnecessary conversion overhead:
+  get uint8Array() {
+    return this.uint8ArrayData == null && (this.uint8ArrayData = Dn(this.base64Data)), this.uint8ArrayData;
+  }
+}, ah = class extends Bn {
+  constructor(e) {
+    super(e), this.type = "file";
+  }
+};
+async function Df({
+  model: e,
+  prompt: t,
+  n = 1,
+  maxImagesPerCall: r,
+  size: s,
+  aspectRatio: a,
+  seed: o,
+  providerOptions: i,
+  maxRetries: l,
+  abortSignal: u,
+  headers: c
+}) {
+  var p, h;
+  const { retry: g } = it({ maxRetries: l }), v = (p = r ?? e.maxImagesPerCall) != null ? p : 1, y = Math.ceil(n / v), m = Array.from({ length: y }, (k, O) => {
+    if (O < y - 1)
+      return v;
+    const N = n % v;
+    return N === 0 ? v : N;
+  }), b = await Promise.all(
+    m.map(
+      async (k) => g(
+        () => e.doGenerate({
+          prompt: t,
+          n: k,
+          abortSignal: u,
+          headers: c,
+          size: s,
+          aspectRatio: a,
+          seed: o,
+          providerOptions: i ?? {}
+        })
+      )
+    )
+  ), S = [], w = [], x = [], _ = {};
+  for (const k of b) {
+    if (S.push(
+      ...k.images.map(
+        (O) => {
+          var N;
+          return new Bn({
+            data: O,
+            mediaType: (N = Vn({
+              data: O,
+              signatures: Ho
+            })) != null ? N : "image/png"
+          });
+        }
+      )
+    ), w.push(...k.warnings), k.providerMetadata)
+      for (const [O, N] of Object.entries(k.providerMetadata))
+        (h = _[O]) != null || (_[O] = { images: [] }), _[O].images.push(
+          ...k.providerMetadata[O].images
+        );
+    x.push(k.response);
+  }
+  if (!S.length)
+    throw new Rp({ responses: x });
+  return new oh({
+    images: S,
+    warnings: w,
+    responses: x,
+    providerMetadata: _
+  });
+}
+var oh = class {
+  constructor(e) {
+    this.images = e.images, this.warnings = e.warnings, this.responses = e.responses, this.providerMetadata = e.providerMetadata;
+  }
+  get image() {
+    return this.images[0];
+  }
+};
+function gr(e) {
+  const t = e.filter(
+    (n) => n.type === "text"
+  );
+  if (t.length !== 0)
+    return t.map((n) => n.text).join("");
+}
+async function Wo({ url: e }) {
+  var t;
+  const n = e.toString();
+  try {
+    const r = await fetch(n);
+    if (!r.ok)
+      throw new sr({
+        url: n,
+        statusCode: r.status,
+        statusText: r.statusText
+      });
+    return {
+      data: new Uint8Array(await r.arrayBuffer()),
+      mediaType: (t = r.headers.get("content-type")) != null ? t : void 0
+    };
+  } catch (r) {
+    throw sr.isInstance(r) ? r : new sr({ url: n, cause: r });
+  }
+}
+function ih(e) {
+  try {
+    const [t, n] = e.split(",");
+    return {
+      mediaType: t.split(";")[0].split(":")[1],
+      base64Content: n
+    };
+  } catch {
+    return {
+      mediaType: void 0,
+      base64Content: void 0
+    };
+  }
+}
+var Yo = se([
+  d(),
+  Sn(Uint8Array),
+  Sn(ArrayBuffer),
+  ya(
+    // Buffer might not be available in some environments such as CloudFlare:
+    (e) => {
+      var t, n;
+      return (n = (t = globalThis.Buffer) == null ? void 0 : t.isBuffer(e)) != null ? n : !1;
+    },
+    { message: "Must be a Buffer" }
+  )
+]);
+function Ko(e) {
+  if (e instanceof Uint8Array)
+    return { data: e, mediaType: void 0 };
+  if (e instanceof ArrayBuffer)
+    return { data: new Uint8Array(e), mediaType: void 0 };
+  if (typeof e == "string")
+    try {
+      e = new URL(e);
+    } catch {
+    }
+  if (e instanceof URL && e.protocol === "data:") {
+    const { mediaType: t, base64Content: n } = ih(
+      e.toString()
+    );
+    if (t == null || n == null)
+      throw new j({
+        name: "InvalidDataContentError",
+        message: `Invalid data URL format in content ${e.toString()}`
+      });
+    return { data: n, mediaType: t };
+  }
+  return { data: e, mediaType: void 0 };
+}
+function lh(e) {
+  if (e instanceof Uint8Array)
+    return e;
+  if (typeof e == "string")
+    try {
+      return Dn(e);
+    } catch (t) {
+      throw new vs({
+        message: "Invalid data content. Content string is not a base64-encoded media.",
+        content: e,
+        cause: t
+      });
+    }
+  if (e instanceof ArrayBuffer)
+    return new Uint8Array(e);
+  throw new vs({ content: e });
+}
+async function Fn({
+  prompt: e,
+  supportedUrls: t,
+  downloadImplementation: n = Wo
+}) {
+  const r = await ch(
+    e.messages,
+    n,
+    t
+  );
+  return [
+    ...e.system != null ? [{ role: "system", content: e.system }] : [],
+    ...e.messages.map(
+      (s) => uh(s, r)
+    )
+  ];
+}
+function uh(e, t) {
+  const n = e.role;
+  switch (n) {
+    case "system":
+      return {
+        role: "system",
+        content: e.content,
+        providerOptions: e.providerOptions
+      };
+    case "user":
+      return typeof e.content == "string" ? {
+        role: "user",
+        content: [{ type: "text", text: e.content }],
+        providerOptions: e.providerOptions
+      } : {
+        role: "user",
+        content: e.content.map((r) => dh(r, t)).filter((r) => r.type !== "text" || r.text !== ""),
+        providerOptions: e.providerOptions
+      };
+    case "assistant":
+      return typeof e.content == "string" ? {
+        role: "assistant",
+        content: [{ type: "text", text: e.content }],
+        providerOptions: e.providerOptions
+      } : {
+        role: "assistant",
+        content: e.content.filter(
+          // remove empty text parts:
+          (r) => r.type !== "text" || r.text !== ""
+        ).map((r) => {
+          const s = r.providerOptions;
+          switch (r.type) {
+            case "file": {
+              const { data: a, mediaType: o } = Ko(
+                r.data
+              );
+              return {
+                type: "file",
+                data: a,
+                filename: r.filename,
+                mediaType: o ?? r.mediaType,
+                providerOptions: s
+              };
+            }
+            case "reasoning":
+              return {
+                type: "reasoning",
+                text: r.text,
+                providerOptions: s
+              };
+            case "text":
+              return {
+                type: "text",
+                text: r.text,
+                providerOptions: s
+              };
+            case "tool-call":
+              return {
+                type: "tool-call",
+                toolCallId: r.toolCallId,
+                toolName: r.toolName,
+                args: r.args,
+                providerOptions: s
+              };
+          }
+        }),
+        providerOptions: e.providerOptions
+      };
+    case "tool":
+      return {
+        role: "tool",
+        content: e.content.map((r) => ({
+          type: "tool-result",
+          toolCallId: r.toolCallId,
+          toolName: r.toolName,
+          result: r.result,
+          content: r.experimental_content,
+          isError: r.isError,
+          providerOptions: r.providerOptions
+        })),
+        providerOptions: e.providerOptions
+      };
+    default: {
+      const r = n;
+      throw new Dp({ role: r });
+    }
+  }
+}
+async function ch(e, t, n) {
+  const r = e.filter((a) => a.role === "user").map((a) => a.content).filter(
+    (a) => Array.isArray(a)
+  ).flat().filter(
+    (a) => a.type === "image" || a.type === "file"
+  ).map((a) => {
+    var o;
+    const i = (o = a.mediaType) != null ? o : a.type === "image" ? "image/*" : void 0;
+    let l = a.type === "image" ? a.image : a.data;
+    if (typeof l == "string")
+      try {
+        l = new URL(l);
+      } catch {
+      }
+    return { mediaType: i, data: l };
+  }).filter(
+    (a) => a.data instanceof URL && a.mediaType != null && !Ql({
+      url: a.data.toString(),
+      mediaType: a.mediaType,
+      supportedUrls: n
+    })
+  ).map((a) => a.data), s = await Promise.all(
+    r.map(async (a) => ({
+      url: a,
+      data: await t({ url: a })
+    }))
+  );
+  return Object.fromEntries(
+    s.map(({ url: a, data: o }) => [a.toString(), o])
+  );
+}
+function dh(e, t) {
+  var n, r;
+  if (e.type === "text")
+    return {
+      type: "text",
+      text: e.text,
+      providerOptions: e.providerOptions
+    };
+  let s;
+  const a = e.type;
+  switch (a) {
+    case "image":
+      s = e.image;
+      break;
+    case "file":
+      s = e.data;
+      break;
+    default:
+      throw new Error(`Unsupported part type: ${a}`);
+  }
+  const { data: o, mediaType: i } = Ko(s);
+  let l = i ?? e.mediaType, u = o;
+  if (u instanceof URL) {
+    const c = t[u.toString()];
+    c && (u = c.data, l = (n = c.mediaType) != null ? n : l);
+  }
+  switch (a) {
+    case "image":
+      return (u instanceof Uint8Array || typeof u == "string") && (l = (r = Vn({ data: u, signatures: Ho })) != null ? r : l), {
+        type: "file",
+        mediaType: l ?? "image/*",
+        // any image
+        filename: void 0,
+        data: u,
+        providerOptions: e.providerOptions
+      };
+    case "file": {
+      if (l == null)
+        throw new Error("Media type is missing for file part");
+      return {
+        type: "file",
+        mediaType: l,
+        filename: e.filename,
+        data: u,
+        providerOptions: e.providerOptions
+      };
+    }
+  }
+}
+function Rt({
+  maxOutputTokens: e,
+  temperature: t,
+  topP: n,
+  topK: r,
+  presencePenalty: s,
+  frequencyPenalty: a,
+  seed: o,
+  stopSequences: i
+}) {
+  if (e != null) {
+    if (!Number.isInteger(e))
+      throw new le({
+        parameter: "maxOutputTokens",
+        value: e,
+        message: "maxOutputTokens must be an integer"
+      });
+    if (e < 1)
+      throw new le({
+        parameter: "maxOutputTokens",
+        value: e,
+        message: "maxOutputTokens must be >= 1"
+      });
+  }
+  if (t != null && typeof t != "number")
+    throw new le({
+      parameter: "temperature",
+      value: t,
+      message: "temperature must be a number"
+    });
+  if (n != null && typeof n != "number")
+    throw new le({
+      parameter: "topP",
+      value: n,
+      message: "topP must be a number"
+    });
+  if (r != null && typeof r != "number")
+    throw new le({
+      parameter: "topK",
+      value: r,
+      message: "topK must be a number"
+    });
+  if (s != null && typeof s != "number")
+    throw new le({
+      parameter: "presencePenalty",
+      value: s,
+      message: "presencePenalty must be a number"
+    });
+  if (a != null && typeof a != "number")
+    throw new le({
+      parameter: "frequencyPenalty",
+      value: a,
+      message: "frequencyPenalty must be a number"
+    });
+  if (o != null && !Number.isInteger(o))
+    throw new le({
+      parameter: "seed",
+      value: o,
+      message: "seed must be an integer"
+    });
+  return {
+    maxOutputTokens: e,
+    temperature: t,
+    topP: n,
+    topK: r,
+    presencePenalty: s,
+    frequencyPenalty: a,
+    stopSequences: i,
+    seed: o
+  };
+}
+var yr = dl(
+  () => se([
+    cl(),
+    d(),
+    T(),
+    ue(),
+    Ke(d(), yr),
+    M(yr)
+  ])
+), tt = Ke(
+  d(),
+  Ke(d(), yr)
+), ph = M(
+  se([
+    f({ type: C("text"), text: d() }),
+    f({
+      type: C("image"),
+      data: d(),
+      mediaType: d().optional()
+    })
+  ])
+), Xo = f({
+  type: C("text"),
+  text: d(),
+  providerOptions: tt.optional()
+}), hh = f({
+  type: C("image"),
+  image: se([Yo, Sn(URL)]),
+  mediaType: d().optional(),
+  providerOptions: tt.optional()
+}), Qo = f({
+  type: C("file"),
+  data: se([Yo, Sn(URL)]),
+  filename: d().optional(),
+  mediaType: d(),
+  providerOptions: tt.optional()
+}), fh = f({
+  type: C("reasoning"),
+  text: d(),
+  providerOptions: tt.optional()
+}), mh = f({
+  type: C("tool-call"),
+  toolCallId: d(),
+  toolName: d(),
+  args: Me(),
+  providerOptions: tt.optional()
+}), gh = f({
+  type: C("tool-result"),
+  toolCallId: d(),
+  toolName: d(),
+  result: Me(),
+  content: ph.optional(),
+  isError: ue().optional(),
+  providerOptions: tt.optional()
+}), ei = f(
+  {
+    role: C("system"),
+    content: d(),
+    providerOptions: tt.optional()
+  }
+), qf = ei, ti = f({
+  role: C("user"),
+  content: se([
+    d(),
+    M(se([Xo, hh, Qo]))
+  ]),
+  providerOptions: tt.optional()
+}), Uf = ti, ni = f({
+  role: C("assistant"),
+  content: se([
+    d(),
+    M(
+      se([
+        Xo,
+        Qo,
+        fh,
+        mh
+      ])
+    )
+  ]),
+  providerOptions: tt.optional()
+}), Lf = ni, ri = f({
+  role: C("tool"),
+  content: M(gh),
+  providerOptions: tt.optional()
+}), Zf = ri, si = se([
+  ei,
+  ti,
+  ni,
+  ri
+]), Vf = si;
+async function Gn(e) {
+  if (e.prompt == null && e.messages == null)
+    throw new gt({
+      prompt: e,
+      message: "prompt or messages must be defined"
+    });
+  if (e.prompt != null && e.messages != null)
+    throw new gt({
+      prompt: e,
+      message: "prompt and messages cannot be defined at the same time"
+    });
+  if (e.system != null && typeof e.system != "string")
+    throw new gt({
+      prompt: e,
+      message: "system must be a string"
+    });
+  let t;
+  if (e.prompt != null && typeof e.prompt == "string")
+    t = [{ role: "user", content: e.prompt }];
+  else if (e.prompt != null && Array.isArray(e.prompt))
+    t = e.prompt;
+  else if (e.messages != null)
+    t = e.messages;
+  else
+    throw new gt({
+      prompt: e,
+      message: "prompt or messages must be defined"
+    });
+  if (t.length === 0)
+    throw new gt({
+      prompt: e,
+      message: "messages must not be empty"
+    });
+  const n = await ot({
+    value: t,
+    schema: M(si)
+  });
+  if (!n.success)
+    throw new gt({
+      prompt: e,
+      message: "The messages must be a ModelMessage[]. If you have passed a UIMessage[], you can use convertToModelMessages to convert them.",
+      cause: n.error
+    });
+  return {
+    messages: t,
+    system: e.system
+  };
+}
+function _t(e) {
+  const t = e.pipeThrough(new TransformStream());
+  return t[Symbol.asyncIterator] = () => {
+    const n = t.getReader();
+    return {
+      async next() {
+        const { done: r, value: s } = await n.read();
+        return r ? { done: !0, value: void 0 } : { done: !1, value: s };
+      }
+    };
+  }, t;
+}
+var yh = {
+  type: "no-schema",
+  jsonSchema: void 0,
+  async validatePartialResult({ value: e, textDelta: t }) {
+    return { success: !0, value: { partial: e, textDelta: t } };
+  },
+  async validateFinalResult(e, t) {
+    return e === void 0 ? {
+      success: !1,
+      error: new dt({
+        message: "No object generated: response did not match schema.",
+        text: t.text,
+        response: t.response,
+        usage: t.usage,
+        finishReason: t.finishReason
+      })
+    } : { success: !0, value: e };
+  },
+  createElementStream() {
+    throw new he({
+      functionality: "element streams in no-schema mode"
+    });
+  }
+}, vh = (e) => ({
+  type: "object",
+  jsonSchema: e.jsonSchema,
+  async validatePartialResult({ value: t, textDelta: n }) {
+    return {
+      success: !0,
+      value: {
+        // Note: currently no validation of partial results:
+        partial: t,
+        textDelta: n
+      }
+    };
+  },
+  async validateFinalResult(t) {
+    return ot({ value: t, schema: e });
+  },
+  createElementStream() {
+    throw new he({
+      functionality: "element streams in object mode"
+    });
+  }
+}), _h = (e) => {
+  const { $schema: t, ...n } = e.jsonSchema;
+  return {
+    type: "enum",
+    // wrap in object that contains array of elements, since most LLMs will not
+    // be able to generate an array directly:
+    // possible future optimization: use arrays directly when model supports grammar-guided generation
+    jsonSchema: {
+      $schema: "http://json-schema.org/draft-07/schema#",
+      type: "object",
+      properties: {
+        elements: { type: "array", items: n }
+      },
+      required: ["elements"],
+      additionalProperties: !1
+    },
+    async validatePartialResult({
+      value: r,
+      latestObject: s,
+      isFirstDelta: a,
+      isFinalDelta: o
+    }) {
+      var i;
+      if (!pn(r) || !Fr(r.elements))
+        return {
+          success: !1,
+          error: new De({
+            value: r,
+            cause: "value must be an object that contains an array of elements"
+          })
+        };
+      const l = r.elements, u = [];
+      for (let h = 0; h < l.length; h++) {
+        const g = l[h], v = await ot({ value: g, schema: e });
+        if (!(h === l.length - 1 && !o)) {
+          if (!v.success)
+            return v;
+          u.push(v.value);
+        }
+      }
+      const c = (i = s == null ? void 0 : s.length) != null ? i : 0;
+      let p = "";
+      return a && (p += "["), c > 0 && (p += ","), p += u.slice(c).map((h) => JSON.stringify(h)).join(","), o && (p += "]"), {
+        success: !0,
+        value: {
+          partial: u,
+          textDelta: p
+        }
+      };
+    },
+    async validateFinalResult(r) {
+      if (!pn(r) || !Fr(r.elements))
+        return {
+          success: !1,
+          error: new De({
+            value: r,
+            cause: "value must be an object that contains an array of elements"
+          })
+        };
+      const s = r.elements;
+      for (const a of s) {
+        const o = await ot({ value: a, schema: e });
+        if (!o.success)
+          return o;
+      }
+      return { success: !0, value: s };
+    },
+    createElementStream(r) {
+      let s = 0;
+      return _t(
+        r.pipeThrough(
+          new TransformStream({
+            transform(a, o) {
+              switch (a.type) {
+                case "object": {
+                  const i = a.object;
+                  for (; s < i.length; s++)
+                    o.enqueue(i[s]);
+                  break;
+                }
+                case "text-delta":
+                case "finish":
+                case "error":
+                  break;
+                default: {
+                  const i = a;
+                  throw new Error(
+                    `Unsupported chunk type: ${i}`
+                  );
+                }
+              }
+            }
+          })
+        )
+      );
+    }
+  };
+}, bh = (e) => ({
+  type: "enum",
+  // wrap in object that contains result, since most LLMs will not
+  // be able to generate an enum value directly:
+  // possible future optimization: use enums directly when model supports top-level enums
+  jsonSchema: {
+    $schema: "http://json-schema.org/draft-07/schema#",
+    type: "object",
+    properties: {
+      result: { type: "string", enum: e }
+    },
+    required: ["result"],
+    additionalProperties: !1
+  },
+  async validateFinalResult(t) {
+    if (!pn(t) || typeof t.result != "string")
+      return {
+        success: !1,
+        error: new De({
+          value: t,
+          cause: 'value must be an object that contains a string in the "result" property.'
+        })
+      };
+    const n = t.result;
+    return e.includes(n) ? { success: !0, value: n } : {
+      success: !1,
+      error: new De({
+        value: t,
+        cause: "value must be a string in the enum"
+      })
+    };
+  },
+  async validatePartialResult({ value: t, textDelta: n }) {
+    if (!pn(t) || typeof t.result != "string")
+      return {
+        success: !1,
+        error: new De({
+          value: t,
+          cause: 'value must be an object that contains a string in the "result" property.'
+        })
+      };
+    const r = t.result, s = e.filter(
+      (a) => a.startsWith(r)
+    );
+    return t.result.length === 0 || s.length === 0 ? {
+      success: !1,
+      error: new De({
+        value: t,
+        cause: "value must be a string in the enum"
+      })
+    } : {
+      success: !0,
+      value: {
+        partial: s.length > 1 ? r : s[0],
+        textDelta: n
+      }
+    };
+  },
+  createElementStream() {
+    throw new he({
+      functionality: "element streams in enum mode"
+    });
+  }
+});
+function ai({
+  output: e,
+  schema: t,
+  enumValues: n
+}) {
+  switch (e) {
+    case "object":
+      return vh(Dt(t));
+    case "array":
+      return _h(Dt(t));
+    case "enum":
+      return bh(n);
+    case "no-schema":
+      return yh;
+    default: {
+      const r = e;
+      throw new Error(`Unsupported output: ${r}`);
+    }
+  }
+}
+function oi({
+  output: e,
+  schema: t,
+  schemaName: n,
+  schemaDescription: r,
+  enumValues: s
+}) {
+  if (e != null && e !== "object" && e !== "array" && e !== "enum" && e !== "no-schema")
+    throw new le({
+      parameter: "output",
+      value: e,
+      message: "Invalid output type."
+    });
+  if (e === "no-schema") {
+    if (t != null)
+      throw new le({
+        parameter: "schema",
+        value: t,
+        message: "Schema is not supported for no-schema output."
+      });
+    if (r != null)
+      throw new le({
+        parameter: "schemaDescription",
+        value: r,
+        message: "Schema description is not supported for no-schema output."
+      });
+    if (n != null)
+      throw new le({
+        parameter: "schemaName",
+        value: n,
+        message: "Schema name is not supported for no-schema output."
+      });
+    if (s != null)
+      throw new le({
+        parameter: "enumValues",
+        value: s,
+        message: "Enum values are not supported for no-schema output."
+      });
+  }
+  if (e === "object") {
+    if (t == null)
+      throw new le({
+        parameter: "schema",
+        value: t,
+        message: "Schema is required for object output."
+      });
+    if (s != null)
+      throw new le({
+        parameter: "enumValues",
+        value: s,
+        message: "Enum values are not supported for object output."
+      });
+  }
+  if (e === "array") {
+    if (t == null)
+      throw new le({
+        parameter: "schema",
+        value: t,
+        message: "Element schema is required for array output."
+      });
+    if (s != null)
+      throw new le({
+        parameter: "enumValues",
+        value: s,
+        message: "Enum values are not supported for array output."
+      });
+  }
+  if (e === "enum") {
+    if (t != null)
+      throw new le({
+        parameter: "schema",
+        value: t,
+        message: "Schema is not supported for enum output."
+      });
+    if (r != null)
+      throw new le({
+        parameter: "schemaDescription",
+        value: r,
+        message: "Schema description is not supported for enum output."
+      });
+    if (n != null)
+      throw new le({
+        parameter: "schemaName",
+        value: n,
+        message: "Schema name is not supported for enum output."
+      });
+    if (s == null)
+      throw new le({
+        parameter: "enumValues",
+        value: s,
+        message: "Enum values are required for enum output."
+      });
+    for (const a of s)
+      if (typeof a != "string")
+        throw new le({
+          parameter: "enumValues",
+          value: a,
+          message: "Enum values must be strings."
+        });
+  }
+}
+var wh = nn({ prefix: "aiobj", size: 24 });
+async function Bf(e) {
+  const {
+    model: t,
+    output: n = "object",
+    system: r,
+    prompt: s,
+    messages: a,
+    maxRetries: o,
+    abortSignal: i,
+    headers: l,
+    experimental_repairText: u,
+    experimental_telemetry: c,
+    providerOptions: p,
+    _internal: {
+      generateId: h = wh,
+      currentDate: g = () => /* @__PURE__ */ new Date()
+    } = {},
+    ...v
+  } = e, y = "enum" in e ? e.enum : void 0, {
+    schema: m,
+    schemaDescription: b,
+    schemaName: S
+  } = "schema" in e ? e : {};
+  oi({
+    output: n,
+    schema: m,
+    schemaName: S,
+    schemaDescription: b,
+    enumValues: y
+  });
+  const { maxRetries: w, retry: x } = it({ maxRetries: o }), _ = ai({
+    output: n,
+    schema: m,
+    enumValues: y
+  }), k = Rt(v), O = Lt({
+    model: t,
+    telemetry: c,
+    headers: l,
+    settings: { ...k, maxRetries: w }
+  }), N = Zt(c);
+  return Ae({
+    name: "ai.generateObject",
+    attributes: X({
+      telemetry: c,
+      attributes: {
+        ...Ee({
+          operationId: "ai.generateObject",
+          telemetry: c
+        }),
+        ...O,
+        // specific settings that only make sense on the outer level:
+        "ai.prompt": {
+          input: () => JSON.stringify({ system: r, prompt: s, messages: a })
+        },
+        "ai.schema": _.jsonSchema != null ? { input: () => JSON.stringify(_.jsonSchema) } : void 0,
+        "ai.schema.name": S,
+        "ai.schema.description": b,
+        "ai.settings.output": _.type
+      }
+    }),
+    tracer: N,
+    fn: async (q) => {
+      var L;
+      let ee, ae, fe, ce, ve, te, ge;
+      const Pe = await Gn({
+        system: r,
+        prompt: s,
+        messages: a
+      }), we = await Fn({
+        prompt: Pe,
+        supportedUrls: await t.supportedUrls
+      }), Y = await x(
+        () => Ae({
+          name: "ai.generateObject.doGenerate",
+          attributes: X({
+            telemetry: c,
+            attributes: {
+              ...Ee({
+                operationId: "ai.generateObject.doGenerate",
+                telemetry: c
+              }),
+              ...O,
+              "ai.prompt.messages": {
+                input: () => JSON.stringify(we)
+              },
+              // standardized gen-ai llm span attributes:
+              "gen_ai.system": t.provider,
+              "gen_ai.request.model": t.modelId,
+              "gen_ai.request.frequency_penalty": k.frequencyPenalty,
+              "gen_ai.request.max_tokens": k.maxOutputTokens,
+              "gen_ai.request.presence_penalty": k.presencePenalty,
+              "gen_ai.request.temperature": k.temperature,
+              "gen_ai.request.top_k": k.topK,
+              "gen_ai.request.top_p": k.topP
+            }
+          }),
+          tracer: N,
+          fn: async (H) => {
+            var V, ie, K, U, de, P, B, xe;
+            const pe = await t.doGenerate({
+              responseFormat: {
+                type: "json",
+                schema: _.jsonSchema,
+                name: S,
+                description: b
+              },
+              ...Rt(v),
+              prompt: we,
+              providerOptions: p,
+              abortSignal: i,
+              headers: l
+            }), G = {
+              id: (ie = (V = pe.response) == null ? void 0 : V.id) != null ? ie : h(),
+              timestamp: (U = (K = pe.response) == null ? void 0 : K.timestamp) != null ? U : g(),
+              modelId: (P = (de = pe.response) == null ? void 0 : de.modelId) != null ? P : t.modelId,
+              headers: (B = pe.response) == null ? void 0 : B.headers,
+              body: (xe = pe.response) == null ? void 0 : xe.body
+            }, z = gr(pe.content);
+            if (z === void 0)
+              throw new dt({
+                message: "No object generated: the model did not return a response.",
+                response: G,
+                usage: pe.usage,
+                finishReason: pe.finishReason
+              });
+            return H.setAttributes(
+              X({
+                telemetry: c,
+                attributes: {
+                  "ai.response.finishReason": pe.finishReason,
+                  "ai.response.object": { output: () => z },
+                  "ai.response.id": G.id,
+                  "ai.response.model": G.modelId,
+                  "ai.response.timestamp": G.timestamp.toISOString(),
+                  // TODO rename telemetry attributes to inputTokens and outputTokens
+                  "ai.usage.promptTokens": pe.usage.inputTokens,
+                  "ai.usage.completionTokens": pe.usage.outputTokens,
+                  // standardized gen-ai llm span attributes:
+                  "gen_ai.response.finish_reasons": [pe.finishReason],
+                  "gen_ai.response.id": G.id,
+                  "gen_ai.response.model": G.modelId,
+                  "gen_ai.usage.input_tokens": pe.usage.inputTokens,
+                  "gen_ai.usage.output_tokens": pe.usage.outputTokens
+                }
+              })
+            ), { ...pe, objectText: z, responseData: G };
+          }
+        })
+      );
+      ee = Y.objectText, ae = Y.finishReason, fe = Y.usage, ce = Y.warnings, ge = Y.providerMetadata, te = (L = Y.request) != null ? L : {}, ve = Y.responseData;
+      async function ne(H) {
+        const V = await It({ text: H });
+        if (!V.success)
+          throw new dt({
+            message: "No object generated: could not parse the response.",
+            cause: V.error,
+            text: H,
+            response: ve,
+            usage: fe,
+            finishReason: ae
+          });
+        const ie = await _.validateFinalResult(
+          V.value,
+          {
+            text: H,
+            response: ve,
+            usage: fe
+          }
+        );
+        if (!ie.success)
+          throw new dt({
+            message: "No object generated: response did not match schema.",
+            cause: ie.error,
+            text: H,
+            response: ve,
+            usage: fe,
+            finishReason: ae
+          });
+        return ie.value;
+      }
+      let oe;
+      try {
+        oe = await ne(ee);
+      } catch (H) {
+        if (u != null && dt.isInstance(H) && (zt.isInstance(H.cause) || De.isInstance(H.cause))) {
+          const V = await u({
+            text: ee,
+            error: H.cause
+          });
+          if (V === null)
+            throw H;
+          oe = await ne(V);
+        } else
+          throw H;
+      }
+      return q.setAttributes(
+        X({
+          telemetry: c,
+          attributes: {
+            "ai.response.finishReason": ae,
+            "ai.response.object": {
+              output: () => JSON.stringify(oe)
+            },
+            // TODO rename telemetry attributes to inputTokens and outputTokens
+            "ai.usage.promptTokens": fe.inputTokens,
+            "ai.usage.completionTokens": fe.outputTokens
+          }
+        })
+      ), new xh({
+        object: oe,
+        finishReason: ae,
+        usage: fe,
+        warnings: ce,
+        request: te,
+        response: ve,
+        providerMetadata: ge
+      });
+    }
+  });
+}
+var xh = class {
+  constructor(e) {
+    this.object = e.object, this.finishReason = e.finishReason, this.usage = e.usage, this.warnings = e.warnings, this.providerMetadata = e.providerMetadata, this.response = e.response, this.request = e.request;
+  }
+  toJsonResponse(e) {
+    var t;
+    return new Response(JSON.stringify(this.object), {
+      status: (t = e == null ? void 0 : e.status) != null ? t : 200,
+      headers: an(e == null ? void 0 : e.headers, {
+        "content-type": "application/json; charset=utf-8"
+      })
+    });
+  }
+};
+function ks() {
+  let e, t;
+  return {
+    promise: new Promise((r, s) => {
+      e = r, t = s;
+    }),
+    resolve: e,
+    reject: t
+  };
+}
+function ii() {
+  let e = [], t = null, n = !1, r = ks();
+  const s = async () => {
+    if (n && e.length === 0) {
+      t == null || t.close();
+      return;
+    }
+    if (e.length === 0)
+      return r = ks(), await r.promise, s();
+    try {
+      const { value: a, done: o } = await e[0].read();
+      o ? (e.shift(), e.length > 0 ? await s() : n && (t == null || t.close())) : t == null || t.enqueue(a);
+    } catch (a) {
+      t == null || t.error(a), e.shift(), n && e.length === 0 && (t == null || t.close());
+    }
+  };
+  return {
+    stream: new ReadableStream({
+      start(a) {
+        t = a;
+      },
+      pull: s,
+      async cancel() {
+        for (const a of e)
+          await a.cancel();
+        e = [], n = !0;
+      }
+    }),
+    addStream: (a) => {
+      if (n)
+        throw new Error("Cannot add inner stream: outer stream is closed");
+      e.push(a.getReader()), r.resolve();
+    },
+    /**
+     * Gracefully close the outer stream. This will let the inner streams
+     * finish processing and then close the outer stream.
+     */
+    close: () => {
+      n = !0, r.resolve(), e.length === 0 && (t == null || t.close());
+    },
+    /**
+     * Immediately close the outer stream. This will cancel all inner streams
+     * and close the outer stream.
+     */
+    terminate: () => {
+      n = !0, r.resolve(), e.forEach((a) => a.cancel()), e = [], t == null || t.close();
+    }
+  };
+}
+var rt = class {
+  constructor() {
+    this.status = { type: "pending" }, this._resolve = void 0, this._reject = void 0;
+  }
+  get value() {
+    return this.promise ? this.promise : (this.promise = new Promise((e, t) => {
+      this.status.type === "resolved" ? e(this.status.value) : this.status.type === "rejected" && t(this.status.error), this._resolve = e, this._reject = t;
+    }), this.promise);
+  }
+  resolve(e) {
+    var t;
+    this.status = { type: "resolved", value: e }, this.promise && ((t = this._resolve) == null || t.call(this, e));
+  }
+  reject(e) {
+    var t;
+    this.status = { type: "rejected", error: e }, this.promise && ((t = this._reject) == null || t.call(this, e));
+  }
+};
+function li() {
+  var e, t;
+  return (t = (e = globalThis == null ? void 0 : globalThis.performance) == null ? void 0 : e.now()) != null ? t : Date.now();
+}
+var Th = nn({ prefix: "aiobj", size: 24 });
+function Ff(e) {
+  const {
+    model: t,
+    output: n = "object",
+    system: r,
+    prompt: s,
+    messages: a,
+    maxRetries: o,
+    abortSignal: i,
+    headers: l,
+    experimental_telemetry: u,
+    providerOptions: c,
+    onError: p,
+    onFinish: h,
+    _internal: {
+      generateId: g = Th,
+      currentDate: v = () => /* @__PURE__ */ new Date(),
+      now: y = li
+    } = {},
+    ...m
+  } = e, b = "enum" in e && e.enum ? e.enum : void 0, {
+    schema: S,
+    schemaDescription: w,
+    schemaName: x
+  } = "schema" in e ? e : {};
+  oi({
+    output: n,
+    schema: S,
+    schemaName: x,
+    schemaDescription: w,
+    enumValues: b
+  });
+  const _ = ai({
+    output: n,
+    schema: S,
+    enumValues: b
+  });
+  return new kh({
+    model: t,
+    telemetry: u,
+    headers: l,
+    settings: m,
+    maxRetries: o,
+    abortSignal: i,
+    outputStrategy: _,
+    system: r,
+    prompt: s,
+    messages: a,
+    schemaName: x,
+    schemaDescription: w,
+    providerOptions: c,
+    onError: p,
+    onFinish: h,
+    generateId: g,
+    currentDate: v,
+    now: y
+  });
+}
+var kh = class {
+  constructor({
+    model: e,
+    headers: t,
+    telemetry: n,
+    settings: r,
+    maxRetries: s,
+    abortSignal: a,
+    outputStrategy: o,
+    system: i,
+    prompt: l,
+    messages: u,
+    schemaName: c,
+    schemaDescription: p,
+    providerOptions: h,
+    onError: g,
+    onFinish: v,
+    generateId: y,
+    currentDate: m,
+    now: b
+  }) {
+    this.objectPromise = new rt(), this.usagePromise = new rt(), this.providerMetadataPromise = new rt(), this.warningsPromise = new rt(), this.requestPromise = new rt(), this.responsePromise = new rt();
+    const { maxRetries: S, retry: w } = it({
+      maxRetries: s
+    }), x = Rt(r), _ = Lt({
+      model: e,
+      telemetry: n,
+      headers: t,
+      settings: { ...x, maxRetries: S }
+    }), k = Zt(n), O = this, N = ii(), q = new TransformStream({
+      transform(L, ee) {
+        ee.enqueue(L), L.type === "error" && (g == null || g({ error: L.error }));
+      }
+    });
+    this.baseStream = N.stream.pipeThrough(q), Ae({
+      name: "ai.streamObject",
+      attributes: X({
+        telemetry: n,
+        attributes: {
+          ...Ee({
+            operationId: "ai.streamObject",
+            telemetry: n
+          }),
+          ..._,
+          // specific settings that only make sense on the outer level:
+          "ai.prompt": {
+            input: () => JSON.stringify({ system: i, prompt: l, messages: u })
+          },
+          "ai.schema": o.jsonSchema != null ? { input: () => JSON.stringify(o.jsonSchema) } : void 0,
+          "ai.schema.name": c,
+          "ai.schema.description": p,
+          "ai.settings.output": o.type
+        }
+      }),
+      tracer: k,
+      endWhenDone: !1,
+      fn: async (L) => {
+        const ee = await Gn({
+          system: i,
+          prompt: l,
+          messages: u
+        }), ae = {
+          responseFormat: {
+            type: "json",
+            schema: o.jsonSchema,
+            name: c,
+            description: p
+          },
+          ...Rt(r),
+          prompt: await Fn({
+            prompt: ee,
+            supportedUrls: await e.supportedUrls
+          }),
+          providerOptions: h,
+          abortSignal: a,
+          headers: t
+        }, fe = {
+          transform: (G, z) => {
+            switch (G.type) {
+              case "text":
+                z.enqueue(G.text);
+                break;
+              case "response-metadata":
+              case "finish":
+              case "error":
+                z.enqueue(G);
+                break;
+            }
+          }
+        }, {
+          result: { stream: ce, response: ve, request: te },
+          doStreamSpan: ge,
+          startTimestampMs: Pe
+        } = await w(
+          () => Ae({
+            name: "ai.streamObject.doStream",
+            attributes: X({
+              telemetry: n,
+              attributes: {
+                ...Ee({
+                  operationId: "ai.streamObject.doStream",
+                  telemetry: n
+                }),
+                ..._,
+                "ai.prompt.messages": {
+                  input: () => JSON.stringify(ae.prompt)
+                },
+                // standardized gen-ai llm span attributes:
+                "gen_ai.system": e.provider,
+                "gen_ai.request.model": e.modelId,
+                "gen_ai.request.frequency_penalty": x.frequencyPenalty,
+                "gen_ai.request.max_tokens": x.maxOutputTokens,
+                "gen_ai.request.presence_penalty": x.presencePenalty,
+                "gen_ai.request.temperature": x.temperature,
+                "gen_ai.request.top_k": x.topK,
+                "gen_ai.request.top_p": x.topP
+              }
+            }),
+            tracer: k,
+            endWhenDone: !1,
+            fn: async (G) => ({
+              startTimestampMs: b(),
+              doStreamSpan: G,
+              result: await e.doStream(ae)
+            })
+          })
+        );
+        O.requestPromise.resolve(te ?? {});
+        let we, Y = {
+          inputTokens: void 0,
+          outputTokens: void 0,
+          totalTokens: void 0
+        }, ne, oe, H, V, ie = "", K = "", U = {
+          id: y(),
+          timestamp: m(),
+          modelId: e.modelId
+        }, de, P, B = !0, xe = !0;
+        const pe = ce.pipeThrough(new TransformStream(fe)).pipeThrough(
+          new TransformStream({
+            async transform(G, z) {
+              var Ge, ft, lt;
+              if (typeof G == "object" && G.type === "stream-start") {
+                we = G.warnings;
+                return;
+              }
+              if (B) {
+                const Te = b() - Pe;
+                B = !1, ge.addEvent("ai.stream.firstChunk", {
+                  "ai.stream.msToFirstChunk": Te
+                }), ge.setAttributes({
+                  "ai.stream.msToFirstChunk": Te
+                });
+              }
+              if (typeof G == "string") {
+                ie += G, K += G;
+                const { value: Te, state: Le } = await Nr(ie);
+                if (Te !== void 0 && !Pn(de, Te)) {
+                  const me = await o.validatePartialResult({
+                    value: Te,
+                    textDelta: K,
+                    latestObject: P,
+                    isFirstDelta: xe,
+                    isFinalDelta: Le === "successful-parse"
+                  });
+                  me.success && !Pn(
+                    P,
+                    me.value.partial
+                  ) && (de = Te, P = me.value.partial, z.enqueue({
+                    type: "object",
+                    object: P
+                  }), z.enqueue({
+                    type: "text-delta",
+                    textDelta: me.value.textDelta
+                  }), K = "", xe = !1);
+                }
+                return;
+              }
+              switch (G.type) {
+                case "response-metadata": {
+                  U = {
+                    id: (Ge = G.id) != null ? Ge : U.id,
+                    timestamp: (ft = G.timestamp) != null ? ft : U.timestamp,
+                    modelId: (lt = G.modelId) != null ? lt : U.modelId
+                  };
+                  break;
+                }
+                case "finish": {
+                  K !== "" && z.enqueue({ type: "text-delta", textDelta: K }), ne = G.finishReason, Y = G.usage, oe = G.providerMetadata, z.enqueue({
+                    ...G,
+                    usage: Y,
+                    response: U
+                  }), O.usagePromise.resolve(Y), O.providerMetadataPromise.resolve(oe), O.responsePromise.resolve({
+                    ...U,
+                    headers: ve == null ? void 0 : ve.headers
+                  });
+                  const Te = await o.validateFinalResult(
+                    de,
+                    {
+                      text: ie,
+                      response: U,
+                      usage: Y
+                    }
+                  );
+                  Te.success ? (H = Te.value, O.objectPromise.resolve(H)) : (V = new dt({
+                    message: "No object generated: response did not match schema.",
+                    cause: Te.error,
+                    text: ie,
+                    response: U,
+                    usage: Y,
+                    finishReason: ne
+                  }), O.objectPromise.reject(V));
+                  break;
+                }
+                default: {
+                  z.enqueue(G);
+                  break;
+                }
+              }
+            },
+            // invoke onFinish callback and resolve toolResults promise when the stream is about to close:
+            async flush(G) {
+              try {
+                const z = Y ?? {
+                  promptTokens: NaN,
+                  completionTokens: NaN,
+                  totalTokens: NaN
+                };
+                ge.setAttributes(
+                  X({
+                    telemetry: n,
+                    attributes: {
+                      "ai.response.finishReason": ne,
+                      "ai.response.object": {
+                        output: () => JSON.stringify(H)
+                      },
+                      "ai.response.id": U.id,
+                      "ai.response.model": U.modelId,
+                      "ai.response.timestamp": U.timestamp.toISOString(),
+                      "ai.usage.inputTokens": z.inputTokens,
+                      "ai.usage.outputTokens": z.outputTokens,
+                      "ai.usage.totalTokens": z.totalTokens,
+                      "ai.usage.reasoningTokens": z.reasoningTokens,
+                      "ai.usage.cachedInputTokens": z.cachedInputTokens,
+                      // standardized gen-ai llm span attributes:
+                      "gen_ai.response.finish_reasons": [ne],
+                      "gen_ai.response.id": U.id,
+                      "gen_ai.response.model": U.modelId,
+                      "gen_ai.usage.input_tokens": z.inputTokens,
+                      "gen_ai.usage.output_tokens": z.outputTokens
+                    }
+                  })
+                ), ge.end(), L.setAttributes(
+                  X({
+                    telemetry: n,
+                    attributes: {
+                      "ai.usage.inputTokens": z.inputTokens,
+                      "ai.usage.outputTokens": z.outputTokens,
+                      "ai.usage.totalTokens": z.totalTokens,
+                      "ai.usage.reasoningTokens": z.reasoningTokens,
+                      "ai.usage.cachedInputTokens": z.cachedInputTokens,
+                      "ai.response.object": {
+                        output: () => JSON.stringify(H)
+                      }
+                    }
+                  })
+                ), await (v == null ? void 0 : v({
+                  usage: z,
+                  object: H,
+                  error: V,
+                  response: {
+                    ...U,
+                    headers: ve == null ? void 0 : ve.headers
+                  },
+                  warnings: we,
+                  providerMetadata: oe
+                }));
+              } catch (z) {
+                G.enqueue({ type: "error", error: z });
+              } finally {
+                L.end();
+              }
+            }
+          })
+        );
+        N.addStream(pe);
+      }
+    }).catch((L) => {
+      N.addStream(
+        new ReadableStream({
+          start(ee) {
+            ee.enqueue({ type: "error", error: L }), ee.close();
+          }
+        })
+      );
+    }).finally(() => {
+      N.close();
+    }), this.outputStrategy = o;
+  }
+  get object() {
+    return this.objectPromise.value;
+  }
+  get usage() {
+    return this.usagePromise.value;
+  }
+  get providerMetadata() {
+    return this.providerMetadataPromise.value;
+  }
+  get warnings() {
+    return this.warningsPromise.value;
+  }
+  get request() {
+    return this.requestPromise.value;
+  }
+  get response() {
+    return this.responsePromise.value;
+  }
+  get partialObjectStream() {
+    return _t(
+      this.baseStream.pipeThrough(
+        new TransformStream({
+          transform(e, t) {
+            switch (e.type) {
+              case "object":
+                t.enqueue(e.object);
+                break;
+              case "text-delta":
+              case "finish":
+              case "error":
+                break;
+              default: {
+                const n = e;
+                throw new Error(`Unsupported chunk type: ${n}`);
+              }
+            }
+          }
+        })
+      )
+    );
+  }
+  get elementStream() {
+    return this.outputStrategy.createElementStream(this.baseStream);
+  }
+  get textStream() {
+    return _t(
+      this.baseStream.pipeThrough(
+        new TransformStream({
+          transform(e, t) {
+            switch (e.type) {
+              case "text-delta":
+                t.enqueue(e.textDelta);
+                break;
+              case "object":
+              case "finish":
+              case "error":
+                break;
+              default: {
+                const n = e;
+                throw new Error(`Unsupported chunk type: ${n}`);
+              }
+            }
+          }
+        })
+      )
+    );
+  }
+  get fullStream() {
+    return _t(this.baseStream);
+  }
+  pipeTextStreamToResponse(e, t) {
+    Uo({
+      response: e,
+      textStream: this.textStream,
+      ...t
+    });
+  }
+  toTextStreamResponse(e) {
+    return Do({
+      textStream: this.textStream,
+      ...e
+    });
+  }
+}, Sh = class extends j {
+  constructor(e) {
+    super({
+      name: "AI_NoSpeechGeneratedError",
+      message: "No speech audio generated."
+    }), this.responses = e.responses;
+  }
+}, Ih = class extends Bn {
+  constructor({
+    data: e,
+    mediaType: t
+  }) {
+    super({ data: e, mediaType: t });
+    let n = "mp3";
+    if (t) {
+      const r = t.split("/");
+      r.length === 2 && t !== "audio/mpeg" && (n = r[1]);
+    }
+    if (!n)
+      throw new Error(
+        "Audio format must be provided or determinable from media type"
+      );
+    this.format = n;
+  }
+};
+async function Gf({
+  model: e,
+  text: t,
+  voice: n,
+  outputFormat: r,
+  instructions: s,
+  speed: a,
+  providerOptions: o = {},
+  maxRetries: i,
+  abortSignal: l,
+  headers: u
+}) {
+  var c;
+  const { retry: p } = it({ maxRetries: i }), h = await p(
+    () => e.doGenerate({
+      text: t,
+      voice: n,
+      outputFormat: r,
+      instructions: s,
+      speed: a,
+      abortSignal: l,
+      headers: u,
+      providerOptions: o
+    })
+  );
+  if (!h.audio || h.audio.length === 0)
+    throw new Sh({ responses: [h.response] });
+  return new Ch({
+    audio: new Ih({
+      data: h.audio,
+      mediaType: (c = Vn({
+        data: h.audio,
+        signatures: zo
+      })) != null ? c : "audio/mp3"
+    }),
+    warnings: h.warnings,
+    responses: [h.response],
+    providerMetadata: h.providerMetadata
+  });
+}
+var Ch = class {
+  constructor(e) {
+    var t;
+    this.audio = e.audio, this.warnings = e.warnings, this.responses = e.responses, this.providerMetadata = (t = e.providerMetadata) != null ? t : {};
+  }
+};
+function Rh(e) {
+  return e != null && Object.keys(e).length > 0;
+}
+function ui({
+  tools: e,
+  toolChoice: t,
+  activeTools: n
+}) {
+  return Rh(e) ? {
+    tools: (n != null ? Object.entries(e).filter(
+      ([s]) => n.includes(s)
+    ) : Object.entries(e)).map(([s, a]) => {
+      const o = a.type;
+      switch (o) {
+        case void 0:
+        case "function":
+          return {
+            type: "function",
+            name: s,
+            description: a.description,
+            parameters: Dt(a.parameters).jsonSchema
+          };
+        case "provider-defined":
+          return {
+            type: "provider-defined",
+            name: s,
+            id: a.id,
+            args: a.args
+          };
+        default: {
+          const i = o;
+          throw new Error(`Unsupported tool type: ${i}`);
+        }
+      }
+    }),
+    toolChoice: t == null ? { type: "auto" } : typeof t == "string" ? { type: t } : { type: "tool", toolName: t.toolName }
+  } : {
+    tools: void 0,
+    toolChoice: void 0
+  };
+}
+function ci(e, t) {
+  return {
+    inputTokens: Gt(e.inputTokens, t.inputTokens),
+    outputTokens: Gt(e.outputTokens, t.outputTokens),
+    totalTokens: Gt(e.totalTokens, t.totalTokens),
+    reasoningTokens: Gt(
+      e.reasoningTokens,
+      t.reasoningTokens
+    ),
+    cachedInputTokens: Gt(
+      e.cachedInputTokens,
+      t.cachedInputTokens
+    )
+  };
+}
+function Gt(e, t) {
+  return e == null && t == null ? void 0 : (e ?? 0) + (t ?? 0);
+}
+function Eh({
+  content: e,
+  toolCalls: t,
+  toolResults: n
+}) {
+  return [
+    ...e.map((r) => {
+      switch (r.type) {
+        case "text":
+        case "reasoning":
+        case "source":
+          return r;
+        case "file":
+          return {
+            type: "file",
+            file: new Bn(r)
+          };
+        case "tool-call":
+          return t.find(
+            (s) => s.toolCallId === r.toolCallId
+          );
+      }
+    }),
+    ...n
+  ];
+}
+async function di({
+  toolCall: e,
+  tools: t,
+  repairToolCall: n,
+  system: r,
+  messages: s
+}) {
+  if (t == null)
+    throw new mr({ toolName: e.toolName });
+  try {
+    return await Ss({ toolCall: e, tools: t });
+  } catch (a) {
+    if (n == null || !(mr.isInstance(a) || Xa.isInstance(a)))
+      throw a;
+    let o = null;
+    try {
+      o = await n({
+        toolCall: e,
+        tools: t,
+        parameterSchema: ({ toolName: i }) => {
+          const { parameters: l } = t[i];
+          return Dt(l).jsonSchema;
+        },
+        system: r,
+        messages: s,
+        error: a
+      });
+    } catch (i) {
+      throw new Np({
+        cause: i,
+        originalError: a
+      });
+    }
+    if (o == null)
+      throw a;
+    return await Ss({ toolCall: o, tools: t });
+  }
+}
+async function Ss({
+  toolCall: e,
+  tools: t
+}) {
+  const n = e.toolName, r = t[n];
+  if (r == null)
+    throw new mr({
+      toolName: e.toolName,
+      availableTools: Object.keys(t)
+    });
+  const s = Dt(r.parameters), a = e.args.trim() === "" ? await ot({ value: {}, schema: s }) : await It({ text: e.args, schema: s });
+  if (a.success === !1)
+    throw new Xa({
+      toolName: n,
+      toolArgs: e.args,
+      cause: a.error
+    });
+  return {
+    type: "tool-call",
+    toolCallId: e.toolCallId,
+    toolName: n,
+    args: a == null ? void 0 : a.value
+  };
+}
+var pi = class {
+  constructor({
+    content: e,
+    finishReason: t,
+    usage: n,
+    warnings: r,
+    request: s,
+    response: a,
+    providerMetadata: o
+  }) {
+    this.content = e, this.finishReason = t, this.usage = n, this.warnings = r, this.request = s, this.response = a, this.providerMetadata = o;
+  }
+  get text() {
+    return this.content.filter((e) => e.type === "text").map((e) => e.text).join("");
+  }
+  get reasoning() {
+    return this.content.filter((e) => e.type === "reasoning");
+  }
+  get reasoningText() {
+    return this.reasoning.length === 0 ? void 0 : this.reasoning.map((e) => e.text).join("");
+  }
+  get files() {
+    return this.content.filter((e) => e.type === "file").map((e) => e.file);
+  }
+  get sources() {
+    return this.content.filter((e) => e.type === "source");
+  }
+  get toolCalls() {
+    return this.content.filter((e) => e.type === "tool-call");
+  }
+  get toolResults() {
+    return this.content.filter((e) => e.type === "tool-result");
+  }
+};
+function Ah(e) {
+  return ({ steps: t }) => t.length >= e;
+}
+function Jf(e) {
+  return ({ steps: t }) => {
+    var n, r, s;
+    return (s = (r = (n = t[t.length - 1]) == null ? void 0 : n.toolCalls) == null ? void 0 : r.some(
+      (a) => a.toolName === e
+    )) != null ? s : !1;
+  };
+}
+function vr({
+  content: e,
+  tools: t
+}) {
+  const n = [], r = e.filter((a) => a.type !== "tool-result" && a.type !== "source").filter((a) => a.type !== "text" || a.text.length > 0).map((a) => {
+    switch (a.type) {
+      case "text":
+        return a;
+      case "reasoning":
+        return {
+          type: "reasoning",
+          text: a.text,
+          providerOptions: a.providerMetadata
+        };
+      case "file":
+        return {
+          type: "file",
+          data: a.file.base64,
+          mediaType: a.file.mediaType
+        };
+      case "tool-call":
+        return a;
+    }
+  });
+  r.length > 0 && n.push({
+    role: "assistant",
+    content: r
+  });
+  const s = e.filter((a) => a.type === "tool-result").map((a) => {
+    const o = t[a.toolName];
+    return (o == null ? void 0 : o.experimental_toToolResultContent) != null ? {
+      type: "tool-result",
+      toolCallId: a.toolCallId,
+      toolName: a.toolName,
+      result: o.experimental_toToolResultContent(a.result),
+      experimental_content: o.experimental_toToolResultContent(
+        a.result
+      )
+    } : {
+      type: "tool-result",
+      toolCallId: a.toolCallId,
+      toolName: a.toolName,
+      result: a.result
+    };
+  });
+  return s.length > 0 && n.push({
+    role: "tool",
+    content: s
+  }), n;
+}
+var Oh = nn({
+  prefix: "aitxt",
+  size: 24
+});
+async function Hf({
+  model: e,
+  tools: t,
+  toolChoice: n,
+  system: r,
+  prompt: s,
+  messages: a,
+  maxRetries: o,
+  abortSignal: i,
+  headers: l,
+  continueUntil: u = Ah(1),
+  experimental_output: c,
+  experimental_telemetry: p,
+  providerOptions: h,
+  experimental_activeTools: g,
+  experimental_prepareStep: v,
+  experimental_repairToolCall: y,
+  _internal: {
+    generateId: m = Oh,
+    currentDate: b = () => /* @__PURE__ */ new Date()
+  } = {},
+  onStepFinish: S,
+  ...w
+}) {
+  const { maxRetries: x, retry: _ } = it({ maxRetries: o }), k = Rt(w), O = Lt({
+    model: e,
+    telemetry: p,
+    headers: l,
+    settings: { ...k, maxRetries: x }
+  }), N = await Gn({
+    system: r,
+    prompt: s,
+    messages: a
+  }), q = Zt(p);
+  return Ae({
+    name: "ai.generateText",
+    attributes: X({
+      telemetry: p,
+      attributes: {
+        ...Ee({
+          operationId: "ai.generateText",
+          telemetry: p
+        }),
+        ...O,
+        // model:
+        "ai.model.provider": e.provider,
+        "ai.model.id": e.modelId,
+        // specific settings that only make sense on the outer level:
+        "ai.prompt": {
+          input: () => JSON.stringify({ system: r, prompt: s, messages: a })
+        }
+      }
+    }),
+    tracer: q,
+    fn: async (L) => {
+      var ee, ae, fe, ce;
+      const ve = Rt(w);
+      let te, ge = [], Pe = [];
+      const we = [], Y = [];
+      do {
+        const oe = [
+          ...N.messages,
+          ...we
+        ], H = await (v == null ? void 0 : v({
+          model: e,
+          steps: Y,
+          stepNumber: Y.length
+        })), V = await Fn({
+          prompt: {
+            system: N.system,
+            messages: oe
+          },
+          supportedUrls: await e.supportedUrls
+        }), ie = (ee = H == null ? void 0 : H.model) != null ? ee : e, { toolChoice: K, tools: U } = ui({
+          tools: t,
+          toolChoice: (ae = H == null ? void 0 : H.toolChoice) != null ? ae : n,
+          activeTools: (fe = H == null ? void 0 : H.experimental_activeTools) != null ? fe : g
+        });
+        te = await _(
+          () => {
+            var B;
+            return Ae({
+              name: "ai.generateText.doGenerate",
+              attributes: X({
+                telemetry: p,
+                attributes: {
+                  ...Ee({
+                    operationId: "ai.generateText.doGenerate",
+                    telemetry: p
+                  }),
+                  ...O,
+                  // model:
+                  "ai.model.provider": ie.provider,
+                  "ai.model.id": ie.modelId,
+                  // prompt:
+                  "ai.prompt.messages": {
+                    input: () => JSON.stringify(V)
+                  },
+                  "ai.prompt.tools": {
+                    // convert the language model level tools:
+                    input: () => U == null ? void 0 : U.map((xe) => JSON.stringify(xe))
+                  },
+                  "ai.prompt.toolChoice": {
+                    input: () => K != null ? JSON.stringify(K) : void 0
+                  },
+                  // standardized gen-ai llm span attributes:
+                  "gen_ai.system": ie.provider,
+                  "gen_ai.request.model": ie.modelId,
+                  "gen_ai.request.frequency_penalty": w.frequencyPenalty,
+                  "gen_ai.request.max_tokens": w.maxOutputTokens,
+                  "gen_ai.request.presence_penalty": w.presencePenalty,
+                  "gen_ai.request.stop_sequences": w.stopSequences,
+                  "gen_ai.request.temperature": (B = w.temperature) != null ? B : void 0,
+                  "gen_ai.request.top_k": w.topK,
+                  "gen_ai.request.top_p": w.topP
+                }
+              }),
+              tracer: q,
+              fn: async (xe) => {
+                var pe, G, z, Ge, ft, lt, Te, Le;
+                const me = await ie.doGenerate({
+                  ...ve,
+                  tools: U,
+                  toolChoice: K,
+                  responseFormat: c == null ? void 0 : c.responseFormat,
+                  prompt: V,
+                  providerOptions: h,
+                  abortSignal: i,
+                  headers: l
+                }), ut = {
+                  id: (G = (pe = me.response) == null ? void 0 : pe.id) != null ? G : m(),
+                  timestamp: (Ge = (z = me.response) == null ? void 0 : z.timestamp) != null ? Ge : b(),
+                  modelId: (lt = (ft = me.response) == null ? void 0 : ft.modelId) != null ? lt : ie.modelId,
+                  headers: (Te = me.response) == null ? void 0 : Te.headers,
+                  body: (Le = me.response) == null ? void 0 : Le.body
+                };
+                return xe.setAttributes(
+                  X({
+                    telemetry: p,
+                    attributes: {
+                      "ai.response.finishReason": me.finishReason,
+                      "ai.response.text": {
+                        output: () => gr(me.content)
+                      },
+                      "ai.response.toolCalls": {
+                        output: () => {
+                          const on = Is(me.content);
+                          return on == null ? void 0 : JSON.stringify(on);
+                        }
+                      },
+                      "ai.response.id": ut.id,
+                      "ai.response.model": ut.modelId,
+                      "ai.response.timestamp": ut.timestamp.toISOString(),
+                      // TODO rename telemetry attributes to inputTokens and outputTokens
+                      "ai.usage.promptTokens": me.usage.inputTokens,
+                      "ai.usage.completionTokens": me.usage.outputTokens,
+                      // standardized gen-ai llm span attributes:
+                      "gen_ai.response.finish_reasons": [me.finishReason],
+                      "gen_ai.response.id": ut.id,
+                      "gen_ai.response.model": ut.modelId,
+                      "gen_ai.usage.input_tokens": me.usage.inputTokens,
+                      "gen_ai.usage.output_tokens": me.usage.outputTokens
+                    }
+                  })
+                ), { ...me, response: ut };
+              }
+            });
+          }
+        ), ge = await Promise.all(
+          te.content.filter(
+            (B) => B.type === "tool-call"
+          ).map(
+            (B) => di({
+              toolCall: B,
+              tools: t,
+              repairToolCall: y,
+              system: r,
+              messages: oe
+            })
+          )
+        ), Pe = t == null ? [] : await Mh({
+          toolCalls: ge,
+          tools: t,
+          tracer: q,
+          telemetry: p,
+          messages: oe,
+          abortSignal: i
+        });
+        const de = Eh({
+          content: te.content,
+          toolCalls: ge,
+          toolResults: Pe
+        });
+        we.push(
+          ...vr({
+            content: de,
+            tools: t ?? {}
+          })
+        );
+        const P = new pi({
+          content: de,
+          finishReason: te.finishReason,
+          usage: te.usage,
+          warnings: te.warnings,
+          providerMetadata: te.providerMetadata,
+          request: (ce = te.request) != null ? ce : {},
+          response: {
+            ...te.response,
+            // deep clone msgs to avoid mutating past messages in multi-step:
+            messages: structuredClone(we)
+          }
+        });
+        Y.push(P), await (S == null ? void 0 : S(P));
+      } while (
+        // there are tool calls:
+        ge.length > 0 && // all current tool calls have results:
+        Pe.length === ge.length && // continue until the stop condition is met:
+        !await u({ steps: Y })
+      );
+      L.setAttributes(
+        X({
+          telemetry: p,
+          attributes: {
+            "ai.response.finishReason": te.finishReason,
+            "ai.response.text": {
+              output: () => gr(te.content)
+            },
+            "ai.response.toolCalls": {
+              output: () => {
+                const oe = Is(te.content);
+                return oe == null ? void 0 : JSON.stringify(oe);
+              }
+            },
+            // TODO rename telemetry attributes to inputTokens and outputTokens
+            "ai.usage.promptTokens": te.usage.inputTokens,
+            "ai.usage.completionTokens": te.usage.outputTokens
+          }
+        })
+      );
+      const ne = Y[Y.length - 1];
+      return new Nh({
+        steps: Y,
+        resolvedOutput: await (c == null ? void 0 : c.parseOutput(
+          { text: ne.text },
+          {
+            response: ne.response,
+            usage: ne.usage,
+            finishReason: ne.finishReason
+          }
+        ))
+      });
+    }
+  });
+}
+async function Mh({
+  toolCalls: e,
+  tools: t,
+  tracer: n,
+  telemetry: r,
+  messages: s,
+  abortSignal: a
+}) {
+  return (await Promise.all(
+    e.map(async ({ toolCallId: i, toolName: l, args: u }) => {
+      const c = t[l];
+      if ((c == null ? void 0 : c.execute) == null)
+        return;
+      const p = await Ae({
+        name: "ai.toolCall",
+        attributes: X({
+          telemetry: r,
+          attributes: {
+            ...Ee({
+              operationId: "ai.toolCall",
+              telemetry: r
+            }),
+            "ai.toolCall.name": l,
+            "ai.toolCall.id": i,
+            "ai.toolCall.args": {
+              output: () => JSON.stringify(u)
+            }
+          }
+        }),
+        tracer: n,
+        fn: async (h) => {
+          try {
+            const g = await c.execute(u, {
+              toolCallId: i,
+              messages: s,
+              abortSignal: a
+            });
+            try {
+              h.setAttributes(
+                X({
+                  telemetry: r,
+                  attributes: {
+                    "ai.toolCall.result": {
+                      output: () => JSON.stringify(g)
+                    }
+                  }
+                })
+              );
+            } catch {
+            }
+            return g;
+          } catch (g) {
+            throw new wo({
+              toolCallId: i,
+              toolName: l,
+              toolArgs: u,
+              cause: g
+            });
+          }
+        }
+      });
+      return {
+        type: "tool-result",
+        toolCallId: i,
+        toolName: l,
+        args: u,
+        result: p
+      };
+    })
+  )).filter(
+    (i) => i != null
+  );
+}
+var Nh = class {
+  constructor(e) {
+    this.steps = e.steps, this.resolvedOutput = e.resolvedOutput;
+  }
+  get finalStep() {
+    return this.steps[this.steps.length - 1];
+  }
+  get content() {
+    return this.finalStep.content;
+  }
+  get text() {
+    return this.finalStep.text;
+  }
+  get files() {
+    return this.finalStep.files;
+  }
+  get reasoningText() {
+    return this.finalStep.reasoningText;
+  }
+  get reasoning() {
+    return this.finalStep.reasoning;
+  }
+  get toolCalls() {
+    return this.finalStep.toolCalls;
+  }
+  get toolResults() {
+    return this.finalStep.toolResults;
+  }
+  get sources() {
+    return this.finalStep.sources;
+  }
+  get finishReason() {
+    return this.finalStep.finishReason;
+  }
+  get warnings() {
+    return this.finalStep.warnings;
+  }
+  get providerMetadata() {
+    return this.finalStep.providerMetadata;
+  }
+  get response() {
+    return this.finalStep.response;
+  }
+  get request() {
+    return this.finalStep.request;
+  }
+  get usage() {
+    return this.finalStep.usage;
+  }
+  get totalUsage() {
+    return this.steps.reduce(
+      (e, t) => ci(e, t.usage),
+      {
+        inputTokens: void 0,
+        outputTokens: void 0,
+        totalTokens: void 0,
+        reasoningTokens: void 0,
+        cachedInputTokens: void 0
+      }
+    );
+  }
+  get experimental_output() {
+    if (this.resolvedOutput == null)
+      throw new co();
+    return this.resolvedOutput;
+  }
+};
+function Is(e) {
+  const t = e.filter(
+    (n) => n.type === "tool-call"
+  );
+  if (t.length !== 0)
+    return t.map((n) => ({
+      toolCallType: n.toolCallType,
+      toolCallId: n.toolCallId,
+      toolName: n.toolName,
+      args: n.args
+    }));
+}
+var Ph = {};
+wp(Ph, {
+  object: () => jh,
+  text: () => $h
+});
+var $h = () => ({
+  type: "text",
+  responseFormat: { type: "text" },
+  async parsePartial({ text: e }) {
+    return { partial: e };
+  },
+  async parseOutput({ text: e }) {
+    return e;
+  }
+}), jh = ({
+  schema: e
+}) => {
+  const t = Dt(e);
+  return {
+    type: "object",
+    responseFormat: {
+      type: "json",
+      schema: t.jsonSchema
+    },
+    async parsePartial({ text: n }) {
+      const r = await Nr(n);
+      switch (r.state) {
+        case "failed-parse":
+        case "undefined-input":
+          return;
+        case "repaired-parse":
+        case "successful-parse":
+          return {
+            // Note: currently no validation of partial results:
+            partial: r.value
+          };
+        default: {
+          const s = r.state;
+          throw new Error(`Unsupported parse state: ${s}`);
+        }
+      }
+    },
+    async parseOutput({ text: n }, r) {
+      const s = await It({ text: n });
+      if (!s.success)
+        throw new dt({
+          message: "No object generated: could not parse the response.",
+          cause: s.error,
+          text: n,
+          response: r.response,
+          usage: r.usage,
+          finishReason: r.finishReason
+        });
+      const a = await ot({
+        value: s.value,
+        schema: t
+      });
+      if (!a.success)
+        throw new dt({
+          message: "No object generated: response did not match schema.",
+          cause: a.error,
+          text: n,
+          response: r.response,
+          usage: r.usage,
+          finishReason: r.finishReason
+        });
+      return a.value;
+    }
+  };
+}, Dh = {
+  word: /\S+\s+/m,
+  line: /\n+/m
+};
+function zf({
+  delayInMs: e = 10,
+  chunking: t = "word",
+  _internal: { delay: n = Tr } = {}
+} = {}) {
+  let r;
+  if (typeof t == "function")
+    r = (s) => {
+      const a = t(s);
+      if (a == null)
+        return null;
+      if (!a.length)
+        throw new Error("Chunking function must return a non-empty string.");
+      if (!s.startsWith(a))
+        throw new Error(
+          `Chunking function must return a match that is a prefix of the buffer. Received: "${a}" expected to start with "${s}"`
+        );
+      return a;
+    };
+  else {
+    const s = typeof t == "string" ? Dh[t] : t;
+    if (s == null)
+      throw new _r({
+        argument: "chunking",
+        message: `Chunking must be "word" or "line" or a RegExp. Received: ${t}`
+      });
+    r = (a) => {
+      const o = s.exec(a);
+      return o ? a.slice(0, o.index) + (o == null ? void 0 : o[0]) : null;
+    };
+  }
+  return () => {
+    let s = "";
+    return new TransformStream({
+      async transform(a, o) {
+        if (a.type !== "text") {
+          s.length > 0 && (o.enqueue({ type: "text", text: s }), s = ""), o.enqueue(a);
+          return;
+        }
+        s += a.text;
+        let i;
+        for (; (i = r(s)) != null; )
+          o.enqueue({ type: "text", text: i }), s = s.slice(i.length), await n(e);
+      }
+    });
+  };
+}
+function hi(e) {
+  return e === void 0 ? [] : Array.isArray(e) ? e : [e];
+}
+function qh({
+  tools: e,
+  generatorStream: t,
+  toolCallStreaming: n,
+  tracer: r,
+  telemetry: s,
+  system: a,
+  messages: o,
+  abortSignal: i,
+  repairToolCall: l
+}) {
+  let u = null;
+  const c = new ReadableStream({
+    start(m) {
+      u = m;
+    }
+  }), p = {}, h = /* @__PURE__ */ new Set();
+  let g = !1;
+  function v() {
+    g && h.size === 0 && u.close();
+  }
+  const y = new TransformStream({
+    async transform(m, b) {
+      const S = m.type;
+      switch (S) {
+        case "stream-start":
+        case "finish":
+        case "text":
+        case "reasoning":
+        case "reasoning-part-finish":
+        case "source":
+        case "response-metadata":
+        case "error": {
+          b.enqueue(m);
+          break;
+        }
+        case "file": {
+          b.enqueue({
+            type: "file",
+            file: new ah({
+              data: m.data,
+              mediaType: m.mediaType
+            })
+          });
+          break;
+        }
+        case "tool-call-delta": {
+          n && (p[m.toolCallId] || (b.enqueue({
+            type: "tool-call-streaming-start",
+            toolCallId: m.toolCallId,
+            toolName: m.toolName
+          }), p[m.toolCallId] = !0), b.enqueue({
+            type: "tool-call-delta",
+            toolCallId: m.toolCallId,
+            toolName: m.toolName,
+            argsTextDelta: m.argsTextDelta
+          }));
+          break;
+        }
+        case "tool-call": {
+          try {
+            const w = await di({
+              toolCall: m,
+              tools: e,
+              repairToolCall: l,
+              system: a,
+              messages: o
+            });
+            b.enqueue(w);
+            const x = e[w.toolName];
+            if (x.execute != null) {
+              const _ = st();
+              h.add(_), Ae({
+                name: "ai.toolCall",
+                attributes: X({
+                  telemetry: s,
+                  attributes: {
+                    ...Ee({
+                      operationId: "ai.toolCall",
+                      telemetry: s
+                    }),
+                    "ai.toolCall.name": w.toolName,
+                    "ai.toolCall.id": w.toolCallId,
+                    "ai.toolCall.args": {
+                      output: () => JSON.stringify(w.args)
+                    }
+                  }
+                }),
+                tracer: r,
+                fn: async (k) => x.execute(w.args, {
+                  toolCallId: w.toolCallId,
+                  messages: o,
+                  abortSignal: i
+                }).then(
+                  (O) => {
+                    u.enqueue({
+                      ...w,
+                      type: "tool-result",
+                      result: O
+                    }), h.delete(_), v();
+                    try {
+                      k.setAttributes(
+                        X({
+                          telemetry: s,
+                          attributes: {
+                            "ai.toolCall.result": {
+                              output: () => JSON.stringify(O)
+                            }
+                          }
+                        })
+                      );
+                    } catch {
+                    }
+                  },
+                  (O) => {
+                    u.enqueue({
+                      type: "error",
+                      error: new wo({
+                        toolCallId: w.toolCallId,
+                        toolName: w.toolName,
+                        toolArgs: w.args,
+                        cause: O
+                      })
+                    }), h.delete(_), v();
+                  }
+                )
+              });
+            }
+          } catch (w) {
+            u.enqueue({
+              type: "error",
+              error: w
+            });
+          }
+          break;
+        }
+        default: {
+          const w = S;
+          throw new Error(`Unhandled chunk type: ${w}`);
+        }
+      }
+    },
+    flush() {
+      g = !0, v();
+    }
+  });
+  return new ReadableStream({
+    async start(m) {
+      return Promise.all([
+        t.pipeThrough(y).pipeTo(
+          new WritableStream({
+            write(b) {
+              m.enqueue(b);
+            },
+            close() {
+            }
+          })
+        ),
+        c.pipeTo(
+          new WritableStream({
+            write(b) {
+              m.enqueue(b);
+            },
+            close() {
+              m.close();
+            }
+          })
+        )
+      ]);
+    }
+  });
+}
+var Uh = nn({
+  prefix: "aitxt",
+  size: 24
+});
+function Wf({
+  model: e,
+  tools: t,
+  toolChoice: n,
+  system: r,
+  prompt: s,
+  messages: a,
+  maxRetries: o,
+  abortSignal: i,
+  headers: l,
+  maxSteps: u = 1,
+  experimental_output: c,
+  experimental_telemetry: p,
+  providerOptions: h,
+  experimental_toolCallStreaming: g = !1,
+  toolCallStreaming: v = g,
+  experimental_activeTools: y,
+  experimental_repairToolCall: m,
+  experimental_transform: b,
+  onChunk: S,
+  onError: w,
+  onFinish: x,
+  onStepFinish: _,
+  _internal: {
+    now: k = li,
+    generateId: O = Uh,
+    currentDate: N = () => /* @__PURE__ */ new Date()
+  } = {},
+  ...q
+}) {
+  return new Zh({
+    model: e,
+    telemetry: p,
+    headers: l,
+    settings: q,
+    maxRetries: o,
+    abortSignal: i,
+    system: r,
+    prompt: s,
+    messages: a,
+    tools: t,
+    toolChoice: n,
+    toolCallStreaming: v,
+    transforms: hi(b),
+    activeTools: y,
+    repairToolCall: m,
+    maxSteps: u,
+    output: c,
+    providerOptions: h,
+    onChunk: S,
+    onError: w,
+    onFinish: x,
+    onStepFinish: _,
+    now: k,
+    currentDate: N,
+    generateId: O
+  });
+}
+function Lh(e) {
+  if (!e)
+    return new TransformStream({
+      transform(a, o) {
+        o.enqueue({ part: a, partialOutput: void 0 });
+      }
+    });
+  let t = "", n = "", r = "";
+  function s({
+    controller: a,
+    partialOutput: o = void 0
+  }) {
+    a.enqueue({
+      part: { type: "text", text: n },
+      partialOutput: o
+    }), n = "";
+  }
+  return new TransformStream({
+    async transform(a, o) {
+      if (a.type === "finish-step" && s({ controller: o }), a.type !== "text") {
+        o.enqueue({ part: a, partialOutput: void 0 });
+        return;
+      }
+      t += a.text, n += a.text;
+      const i = await e.parsePartial({ text: t });
+      if (i != null) {
+        const l = JSON.stringify(i.partial);
+        l !== r && (s({ controller: o, partialOutput: i.partial }), r = l);
+      }
+    },
+    flush(a) {
+      n.length > 0 && s({ controller: a });
+    }
+  });
+}
+var Zh = class {
+  constructor({
+    model: e,
+    telemetry: t,
+    headers: n,
+    settings: r,
+    maxRetries: s,
+    abortSignal: a,
+    system: o,
+    prompt: i,
+    messages: l,
+    tools: u,
+    toolChoice: c,
+    toolCallStreaming: p,
+    transforms: h,
+    activeTools: g,
+    repairToolCall: v,
+    maxSteps: y,
+    output: m,
+    providerOptions: b,
+    now: S,
+    currentDate: w,
+    generateId: x,
+    onChunk: _,
+    onError: k,
+    onFinish: O,
+    onStepFinish: N
+  }) {
+    if (this.totalUsagePromise = new rt(), this.finishReasonPromise = new rt(), this.stepsPromise = new rt(), y < 1)
+      throw new le({
+        parameter: "maxSteps",
+        value: y,
+        message: "maxSteps must be at least 1"
+      });
+    this.output = m, this.generateId = x;
+    let q, L = [];
+    const ee = [];
+    let ae, fe, ce = {}, ve = [];
+    const te = [];
+    let ge;
+    const Pe = new TransformStream({
+      async transform(U, de) {
+        de.enqueue(U);
+        const { part: P } = U;
+        if ((P.type === "text" || P.type === "reasoning" || P.type === "source" || P.type === "tool-call" || P.type === "tool-result" || P.type === "tool-call-streaming-start" || P.type === "tool-call-delta") && await (_ == null ? void 0 : _({ chunk: P })), P.type === "error" && await (k == null ? void 0 : k({ error: P.error })), P.type === "text") {
+          const B = L[L.length - 1];
+          (B == null ? void 0 : B.type) === "text" ? B.text += P.text : L.push({ type: "text", text: P.text });
+        }
+        if (P.type === "reasoning" && (q == null ? (q = {
+          type: "reasoning",
+          text: P.text,
+          providerMetadata: P.providerMetadata
+        }, L.push(q)) : (q.text += P.text, q.providerMetadata = P.providerMetadata)), P.type === "reasoning-part-finish" && q != null && (q = void 0), P.type === "file" && L.push({ type: "file", file: P.file }), P.type === "source" && L.push(P), P.type === "tool-call" && L.push(P), P.type === "tool-result" && L.push(P), P.type === "start-step" && (ce = P.request, ve = P.warnings), P.type === "finish-step") {
+          const B = vr({
+            content: L,
+            tools: u ?? {}
+          }), xe = new pi({
+            content: L,
+            finishReason: P.finishReason,
+            usage: P.usage,
+            warnings: ve,
+            request: ce,
+            response: {
+              ...P.response,
+              messages: [...ee, ...B]
+            },
+            providerMetadata: P.providerMetadata
+          });
+          await (N == null ? void 0 : N(xe)), te.push(xe), L = [], q = void 0, ee.push(...B);
+        }
+        P.type === "finish" && (fe = P.totalUsage, ae = P.finishReason);
+      },
+      async flush(U) {
+        try {
+          if (te.length === 0)
+            return;
+          const de = ae ?? "unknown", P = fe ?? {
+            inputTokens: void 0,
+            outputTokens: void 0,
+            totalTokens: void 0
+          };
+          K.finishReasonPromise.resolve(de), K.totalUsagePromise.resolve(P), K.stepsPromise.resolve(te);
+          const B = te[te.length - 1];
+          await (O == null ? void 0 : O({
+            finishReason: de,
+            totalUsage: P,
+            usage: B.usage,
+            content: B.content,
+            text: B.text,
+            reasoningText: B.reasoningText,
+            reasoning: B.reasoning,
+            files: B.files,
+            sources: B.sources,
+            toolCalls: B.toolCalls,
+            toolResults: B.toolResults,
+            request: B.request,
+            response: B.response,
+            warnings: B.warnings,
+            providerMetadata: B.providerMetadata,
+            steps: te
+          })), ge.setAttributes(
+            X({
+              telemetry: t,
+              attributes: {
+                "ai.response.finishReason": de,
+                "ai.response.text": { output: () => B.text },
+                "ai.response.toolCalls": {
+                  output: () => {
+                    var xe;
+                    return (xe = B.toolCalls) != null && xe.length ? JSON.stringify(B.toolCalls) : void 0;
+                  }
+                },
+                "ai.usage.inputTokens": P.inputTokens,
+                "ai.usage.outputTokens": P.outputTokens,
+                "ai.usage.totalTokens": P.totalTokens,
+                "ai.usage.reasoningTokens": P.reasoningTokens,
+                "ai.usage.cachedInputTokens": P.cachedInputTokens
+              }
+            })
+          );
+        } catch (de) {
+          U.error(de);
+        } finally {
+          ge.end();
+        }
+      }
+    }), we = ii();
+    this.addStream = we.addStream, this.closeStream = we.close;
+    let Y = we.stream;
+    Y = Y.pipeThrough(
+      new TransformStream({
+        start(U) {
+          U.enqueue({ type: "start" });
+        }
+      })
+    );
+    for (const U of h)
+      Y = Y.pipeThrough(
+        U({
+          tools: u,
+          stopStream() {
+            we.terminate();
+          }
+        })
+      );
+    this.baseStream = Y.pipeThrough(Lh(m)).pipeThrough(Pe);
+    const { maxRetries: ne, retry: oe } = it({
+      maxRetries: s
+    }), H = Zt(t), V = Rt(r), ie = Lt({
+      model: e,
+      telemetry: t,
+      headers: n,
+      settings: { ...V, maxRetries: ne }
+    }), K = this;
+    Ae({
+      name: "ai.streamText",
+      attributes: X({
+        telemetry: t,
+        attributes: {
+          ...Ee({ operationId: "ai.streamText", telemetry: t }),
+          ...ie,
+          // specific settings that only make sense on the outer level:
+          "ai.prompt": {
+            input: () => JSON.stringify({ system: o, prompt: i, messages: l })
+          },
+          "ai.settings.maxSteps": y
+        }
+      }),
+      tracer: H,
+      endWhenDone: !1,
+      fn: async (U) => {
+        ge = U;
+        async function de({
+          currentStep: P,
+          responseMessages: B,
+          usage: xe
+        }) {
+          const pe = await Gn({
+            system: o,
+            prompt: i,
+            messages: l
+          }), G = [
+            ...pe.messages,
+            ...B
+          ], z = await Fn({
+            prompt: {
+              system: pe.system,
+              messages: G
+            },
+            supportedUrls: await e.supportedUrls
+          }), Ge = {
+            ...ui({ tools: u, toolChoice: c, activeTools: g })
+          }, {
+            result: { stream: ft, response: lt, request: Te },
+            doStreamSpan: Le,
+            startTimestampMs: me
+          } = await oe(
+            () => Ae({
+              name: "ai.streamText.doStream",
+              attributes: X({
+                telemetry: t,
+                attributes: {
+                  ...Ee({
+                    operationId: "ai.streamText.doStream",
+                    telemetry: t
+                  }),
+                  ...ie,
+                  "ai.prompt.messages": {
+                    input: () => JSON.stringify(z)
+                  },
+                  "ai.prompt.tools": {
+                    // convert the language model level tools:
+                    input: () => {
+                      var F;
+                      return (F = Ge.tools) == null ? void 0 : F.map(
+                        (ke) => JSON.stringify(ke)
+                      );
+                    }
+                  },
+                  "ai.prompt.toolChoice": {
+                    input: () => Ge.toolChoice != null ? JSON.stringify(Ge.toolChoice) : void 0
+                  },
+                  // standardized gen-ai llm span attributes:
+                  "gen_ai.system": e.provider,
+                  "gen_ai.request.model": e.modelId,
+                  "gen_ai.request.frequency_penalty": V.frequencyPenalty,
+                  "gen_ai.request.max_tokens": V.maxOutputTokens,
+                  "gen_ai.request.presence_penalty": V.presencePenalty,
+                  "gen_ai.request.stop_sequences": V.stopSequences,
+                  "gen_ai.request.temperature": V.temperature,
+                  "gen_ai.request.top_k": V.topK,
+                  "gen_ai.request.top_p": V.topP
+                }
+              }),
+              tracer: H,
+              endWhenDone: !1,
+              fn: async (F) => ({
+                startTimestampMs: S(),
+                // get before the call
+                doStreamSpan: F,
+                result: await e.doStream({
+                  ...V,
+                  ...Ge,
+                  responseFormat: m == null ? void 0 : m.responseFormat,
+                  prompt: z,
+                  providerOptions: b,
+                  abortSignal: a,
+                  headers: n
+                })
+              })
+            })
+          ), ut = qh({
+            tools: u,
+            generatorStream: ft,
+            toolCallStreaming: p,
+            tracer: H,
+            telemetry: t,
+            system: o,
+            messages: G,
+            repairToolCall: v,
+            abortSignal: a
+          }), on = Te ?? {}, Vt = [], Dr = [];
+          let Hn;
+          const At = [];
+          let Ot, Mt = "unknown", Ze = {
+            inputTokens: void 0,
+            outputTokens: void 0,
+            totalTokens: void 0
+          }, qr, Ur = !0, Lr = "", Je = {
+            id: x(),
+            timestamp: w(),
+            modelId: e.modelId
+          };
+          async function _i({
+            controller: F,
+            chunk: ke
+          }) {
+            F.enqueue(ke), Lr += ke.text;
+          }
+          K.addStream(
+            ut.pipeThrough(
+              new TransformStream({
+                async transform(F, ke) {
+                  var Bt, zn, Zr, Vr;
+                  if (F.type === "stream-start") {
+                    Hn = F.warnings;
+                    return;
+                  }
+                  if (Ur) {
+                    const mt = S() - me;
+                    Ur = !1, Le.addEvent("ai.stream.firstChunk", {
+                      "ai.response.msToFirstChunk": mt
+                    }), Le.setAttributes({
+                      "ai.response.msToFirstChunk": mt
+                    }), ke.enqueue({
+                      type: "start-step",
+                      request: on,
+                      warnings: Hn ?? []
+                    });
+                  }
+                  if (F.type === "text" && F.text.length === 0)
+                    return;
+                  const Br = F.type;
+                  switch (Br) {
+                    case "text": {
+                      await _i({ controller: ke, chunk: F });
+                      break;
+                    }
+                    case "reasoning": {
+                      ke.enqueue(F), Ot == null ? (Ot = {
+                        type: "reasoning",
+                        text: F.text,
+                        providerMetadata: F.providerMetadata
+                      }, At.push(Ot)) : (Ot.text += F.text, Ot.providerMetadata = F.providerMetadata);
+                      break;
+                    }
+                    case "reasoning-part-finish": {
+                      Ot = void 0, ke.enqueue(F);
+                      break;
+                    }
+                    case "tool-call": {
+                      ke.enqueue(F), Vt.push(F), At.push(F);
+                      break;
+                    }
+                    case "tool-result": {
+                      ke.enqueue(F), Dr.push(F), At.push(F);
+                      break;
+                    }
+                    case "response-metadata": {
+                      Je = {
+                        id: (Bt = F.id) != null ? Bt : Je.id,
+                        timestamp: (zn = F.timestamp) != null ? zn : Je.timestamp,
+                        modelId: (Zr = F.modelId) != null ? Zr : Je.modelId
+                      };
+                      break;
+                    }
+                    case "finish": {
+                      Ze = F.usage, Mt = F.finishReason, qr = F.providerMetadata;
+                      const mt = S() - me;
+                      Le.addEvent("ai.stream.finish"), Le.setAttributes({
+                        "ai.response.msToFinish": mt,
+                        "ai.response.avgOutputTokensPerSecond": 1e3 * ((Vr = Ze.outputTokens) != null ? Vr : 0) / mt
+                      });
+                      break;
+                    }
+                    case "file": {
+                      At.push(F), ke.enqueue(F);
+                      break;
+                    }
+                    case "source": {
+                      At.push(F), ke.enqueue(F);
+                      break;
+                    }
+                    case "tool-call-streaming-start":
+                    case "tool-call-delta": {
+                      ke.enqueue(F);
+                      break;
+                    }
+                    case "error": {
+                      ke.enqueue(F), Mt = "error";
+                      break;
+                    }
+                    default: {
+                      const mt = Br;
+                      throw new Error(`Unknown chunk type: ${mt}`);
+                    }
+                  }
+                },
+                // invoke onFinish callback and resolve toolResults promise when the stream is about to close:
+                async flush(F) {
+                  const ke = Vt.length > 0 ? JSON.stringify(Vt) : void 0;
+                  try {
+                    Le.setAttributes(
+                      X({
+                        telemetry: t,
+                        attributes: {
+                          "ai.response.finishReason": Mt,
+                          "ai.response.text": { output: () => Lr },
+                          "ai.response.toolCalls": {
+                            output: () => ke
+                          },
+                          "ai.response.id": Je.id,
+                          "ai.response.model": Je.modelId,
+                          "ai.response.timestamp": Je.timestamp.toISOString(),
+                          "ai.usage.inputTokens": Ze.inputTokens,
+                          "ai.usage.outputTokens": Ze.outputTokens,
+                          "ai.usage.totalTokens": Ze.totalTokens,
+                          "ai.usage.reasoningTokens": Ze.reasoningTokens,
+                          "ai.usage.cachedInputTokens": Ze.cachedInputTokens,
+                          // standardized gen-ai llm span attributes:
+                          "gen_ai.response.finish_reasons": [Mt],
+                          "gen_ai.response.id": Je.id,
+                          "gen_ai.response.model": Je.modelId,
+                          "gen_ai.usage.input_tokens": Ze.inputTokens,
+                          "gen_ai.usage.output_tokens": Ze.outputTokens
+                        }
+                      })
+                    );
+                  } catch {
+                  } finally {
+                    Le.end();
+                  }
+                  F.enqueue({
+                    type: "finish-step",
+                    finishReason: Mt,
+                    usage: Ze,
+                    providerMetadata: qr,
+                    response: {
+                      ...Je,
+                      headers: lt == null ? void 0 : lt.headers
+                    }
+                  });
+                  const Bt = ci(xe, Ze);
+                  P + 1 < y && // there are tool calls:
+                  Vt.length > 0 && // all current tool calls have results:
+                  Dr.length === Vt.length ? (B.push(
+                    ...vr({
+                      content: At,
+                      tools: u ?? {}
+                    })
+                  ), await de({
+                    currentStep: P + 1,
+                    responseMessages: B,
+                    usage: Bt
+                  })) : (F.enqueue({
+                    type: "finish",
+                    finishReason: Mt,
+                    totalUsage: Bt
+                  }), K.closeStream());
+                }
+              })
+            )
+          );
+        }
+        await de({
+          currentStep: 0,
+          responseMessages: [],
+          usage: {
+            inputTokens: void 0,
+            outputTokens: void 0,
+            totalTokens: void 0
+          }
+        });
+      }
+    }).catch((U) => {
+      K.addStream(
+        new ReadableStream({
+          start(de) {
+            de.enqueue({ type: "error", error: U }), de.close();
+          }
+        })
+      ), K.closeStream();
+    });
+  }
+  get steps() {
+    return this.stepsPromise.value;
+  }
+  get finalStep() {
+    return this.steps.then((e) => e[e.length - 1]);
+  }
+  get content() {
+    return this.finalStep.then((e) => e.content);
+  }
+  get warnings() {
+    return this.finalStep.then((e) => e.warnings);
+  }
+  get providerMetadata() {
+    return this.finalStep.then((e) => e.providerMetadata);
+  }
+  get text() {
+    return this.finalStep.then((e) => e.text);
+  }
+  get reasoningText() {
+    return this.finalStep.then((e) => e.reasoningText);
+  }
+  get reasoning() {
+    return this.finalStep.then((e) => e.reasoning);
+  }
+  get sources() {
+    return this.finalStep.then((e) => e.sources);
+  }
+  get files() {
+    return this.finalStep.then((e) => e.files);
+  }
+  get toolCalls() {
+    return this.finalStep.then((e) => e.toolCalls);
+  }
+  get toolResults() {
+    return this.finalStep.then((e) => e.toolResults);
+  }
+  get usage() {
+    return this.finalStep.then((e) => e.usage);
+  }
+  get request() {
+    return this.finalStep.then((e) => e.request);
+  }
+  get response() {
+    return this.finalStep.then((e) => e.response);
+  }
+  get totalUsage() {
+    return this.totalUsagePromise.value;
+  }
+  get finishReason() {
+    return this.finishReasonPromise.value;
+  }
+  /**
+  Split out a new stream from the original stream.
+  The original stream is replaced to allow for further splitting,
+  since we do not know how many times the stream will be split.
+  
+  Note: this leads to buffering the stream content on the server.
+  However, the LLM results are expected to be small enough to not cause issues.
+     */
+  teeStream() {
+    const [e, t] = this.baseStream.tee();
+    return this.baseStream = t, e;
+  }
+  get textStream() {
+    return _t(
+      this.teeStream().pipeThrough(
+        new TransformStream({
+          transform({ part: e }, t) {
+            e.type === "text" && t.enqueue(e.text);
+          }
+        })
+      )
+    );
+  }
+  get fullStream() {
+    return _t(
+      this.teeStream().pipeThrough(
+        new TransformStream({
+          transform({ part: e }, t) {
+            t.enqueue(e);
+          }
+        })
+      )
+    );
+  }
+  async consumeStream(e) {
+    var t;
+    try {
+      await Zn({
+        stream: this.fullStream,
+        onError: e == null ? void 0 : e.onError
+      });
+    } catch (n) {
+      (t = e == null ? void 0 : e.onError) == null || t.call(e, n);
+    }
+  }
+  get experimental_partialOutputStream() {
+    if (this.output == null)
+      throw new co();
+    return _t(
+      this.teeStream().pipeThrough(
+        new TransformStream({
+          transform({ partialOutput: e }, t) {
+            e != null && t.enqueue(e);
+          }
+        })
+      )
+    );
+  }
+  toUIMessageStream({
+    newMessageId: e,
+    originalMessages: t = [],
+    onFinish: n,
+    messageMetadata: r,
+    sendReasoning: s = !1,
+    sendSources: a = !1,
+    experimental_sendStart: o = !0,
+    experimental_sendFinish: i = !0,
+    onError: l = () => "An error occurred."
+    // mask error messages for safety by default
+  } = {}) {
+    const u = t[t.length - 1], p = (u == null ? void 0 : u.role) === "assistant" ? u.id : e, h = this.fullStream.pipeThrough(
+      new TransformStream({
+        transform: async (y, m) => {
+          const b = y.type;
+          switch (b) {
+            case "text": {
+              m.enqueue({
+                type: "text",
+                text: y.text
+              });
+              break;
+            }
+            case "reasoning": {
+              s && m.enqueue({
+                type: "reasoning",
+                text: y.text,
+                providerMetadata: y.providerMetadata
+              });
+              break;
+            }
+            case "reasoning-part-finish": {
+              s && m.enqueue({ type: "reasoning-part-finish" });
+              break;
+            }
+            case "file": {
+              m.enqueue({
+                type: "file",
+                mediaType: y.file.mediaType,
+                url: `data:${y.file.mediaType};base64,${y.file.base64}`
+              });
+              break;
+            }
+            case "source": {
+              a && m.enqueue({
+                type: "source",
+                sourceType: y.sourceType,
+                id: y.id,
+                url: y.url,
+                title: y.title,
+                providerMetadata: y.providerMetadata
+              });
+              break;
+            }
+            case "tool-call-streaming-start": {
+              m.enqueue({
+                type: "tool-call-streaming-start",
+                toolCallId: y.toolCallId,
+                toolName: y.toolName
+              });
+              break;
+            }
+            case "tool-call-delta": {
+              m.enqueue({
+                type: "tool-call-delta",
+                toolCallId: y.toolCallId,
+                argsTextDelta: y.argsTextDelta
+              });
+              break;
+            }
+            case "tool-call": {
+              m.enqueue({
+                type: "tool-call",
+                toolCallId: y.toolCallId,
+                toolName: y.toolName,
+                args: y.args
+              });
+              break;
+            }
+            case "tool-result": {
+              m.enqueue({
+                type: "tool-result",
+                toolCallId: y.toolCallId,
+                result: y.result
+              });
+              break;
+            }
+            case "error": {
+              m.enqueue({
+                type: "error",
+                errorText: l(y.error)
+              });
+              break;
+            }
+            case "start-step": {
+              const S = r == null ? void 0 : r({ part: y });
+              m.enqueue({
+                type: "start-step",
+                metadata: S
+              });
+              break;
+            }
+            case "finish-step": {
+              const S = r == null ? void 0 : r({ part: y });
+              m.enqueue({
+                type: "finish-step",
+                metadata: S
+              });
+              break;
+            }
+            case "start": {
+              if (o) {
+                const S = r == null ? void 0 : r({ part: y });
+                m.enqueue({
+                  type: "start",
+                  messageId: p,
+                  metadata: S
+                });
+              }
+              break;
+            }
+            case "finish": {
+              if (i) {
+                const S = r == null ? void 0 : r({ part: y });
+                m.enqueue({
+                  type: "finish",
+                  metadata: S
+                });
+              }
+              break;
+            }
+            default: {
+              const S = b;
+              throw new Error(`Unknown chunk type: ${S}`);
+            }
+          }
+        }
+      })
+    );
+    if (n == null)
+      return h;
+    const g = Pr({
+      lastMessage: u,
+      newMessageId: p ?? this.generateId()
+    });
+    return $r({
+      stream: h,
+      runUpdateMessageJob: async (y) => {
+        await y({ state: g, write: () => {
+        } });
+      }
+    }).pipeThrough(
+      new TransformStream({
+        transform(y, m) {
+          m.enqueue(y);
+        },
+        flush() {
+          const y = g.message.id === (u == null ? void 0 : u.id);
+          n({
+            isContinuation: y,
+            responseMessage: g.message,
+            messages: [
+              ...y ? t.slice(0, -1) : t,
+              g.message
+            ]
+          });
+        }
+      })
+    );
+  }
+  pipeUIMessageStreamToResponse(e, {
+    newMessageId: t,
+    originalMessages: n,
+    onFinish: r,
+    messageMetadata: s,
+    sendReasoning: a,
+    sendSources: o,
+    experimental_sendFinish: i,
+    experimental_sendStart: l,
+    onError: u,
+    ...c
+  } = {}) {
+    Xp({
+      response: e,
+      stream: this.toUIMessageStream({
+        newMessageId: t,
+        originalMessages: n,
+        onFinish: r,
+        messageMetadata: s,
+        sendReasoning: a,
+        sendSources: o,
+        experimental_sendFinish: i,
+        experimental_sendStart: l,
+        onError: u
+      }),
+      ...c
+    });
+  }
+  pipeTextStreamToResponse(e, t) {
+    Uo({
+      response: e,
+      textStream: this.textStream,
+      ...t
+    });
+  }
+  toUIMessageStreamResponse({
+    newMessageId: e,
+    originalMessages: t,
+    onFinish: n,
+    messageMetadata: r,
+    sendReasoning: s,
+    sendSources: a,
+    experimental_sendFinish: o,
+    experimental_sendStart: i,
+    onError: l,
+    ...u
+  } = {}) {
+    return Kp({
+      stream: this.toUIMessageStream({
+        newMessageId: e,
+        originalMessages: t,
+        onFinish: n,
+        messageMetadata: r,
+        sendReasoning: s,
+        sendSources: a,
+        experimental_sendFinish: o,
+        experimental_sendStart: i,
+        onError: l
+      }),
+      ...u
+    });
+  }
+  toTextStreamResponse(e) {
+    return Do({
+      textStream: this.textStream,
+      ...e
+    });
+  }
+};
+function Yf({
+  settings: e
+}) {
+  return {
+    middlewareVersion: "v2",
+    transformParams: async ({ params: t }) => Mn(e, t)
+  };
+}
+function Vh(e, t) {
+  if (t.length === 0)
+    return null;
+  const n = e.indexOf(t);
+  if (n !== -1)
+    return n;
+  for (let r = e.length - 1; r >= 0; r--) {
+    const s = e.substring(r);
+    if (t.startsWith(s))
+      return r;
+  }
+  return null;
+}
+function Kf({
+  tagName: e,
+  separator: t = `
+`,
+  startWithReasoning: n = !1
+}) {
+  const r = `<${e}>`, s = `</${e}>`;
+  return {
+    middlewareVersion: "v2",
+    wrapGenerate: async ({ doGenerate: a }) => {
+      const { content: o, ...i } = await a(), l = [];
+      for (const u of o) {
+        if (u.type !== "text") {
+          l.push(u);
+          continue;
+        }
+        const c = n ? r + u.text : u.text, p = new RegExp(`${r}(.*?)${s}`, "gs"), h = Array.from(c.matchAll(p));
+        if (!h.length) {
+          l.push(u);
+          continue;
+        }
+        const g = h.map((y) => y[1]).join(t);
+        let v = c;
+        for (let y = h.length - 1; y >= 0; y--) {
+          const m = h[y], b = v.slice(0, m.index), S = v.slice(
+            m.index + m[0].length
+          );
+          v = b + (b.length > 0 && S.length > 0 ? t : "") + S;
+        }
+        l.push({
+          type: "reasoning",
+          text: g
+        }), l.push({
+          type: "text",
+          text: v
+        });
+      }
+      return { content: l, ...i };
+    },
+    wrapStream: async ({ doStream: a }) => {
+      const { stream: o, ...i } = await a();
+      let l = !0, u = !0, c = !1, p = n, h = "";
+      return {
+        stream: o.pipeThrough(
+          new TransformStream({
+            transform: (g, v) => {
+              if (g.type !== "text") {
+                v.enqueue(g);
+                return;
+              }
+              h += g.text;
+              function y(m) {
+                if (m.length > 0) {
+                  const b = c && (p ? !l : !u) ? t : "";
+                  v.enqueue(
+                    p ? {
+                      type: "reasoning",
+                      text: b + m
+                    } : {
+                      type: "text",
+                      text: b + m
+                    }
+                  ), c = !1, p ? l = !1 : u = !1;
+                }
+              }
+              do {
+                const m = p ? s : r, b = Vh(h, m);
+                if (b == null) {
+                  y(h), h = "";
+                  break;
+                }
+                if (y(h.slice(0, b)), b + m.length <= h.length)
+                  h = h.slice(b + m.length), p && v.enqueue({ type: "reasoning-part-finish" }), p = !p, c = !0;
+                else {
+                  h = h.slice(b);
+                  break;
+                }
+              } while (!0);
+            }
+          })
+        ),
+        ...i
+      };
+    }
+  };
+}
+function Xf() {
+  return {
+    middlewareVersion: "v2",
+    wrapStream: async ({ doGenerate: e }) => {
+      const t = await e();
+      return {
+        stream: new ReadableStream({
+          start(r) {
+            r.enqueue({
+              type: "stream-start",
+              warnings: t.warnings
+            }), r.enqueue({ type: "response-metadata", ...t.response });
+            for (const s of t.content)
+              r.enqueue(s);
+            r.enqueue({
+              type: "finish",
+              finishReason: t.finishReason,
+              usage: t.usage,
+              providerMetadata: t.providerMetadata
+            }), r.close();
+          }
+        }),
+        request: t.request,
+        response: t.response
+      };
+    }
+  };
+}
+var Qf = ({
+  model: e,
+  middleware: t,
+  modelId: n,
+  providerId: r
+}) => hi(t).reverse().reduce((s, a) => Bh({ model: s, middleware: a, modelId: n, providerId: r }), e), Bh = ({
+  model: e,
+  middleware: { transformParams: t, wrapGenerate: n, wrapStream: r },
+  modelId: s,
+  providerId: a
+}) => {
+  async function o({
+    params: i,
+    type: l
+  }) {
+    return t ? await t({ params: i, type: l }) : i;
+  }
+  return {
+    specificationVersion: "v2",
+    provider: a ?? e.provider,
+    modelId: s ?? e.modelId,
+    // TODO middleware should be able to modify the supported urls
+    get supportedUrls() {
+      return e.supportedUrls;
+    },
+    async doGenerate(i) {
+      const l = await o({ params: i, type: "generate" }), u = async () => e.doGenerate(l);
+      return n ? n({
+        doGenerate: u,
+        doStream: async () => e.doStream(l),
+        params: l,
+        model: e
+      }) : u();
+    },
+    async doStream(i) {
+      const l = await o({ params: i, type: "stream" }), u = async () => e.doGenerate(l), c = async () => e.doStream(l);
+      return r ? r({ doGenerate: u, doStream: c, params: l, model: e }) : c();
+    }
+  };
+};
+function Fh({
+  languageModels: e,
+  textEmbeddingModels: t,
+  imageModels: n,
+  fallbackProvider: r
+}) {
+  return {
+    languageModel(s) {
+      if (e != null && s in e)
+        return e[s];
+      if (r)
+        return r.languageModel(s);
+      throw new je({ modelId: s, modelType: "languageModel" });
+    },
+    textEmbeddingModel(s) {
+      if (t != null && s in t)
+        return t[s];
+      if (r)
+        return r.textEmbeddingModel(s);
+      throw new je({ modelId: s, modelType: "textEmbeddingModel" });
+    },
+    imageModel(s) {
+      if (n != null && s in n)
+        return n[s];
+      if (r != null && r.imageModel)
+        return r.imageModel(s);
+      throw new je({ modelId: s, modelType: "imageModel" });
+    }
+  };
+}
+var em = Fh, fi = "AI_NoSuchProviderError", mi = `vercel.ai.error.${fi}`, Gh = Symbol.for(mi), gi, Jh = class extends je {
+  constructor({
+    modelId: e,
+    modelType: t,
+    providerId: n,
+    availableProviders: r,
+    message: s = `No such provider: ${n} (available providers: ${r.join()})`
+  }) {
+    super({ errorName: fi, modelId: e, modelType: t, message: s }), this[gi] = !0, this.providerId = n, this.availableProviders = r;
+  }
+  static isInstance(e) {
+    return j.hasMarker(e, mi);
+  }
+};
+gi = Gh;
+function Hh(e, {
+  separator: t = ":"
+} = {}) {
+  const n = new zh({
+    separator: t
+  });
+  for (const [r, s] of Object.entries(e))
+    n.registerProvider({ id: r, provider: s });
+  return n;
+}
+var tm = Hh, zh = class {
+  constructor({ separator: e }) {
+    this.providers = {}, this.separator = e;
+  }
+  registerProvider({
+    id: e,
+    provider: t
+  }) {
+    this.providers[e] = t;
+  }
+  getProvider(e) {
+    const t = this.providers[e];
+    if (t == null)
+      throw new Jh({
+        modelId: e,
+        modelType: "languageModel",
+        providerId: e,
+        availableProviders: Object.keys(this.providers)
+      });
+    return t;
+  }
+  splitId(e, t) {
+    const n = e.indexOf(this.separator);
+    if (n === -1)
+      throw new je({
+        modelId: e,
+        modelType: t,
+        message: `Invalid ${t} id for registry: ${e} (must be in the format "providerId${this.separator}modelId")`
+      });
+    return [e.slice(0, n), e.slice(n + this.separator.length)];
+  }
+  languageModel(e) {
+    var t, n;
+    const [r, s] = this.splitId(e, "languageModel"), a = (n = (t = this.getProvider(r)).languageModel) == null ? void 0 : n.call(t, s);
+    if (a == null)
+      throw new je({ modelId: e, modelType: "languageModel" });
+    return a;
+  }
+  textEmbeddingModel(e) {
+    var t;
+    const [n, r] = this.splitId(e, "textEmbeddingModel"), s = this.getProvider(n), a = (t = s.textEmbeddingModel) == null ? void 0 : t.call(s, r);
+    if (a == null)
+      throw new je({
+        modelId: e,
+        modelType: "textEmbeddingModel"
+      });
+    return a;
+  }
+  imageModel(e) {
+    var t;
+    const [n, r] = this.splitId(e, "imageModel"), s = this.getProvider(n), a = (t = s.imageModel) == null ? void 0 : t.call(s, r);
+    if (a == null)
+      throw new je({ modelId: e, modelType: "imageModel" });
+    return a;
+  }
+};
+function nm(e) {
+  return e;
+}
+var yi = "2024-11-05", Wh = [
+  yi,
+  "2024-10-07"
+], Yh = f({
+  name: d(),
+  version: d()
+}).passthrough(), jr = f({
+  _meta: be(f({}).passthrough())
+}).passthrough(), Qt = jr, Kh = f({
+  method: d(),
+  params: be(jr)
+}), Xh = f({
+  experimental: be(f({}).passthrough()),
+  logging: be(f({}).passthrough()),
+  prompts: be(
+    f({
+      listChanged: be(ue())
+    }).passthrough()
+  ),
+  resources: be(
+    f({
+      subscribe: be(ue()),
+      listChanged: be(ue())
+    }).passthrough()
+  ),
+  tools: be(
+    f({
+      listChanged: be(ue())
+    }).passthrough()
+  )
+}).passthrough(), Qh = Qt.extend({
+  protocolVersion: d(),
+  capabilities: Xh,
+  serverInfo: Yh,
+  instructions: be(d())
+}), ef = Qt.extend({
+  nextCursor: be(d())
+}), tf = f({
+  name: d(),
+  description: be(d()),
+  inputSchema: f({
+    type: C("object"),
+    properties: be(f({}).passthrough())
+  }).passthrough()
+}).passthrough(), nf = ef.extend({
+  tools: M(tf)
+}), rf = f({
+  type: C("text"),
+  text: d()
+}).passthrough(), sf = f({
+  type: C("image"),
+  data: d().base64(),
+  mimeType: d()
+}).passthrough(), vi = f({
+  /**
+   * The URI of this resource.
+   */
+  uri: d(),
+  /**
+   * The MIME type of this resource, if known.
+   */
+  mimeType: be(d())
+}).passthrough(), af = vi.extend({
+  text: d()
+}), of = vi.extend({
+  blob: d().base64()
+}), lf = f({
+  type: C("resource"),
+  resource: se([af, of])
+}).passthrough(), uf = Qt.extend({
+  content: M(
+    se([rf, sf, lf])
+  ),
+  isError: ue().default(!1).optional()
+}).or(
+  Qt.extend({
+    toolResult: Me()
+  })
+), Jn = "2.0", cf = f({
+  jsonrpc: C(Jn),
+  id: se([d(), T().int()])
+}).merge(Kh).strict(), df = f({
+  jsonrpc: C(Jn),
+  id: se([d(), T().int()]),
+  result: Qt
+}).strict(), pf = f({
+  jsonrpc: C(Jn),
+  id: se([d(), T().int()]),
+  error: f({
+    code: T().int(),
+    message: d(),
+    data: be(Me())
+  })
+}).strict(), hf = f({
+  jsonrpc: C(Jn)
+}).merge(
+  f({
+    method: d(),
+    params: be(jr)
+  })
+).strict(), ff = se([
+  cf,
+  hf,
+  df,
+  pf
+]), mf = class {
+  constructor({
+    url: e,
+    headers: t
+  }) {
+    this.connected = !1, this.url = new URL(e), this.headers = t;
+  }
+  async start() {
+    return new Promise((e, t) => {
+      if (this.connected)
+        return e();
+      this.abortController = new AbortController(), (async () => {
+        var r, s, a;
+        try {
+          const o = new Headers(this.headers);
+          o.set("Accept", "text/event-stream");
+          const i = await fetch(this.url.href, {
+            headers: o,
+            signal: (r = this.abortController) == null ? void 0 : r.signal
+          });
+          if (!i.ok || !i.body) {
+            const p = new _e({
+              message: `MCP SSE Transport Error: ${i.status} ${i.statusText}`
+            });
+            return (s = this.onerror) == null || s.call(this, p), t(p);
+          }
+          const u = i.body.pipeThrough(new TextDecoderStream()).pipeThrough(xa()).getReader(), c = async () => {
+            var p, h, g;
+            try {
+              for (; ; ) {
+                const { done: v, value: y } = await u.read();
+                if (v) {
+                  if (this.connected)
+                    throw this.connected = !1, new _e({
+                      message: "MCP SSE Transport Error: Connection closed unexpectedly"
+                    });
+                  return;
+                }
+                const { event: m, data: b } = y;
+                if (m === "endpoint") {
+                  if (this.endpoint = new URL(b, this.url), this.endpoint.origin !== this.url.origin)
+                    throw new _e({
+                      message: `MCP SSE Transport Error: Endpoint origin does not match connection origin: ${this.endpoint.origin}`
+                    });
+                  this.connected = !0, e();
+                } else if (m === "message")
+                  try {
+                    const S = ff.parse(
+                      JSON.parse(b)
+                    );
+                    (p = this.onmessage) == null || p.call(this, S);
+                  } catch (S) {
+                    const w = new _e({
+                      message: "MCP SSE Transport Error: Failed to parse message",
+                      cause: S
+                    });
+                    (h = this.onerror) == null || h.call(this, w);
+                  }
+              }
+            } catch (v) {
+              if (v instanceof Error && v.name === "AbortError")
+                return;
+              (g = this.onerror) == null || g.call(this, v), t(v);
+            }
+          };
+          this.sseConnection = {
+            close: () => u.cancel()
+          }, c();
+        } catch (o) {
+          if (o instanceof Error && o.name === "AbortError")
+            return;
+          (a = this.onerror) == null || a.call(this, o), t(o);
+        }
+      })();
+    });
+  }
+  async close() {
+    var e, t, n;
+    this.connected = !1, (e = this.sseConnection) == null || e.close(), (t = this.abortController) == null || t.abort(), (n = this.onclose) == null || n.call(this);
+  }
+  async send(e) {
+    var t, n, r;
+    if (!this.endpoint || !this.connected)
+      throw new _e({
+        message: "MCP SSE Transport Error: Not connected"
+      });
+    try {
+      const s = new Headers(this.headers);
+      s.set("Content-Type", "application/json");
+      const a = {
+        method: "POST",
+        headers: s,
+        body: JSON.stringify(e),
+        signal: (t = this.abortController) == null ? void 0 : t.signal
+      }, o = await fetch(this.endpoint, a);
+      if (!o.ok) {
+        const i = await o.text().catch(() => null), l = new _e({
+          message: `MCP SSE Transport Error: POSTing to endpoint (HTTP ${o.status}): ${i}`
+        });
+        (n = this.onerror) == null || n.call(this, l);
+        return;
+      }
+    } catch (s) {
+      (r = this.onerror) == null || r.call(this, s);
+      return;
+    }
+  }
+};
+function gf(e) {
+  if (e.type !== "sse")
+    throw new _e({
+      message: "Unsupported or invalid transport configuration. If you are using a custom transport, make sure it implements the MCPTransport interface."
+    });
+  return new mf(e);
+}
+function yf(e) {
+  return "start" in e && typeof e.start == "function" && "send" in e && typeof e.send == "function" && "close" in e && typeof e.close == "function";
+}
+var vf = "1.0.0";
+async function rm(e) {
+  const t = new _f(e);
+  return await t.init(), t;
+}
+var _f = class {
+  constructor({
+    transport: e,
+    name: t = "ai-sdk-mcp-client",
+    onUncaughtError: n
+  }) {
+    this.requestMessageId = 0, this.responseHandlers = /* @__PURE__ */ new Map(), this.serverCapabilities = {}, this.isClosed = !0, this.onUncaughtError = n, yf(e) ? this.transport = e : this.transport = gf(e), this.transport.onclose = () => this.onClose(), this.transport.onerror = (r) => this.onError(r), this.transport.onmessage = (r) => {
+      if ("method" in r) {
+        this.onError(
+          new _e({
+            message: "Unsupported message type"
+          })
+        );
+        return;
+      }
+      this.onResponse(r);
+    }, this.clientInfo = {
+      name: t,
+      version: vf
+    };
+  }
+  async init() {
+    try {
+      await this.transport.start(), this.isClosed = !1;
+      const e = await this.request({
+        request: {
+          method: "initialize",
+          params: {
+            protocolVersion: yi,
+            capabilities: {},
+            clientInfo: this.clientInfo
+          }
+        },
+        resultSchema: Qh
+      });
+      if (e === void 0)
+        throw new _e({
+          message: "Server sent invalid initialize result"
+        });
+      if (!Wh.includes(e.protocolVersion))
+        throw new _e({
+          message: `Server's protocol version is not supported: ${e.protocolVersion}`
+        });
+      return this.serverCapabilities = e.capabilities, await this.notification({
+        method: "notifications/initialized"
+      }), this;
+    } catch (e) {
+      throw await this.close(), e;
+    }
+  }
+  async close() {
+    var e;
+    this.isClosed || (await ((e = this.transport) == null ? void 0 : e.close()), this.onClose());
+  }
+  assertCapability(e) {
+    switch (e) {
+      case "initialize":
+        break;
+      case "tools/list":
+      case "tools/call":
+        if (!this.serverCapabilities.tools)
+          throw new _e({
+            message: "Server does not support tools"
+          });
+        break;
+      default:
+        throw new _e({
+          message: `Unsupported method: ${e}`
+        });
+    }
+  }
+  async request({
+    request: e,
+    resultSchema: t,
+    options: n
+  }) {
+    return new Promise((r, s) => {
+      if (this.isClosed)
+        return s(
+          new _e({
+            message: "Attempted to send a request from a closed client"
+          })
+        );
+      this.assertCapability(e.method);
+      const a = n == null ? void 0 : n.signal;
+      a == null || a.throwIfAborted();
+      const o = this.requestMessageId++, i = {
+        ...e,
+        jsonrpc: "2.0",
+        id: o
+      }, l = () => {
+        this.responseHandlers.delete(o);
+      };
+      this.responseHandlers.set(o, (u) => {
+        if (a != null && a.aborted)
+          return s(
+            new _e({
+              message: "Request was aborted",
+              cause: a.reason
+            })
+          );
+        if (u instanceof Error)
+          return s(u);
+        try {
+          const c = t.parse(u.result);
+          r(c);
+        } catch (c) {
+          const p = new _e({
+            message: "Failed to parse server response",
+            cause: c
+          });
+          s(p);
+        }
+      }), this.transport.send(i).catch((u) => {
+        l(), s(u);
+      });
+    });
+  }
+  async listTools({
+    params: e,
+    options: t
+  } = {}) {
+    try {
+      return this.request({
+        request: { method: "tools/list", params: e },
+        resultSchema: nf,
+        options: t
+      });
+    } catch (n) {
+      throw n;
+    }
+  }
+  async callTool({
+    name: e,
+    args: t,
+    options: n
+  }) {
+    try {
+      return this.request({
+        request: { method: "tools/call", params: { name: e, arguments: t } },
+        resultSchema: uf,
+        options: {
+          signal: n == null ? void 0 : n.abortSignal
+        }
+      });
+    } catch (r) {
+      throw r;
+    }
+  }
+  async notification(e) {
+    const t = {
+      ...e,
+      jsonrpc: "2.0"
+    };
+    await this.transport.send(t);
+  }
+  /**
+   * Returns a set of AI SDK tools from the MCP server
+   * @returns A record of tool names to their implementations
+   */
+  async tools({
+    schemas: e = "automatic"
+  } = {}) {
+    var t;
+    const n = {};
+    try {
+      const r = await this.listTools();
+      for (const { name: s, description: a, inputSchema: o } of r.tools) {
+        if (e !== "automatic" && !(s in e))
+          continue;
+        const i = e === "automatic" ? Ir({
+          ...o,
+          properties: (t = o.properties) != null ? t : {},
+          additionalProperties: !1
+        }) : e[s].parameters, l = this, u = {
+          description: a,
+          parameters: i,
+          execute: async (c, p) => {
+            var h;
+            return (h = p == null ? void 0 : p.abortSignal) == null || h.throwIfAborted(), l.callTool({
+              name: s,
+              args: c,
+              options: p
+            });
+          }
+        };
+        n[s] = u;
+      }
+      return n;
+    } catch (r) {
+      throw r;
+    }
+  }
+  onClose() {
+    if (this.isClosed)
+      return;
+    this.isClosed = !0;
+    const e = new _e({
+      message: "Connection closed"
+    });
+    for (const t of this.responseHandlers.values())
+      t(e);
+    this.responseHandlers.clear();
+  }
+  onError(e) {
+    this.onUncaughtError && this.onUncaughtError(e);
+  }
+  onResponse(e) {
+    const t = Number(e.id), n = this.responseHandlers.get(t);
+    if (n === void 0)
+      throw new _e({
+        message: `Protocol error: Received a response for an unknown message ID: ${JSON.stringify(
+          e
+        )}`
+      });
+    this.responseHandlers.delete(t), n(
+      "result" in e ? e : new _e({
+        message: e.error.message,
+        cause: e.error
+      })
+    );
+  }
+}, bf = class extends j {
+  constructor(e) {
+    super({
+      name: "AI_NoTranscriptGeneratedError",
+      message: "No transcript generated."
+    }), this.responses = e.responses;
+  }
+};
+async function sm({
+  model: e,
+  audio: t,
+  providerOptions: n = {},
+  maxRetries: r,
+  abortSignal: s,
+  headers: a
+}) {
+  const { retry: o } = it({ maxRetries: r }), i = t instanceof URL ? (await Wo({ url: t })).data : lh(t), l = await o(
+    () => {
+      var u;
+      return e.doGenerate({
+        audio: i,
+        abortSignal: s,
+        headers: a,
+        providerOptions: n,
+        mediaType: (u = Vn({
+          data: i,
+          signatures: zo
+        })) != null ? u : "audio/wav"
+      });
+    }
+  );
+  if (!l.text)
+    throw new bf({ responses: [l.response] });
+  return new wf({
+    text: l.text,
+    segments: l.segments,
+    language: l.language,
+    durationInSeconds: l.durationInSeconds,
+    warnings: l.warnings,
+    responses: [l.response],
+    providerMetadata: l.providerMetadata
+  });
+}
+var wf = class {
+  constructor(e) {
+    var t;
+    this.text = e.text, this.segments = e.segments, this.language = e.language, this.durationInSeconds = e.durationInSeconds, this.warnings = e.warnings, this.responses = e.responses, this.providerMetadata = (t = e.providerMetadata) != null ? t : {};
+  }
+};
 export {
   j as AISDKError,
-  Be as APICallError,
-  $h as AssistantResponse,
-  Nn as DownloadError,
-  Li as EmptyResponseBodyError,
-  ne as InvalidArgumentError,
-  Va as InvalidDataContentError,
-  $d as InvalidMessageRoleError,
-  ut as InvalidPromptError,
-  xn as InvalidResponseDataError,
-  Ep as InvalidStreamPartError,
-  pi as InvalidToolArgumentsError,
-  mr as JSONParseError,
-  Tm as LangChainAdapter,
-  Rm as LlamaIndexAdapter,
-  Dr as LoadAPIKeyError,
-  Se as MCPClientError,
-  Pn as MessageConversionError,
-  lh as NoContentGeneratedError,
-  Id as NoImageGeneratedError,
+  $e as APICallError,
+  zp as ChatStore,
+  Wp as DefaultChatTransport,
+  sr as DownloadError,
+  ki as EmptyResponseBodyError,
+  le as InvalidArgumentError,
+  vs as InvalidDataContentError,
+  Dp as InvalidMessageRoleError,
+  gt as InvalidPromptError,
+  Wn as InvalidResponseDataError,
+  kf as InvalidStreamPartError,
+  Xa as InvalidToolArgumentsError,
+  zt as JSONParseError,
+  Go as JsonToSseTransformStream,
+  ln as LoadAPIKeyError,
+  _e as MCPClientError,
+  _s as MessageConversionError,
+  Tf as NoContentGeneratedError,
+  Rp as NoImageGeneratedError,
   dt as NoObjectGeneratedError,
-  ri as NoOutputSpecifiedError,
-  pt as NoSuchModelError,
-  Yp as NoSuchProviderError,
-  Jn as NoSuchToolError,
-  Cp as Output,
-  Fa as RetryError,
-  Dh as StreamData,
-  xp as ToolCallRepairError,
-  oi as ToolExecutionError,
-  ft as TypeValidationError,
-  se as UnsupportedFunctionalityError,
-  Rh as appendClientMessage,
-  Eh as appendResponseMessages,
-  Zd as convertToCoreMessages,
-  Yd as coreAssistantMessageSchema,
-  Qd as coreMessageSchema,
-  Wd as coreSystemMessageSchema,
-  Xd as coreToolMessageSchema,
-  Kd as coreUserMessageSchema,
-  Mh as cosineSimilarity,
-  tf as createAnthropic,
-  go as createDataStream,
-  ph as createDataStreamResponse,
-  Ft as createIdGenerator,
-  df as createMistral,
-  oh as createOpenAI,
-  Xp as createProviderRegistry,
-  Wp as customProvider,
-  Th as defaultSettingsMiddleware,
-  fh as embed,
-  hh as embedMany,
-  Oh as experimental_createMCPClient,
-  Nh as experimental_createProviderRegistry,
-  Ah as experimental_customProvider,
-  gh as experimental_generateImage,
-  xh as experimental_generateSpeech,
-  kh as experimental_transcribe,
-  Ch as experimental_wrapLanguageModel,
-  Sh as extractReasoningMiddleware,
-  zt as formatAssistantStreamPart,
-  pe as formatDataStreamPart,
-  kt as generateId,
-  yh as generateObject,
-  _h as generateText,
-  io as jsonSchema,
-  uh as parseAssistantStreamPart,
-  Qu as parseDataStreamPart,
-  mh as pipeDataStreamToResponse,
-  ch as processDataStream,
-  dh as processTextStream,
-  jh as simulateReadableStream,
-  Ih as simulateStreamingMiddleware,
-  bh as smoothStream,
-  vh as streamObject,
-  wh as streamText,
-  Ph as tool,
-  Gp as wrapLanguageModel,
-  nc as zodSchema
+  co as NoOutputSpecifiedError,
+  je as NoSuchModelError,
+  Jh as NoSuchProviderError,
+  mr as NoSuchToolError,
+  Ph as Output,
+  bs as RetryError,
+  Np as ToolCallRepairError,
+  wo as ToolExecutionError,
+  De as TypeValidationError,
+  he as UnsupportedFunctionalityError,
+  Sf as appendClientMessage,
+  Dt as asSchema,
+  ni as assistantModelMessageSchema,
+  If as callChatApi,
+  Cf as callCompletionApi,
+  Rf as convertFileListToFileUIParts,
+  Ef as convertToCoreMessages,
+  Yp as convertToModelMessages,
+  Lf as coreAssistantMessageSchema,
+  Vf as coreMessageSchema,
+  qf as coreSystemMessageSchema,
+  Zf as coreToolMessageSchema,
+  Uf as coreUserMessageSchema,
+  Nf as cosineSimilarity,
+  qu as createAnthropic,
+  tc as createGoogleGenerativeAI,
+  nn as createIdGenerator,
+  dc as createMistral,
+  id as createOpenAI,
+  Hh as createProviderRegistry,
+  Do as createTextStreamResponse,
+  Of as createUIMessageStream,
+  Kp as createUIMessageStreamResponse,
+  Fh as customProvider,
+  Af as defaultChatStore,
+  Yf as defaultSettingsMiddleware,
+  $f as embed,
+  jf as embedMany,
+  rm as experimental_createMCPClient,
+  tm as experimental_createProviderRegistry,
+  em as experimental_customProvider,
+  Df as experimental_generateImage,
+  Gf as experimental_generateSpeech,
+  sm as experimental_transcribe,
+  Nn as extractMaxToolInvocationStep,
+  Kf as extractReasoningMiddleware,
+  st as generateId,
+  Bf as generateObject,
+  Hf as generateText,
+  Mf as getTextFromDataUrl,
+  qt as getToolInvocations,
+  Jf as hasToolCall,
+  Bo as isAssistantMessageWithCompletedToolCalls,
+  Pn as isDeepEqualData,
+  Ir as jsonSchema,
+  Ah as maxSteps,
+  si as modelMessageSchema,
+  Nr as parsePartialJson,
+  Uo as pipeTextStreamToResponse,
+  Xp as pipeUIMessageStreamToResponse,
+  Jp as shouldResubmitMessages,
+  Pf as simulateReadableStream,
+  Xf as simulateStreamingMiddleware,
+  zf as smoothStream,
+  Ff as streamObject,
+  Wf as streamText,
+  ei as systemModelMessageSchema,
+  nm as tool,
+  ri as toolModelMessageSchema,
+  Hp as updateToolCallResult,
+  ti as userModelMessageSchema,
+  Qf as wrapLanguageModel
 };

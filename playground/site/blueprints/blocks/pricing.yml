@@ -1,0 +1,67 @@
+name: Pricing Table
+icon: money
+preview: fields
+wysiwyg: true
+fields:
+  heading:
+    label: Section Heading
+    type: text
+    placeholder: Choose Your Plan
+  description:
+    label: Section Description
+    type: textarea
+    placeholder: Select the perfect plan for your needs
+  plans:
+    label: Pricing Plans
+    type: structure
+    min: 1
+    max: 4
+    fields:
+      name:
+        label: Plan Name
+        type: text
+        placeholder: Pro Plan
+      price:
+        label: Price
+        type: number
+        placeholder: 29
+      currency:
+        label: Currency
+        type: text
+        default: USD
+        placeholder: USD
+      billing_period:
+        label: Billing Period
+        type: select
+        default: month
+        options:
+          month: per month
+          year: per year
+          one-time: one-time
+      description:
+        label: Plan Description
+        type: textarea
+        placeholder: Perfect for growing businesses
+      features:
+        label: Features
+        type: list
+        placeholder: Add feature
+      cta_text:
+        label: Button Text
+        type: text
+        placeholder: Get Started
+      cta_link:
+        label: Button Link
+        type: url
+      featured:
+        label: Featured Plan
+        type: toggle
+        default: false
+        help: Highlight this plan as recommended
+  layout:
+    label: Layout
+    type: radio
+    default: cards
+    options:
+      cards: Card Layout
+      table: Table Layout

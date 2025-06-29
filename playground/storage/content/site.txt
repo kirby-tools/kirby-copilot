@@ -1,4 +1,8 @@
-Title: Playground
+Title: Kirby Copilot
+
+----
+
+Modelprovider: openai
 
 ----
 
@@ -6,7 +10,15 @@ Apikey:
 
 ----
 
-Gptmodel: o4-mini
+Openaimodel: o4-mini
+
+----
+
+Googlemodel: gemini-2.5-flash-preview-04-17
+
+----
+
+Anthropicmodel: claude-sonnet-4-20250514
 
 ----
 
@@ -49,3 +61,7 @@ Intro: Kirby Copilot is your everyday AI companion
 ----
 
 Date: 2025-03-01
+
+----
+
+Gptmodel: o4-mini

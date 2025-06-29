@@ -1,4 +1,5 @@
 export * from "./ai";
+export * from "./blocks";
 export * from "./content";
 export * from "./events";
 export * from "./files";

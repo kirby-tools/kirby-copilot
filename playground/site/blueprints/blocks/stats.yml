@@ -1,0 +1,49 @@
+name: Statistics Counter
+icon: chart
+preview: fields
+wysiwyg: true
+fields:
+  heading:
+    label: Section Heading
+    type: text
+    placeholder: Our Impact in Numbers
+  statistics:
+    label: Statistics
+    type: structure
+    min: 1
+    max: 6
+    fields:
+      number:
+        label: Number
+        type: number
+        placeholder: 1000
+      suffix:
+        label: Number Suffix
+        type: text
+        placeholder: +
+        help: e.g., +, %, K, M
+      label:
+        label: Statistic Label
+        type: text
+        placeholder: Happy Customers
+      icon:
+        label: Icon
+        type: select
+        options:
+          users: Users
+          heart: Hearts
+          star: Stars
+          globe: Global
+          chart: Chart
+          trophy: Trophy
+          clock: Time
+          shield: Security
+          rocket: Growth
+  background_style:
+    label: Background
+    type: radio
+    default: light
+    options:
+      light: Light Background
+      dark: Dark Background
+      colored: Colored Background

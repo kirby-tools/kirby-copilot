@@ -1,0 +1,76 @@
+name: Content Showcase
+icon: image
+preview: fields
+wysiwyg: true
+tabs:
+  content:
+    label: Content
+    fields:
+      title:
+        label: Section Title
+        type: text
+        placeholder: Discover Amazing Features
+      content:
+        label: Content
+        type: writer
+        placeholder: Write compelling content about your product or service...
+        marks:
+          - bold
+          - italic
+          - link
+          - code
+      media:
+        label: Media
+        type: files
+        layout: cards
+        max: 1
+        uploads:
+          - image
+          - video
+      buttons:
+        label: Action Buttons
+        type: structure
+        max: 2
+        fields:
+          text:
+            label: Button Text
+            type: text
+            placeholder: Learn More
+          link:
+            label: Button Link
+            type: url
+          style:
+            label: Button Style
+            type: radio
+            default: primary
+            options:
+              primary: Primary
+              secondary: Secondary
+              outline: Outline
+  layout:
+    label: Layout
+    fields:
+      content_alignment:
+        label: Content Position
+        type: radio
+        default: left
+        options:
+          left: Content Left, Media Right
+          right: Content Right, Media Left
+      vertical_alignment:
+        label: Vertical Alignment
+        type: radio
+        default: center
+        options:
+          top: Top
+          center: Center
+          bottom: Bottom
+      background_color:
+        label: Section Background
+        type: select
+        default: white
+        options:
+          white: White
+          gray: Light Gray
+          blue: Light Blue
+          transparent: Transparent

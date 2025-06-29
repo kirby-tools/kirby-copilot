@@ -48,9 +48,9 @@ export async function generateAndInsertText(
   try {
     const { textStream } = await useStreamText({
       userPrompt: [
-        prompt,
         `<response_format>\n${responseFormat}\n</response_format>`,
         selection && `<selected_text>\n${selection}\n</selected_text>`,
+        prompt,
       ]
         .filter(Boolean)
         .join("\n\n"),

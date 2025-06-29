@@ -1,0 +1,50 @@
+name: Hero Section
+icon: sparkling
+preview: fields
+wysiwyg: true
+tabs:
+  content:
+    label: Content
+    fields:
+      title:
+        label: Main Title
+        type: text
+        placeholder: Welcome to our amazing product
+      subtitle:
+        label: Subtitle
+        type: textarea
+        placeholder: A compelling description that explains what makes you special
+      cta_text:
+        label: Call to Action Text
+        type: text
+        placeholder: Get Started Now
+      cta_link:
+        label: Call to Action Link
+        type: url
+        placeholder: https://example.com/signup
+      background_image:
+        label: Background Image
+        type: files
+        layout: cards
+        max: 1
+        uploads: image
+  settings:
+    label: Settings
+    fields:
+      background_color:
+        label: Background Color
+        type: select
+        default: blue
+        options:
+          blue: Blue
+          purple: Purple
+          gradient: Gradient
+          image: Use Image
+      text_alignment:
+        label: Text Alignment
+        type: radio
+        default: center
+        options:
+          left: Left
+          center: Center
+          right: Right

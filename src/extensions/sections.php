@@ -25,15 +25,13 @@ return [
             'systemPrompt' => function () {
                 return $this->tryResolveQuery($this->systemPrompt);
             },
-            'fieldType' => function () {
+            'field' => function () {
                 if (!$this->field) {
                     return null;
                 }
 
                 $fields = $this->model()->blueprint()->fields();
-                $field = $fields[strtolower($this->field)] ?? null;
-                $type = $field['type'] ?? null;
-                return $type;
+                return $fields[strtolower($this->field)] ?? null;
             },
             'modelFile' => function () {
                 /** @var \Kirby\Cms\File */
