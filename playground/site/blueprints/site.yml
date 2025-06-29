@@ -9,16 +9,23 @@ tabs:
     columns:
       - width: 2/3
         fields:
-          infoApiKey:
-            label: Getting Started
+          infoWelcome:
+            label: Welcome to Kirby Copilot
             type: info
             theme: positive
             text: |
-              To play with the **Kirby Copilot**, please configure your AI provider settings below. Choose from **OpenAI**, **Google**, or **Anthropic** and enter your corresponding API key. The key is required to make client-side requests to AI models. For production use of the plugin, you will need to provide one in the global configuration of Kirby.
+              Choose your favorite AI provider below to play with **Kirby Copilot**. An API key is required to try this playground. For production use of the plugin, you can store the API key in Kirby's configuration file.
+
+              **Get your API key:**
+              - **OpenAI**: [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+              - **Google**: [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)
+              - **Anthropic**: [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys)
+
           headlineProvider:
             type: headline
             label: AI Provider Configuration
             numbered: false
+
           modelProvider:
             label: AI Provider
             type: toggles
@@ -31,19 +38,16 @@ tabs:
                 text: Google
               - value: anthropic
                 text: Anthropic
-            help: |
-              Choose your preferred AI provider. Each provider offers different models and capabilities.
+            help: Choose your preferred AI provider. We recommend Google for their Gemini models.
+
           apiKey:
             label: API Key
             type: playground-api-key
             help: |
-              **OpenAI**: Get your key from [OpenAI Platform](https://platform.openai.com/api-keys)
-              **Google**: Get your key from [Google AI Studio](https://aistudio.google.com/app/apikey)
-              **Anthropic**: Get your key from [Anthropic Console](https://console.anthropic.com/settings/keys)
+              The key is stored securely in your browser's session storage.
 
-              The key will be saved to the **session storage** of your browser. It will not be stored server-side or in any other way.
           openaiModel:
-            label: AI Model
+            label: Model
             type: select
             when:
               modelProvider: openai
@@ -51,81 +55,83 @@ tabs:
               o4-mini: o4-mini (recommended)
               gpt-4o: GPT-4o
               gpt-4o-mini: GPT-4o Mini
-            help: |
-              Select the OpenAI model to use. **o4-mini** is recommended for most use cases. <ins>**Note: Add a valid payment method in your account to use these models.**</ins>
+            help: o4-mini offers a good balance of performance and cost. Blocks generation is weak for all OpenAI models.
+
           googleModel:
-            label: Google Model
+            label: Model
             type: select
             when:
               modelProvider: google
             options:
               gemini-2.5-flash-preview-04-17: Gemini 2.5 Flash (recommended)
               gemini-2.5-pro-preview-06-05: Gemini 2.5 Pro
-            help: |
-              Select the Google Gemini model to use. **Gemini 2.5 Flash** offers the best performance for most cases.
+            help: Gemini 2.5 Flash excels at structured content generation. Our overall recommendation!
+
           anthropicModel:
-            label: Anthropic Model
+            label: Model
             type: select
             when:
               modelProvider: anthropic
             options:
               claude-sonnet-4-20250514: Claude 4 Sonnet (recommended)
               claude-opus-4-20250514: Claude 4 Opus
-            help: |
-              Select the Anthropic Claude model to use. **Claude 4 Sonnet** provides an excellent balance of capability and speed.
+            help: Claude 4 Sonnet provides excellent reasoning and creativity.
 
       - width: 1/3
         fields:
-          infoDocumentation:
-            label: 🛍️ Convinced? Grab a copy!
+          infoInstallation:
+            label: 🙋‍♂️ Curious? Try in your project!
             type: info
             theme: passive
             text: |
-              Purchase a copy of <sparkly-text style="--sparkly-text-size: 2em; --sparkly-text-color: var(--color-yellow-600)">**[Kirby Copilot](https://kirby.tools/copilot)**</sparkly-text> to improve the content management of your client's Kirby project or your own with AI.
+              **<sparkly-text style="--sparkly-text-size: 2em; --sparkly-text-color: var(--color-yellow-600)">[Install Kirby Copilot](https://kirby.tools/docs/copilot/getting-started/installation)</sparkly-text>** now in your own projects, and buy a license when you're convinced.
 
   blocksFields:
     label: Blocks Fields
     columns:
       - width: 1/1
         fields:
-          headline01:
+          headlineBlocks:
             type: headline
-            label: Copilot for Blocks Fields
+            label: Blocks Field Generation
+            numbered: false
+
       - width: 2/3
         fields:
-          content01:
+          demoBlocks:
             extends: fields/blocks
             label: Blocks Builder
+            help: |
+              Copilot generates content **based on your blocks** definitions and fieldsets.<br> It adapts to your project's structure!
+
       - width: 1/3
         sections:
-          copilot01:
+          copilotBlocks:
             type: copilot
-            field: content01
+            field: demoBlocks
+            userPrompt: Create an engaging landing page for the Kirby CMS. Showcase what it offers for designers and developers.
+            open: true
 
   layoutFields:
     label: Layout Fields
     columns:
-      - width: 2/3
+      - width: 1/1
         fields:
-          infoLayoutFields:
-            label: Page Builder
-            type: info
-            theme: positive
-            text: |
-              With Kirby Copilot for `layout` fields, you can create complex page structures just by prompting!
-      - width: 2/3
-        fields:
-          headline07:
+          headlineLayouts:
             type: headline
-            label: Copilot for Layout Fields
-          content07:
-            label: Layouts Builder
+            label: Layout Field Generation
+            numbered: false
+
+      - width: 2/3
+        fields:
+          demoLayouts:
+            label: Layout Builder
             type: layout
             layouts:
               - 1/1
-              - "1/2, 1/2"
-              - "1/1, 1/3, 2/3"
-              - "1/1, 2/3, 1/3"
+              - 1/2, 1/2
+              - 1/3, 2/3
+              - 2/3, 1/3
             fieldsets:
               # Landing page blocks
               - hero
@@ -147,25 +153,31 @@ tabs:
               # - video
               # - code
               # - markdown
+            help: |
+              Copilot generates content **based on your blocks** definitions and fieldsets.<br> It adapts to your project's structure!
+
       - width: 1/3
         sections:
-          copilot07:
+          copilotLayouts:
             type: copilot
-            field: content07
-          infoLayoutFields:
-            label: Recommendation
+            field: demoLayouts
+            userPrompt: Create a modern landing page for the Kirby CMS with hero section, features, testimonials, and call-to-action. Showcase what it offers for designers and developers.
+            open: true
+
+          infoLayoutTip:
+            label: Required Models
             type: info
             theme: notice
             text: |
-              Please use **Google Gemini** models, since OpenAI's models have [limitations on nested structured outputs](https://platform.openai.com/docs/guides/structured-outputs/supported-schemas?api-mode=responses#objects-have-limitations-on-nesting-depth-and-size). Gemini results are more reliable for structured output generation.
+              Please use **Google Gemini** models, since OpenAI's models have [limitations on nested structured outputs](https://platform.openai.com/docs/guides/structured-outputs/supported-schemas?api-mode=responses#objects-have-limitations-on-nesting-depth-and-size). Gemini models have superior structured output capabilities.
 
-  textlikeFields:
-    label: Writer & Textarea Fields
+  textFields:
+    label: Writer & Textareas
     columns:
       - width: 1/1
         fields:
-          infoTextlikeFields:
-            label: Writer & Textareas
+          infoText:
+            label: Toolbar and Shortcuts
             type: info
             theme: positive
             text: |
@@ -173,13 +185,16 @@ tabs:
               - Use the Copilot section on the right, just like with blocks fields.
               - Use the toolbar button to open a prompt dialog. To open it programmatically, use the shortcut:
                 `Cmd + .` (macOS) or `Ctrl + .` (Windows/Linux).
-          headline06:
+
+          headlineWriter:
             type: headline
-            label: Copilot for Writer Fields
+            label: Writer Fields
+            numbered: false
+
       - width: 2/3
         fields:
-          content06:
-            label: Writer
+          demoWriter:
+            label: Text
             type: writer
             toolbar:
               inline: false
@@ -189,21 +204,25 @@ tabs:
               - underline
               - "|"
               - copilot
+
       - width: 1/3
         sections:
-          copilot06:
+          copilotWriter:
             type: copilot
-            field: content06
+            field: demoWriter
+            userPrompt: Write a compelling introduction about the future of web development.
 
       - width: 1/1
         fields:
-          headline02:
+          headlineTextarea:
             type: headline
-            label: Copilot for Textarea Fields
+            label: Textarea Fields
+            numbered: false
+
       - width: 2/3
         fields:
-          content02:
-            label: Textarea
+          demoTextarea:
+            label: Text
             type: textarea
             buttons:
               - headlines
@@ -212,112 +231,66 @@ tabs:
               - italic
               - "|"
               - copilot
+
       - width: 1/3
         sections:
-          copilot02:
+          copilotTextarea:
             type: copilot
-            field: content02
+            field: demoTextarea
 
-  promptUsage:
-    label: Prompt Usage
+  context:
+    label: Placeholders
     columns:
-      - width: 1/1
-        fields:
-          headline05:
-            type: headline
-            label: Include Fields as Context
       - width: 2/3
-        fields:
-          info05:
-            label: Info
-            type: info
-            theme: passive
-            text: |
-              Context is key to a good user prompt. The content from other fields of the same model are available in the user prompt. Wrap the field name in curly braces to use it as a placeholder.
-
-              This prompt uses the field `date` from the bottom of this page:
-              ```
-              What is the current date? (Hint, it is {date}!)
-              ```
-          content05:
-            extends: fields/blocks
-            label: Blocks
-      - width: 1/3
-        sections:
-          copilot05:
-            type: copilot
-            field: content05
-            userPrompt: |
-              What is the current date?
-              (Hint, it is {date}!)
-            files: false
-
-      - width: 1/1
-        fields:
-          headline03:
-            type: headline
-            label: Predefined Prompt
-      - width: 2/3
-        fields:
-          info03:
-            label: Info
-            type: info
-            theme: passive
-            text: |
-              Add a predefined user prompt with the `userPrompt` property.
-          content03:
-            extends: fields/blocks
-            label: Blocks
-      - width: 1/3
-        sections:
-          copilot03:
-            type: copilot
-            field: content03
-            userPrompt: Write a short story about lorem ipsum. Segment article into headings (H2).
-
-      - width: 1/1
-        fields:
-          headline04:
-            type: headline
-            label: Immutable, Predefined Prompt
-      - width: 2/3
-        fields:
-          info04:
-            label: Info
-            type: info
-            theme: passive
-            text: |
-              With both the `editable` and the `files` property set to `false`, the user prompt is not editable and no context files can be added, respectively.
-          content04:
-            extends: fields/blocks
-            label: Blocks
-      - width: 1/3
-        sections:
-          copilot04:
-            type: copilot
-            field: content04
-            userPrompt: Write a short story about lorem ipsum. Segment article into headings (H2).
-            editable: false
-            files: false
-
-      - width: 1/1
         fields:
           headlineContext:
             type: headline
-            label: Context
-      - width: 2/3
-        fields:
-          intro:
-            label: Intro
-            type: text
+            label: Context & Placeholders
+            numbered: false
+
           infoContext:
             label: Info
             type: info
             theme: passive
             text: |
-              Access the fields above in any user prompt by using the placeholders `{intro}` and `{date}`.
-      - width: 1/3
+              Context is key to a good user prompt. You can access every fields of the same Panel view in your user prompts. Wrap the field name in curly braces to use it as a placeholder, for example `{siteTitle}`.
+
+      - width: 2/3
         fields:
-          date:
-            label: Date
-            type: date
+          contextDemo:
+            label: Context Example
+            type: blocks
+            fieldsets:
+              - heading
+              - text
+              - list
+              - quote
+              - image
+              - video
+              - code
+              - markdown
+
+          siteTitle:
+            label: Site Title
+            type: text
+            width: 1/2
+            help: Referenced in AI prompts as `{siteTitle}`
+
+          currentYear:
+            label: Current Year
+            type: text
+            width: 1/2
+            help: Referenced in AI prompts as `{currentYear}`
+
+      - width: 1/3
+        sections:
+          copilotContext:
+            type: copilot
+            field: contextDemo
+            userPrompt: |
+              Create content for {siteTitle} that's relevant for {currentYear}.
+
+              Make it modern and engaging for today's audience.
+            files: false
+            open: true
+            help: This prompt uses context from the **Site Title** and **Current Year** fields.

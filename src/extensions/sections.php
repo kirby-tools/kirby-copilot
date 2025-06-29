@@ -31,7 +31,7 @@ return [
                 }
 
                 $fields = $this->model()->blueprint()->fields();
-                return $fields[strtolower($this->field)] ?? null;
+                return $fields[$this->field] ?? null;
             },
             'modelFile' => function () {
                 /** @var \Kirby\Cms\File */

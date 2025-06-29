@@ -155,8 +155,11 @@ watch(isDetailsOpen, (value) => {
     }
   }
 
-  if (storage.value) {
-    storageKey = getHashedStorageKey(panel.view.path, field.value.name);
+  if (storage.value && field.value?.name) {
+    storageKey = getHashedStorageKey(
+      panel.view.path,
+      field.value.name.toLowerCase(),
+    );
     currentPrompt.value =
       localStorage.getItem(`${storageKey}$prompt`) || userPrompt.value || "";
     isDetailsOpen.value =
@@ -199,7 +202,8 @@ async function generate() {
 
   panel.isLoading = true;
   isGenerating.value = true;
-  currentFieldContent.value = currentContent.value[field.value.name];
+  currentFieldContent.value =
+    currentContent.value[field.value.name.toLowerCase()];
   abortController = new AbortController();
 
   const { getZodSchema: getBlocksZodSchema, normalizeBlock } = useBlocks();
@@ -231,7 +235,7 @@ async function generate() {
 
         await updateContent(
           {
-            [field.value.name]: [
+            [field.value.name.toLowerCase()]: [
               ...currentFieldContent.value,
               ...partialObject.map(
                 field.value.type === "layout"
@@ -264,7 +268,7 @@ async function generate() {
 
         await updateContent(
           {
-            [field.value.name]: currentFieldContent.value + text,
+            [field.value.name.toLowerCase()]: currentFieldContent.value + text,
           },
           // Disable saving content to storage in Kirby 5
           false,
@@ -305,7 +309,7 @@ async function generate() {
 
   // Store the final content
   updateContent({
-    [field.value.name]:
+    [field.value.name.toLowerCase()]:
       field.value.type === "layout" || field.value.type === "blocks"
         ? [
             ...currentFieldContent.value,
@@ -331,7 +335,7 @@ function abort() {
 
 function undo() {
   updateContent({
-    [field.value.name]: currentFieldContent.value,
+    [field.value.name.toLowerCase()]: currentFieldContent.value,
   });
   currentFieldContent.value = undefined;
 }
@@ -404,9 +408,13 @@ function fieldTypeToResponseFormat(fieldType) {
         required for the generated text.
       </k-text>
     </k-box>
-    <k-box v-else-if="!(field.name in currentContent)" theme="empty">
+    <k-box
+      v-else-if="!field || !(field.name.toLowerCase() in currentContent)"
+      theme="empty"
+    >
       <k-text>
-        The <code>{{ field }}</code> field does not exist in the current model.
+        The <code>{{ field.name }}</code> field does not exist in the current
+        model.
       </k-text>
     </k-box>
     <k-box v-else-if="!allow.includes('edit') && !userPrompt" theme="empty">
