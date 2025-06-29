@@ -187,72 +187,6 @@ const FIELD_TYPE_TO_SCHEMA = {
 };
 
 /**
- * Generates a Zod schema from a Kirby blocks fieldsets configuration
- */
-export function generateKirbyBlocksSchema(fieldsets) {
-  if (!Array.isArray(fieldsets) || fieldsets.length === 0) {
-    throw new Error("Invalid fieldsets configuration");
-  }
-
-  const blockSchemas = fieldsets.map(generateBlockSchema).filter(Boolean);
-
-  return z.union(blockSchemas).describe("Union of all Kirby block types");
-}
-
-/**
- * Generates a Zod schema for a single block type
- */
-function generateBlockSchema(fieldsets) {
-  const { name, type, fields } = fieldsets;
-
-  if (!fields || Object.keys(fields).length === 0) {
-    return;
-  }
-
-  const contentSchema = {};
-
-  for (const field of Object.values(fields)) {
-    if (field.disabled || field.hidden) continue;
-    if (EXCLUDED_FIELD_TYPES.has(field.type)) continue;
-
-    const fieldSchema = fieldToZodSchema(field);
-    contentSchema[field.name] = fieldSchema;
-  }
-
-  return z
-    .object({
-      type: z.literal(type),
-      content: z.object(contentSchema),
-    })
-    .describe(`Kirby block: ${name}`);
-}
-
-/**
- * Converts a Kirby field definition to a Zod schema
- */
-function fieldToZodSchema(field) {
-  const schemaBuilder = FIELD_TYPE_TO_SCHEMA[field.type];
-
-  let schema = schemaBuilder(field);
-
-  // Handle required fields
-  if (field.required === true) {
-    // Required fields must have content
-    if (schema._def.typeName === "ZodString") {
-      const description = schema._def.description;
-      schema = z.string().min(1).describe(description);
-    } else if (schema._def.typeName === "ZodArray") {
-      schema = schema.min(1);
-    }
-  } else {
-    // TODO: OpenAI doesn't support optional fields yet
-    // schema = schema.optional();
-  }
-
-  return schema;
-}
-
-/**
  * Creates a Zod schema for single selection fields (select, radio, toggles)
  */
 function createSingleSelectionSchema(field) {
@@ -290,4 +224,70 @@ function createMultipleSelectionSchema(field) {
   return z
     .array(z.string())
     .describe(`"${field.label}", multiple selection values`);
+}
+
+/**
+ * Converts a Kirby field definition to a Zod schema
+ */
+export function fieldToZodSchema(field) {
+  const schemaBuilder = FIELD_TYPE_TO_SCHEMA[field.type];
+
+  let schema = schemaBuilder(field);
+
+  // Handle required fields
+  if (field.required === true) {
+    // Required fields must have content
+    if (schema._def.typeName === "ZodString") {
+      const description = schema._def.description;
+      schema = z.string().min(1).describe(description);
+    } else if (schema._def.typeName === "ZodArray") {
+      schema = schema.min(1);
+    }
+  } else {
+    // TODO: OpenAI doesn't support optional fields yet
+    // schema = schema.optional();
+  }
+
+  return schema;
+}
+
+/**
+ * Generates a Zod schema for a single block type
+ */
+export function generateBlockSchema(fieldsets) {
+  const { name, type, fields } = fieldsets;
+
+  if (!fields || Object.keys(fields).length === 0) {
+    return;
+  }
+
+  const contentSchema = {};
+
+  for (const field of Object.values(fields)) {
+    if (field.disabled || field.hidden) continue;
+    if (EXCLUDED_FIELD_TYPES.has(field.type)) continue;
+
+    const fieldSchema = fieldToZodSchema(field);
+    contentSchema[field.name] = fieldSchema;
+  }
+
+  return z
+    .object({
+      type: z.literal(type),
+      content: z.object(contentSchema),
+    })
+    .describe(`Kirby block: ${name}`);
+}
+
+/**
+ * Generates a Zod schema from a Kirby blocks fieldsets configuration
+ */
+export function generateKirbyBlocksSchema(fieldsets) {
+  if (!Array.isArray(fieldsets) || fieldsets.length === 0) {
+    throw new Error("Invalid fieldsets configuration");
+  }
+
+  const blockSchemas = fieldsets.map(generateBlockSchema).filter(Boolean);
+
+  return z.union(blockSchemas).describe("Union of all Kirby block types");
 }

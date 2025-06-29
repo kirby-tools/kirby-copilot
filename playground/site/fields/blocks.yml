@@ -1,0 +1,22 @@
+type: blocks
+fieldsets:
+  # Landing page blocks
+  - hero
+  - features
+  - showcase
+  # - stats
+  - testimonials
+  - team
+  # - pricing
+  - faq
+  - cta
+  - contact
+  # # Core Kirby blocks
+  - heading
+  - text
+  # - list
+  # - quote
+  # - image
+  # - video
+  # - code
+  # - markdown

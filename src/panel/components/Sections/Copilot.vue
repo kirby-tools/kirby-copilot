@@ -18,6 +18,7 @@ import { section } from "kirbyuse/props";
 import {
   useBlocks,
   useFilePicker,
+  useLayouts,
   usePluginContext,
   useStreamObject,
   useStreamText,
@@ -201,14 +202,17 @@ async function generate() {
   currentFieldContent.value = currentContent.value[field.value.name];
   abortController = new AbortController();
 
-  const { getZodSchema, normalizeBlock } = useBlocks();
+  const { getZodSchema: getBlocksZodSchema, normalizeBlock } = useBlocks();
+  const { getZodSchema: getLayoutZodSchema, normalizeLayout } = useLayouts();
   let text = "";
-  let blocks = [];
+  let structuredOutput = [];
 
   try {
-    // Handle blocks by streaming the object
-    if (field.value.type === "blocks") {
-      const schema = await getZodSchema(field.value);
+    // Handle layouts by streaming the object
+    if (field.value.type === "layout" || field.value.type === "blocks") {
+      const schema = await (
+        field.value.type === "layout" ? getLayoutZodSchema : getBlocksZodSchema
+      )(field.value);
 
       const { partialObjectStream, object: finalObject } =
         await useStreamObject({
@@ -223,22 +227,26 @@ async function generate() {
 
       // Stream partial updates
       for await (const partialObject of partialObjectStream) {
-        if (partialObject && Array.isArray(partialObject)) {
-          await updateContent(
-            {
-              [field.value.name]: [
-                ...currentFieldContent.value,
-                ...partialObject.map(normalizeBlock),
-              ],
-            },
-            // Disable saving content to storage in Kirby 5
-            false,
-          );
-        }
+        if (!partialObject || !Array.isArray(partialObject)) continue;
+
+        await updateContent(
+          {
+            [field.value.name]: [
+              ...currentFieldContent.value,
+              ...partialObject.map(
+                field.value.type === "layout"
+                  ? normalizeLayout
+                  : normalizeBlock,
+              ),
+            ],
+          },
+          // Disable saving content to storage in Kirby 5
+          false,
+        );
       }
 
       // Set final result
-      blocks = await finalObject;
+      structuredOutput = await finalObject;
     } else {
       const { textStream } = await useStreamText({
         userPrompt: [
@@ -277,8 +285,14 @@ async function generate() {
       AISDKError.isInstance(error) ||
       APICallError.isInstance(error)
     ) {
+      let message = error.message;
+
+      if (message.includes("levels of nesting exceeds limit")) {
+        message = `The ${field.value.type} generation for the "${field.value.name}" field exceeds OpenAI's architectural constraints for nested data structures. This is a known limitation of OpenAI's API. Please use Google Gemini or Anthropic Claude instead, which support complex schemas.`;
+      }
+
       console.error(error);
-      panel.notification.error(error.message);
+      panel.notification.error(message);
       return;
     }
 
@@ -292,8 +306,13 @@ async function generate() {
   // Store the final content
   updateContent({
     [field.value.name]:
-      field.value.type === "blocks"
-        ? [...currentFieldContent.value, ...(blocks ?? []).map(normalizeBlock)]
+      field.value.type === "layout" || field.value.type === "blocks"
+        ? [
+            ...currentFieldContent.value,
+            ...(structuredOutput ?? []).map(
+              field.value.type === "layout" ? normalizeLayout : normalizeBlock,
+            ),
+          ]
         : currentFieldContent.value + text,
   });
 

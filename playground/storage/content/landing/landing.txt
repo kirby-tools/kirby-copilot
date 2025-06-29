@@ -1,0 +1,17 @@
+Title: Landing Page
+
+----
+
+Subtitle: Kirby Copilot is now a feature-complete page builder!
+
+----
+
+Layout: 
+
+----
+
+Seo: 
+
+----
+
+Uuid: 9VCXvnN1p47KrpLK

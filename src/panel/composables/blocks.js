@@ -1,4 +1,4 @@
-import { generateKirbyBlocksSchema } from "../utils/blocks-schema";
+import { generateKirbyBlocksSchema } from "../schemas/blocks";
 
 let fieldsets;
 let pendingPromise;

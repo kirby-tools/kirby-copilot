@@ -1,0 +1,67 @@
+title: Landing Page
+
+options:
+  preview: https://kirby.tools/copilot
+
+tabs:
+  content:
+    label: Content
+    columns:
+      - width: 2/3
+        fields:
+          title:
+            label: Page Title
+            type: text
+            help: The main heading for your landing page
+
+          subtitle:
+            label: Subtitle
+            type: text
+            help: A compelling tagline or description
+
+          layout:
+            label: Page Layout
+            type: layout
+            layouts:
+              - 1/1
+              - 1/2, 1/2
+              - 1/3, 2/3
+              - 2/3, 1/3
+              - 1/4, 1/4, 1/4, 1/4
+              - 1/2, 1/2, 1/3, 1/3, 1/3
+            fieldsets:
+              - hero
+              - features
+              - testimonials
+              - cta
+              - text
+              - heading
+            help: Build your landing page structure with AI assistance
+
+      - width: 1/3
+        sections:
+          copilot:
+            type: copilot
+            field: layout
+            userPrompt: |
+              Create a modern landing page layout for "{title}".
+
+              Subtitle: {subtitle}
+
+              Build a compelling structure that converts visitors into customers.
+            help: Describe what kind of landing page you want to create and let AI build the layout structure for you.
+
+  settings:
+    label: Settings
+    fields:
+      seo:
+        label: SEO
+        type: structure
+        fields:
+          metaTitle:
+            label: Meta Title
+            type: text
+          metaDescription:
+            label: Meta Description
+            type: textarea
+            maxlength: 160
