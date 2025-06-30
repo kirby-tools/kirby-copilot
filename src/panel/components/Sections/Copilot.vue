@@ -76,11 +76,10 @@ const config = ref();
 const isInitialized = ref(false);
 const isGenerating = ref(false);
 const isDetailsOpen = ref(false);
-const isBadgeHovered = ref(false);
 const detailsElement = ref();
 const currentPrompt = ref();
 const currentFieldContent = ref();
-const allow = ref([]);
+const permissions = ref([]);
 const files = ref([]);
 const licenseStatus = ref();
 
@@ -130,8 +129,8 @@ watch(isDetailsOpen, (value) => {
   systemPrompt.value =
     response.systemPrompt || context.config.systemPrompt || SYSTEM_PROMPT;
   storage.value = response.storage;
-  if (response.editable === true) allow.value.push("edit");
-  if (response.files === true) allow.value.push("files");
+  if (response.editable === true) permissions.value.push("edit");
+  if (response.files === true) permissions.value.push("files");
   theme.value = response.theme || "notice-icon";
   size.value = response.size || "md";
   logLevel.value = LOG_LEVELS.indexOf(
@@ -402,12 +401,6 @@ function fieldTypeToResponseFormat(fieldType) {
         global configuration.
       </k-text>
     </k-box>
-    <k-box v-else-if="!field" theme="empty">
-      <k-text>
-        Missing <code>field</code> property in the section configuration. It is
-        required for the generated text.
-      </k-text>
-    </k-box>
     <k-box
       v-else-if="!field || !(field.name.toLowerCase() in currentContent)"
       theme="empty"
@@ -417,7 +410,10 @@ function fieldTypeToResponseFormat(fieldType) {
         model.
       </k-text>
     </k-box>
-    <k-box v-else-if="!allow.includes('edit') && !userPrompt" theme="empty">
+    <k-box
+      v-else-if="!permissions.includes('edit') && !userPrompt"
+      theme="empty"
+    >
       <k-text>
         If the user prompt cannot be edited by the user, a default
         <code>userPrompt</code> has to be set in the section configuration.
@@ -454,24 +450,28 @@ function fieldTypeToResponseFormat(fieldType) {
       </k-button-group>
 
       <details
-        v-if="allow.length > 0"
+        v-if="permissions.length > 0"
         ref="detailsElement"
         @toggle="isDetailsOpen = $event.target.open"
       >
         <summary>
           {{
             [
-              ...(allow.includes("edit")
+              ...(permissions.includes("edit")
                 ? [panel.t("johannschopplich.copilot.prompt.label")]
                 : []),
-              ...(allow.includes("files")
+              ...(permissions.includes("files")
                 ? [panel.t("johannschopplich.copilot.context")]
                 : []),
             ].join(", ")
           }}
         </summary>
+
         <div class="kai-mt-3">
-          <div v-if="allow.includes('edit')" class="kai-mb-2 kai-text-right">
+          <div
+            v-if="permissions.includes('edit')"
+            class="kai-mb-2 kai-text-right"
+          >
             <k-input
               :key="isDetailsOpen ? 1 : 0"
               :value="currentPrompt"
@@ -494,34 +494,34 @@ function fieldTypeToResponseFormat(fieldType) {
             />
           </div>
 
-          <div v-if="allow.includes('files')" class="kai-relative kai-w-max">
+          <k-button-group
+            v-if="permissions.includes('files')"
+            layout="collapsed"
+          >
             <k-button
               icon="attachment"
               :text="panel.t('johannschopplich.copilot.files.select')"
               variant="filled"
+              :badge="
+                _isKirby5 && files.length > 0
+                  ? {
+                      theme: 'notice',
+                      text: files.length,
+                    }
+                  : undefined
+              "
               size="sm"
+              class="!kai-rounded-[var(--button-rounded)]"
               @click="pickFiles()"
             />
-            <span
+            <k-button
               v-if="files.length > 0"
-              :data-theme="isBadgeHovered ? 'negative' : 'notice'"
-              class="kai-cursor-pointer"
-              :class="[
-                _isKirby5
-                  ? 'k-button-badge kai-top-[-2px]'
-                  : 'k-tabs-badge kai-top-[-6px]',
-              ]"
-              @mouseenter="isBadgeHovered = true"
-              @mouseleave="isBadgeHovered = false"
-              @click="((files = []), (isBadgeHovered = false))"
-            >
-              {{
-                isBadgeHovered
-                  ? panel.t("johannschopplich.copilot.delete")
-                  : files.length
-              }}
-            </span>
-          </div>
+              :text="panel.t('johannschopplich.copilot.delete')"
+              variant="dimmed"
+              size="sm"
+              @click="files = []"
+            />
+          </k-button-group>
           <k-box v-else-if="modelFile" theme="none">
             <k-text>
               {{
