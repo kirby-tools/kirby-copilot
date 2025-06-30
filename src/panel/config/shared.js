@@ -14,12 +14,8 @@ export async function generateAndInsertText(
     const apiKey = sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`);
     if (!apiKey) {
       panel.notification.error(
-        "Please set your OpenAI API key in the playground settings.",
+        "Please set your API key in the playground settings.",
       );
-      return;
-    }
-    if (!apiKey.startsWith("sk-")) {
-      panel.notification.error("Invalid OpenAI API key.");
       return;
     }
   }
