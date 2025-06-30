@@ -9,11 +9,6 @@ tabs:
     columns:
       - width: 2/3
         fields:
-          title:
-            label: Article Title
-            type: text
-            help: The main headline of your article
-
           author:
             label: Author
             type: text

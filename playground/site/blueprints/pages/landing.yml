@@ -9,15 +9,10 @@ tabs:
     columns:
       - width: 2/3
         fields:
-          title:
-            label: Page Title
-            type: text
-            help: The main heading for your landing page
-
-          subtitle:
-            label: Subtitle
-            type: text
-            help: A compelling tagline or description
+          # subtitle:
+          #   label: Subtitle
+          #   type: text
+          #   help: A compelling tagline or description
 
           layout:
             label: Page Layout
@@ -32,24 +27,32 @@ tabs:
             fieldsets:
               - hero
               - features
+              - showcase
+              - stats
               - testimonials
+              - team
+              - faq
               - cta
-              - text
+              - contact
+              # Core Kirby blocks
               - heading
-            help: Build your landing page structure with AI assistance
+              - text
+            help: Describe what kind of landing page you need and let AI build the layout structure for you.
 
       - width: 1/3
         sections:
           copilot:
             type: copilot
             field: layout
-            userPrompt: |
-              Create a modern landing page layout for "{title}".
+            # userPrompt: |
+            #   Create a modern landing page layout for "{title}".
 
-              Subtitle: {subtitle}
+            #   Subtitle: {subtitle}
 
-              Build a compelling structure that converts visitors into customers.
-            help: Describe what kind of landing page you want to create and let AI build the layout structure for you.
+            #   Build a compelling structure that converts visitors into customers.
+            # userPrompt: |
+            #   Create an engaging landing page for the Kirby CMS. Showcase what it offers for designers and developers.
+            open: true
 
   settings:
     label: Settings

@@ -34,11 +34,14 @@ tabs:
             options:
               - value: openai
                 text: OpenAI
+                icon: copilot-provider-openai
               - value: google
                 text: Google
+                icon: copilot-provider-google
               - value: anthropic
                 text: Anthropic
-            help: Choose your preferred AI provider. We recommend Google for their Gemini models.
+                icon: copilot-provider-anthropic
+            help: Choose your preferred AI provider. We recommend **Google** with their Gemini models. You can create an API key [for free](https://aistudio.google.com/app/apikey).
 
           apiKey:
             label: API Key
