@@ -72,7 +72,7 @@ return [
                 foreach ($kirby->extensions('blueprints') as $name => $blueprint) {
                     if (dirname($name) === 'blocks') {
                         $blockType = basename($name);
-                        // Only add if not already defined in configuration
+
                         if (!isset($blockBlueprints[$blockType])) {
                             $blockBlueprints[$blockType] = 'blocks/' . $blockType;
                         }
@@ -86,7 +86,7 @@ return [
                     $customBlocks = glob($blocksDir . '/*.yml');
                     foreach ($customBlocks as $blockFile) {
                         $blockType = basename($blockFile, '.yml');
-                        // Only add if not already defined in configuration
+
                         if (!isset($blockBlueprints[$blockType])) {
                             $blockBlueprints[$blockType] = 'blocks/' . $blockType;
                         }
