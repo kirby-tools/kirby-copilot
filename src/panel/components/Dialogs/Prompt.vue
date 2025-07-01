@@ -9,14 +9,10 @@ import {
 } from "../../composables";
 import AutoGrowTextarea from "../Ui/AutoGrowTextarea.vue";
 
-const props = defineProps({
+defineProps({
   fields: {
     type: Array,
     default: () => [],
-  },
-  preselectedField: {
-    type: String,
-    required: false,
   },
   selection: {
     type: String,
@@ -32,8 +28,9 @@ const { lastPrompt, currentIndex, addToHistory, navigateHistory } =
   usePromptHistory();
 
 const textarea = ref();
+const picklist = ref();
 const files = ref([]);
-const selectedField = ref(props.preselectedField);
+const selectedFields = ref([]);
 const insertOption = ref("append");
 const prompt = ref("");
 const licenseStatus = ref();
@@ -78,7 +75,7 @@ function submit() {
   emit("submit", {
     prompt: prompt.value,
     files: files.value,
-    field: selectedField.value,
+    fields: selectedFields.value,
     append: insertOption.value === "append",
   });
 }
@@ -94,7 +91,7 @@ async function pickFiles() {
     :cancel-button="false"
     :submit-button="false"
     :visible="true"
-    size="medium"
+    size="large"
     class="k-copilot-prompt-dialog"
     @cancel="emit('cancel')"
   >
@@ -142,19 +139,26 @@ async function pickFiles() {
           </k-button-group>
 
           <div class="kai-flex kai-gap-2">
-            <k-select-input
-              v-if="fields.length > 0"
-              class="kai-underline kai-underline-offset-[var(--link-underline-offset)]"
-              :options="
-                fields.map((field) => ({
-                  value: field.name,
-                  text: field.label || field.name,
-                }))
-              "
-              :empty="false"
-              :value="selectedField"
-              @input="selectedField = $event"
-            />
+            <template v-if="fields.length > 0">
+              <k-button
+                icon="box"
+                :text="panel.t('johannschopplich.copilot.fields')"
+                class="kai-underline kai-underline-offset-[var(--link-underline-offset)]"
+                @click="picklist.toggle()"
+              />
+              <k-picklist-dropdown
+                ref="picklist"
+                :options="
+                  fields.map((field) => ({
+                    value: field.name,
+                    text: field.label || field.name,
+                  }))
+                "
+                :empty="false"
+                :value="selectedFields"
+                @input="selectedFields = $event"
+              />
+            </template>
             <k-select-input
               v-else-if="selection"
               class="kai-underline kai-underline-offset-[var(--link-underline-offset)]"
@@ -177,6 +181,10 @@ async function pickFiles() {
               theme="notice-icon"
               variant="filled"
               icon="sparkling"
+              :disabled="
+                !prompt.trim() ||
+                (fields.length > 0 && selectedFields.length === 0)
+              "
               @click="submit()"
             >
               {{ panel.t("johannschopplich.copilot.generate") }}

@@ -1,16 +1,15 @@
 <script setup>
 import { isAbortError } from "@ai-sdk/provider-utils";
 import { loadPluginModule, ref, useContent, usePanel } from "kirbyuse";
+import { z } from "zod";
 import {
   useBlocks,
   useLayouts,
   usePluginContext,
   useStreamObject,
-  useStreamText,
 } from "../../composables";
 import { openPromptDialog } from "../../config/shared";
 import {
-  FIELD_TYPE_RESPONSE_FORMAT,
   PLUGIN_MODEL_FIELDS_API_ROUTE,
   STORAGE_KEY_PREFIX,
   SYSTEM_PROMPT,
@@ -54,134 +53,104 @@ async function initPromptDialog() {
   );
 
   fields = Object.values(fields).filter(
-    (field) => !EXCLUDED_FIELD_TYPES.has(field.type),
+    (field) =>
+      !EXCLUDED_FIELD_TYPES.has(field.type) && !field.disabled && !field.hidden,
   );
-  const preselectedField = fields.find(
-    (field) => field.type === "blocks",
-  )?.name;
 
-  const promptContext = await openPromptDialog({
-    fields,
-    preselectedField,
-  });
+  const promptContext = await openPromptDialog({ fields });
   if (!promptContext) return;
 
-  const { prompt, files, field: fieldName } = promptContext;
-  const field = fields.find((field) => field.name === fieldName);
-  if (!prompt || !field) return;
+  const { prompt, files, fields: selectedFieldNames } = promptContext;
+  const selectedFields = fields.filter((field) =>
+    selectedFieldNames.includes(field.name),
+  );
+  if (!prompt || selectedFields.length === 0) return;
 
-  const currentFieldContent = currentContent.value[field.name];
   const { getZodSchema: getBlocksZodSchema, normalizeBlock } = useBlocks();
   const { getZodSchema: getLayoutZodSchema, normalizeLayout } = useLayouts();
+
+  // Build schema for all selected fields
+  const fieldsSchema = {};
+
+  for (const field of selectedFields) {
+    if (field.type === "layout") {
+      fieldsSchema[field.name] = z.array(await getLayoutZodSchema(field));
+    } else if (field.type === "blocks") {
+      fieldsSchema[field.name] = z.array(await getBlocksZodSchema(field));
+    } else {
+      fieldsSchema[field.name] = fieldToZodSchema(field);
+    }
+  }
 
   panel.isLoading = true;
   isGenerating.value = true;
   document.addEventListener("keydown", handleEscape);
 
+  const _currentContent = { ...currentContent.value };
+
   // Ensure plugin assets are registered for loading the AI module
   await usePluginContext();
   const { AISDKError, APICallError } = await loadPluginModule("ai");
 
-  try {
-    let text = "";
-    let structuredOutput = [];
+  function processFieldValues(objectData, content) {
+    const processedContent = {};
 
-    // Handle structured fields (layouts, blocks, structure, object, entries) by streaming the object
-    if (
-      ["layout", "blocks", "structure", "object", "entries"].includes(
-        field.type,
-      )
-    ) {
-      const schema =
-        field.type === "layout"
-          ? await getLayoutZodSchema(field)
-          : field.type === "blocks"
-            ? await getBlocksZodSchema(field)
-            : fieldToZodSchema(field);
+    for (const field of selectedFields) {
+      const fieldValue = objectData[field.name];
+      if (fieldValue == null) continue;
 
-      const { partialObjectStream, object: finalObject } =
-        await useStreamObject({
-          userPrompt: prompt,
-          systemPrompt: SYSTEM_PROMPT,
-          schema,
-          output:
-            field.type === "layout" ||
-            field.type === "blocks" ||
-            field.type === "structure" ||
-            field.type === "entries"
-              ? "array"
-              : "object",
-          files: files.value,
-          abortSignal: abortController.signal,
-        });
+      const currentFieldContent = content[field.name];
 
-      // Stream partial updates
-      for await (const partialObject of partialObjectStream) {
-        if (!partialObject) continue;
-
-        let updatedContent;
-        if (field.type === "layout" || field.type === "blocks") {
-          if (!Array.isArray(partialObject)) continue;
-          updatedContent = [
-            ...currentFieldContent,
-            ...partialObject.map(
-              field.type === "layout" ? normalizeLayout : normalizeBlock,
-            ),
-          ];
-        } else if (field.type === "structure" || field.type === "entries") {
-          if (!Array.isArray(partialObject)) continue;
-          updatedContent = partialObject;
-        } else {
-          updatedContent = partialObject;
-        }
-
-        await updateContent(
-          { [field.name]: updatedContent },
-          // Disable saving content to storage in Kirby 5
-          false,
-        );
+      // Handle layouts and blocks field normalization
+      if (
+        (field.type === "layout" || field.type === "blocks") &&
+        Array.isArray(fieldValue)
+      ) {
+        processedContent[field.name] = [
+          ...currentFieldContent,
+          ...fieldValue.map(
+            field.type === "layout" ? normalizeLayout : normalizeBlock,
+          ),
+        ];
+      } else {
+        processedContent[field.name] = fieldValue;
       }
+    }
 
-      // Set final result
-      structuredOutput = await finalObject;
-    } else {
-      const { textStream } = await useStreamText({
-        userPrompt: [
-          `<response_format>\n${FIELD_TYPE_RESPONSE_FORMAT[field.type] || "text"}\n</response_format>`,
-          prompt,
-        ].join("\n\n"),
-        systemPrompt: SYSTEM_PROMPT,
-        files: files.value,
-        abortSignal: abortController.signal,
-      });
+    return processedContent;
+  }
 
-      for await (const textPart of textStream) {
-        text += textPart;
+  try {
+    const { partialObjectStream, object: finalObject } = await useStreamObject({
+      userPrompt: prompt,
+      systemPrompt: SYSTEM_PROMPT,
+      schema: z.object(fieldsSchema),
+      output: "object",
+      files,
+      abortSignal: abortController.signal,
+    });
 
+    // Stream partial updates
+    for await (const partialObject of partialObjectStream) {
+      if (!partialObject) continue;
+
+      const updatedContent = processFieldValues(partialObject, _currentContent);
+
+      if (Object.keys(updatedContent).length > 0) {
         await updateContent(
-          { [field.name]: currentFieldContent + text },
+          updatedContent,
           // Disable saving content to storage in Kirby 5
           false,
         );
       }
     }
 
+    // Set final result
+    const structuredOutput = await finalObject;
+    const finalContent = processFieldValues(structuredOutput, _currentContent);
+
     // Store the final content
-    await updateContent({
-      [field.name]:
-        field.type === "layout" || field.type === "blocks"
-          ? [
-              ...currentFieldContent,
-              ...(structuredOutput ?? []).map(
-                field.type === "layout" ? normalizeLayout : normalizeBlock,
-              ),
-            ]
-          : ["structure", "entries"].includes(field.type)
-            ? structuredOutput
-            : field.type === "object"
-              ? structuredOutput
-              : currentFieldContent + text,
-    });
+    await updateContent(finalContent);
 
     panel.notification.success({
       icon: "sparkling",
@@ -198,7 +167,8 @@ async function initPromptDialog() {
       let message = error.message;
 
       if (message.includes("levels of nesting exceeds limit")) {
-        message = `The ${field.type} generation for the "${field.name}" field exceeds OpenAI's architectural constraints for nested data structures. This is a known limitation of OpenAI's API. Please use Google Gemini or Anthropic Claude instead, which support complex schemas.`;
+        message =
+          "The fields generation exceeds OpenAI's architectural constraints for nested data structures. This is a known limitation of OpenAI's API. Please use Google Gemini or Anthropic Claude instead, which support complex schemas.";
       }
 
       console.error(error);

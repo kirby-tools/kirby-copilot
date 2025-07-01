@@ -5,17 +5,7 @@ import { z } from "zod";
  */
 export const EXCLUDED_FIELD_TYPES = new Set(
   /// keep-sorted
-  [
-    "files",
-    "gap",
-    "headline",
-    "hidden",
-    "info",
-    "layout",
-    "line",
-    "pages",
-    "users",
-  ],
+  ["files", "gap", "headline", "hidden", "info", "line", "pages", "users"],
 );
 
 /**
