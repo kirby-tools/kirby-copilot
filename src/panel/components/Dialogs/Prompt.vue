@@ -9,7 +9,15 @@ import {
 } from "../../composables";
 import AutoGrowTextarea from "../Ui/AutoGrowTextarea.vue";
 
-defineProps({
+const props = defineProps({
+  fields: {
+    type: Array,
+    default: () => [],
+  },
+  preselectedField: {
+    type: String,
+    required: false,
+  },
   selection: {
     type: String,
     default: "",
@@ -25,13 +33,14 @@ const { lastPrompt, currentIndex, addToHistory, navigateHistory } =
 
 const textarea = ref();
 const files = ref([]);
+const selectedField = ref(props.preselectedField);
 const insertOption = ref("append");
 const prompt = ref("");
 const licenseStatus = ref();
 
 useEventListener(textarea, "keydown", (event) => {
   // Listen to `Cmd/Ctrl + Enter` to submit the prompt
-  if (event.metaKey && event.key === "Enter") {
+  if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
     submit();
   }
 
@@ -69,6 +78,7 @@ function submit() {
   emit("submit", {
     prompt: prompt.value,
     files: files.value,
+    field: selectedField.value,
     append: insertOption.value === "append",
   });
 }
@@ -133,7 +143,20 @@ async function pickFiles() {
 
           <div class="kai-flex kai-gap-2">
             <k-select-input
-              v-if="selection"
+              v-if="fields.length > 0"
+              class="kai-underline kai-underline-offset-[var(--link-underline-offset)]"
+              :options="
+                fields.map((field) => ({
+                  value: field.name,
+                  text: field.label || field.name,
+                }))
+              "
+              :empty="false"
+              :value="selectedField"
+              @input="selectedField = $event"
+            />
+            <k-select-input
+              v-else-if="selection"
               class="kai-underline kai-underline-offset-[var(--link-underline-offset)]"
               :options="[
                 {

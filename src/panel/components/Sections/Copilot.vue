@@ -319,6 +319,9 @@ async function generate() {
 
 function abort() {
   abortController?.abort();
+  abortController = undefined;
+  panel.isLoading = false;
+  isGenerating.value = false;
 }
 
 function undo() {

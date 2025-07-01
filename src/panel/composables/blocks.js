@@ -1,3 +1,4 @@
+import { PLUGIN_FIELDSETS_API_ROUTE } from "../constants";
 import { generateKirbyBlocksSchema } from "../schemas/blocks";
 
 let fieldsets;
@@ -9,7 +10,7 @@ export function useBlocks() {
     if (pendingPromise) return pendingPromise;
 
     pendingPromise = window.panel.api
-      .get("/__copilot__/fieldsets")
+      .get(PLUGIN_FIELDSETS_API_ROUTE)
       .then((response) => {
         fieldsets = response;
         pendingPromise = undefined;
