@@ -24,10 +24,11 @@ import {
   useStreamText,
 } from "../../composables";
 import {
+  FIELD_TYPE_RESPONSE_FORMAT,
   LOG_LEVELS,
   STORAGE_KEY_PREFIX,
+  SUPPORTED_IMAGE_MIME_TYPES,
   SUPPORTED_PROVIDERS,
-  SUPPORTED_VISION_MIME_TYPES,
   SYSTEM_PROMPT,
 } from "../../constants";
 import { CopilotError } from "../../utils/error";
@@ -49,13 +50,6 @@ const _isKirby5 = isKirby5();
 const panel = usePanel();
 const { t } = useI18n();
 const { currentContent, update: updateContent } = useContent();
-
-const RESPONSE_FORMAT_PER_FIELD = {
-  writer: "HTML",
-  textarea: "markdown",
-  // Community plugin field types
-  markdown: "markdown",
-};
 
 // Section props
 const label = ref();
@@ -145,7 +139,7 @@ watch(isDetailsOpen, (value) => {
   if (response.files === "auto" && response.modelFile) {
     modelFile.value = response.modelFile;
     const { mime, url } = response.modelFile;
-    if (SUPPORTED_VISION_MIME_TYPES.includes(mime)) {
+    if (SUPPORTED_IMAGE_MIME_TYPES.includes(mime)) {
       fetch(url)
         .then((response) => response.blob())
         .then((blob) => {
@@ -203,10 +197,11 @@ async function generate() {
 
   const { getZodSchema: getBlocksZodSchema, normalizeBlock } = useBlocks();
   const { getZodSchema: getLayoutZodSchema, normalizeLayout } = useLayouts();
-  let text = "";
-  let structuredOutput = [];
 
   try {
+    let text = "";
+    let structuredOutput = [];
+
     // Handle layouts by streaming the object
     if (field.value.type === "layout" || field.value.type === "blocks") {
       const schema = await (
@@ -249,7 +244,7 @@ async function generate() {
     } else {
       const { textStream } = await useStreamText({
         userPrompt: [
-          `<response_format>\n${fieldTypeToResponseFormat(field.value.type)}\n</response_format>`,
+          `<response_format>\n${FIELD_TYPE_RESPONSE_FORMAT[field.value.type] || "text"}\n</response_format>`,
           currentPrompt.value,
         ].join("\n\n"),
         systemPrompt: systemPrompt.value,
@@ -270,11 +265,27 @@ async function generate() {
         );
       }
     }
-  } catch (error) {
-    abortController = undefined;
-    panel.isLoading = false;
-    isGenerating.value = false;
 
+    // Store the final content
+    await updateContent({
+      [field.value.name.toLowerCase()]:
+        field.value.type === "layout" || field.value.type === "blocks"
+          ? [
+              ...currentFieldContent.value,
+              ...(structuredOutput ?? []).map(
+                field.value.type === "layout"
+                  ? normalizeLayout
+                  : normalizeBlock,
+              ),
+            ]
+          : currentFieldContent.value + text,
+    });
+
+    panel.notification.success({
+      icon: "sparkling",
+      message: panel.t("johannschopplich.copilot.generator.success"),
+    });
+  } catch (error) {
     if (isAbortError(error)) return;
 
     const { AISDKError, APICallError } = await loadPluginModule("ai");
@@ -299,29 +310,11 @@ async function generate() {
     panel.notification.error(
       panel.t("johannschopplich.copilot.generator.error"),
     );
-    return;
+  } finally {
+    abortController = undefined;
+    panel.isLoading = false;
+    isGenerating.value = false;
   }
-
-  // Store the final content
-  updateContent({
-    [field.value.name.toLowerCase()]:
-      field.value.type === "layout" || field.value.type === "blocks"
-        ? [
-            ...currentFieldContent.value,
-            ...(structuredOutput ?? []).map(
-              field.value.type === "layout" ? normalizeLayout : normalizeBlock,
-            ),
-          ]
-        : currentFieldContent.value + text,
-  });
-
-  abortController = undefined;
-  panel.isLoading = false;
-  isGenerating.value = false;
-  panel.notification.success({
-    icon: "sparkling",
-    message: panel.t("johannschopplich.copilot.generator.success"),
-  });
 }
 
 function abort() {
@@ -344,10 +337,6 @@ function onModelSave() {
   if (canUndo.value) {
     currentFieldContent.value = undefined;
   }
-}
-
-function fieldTypeToResponseFormat(fieldType) {
-  return RESPONSE_FORMAT_PER_FIELD[fieldType] || "text";
 }
 </script>
 
@@ -398,12 +387,17 @@ function fieldTypeToResponseFormat(fieldType) {
       </k-text>
     </k-box>
     <k-box
-      v-else-if="!field || !(field.name.toLowerCase() in currentContent)"
+      v-else-if="
+        !field ||
+        typeof field === 'string' ||
+        (typeof field === 'object' &&
+          !(field?.name.toLowerCase() in currentContent))
+      "
       theme="empty"
     >
       <k-text>
-        The <code>{{ field.name }}</code> field does not exist in the current
-        model.
+        The <code>{{ field?.name ?? field }}</code> field does not exist in the
+        current model.
       </k-text>
     </k-box>
     <k-box
@@ -528,7 +522,7 @@ function fieldTypeToResponseFormat(fieldType) {
               {{
                 panel.t(
                   `johannschopplich.copilot.context.file.${
-                    SUPPORTED_VISION_MIME_TYPES.includes(modelFile.mime)
+                    SUPPORTED_IMAGE_MIME_TYPES.includes(modelFile.mime)
                       ? "model"
                       : "unsupported"
                   }`,

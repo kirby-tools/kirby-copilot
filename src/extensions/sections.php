@@ -1,5 +1,6 @@
 <?php
 
+use Kirby\Form\Form;
 use Kirby\Toolkit\I18n;
 
 return [
@@ -31,7 +32,21 @@ return [
                 }
 
                 $fields = $this->model()->blueprint()->fields();
-                return $fields[$this->field] ?? null;
+                $content = $this->model()->content()->toArray();
+                $form = new Form([
+                    'fields' => $fields,
+                    'values' => $content,
+                    'model' => $this->model(),
+                    'strict' => true
+                ]);
+
+                $fields = $form->fields()->toArray();
+
+                foreach ($fields as $index => $props) {
+                    unset($fields[$index]['value']);
+                }
+
+                return $fields[strtolower($this->field)] ?? $this->field;
             },
             'modelFile' => function () {
                 /** @var \Kirby\Cms\File */
