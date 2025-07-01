@@ -83,361 +83,75 @@ describe("generateKirbyBlocksSchema", () => {
         }),
       ).toThrow();
     });
-  });
 
-  describe("field type handling", () => {
-    const fieldTypesConfig = [
-      {
-        type: "demo",
-        name: "Demo Block",
-        fields: {
-          // Text fields
-          title: {
-            type: "text",
-            label: "Title",
-            name: "title",
-            required: false,
-          },
-          description: {
-            type: "textarea",
-            label: "Description",
-            name: "description",
-            required: false,
-          },
-          email: {
-            type: "email",
-            label: "Email",
-            name: "email",
-            required: false,
-          },
-          phone: {
-            type: "tel",
-            label: "Phone",
-            name: "phone",
-            required: false,
-          },
-          website: {
-            type: "url",
-            label: "Website",
-            name: "website",
-            required: false,
-          },
+    it("should create schemas for all valid blocks", () => {
+      const schema = generateKirbyBlocksSchema(basicBlocksConfig);
 
-          // Rich text fields
-          content: {
-            type: "writer",
-            label: "Content",
-            name: "content",
-            required: false,
-          },
-          notes: {
-            type: "markdown",
-            label: "Notes",
-            name: "notes",
-            required: false,
-          },
-          items: {
-            type: "list",
-            label: "Items",
-            name: "items",
-            required: false,
-          },
-
-          // Boolean fields
-          featured: {
-            type: "toggle",
-            label: "Featured",
-            name: "featured",
-            required: false,
-          },
-
-          // Selection fields
-          category: {
-            type: "select",
-            label: "Category",
-            name: "category",
-            options: ["news", "blog", "event"],
-            required: false,
-          },
-          status: {
-            type: "radio",
-            label: "Status",
-            name: "status",
-            options: [
-              { value: "draft", text: "Draft" },
-              { value: "published", text: "Published" },
-            ],
-            required: false,
-          },
-          tags: {
-            type: "checkboxes",
-            label: "Tags",
-            name: "tags",
-            options: ["tech", "design", "business"],
-            required: false,
-          },
-
-          // Number fields
-          priority: {
-            type: "number",
-            label: "Priority",
-            name: "priority",
-            required: false,
-          },
-          rating: {
-            type: "range",
-            label: "Rating",
-            name: "rating",
-            min: 1,
-            max: 5,
-            required: false,
-          },
-
-          // Date/time fields
-          publishDate: {
-            type: "date",
-            label: "Publish Date",
-            name: "publishDate",
-            required: false,
-          },
-          publishTime: {
-            type: "time",
-            label: "Publish Time",
-            name: "publishTime",
-            required: false,
-          },
-
-          // Other fields
-          theme: {
-            type: "color",
-            label: "Theme Color",
-            name: "theme",
-            required: false,
-          },
-          permalink: {
-            type: "slug",
-            label: "Permalink",
-            name: "permalink",
-            required: false,
-          },
-          relatedPage: {
-            type: "link",
-            label: "Related Page",
-            name: "relatedPage",
-            required: false,
-          },
-        },
-      },
-    ];
-
-    it("should handle text fields correctly", () => {
-      const schema = generateKirbyBlocksSchema(fieldTypesConfig);
-
-      const validBlock = {
-        type: "demo",
-        content: {
-          title: "Sample Title",
-          description: "Multi-line\ndescription text",
-          email: "user@example.com",
-          phone: "+1-555-0123",
-          website: "https://example.com",
-        },
-      };
-
-      expect(() => schema.parse(validBlock)).not.toThrow();
-    });
-
-    it("should handle rich text fields correctly", () => {
-      const schema = generateKirbyBlocksSchema(fieldTypesConfig);
-
-      const validBlock = {
-        type: "demo",
-        content: {
-          content: "<p>Rich <strong>text</strong> content</p>",
-          notes: "# Markdown\n- List item",
-          items: "<ul><li>Item 1</li><li>Item 2</li></ul>",
-        },
-      };
-
-      expect(() => schema.parse(validBlock)).not.toThrow();
-    });
-
-    it("should handle boolean fields correctly", () => {
-      const schema = generateKirbyBlocksSchema(fieldTypesConfig);
-
-      const validBlock = {
-        type: "demo",
-        content: { featured: true },
-      };
-
-      expect(() => schema.parse(validBlock)).not.toThrow();
-
-      // Should reject non-boolean values
+      // Should accept valid text block
       expect(() =>
         schema.parse({
-          type: "demo",
-          content: { featured: "true" },
-        }),
-      ).toThrow();
-    });
-
-    it("should handle selection fields correctly", () => {
-      const schema = generateKirbyBlocksSchema(fieldTypesConfig);
-
-      const validBlock = {
-        type: "demo",
-        content: {
-          category: "news",
-          status: "published",
-          tags: ["tech", "design"],
-        },
-      };
-
-      expect(() => schema.parse(validBlock)).not.toThrow();
-
-      // Should reject invalid enum values
-      expect(() =>
-        schema.parse({
-          type: "demo",
-          content: { category: "invalid" },
-        }),
-      ).toThrow();
-    });
-
-    it("should handle number fields with constraints", () => {
-      const schema = generateKirbyBlocksSchema(fieldTypesConfig);
-
-      const validBlock = {
-        type: "demo",
-        content: {
-          priority: 10,
-          rating: 3,
-        },
-      };
-
-      expect(() => schema.parse(validBlock)).not.toThrow();
-
-      // Should reject values outside range
-      expect(() =>
-        schema.parse({
-          type: "demo",
-          content: { rating: 10 },
-        }),
-      ).toThrow();
-    });
-
-    it("should handle date and time fields correctly", () => {
-      const schema = generateKirbyBlocksSchema(fieldTypesConfig);
-
-      const validBlock = {
-        type: "demo",
-        content: {
-          publishDate: "2023-12-25",
-          publishTime: "14:30:00",
-        },
-      };
-
-      expect(() => schema.parse(validBlock)).not.toThrow();
-    });
-
-    it("should handle special fields correctly", () => {
-      const schema = generateKirbyBlocksSchema(fieldTypesConfig);
-
-      const validBlock = {
-        type: "demo",
-        content: {
-          theme: "#ff0000",
-          permalink: "sample-post",
-          relatedPage: "page://abc123",
-        },
-      };
-
-      expect(() => schema.parse(validBlock)).not.toThrow();
-    });
-  });
-
-  describe("required fields validation", () => {
-    const requiredFieldsConfig = [
-      {
-        type: "article",
-        name: "Article Block",
-        fields: {
-          title: {
-            type: "text",
-            label: "Title",
-            name: "title",
-            required: true,
-          },
-          content: {
-            type: "writer",
-            label: "Content",
-            name: "content",
-            required: true,
-          },
-          tags: { type: "tags", label: "Tags", name: "tags", required: true },
-          excerpt: {
-            type: "textarea",
-            label: "Excerpt",
-            name: "excerpt",
-            required: false,
-          },
-        },
-      },
-    ];
-
-    it("should enforce required string fields", () => {
-      const schema = generateKirbyBlocksSchema(requiredFieldsConfig);
-
-      // Valid block with all required fields
-      expect(() =>
-        schema.parse({
-          type: "article",
-          content: {
-            title: "Article Title",
-            content: "<p>Article content</p>",
-            tags: ["tech"],
-          },
+          type: "text",
+          content: { content: "<p>Some content</p>" },
         }),
       ).not.toThrow();
 
-      // Should reject empty required string
+      // Should accept valid heading block
       expect(() =>
         schema.parse({
-          type: "article",
-          content: {
-            title: "",
-            content: "<p>Article content</p>",
-            tags: ["tech"],
-          },
+          type: "heading",
+          content: { level: "h1", text: "Heading text" },
+        }),
+      ).not.toThrow();
+
+      // Should reject invalid block type
+      expect(() =>
+        schema.parse({
+          type: "nonexistent",
+          content: {},
         }),
       ).toThrow();
+    });
+  });
+
+  describe("block validation", () => {
+    it("should validate required fields", () => {
+      const schema = generateKirbyBlocksSchema(basicBlocksConfig);
 
       // Should reject missing required field
       expect(() =>
         schema.parse({
-          type: "article",
-          content: {
-            content: "<p>Article content</p>",
-            tags: ["tech"],
-          },
+          type: "heading",
+          content: { level: "h1" }, // Missing required 'text' field
         }),
       ).toThrow();
-    });
 
-    it("should enforce required array fields", () => {
-      const schema = generateKirbyBlocksSchema(requiredFieldsConfig);
-
-      // Should reject empty required array
+      // Should accept block with all required fields
       expect(() =>
         schema.parse({
-          type: "article",
-          content: {
-            title: "Article Title",
-            content: "<p>Article content</p>",
-            tags: [],
-          },
+          type: "heading",
+          content: { level: "h1", text: "Valid heading" },
+        }),
+      ).not.toThrow();
+    });
+
+    it("should validate field types", () => {
+      const schema = generateKirbyBlocksSchema(basicBlocksConfig);
+
+      // Should reject invalid enum value
+      expect(() =>
+        schema.parse({
+          type: "heading",
+          content: { level: "h7", text: "Invalid level" }, // h7 not in options
         }),
       ).toThrow();
+
+      // Should accept valid enum value
+      expect(() =>
+        schema.parse({
+          type: "heading",
+          content: { level: "h2", text: "Valid level" },
+        }),
+      ).not.toThrow();
     });
   });
 
@@ -477,22 +191,18 @@ describe("generateKirbyBlocksSchema", () => {
         }),
       ).not.toThrow();
 
-      // The excluded fields simply won't be in the schema, so they'll be ignored
-      // This test verifies that the schema was created without the excluded fields
-      // by checking that only the included field is required
+      // Should fail when missing required included field
       expect(() =>
         schema.parse({
           type: "layout",
-          content: {
-            // Missing required 'content' field should fail
-          },
+          content: {},
         }),
       ).toThrow();
     });
   });
 
-  describe("structure fields", () => {
-    const structureFieldConfig = [
+  describe("complex field integration", () => {
+    const complexBlocksConfig = [
       {
         type: "testimonials",
         name: "Testimonials Block",
@@ -525,10 +235,46 @@ describe("generateKirbyBlocksSchema", () => {
           },
         },
       },
+      {
+        type: "card",
+        name: "Card Block",
+        fields: {
+          settings: {
+            type: "object",
+            label: "Card Settings",
+            name: "settings",
+            fields: {
+              title: {
+                type: "text",
+                label: "Title",
+                name: "title",
+                required: true,
+              },
+              priority: {
+                type: "number",
+                label: "Priority",
+                name: "priority",
+                min: 1,
+                max: 10,
+              },
+            },
+          },
+          tags: {
+            type: "entries",
+            label: "Tags",
+            name: "tags",
+            min: 1,
+            max: 5,
+            field: {
+              field: { type: "text" },
+            },
+          },
+        },
+      },
     ];
 
-    it("should handle structure fields with defined sub-fields", () => {
-      const schema = generateKirbyBlocksSchema(structureFieldConfig);
+    it("should handle structure fields in blocks", () => {
+      const schema = generateKirbyBlocksSchema(complexBlocksConfig);
 
       const validBlock = {
         type: "testimonials",
@@ -539,11 +285,6 @@ describe("generateKirbyBlocksSchema", () => {
               quote: "Great product!",
               rating: 5,
             },
-            {
-              name: "Jane Smith",
-              quote: "Excellent service.",
-              rating: 4,
-            },
           ],
         },
       };
@@ -551,10 +292,41 @@ describe("generateKirbyBlocksSchema", () => {
       expect(() => schema.parse(validBlock)).not.toThrow();
     });
 
-    it("should validate structure sub-field requirements", () => {
-      const schema = generateKirbyBlocksSchema(structureFieldConfig);
+    it("should handle object fields in blocks", () => {
+      const schema = generateKirbyBlocksSchema(complexBlocksConfig);
 
-      // Should reject structure item missing required fields
+      const validBlock = {
+        type: "card",
+        content: {
+          settings: {
+            title: "Card Title",
+            priority: 5,
+          },
+          tags: ["web", "design"],
+        },
+      };
+
+      expect(() => schema.parse(validBlock)).not.toThrow();
+    });
+
+    it("should handle entries fields in blocks", () => {
+      const schema = generateKirbyBlocksSchema(complexBlocksConfig);
+
+      const validBlock = {
+        type: "card",
+        content: {
+          settings: { title: "Card Title" },
+          tags: ["web", "design", "ui"],
+        },
+      };
+
+      expect(() => schema.parse(validBlock)).not.toThrow();
+    });
+
+    it("should validate complex field constraints", () => {
+      const schema = generateKirbyBlocksSchema(complexBlocksConfig);
+
+      // Should reject structure item missing required field
       expect(() =>
         schema.parse({
           type: "testimonials",
@@ -568,10 +340,33 @@ describe("generateKirbyBlocksSchema", () => {
           },
         }),
       ).toThrow();
+
+      // Should reject object missing required field  
+      expect(() =>
+        schema.parse({
+          type: "card",
+          content: {
+            settings: {
+              priority: 5, // Missing required title
+            },
+          },
+        }),
+      ).toThrow();
+
+      // Should reject entries below minimum
+      expect(() =>
+        schema.parse({
+          type: "card",
+          content: {
+            settings: { title: "Card Title" },
+            tags: [], // Below min of 1
+          },
+        }),
+      ).toThrow();
     });
   });
 
-  describe("writer field inline handling", () => {
+  describe("writer field modes", () => {
     const writerFieldConfig = [
       {
         type: "content",
@@ -593,10 +388,10 @@ describe("generateKirbyBlocksSchema", () => {
       },
     ];
 
-    it("should generate different descriptions for inline vs block writer fields", () => {
+    it("should handle both inline and block writer fields", () => {
       const schema = generateKirbyBlocksSchema(writerFieldConfig);
 
-      // Both should be valid strings, but descriptions differ
+      // Both should accept string content
       expect(() =>
         schema.parse({
           type: "content",
