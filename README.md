@@ -2,17 +2,21 @@
 
 # Kirby Copilot
 
-Kirby Copilot is a plugin for [Kirby CMS](https://getkirby.com) that integrates AI capabilities into your Kirby projects, allowing you to generate content directly from the Panel.
+Kirby Copilot is a plugin for [Kirby CMS](https://getkirby.com) that integrates AI features into your Kirby projects, allowing you to generate structured content and entire page layouts directly from the Panel. This documentation will guide you through the installation, configuration and usage of the plugin.
+
+::tip
+Explore the [interactive playground](https://try.kirbycopilot.com) or [install the plugin](https://kirby.tools/docs/copilot/getting-started/installation) to try Kirby Copilot for yourself.
+::
 
 ## Features
 
-To streamline content creation for you or your clients and editors, Kirby Copilot offers:
+The following features make AI-assisted content creation and editing easy for you and your clients or editors:
 
-- 🦙 **Multi-model**: Use OpenAI GPT, Anthropic Claude, Google Gemini, or Mistral AI models to generate content.
-- 🧱 **Blocks support**: Generate content for blocks fields.
+- 🦙 **Multi-model**: Use OpenAI models, Google Gemini, Anthropic Claude, or Mistral AI models to generate content.
+- 🧱 **Structure-Aware Generation**: Generate entire layouts from a single prompt, based on your project's unique block definitions.
+- 📇 **In-Context Editing**: Use the Copilot button in writer/textarea fields to refine text with AI assistance. Works perfectly with selected text.
 - 🌞 **Customizable prompts**: Tailor AI responses with user and system instructions.
-- 🎀 **Context-aware responses**: Include context from other fields with placeholders in user prompts to improve content relevance.
-- 🛎️ **Playground**: Try out the plugin's features with an interactive live demo.
+- 🎀 **Rich Context**: Go beyond text. Use other fields, images, and even PDF documents as context for more accurate and relevant AI responses.
 
 ## Licensing
 
