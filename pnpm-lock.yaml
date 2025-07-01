@@ -12,13 +12,13 @@ importers:
         specifier: ^2.0.0-beta.3
         version: 2.0.0-canary.19(zod@3.25.67)
       '@ai-sdk/google':
-        specifier: ^2.0.0-beta.3
+        specifier: ^2.0.0-beta.5
         version: 2.0.0-canary.20(zod@3.25.67)
       '@ai-sdk/mistral':
         specifier: ^2.0.0-beta.2
         version: 2.0.0-canary.19(zod@3.25.67)
       '@ai-sdk/openai':
-        specifier: ^2.0.0-beta.2
+        specifier: ^2.0.0-beta.3
         version: 2.0.0-canary.20(zod@3.25.67)
       '@ai-sdk/provider-utils':
         specifier: ^3.0.0-beta.2
@@ -30,7 +30,7 @@ importers:
         specifier: ^0.5.2
         version: 0.5.2(kirbyuse@0.12.1)
       ai:
-        specifier: ^5.0.0-beta.2
+        specifier: ^5.0.0-beta.3
         version: 5.0.0-canary.24(zod@3.25.67)
       autoprefixer:
         specifier: ^10.4.21
@@ -48,8 +48,8 @@ importers:
         specifier: ^0.12.1
         version: 0.12.1
       ohash:
-        specifier: ^1.1.6
-        version: 1.1.6
+        specifier: ^2.0.11
+        version: 2.0.11
       pdfjs-dist:
         specifier: ^4.10.38
         version: 4.10.38
@@ -2035,9 +2035,6 @@ packages:
   object-hash@3.0.0:
     resolution: {integrity: sha512-RSn9F68PjH9HqtltsSnqYC1XXoWe9Bju5+213R98cNGttag9q9yAOTzdbsqvIa7aNm5WffBZFpWYr2aWrklWAw==}
     engines: {node: '>= 6'}
-
-  ohash@1.1.6:
-    resolution: {integrity: sha512-TBu7PtV8YkAZn0tSxobKY2n2aAQva936lhRrj6957aDaCf9IEtqsKbgMzXE/F/sjqYOwmrukeORHNLe5glk7Cg==}
 
   ohash@2.0.11:
     resolution: {integrity: sha512-RdR9FQrFwNBNXAr4GixM8YaRZRJ5PUWbKYbE5eOsrwAjJW0q2REGcf79oYPsLyskQCZG1PLN+S/K1V00joZAoQ==}
@@ -4855,8 +4852,6 @@ snapshots:
   object-assign@4.1.1: {}
 
   object-hash@3.0.0: {}
-
-  ohash@1.1.6: {}
 
   ohash@2.0.11: {}
 
