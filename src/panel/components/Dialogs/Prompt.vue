@@ -27,7 +27,6 @@ const textarea = ref();
 const files = ref([]);
 const insertOption = ref("append");
 const prompt = ref("");
-const isBadgeHovered = ref(false);
 const licenseStatus = ref();
 
 useEventListener(textarea, "keydown", (event) => {
@@ -108,29 +107,29 @@ async function pickFiles() {
 
       <div class="kai-absolute kai-inset-x-px kai-bottom-px kai-p-2">
         <div class="kai-flex kai-items-center kai-justify-between">
-          <div class="kai-relative">
-            <k-button theme="empty" icon="attachment" @click="pickFiles()" />
-            <!-- TODO: `k-tabs-badge` is for Kirby 4 compatibility. `k-button-badge` is for Kirby 5. -->
-            <span
+          <k-button-group class="kai-gap-1">
+            <k-button
+              theme="empty"
+              icon="attachment"
+              :badge="
+                _isKirby5 && files.length > 0
+                  ? {
+                      theme: 'notice',
+                      text: files.length,
+                    }
+                  : undefined
+              "
+              class="!kai-rounded-[var(--button-rounded)]"
+              @click="pickFiles()"
+            />
+            <k-button
               v-if="files.length > 0"
-              :data-theme="isBadgeHovered ? 'negative' : 'notice'"
-              class="kai-cursor-pointer"
-              :class="[
-                _isKirby5
-                  ? 'k-button-badge kai-top-[-2px]'
-                  : 'k-tabs-badge kai-top-[-6px]',
-              ]"
-              @mouseenter="isBadgeHovered = true"
-              @mouseleave="isBadgeHovered = false"
-              @click="((files = []), (isBadgeHovered = false))"
-            >
-              {{
-                isBadgeHovered
-                  ? panel.t("johannschopplich.copilot.delete")
-                  : files.length
-              }}
-            </span>
-          </div>
+              :text="panel.t('johannschopplich.copilot.delete')"
+              variant="dimmed"
+              size="sm"
+              @click="files = []"
+            />
+          </k-button-group>
 
           <div class="kai-flex kai-gap-2">
             <k-select-input
