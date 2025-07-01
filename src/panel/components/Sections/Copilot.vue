@@ -480,14 +480,6 @@ function fieldTypeToResponseFormat(fieldType) {
               :counter="false"
               @input="currentPrompt = $event"
             />
-            <k-button
-              v-show="userPrompt && currentPrompt !== userPrompt"
-              icon="undo"
-              text="Reset"
-              variant="dimmed"
-              size="xs"
-              @click="currentPrompt = userPrompt"
-            />
           </div>
 
           <k-button-group
@@ -516,6 +508,19 @@ function fieldTypeToResponseFormat(fieldType) {
               variant="dimmed"
               size="sm"
               @click="files = []"
+            />
+            <k-button
+              v-if="
+                permissions.includes('edit') &&
+                userPrompt &&
+                currentPrompt !== userPrompt
+              "
+              icon="undo"
+              :text="panel.t('johannschopplich.copilot.reset')"
+              variant="dimmed"
+              size="xs"
+              class="kai-ml-auto"
+              @click="currentPrompt = userPrompt"
             />
           </k-button-group>
           <k-box v-else-if="modelFile" theme="none">

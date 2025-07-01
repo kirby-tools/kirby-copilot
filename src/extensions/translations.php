@@ -19,6 +19,7 @@ return [
         'johannschopplich.copilot.prompt.dialogContextPlaceholder' => 'Ask anything… (Selected text will be used as context)',
         'johannschopplich.copilot.files.select' => 'Select files',
         'johannschopplich.copilot.images.select' => 'Select images',
+        'johannschopplich.copilot.reset' => 'Reset',
         'johannschopplich.copilot.generator.success' => 'Content generated',
         'johannschopplich.copilot.generator.error' => 'Could not generate text. Please check console logs.'
     ],
@@ -40,6 +41,7 @@ return [
         'johannschopplich.copilot.prompt.dialogContextPlaceholder' => 'Frage etwas… (Ausgewählter Text wird als Kontext verwendet)',
         'johannschopplich.copilot.files.select' => 'Dateien auswählen',
         'johannschopplich.copilot.images.select' => 'Bilder auswählen',
+        'johannschopplich.copilot.reset' => 'Zurücksetzen',
         'johannschopplich.copilot.generator.success' => 'Content generiert',
         'johannschopplich.copilot.generator.error' => 'Text konnte nicht generiert werden. Bitte Konsolenprotokolle prüfen.'
     ],
@@ -61,6 +63,7 @@ return [
         'johannschopplich.copilot.prompt.dialogContextPlaceholder' => 'Posez une question… (Le texte sélectionné sera utilisé comme contexte)',
         'johannschopplich.copilot.files.select' => 'Sélectionner des fichiers',
         'johannschopplich.copilot.images.select' => 'Sélectionner des images',
+        'johannschopplich.copilot.reset' => 'Réinitialiser',
         'johannschopplich.copilot.generator.success' => 'Contenu généré',
         'johannschopplich.copilot.generator.error' => 'Impossible de générer le texte. Veuillez vérifier les journaux de la console.'
     ],
@@ -82,6 +85,7 @@ return [
         'johannschopplich.copilot.prompt.dialogContextPlaceholder' => 'Stel een vraag... (Geselecteerde tekst wordt gebruikt als context)',
         'johannschopplich.copilot.files.select' => 'Selecteer bestanden',
         'johannschopplich.copilot.images.select' => 'Selecteer afbeeldingen',
+        'johannschopplich.copilot.reset' => 'Resetten',
         'johannschopplich.copilot.generator.success' => 'Inhoud gegenereerd',
         'johannschopplich.copilot.generator.error' => 'Kon geen tekst genereren. Controleer de console logs.'
     ]
