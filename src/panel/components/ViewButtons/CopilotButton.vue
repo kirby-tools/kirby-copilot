@@ -40,7 +40,7 @@ async function initPromptDialog() {
 
   const handleEscape = (event) => {
     if (event.key === "Escape") {
-      abortController?.abort();
+      abort();
     }
   };
 
