@@ -48,7 +48,7 @@ return [
                 $mime = $model->mime();
                 $url = $model->url();
 
-                // Ensure the image context is supported by GPT Vision
+                // Ensure the image context is supported by creating a thumbnail
                 if (str_starts_with($mime, 'image/')) {
                     $targetSize = 2048;
                     /** @var \Kirby\Cms\FileVersion|\Kirby\Cms\File|\Kirby\Filesystem\Asset */
