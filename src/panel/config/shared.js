@@ -1,3 +1,4 @@
+import { isAbortError } from "@ai-sdk/provider-utils";
 import { loadPluginModule, usePanel } from "kirbyuse";
 import { usePluginContext, useStreamText } from "../composables";
 import { STORAGE_KEY_PREFIX, SYSTEM_PROMPT } from "../constants";
@@ -75,11 +76,7 @@ export async function generateAndInsertText(
       message: panel.t("johannschopplich.copilot.generator.success"),
     });
   } catch (error) {
-    if (
-      error instanceof Error &&
-      (error.name === "AbortError" || error.name === "TimeoutError")
-    )
-      return;
+    if (isAbortError(error)) return;
 
     if (
       error instanceof CopilotError ||
