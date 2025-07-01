@@ -5,17 +5,19 @@ export function useLayouts() {
   const { getFieldsets } = useBlocks();
 
   async function getZodSchema(fieldConfig) {
-    const fieldsets = await getFieldsets();
+    let fieldsets = await getFieldsets();
 
-    let filteredFieldsets = fieldsets;
+    if (fieldConfig.fieldsets) {
+      const fieldsetTypes = Array.isArray(fieldConfig.fieldsets)
+        ? fieldConfig.fieldsets
+        : Object.keys(fieldConfig.fieldsets);
 
-    if (fieldConfig.fieldsets && Array.isArray(fieldConfig.fieldsets)) {
-      filteredFieldsets = fieldsets.filter((fieldset) =>
-        fieldConfig.fieldsets.includes(fieldset.type),
+      fieldsets = fieldsets.filter((fieldset) =>
+        fieldsetTypes.includes(fieldset.type),
       );
     }
 
-    return generateKirbyLayoutsSchema(filteredFieldsets, fieldConfig);
+    return generateKirbyLayoutsSchema(fieldsets, fieldConfig);
   }
 
   function normalizeLayout(layout) {

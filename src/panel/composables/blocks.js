@@ -23,9 +23,13 @@ export function useBlocks() {
   async function getZodSchema(fieldConfig) {
     let fieldsets = await getFieldsets();
 
-    if (fieldConfig.fieldsets && Array.isArray(fieldConfig.fieldsets)) {
+    if (fieldConfig.fieldsets) {
+      const fieldsetTypes = Array.isArray(fieldConfig.fieldsets)
+        ? fieldConfig.fieldsets
+        : Object.keys(fieldConfig.fieldsets);
+
       fieldsets = fieldsets.filter((fieldset) =>
-        fieldConfig.fieldsets.includes(fieldset.type),
+        fieldsetTypes.includes(fieldset.type),
       );
     }
 

@@ -21,7 +21,7 @@ export function legacyViewButtonMixin(Vue) {
       buttonComponent = new ButtonConstructor({ parent: this });
       buttonComponent.$mount();
 
-      buttonGroup.$el.after(buttonComponent.$el);
+      buttonGroup.$el.before(buttonComponent.$el);
     },
     beforeDestroy() {
       if (this.$options.name !== "k-header") return;
