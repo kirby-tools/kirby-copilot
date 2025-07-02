@@ -95,14 +95,13 @@ async function initPromptDialog() {
 
   const _currentContent = { ...currentContent.value };
 
-  // Ensure plugin assets are registered for loading the AI module
-  await usePluginContext();
+  const { config } = await usePluginContext();
   const { AISDKError, APICallError } = await loadPluginModule("ai");
 
   try {
     const { partialObjectStream, object: finalObject } = await useStreamObject({
       userPrompt: prompt,
-      systemPrompt: SYSTEM_PROMPT,
+      systemPrompt: config.systemPrompt || SYSTEM_PROMPT,
       schema: z.object(fieldsSchema),
       output: "object",
       files,
