@@ -38,8 +38,7 @@ export async function generateAndInsertText(
   panel.isLoading = true;
   document.addEventListener("keydown", handleEscape);
 
-  // Ensure plugin assets are registered for loading the AI module
-  await usePluginContext();
+  const { config } = await usePluginContext();
   const { AISDKError, APICallError } = await loadPluginModule("ai");
 
   try {
@@ -51,7 +50,7 @@ export async function generateAndInsertText(
       ]
         .filter(Boolean)
         .join("\n\n"),
-      systemPrompt: SYSTEM_PROMPT,
+      systemPrompt: config.systemPrompt || SYSTEM_PROMPT,
       files,
       abortSignal: abortController.signal,
     });
