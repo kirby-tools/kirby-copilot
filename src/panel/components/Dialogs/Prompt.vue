@@ -102,11 +102,10 @@ async function pickFiles() {
         :value="prompt"
         shared-class="kai-p-2 kai-leading-[1.5] focus:kai-outline-none"
         :placeholder="
-          panel.t(
-            selection
-              ? 'johannschopplich.copilot.prompt.dialogContextPlaceholder'
-              : 'johannschopplich.copilot.prompt.dialogPlaceholder',
-          )
+          panel.t('johannschopplich.copilot.prompt.placeholder') +
+          (selection
+            ? ` (${panel.t('johannschopplich.copilot.prompt.selectionContext')})`
+            : '')
         "
         @input="prompt = $event"
         @mounted="textarea = $event"

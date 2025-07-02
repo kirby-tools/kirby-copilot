@@ -1,4 +1,4 @@
-Title: Article
+Title: An Article About the Kirby CMS
 
 ----
 

@@ -57,6 +57,13 @@ async function initPromptDialog() {
       !EXCLUDED_FIELD_TYPES.has(field.type) && !field.disabled && !field.hidden,
   );
 
+  if (fields.length === 0) {
+    panel.notification.error(
+      panel.t("johannschopplich.copilot.generator.noFields"),
+    );
+    return;
+  }
+
   const promptContext = await openPromptDialog({ fields });
   if (!promptContext) return;
 
@@ -66,8 +73,8 @@ async function initPromptDialog() {
   );
   if (!prompt || selectedFields.length === 0) return;
 
-  const { getZodSchema: getBlocksZodSchema, normalizeBlock } = useBlocks();
-  const { getZodSchema: getLayoutZodSchema, normalizeLayout } = useLayouts();
+  const { getZodSchema: getBlocksZodSchema } = useBlocks();
+  const { getZodSchema: getLayoutZodSchema } = useLayouts();
 
   // Build schema for all selected fields
   const fieldsSchema = {};
@@ -92,34 +99,6 @@ async function initPromptDialog() {
   await usePluginContext();
   const { AISDKError, APICallError } = await loadPluginModule("ai");
 
-  function processFieldValues(objectData, content) {
-    const processedContent = {};
-
-    for (const field of selectedFields) {
-      const fieldValue = objectData[field.name];
-      if (fieldValue == null) continue;
-
-      const currentFieldContent = content[field.name];
-
-      // Handle layouts and blocks field normalization
-      if (
-        (field.type === "layout" || field.type === "blocks") &&
-        Array.isArray(fieldValue)
-      ) {
-        processedContent[field.name] = [
-          ...currentFieldContent,
-          ...fieldValue.map(
-            field.type === "layout" ? normalizeLayout : normalizeBlock,
-          ),
-        ];
-      } else {
-        processedContent[field.name] = fieldValue;
-      }
-    }
-
-    return processedContent;
-  }
-
   try {
     const { partialObjectStream, object: finalObject } = await useStreamObject({
       userPrompt: prompt,
@@ -134,7 +113,11 @@ async function initPromptDialog() {
     for await (const partialObject of partialObjectStream) {
       if (!partialObject) continue;
 
-      const updatedContent = processFieldValues(partialObject, _currentContent);
+      const updatedContent = processFieldValues({
+        object: partialObject,
+        selectedFields,
+        currentContent: _currentContent,
+      });
 
       if (Object.keys(updatedContent).length > 0) {
         await updateContent(
@@ -147,7 +130,11 @@ async function initPromptDialog() {
 
     // Set final result
     const structuredOutput = await finalObject;
-    const finalContent = processFieldValues(structuredOutput, _currentContent);
+    const finalContent = processFieldValues({
+      object: structuredOutput,
+      selectedFields,
+      currentContent: _currentContent,
+    });
 
     // Store the final content
     await updateContent(finalContent);
@@ -193,6 +180,36 @@ function abort() {
   abortController = undefined;
   isGenerating.value = false;
   panel.isLoading = false;
+}
+
+function processFieldValues({ object, selectedFields, currentContent }) {
+  const { normalizeBlock } = useBlocks();
+  const { normalizeLayout } = useLayouts();
+
+  const processedContent = {};
+
+  for (const field of selectedFields) {
+    const fieldValue = object[field.name];
+    if (fieldValue == null) continue;
+
+    const currentFieldContent = currentContent[field.name];
+
+    // Handle layouts and blocks field normalization
+    if (field.type === "layout" || field.type === "blocks") {
+      if (Array.isArray(fieldValue)) {
+        processedContent[field.name] = [
+          ...currentFieldContent,
+          ...fieldValue.map(
+            field.type === "layout" ? normalizeLayout : normalizeBlock,
+          ),
+        ];
+      }
+    } else {
+      processedContent[field.name] = fieldValue;
+    }
+  }
+
+  return processedContent;
 }
 </script>
 

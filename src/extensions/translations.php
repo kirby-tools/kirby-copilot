@@ -15,14 +15,14 @@ return [
         'johannschopplich.copilot.context.model.unsupported' => 'The file type is not supported as context.',
         'johannschopplich.copilot.prompt.label' => 'Prompt',
         'johannschopplich.copilot.prompt.empty' => 'Empty prompt',
-        'johannschopplich.copilot.prompt.placeholder' => 'Enter prompt here',
-        'johannschopplich.copilot.prompt.dialogPlaceholder' => 'Ask anything…',
-        'johannschopplich.copilot.prompt.dialogContextPlaceholder' => 'Ask anything… (Selected text will be used as context)',
+        'johannschopplich.copilot.prompt.placeholder' => 'What would you like to generate?',
+        'johannschopplich.copilot.prompt.selectionContext' => 'Selected text will be used as context.',
         'johannschopplich.copilot.files.select' => 'Select files',
         'johannschopplich.copilot.images.select' => 'Select images',
         'johannschopplich.copilot.reset' => 'Reset',
         'johannschopplich.copilot.generator.success' => 'Content generated',
-        'johannschopplich.copilot.generator.error' => 'Could not generate text. Please check console logs.'
+        'johannschopplich.copilot.generator.error' => 'Could not generate text. Please check console logs.',
+        'johannschopplich.copilot.generator.noFields' => 'No fields available for generation'
     ],
     'de' => [
         'johannschopplich.copilot.label' => 'Copilot',
@@ -38,14 +38,14 @@ return [
         'johannschopplich.copilot.context.model.unsupported' => 'Der Dateityp wird als Kontext nicht unterstützt.',
         'johannschopplich.copilot.prompt.label' => 'Prompt',
         'johannschopplich.copilot.prompt.empty' => 'Leere Prompt',
-        'johannschopplich.copilot.prompt.placeholder' => 'Prompt hier eingeben',
-        'johannschopplich.copilot.prompt.dialogPlaceholder' => 'Frage etwas…',
-        'johannschopplich.copilot.prompt.dialogContextPlaceholder' => 'Frage etwas… (Ausgewählter Text wird als Kontext verwendet)',
+        'johannschopplich.copilot.prompt.placeholder' => 'Was möchtest du generieren lassen?',
+        'johannschopplich.copilot.prompt.selectionContext' => 'Ausgewählter Text wird als Kontext verwendet.',
         'johannschopplich.copilot.files.select' => 'Dateien auswählen',
         'johannschopplich.copilot.images.select' => 'Bilder auswählen',
         'johannschopplich.copilot.reset' => 'Zurücksetzen',
         'johannschopplich.copilot.generator.success' => 'Content generiert',
-        'johannschopplich.copilot.generator.error' => 'Text konnte nicht generiert werden. Bitte Konsolenprotokolle prüfen.'
+        'johannschopplich.copilot.generator.error' => 'Text konnte nicht generiert werden. Bitte Konsolenprotokolle prüfen.',
+        'johannschopplich.copilot.generator.noFields' => 'Keine Felder für die Generierung verfügbar'
     ],
     'fr' => [
         'johannschopplich.copilot.label' => 'Copilot',
@@ -61,14 +61,14 @@ return [
         'johannschopplich.copilot.context.model.unsupported' => 'Le type de fichier n\'est pas pris en charge comme contexte.',
         'johannschopplich.copilot.prompt.label' => 'Requête',
         'johannschopplich.copilot.prompt.empty' => 'Requête vide',
-        'johannschopplich.copilot.prompt.placeholder' => 'Entrez la requête ici',
-        'johannschopplich.copilot.prompt.dialogPlaceholder' => 'Posez une question…',
-        'johannschopplich.copilot.prompt.dialogContextPlaceholder' => 'Posez une question… (Le texte sélectionné sera utilisé comme contexte)',
+        'johannschopplich.copilot.prompt.placeholder' => 'Que souhaitez-vous générer ?',
+        'johannschopplich.copilot.prompt.selectionContext' => 'Le texte sélectionné sera utilisé comme contexte.',
         'johannschopplich.copilot.files.select' => 'Sélectionner des fichiers',
         'johannschopplich.copilot.images.select' => 'Sélectionner des images',
         'johannschopplich.copilot.reset' => 'Réinitialiser',
         'johannschopplich.copilot.generator.success' => 'Contenu généré',
-        'johannschopplich.copilot.generator.error' => 'Impossible de générer le texte. Veuillez vérifier les journaux de la console.'
+        'johannschopplich.copilot.generator.error' => 'Impossible de générer le texte. Veuillez vérifier les journaux de la console.',
+        'johannschopplich.copilot.generator.noFields' => 'Aucun champ disponible pour la génération'
     ],
     'nl' => [
         'johannschopplich.copilot.label' => 'Copilot',
@@ -84,13 +84,13 @@ return [
         'johannschopplich.copilot.context.model.unsupported' => 'Dit bestandstype wordt niet ondersteund als context.',
         'johannschopplich.copilot.prompt.label' => 'Prompt',
         'johannschopplich.copilot.prompt.empty' => 'Lege prompt',
-        'johannschopplich.copilot.prompt.placeholder' => 'Voer hier prompt in',
-        'johannschopplich.copilot.prompt.dialogPlaceholder' => 'Stel een vraag...',
-        'johannschopplich.copilot.prompt.dialogContextPlaceholder' => 'Stel een vraag... (Geselecteerde tekst wordt gebruikt als context)',
+        'johannschopplich.copilot.prompt.placeholder' => 'Wat wil je genereren?',
+        'johannschopplich.copilot.prompt.selectionContext' => 'Geselecteerde tekst wordt gebruikt als context.',
         'johannschopplich.copilot.files.select' => 'Selecteer bestanden',
         'johannschopplich.copilot.images.select' => 'Selecteer afbeeldingen',
         'johannschopplich.copilot.reset' => 'Resetten',
         'johannschopplich.copilot.generator.success' => 'Inhoud gegenereerd',
-        'johannschopplich.copilot.generator.error' => 'Kon geen tekst genereren. Controleer de console logs.'
+        'johannschopplich.copilot.generator.error' => 'Kon geen tekst genereren. Controleer de console logs.',
+        'johannschopplich.copilot.generator.noFields' => 'Geen velden beschikbaar voor generatie'
     ]
 ];
