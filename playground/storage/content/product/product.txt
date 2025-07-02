@@ -1,21 +1,5 @@
-Title: Red Sneaker
+Title: Your Favorite Shoe
 
 ----
 
-Manufacturer: Famous Brand
-
-----
-
-Category: Streetwear
-
-----
-
-Releasedate: 2025-01-01
-
-----
-
-Content01: 
-
-----
-
-Uuid: SbXfnHBMRGF2znS2
+Uuid: VRMQMkcI5QXtOK9f
