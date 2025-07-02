@@ -4,9 +4,8 @@
 
 Kirby Copilot is a plugin for [Kirby CMS](https://getkirby.com) that integrates AI features into your Kirby projects, allowing you to generate structured content and entire page layouts directly from the Panel.
 
-::tip
-Explore the [interactive playground](https://try.kirbycopilot.com) or [install the plugin](https://kirby.tools/docs/copilot/getting-started/installation) to try Kirby Copilot for yourself.
-::
+> [!TIP]
+> Explore the [interactive playground](https://try.kirbycopilot.com) or [install the plugin](https://kirby.tools/docs/copilot/getting-started/installation) to try Kirby Copilot for yourself.
 
 ## Features
 
@@ -29,8 +28,9 @@ To get started, please refer to the [documentation](https://kirby.tools/docs/cop
 Here are some quick links:
 
 - [Installation](https://kirby.tools/docs/copilot/getting-started/installation)
+- [Panel View Button](https://kirby.tools/docs/copilot/usage/view-button)
+- [Blocks & Layouts Generation](https://kirby.tools/docs/copilot/usage/blocks-and-layouts)
 - [Global Configuration](https://kirby.tools/docs/copilot/configuration/global)
-- [Section Configuration](https://kirby.tools/docs/copilot/configuration/section)
 
 ## Support and Questions
 
