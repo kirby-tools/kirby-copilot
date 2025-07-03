@@ -58,7 +58,7 @@ export const FIELD_TYPE_TO_SCHEMA = {
       `"${field.label}" (WYSIWYG), ${
         field.inline === true
           ? "text with inline formatting only (bold, italic, underline, code, links, email, sub, sup). NO wrapping paragraph <p> tags allowed."
-          : "text wrapped in <p> tags (can contain one or multiple paragraphs). Inline formatting (bold, italic, underline, code, links, email, sub, sup) is allowed."
+          : "text wrapped in paragraph <p> tags (can contain one or multiple paragraphs). Inline formatting (bold, italic, underline, code, links, email, sub, sup) is allowed."
       }`,
     ),
   list: (field) =>
@@ -218,22 +218,21 @@ export function fieldToZodSchema(field) {
  * Creates a Zod object schema for fields that contain nested sub-fields (structure, object)
  */
 function createNestedFieldsSchema(field) {
-  // If the field has defined fields, create a proper schema
-  if (typeof field.fields === "object" && field.fields !== null) {
-    const nestedContentSchema = {};
+  if (typeof field.fields !== "object" || field.fields === null) return;
 
-    for (const [fieldName, subField] of Object.entries(field.fields)) {
-      if (subField.disabled || subField.hidden) continue;
-      if (EXCLUDED_FIELD_TYPES.has(subField.type)) continue;
+  const nestedContentSchema = {};
 
-      nestedContentSchema[fieldName] = fieldToZodSchema({
-        ...subField,
-        name: fieldName,
-      });
-    }
+  for (const [fieldName, subField] of Object.entries(field.fields)) {
+    if (subField.disabled || subField.hidden) continue;
+    if (EXCLUDED_FIELD_TYPES.has(subField.type)) continue;
 
-    return z.object(nestedContentSchema);
+    nestedContentSchema[fieldName] = fieldToZodSchema({
+      ...subField,
+      name: fieldName,
+    });
   }
+
+  return z.object(nestedContentSchema);
 }
 
 /**
