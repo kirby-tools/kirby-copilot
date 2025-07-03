@@ -140,9 +140,17 @@ async function pickFiles() {
           <div class="kai-flex kai-gap-2">
             <template v-if="fields.length > 0">
               <k-button
-                icon="box"
                 :text="panel.t('johannschopplich.copilot.fields')"
-                class="kai-underline kai-underline-offset-[var(--link-underline-offset)]"
+                variant="filled"
+                :badge="
+                  selectedFields.length > 0
+                    ? {
+                        theme: 'info',
+                        text: selectedFields.length,
+                      }
+                    : undefined
+                "
+                dropdown
                 @click="picklist.toggle()"
               />
               <k-picklist-dropdown

@@ -1,7 +1,12 @@
 title: Playground
 
-options:
-  preview: https://kirby.tools/copilot
+buttons:
+  copilot: true
+  social:
+    icon: cart
+    text: Buy
+    link: https://kirby.tools/copilot
+    theme: love-icon
 
 tabs:
   gettingStarted:
