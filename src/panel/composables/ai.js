@@ -138,9 +138,9 @@ async function resolveLanguageModel() {
   // eslint-disable-next-line no-undef
   if (__PLAYGROUND__ && !window.location.hostname.includes("localhost")) {
     config = JSON.parse(JSON.stringify(config));
-    const currentContent = useContent().currentContent.value;
+    const { currentContent } = useContent();
 
-    const selectedProvider = currentContent.modelprovider || "openai";
+    const selectedProvider = currentContent.value.modelprovider || "openai";
     config.provider = selectedProvider;
 
     const modelFieldMap = {
@@ -150,7 +150,7 @@ async function resolveLanguageModel() {
     };
 
     const modelField = modelFieldMap[selectedProvider];
-    const selectedModel = currentContent[modelField];
+    const selectedModel = currentContent.value[modelField];
 
     if (selectedModel) {
       config.providers[selectedProvider] ??= {};
