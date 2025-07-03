@@ -1,7 +1,10 @@
 title: Recipe
 
-options:
-  preview: https://kirby.tools/copilot
+buttons:
+  copilot: true
+  preview: true
+  settings: true
+  status: true
 
 columns:
   - width: 2/3

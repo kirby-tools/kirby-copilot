@@ -1,7 +1,10 @@
 title: Landing Page
 
-options:
-  preview: https://kirby.tools/copilot
+buttons:
+  copilot: true
+  preview: true
+  settings: true
+  status: true
 
 tabs:
   content:
