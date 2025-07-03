@@ -10,15 +10,19 @@ export function usePromptHistory() {
   const currentIndex = ref(-1);
 
   function addToHistory(prompt) {
-    if (!prompt) return;
+    if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
+      return;
+    }
+
+    const trimmedPrompt = prompt.trim();
 
     // Remove duplicate if exists
-    const index = history.value.indexOf(prompt);
+    const index = history.value.indexOf(trimmedPrompt);
     if (index !== -1) {
       history.value.splice(index, 1);
     }
 
-    history.value.unshift(prompt);
+    history.value.unshift(trimmedPrompt);
 
     // Limit history size
     if (history.value.length > MAX_HISTORY) {
@@ -30,6 +34,8 @@ export function usePromptHistory() {
   }
 
   function navigateHistory(direction) {
+    if (history.value.length === 0) return;
+
     if (direction === "up") {
       if (currentIndex.value + 1 < history.value.length) {
         currentIndex.value++;
