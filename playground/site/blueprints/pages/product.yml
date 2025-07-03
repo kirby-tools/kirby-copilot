@@ -12,11 +12,6 @@ tabs:
     columns:
       - width: 2/3
         fields:
-          title:
-            label: Product Name
-            type: text
-            help: The main product title
-
           description:
             label: Product Description
             type: textarea
