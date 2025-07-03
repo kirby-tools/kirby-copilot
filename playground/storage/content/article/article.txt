@@ -2,4 +2,40 @@ Title: An Article About the Kirby CMS
 
 ----
 
+Content: [{"content":{"level":"h1","text":"Discover Kirby CMS: The Flexible File-Based Content Management System"},"id":"e2b96ce8-b553-4663-9879-58e28d99e9e6","isHidden":false,"type":"heading"},{"content":{"text":"<p>In a world dominated by complex database-driven content management systems, Kirby stands out. It's a file-based CMS that offers a unique blend of simplicity, flexibility, and performance. Built with PHP, Kirby doesn't require a database, storing all content in plain text files and folders. This approach makes it incredibly fast, secure, and easy to manage, appealing strongly to both developers and designers.</p>"},"id":"ea3ee63e-0f1a-4a02-92b3-02b5f039b3e4","isHidden":false,"type":"text"},{"content":{"level":"h2","text":"For Developers: Power and Flexibility"},"id":"7a79a234-0815-4708-a0c4-66e57356fa4d","isHidden":false,"type":"heading"},{"content":{"text":"<p>Developers love Kirby for its clean architecture and powerful feature set. The file-based nature means setup is as simple as uploading files. Content structure is defined by the folder structure and simple text files (like Markdown or YAML), giving developers complete control without database migrations or complex schema definitions. Templating is done with plain PHP, allowing for maximum flexibility and performance. Custom fields are easy to define and extend, and Kirby's API allows for headless use cases.</p>"},"id":"bd8a3ff5-7c72-41be-8b50-4494b4eab263","isHidden":false,"type":"text"},{"content":{"text":"<ul><li>File-based content storage (Markdown, YAML, etc.)</li><li>No database required</li><li>Flexible PHP templating</li><li>Easy custom field creation</li><li>Powerful plugin system</li><li>Built-in REST API</li><li>Excellent performance and security</li></ul>"},"id":"8bc65ecc-82cb-4889-b600-764a6a217f5a","isHidden":false,"type":"list"},{"content":{"level":"h3","text":"Example: A Simple Template File"},"id":"2a56dbab-e4b7-45f7-a58a-7e6d7da969ec","isHidden":false,"type":"heading"},{"content":{"code":"<?php\\n// templates/default.php\\n\\n// Get the current page object\\n$page = $kirby->page();\\n\\n?>\\n\\n<!DOCTYPE html>\\n<html>\\n<head>\\n    <title><?= $page->title() ?> | My Site</title>\\n</head>\\n<body>\\n    <h1><?= $page->title() ?></h1>\\n    <div class=\"content\">\\n        <?= $page->text()->kt() // Render text field with KirbyText ?>\\n    </div>\\n</body>\\n</html>","language":"php"},"id":"b724fccd-fb30-4cbc-bdf0-4c530526560f","isHidden":false,"type":"code"},{"content":{"level":"h2","text":"For Designers: Creative Freedom and Ease of Use"},"id":"bea2e0ba-36bd-460a-92fb-84e80150b6af","isHidden":false,"type":"heading"},{"content":{"text":"<p>Designers appreciate Kirby's intuitive and clean admin panel. The panel provides a streamlined interface for content editors, making it easy to manage pages, files, and users. Unlike many CMSs, Kirby doesn't impose rigid content types, allowing designers and developers to create exactly the content structure needed for a project. The built-in Blocks field provides a visual drag-and-drop editor for rich content layouts, giving editors control over page design within predefined structures. Media management is straightforward, handling images, documents, and other files with ease.</p>"},"id":"c2c7b75f-3f27-45d1-b7c6-ddb50546a8e2","isHidden":false,"type":"text"},{"content":{"text":"<ul><li>Clean and intuitive administration panel</li><li>Flexible content structure tailored to the project</li><li>Visual Block editor for rich layouts</li><li>Simple and effective media management</li><li>User roles and permissions</li><li>Customizable panel interface</li></ul>"},"id":"8b3ad54e-7cbf-4f3f-bfe0-032c8c1bf99d","isHidden":false,"type":"list"},{"content":{"level":"h3","text":"Visual Content Editing with Blocks"},"id":"a3d931b0-f297-4bf7-98d0-5362547064b0","isHidden":false,"type":"heading"},{"content":{"location":"web","image":[],"src":"https://getkirby.com/assets/images/features/editor/blocks-in-action.gif","alt":"Screenshot of Kirby Blocks editor","caption":"The visual Blocks editor makes creating rich content easy for editors.","link":"","ratio":"16/9","crop":"false"},"id":"21c533a2-2e7e-4e1d-85fd-7328b7a61951","isHidden":false,"type":"image"},{"content":{"level":"h2","text":"Conclusion"},"id":"3eed87fc-b706-43bd-b597-962b51ab07d3","isHidden":false,"type":"heading"},{"content":{"text":"<p>Kirby CMS offers a refreshing alternative to traditional database-driven systems. Its file-based approach provides unparalleled flexibility for developers and a clean, intuitive editing experience for designers and content creators. Whether you're building a small portfolio site, a complex corporate website, or a headless application, Kirby provides the tools you need without unnecessary bloat or complexity. It's a CMS that truly puts creators in control.</p>"},"id":"fc56a612-a2be-4d9a-8064-a8cd0bc502ec","isHidden":false,"type":"text"},{"content":{"text":"Kirby is a content management system that adapts to your projects. Not the other way around.","citation":"Bastian Allgeier, Creator of Kirby"},"id":"8eeaaf87-5354-4742-bf1a-cae7321eaea4","isHidden":false,"type":"quote"}]
+
+----
+
+Metadescription: 
+
+----
+
+Author: 
+
+----
+
+Publishdate: 
+
+----
+
+Excerpt: 
+
+----
+
+Category: 
+
+----
+
+Tags: 
+
+----
+
+Featured: false
+
+----
+
+Seo: 
+
+----
+
 Uuid: uWApUYouc9VtOppX

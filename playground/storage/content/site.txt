@@ -14,7 +14,7 @@ Openaimodel: o4-mini
 
 ----
 
-Googlemodel: gemini-2.5-flash-preview-04-17
+Googlemodel: gemini-2.5-flash
 
 ----
 

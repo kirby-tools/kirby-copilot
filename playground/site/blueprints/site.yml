@@ -66,8 +66,8 @@ tabs:
             when:
               modelProvider: google
             options:
-              gemini-2.5-flash-preview-04-17: Gemini 2.5 Flash (recommended)
-              gemini-2.5-pro-preview-06-05: Gemini 2.5 Pro
+              gemini-2.5-flash: Gemini 2.5 Flash (recommended)
+              gemini-2.5-pro: Gemini 2.5 Pro
             help: Gemini 2.5 Flash excels at structured content generation. Our overall recommendation!
 
           anthropicModel:
