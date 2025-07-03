@@ -96,7 +96,7 @@ async function pickFiles() {
     @cancel="emit('cancel')"
   >
     <div
-      class="kai-relative kai-rounded-[var(--rounded)] kai-pb-[calc(1rem+32px)] focus-within:kai-outline focus-within:kai-outline-[2px] focus-within:kai-outline-[var(--color-focus,currentColor)]"
+      class="kai-relative kai-rounded-[var(--rounded)] focus-within:kai-outline focus-within:kai-outline-[2px] focus-within:kai-outline-[var(--color-focus,currentColor)]"
     >
       <AutoGrowTextarea
         :value="prompt"
@@ -107,96 +107,97 @@ async function pickFiles() {
             ? ` (${panel.t('johannschopplich.copilot.prompt.selectionContext')})`
             : '')
         "
+        rows="3"
         @input="prompt = $event"
         @mounted="textarea = $event"
       />
 
-      <div class="kai-absolute kai-inset-x-px kai-bottom-px kai-p-2">
-        <div class="kai-flex kai-items-center kai-justify-between">
-          <k-button-group class="kai-gap-1">
+      <div
+        class="kai-flex kai-items-center kai-justify-between kai-px-2 kai-pb-2"
+      >
+        <k-button-group class="kai-gap-1">
+          <k-button
+            theme="empty"
+            icon="attachment"
+            :badge="
+              _isKirby5 && files.length > 0
+                ? {
+                    theme: 'notice',
+                    text: files.length,
+                  }
+                : undefined
+            "
+            class="!kai-rounded-[var(--button-rounded)]"
+            @click="pickFiles()"
+          />
+          <k-button
+            v-if="files.length > 0"
+            :text="panel.t('johannschopplich.copilot.delete')"
+            variant="dimmed"
+            size="sm"
+            @click="files = []"
+          />
+        </k-button-group>
+
+        <div class="kai-flex kai-gap-2">
+          <template v-if="fields.length > 0">
             <k-button
-              theme="empty"
-              icon="attachment"
+              :text="panel.t('johannschopplich.copilot.fields')"
+              variant="filled"
               :badge="
-                _isKirby5 && files.length > 0
+                selectedFields.length > 0
                   ? {
-                      theme: 'notice',
-                      text: files.length,
+                      theme: 'info',
+                      text: selectedFields.length,
                     }
                   : undefined
               "
-              class="!kai-rounded-[var(--button-rounded)]"
-              @click="pickFiles()"
+              dropdown
+              @click="picklist.toggle()"
             />
-            <k-button
-              v-if="files.length > 0"
-              :text="panel.t('johannschopplich.copilot.delete')"
-              variant="dimmed"
-              size="sm"
-              @click="files = []"
-            />
-          </k-button-group>
-
-          <div class="kai-flex kai-gap-2">
-            <template v-if="fields.length > 0">
-              <k-button
-                :text="panel.t('johannschopplich.copilot.fields')"
-                variant="filled"
-                :badge="
-                  selectedFields.length > 0
-                    ? {
-                        theme: 'info',
-                        text: selectedFields.length,
-                      }
-                    : undefined
-                "
-                dropdown
-                @click="picklist.toggle()"
-              />
-              <k-picklist-dropdown
-                ref="picklist"
-                :options="
-                  fields.map((field) => ({
-                    value: field.name,
-                    text: field.label || field.name,
-                  }))
-                "
-                :empty="false"
-                :value="selectedFields"
-                @input="selectedFields = $event"
-              />
-            </template>
-            <k-select-input
-              v-else-if="selection"
-              class="kai-underline kai-underline-offset-[var(--link-underline-offset)]"
-              :options="[
-                {
-                  value: 'append',
-                  text: panel.t('johannschopplich.copilot.append'),
-                },
-                {
-                  value: 'replace',
-                  text: panel.t('johannschopplich.copilot.replace'),
-                },
-              ]"
-              :empty="false"
-              :value="insertOption"
-              @input="insertOption = $event"
-            />
-
-            <k-button
-              theme="notice-icon"
-              variant="filled"
-              icon="sparkling"
-              :disabled="
-                !prompt.trim() ||
-                (fields.length > 0 && selectedFields.length === 0)
+            <k-picklist-dropdown
+              ref="picklist"
+              :options="
+                fields.map((field) => ({
+                  value: field.name,
+                  text: field.label || field.name,
+                }))
               "
-              @click="submit()"
-            >
-              {{ panel.t("johannschopplich.copilot.generate") }}
-            </k-button>
-          </div>
+              :empty="false"
+              :value="selectedFields"
+              @input="selectedFields = $event"
+            />
+          </template>
+          <k-select-input
+            v-else-if="selection"
+            class="kai-underline kai-underline-offset-[var(--link-underline-offset)]"
+            :options="[
+              {
+                value: 'append',
+                text: panel.t('johannschopplich.copilot.append'),
+              },
+              {
+                value: 'replace',
+                text: panel.t('johannschopplich.copilot.replace'),
+              },
+            ]"
+            :empty="false"
+            :value="insertOption"
+            @input="insertOption = $event"
+          />
+
+          <k-button
+            theme="notice-icon"
+            variant="filled"
+            icon="sparkling"
+            :disabled="
+              !prompt.trim() ||
+              (fields.length > 0 && selectedFields.length === 0)
+            "
+            @click="submit()"
+          >
+            {{ panel.t("johannschopplich.copilot.generate") }}
+          </k-button>
         </div>
       </div>
 
