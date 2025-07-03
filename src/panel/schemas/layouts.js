@@ -8,14 +8,14 @@ function extractLayoutWidths(layouts) {
   const widths = new Set();
 
   for (const layout of layouts) {
-    if (typeof layout === "string") {
-      // Split by comma and trim each width
-      const layoutWidths = layout.split(",").map((width) => width.trim());
-      for (const width of layoutWidths) widths.add(width);
+    for (const width of layout) {
+      if (typeof width === "string" && width.trim()) {
+        widths.add(width);
+      }
     }
   }
 
-  return Array.from(widths);
+  return [...widths];
 }
 
 /**
@@ -58,7 +58,7 @@ export function generateKirbyLayoutsSchema(fieldsets, fieldConfig = {}) {
     throw new Error("No fieldsets available for layout schema generation");
   }
 
-  const layouts = fieldConfig.layouts || ["1/1"];
+  const layouts = fieldConfig.layouts ?? [["1/1"]];
   const layoutWidths = extractLayoutWidths(layouts);
   const layoutSchema = generateLayoutSchema(fieldsets, layoutWidths);
 
