@@ -5,7 +5,7 @@ buttons:
   social:
     icon: cart
     text: Buy
-    link: https://kirby.tools/copilot
+    link: https://kirby.tools/copilot/buy
     theme: love-icon
 
 tabs:
