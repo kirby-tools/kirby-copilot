@@ -30,6 +30,8 @@ class ComposerStaticInitdc61905a5ed24fb97424a62721b3672b
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'JohannSchopplich\\Licensing\\Http\\HttpClientInterface' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-licensing/src/Http/HttpClientInterface.php',
+        'JohannSchopplich\\Licensing\\Http\\KirbyHttpClient' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-licensing/src/Http/KirbyHttpClient.php',
         'JohannSchopplich\\Licensing\\Licenses' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-licensing/src/Licenses.php',
         'JohannSchopplich\\Licensing\\PluginLicense' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-licensing/src/PluginLicense.php',
         'Kirby\\ComposerInstaller\\CmsInstaller' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/CmsInstaller.php',
