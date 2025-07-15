@@ -23,7 +23,8 @@ return [
                             'model' => 'o4-mini'
                         ]
                     ],
-                    'temperature' => 0.5
+                    'temperature' => 0.5,
+                    'excludedBlocks' => []
                 ];
 
                 // Merge user configuration with defaults
