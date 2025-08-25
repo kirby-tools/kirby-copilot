@@ -8,7 +8,7 @@ fi
 git pull origin main
 
 # Install Composer dependencies
-composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+composer install --no-interaction --prefer-dist --optimize-autoloader
 
 {RELOAD_PHP_FPM}
 
