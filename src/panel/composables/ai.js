@@ -8,6 +8,12 @@ import { createContentContext } from "./content";
 import { useLogger } from "./logger";
 import { usePluginContext } from "./plugin";
 
+const PROVIDER_MODEL_MAP = {
+  openai: "openaimodel",
+  google: "googlemodel",
+  anthropic: "anthropicmodel",
+};
+
 export async function useStreamText({
   userPrompt,
   systemPrompt,
@@ -143,13 +149,7 @@ async function resolveLanguageModel() {
     const selectedProvider = currentContent.value.modelprovider || "openai";
     config.provider = selectedProvider;
 
-    const modelFieldMap = {
-      openai: "openaimodel",
-      google: "googlemodel",
-      anthropic: "anthropicmodel",
-    };
-
-    const modelField = modelFieldMap[selectedProvider];
+    const modelField = PROVIDER_MODEL_MAP[selectedProvider];
     const selectedModel = currentContent.value[modelField];
 
     if (selectedModel) {
@@ -200,6 +200,11 @@ async function resolveLanguageModel() {
       __PLAYGROUND__ && !window.location.hostname.includes("localhost")
         ? sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`)
         : providerConfig.apiKey,
+    ...(provider === "anthropic"
+      ? {
+          headers: { "anthropic-dangerous-direct-browser-access": "true" },
+        }
+      : undefined),
   });
 
   return api.languageModel(providerConfig.model);
