@@ -164,11 +164,14 @@ async function resolveLanguageModel() {
     );
   }
 
-  for (const field of ["apiKey", "model"]) {
-    if (!config.providers?.[config.provider]?.[field]) {
-      throw new CopilotError(
-        `Missing "${field}" property in the "johannschopplich.copilot.providers.${config.provider}" global configuration.`,
-      );
+  // eslint-disable-next-line no-undef
+  if (!__PLAYGROUND__) {
+    for (const field of ["apiKey", "model"]) {
+      if (!config.providers?.[config.provider]?.[field]) {
+        throw new CopilotError(
+          `Missing "${field}" property in the "johannschopplich.copilot.providers.${config.provider}" global configuration.`,
+        );
+      }
     }
   }
 
