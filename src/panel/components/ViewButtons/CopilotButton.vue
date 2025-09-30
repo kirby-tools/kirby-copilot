@@ -10,12 +10,37 @@ import {
 } from "../../composables";
 import { openPromptDialog } from "../../config/shared";
 import {
+  DEFAULT_LOG_LEVEL,
+  LOG_LEVELS,
   PLUGIN_MODEL_FIELDS_API_ROUTE,
   STORAGE_KEY_PREFIX,
   SYSTEM_PROMPT,
 } from "../../constants";
 import { EXCLUDED_FIELD_TYPES, fieldToZodSchema } from "../../schemas/fields";
 import { CopilotError } from "../../utils/error";
+
+const props = defineProps({
+  label: {
+    type: String,
+    required: false,
+  },
+  userPrompt: {
+    type: String,
+    required: false,
+  },
+  systemPrompt: {
+    type: String,
+    required: false,
+  },
+  logLevel: {
+    type: String,
+    default: "",
+  },
+  theme: {
+    type: String,
+    default: "notice-icon",
+  },
+});
 
 const panel = usePanel();
 const { currentContent, update: updateContent } = useContent();
@@ -64,7 +89,10 @@ async function initPromptDialog() {
     return;
   }
 
-  const promptContext = await openPromptDialog({ fields });
+  const promptContext = await openPromptDialog({
+    fields,
+    userPrompt: props.userPrompt,
+  });
   if (!promptContext) return;
 
   const { prompt, files, fields: selectedFieldNames } = promptContext;
@@ -98,13 +126,23 @@ async function initPromptDialog() {
   const { config } = await usePluginContext();
   const { AISDKError, APICallError } = await loadPluginModule("ai");
 
+  const systemPrompt =
+    props.systemPrompt || config.systemPrompt || SYSTEM_PROMPT;
+
   try {
     const { partialObjectStream, object: finalObject } = await useStreamObject({
       userPrompt: prompt,
-      systemPrompt: config.systemPrompt || SYSTEM_PROMPT,
+      systemPrompt,
       schema: z.object(fieldsSchema),
       output: "object",
       files,
+      logLevel: LOG_LEVELS.indexOf(
+        props.logLevel && LOG_LEVELS.includes(props.logLevel)
+          ? props.logLevel
+          : config.logLevel && LOG_LEVELS.includes(config.logLevel)
+            ? config.logLevel
+            : DEFAULT_LOG_LEVEL,
+      ),
       abortSignal: abortController.signal,
     });
 
@@ -221,8 +259,8 @@ function processFieldValues({ object, selectedFields, currentContent }) {
           ? 'loader'
           : 'sparkling'
     "
-    :text="panel.t('johannschopplich.copilot.label')"
-    :theme="isHovering && isGenerating ? 'notice' : 'notice-icon'"
+    :text="label || panel.t('johannschopplich.copilot.label')"
+    :theme="isHovering && isGenerating ? 'notice' : theme"
     variant="filled"
     size="sm"
     responsive

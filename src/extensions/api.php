@@ -23,6 +23,7 @@ return [
                             'model' => 'o4-mini'
                         ]
                     ],
+                    'logLevel' => 'warn',
                     'temperature' => 0.5,
                     'excludedBlocks' => []
                 ];

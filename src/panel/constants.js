@@ -10,7 +10,9 @@ export const SUPPORTED_IMAGE_MIME_TYPES = [
   "image/webp",
   "image/gif",
 ];
+
 export const LOG_LEVELS = ["error", "warn", "info", "debug"];
+export const DEFAULT_LOG_LEVEL = "warn";
 export const STORAGE_KEY_PREFIX = "kirby$copilot$";
 
 /// keep-sorted

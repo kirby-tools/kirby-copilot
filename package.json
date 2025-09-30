@@ -16,14 +16,14 @@
     "release": "pnpm run build && pnpm run build:assets && bumpp --all --execute \"npx zx scripts/pre-release.mjs\" && zx scripts/post-release.mjs"
   },
   "devDependencies": {
-    "@ai-sdk/anthropic": "^2.0.17",
-    "@ai-sdk/google": "^2.0.15",
-    "@ai-sdk/mistral": "^2.0.15",
-    "@ai-sdk/openai": "^2.0.32",
-    "@ai-sdk/provider-utils": "^3.0.9",
+    "@ai-sdk/anthropic": "^2.0.22",
+    "@ai-sdk/google": "^2.0.17",
+    "@ai-sdk/mistral": "^2.0.17",
+    "@ai-sdk/openai": "^2.0.42",
+    "@ai-sdk/provider-utils": "^3.0.10",
     "@antfu/eslint-config": "^5.4.1",
     "@kirby-tools/licensing": "^0.5.2",
-    "ai": "^5.0.49",
+    "ai": "^5.0.59",
     "autoprefixer": "^10.4.21",
     "bumpp": "^10.2.3",
     "eslint": "^9.36.0",
@@ -37,7 +37,7 @@
     "vite": "~6.3.6",
     "vitest": "^3.2.4",
     "zod": "^4.1.11",
-    "zx": "^8.8.3"
+    "zx": "^8.8.4"
   },
   "pnpm": {
     "overrides": {

@@ -9,12 +9,16 @@ import {
 } from "../../composables";
 import AutoGrowTextarea from "../Ui/AutoGrowTextarea.vue";
 
-defineProps({
+const props = defineProps({
   fields: {
     type: Array,
     default: () => [],
   },
   selection: {
+    type: String,
+    default: "",
+  },
+  userPrompt: {
     type: String,
     default: "",
   },
@@ -32,7 +36,7 @@ const picklist = ref();
 const files = ref([]);
 const selectedFields = ref([]);
 const insertOption = ref("append");
-const prompt = ref("");
+const prompt = ref(props.userPrompt || "");
 const licenseStatus = ref();
 
 useEventListener(textarea, "keydown", (event) => {

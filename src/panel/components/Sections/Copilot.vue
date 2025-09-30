@@ -24,6 +24,7 @@ import {
   useStreamText,
 } from "../../composables";
 import {
+  DEFAULT_LOG_LEVEL,
   FIELD_TYPE_RESPONSE_FORMAT,
   LOG_LEVELS,
   STORAGE_KEY_PREFIX,
@@ -128,7 +129,11 @@ watch(isDetailsOpen, (value) => {
   theme.value = response.theme || "notice-icon";
   size.value = response.size || "md";
   logLevel.value = LOG_LEVELS.indexOf(
-    context.config.logLevel ?? response.logLevel,
+    response.logLevel && LOG_LEVELS.includes(response.logLevel)
+      ? response.logLevel
+      : context.config.logLevel && LOG_LEVELS.includes(context.config.logLevel)
+        ? context.config.logLevel
+        : DEFAULT_LOG_LEVEL,
   );
   help.value = response.help ? t(response.help) : undefined;
   config.value = context.config;

@@ -15,7 +15,7 @@ return [
             'files' => fn ($files = null) => $files ?? true,
             'theme' => fn ($theme = null) => is_string($theme) ? $theme : null,
             'size' => fn ($size = null) => is_string($size) ? $size : null,
-            'logLevel' => fn ($logLevel = null) => in_array($logLevel, ['error', 'warn', 'info', 'debug'], true) ? $logLevel : 'warn',
+            'logLevel' => fn ($logLevel = null) => in_array($logLevel, ['error', 'warn', 'info', 'debug'], true) ? $logLevel : null,
             'open' => fn ($open = false) => $open !== false,
             'help' => fn ($help = null) => I18n::translate($help, $help)
         ],

@@ -1,7 +1,9 @@
 title: Article
 
 buttons:
-  copilot: true
+  copilot:
+    userPrompt: Write a detailed article about the impact of artificial intelligence on modern society.
+    theme: blue-icon
   preview: true
   settings: true
   status: true
