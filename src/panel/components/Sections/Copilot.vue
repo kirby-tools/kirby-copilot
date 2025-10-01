@@ -25,12 +25,12 @@ import {
 } from "../../composables";
 import {
   DEFAULT_LOG_LEVEL,
+  DEFAULT_SYSTEM_PROMPT,
   FIELD_TYPE_RESPONSE_FORMAT,
   LOG_LEVELS,
   STORAGE_KEY_PREFIX,
   SUPPORTED_IMAGE_MIME_TYPES,
   SUPPORTED_PROVIDERS,
-  SYSTEM_PROMPT,
 } from "../../constants";
 import { CopilotError } from "../../utils/error";
 import { getHashedStorageKey } from "../../utils/storage";
@@ -122,7 +122,9 @@ watch(isDetailsOpen, (value) => {
   field.value = response.field ?? undefined;
   userPrompt.value = response.userPrompt ?? undefined;
   systemPrompt.value =
-    response.systemPrompt || context.config.systemPrompt || SYSTEM_PROMPT;
+    response.systemPrompt ||
+    context.config.systemPrompt ||
+    DEFAULT_SYSTEM_PROMPT;
   storage.value = response.storage;
   if (response.editable === true) permissions.value.push("edit");
   if (response.files === true) permissions.value.push("files");

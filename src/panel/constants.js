@@ -4,11 +4,12 @@ export const PLUGIN_FIELDSETS_API_ROUTE = "__copilot__/fieldsets";
 
 /// keep-sorted
 export const SUPPORTED_PROVIDERS = ["anthropic", "google", "mistral", "openai"];
+/// keep-sorted
 export const SUPPORTED_IMAGE_MIME_TYPES = [
-  "image/png",
-  "image/jpeg",
-  "image/webp",
   "image/gif",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
 ];
 
 export const LOG_LEVELS = ["error", "warn", "info", "debug"];
@@ -23,7 +24,7 @@ export const FIELD_TYPE_RESPONSE_FORMAT = {
   writer: "HTML",
 };
 
-export const SYSTEM_PROMPT = `
+export const DEFAULT_SYSTEM_PROMPT = `
 You are an AI assistant integrated into the Kirby CMS Panel. Your primary task is to help users generate content for various field types within the CMS. You must provide relevant and helpful content based on the user's question and the specified field type, while considering any provided context.
 
 Consider the user context if provided:

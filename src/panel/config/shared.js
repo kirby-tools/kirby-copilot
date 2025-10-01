@@ -1,7 +1,7 @@
 import { isAbortError } from "@ai-sdk/provider-utils";
 import { loadPluginModule, usePanel } from "kirbyuse";
 import { usePluginContext, useStreamText } from "../composables";
-import { STORAGE_KEY_PREFIX, SYSTEM_PROMPT } from "../constants";
+import { DEFAULT_SYSTEM_PROMPT, STORAGE_KEY_PREFIX } from "../constants";
 import { CopilotError } from "../utils/error";
 
 export async function generateAndInsertText(
@@ -50,7 +50,7 @@ export async function generateAndInsertText(
       ]
         .filter(Boolean)
         .join("\n\n"),
-      systemPrompt: config.systemPrompt || SYSTEM_PROMPT,
+      systemPrompt: config.systemPrompt || DEFAULT_SYSTEM_PROMPT,
       files,
       abortSignal: abortController.signal,
     });

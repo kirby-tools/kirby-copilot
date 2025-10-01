@@ -11,10 +11,10 @@ import {
 import { openPromptDialog } from "../../config/shared";
 import {
   DEFAULT_LOG_LEVEL,
+  DEFAULT_SYSTEM_PROMPT,
   LOG_LEVELS,
   PLUGIN_MODEL_FIELDS_API_ROUTE,
   STORAGE_KEY_PREFIX,
-  SYSTEM_PROMPT,
 } from "../../constants";
 import { EXCLUDED_FIELD_TYPES, fieldToZodSchema } from "../../schemas/fields";
 import { CopilotError } from "../../utils/error";
@@ -127,7 +127,7 @@ async function initPromptDialog() {
   const { AISDKError, APICallError } = await loadPluginModule("ai");
 
   const systemPrompt =
-    props.systemPrompt || config.systemPrompt || SYSTEM_PROMPT;
+    props.systemPrompt || config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
 
   try {
     const { partialObjectStream, object: finalObject } = await useStreamObject({
