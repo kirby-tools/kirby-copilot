@@ -23,7 +23,7 @@ export async function useStreamText({
 }) {
   const logger = useLogger();
   const { config } = await usePluginContext();
-  const languageModel = await resolveLanguageModel();
+  const { model, providerOptions } = await resolveLanguageModel();
 
   if (import.meta.env.DEV) {
     logLevel = 3;
@@ -42,7 +42,8 @@ export async function useStreamText({
   }
 
   return streamText({
-    model: languageModel,
+    model,
+    providerOptions,
     temperature: config.temperature,
     system: systemPrompt || undefined,
     ...(imageByteArrays.length > 0
@@ -86,7 +87,7 @@ export async function useStreamObject({
 }) {
   const logger = useLogger();
   const { config } = await usePluginContext();
-  const languageModel = await resolveLanguageModel();
+  const { model, providerOptions } = await resolveLanguageModel();
 
   if (import.meta.env.DEV) {
     logLevel = 3;
@@ -106,7 +107,8 @@ export async function useStreamObject({
   }
 
   return streamObject({
-    model: languageModel,
+    model,
+    providerOptions,
     temperature: config.temperature,
     schema,
     output,
@@ -207,7 +209,17 @@ async function resolveLanguageModel() {
       : undefined),
   });
 
-  return api.languageModel(providerConfig.model);
+  const model = api.languageModel(providerConfig.model);
+  const providerOptions =
+    typeof providerConfig.options === "object" &&
+    providerConfig.options !== null
+      ? { [provider]: providerConfig.options }
+      : undefined;
+
+  return {
+    model,
+    providerOptions,
+  };
 }
 
 async function resolveAttachments({ userPrompt, files = [] }) {
