@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d573caa6d0b5ff420cce9b63dd54266e",
+    "content-hash": "e831da6ff89f5e260a6b26238056c72c",
     "packages": [
         {
             "name": "getkirby/composer-installer",
@@ -363,16 +363,16 @@
         },
         {
             "name": "getkirby/cms",
-            "version": "5.1.1",
+            "version": "5.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/getkirby/kirby.git",
-                "reference": "fb11f5e3ec422e948fb1a52f16988335bb3489b4"
+                "reference": "0f916becac8a2bc824a72cdb70066ed56b50c0f4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/getkirby/kirby/zipball/fb11f5e3ec422e948fb1a52f16988335bb3489b4",
-                "reference": "fb11f5e3ec422e948fb1a52f16988335bb3489b4",
+                "url": "https://api.github.com/repos/getkirby/kirby/zipball/0f916becac8a2bc824a72cdb70066ed56b50c0f4",
+                "reference": "0f916becac8a2bc824a72cdb70066ed56b50c0f4",
                 "shasum": ""
             },
             "require": {
@@ -464,7 +464,7 @@
                     "type": "custom"
                 }
             ],
-            "time": "2025-09-16T13:06:53+00:00"
+            "time": "2025-09-30T08:56:15+00:00"
         },
         {
             "name": "graham-campbell/result-type",
