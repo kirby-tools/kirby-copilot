@@ -42,6 +42,14 @@ const licenseStatus = ref();
 useEventListener(textarea, "keydown", (event) => {
   // Listen to `Cmd/Ctrl + Enter` to submit the prompt
   if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+    event.preventDefault();
+
+    if (
+      !prompt.value.trim() ||
+      (props.fields.length > 0 && selectedFields.value.length === 0)
+    )
+      return;
+
     submit();
   }
 
