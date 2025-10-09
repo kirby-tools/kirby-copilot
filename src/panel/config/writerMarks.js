@@ -33,7 +33,9 @@ const copilot = {
     let position = cursorPosition;
     const segments = text.split(/(\n\n?|\*{1,3}|`{1,3})/);
 
-    for (const segment of segments) {
+    for (let i = 0; i < segments.length; i++) {
+      const segment = segments[i];
+
       // Skip empty segments from split
       if (!segment || segment.length === 0) {
         continue;
@@ -60,38 +62,34 @@ const copilot = {
         );
         position += 1;
         transactionContext.lastSegment = segment;
-      } else {
-        // Handle markdown syntax markers (bold, italic, code)
+      } else if (segment.length > 0) {
         const isMarkdownSyntax = segment in MARKDOWN_SYNTAX_MAP;
 
-        // Check if we're closing an active mark by looking for the same syntax
-        const isClosingActiveMark =
-          isMarkdownSyntax &&
-          [...transactionContext.activeMarks].some((mark) => {
-            // Find which syntax corresponds to this mark
-            for (const [syntax, markNames] of Object.entries(
-              MARKDOWN_SYNTAX_MAP,
-            )) {
-              if (syntax === segment && markNames.includes(mark.type.name)) {
-                return true;
-              }
-            }
-            return false;
-          });
+        if (isMarkdownSyntax) {
+          const nextSegment = i < segments.length - 1 ? segments[i + 1] : "";
+          const isClosingMark = isClosingActiveMark(
+            segment,
+            transactionContext.activeMarks,
+          );
+          const shouldFormat =
+            isClosingMark || shouldApplyMarkdownFormat(segment, nextSegment);
 
-        if (
-          isMarkdownSyntax &&
-          (!transactionContext.lastSegment.includes(segment) ||
-            isClosingActiveMark)
-        ) {
-          for (const markName of MARKDOWN_SYNTAX_MAP[segment]) {
-            tr = toggleMark(tr, markName, transactionContext, context);
+          // Only process as markdown if:
+          // 1. We're closing an active mark, OR
+          // 2. It should be formatted AND not part of code block context
+          if (
+            shouldFormat &&
+            !transactionContext.lastSegment.includes(segment)
+          ) {
+            for (const markName of MARKDOWN_SYNTAX_MAP[segment]) {
+              tr = toggleMark(tr, markName, transactionContext, context);
+            }
+            transactionContext.lastSegment = segment;
+            continue; // Don't insert the markdown syntax as text
           }
-          transactionContext.lastSegment = segment;
-          continue; // Don't insert the markdown syntax as text
         }
 
-        // Insert regular text
+        // Insert regular text (including list markers like "* " or "- ")
         tr = tr.insertText(segment, position);
         position += segment.length;
         transactionContext.lastSegment = segment;
@@ -129,6 +127,7 @@ const copilot = {
         transactionContext,
         context,
       );
+
       cursorPosition = newPosition;
       view.dispatch(newTr);
     };
@@ -170,24 +169,63 @@ export const writerMarks = {
   copilot,
 };
 
+function isEntireDocumentSelected(state) {
+  const docSize = state.doc.content.size;
+  const { from, to } = state.selection;
+  return from === 0 && to === docSize;
+}
+
 function toggleMark(tr, type, transactionContext, { schema }) {
-  if (
-    [...transactionContext.activeMarks].some((mark) => mark.type.name === type)
-  ) {
-    transactionContext.activeMarks.delete(type);
-    const activeMarks = [...transactionContext.activeMarks].filter(
-      (mark) => mark.type.name !== type,
-    );
-    return tr.setStoredMarks(activeMarks);
+  const markType = schema.marks[type];
+  if (!markType) return tr;
+
+  // Check if this mark type is currently active
+  const activeMark = [...transactionContext.activeMarks].find(
+    (mark) => mark.type.name === type,
+  );
+
+  if (activeMark) {
+    // Deactivate: remove from active marks and clear stored marks
+    transactionContext.activeMarks.delete(activeMark);
+    const remainingMarks = [...transactionContext.activeMarks];
+    return tr.setStoredMarks(remainingMarks);
   } else {
-    const mark = schema.marks[type].create();
+    // Activate: add to active marks
+    const mark = markType.create();
     transactionContext.activeMarks.add(mark);
     return tr.addStoredMark(mark);
   }
 }
 
-function isEntireDocumentSelected(state) {
-  const docSize = state.doc.content.size;
-  const { from, to } = state.selection;
-  return from === 0 && to === docSize;
+function isClosingActiveMark(segment, activeMarks) {
+  return [...activeMarks].some((mark) => {
+    for (const [syntax, markNames] of Object.entries(MARKDOWN_SYNTAX_MAP)) {
+      if (syntax === segment && markNames.includes(mark.type.name)) {
+        return true;
+      }
+    }
+
+    return false;
+  });
+}
+
+function shouldApplyMarkdownFormat(segment, nextSegment) {
+  // Backticks are always code formatting
+  if (segment.startsWith("`")) {
+    return true;
+  }
+
+  // For asterisks: check if followed by space (list marker) or non-space (formatting)
+  if (segment.startsWith("*")) {
+    // If next segment starts with space(s), it's a list marker
+    // Examples: `* item`, `*   item`
+    if (/^\s/.test(nextSegment)) {
+      return false; // Don't process as markdown (treat as literal list marker)
+    }
+    // If next segment is non-empty and starts with non-space, it's formatting
+    // Examples: `*text`, `**text`
+    return nextSegment.length > 0 && /\S/.test(nextSegment);
+  }
+
+  return false;
 }
