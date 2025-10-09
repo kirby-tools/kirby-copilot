@@ -36,6 +36,10 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  icon: {
+    type: String,
+    default: "sparkling",
+  },
   theme: {
     type: String,
     default: "notice-icon",
@@ -253,11 +257,7 @@ function processFieldValues({ object, selectedFields, currentContent }) {
 <template>
   <k-button
     :icon="
-      isHovering && isGenerating
-        ? 'cancel'
-        : isGenerating
-          ? 'loader'
-          : 'sparkling'
+      isHovering && isGenerating ? 'cancel' : isGenerating ? 'loader' : icon
     "
     :text="label || panel.t('johannschopplich.copilot.label')"
     :theme="isHovering && isGenerating ? 'notice' : theme"

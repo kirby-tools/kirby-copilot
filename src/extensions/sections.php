@@ -13,6 +13,7 @@ return [
             'storage' => fn ($storage = true) => $storage !== false,
             'editable' => fn ($editable = true) => $editable,
             'files' => fn ($files = null) => $files ?? true,
+            'icon' => fn ($icon = null) => is_string($icon) ? $icon : 'sparkling',
             'theme' => fn ($theme = null) => is_string($theme) ? $theme : null,
             'size' => fn ($size = null) => is_string($size) ? $size : null,
             'logLevel' => fn ($logLevel = null) => in_array($logLevel, ['error', 'warn', 'info', 'debug'], true) ? $logLevel : null,

@@ -58,6 +58,7 @@ const field = ref();
 const userPrompt = ref();
 const systemPrompt = ref();
 const storage = ref();
+const icon = ref();
 const theme = ref();
 const size = ref();
 const logLevel = ref();
@@ -128,6 +129,7 @@ watch(isDetailsOpen, (value) => {
   storage.value = response.storage;
   if (response.editable === true) permissions.value.push("edit");
   if (response.files === true) permissions.value.push("files");
+  icon.value = response.icon || "sparkling";
   theme.value = response.theme || "notice-icon";
   size.value = response.size || "md";
   logLevel.value = LOG_LEVELS.indexOf(
@@ -422,7 +424,7 @@ function onModelSave() {
     <div v-else class="kai-space-y-4">
       <k-button-group layout="collapsed">
         <k-button
-          :icon="isGenerating ? 'loader' : 'sparkling'"
+          :icon="isGenerating ? 'loader' : icon"
           :text="panel.t('johannschopplich.copilot.generate')"
           :theme="theme"
           variant="filled"
