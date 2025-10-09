@@ -74,9 +74,6 @@ const copilot = {
           const shouldFormat =
             isClosingMark || shouldApplyMarkdownFormat(segment, nextSegment);
 
-          // Only process as markdown if:
-          // 1. We're closing an active mark, OR
-          // 2. It should be formatted AND not part of code block context
           if (
             shouldFormat &&
             !transactionContext.lastSegment.includes(segment)
@@ -89,7 +86,6 @@ const copilot = {
           }
         }
 
-        // Insert regular text (including list markers like "* " or "- ")
         tr = tr.insertText(segment, position);
         position += segment.length;
         transactionContext.lastSegment = segment;
