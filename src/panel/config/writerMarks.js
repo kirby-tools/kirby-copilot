@@ -37,9 +37,7 @@ const copilot = {
       const segment = segments[i];
 
       // Skip empty segments from split
-      if (!segment || segment.length === 0) {
-        continue;
-      }
+      if (!segment) continue;
 
       if (segment === "\n\n") {
         // Insert paragraph break (block-level) or two hard breaks (inline mode)
@@ -51,7 +49,7 @@ const copilot = {
           : context.schema.nodes.paragraph.create();
 
         tr = tr.replaceWith(position, position, nodes);
-        position += this.editor.options.inline ? 2 : 1;
+        position += 2;
         transactionContext.lastSegment = segment;
       } else if (segment === "\n") {
         // Insert single hard break
@@ -72,7 +70,7 @@ const copilot = {
             transactionContext.activeMarks,
           );
           const shouldFormat =
-            isClosingMark || shouldApplyMarkdownFormat(segment, nextSegment);
+            isClosingMark || isFormattingContext(segment, nextSegment);
 
           if (
             shouldFormat &&
@@ -82,7 +80,7 @@ const copilot = {
               tr = toggleMark(tr, markName, transactionContext, context);
             }
             transactionContext.lastSegment = segment;
-            continue; // Don't insert the markdown syntax as text
+            continue;
           }
         }
 
@@ -205,23 +203,14 @@ function isClosingActiveMark(segment, activeMarks) {
   });
 }
 
-function shouldApplyMarkdownFormat(segment, nextSegment) {
-  // Backticks are always code formatting
-  if (segment.startsWith("`")) {
-    return true;
-  }
-
-  // For asterisks: check if followed by space (list marker) or non-space (formatting)
+function isFormattingContext(segment, nextSegment) {
+  // Asterisks are formatting marks only when followed by non-whitespace
+  // Examples: `*text` (italic), `**text` (bold)
+  // Not formatting: `* item` (list), `* ` (standalone)
   if (segment.startsWith("*")) {
-    // If next segment starts with space(s), it's a list marker
-    // Examples: `* item`, `*   item`
-    if (/^\s/.test(nextSegment)) {
-      return false; // Don't process as markdown (treat as literal list marker)
-    }
-    // If next segment is non-empty and starts with non-space, it's formatting
-    // Examples: `*text`, `**text`
     return nextSegment.length > 0 && /\S/.test(nextSegment);
   }
 
-  return false;
+  // All other markdown syntax should be formatted
+  return true;
 }
