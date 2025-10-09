@@ -1,63 +1,242 @@
 title: Recipe
 
 buttons:
-  copilot: true
-  preview: true
+  # copilot:
+  #   userPrompt: Create a delicious and detailed recipe for a seasonal dish with interesting flavors.
+  #   icon: copilot-ai-generate
+  open: true
   settings: true
   status: true
 
-columns:
-  - width: 2/3
-    fields:
-      instructions:
-        type: writer
-        label: Instructions
-        toolbar:
-          inline: false
-        marks:
-          - bold
-          - italic
-          - underline
-          - strike
-          - code
-          - "|"
-          - link
-          - email
-          - "|"
-          - clear
-          - "|"
-          - copilot
-      # instructions:
-      #   type: textarea
-      #   label: Instructions
-      #   size: small
-      #   buttons:
-      #     - headlines
-      #     - "|"
-      #     - bold
-      #     - italic
-      #     - code
-      #     - "|"
-      #     - link
-      #     - email
-      #     - file
-      #     - "|"
-      #     - ul
-      #     - ol
-      #     - "|"
-      #     - copilot
-
-  - width: 1/3
-    fields:
-      metadata:
-        type: group
-        label: Recipe Info
+tabs:
+  content:
+    label: Content
+    columns:
+      - width: 2/3
         fields:
-          servings:
-            type: number
-            label: Servings
-          metaDescription:
-            label: SEO Meta Description
+          instructions:
+            label: Cooking Instructions
+            type: writer
+            toolbar:
+              inline: false
+            marks:
+              - bold
+              - italic
+              - underline
+              - strike
+              - code
+              - "|"
+              - link
+              - email
+              - "|"
+              - clear
+              - "|"
+              - copilot
+            help: Step-by-step cooking instructions with rich formatting
+          # instructions:
+          #   label: Cooking Instructions
+          #   type: textarea
+          #   size: small
+          #   buttons:
+          #     - headlines
+          #     - "|"
+          #     - bold
+          #     - italic
+          #     - code
+          #     - "|"
+          #     - link
+          #     - email
+          #     - file
+          #     - "|"
+          #     - ul
+          #     - ol
+          #     - "|"
+          #     - copilot
+            help: Step-by-step cooking instructions with rich formatting
+
+          ingredients:
+            label: Ingredients
+            type: structure
+            fields:
+              amount:
+                label: Amount
+                type: text
+                width: 1/4
+                help: e.g., 2 cups, 1 tbsp
+              ingredient:
+                label: Ingredient
+                type: text
+                width: 1/2
+                help: The ingredient name
+              notes:
+                label: Notes
+                type: text
+                width: 1/4
+                help: Optional preparation notes
+            help: List all ingredients with measurements
+
+          tips:
+            label: Chef's Tips & Variations
             type: textarea
+            help: Pro tips, substitutions, and creative variations
             buttons:
               - copilot
+
+      - width: 1/3
+        fields:
+          description:
+            label: Recipe Description
+            type: textarea
+            help: A mouth-watering introduction to this recipe
+            buttons:
+              - copilot
+
+          recipeInfo:
+            label: Recipe Details
+            type: group
+            fields:
+              servings:
+                label: Servings
+                type: number
+                default: 4
+                help: Number of servings this recipe yields
+              prepTime:
+                label: Prep Time
+                type: text
+                help: e.g., 15 minutes
+              cookTime:
+                label: Cook Time
+                type: text
+                help: e.g., 30 minutes
+              difficulty:
+                label: Difficulty Level
+                type: select
+                options:
+                  - Easy
+                  - Medium
+                  - Advanced
+                  - Expert
+                default: Medium
+
+          cuisine:
+            label: Cuisine Type
+            type: select
+            options:
+              - Italian
+              - French
+              - Asian
+              - Mediterranean
+              - Mexican
+              - American
+              - Middle Eastern
+              - Indian
+              - Fusion
+            help: Culinary tradition or style
+
+          dietaryInfo:
+            label: Dietary Information
+            type: checkboxes
+            options:
+              vegetarian: Vegetarian
+              vegan: Vegan
+              glutenFree: Gluten-Free
+              dairyFree: Dairy-Free
+              nutFree: Nut-Free
+              lowCarb: Low-Carb
+            help: Applicable dietary categories
+
+          mealType:
+            label: Meal Type
+            type: multiselect
+            options:
+              - Breakfast
+              - Brunch
+              - Lunch
+              - Dinner
+              - Appetizer
+              - Dessert
+              - Snack
+              - Side Dish
+            help: When this dish is typically served
+
+  # nutritionAndPairing:
+  #   label: Nutrition & Pairing
+  #   columns:
+  #     - width: 1/2
+  #       fields:
+  #         nutrition:
+  #           label: Nutritional Information
+  #           type: structure
+  #           fields:
+  #             metric:
+  #               label: Metric
+  #               type: text
+  #               help: e.g., Calories, Protein, Carbs
+  #             value:
+  #               label: Value
+  #               type: text
+  #               help: Amount per serving
+  #           help: Optional nutritional breakdown per serving
+
+  #         allergens:
+  #           label: Common Allergens
+  #           type: tags
+  #           help: List any allergens present in this recipe
+
+  #     - width: 1/2
+  #       fields:
+  #         pairingsSuggestions:
+  #           label: Pairing Suggestions
+  #           type: textarea
+  #           help: Wine, drinks, or side dishes that complement this recipe
+  #           buttons:
+  #             - copilot
+
+  #         seasonality:
+  #           label: Best Season
+  #           type: select
+  #           options:
+  #             - Spring
+  #             - Summer
+  #             - Fall
+  #             - Winter
+  #             - Year-Round
+  #           help: When ingredients are at their peak
+
+  #         equipment:
+  #           label: Required Equipment
+  #           type: list
+  #           help: Special kitchen tools or appliances needed
+
+  # seoAndMarketing:
+  #   label: SEO & Marketing
+  #   fields:
+  #     metaTitle:
+  #       label: Meta Title
+  #       type: text
+  #       help: SEO-optimized title for search engines
+
+  #     metaDescription:
+  #       label: Meta Description
+  #       type: textarea
+  #       maxlength: 160
+  #       help: Compelling description for search results and social sharing
+  #       buttons:
+  #         - copilot
+
+  #     tags:
+  #       label: Recipe Tags
+  #       type: tags
+  #       help: Keywords for search and categorization
+
+  #     featuredRecipe:
+  #       label: Featured Recipe
+  #       type: toggle
+  #       help: Highlight this recipe on your homepage
+
+  #     userStory:
+  #       label: Recipe Story
+  #       type: textarea
+  #       help: Personal anecdote or background story about this recipe
+  #       buttons:
+  #         - copilot

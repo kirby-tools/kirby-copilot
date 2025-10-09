@@ -1,4 +1,4 @@
-Title: 🍞 Bread Recipe
+Title: Whole Wheat Sourdough Bread Recipe
 
 ----
 
@@ -6,11 +6,24 @@ Instructions:
 
 ----
 
-Servings: 6
+Ingredients:
+
+- 
+  amount: ""
+  ingredient: ""
+  notes: ""
 
 ----
 
-Metadescription: 
+Tips: 
+
+----
+
+Description: 
+
+----
+
+Servings: 6
 
 ----
 
@@ -22,11 +35,27 @@ Cooktime:
 
 ----
 
-Intro: 
+Difficulty: 
 
 ----
 
-Ingredients: 
+Cuisine: 
+
+----
+
+Dietaryinfo: 
+
+----
+
+Mealtype: 
+
+----
+
+Metadescription: 
+
+----
+
+Intro: 
 
 ----
 
@@ -39,3 +68,39 @@ Image:
 ----
 
 Uuid: uWApUYouc9VtOppX
+
+----
+
+Nutrition: 
+
+----
+
+Allergens: 
+
+----
+
+Pairingssuggestions: 
+
+----
+
+Seasonality: 
+
+----
+
+Equipment: 
+
+----
+
+Metatitle: 
+
+----
+
+Tags: 
+
+----
+
+Featuredrecipe: false
+
+----
+
+Userstory: 
