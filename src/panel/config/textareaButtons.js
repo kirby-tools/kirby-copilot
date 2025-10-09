@@ -17,7 +17,7 @@ export const copilot = {
       this.command("insert", (input, selection) => {
         if (isFirstInsertion) {
           isFirstInsertion = false;
-          // Concatenating space is handled in generator
+          // Concatenating space is handled by the generator function
           return selection + text;
         }
 

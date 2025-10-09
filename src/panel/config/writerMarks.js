@@ -34,41 +34,64 @@ const copilot = {
     const segments = text.split(/(\n\n?|\*{1,3}|`{1,3})/);
 
     for (const segment of segments) {
+      // Skip empty segments from split
+      if (!segment || segment.length === 0) {
+        continue;
+      }
+
       if (segment === "\n\n") {
-        tr = tr.replaceWith(
-          position,
-          position,
-          this.editor.options.inline
-            ? [
-                context.schema.nodes.hardBreak.create(),
-                context.schema.nodes.hardBreak.create(),
-              ]
-            : context.schema.nodes.paragraph.create(),
-        );
-        position += 2;
+        // Insert paragraph break (block-level) or two hard breaks (inline mode)
+        const nodes = this.editor.options.inline
+          ? [
+              context.schema.nodes.hardBreak.create(),
+              context.schema.nodes.hardBreak.create(),
+            ]
+          : context.schema.nodes.paragraph.create();
+
+        tr = tr.replaceWith(position, position, nodes);
+        position += this.editor.options.inline ? 2 : 1;
+        transactionContext.lastSegment = segment;
       } else if (segment === "\n") {
+        // Insert single hard break
         tr = tr.replaceWith(
           position,
           position,
           context.schema.nodes.hardBreak.create(),
         );
         position += 1;
-      } else if (segment.length > 0) {
+        transactionContext.lastSegment = segment;
+      } else {
+        // Handle markdown syntax markers (bold, italic, code)
+        const isMarkdownSyntax = segment in MARKDOWN_SYNTAX_MAP;
+
+        // Check if we're closing an active mark by looking for the same syntax
+        const isClosingActiveMark =
+          isMarkdownSyntax &&
+          [...transactionContext.activeMarks].some((mark) => {
+            // Find which syntax corresponds to this mark
+            for (const [syntax, markNames] of Object.entries(
+              MARKDOWN_SYNTAX_MAP,
+            )) {
+              if (syntax === segment && markNames.includes(mark.type.name)) {
+                return true;
+              }
+            }
+            return false;
+          });
+
         if (
-          (segment in MARKDOWN_SYNTAX_MAP &&
-            // Simple check to prevent code blocks from being interpreted as code marks
-            !transactionContext.lastSegment.includes(segment)) ||
-          [...transactionContext.activeMarks].some(
-            (mark) => mark.type.name === segment,
-          )
+          isMarkdownSyntax &&
+          (!transactionContext.lastSegment.includes(segment) ||
+            isClosingActiveMark)
         ) {
-          for (const mark of MARKDOWN_SYNTAX_MAP[segment]) {
-            tr = toggleMark(tr, mark, transactionContext, context);
+          for (const markName of MARKDOWN_SYNTAX_MAP[segment]) {
+            tr = toggleMark(tr, markName, transactionContext, context);
           }
           transactionContext.lastSegment = segment;
-          continue;
+          continue; // Don't insert the markdown syntax as text
         }
 
+        // Insert regular text
         tr = tr.insertText(segment, position);
         position += segment.length;
         transactionContext.lastSegment = segment;
@@ -89,10 +112,16 @@ const copilot = {
 
     let cursorPosition;
     let hasDeletedSelection = false;
+    let isFirstInsertion = true;
 
     const appendText = (text) => {
       const { state, view } = this.editor;
-      cursorPosition = state.selection.to;
+
+      if (isFirstInsertion) {
+        cursorPosition = state.selection.to;
+        isFirstInsertion = false;
+      }
+
       const { tr: newTr, newPosition } = this._insertText(
         state.tr,
         text,
