@@ -204,11 +204,12 @@ function isClosingActiveMark(segment, activeMarks) {
 }
 
 function isFormattingContext(segment, nextSegment) {
-  // Asterisks are formatting marks only when followed by non-whitespace
+  // Asterisks are formatting marks only when followed immediately by non-whitespace
   // Examples: `*text` (italic), `**text` (bold)
-  // Not formatting: `* item` (list), `* ` (standalone)
+  // Not formatting: `* item` (list), `*   item` (list with spaces)
   if (segment.startsWith("*")) {
-    return nextSegment.length > 0 && /\S/.test(nextSegment);
+    // Check if next segment starts with non-whitespace (not just contains it)
+    return nextSegment.length > 0 && /^\S/.test(nextSegment);
   }
 
   // All other markdown syntax should be formatted
