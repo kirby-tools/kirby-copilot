@@ -24,7 +24,7 @@ return [
                         ]
                     ],
                     'logLevel' => 'warn',
-                    'temperature' => 0.5,
+                    'temperature' => null,
                     'excludedBlocks' => []
                 ];
 

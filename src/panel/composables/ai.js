@@ -44,7 +44,7 @@ export async function useStreamText({
   return streamText({
     model,
     providerOptions,
-    temperature: config.temperature,
+    temperature: config.temperature ?? undefined,
     system: systemPrompt || undefined,
     ...(imageByteArrays.length > 0
       ? {
@@ -109,7 +109,7 @@ export async function useStreamObject({
   return streamObject({
     model,
     providerOptions,
-    temperature: config.temperature,
+    temperature: config.temperature ?? undefined,
     schema,
     output,
     // system: systemPrompt || undefined,
