@@ -52,7 +52,7 @@ tabs:
           #     - ol
           #     - "|"
           #     - copilot
-            help: Step-by-step cooking instructions with rich formatting
+          #   help: Step-by-step cooking instructions with rich formatting
 
           ingredients:
             label: Ingredients
