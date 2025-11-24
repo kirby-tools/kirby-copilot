@@ -7,22 +7,22 @@ namespace Composer\Autoload;
 class ComposerStaticInit5bff1d0570d206d53d6e6252d07f89e6
 {
     public static $prefixLengthsPsr4 = array (
-        'K' => 
+        'K' =>
         array (
             'Kirby\\' => 6,
         ),
-        'J' => 
+        'J' =>
         array (
             'JohannSchopplich\\Licensing\\' => 27,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Kirby\\' => 
+        'Kirby\\' =>
         array (
             0 => __DIR__ . '/..' . '/getkirby/composer-installer/src',
         ),
-        'JohannSchopplich\\Licensing\\' => 
+        'JohannSchopplich\\Licensing\\' =>
         array (
             0 => __DIR__ . '/..' . '/johannschopplich/kirby-tools-licensing/src',
         ),
