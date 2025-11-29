@@ -4,6 +4,7 @@ import { loadPluginModule, ref, useContent, usePanel } from "kirbyuse";
 import { z } from "zod";
 import {
   useBlocks,
+  useFields,
   useLayouts,
   usePluginContext,
   useStreamObject,
@@ -13,10 +14,9 @@ import {
   DEFAULT_LOG_LEVEL,
   DEFAULT_SYSTEM_PROMPT,
   LOG_LEVELS,
-  PLUGIN_MODEL_FIELDS_API_ROUTE,
   STORAGE_KEY_PREFIX,
 } from "../../constants";
-import { EXCLUDED_FIELD_TYPES, fieldToZodSchema } from "../../schemas/fields";
+import { fieldToZodSchema } from "../../schemas/fields";
 import { CopilotError } from "../../utils/error";
 
 const props = defineProps({
@@ -48,6 +48,7 @@ const props = defineProps({
 
 const panel = usePanel();
 const { currentContent, update: updateContent } = useContent();
+const { getViewFields } = useFields();
 
 const isGenerating = ref(false);
 const isHovering = ref(false);
@@ -73,18 +74,7 @@ async function initPromptDialog() {
     }
   };
 
-  let fields = await panel.api.get(
-    PLUGIN_MODEL_FIELDS_API_ROUTE,
-    { id: panel.view.path },
-    undefined,
-    // Silent
-    true,
-  );
-
-  fields = Object.values(fields).filter(
-    (field) =>
-      !EXCLUDED_FIELD_TYPES.has(field.type) && !field.disabled && !field.hidden,
-  );
+  const fields = await getViewFields();
 
   if (fields.length === 0) {
     panel.notification.error(

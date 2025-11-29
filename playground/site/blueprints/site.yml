@@ -1,7 +1,8 @@
 title: Playground
 
 buttons:
-  copilot: true
+  copilot:
+    userPrompt: Generate a sample site showcasing the blocks features.
   social:
     icon: cart
     text: Buy
@@ -212,6 +213,8 @@ tabs:
               - underline
               - "|"
               - copilot
+            copilot:
+              userPrompt: Write a compelling introduction about the future of web development.
 
       - width: 1/3
         sections:
@@ -239,6 +242,8 @@ tabs:
               - italic
               - "|"
               - copilot
+            copilot:
+              userPrompt: Write a compelling introduction about the future of web development.
 
       - width: 1/3
         sections:

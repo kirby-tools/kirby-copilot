@@ -3,10 +3,12 @@ import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import { isKirby5, ref, usePanel } from "kirbyuse";
 import {
   useEventListener,
+  useFields,
   useFilePicker,
   usePluginContext,
   usePromptHistory,
 } from "../../composables";
+import { flattenFieldDefinitions } from "../../utils/fields";
 import AutoGrowTextarea from "../Ui/AutoGrowTextarea.vue";
 
 const props = defineProps({
@@ -15,6 +17,10 @@ const props = defineProps({
     default: () => [],
   },
   selection: {
+    type: String,
+    default: "",
+  },
+  fieldName: {
     type: String,
     default: "",
   },
@@ -30,6 +36,7 @@ const _isKirby5 = isKirby5();
 const panel = usePanel();
 const { lastPrompt, currentIndex, addToHistory, navigateHistory } =
   usePromptHistory();
+const { getViewFields } = useFields();
 
 const textarea = ref();
 const picklist = ref();
@@ -80,6 +87,15 @@ useEventListener(textarea, "keydown", (event) => {
   licenseStatus.value =
     // eslint-disable-next-line no-undef
     __PLAYGROUND__ ? "active" : context.licenseStatus;
+
+  if (props.fieldName) {
+    const fieldDefinition = await findFieldDefinition(props.fieldName);
+
+    // Use field-specific custom user prompt if configured
+    if (fieldDefinition?.copilot?.userPrompt) {
+      prompt.value = fieldDefinition.copilot.userPrompt;
+    }
+  }
 })();
 
 function submit() {
@@ -90,6 +106,23 @@ function submit() {
     fields: selectedFields.value,
     append: insertOption.value === "append",
   });
+}
+
+async function findFieldDefinition(fieldName) {
+  const modelFields = await getViewFields();
+
+  for (const rootField of modelFields) {
+    // Check if this root field matches
+    if (rootField.name === fieldName) {
+      return rootField;
+    }
+
+    // Check nested fields within blocks/layouts
+    const flattenedFields = flattenFieldDefinitions(rootField);
+    if (flattenedFields[fieldName]) {
+      return flattenedFields[fieldName];
+    }
+  }
 }
 
 async function pickFiles() {

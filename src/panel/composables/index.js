@@ -2,6 +2,7 @@ export * from "./ai";
 export * from "./blocks";
 export * from "./content";
 export * from "./events";
+export * from "./fields";
 export * from "./files";
 export * from "./layouts";
 export * from "./logger";

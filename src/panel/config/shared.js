@@ -9,6 +9,16 @@ export async function generateAndInsertText(
   { appendText, replaceText, responseFormat = "text" },
 ) {
   const panel = usePanel();
+  const fieldName = getCurrentFieldName();
+
+  if (import.meta.env.DEV) {
+    // eslint-disable-next-line no-console
+    console.log("Generating text for field:", {
+      selection,
+      fieldName,
+      responseFormat,
+    });
+  }
 
   // eslint-disable-next-line no-undef
   if (__PLAYGROUND__ && !window.location.hostname.includes("localhost")) {
@@ -29,7 +39,7 @@ export async function generateAndInsertText(
     }
   };
 
-  const promptContext = await openPromptDialog({ selection });
+  const promptContext = await openPromptDialog({ selection, fieldName });
   if (!promptContext) return;
 
   const { prompt, files } = promptContext;
@@ -118,4 +128,18 @@ export async function openPromptDialog(props = {}) {
       },
     });
   });
+}
+
+/**
+ * Extracts the current field name from the active element in the Panel
+ */
+function getCurrentFieldName() {
+  const fieldElement = document.activeElement?.closest(".k-field");
+  if (!fieldElement) return;
+
+  const fieldNameClass = [...fieldElement.classList].find((i) =>
+    i.startsWith("k-field-name-"),
+  );
+
+  return fieldNameClass?.replace("k-field-name-", "");
 }
