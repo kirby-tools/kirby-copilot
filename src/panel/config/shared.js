@@ -9,13 +9,13 @@ export async function generateAndInsertText(
   { appendText, replaceText, responseFormat = "text" },
 ) {
   const panel = usePanel();
-  const fieldName = getCurrentFieldName();
+  const fieldMeta = getFieldMetadata();
 
   if (import.meta.env.DEV) {
     // eslint-disable-next-line no-console
     console.log("Generating text for field:", {
       selection,
-      fieldName,
+      fieldMeta,
       responseFormat,
     });
   }
@@ -39,7 +39,7 @@ export async function generateAndInsertText(
     }
   };
 
-  const promptContext = await openPromptDialog({ selection, fieldName });
+  const promptContext = await openPromptDialog({ selection, fieldMeta });
   if (!promptContext) return;
 
   const { prompt, files } = promptContext;
@@ -131,15 +131,21 @@ export async function openPromptDialog(props = {}) {
 }
 
 /**
- * Extracts the current field name from the active element in the Panel
+ * Extracts the current field name and type from the active element in the Panel
  */
-function getCurrentFieldName() {
+function getFieldMetadata() {
   const fieldElement = document.activeElement?.closest(".k-field");
   if (!fieldElement) return;
 
   const fieldNameClass = [...fieldElement.classList].find((i) =>
     i.startsWith("k-field-name-"),
   );
+  const fieldTypeClass = [...fieldElement.classList].find((i) =>
+    i.startsWith("k-field-type-"),
+  );
 
-  return fieldNameClass?.replace("k-field-name-", "");
+  const name = fieldNameClass?.replace("k-field-name-", "");
+  const type = fieldTypeClass?.replace("k-field-type-", "");
+
+  return name ? { name, type } : undefined;
 }

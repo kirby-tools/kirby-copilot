@@ -8,7 +8,7 @@ import {
   usePluginContext,
   usePromptHistory,
 } from "../../composables";
-import { flattenFieldDefinitions } from "../../utils/fields";
+import { findFieldInDefinitions } from "../../utils/fields";
 import AutoGrowTextarea from "../Ui/AutoGrowTextarea.vue";
 
 const props = defineProps({
@@ -20,13 +20,13 @@ const props = defineProps({
     type: String,
     default: "",
   },
-  fieldName: {
-    type: String,
-    default: "",
-  },
   userPrompt: {
     type: String,
     default: "",
+  },
+  fieldMeta: {
+    type: Object,
+    default: null,
   },
 });
 
@@ -88,8 +88,8 @@ useEventListener(textarea, "keydown", (event) => {
     // eslint-disable-next-line no-undef
     __PLAYGROUND__ ? "active" : context.licenseStatus;
 
-  if (props.fieldName) {
-    const fieldDefinition = await findFieldDefinition(props.fieldName);
+  if (props.fieldMeta) {
+    const fieldDefinition = await findFieldDefinition(props.fieldMeta);
 
     // Use field-specific custom user prompt if configured
     if (fieldDefinition?.copilot?.userPrompt) {
@@ -108,20 +108,27 @@ function submit() {
   });
 }
 
-async function findFieldDefinition(fieldName) {
+async function findFieldDefinition(fieldMeta) {
+  if (!fieldMeta) return;
+
   const modelFields = await getViewFields();
+  const { name: fieldName, type: fieldType } = fieldMeta;
 
   for (const rootField of modelFields) {
     // Check if this root field matches
     if (rootField.name === fieldName) {
-      return rootField;
+      if (!fieldType || rootField.type === fieldType) {
+        return rootField;
+      }
     }
 
-    // Check nested fields within blocks/layouts
-    const flattenedFields = flattenFieldDefinitions(rootField);
-    if (flattenedFields[fieldName]) {
-      return flattenedFields[fieldName];
-    }
+    // Recursively search nested fields
+    const resolvedField = findFieldInDefinitions(
+      rootField,
+      fieldName,
+      fieldType,
+    );
+    if (resolvedField) return resolvedField;
   }
 }
 
