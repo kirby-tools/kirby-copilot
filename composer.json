@@ -2,7 +2,7 @@
   "name": "johannschopplich/kirby-copilot",
   "description": "AI-powered content generation for Kirby CMS",
   "type": "kirby-plugin",
-  "version": "2.8.0",
+  "version": "2.8.1",
   "keywords": [
     "ai",
     "content",
