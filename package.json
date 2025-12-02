@@ -16,23 +16,23 @@
     "release": "pnpm run build && pnpm run build:assets && bumpp --all --execute \"npx zx scripts/pre-release.mjs\" && zx scripts/post-release.mjs"
   },
   "devDependencies": {
-    "@ai-sdk/anthropic": "^2.0.50",
+    "@ai-sdk/anthropic": "^2.0.53",
     "@ai-sdk/google": "^2.0.44",
     "@ai-sdk/mistral": "^2.0.25",
-    "@ai-sdk/openai": "^2.0.74",
+    "@ai-sdk/openai": "^2.0.76",
     "@ai-sdk/provider-utils": "^3.0.18",
     "@antfu/eslint-config": "^6.2.0",
     "@kirby-tools/licensing": "^0.5.2",
-    "ai": "^5.0.104",
+    "ai": "^5.0.106",
     "autoprefixer": "^10.4.22",
     "bumpp": "^10.3.2",
     "eslint": "^9.39.1",
     "kirbyup": "^3.4.1",
     "kirbyuse": "^1.0.0",
     "ohash": "^2.0.11",
-    "pdfjs-dist": "^5.4.394",
-    "prettier": "^3.7.1",
-    "prettier-plugin-tailwindcss": "^0.7.1",
+    "pdfjs-dist": "^5.4.449",
+    "prettier": "^3.7.3",
+    "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^3.4.18",
     "vite": "~6.3.7",
     "vitest": "^4.0.14",
@@ -42,8 +42,7 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@parcel/watcher",
-      "esbuild",
-      "unrs-resolver"
+      "esbuild"
     ]
   }
 }

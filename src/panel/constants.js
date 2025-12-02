@@ -11,6 +11,19 @@ export const SUPPORTED_IMAGE_MIME_TYPES = [
   "image/png",
   "image/webp",
 ];
+/// keep-sorted
+export const SUPPORTED_FILE_MIME_TYPES = [
+  ...SUPPORTED_IMAGE_MIME_TYPES,
+  "application/pdf",
+];
+
+/**
+ * Maximum total size for PDF files in bytes (50 MB)
+ *
+ * @remarks
+ * If exceeded, fall back to text extraction
+ */
+export const PDF_SIZE_LIMIT = 50 * 1024 * 1024;
 
 export const LOG_LEVELS = ["error", "warn", "info", "debug"];
 export const DEFAULT_LOG_LEVEL = "warn";
@@ -29,7 +42,6 @@ You are an AI assistant integrated into the Kirby CMS Panel. Your primary task i
 
 Consider the user context if provided:
 - If selected_text is provided, use it as context for the user's question.
-- If pdf_documents are provided, incorporate the information from these documents into your response as applicable.
 
 Format your response according to the specified response_format if provided:
 1. If response_format is "text", provide your response in plain text without any Markdown or HTML syntax.

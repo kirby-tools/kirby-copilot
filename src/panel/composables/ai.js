@@ -1,5 +1,9 @@
 import { loadPluginModule, useContent } from "kirbyuse";
-import { STORAGE_KEY_PREFIX, SUPPORTED_PROVIDERS } from "../constants";
+import {
+  PDF_SIZE_LIMIT,
+  STORAGE_KEY_PREFIX,
+  SUPPORTED_PROVIDERS,
+} from "../constants";
 import { CopilotError } from "../utils/error";
 import { extractTextFromPdf } from "../utils/pdf";
 import { renderTemplate } from "../utils/template";
@@ -31,22 +35,25 @@ export async function useStreamText({
 
   const { AISDKError, APICallError, streamText, smoothStream } =
     await loadPluginModule("ai");
-  const { userPromptWithContext, imageByteArrays } = await resolveAttachments({
-    userPrompt,
-    files,
-  });
+  const { userPromptWithContext, imageByteArrays, pdfByteArrays } =
+    await resolveAttachments({
+      userPrompt,
+      files,
+    });
 
   if (logLevel > 1) {
     logger.info("System prompt:", systemPrompt);
     logger.info("User prompt with context:", userPromptWithContext);
   }
 
+  const hasFiles = imageByteArrays.length > 0 || pdfByteArrays.length > 0;
+
   return streamText({
     model,
     providerOptions,
     temperature: config.temperature ?? undefined,
     system: systemPrompt || undefined,
-    ...(imageByteArrays.length > 0
+    ...(hasFiles
       ? {
           messages: [
             {
@@ -56,6 +63,11 @@ export async function useStreamText({
                 ...imageByteArrays.map((image) => ({
                   type: "image",
                   image,
+                })),
+                ...pdfByteArrays.map((data) => ({
+                  type: "file",
+                  data,
+                  mediaType: "application/pdf",
                 })),
               ],
             },
@@ -96,15 +108,18 @@ export async function useStreamObject({
   const { AISDKError, APICallError, streamObject } =
     await loadPluginModule("ai");
 
-  const { userPromptWithContext, imageByteArrays } = await resolveAttachments({
-    userPrompt,
-    files,
-  });
+  const { userPromptWithContext, imageByteArrays, pdfByteArrays } =
+    await resolveAttachments({
+      userPrompt,
+      files,
+    });
 
   if (logLevel > 1) {
     logger.info("System prompt:", systemPrompt);
     logger.info("User prompt with context:", userPromptWithContext);
   }
+
+  const hasFiles = imageByteArrays.length > 0 || pdfByteArrays.length > 0;
 
   return streamObject({
     model,
@@ -113,7 +128,7 @@ export async function useStreamObject({
     schema,
     output,
     // system: systemPrompt || undefined,
-    ...(imageByteArrays.length > 0
+    ...(hasFiles
       ? {
           messages: [
             {
@@ -123,6 +138,11 @@ export async function useStreamObject({
                 ...imageByteArrays.map((image) => ({
                   type: "image",
                   image,
+                })),
+                ...pdfByteArrays.map((data) => ({
+                  type: "file",
+                  data,
+                  mediaType: "application/pdf",
                 })),
               ],
             },
@@ -229,7 +249,12 @@ async function resolveAttachments({ userPrompt, files = [] }) {
   const images = files.filter((file) => file.type.startsWith("image/"));
   const pdfs = files.filter((file) => file.type === "application/pdf");
 
-  if (pdfs.length > 0) {
+  // Calculate total PDF size
+  const totalPdfSize = pdfs.reduce((sum, pdf) => sum + pdf.size, 0);
+  const hasNativePdfSupport = totalPdfSize <= PDF_SIZE_LIMIT;
+
+  // If PDFs exceed size limit, fall back to text extraction
+  if (!hasNativePdfSupport && pdfs.length > 0) {
     const pdfTexts = await Promise.all(pdfs.map(extractTextFromPdf));
     userPromptWithContext += `\n\n${pdfTexts
       .map(
@@ -239,6 +264,7 @@ async function resolveAttachments({ userPrompt, files = [] }) {
       .join("\n\n")}`;
   }
 
+  // Convert images to byte arrays
   const imageByteArrays = await Promise.all(
     images.map(async (file) => {
       const reducedBlob = await toReducedBlob(file, 2048);
@@ -247,8 +273,19 @@ async function resolveAttachments({ userPrompt, files = [] }) {
     }),
   );
 
+  // Convert PDFs to byte arrays if under size limit
+  const pdfByteArrays = hasNativePdfSupport
+    ? await Promise.all(
+        pdfs.map(async (file) => {
+          const arrayBuffer = await file.arrayBuffer();
+          return new Uint8Array(arrayBuffer);
+        }),
+      )
+    : [];
+
   return {
     userPromptWithContext,
     imageByteArrays,
+    pdfByteArrays,
   };
 }
