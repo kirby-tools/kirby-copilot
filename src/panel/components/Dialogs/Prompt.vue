@@ -1,6 +1,6 @@
 <script setup>
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
-import { isKirby5, ref, usePanel } from "kirbyuse";
+import { computed, isKirby5, ref, usePanel } from "kirbyuse";
 import {
   useEventListener,
   useFields,
@@ -38,13 +38,16 @@ const { lastPrompt, currentIndex, addToHistory, navigateHistory } =
   usePromptHistory();
 const { getViewFields } = useFields();
 
-const textarea = ref();
+const textareaComponent = ref();
+const textarea = computed(() => textareaComponent.value?.el);
 const picklist = ref();
+const placeholderDropdown = ref();
 const files = ref([]);
 const selectedFields = ref([]);
 const insertOption = ref("append");
 const prompt = ref(props.userPrompt || "");
 const licenseStatus = ref();
+const modelFields = ref([]);
 
 useEventListener(textarea, "keydown", (event) => {
   // Listen to `Cmd/Ctrl + Enter` to submit the prompt
@@ -88,8 +91,12 @@ useEventListener(textarea, "keydown", (event) => {
     // eslint-disable-next-line no-undef
     __PLAYGROUND__ ? "active" : context.licenseStatus;
 
+  // Fetch model fields for placeholder insertion
+  const fields = await getViewFields();
+  modelFields.value = fields;
+
   if (props.fieldMeta) {
-    const fieldDefinition = await findFieldDefinition(props.fieldMeta);
+    const fieldDefinition = await findFieldDefinition(fields, props.fieldMeta);
 
     // Use field-specific custom user prompt if configured
     if (fieldDefinition?.copilot?.userPrompt) {
@@ -108,10 +115,7 @@ function submit() {
   });
 }
 
-async function findFieldDefinition(fieldMeta) {
-  if (!fieldMeta) return;
-
-  const modelFields = await getViewFields();
+async function findFieldDefinition(modelFields, fieldMeta) {
   const { name: fieldName, type: fieldType } = fieldMeta;
 
   for (const rootField of modelFields) {
@@ -136,6 +140,11 @@ async function pickFiles() {
   const selectedFiles = await useFilePicker();
   files.value = [...files.value, ...selectedFiles];
 }
+
+function insertFieldPlaceholder(fieldName) {
+  const placeholder = `{${fieldName}}`;
+  textareaComponent.value?.insertAtCursor(placeholder);
+}
 </script>
 
 <template>
@@ -151,6 +160,7 @@ async function pickFiles() {
       class="kai-relative kai-rounded-[var(--rounded)] focus-within:kai-outline focus-within:kai-outline-[2px] focus-within:kai-outline-[var(--color-focus,currentColor)]"
     >
       <AutoGrowTextarea
+        ref="textareaComponent"
         :value="prompt"
         shared-class="kai-p-2 kai-leading-[1.5] focus:kai-outline-none"
         :placeholder="
@@ -161,7 +171,6 @@ async function pickFiles() {
         "
         rows="3"
         @input="prompt = $event"
-        @mounted="textarea = $event"
       />
 
       <div
@@ -169,7 +178,6 @@ async function pickFiles() {
       >
         <k-button-group class="kai-gap-1">
           <k-button
-            theme="empty"
             icon="attachment"
             :badge="
               _isKirby5 && files.length > 0
@@ -179,7 +187,6 @@ async function pickFiles() {
                   }
                 : undefined
             "
-            class="!kai-rounded-[var(--button-rounded)]"
             @click="pickFiles()"
           />
           <k-button
@@ -189,6 +196,24 @@ async function pickFiles() {
             size="sm"
             @click="files = []"
           />
+          <div class="kai-flex kai-items-center kai-justify-between">
+            <k-button
+              v-if="modelFields.length > 0"
+              icon="copilot-text-snippet"
+              :title="panel.t('johannschopplich.copilot.insertPlaceholder')"
+              :dropdown="true"
+              @click="placeholderDropdown?.toggle()"
+            />
+            <k-dropdown-content
+              ref="placeholderDropdown"
+              :options="
+                modelFields.map((field) => ({
+                  text: field.label || field.name,
+                  click: () => insertFieldPlaceholder(field.name),
+                }))
+              "
+            />
+          </div>
         </k-button-group>
 
         <div class="kai-flex kai-gap-2">

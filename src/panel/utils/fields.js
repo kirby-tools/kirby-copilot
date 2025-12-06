@@ -3,11 +3,6 @@
  *
  * @remarks
  * Traverses through all nested structures including blocks, layouts, structures, etc.
- *
- * @param {object} fieldDefinition - Field definition object to search within
- * @param {string} fieldName - Name of the field to find
- * @param {string} [fieldType] - Optional type to help disambiguate fields with the same name
- * @returns {object|undefined} The matching field definition or null if not found
  */
 export function findFieldInDefinitions(fieldDefinition, fieldName, fieldType) {
   // Check if this field matches
