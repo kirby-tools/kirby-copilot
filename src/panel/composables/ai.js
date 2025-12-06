@@ -127,7 +127,7 @@ export async function useStreamObject({
     temperature: config.temperature ?? undefined,
     schema,
     output,
-    // system: systemPrompt || undefined,
+    system: systemPrompt || undefined,
     ...(hasFiles
       ? {
           messages: [
