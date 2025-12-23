@@ -1,7 +1,9 @@
 import { z } from "zod";
 
 /**
- * Field types that should be excluded from block schema generation
+ * Field types excluded from AI generation:
+ * - UI elements: gap, headline, info, line
+ * - Reference types: files, pages, users
  */
 export const EXCLUDED_FIELD_TYPES = new Set(
   /// keep-sorted
@@ -131,7 +133,7 @@ export const FIELD_TYPE_TO_SCHEMA = {
 
     // Fallback for structures without defined fields
     return z
-      .array(z.record(z.string()))
+      .array(z.record(z.string(), z.string()))
       .describe(
         `"${field.label}", repeatable structured data based on expected content structure`,
       );
@@ -149,7 +151,7 @@ export const FIELD_TYPE_TO_SCHEMA = {
 
     // Fallback for objects without defined fields
     return z
-      .record(z.string())
+      .record(z.string(), z.string())
       .describe(
         `"${field.label}", object data based on expected content structure`,
       );
@@ -190,25 +192,34 @@ export const FIELD_TYPE_TO_SCHEMA = {
 export function fieldToZodSchema(field) {
   const schemaBuilder = FIELD_TYPE_TO_SCHEMA[field.type];
 
+  if (!schemaBuilder) {
+    throw new Error(`Unsupported field type: ${field.type}`);
+  }
+
   let schema = schemaBuilder(field);
 
   // Handle required fields
   if (field.required === true) {
+    const schemaType = schema._zod?.def?.type;
+
     // Required fields must have content
-    if (schema._def.typeName === "ZodString") {
+    if (schemaType === "string") {
       // Only add minimum validation if not already set
-      if (schema._def.checks?.some((check) => check.kind === "min") !== true) {
+      if (schema.minLength == null) {
         schema = schema.min(1);
       }
-    } else if (schema._def.typeName === "ZodArray") {
+    } else if (schemaType === "array") {
       // Only add minimum validation if not already set
-      if (schema._def.minLength == null) {
+      const hasMinCheck = schema._zod?.def?.checks?.some(
+        (check) => check._zod?.def?.check === "min_length",
+      );
+      if (!hasMinCheck) {
         schema = schema.min(1);
       }
     }
   } else {
-    // TODO: OpenAI doesn't support optional fields yet
-    // schema = schema.optional();
+    // Optional schema properties are not supported by OpenAI
+    schema = schema.nullable();
   }
 
   return schema;

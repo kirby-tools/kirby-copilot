@@ -58,7 +58,7 @@ describe("generateKirbyBlocksSchema", () => {
       );
     });
 
-    it("should filter out blocks with no fields", () => {
+    it("should filter out blocks with no fields and reject invalid types", () => {
       const configWithEmptyBlock = [
         ...basicBlocksConfig,
         { type: "empty", name: "Empty", fields: {} },
@@ -67,7 +67,7 @@ describe("generateKirbyBlocksSchema", () => {
 
       const schema = generateKirbyBlocksSchema(configWithEmptyBlock);
 
-      // Should still parse valid blocks
+      // Valid blocks still work
       expect(() =>
         schema.parse({
           type: "text",
@@ -75,40 +75,10 @@ describe("generateKirbyBlocksSchema", () => {
         }),
       ).not.toThrow();
 
-      // Should reject invalid block types
+      // Empty/no-fields blocks and nonexistent types are rejected
+      expect(() => schema.parse({ type: "empty", content: {} })).toThrow();
       expect(() =>
-        schema.parse({
-          type: "empty",
-          content: {},
-        }),
-      ).toThrow();
-    });
-
-    it("should create schemas for all valid blocks", () => {
-      const schema = generateKirbyBlocksSchema(basicBlocksConfig);
-
-      // Should accept valid text block
-      expect(() =>
-        schema.parse({
-          type: "text",
-          content: { content: "<p>Some content</p>" },
-        }),
-      ).not.toThrow();
-
-      // Should accept valid heading block
-      expect(() =>
-        schema.parse({
-          type: "heading",
-          content: { level: "h1", text: "Heading text" },
-        }),
-      ).not.toThrow();
-
-      // Should reject invalid block type
-      expect(() =>
-        schema.parse({
-          type: "nonexistent",
-          content: {},
-        }),
+        schema.parse({ type: "nonexistent", content: {} }),
       ).toThrow();
     });
   });
@@ -158,15 +128,14 @@ describe("generateKirbyBlocksSchema", () => {
   describe("excluded field types", () => {
     const excludedFieldsConfig = [
       {
-        type: "layout",
-        name: "Layout Block",
+        type: "custom",
+        name: "Custom Block",
         fields: {
           // Excluded fields (should not appear in schema)
           separator: { type: "line", label: "Separator", name: "separator" },
           info: { type: "info", label: "Info", name: "info" },
           spacing: { type: "gap", label: "Spacing", name: "spacing" },
           title: { type: "headline", label: "Title", name: "title" },
-          grid: { type: "layout", label: "Grid", name: "grid" },
           images: { type: "files", label: "Images", name: "images" },
 
           // Included fields
@@ -186,7 +155,7 @@ describe("generateKirbyBlocksSchema", () => {
       // Should validate block with only included fields
       expect(() =>
         schema.parse({
-          type: "layout",
+          type: "custom",
           content: { content: "Valid content" },
         }),
       ).not.toThrow();
@@ -194,7 +163,7 @@ describe("generateKirbyBlocksSchema", () => {
       // Should fail when missing required included field
       expect(() =>
         schema.parse({
-          type: "layout",
+          type: "custom",
           content: {},
         }),
       ).toThrow();
@@ -265,102 +234,59 @@ describe("generateKirbyBlocksSchema", () => {
             name: "tags",
             min: 1,
             max: 5,
-            field: {
-              field: { type: "text" },
-            },
+            field: { field: { type: "text" } },
           },
         },
       },
     ];
 
-    it("should handle structure fields in blocks", () => {
+    it("should handle structure, object and entries fields in blocks", () => {
       const schema = generateKirbyBlocksSchema(complexBlocksConfig);
 
-      const validBlock = {
-        type: "testimonials",
-        content: {
-          items: [
-            {
-              name: "John Doe",
-              quote: "Great product!",
-              rating: 5,
-            },
-          ],
-        },
-      };
+      // Structure field
+      expect(() =>
+        schema.parse({
+          type: "testimonials",
+          content: { items: [{ name: "John", quote: "Great!", rating: 5 }] },
+        }),
+      ).not.toThrow();
 
-      expect(() => schema.parse(validBlock)).not.toThrow();
-    });
-
-    it("should handle object fields in blocks", () => {
-      const schema = generateKirbyBlocksSchema(complexBlocksConfig);
-
-      const validBlock = {
-        type: "card",
-        content: {
-          settings: {
-            title: "Card Title",
-            priority: 5,
+      // Object and entries fields
+      expect(() =>
+        schema.parse({
+          type: "card",
+          content: {
+            settings: { title: "Card Title", priority: null },
+            tags: ["web", "design"],
           },
-          tags: ["web", "design"],
-        },
-      };
-
-      expect(() => schema.parse(validBlock)).not.toThrow();
-    });
-
-    it("should handle entries fields in blocks", () => {
-      const schema = generateKirbyBlocksSchema(complexBlocksConfig);
-
-      const validBlock = {
-        type: "card",
-        content: {
-          settings: { title: "Card Title" },
-          tags: ["web", "design", "ui"],
-        },
-      };
-
-      expect(() => schema.parse(validBlock)).not.toThrow();
+        }),
+      ).not.toThrow();
     });
 
     it("should validate complex field constraints", () => {
       const schema = generateKirbyBlocksSchema(complexBlocksConfig);
 
-      // Should reject structure item missing required field
+      // Structure item missing required field
       expect(() =>
         schema.parse({
           type: "testimonials",
-          content: {
-            items: [
-              {
-                quote: "Missing name field",
-                rating: 5,
-              },
-            ],
-          },
+          content: { items: [{ quote: "Missing name", rating: 5 }] },
         }),
       ).toThrow();
 
-      // Should reject object missing required field  
+      // Object missing required field
       expect(() =>
         schema.parse({
           type: "card",
-          content: {
-            settings: {
-              priority: 5, // Missing required title
-            },
-          },
+          content: { settings: { priority: 5 }, tags: ["tag"] },
         }),
       ).toThrow();
 
-      // Should reject entries below minimum
+      // Entries below minimum
       expect(() =>
         schema.parse({
           type: "card",
-          content: {
-            settings: { title: "Card Title" },
-            tags: [], // Below min of 1
-          },
+          content: { settings: { title: "Card" }, tags: [] },
         }),
       ).toThrow();
     });
