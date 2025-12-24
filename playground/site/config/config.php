@@ -24,11 +24,11 @@ return [
         'provider' => 'google',
         'providers' => [
             'openai' => [
-                'model' => 'o4-mini',
+                'model' => 'gpt-5-mini',
                 'apiKey' => env('OPENAI_API_KEY', 'YOUR_API_KEY')
             ],
             'google' => [
-                'model' => 'gemini-2.5-flash',
+                'model' => 'gemini-3-flash-preview',
                 'apiKey' => env('GOOGLE_API_KEY', 'YOUR_API_KEY')
             ]
         ]

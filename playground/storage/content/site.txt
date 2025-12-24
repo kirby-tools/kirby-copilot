@@ -6,15 +6,15 @@ Modelprovider: google
 
 ----
 
-Apikey: 
+Apikey:
 
 ----
 
-Openaimodel: o4-mini
+Openaimodel: gpt-5-mini
 
 ----
 
-Googlemodel: gemini-2.5-flash
+Googlemodel: gemini-3-flash-preview
 
 ----
 
@@ -22,23 +22,23 @@ Anthropicmodel: claude-sonnet-4-20250514
 
 ----
 
-Demoblocks: 
+Demoblocks:
 
 ----
 
-Demolayouts: 
+Demolayouts:
 
 ----
 
-Demowriter: 
+Demowriter:
 
 ----
 
-Demotextarea: 
+Demotextarea:
 
 ----
 
-Contextdemo: 
+Contextdemo:
 
 ----
 

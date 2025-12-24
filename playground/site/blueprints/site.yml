@@ -61,10 +61,10 @@ tabs:
             when:
               modelProvider: openai
             options:
-              o4-mini: o4-mini (recommended)
-              gpt-4o: GPT-4o
-              gpt-4o-mini: GPT-4o Mini
-            help: o4-mini offers a good balance of performance and cost. Blocks generation is weak for all OpenAI models.
+              gpt-5-mini: GPT-5 Mini (recommended)
+              gpt-5.1: GPT-5.1
+              gpt-5.2: GPT-5.2
+            help: GPT-5 mini offers a good balance of performance and cost. Blocks generation is weak for all OpenAI models.
 
           googleModel:
             label: Model
@@ -72,9 +72,9 @@ tabs:
             when:
               modelProvider: google
             options:
-              gemini-2.5-flash: Gemini 2.5 Flash (recommended)
-              gemini-2.5-pro: Gemini 2.5 Pro
-            help: Gemini 2.5 Flash excels at structured content generation. Our overall recommendation!
+              gemini-3-flash-preview: Gemini 3 Flash (recommended)
+              gemini-3-pro-preview: Gemini 3 Pro
+            help: Gemini 3 Flash excels at structured content generation. Our overall recommendation!
 
           anthropicModel:
             label: Model
