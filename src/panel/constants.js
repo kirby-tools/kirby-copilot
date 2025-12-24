@@ -4,6 +4,31 @@ export const PLUGIN_FIELDSETS_API_ROUTE = "__copilot__/fieldsets";
 
 /// keep-sorted
 export const SUPPORTED_PROVIDERS = ["anthropic", "google", "mistral", "openai"];
+
+// Provider-specific reasoning configuration per effort level with mode-specific overrides
+export const PROVIDER_REASONING_MAP = {
+  none: {
+    anthropic: undefined,
+    openai: "none",
+    "openai:gpt-5-mini": "minimal", // GPT-5-mini also allows `minimal`
+    google: "low",
+    "google:gemini-3-flash-preview": "minimal", // Gemini 3 Flash Preview also supports `minimal`
+    "google:gemini-3-flash": "minimal", // Future-proofing for Gemini 3 Flash
+  },
+  low: { anthropic: 8_000, openai: "low", google: "low" },
+  medium: {
+    anthropic: 16_000,
+    openai: "medium",
+    google: "medium",
+    "google:gemini-3-pro-preview": "high", // Gemini 3 Pro only supports `low` or `high`
+    "google:gemini-3-pro": "high", // Future-proofing for Gemini 3 Pro
+  },
+  high: { anthropic: 32_000, openai: "high", google: "high" },
+};
+
+// Default reasoning effort level
+export const DEFAULT_REASONING_EFFORT = "low";
+
 /// keep-sorted
 export const SUPPORTED_IMAGE_MIME_TYPES = [
   "image/gif",
@@ -11,6 +36,7 @@ export const SUPPORTED_IMAGE_MIME_TYPES = [
   "image/png",
   "image/webp",
 ];
+
 /// keep-sorted
 export const SUPPORTED_FILE_MIME_TYPES = [
   ...SUPPORTED_IMAGE_MIME_TYPES,

@@ -24,7 +24,7 @@ return [
                         ]
                     ],
                     'logLevel' => 'warn',
-                    'temperature' => null,
+                    'reasoningEffort' => 'low',
                     'excludedBlocks' => []
                 ];
 
@@ -36,6 +36,11 @@ return [
 
                 // Lowercase model providers configuration keys
                 $config['providers'] = array_change_key_case($config['providers'], CASE_LOWER);
+
+                // Validate reasoning effort
+                if (!in_array($config['reasoningEffort'], ['none', 'low', 'medium', 'high'], true)) {
+                    $config['reasoningEffort'] = 'low';
+                }
 
                 $assets = $kirby
                     ->plugin('johannschopplich/copilot')

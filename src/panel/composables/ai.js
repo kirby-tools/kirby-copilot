@@ -1,6 +1,8 @@
 import { loadPluginModule, useContent } from "kirbyuse";
 import {
+  DEFAULT_REASONING_EFFORT,
   PDF_SIZE_LIMIT,
+  PROVIDER_REASONING_MAP,
   STORAGE_KEY_PREFIX,
   SUPPORTED_PROVIDERS,
 } from "../constants";
@@ -30,7 +32,6 @@ export async function useStreamText({
   abortSignal,
 }) {
   const logger = useLogger();
-  const { config } = await usePluginContext();
   const { model, providerOptions } = await resolveLanguageModel();
 
   if (import.meta.env.DEV) {
@@ -56,7 +57,6 @@ export async function useStreamText({
   return streamText({
     model,
     providerOptions,
-    temperature: config.temperature ?? undefined,
     output,
     system: systemPrompt || undefined,
     ...(hasFiles
@@ -164,15 +164,60 @@ async function resolveLanguageModel() {
   });
 
   const model = api.languageModel(providerConfig.model);
-  const providerOptions =
+  const reasoningEffort = config.reasoningEffort ?? DEFAULT_REASONING_EFFORT;
+  const reasoningConfig = PROVIDER_REASONING_MAP[reasoningEffort];
+
+  // Get reasoning value with model-specific override support
+  const modelName = providerConfig.model;
+  const reasoningValue = supportsReasoning(modelName)
+    ? (reasoningConfig?.[`${provider}:${modelName}`] ??
+      reasoningConfig?.[provider])
+    : undefined;
+
+  const providerOptions = {
+    // Enable reasoning for Anthropic models
+    ...(provider === "anthropic" &&
+      reasoningValue && {
+        anthropic: {
+          thinking: {
+            type: "enabled",
+            budgetTokens: reasoningValue,
+          },
+        },
+      }),
+    // Set reasoning effort for OpenAI models
+    ...(provider === "openai" &&
+      reasoningValue && {
+        openai: {
+          reasoningEffort: reasoningValue,
+        },
+      }),
+    // Set thinking level for Google models
+    ...(provider === "google" &&
+      reasoningValue && {
+        google: {
+          thinkingConfig: {
+            thinkingLevel: reasoningValue,
+          },
+        },
+      }),
+  };
+
+  // Merge custom provider options (takes precedence)
+  if (
     typeof providerConfig.options === "object" &&
     providerConfig.options !== null
-      ? { [provider]: providerConfig.options }
-      : undefined;
+  ) {
+    providerOptions[provider] = {
+      ...providerOptions[provider],
+      ...providerConfig.options,
+    };
+  }
 
   return {
     model,
-    providerOptions,
+    providerOptions:
+      Object.keys(providerOptions).length > 0 ? providerOptions : undefined,
   };
 }
 
@@ -222,4 +267,12 @@ async function resolveAttachments({ userPrompt, files = [] }) {
     imageByteArrays,
     pdfByteArrays,
   };
+}
+
+function supportsReasoning(modelName) {
+  return (
+    modelName.startsWith("gpt-5") ||
+    modelName.startsWith("gemini-3-") ||
+    /^claude-.*?-4/.test(modelName)
+  );
 }
