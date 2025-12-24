@@ -20,7 +20,6 @@ import {
   useFilePicker,
   useLayouts,
   usePluginContext,
-  useStreamObject,
   useStreamText,
 } from "../../composables";
 import {
@@ -206,6 +205,7 @@ async function generate() {
 
   const { getZodSchema: getBlocksZodSchema, normalizeBlock } = useBlocks();
   const { getZodSchema: getLayoutZodSchema, normalizeLayout } = useLayouts();
+  const { Output } = await loadPluginModule("ai");
 
   try {
     let text = "";
@@ -213,34 +213,30 @@ async function generate() {
 
     // Handle layouts by streaming the object
     if (field.value.type === "layout" || field.value.type === "blocks") {
-      const schema = await (
-        field.value.type === "layout" ? getLayoutZodSchema : getBlocksZodSchema
-      )(field.value);
+      const getSchema =
+        field.value.type === "layout" ? getLayoutZodSchema : getBlocksZodSchema;
+      const normalizer =
+        field.value.type === "layout" ? normalizeLayout : normalizeBlock;
+      const schema = await getSchema(field.value);
 
-      const { partialObjectStream, object: finalObject } =
-        await useStreamObject({
-          userPrompt: currentPrompt.value,
-          systemPrompt: systemPrompt.value,
-          schema,
-          output: "array",
-          files: files.value,
-          logLevel: logLevel.value,
-          abortSignal: abortController.signal,
-        });
+      const { partialOutputStream, output: finalOutput } = await useStreamText({
+        userPrompt: currentPrompt.value,
+        systemPrompt: systemPrompt.value,
+        output: Output.array({ element: schema }),
+        files: files.value,
+        logLevel: logLevel.value,
+        abortSignal: abortController.signal,
+      });
 
       // Stream partial updates
-      for await (const partialObject of partialObjectStream) {
-        if (!partialObject || !Array.isArray(partialObject)) continue;
+      for await (const partialOutput of partialOutputStream) {
+        if (!partialOutput || !Array.isArray(partialOutput)) continue;
 
         await updateContent(
           {
             [field.value.name.toLowerCase()]: [
               ...currentFieldContent.value,
-              ...partialObject.map(
-                field.value.type === "layout"
-                  ? normalizeLayout
-                  : normalizeBlock,
-              ),
+              ...partialOutput.map(normalizer),
             ],
           },
           // Disable saving content to storage in Kirby 5
@@ -249,7 +245,7 @@ async function generate() {
       }
 
       // Set final result
-      structuredOutput = await finalObject;
+      structuredOutput = await finalOutput;
     } else {
       const { textStream } = await useStreamText({
         userPrompt: [

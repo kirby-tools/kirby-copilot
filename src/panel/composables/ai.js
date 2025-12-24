@@ -18,9 +18,13 @@ const PROVIDER_MODEL_MAP = {
   anthropic: "anthropicmodel",
 };
 
+/**
+ * @returns {ReturnType<typeof import("ai").streamText>} A streamable text response from the AI provider.
+ */
 export async function useStreamText({
   userPrompt,
   systemPrompt,
+  output,
   files = [],
   logLevel = 1,
   abortSignal,
@@ -35,6 +39,7 @@ export async function useStreamText({
 
   const { AISDKError, APICallError, streamText, smoothStream } =
     await loadPluginModule("ai");
+
   const { userPromptWithContext, imageByteArrays, pdfByteArrays } =
     await resolveAttachments({
       userPrompt,
@@ -52,80 +57,6 @@ export async function useStreamText({
     model,
     providerOptions,
     temperature: config.temperature ?? undefined,
-    system: systemPrompt || undefined,
-    ...(hasFiles
-      ? {
-          messages: [
-            {
-              role: "user",
-              content: [
-                { type: "text", text: userPromptWithContext },
-                ...imageByteArrays.map((image) => ({
-                  type: "image",
-                  image,
-                })),
-                ...pdfByteArrays.map((data) => ({
-                  type: "file",
-                  data,
-                  mediaType: "application/pdf",
-                })),
-              ],
-            },
-          ],
-        }
-      : {
-          prompt: userPromptWithContext,
-        }),
-    experimental_transform: smoothStream({
-      chunking: "line",
-    }),
-    abortSignal,
-    onError({ error }) {
-      if (AISDKError.isInstance(error) || APICallError.isInstance(error)) {
-        throw error;
-      }
-    },
-  });
-}
-
-export async function useStreamObject({
-  userPrompt,
-  systemPrompt,
-  schema,
-  output = "object",
-  files = [],
-  logLevel = 1,
-  abortSignal,
-}) {
-  const logger = useLogger();
-  const { config } = await usePluginContext();
-  const { model, providerOptions } = await resolveLanguageModel();
-
-  if (import.meta.env.DEV) {
-    logLevel = 3;
-  }
-
-  const { AISDKError, APICallError, streamObject } =
-    await loadPluginModule("ai");
-
-  const { userPromptWithContext, imageByteArrays, pdfByteArrays } =
-    await resolveAttachments({
-      userPrompt,
-      files,
-    });
-
-  if (logLevel > 1) {
-    logger.info("System prompt:", systemPrompt);
-    logger.info("User prompt with context:", userPromptWithContext);
-  }
-
-  const hasFiles = imageByteArrays.length > 0 || pdfByteArrays.length > 0;
-
-  return streamObject({
-    model,
-    providerOptions,
-    temperature: config.temperature ?? undefined,
-    schema,
     output,
     system: systemPrompt || undefined,
     ...(hasFiles
@@ -151,6 +82,9 @@ export async function useStreamObject({
       : {
           prompt: userPromptWithContext,
         }),
+    ...(!output && {
+      experimental_transform: smoothStream({ chunking: "line" }),
+    }),
     abortSignal,
     onError({ error }) {
       if (AISDKError.isInstance(error) || APICallError.isInstance(error)) {

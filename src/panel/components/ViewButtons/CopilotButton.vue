@@ -7,7 +7,7 @@ import {
   useFields,
   useLayouts,
   usePluginContext,
-  useStreamObject,
+  useStreamText,
 } from "../../composables";
 import { openPromptDialog } from "../../config/shared";
 import {
@@ -118,17 +118,16 @@ async function initPromptDialog() {
   const _currentContent = { ...currentContent.value };
 
   const { config } = await usePluginContext();
-  const { AISDKError, APICallError } = await loadPluginModule("ai");
+  const { AISDKError, APICallError, Output } = await loadPluginModule("ai");
 
   const systemPrompt =
     props.systemPrompt || config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
 
   try {
-    const { partialObjectStream, object: finalObject } = await useStreamObject({
+    const { partialOutputStream, output: finalOutput } = await useStreamText({
       userPrompt: prompt,
       systemPrompt,
-      schema: z.object(fieldsSchema),
-      output: "object",
+      output: Output.object({ schema: z.object(fieldsSchema) }),
       files,
       logLevel: LOG_LEVELS.indexOf(
         props.logLevel && LOG_LEVELS.includes(props.logLevel)
@@ -141,11 +140,11 @@ async function initPromptDialog() {
     });
 
     // Stream partial updates
-    for await (const partialObject of partialObjectStream) {
-      if (!partialObject) continue;
+    for await (const partialOutput of partialOutputStream) {
+      if (!partialOutput) continue;
 
       const updatedContent = processFieldValues({
-        object: partialObject,
+        object: partialOutput,
         selectedFields,
         currentContent: _currentContent,
       });
@@ -160,7 +159,7 @@ async function initPromptDialog() {
     }
 
     // Set final result
-    const structuredOutput = await finalObject;
+    const structuredOutput = await finalOutput;
     const finalContent = processFieldValues({
       object: structuredOutput,
       selectedFields,
