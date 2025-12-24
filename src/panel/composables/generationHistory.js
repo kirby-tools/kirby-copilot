@@ -3,11 +3,15 @@ import { getHashedStorageKey } from "../utils/storage";
 
 const MAX_HISTORY = 50;
 
-export function usePromptHistory() {
+export function useGenerationHistory() {
   const storageKey = getHashedStorageKey("history", window.location.hostname);
   const history = ref(JSON.parse(localStorage.getItem(storageKey) || "[]"));
   const lastPrompt = ref("");
   const currentIndex = ref(-1);
+
+  function saveHistory() {
+    localStorage.setItem(storageKey, JSON.stringify(history.value));
+  }
 
   function addToHistory(prompt) {
     if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
@@ -16,10 +20,10 @@ export function usePromptHistory() {
 
     const trimmedPrompt = prompt.trim();
 
-    // Remove duplicate if exists
-    const index = history.value.indexOf(trimmedPrompt);
-    if (index !== -1) {
-      history.value.splice(index, 1);
+    // Remove duplicate if exists (move to front)
+    const existingIndex = history.value.indexOf(trimmedPrompt);
+    if (existingIndex !== -1) {
+      history.value.splice(existingIndex, 1);
     }
 
     history.value.unshift(trimmedPrompt);
@@ -29,7 +33,7 @@ export function usePromptHistory() {
       history.value = history.value.slice(0, MAX_HISTORY);
     }
 
-    localStorage.setItem(storageKey, JSON.stringify(history.value));
+    saveHistory();
     currentIndex.value = -1;
   }
 
@@ -52,10 +56,33 @@ export function usePromptHistory() {
     }
   }
 
+  function deleteEntry(prompt) {
+    const index = history.value.indexOf(prompt);
+    if (index === -1) return false;
+
+    history.value.splice(index, 1);
+    saveHistory();
+    return true;
+  }
+
+  function clearHistory() {
+    history.value = [];
+    saveHistory();
+    currentIndex.value = -1;
+  }
+
+  function getRecentEntries(limit = 10) {
+    return history.value.slice(0, limit);
+  }
+
   return {
+    history,
     lastPrompt,
     currentIndex,
     addToHistory,
     navigateHistory,
+    deleteEntry,
+    clearHistory,
+    getRecentEntries,
   };
 }

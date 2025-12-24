@@ -2,14 +2,18 @@
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import { computed, isKirby5, ref, usePanel } from "kirbyuse";
 import {
+  createContentContext,
   useEventListener,
   useFields,
   useFilePicker,
+  useGenerationHistory,
   usePluginContext,
-  usePromptHistory,
+  usePromptTemplates,
 } from "../../composables";
 import { findFieldInDefinitions } from "../../utils/fields";
+import { renderTemplate } from "../../utils/template";
 import AutoGrowTextarea from "../Ui/AutoGrowTextarea.vue";
+import ContentDropdown from "../Ui/ContentDropdown.vue";
 
 const props = defineProps({
   fields: {
@@ -34,20 +38,49 @@ const emit = defineEmits(["cancel", "close", "input", "submit", "success"]);
 
 const _isKirby5 = isKirby5();
 const panel = usePanel();
-const { lastPrompt, currentIndex, addToHistory, navigateHistory } =
-  usePromptHistory();
+const {
+  lastPrompt,
+  currentIndex,
+  addToHistory,
+  navigateHistory,
+  getRecentEntries,
+} = useGenerationHistory();
+const { templates, addTemplate, setTemplates } = usePromptTemplates();
 const { getViewFields } = useFields();
+const contentContext = createContentContext();
 
 const textareaComponent = ref();
 const textarea = computed(() => textareaComponent.value?.el);
 const picklist = ref();
 const placeholderDropdown = ref();
+const isPlaceholderDropdownOpen = ref(false);
+const templateDropdown = ref();
+const historyDropdown = ref();
+const fieldSearchQuery = ref("");
 const files = ref([]);
 const selectedFields = ref([]);
 const insertOption = ref("append");
 const prompt = ref(props.userPrompt || "");
 const licenseStatus = ref();
 const modelFields = ref([]);
+
+const recentPrompts = computed(() => getRecentEntries(10));
+
+const hasPlaceholders = computed(() => /\{\w+\}/.test(prompt.value));
+const resolvedPrompt = computed(() =>
+  renderTemplate(prompt.value, contentContext, (key) => `{${key}}`).trim(),
+);
+
+const filteredModelFields = computed(() => {
+  const query = fieldSearchQuery.value.toLowerCase();
+  if (!query.trim()) return modelFields.value;
+
+  return modelFields.value.filter(
+    (field) =>
+      field.name.toLowerCase().includes(query) ||
+      (field.label && field.label.toLowerCase().includes(query)),
+  );
+});
 
 useEventListener(textarea, "keydown", (event) => {
   // Listen to `Cmd/Ctrl + Enter` to submit the prompt
@@ -115,6 +148,126 @@ function submit() {
   });
 }
 
+async function pickFiles() {
+  const selectedFiles = await useFilePicker();
+  files.value = [...files.value, ...selectedFiles];
+}
+
+function togglePlaceholderDropdown() {
+  if (!isPlaceholderDropdownOpen.value) {
+    // Reset search when opening dropdown
+    fieldSearchQuery.value = "";
+  }
+
+  isPlaceholderDropdownOpen.value = !isPlaceholderDropdownOpen.value;
+  placeholderDropdown.value?.toggle();
+}
+
+function insertFieldPlaceholder(fieldName) {
+  const placeholder = `{${fieldName}}`;
+  textareaComponent.value?.insertAtCursor(placeholder);
+  isPlaceholderDropdownOpen.value = false;
+}
+
+function loadTemplate(template) {
+  prompt.value = template.prompt;
+  templateDropdown.value?.close();
+  textarea.value?.focus();
+}
+
+function openSaveTemplateDialog() {
+  panel.dialog.open({
+    component: "k-form-dialog",
+    props: {
+      fields: {
+        name: {
+          label: panel.t("johannschopplich.copilot.template.name"),
+          type: "text",
+          required: true,
+          autofocus: true,
+        },
+      },
+      value: {
+        name: "",
+      },
+    },
+    on: {
+      submit(values) {
+        if (values.name && prompt.value.trim()) {
+          addTemplate(values.name, prompt.value);
+        }
+
+        panel.dialog.close();
+      },
+    },
+  });
+}
+
+function openEditTemplatesDialog() {
+  panel.dialog.open({
+    component: "k-form-dialog",
+    props: {
+      size: "huge",
+      fields: {
+        templates: {
+          label: panel.t("johannschopplich.copilot.templates"),
+          type: "structure",
+          empty: panel.t("johannschopplich.copilot.template.empty"),
+          columns: {
+            name: {
+              label: panel.t("johannschopplich.copilot.template.name"),
+              width: "1/3",
+            },
+            prompt: {
+              label: panel.t("johannschopplich.copilot.prompt.label"),
+              width: "2/3",
+            },
+          },
+          fields: {
+            name: {
+              label: panel.t("johannschopplich.copilot.template.name"),
+              type: "text",
+              required: true,
+            },
+            prompt: {
+              label: panel.t("johannschopplich.copilot.prompt.label"),
+              type: "textarea",
+              required: true,
+            },
+          },
+        },
+      },
+      value: {
+        templates: templates.value.map((template) => ({
+          name: template.name,
+          prompt: template.prompt,
+        })),
+      },
+    },
+    on: {
+      submit(values) {
+        setTemplates(values.templates);
+        panel.dialog.close();
+      },
+    },
+  });
+}
+
+function loadPromptFromHistory(promptText) {
+  prompt.value = promptText;
+  historyDropdown.value?.close();
+  textarea.value?.focus();
+}
+
+function getFieldPreview(fieldName) {
+  const value = contentContext[fieldName.toLowerCase()] ?? "";
+  const stringifiedValue = String(value);
+
+  return stringifiedValue.length > 30
+    ? `${stringifiedValue.slice(0, 30)}…`
+    : stringifiedValue;
+}
+
 async function findFieldDefinition(modelFields, fieldMeta) {
   const { name: fieldName, type: fieldType } = fieldMeta;
 
@@ -134,16 +287,6 @@ async function findFieldDefinition(modelFields, fieldMeta) {
     );
     if (resolvedField) return resolvedField;
   }
-}
-
-async function pickFiles() {
-  const selectedFiles = await useFilePicker();
-  files.value = [...files.value, ...selectedFiles];
-}
-
-function insertFieldPlaceholder(fieldName) {
-  const placeholder = `{${fieldName}}`;
-  textareaComponent.value?.insertAtCursor(placeholder);
 }
 </script>
 
@@ -173,10 +316,33 @@ function insertFieldPlaceholder(fieldName) {
         @input="prompt = $event"
       />
 
+      <!-- Placeholder preview panel -->
+      <details
+        v-if="hasPlaceholders"
+        class="kai-group kai-mx-2 kai-mb-2 kai-rounded-[var(--rounded)] kai-bg-[var(--color-background)]"
+      >
+        <summary
+          class="kai-flex kai-cursor-pointer kai-list-none kai-items-center kai-gap-0.5 kai-rounded-[var(--rounded)] kai-p-1.5 [&::-webkit-details-marker]:kai-hidden"
+        >
+          <k-icon
+            type="angle-dropdown"
+            class="kai-size-[var(--icon-size)] kai-transition-transform [transform:rotate(-90deg)] group-open:[transform:rotate(0deg)]"
+          />
+          <span>{{ panel.t("johannschopplich.copilot.preview") }}</span>
+        </summary>
+        <div class="kai-px-1.5 kai-py-2">
+          <p
+            class="kai-whitespace-pre-wrap kai-leading-[1.25]"
+            v-text="resolvedPrompt"
+          />
+        </div>
+      </details>
+
       <div
         class="kai-flex kai-items-center kai-justify-between kai-px-2 kai-pb-2"
       >
         <k-button-group class="kai-gap-1">
+          <!-- File picker button -->
           <k-button
             icon="attachment"
             :badge="
@@ -187,6 +353,11 @@ function insertFieldPlaceholder(fieldName) {
                   }
                 : undefined
             "
+            :aria-label="
+              files.length > 0
+                ? `${panel.t('johannschopplich.copilot.files.select')} (${files.length})`
+                : panel.t('johannschopplich.copilot.files.select')
+            "
             @click="pickFiles()"
           />
           <k-button
@@ -196,26 +367,131 @@ function insertFieldPlaceholder(fieldName) {
             size="sm"
             @click="files = []"
           />
-          <div class="kai-flex kai-items-center kai-justify-between">
-            <k-button
-              v-if="modelFields.length > 0"
-              icon="copilot-text-snippet"
-              :title="panel.t('johannschopplich.copilot.insertPlaceholder')"
-              :dropdown="true"
-              @click="placeholderDropdown?.toggle()"
-            />
-            <k-dropdown-content
-              ref="placeholderDropdown"
-              :options="
-                modelFields.map((field) => ({
-                  text: field.label || field.name,
-                  click: () => insertFieldPlaceholder(field.name),
-                }))
-              "
-            />
-          </div>
+
+          <!-- Placeholder insertion dropdown -->
+          <k-button
+            v-if="modelFields.length > 0"
+            icon="copilot-text-snippet"
+            :dropdown="true"
+            :aria-label="panel.t('johannschopplich.copilot.insertPlaceholder')"
+            class="max-sm:kai-hidden"
+            @click="togglePlaceholderDropdown()"
+          />
+          <ContentDropdown
+            ref="placeholderDropdown"
+            @close="isPlaceholderDropdownOpen = false"
+          >
+            <header class="k-copilot-dropdown-content-header">
+              <div class="k-copilot-dropdown-content-search">
+                <k-search-input
+                  v-if="modelFields.length > 5"
+                  :value="fieldSearchQuery"
+                  type="text"
+                  :placeholder="
+                    panel.t('johannschopplich.copilot.searchFields')
+                  "
+                  @input="fieldSearchQuery = $event"
+                  @click.native.stop
+                  @keydown.native.stop
+                  @keydown.escape.native.prevent="togglePlaceholderDropdown()"
+                />
+              </div>
+            </header>
+
+            <div class="k-copilot-dropdown-content-body">
+              <k-dropdown-item
+                v-for="field in filteredModelFields"
+                :key="field.name"
+                @click="insertFieldPlaceholder(field.name)"
+              >
+                <span class="kai-inline-flex kai-w-full kai-gap-3">
+                  <span>{{ field.label || field.name }}</span>
+                  <span
+                    v-if="getFieldPreview(field.name)"
+                    class="kai-truncate kai-text-[var(--color-text-dimmed)] [font-size:var(--font-size-tiny)]"
+                  >
+                    {{ getFieldPreview(field.name) }}
+                  </span>
+                </span>
+              </k-dropdown-item>
+              <k-dropdown-item v-if="filteredModelFields.length === 0" disabled>
+                {{ panel.t("johannschopplich.copilot.noFieldsFound") }}
+              </k-dropdown-item>
+            </div>
+          </ContentDropdown>
+
+          <!-- Templates dropdown -->
+          <k-button
+            icon="bookmark"
+            :dropdown="true"
+            :aria-label="panel.t('johannschopplich.copilot.templates')"
+            class="max-sm:kai-hidden"
+            @click="templateDropdown?.toggle()"
+          />
+          <ContentDropdown ref="templateDropdown">
+            <div class="k-copilot-dropdown-content-body">
+              <!-- Save current prompt button -->
+              <k-dropdown-item
+                v-if="prompt.trim()"
+                icon="add"
+                @click="openSaveTemplateDialog()"
+              >
+                {{ panel.t("johannschopplich.copilot.template.saveAs") }}
+              </k-dropdown-item>
+
+              <!-- Edit templates button -->
+              <k-dropdown-item
+                v-if="templates.length > 0"
+                icon="settings"
+                @click="openEditTemplatesDialog()"
+              >
+                {{ panel.t("johannschopplich.copilot.template.edit") }}
+              </k-dropdown-item>
+
+              <hr v-if="templates.length > 0" />
+
+              <!-- Saved templates list -->
+              <k-dropdown-item
+                v-for="template in templates"
+                :key="template.id"
+                @click="loadTemplate(template)"
+              >
+                <span class="kai-truncate">{{ template.name }}</span>
+              </k-dropdown-item>
+
+              <!-- Empty state -->
+              <k-dropdown-item v-if="templates.length === 0" disabled>
+                {{ panel.t("johannschopplich.copilot.template.empty") }}
+              </k-dropdown-item>
+            </div>
+          </ContentDropdown>
+
+          <!-- History dropdown -->
+          <k-button
+            v-if="recentPrompts.length > 0"
+            icon="clock"
+            :aria-label="panel.t('johannschopplich.copilot.history')"
+            :dropdown="true"
+            class="max-sm:kai-hidden"
+            @click="historyDropdown?.toggle()"
+          />
+          <ContentDropdown
+            v-if="recentPrompts.length > 0"
+            ref="historyDropdown"
+          >
+            <div class="k-copilot-dropdown-content-body">
+              <k-dropdown-item
+                v-for="(promptText, index) in recentPrompts"
+                :key="index"
+                @click="loadPromptFromHistory(promptText)"
+              >
+                <span class="kai-truncate">{{ promptText }}</span>
+              </k-dropdown-item>
+            </div>
+          </ContentDropdown>
         </k-button-group>
 
+        <!-- Action buttons -->
         <div class="kai-flex kai-gap-2">
           <template v-if="fields.length > 0">
             <k-button
@@ -296,5 +572,12 @@ function insertFieldPlaceholder(fieldName) {
   --dialog-padding: 0;
   --dialog-rounded: var(--rounded);
   overflow: visible;
+}
+
+@media screen and (min-width: 60rem) {
+  .k-dialog.k-copilot-prompt-dialog[data-size="large"] {
+    /** Between 40rem (large) and 60rem (huge) */
+    --dialog-width: 50rem;
+  }
 }
 </style>

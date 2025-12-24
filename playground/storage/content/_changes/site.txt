@@ -1,0 +1,49 @@
+Title: Kirby Copilot
+
+----
+
+Modelprovider: google
+
+----
+
+Apikey: 
+
+----
+
+Openaimodel: gpt-5-mini
+
+----
+
+Googlemodel: gemini-3-flash-preview
+
+----
+
+Anthropicmodel: claude-sonnet-4-20250514
+
+----
+
+Demoblocks: 
+
+----
+
+Demolayouts: 
+
+----
+
+Demowriter: <p>The web is evolving from static pages into immersive, AI-driven experiences. Powered by 3D and blockchain technologies, this transformation is redefining how we connect with information and each other.</p>
+
+----
+
+Demotextarea: 
+
+----
+
+Contextdemo: 
+
+----
+
+Sitetitle: Holistic Web Development
+
+----
+
+Currentyear: 2025
