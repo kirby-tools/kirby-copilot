@@ -6,7 +6,7 @@ Modelprovider: google
 
 ----
 
-Apikey:
+Apikey: 
 
 ----
 
@@ -22,23 +22,23 @@ Anthropicmodel: claude-sonnet-4-20250514
 
 ----
 
-Demoblocks:
+Demoblocks: 
 
 ----
 
-Demolayouts:
+Demolayouts: 
 
 ----
 
-Demowriter:
+Demowriter: 
 
 ----
 
-Demotextarea:
+Demotextarea: 
 
 ----
 
-Contextdemo:
+Contextdemo: 
 
 ----
 
