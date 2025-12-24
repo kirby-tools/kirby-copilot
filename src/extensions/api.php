@@ -17,10 +17,10 @@ return [
                 $config = $kirby->option('johannschopplich.copilot', []);
 
                 $defaultConfig = [
-                    'provider' => 'openai',
+                    'provider' => 'google',
                     'providers' => [
-                        'openai' => [
-                            'model' => 'o4-mini'
+                        'google' => [
+                            'model' => 'gemini-3-flash-preview'
                         ]
                     ],
                     'logLevel' => 'warn',
