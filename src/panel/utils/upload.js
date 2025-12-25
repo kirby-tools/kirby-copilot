@@ -1,3 +1,11 @@
+/**
+ * Opens a file picker dialog and returns the selected files.
+ *
+ * @param {object} options
+ * @param {string} [options.accept] - Accepted file types (MIME types or extensions)
+ * @param {boolean} [options.multiple] - Whether multiple files can be selected
+ * @returns {Promise<File[]>} Array of selected files
+ */
 export async function openFilePicker({ accept = "*", multiple = true } = {}) {
   const input = document.createElement("input");
   input.type = "file";
@@ -20,6 +28,13 @@ export async function openFilePicker({ accept = "*", multiple = true } = {}) {
   });
 }
 
+/**
+ * Resizes an image blob to fit within a maximum dimension while preserving aspect ratio.
+ *
+ * @param {Blob} blob - The image blob to resize
+ * @param {number} [maxDimension] - Maximum width or height in pixels
+ * @returns {Promise<Blob>} The resized image blob, or original if no maxDimension specified
+ */
 export async function toReducedBlob(blob, maxDimension) {
   if (!maxDimension) return blob;
 
@@ -28,6 +43,14 @@ export async function toReducedBlob(blob, maxDimension) {
   return resizedBlob;
 }
 
+/**
+ * Loads a blob as an `HTMLImageElement`.
+ *
+ * @param {Blob} blob - The image blob to load
+ * @param {object} [options]
+ * @param {string} [options.crossOrigin] - CORS setting for the image
+ * @returns {Promise<HTMLImageElement>} The loaded image element
+ */
 async function loadImage(blob, options = {}) {
   if (!blob.type.startsWith("image/")) {
     throw new TypeError(`MIME type must be an image, but got: ${blob.type}`);
@@ -57,13 +80,15 @@ async function loadImage(blob, options = {}) {
   }
 }
 
-async function imageToBlob(
-  image,
-  /** MIME type for the output blob (e.g., `image/jpeg`, `image/png`) */
-  mimeType,
-  /** Maximum dimension (width or height) in pixels */
-  maxDimension,
-) {
+/**
+ * Converts an image element to a resized blob using canvas.
+ *
+ * @param {HTMLImageElement} image - The source image element
+ * @param {string} mimeType - MIME type for the output blob (e.g., `image/jpeg`, `image/png`)
+ * @param {number} [maxDimension] - Maximum width or height in pixels
+ * @returns {Promise<Blob>} The resulting image blob
+ */
+async function imageToBlob(image, mimeType, maxDimension) {
   if (!image.complete || !image.naturalWidth) {
     throw new Error("Image has not been properly loaded");
   }

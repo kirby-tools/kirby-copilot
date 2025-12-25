@@ -2,7 +2,7 @@ import { z } from "zod";
 import { EXCLUDED_FIELD_TYPES, fieldToZodSchema } from "./fields";
 
 /**
- * Generates a Zod schema for a single block type
+ * Generates a Zod schema for a single block type.
  */
 export function generateBlockSchema(fieldsets) {
   const { name, type, fields } = fieldsets;
@@ -30,7 +30,7 @@ export function generateBlockSchema(fieldsets) {
 }
 
 /**
- * Generates a Zod schema from a Kirby blocks fieldsets configuration
+ * Generates a Zod schema from a Kirby blocks fieldsets configuration.
  */
 export function generateKirbyBlocksSchema(fieldsets) {
   if (!Array.isArray(fieldsets) || fieldsets.length === 0) {

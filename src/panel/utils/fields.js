@@ -1,5 +1,5 @@
 /**
- * Recursively searches for a field definition by name and optionally by type
+ * Recursively searches for a field definition by name and optionally by type.
  *
  * @remarks
  * Traverses through all nested structures including blocks, layouts, structures, etc.

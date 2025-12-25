@@ -288,7 +288,7 @@ function supportsReasoning(modelName) {
  * buffering to ensure tags are never split mid-stream. Handles nested elements
  * of the same type (e.g., `<ol><ol>...</ol></ol>`).
  *
- * @returns {import("ai").ChunkDetector} A function that returns complete chunks or `null` to buffer more.
+ * @returns {import("ai").ChunkDetector} A function that returns complete chunks or `null` to buffer more
  */
 function createHtmlChunking() {
   return (buffer) => {

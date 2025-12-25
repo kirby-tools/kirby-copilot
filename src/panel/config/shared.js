@@ -132,7 +132,9 @@ export async function openPromptDialog(props = {}) {
 }
 
 /**
- * Extracts the current field name and type from the active element in the Panel
+ * Extracts the current field name and type from the active element in the Panel.
+ *
+ * @returns {{ name: string, type: string } | undefined} Field metadata or undefined if not in a field
  */
 function getFieldMetadata() {
   const fieldElement = document.activeElement?.closest(".k-field");
