@@ -33,8 +33,8 @@ const GENERATING_STYLES = /* css */ `
     var(--color-purple-500)
   );
   mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
+    linear-gradient(#fff, #fff) content-box,
+    linear-gradient(#fff, #fff);
   mask-composite: exclude;
   -webkit-mask-composite: xor;
   animation: k-copilot-rotate 2s linear infinite;
