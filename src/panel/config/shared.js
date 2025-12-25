@@ -5,6 +5,48 @@ import { DEFAULT_SYSTEM_PROMPT, STORAGE_KEY_PREFIX } from "../constants";
 import { CopilotError } from "../utils/error";
 
 const GENERATING_CLASS = "k-copilot-generating";
+const GENERATING_STYLES = /* css */ `
+@property --copilot-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.k-field.${GENERATING_CLASS} .k-input {
+  position: relative;
+  outline: none;
+}
+
+.k-field.${GENERATING_CLASS} .k-input::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: calc(var(--input-rounded, var(--rounded)) + 2px);
+  padding: 2px;
+  background: conic-gradient(
+    from var(--copilot-angle),
+    var(--color-purple-500),
+    var(--color-blue-500),
+    transparent 30%,
+    transparent 70%,
+    var(--color-blue-500),
+    var(--color-purple-500)
+  );
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  animation: k-copilot-rotate 2s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes k-copilot-rotate {
+  to {
+    --copilot-angle: 360deg;
+  }
+}
+`.trimStart();
 
 export async function generateAndInsertText(
   selection,
@@ -167,14 +209,6 @@ function injectGeneratingStyles() {
   cssInjected = true;
 
   const style = document.createElement("style");
-  style.textContent = `
-.k-field.${GENERATING_CLASS} .k-input {
-  animation: k-copilot-pulse 1.5s ease-in-out infinite;
-}
-@keyframes k-copilot-pulse {
-  0%, 100% { outline: 2px solid transparent; outline-offset: 0; }
-  50% { outline: 2px solid var(--color-focus); outline-offset: 0; }
-}
-`.trimStart();
+  style.textContent = GENERATING_STYLES;
   document.head.appendChild(style);
 }
