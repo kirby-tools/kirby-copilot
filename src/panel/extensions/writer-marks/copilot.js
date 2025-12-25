@@ -1,7 +1,7 @@
 import { DOMParser } from "prosemirror-model";
-import { generateAndInsertText } from "./shared";
+import { generateAndInsertText } from "../shared";
 
-const copilot = {
+export const copilot = {
   get button() {
     return {
       icon: "sparkling",
@@ -140,10 +140,6 @@ const copilot = {
       appendText,
     });
   },
-};
-
-export const writerMarks = {
-  copilot,
 };
 
 function isEntireDocumentSelected(state) {

@@ -1,6 +1,10 @@
 import { isAbortError } from "@ai-sdk/provider-utils";
 import { loadPluginModule, usePanel } from "kirbyuse";
-import { usePluginContext, useStreamText } from "../composables";
+import {
+  openPromptDialog,
+  usePluginContext,
+  useStreamText,
+} from "../composables";
 import { DEFAULT_SYSTEM_PROMPT, STORAGE_KEY_PREFIX } from "../constants";
 import generatingStyles from "../styles/copilot-generating.css?raw";
 import { CopilotError } from "../utils/error";
@@ -112,29 +116,6 @@ export async function generateAndInsertText(
     panel.isLoading = false;
     document.removeEventListener("keydown", handleEscape);
   }
-}
-
-export async function openPromptDialog(props = {}) {
-  return new Promise((resolve) => {
-    const panel = usePanel();
-    let result;
-
-    panel.dialog.open({
-      component: "k-copilot-prompt-dialog",
-      props,
-      on: {
-        close: () => {
-          setTimeout(() => {
-            resolve(result);
-          }, 25);
-        },
-        submit: (event) => {
-          result = event;
-          panel.dialog.close();
-        },
-      },
-    });
-  });
 }
 
 /**

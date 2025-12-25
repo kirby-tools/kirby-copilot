@@ -1,4 +1,4 @@
-import { generateAndInsertText } from "./shared";
+import { generateAndInsertText } from "../shared";
 
 export const copilot = {
   icon: "sparkling",
@@ -36,8 +36,4 @@ export const copilot = {
     });
   },
   shortcut: ".",
-};
-
-export const textareaButtons = {
-  copilot,
 };

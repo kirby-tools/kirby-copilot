@@ -3,13 +3,13 @@ import { isAbortError } from "@ai-sdk/provider-utils";
 import { loadPluginModule, ref, useContent, usePanel } from "kirbyuse";
 import { z } from "zod";
 import {
+  openPromptDialog,
   useBlocks,
   useFields,
   useLayouts,
   usePluginContext,
   useStreamText,
 } from "../../composables";
-import { openPromptDialog } from "../../config/shared";
 import {
   DEFAULT_LOG_LEVEL,
   DEFAULT_SYSTEM_PROMPT,
