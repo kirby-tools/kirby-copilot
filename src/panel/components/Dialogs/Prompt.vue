@@ -563,7 +563,7 @@ async function findFieldDefinition(modelFields, activeField) {
         api-namespace="__copilot__"
         :license-status="licenseStatus"
         pricing-url="https://kirby.tools/copilot/buy"
-        class="kai-absolute kai-right-0 kai-top-[calc(-0.25rem-24px)]"
+        class="kai-absolute kai-right-0 kai-top-[calc(-0.25rem-24px-2px)]"
       />
     </div>
   </k-dialog>
