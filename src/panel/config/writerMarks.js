@@ -1,11 +1,5 @@
+import { DOMParser } from "prosemirror-model";
 import { generateAndInsertText } from "./shared";
-
-const MARKDOWN_SYNTAX_MAP = {
-  "***": ["bold", "italic"],
-  "**": ["bold"],
-  "*": ["italic"],
-  "`": ["code"],
-};
 
 const copilot = {
   get button() {
@@ -29,78 +23,68 @@ const copilot = {
     return "copilot";
   },
 
-  _insertText(tr, text, cursorPosition, transactionContext, context) {
-    let position = cursorPosition;
-    const segments = text.split(/(\n\n?|\*{1,3}|`{1,3})/);
+  _insertText(tr, text, cursorPosition, context) {
+    const position = cursorPosition;
 
-    for (let i = 0; i < segments.length; i++) {
-      const segment = segments[i];
+    // Handle double newline as paragraph break
+    if (text === "\n\n") {
+      const node = this.editor.options.inline
+        ? [
+            context.schema.nodes.hardBreak.create(),
+            context.schema.nodes.hardBreak.create(),
+          ]
+        : context.schema.nodes.paragraph.create();
+      tr = tr.replaceWith(position, position, node);
+      return { tr, newPosition: position + 2 };
+    }
 
-      // Skip empty segments from split
-      if (!segment) continue;
+    // Handle single newline as hard break
+    if (text === "\n") {
+      tr = tr.replaceWith(
+        position,
+        position,
+        context.schema.nodes.hardBreak.create(),
+      );
+      return { tr, newPosition: position + 1 };
+    }
 
-      if (segment === "\n\n") {
-        // Insert paragraph break (block-level) or two hard breaks (inline mode)
-        const nodes = this.editor.options.inline
-          ? [
-              context.schema.nodes.hardBreak.create(),
-              context.schema.nodes.hardBreak.create(),
-            ]
-          : context.schema.nodes.paragraph.create();
+    // Check if text contains HTML (complete elements from chunking)
+    if (text.includes("<")) {
+      try {
+        // Match Kirby's pattern: https://github.com/getkirby/kirby/blob/42cd286dab62d87a331e53abfe103e4fba118dd6/panel/src/components/Forms/Writer/Editor.js#L100
+        const htmlString = `<div>${text}</div>`;
+        const element = new window.DOMParser().parseFromString(
+          htmlString,
+          "text/html",
+        ).body.firstElementChild;
 
-        tr = tr.replaceWith(position, position, nodes);
-        position += 2;
-        transactionContext.lastSegment = segment;
-      } else if (segment === "\n") {
-        // Insert single hard break
-        tr = tr.replaceWith(
-          position,
-          position,
-          context.schema.nodes.hardBreak.create(),
-        );
-        position += 1;
-        transactionContext.lastSegment = segment;
-      } else if (segment.length > 0) {
-        const isMarkdownSyntax = segment in MARKDOWN_SYNTAX_MAP;
+        const parser = DOMParser.fromSchema(context.schema);
+        const slice = parser.parseSlice(element);
 
-        if (isMarkdownSyntax) {
-          const nextSegment = i < segments.length - 1 ? segments[i + 1] : "";
-          const isClosingMark = isClosingActiveMark(
-            segment,
-            transactionContext.activeMarks,
-          );
-          const shouldFormat =
-            isClosingMark || isFormattingContext(segment, nextSegment);
-
-          if (
-            shouldFormat &&
-            !transactionContext.lastSegment.includes(segment)
-          ) {
-            for (const markName of MARKDOWN_SYNTAX_MAP[segment]) {
-              tr = toggleMark(tr, markName, transactionContext, context);
-            }
-            transactionContext.lastSegment = segment;
-            continue;
-          }
-        }
-
-        tr = tr.insertText(segment, position);
-        position += segment.length;
-        transactionContext.lastSegment = segment;
+        const sizeBefore = tr.doc.content.size;
+        tr = tr.replaceRange(position, position, slice);
+        const sizeAfter = tr.doc.content.size;
+        return { tr, newPosition: position + (sizeAfter - sizeBefore) };
+      } catch (error) {
+        console.error("Failed to parse HTML:", error);
+        // Fall through to plain text insertion
       }
     }
 
-    return { tr, newPosition: position };
+    tr = tr.setStoredMarks([]).insertText(text, position);
+    return { tr, newPosition: position + text.length };
   },
 
   _openPromptDialog(context) {
     const { state } = this.editor;
     const { from, to } = state.selection;
-    const textSelection = state.doc.textBetween(from, to);
-    const transactionContext = {
-      activeMarks: new Set(),
-      lastSegment: "",
-    };
+
+    // Get HTML-formatted selection and normalize to rich-text format
+    let selection = "";
+    if (from !== to) {
+      const fragment = state.doc.slice(from, to).content;
+      selection = normalizeHtmlToRichText(this.editor.getHTML(fragment));
+    }
 
     let cursorPosition;
     let hasDeletedSelection = false;
@@ -118,7 +102,6 @@ const copilot = {
         state.tr,
         text,
         cursorPosition,
-        transactionContext,
         context,
       );
 
@@ -144,15 +127,14 @@ const copilot = {
         tr,
         text,
         cursorPosition,
-        transactionContext,
         context,
       );
       cursorPosition = newPosition;
       view.dispatch(newTr);
     };
 
-    generateAndInsertText(textSelection, {
-      responseFormat: "text",
+    generateAndInsertText(selection, {
+      responseFormat: "rich-text",
       replaceText,
       appendText,
     });
@@ -164,54 +146,16 @@ export const writerMarks = {
 };
 
 function isEntireDocumentSelected(state) {
-  const docSize = state.doc.content.size;
   const { from, to } = state.selection;
-  return from === 0 && to === docSize;
+  return from <= 1 && to >= state.doc.content.size - 1;
 }
 
-function toggleMark(tr, type, transactionContext, { schema }) {
-  const markType = schema.marks[type];
-  if (!markType) return tr;
-
-  // Check if this mark type is currently active
-  const activeMark = [...transactionContext.activeMarks].find(
-    (mark) => mark.type.name === type,
-  );
-
-  if (activeMark) {
-    // Deactivate: remove from active marks and clear stored marks
-    transactionContext.activeMarks.delete(activeMark);
-    const remainingMarks = [...transactionContext.activeMarks];
-    return tr.setStoredMarks(remainingMarks);
-  } else {
-    // Activate: add to active marks
-    const mark = markType.create();
-    transactionContext.activeMarks.add(mark);
-    return tr.addStoredMark(mark);
-  }
-}
-
-function isClosingActiveMark(segment, activeMarks) {
-  return [...activeMarks].some((mark) => {
-    for (const [syntax, markNames] of Object.entries(MARKDOWN_SYNTAX_MAP)) {
-      if (syntax === segment && markNames.includes(mark.type.name)) {
-        return true;
-      }
-    }
-
-    return false;
-  });
-}
-
-function isFormattingContext(segment, nextSegment) {
-  // Asterisks are formatting marks only when followed immediately by non-whitespace
-  // Examples: `*text` (italic), `**text` (bold)
-  // Not formatting: `* item` (list), `*   item` (list with spaces)
-  if (segment.startsWith("*")) {
-    // Check if next segment starts with non-whitespace (not just contains it)
-    return nextSegment.length > 0 && /^\S/.test(nextSegment);
-  }
-
-  // All other markdown syntax should be formatted
-  return true;
+/**
+ * Converts HTML with `<p>` and `<br>` tags to rich-text format (newlines for breaks).
+ */
+function normalizeHtmlToRichText(html) {
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>\s*<p>/gi, "\n\n")
+    .replace(/^<p>|<\/p>$/gi, "");
 }

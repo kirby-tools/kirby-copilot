@@ -3,25 +3,25 @@ import { generateRandomId } from "utilful";
 import { getHashedStorageKey } from "../utils/storage";
 
 const TEMPLATE_LIMIT = 50;
-const MARKDOWN_PRESERVATION_INSTRUCTION =
-  "IMPORTANT: Preserve all Markdown formatting (bold, italic, links, code, headings, lists, etc.) exactly as in the original.";
+const FORMATTING_PRESERVATION_INSTRUCTION =
+  "IMPORTANT: Preserve all formatting (bold, italic, links, code, headings, lists, etc.) exactly as in the original.";
 
 const DEFAULT_TEMPLATES = [
   {
     name: "Fix Grammar & Spelling",
-    prompt: `Fix all spelling and grammar errors in the given text. ${MARKDOWN_PRESERVATION_INSTRUCTION} Only output the corrected text, nothing else.`,
+    prompt: `Fix all spelling and grammar errors in the given text. ${FORMATTING_PRESERVATION_INSTRUCTION} Only output the corrected text, nothing else.`,
   },
   {
     name: "Make Concise",
-    prompt: `Make the given text more concise by removing unnecessary words while keeping the meaning intact. ${MARKDOWN_PRESERVATION_INSTRUCTION} Only output the reduced text, nothing else.`,
+    prompt: `Make the given text more concise by removing unnecessary words while keeping the meaning intact. ${FORMATTING_PRESERVATION_INSTRUCTION} Only output the reduced text, nothing else.`,
   },
   {
     name: "Simplify",
-    prompt: `Simplify the given text to make it easier to understand, using simpler words and shorter sentences. ${MARKDOWN_PRESERVATION_INSTRUCTION} Only output the simplified text, nothing else.`,
+    prompt: `Simplify the given text to make it easier to understand, using simpler words and shorter sentences. ${FORMATTING_PRESERVATION_INSTRUCTION} Only output the simplified text, nothing else.`,
   },
   {
     name: "Extend",
-    prompt: `Extend the given text with more details, examples, or explanations while maintaining the same style and tone. ${MARKDOWN_PRESERVATION_INSTRUCTION} Only output the extended text, nothing else.`,
+    prompt: `Extend the given text with more details, examples, or explanations while maintaining the same style and tone. ${FORMATTING_PRESERVATION_INSTRUCTION} Only output the extended text, nothing else.`,
   },
   {
     name: "Summarize",

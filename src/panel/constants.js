@@ -57,10 +57,10 @@ export const STORAGE_KEY_PREFIX = "kirby$copilot$";
 
 /// keep-sorted
 export const FIELD_TYPE_RESPONSE_FORMAT = {
-  list: "HTML",
+  list: "rich-text",
   markdown: "markdown", // Community plugin field type
   textarea: "markdown",
-  writer: "HTML",
+  writer: "rich-text",
 };
 
 export const DEFAULT_SYSTEM_PROMPT = `
@@ -69,7 +69,7 @@ You are a content assistant.
 When <response_format> is provided, format your response as:
 - "text": Plain text only, no formatting syntax.
 - "markdown": Raw Markdown, no code fence wrappers.
-- "HTML": Only body-level tags (<p>, <h2>, <ul>, <a>, etc.), no <html>/<body>.
+- "rich-text": Use double newlines to separate paragraphs. For inline formatting, use HTML tags (<strong>, <em>, <code>, <a href="...">, etc.). Do NOT wrap paragraphs in <p> tags.
 
-When <selected_text> is provided, use it as context for your response.
+When <selection> is provided, use it as context for your response. If <selection> contains formatting, preserve similar formatting in your response.
 `;

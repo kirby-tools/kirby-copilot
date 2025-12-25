@@ -55,12 +55,13 @@ export async function generateAndInsertText(
     const { textStream } = await useStreamText({
       userPrompt: [
         `<response_format>\n${responseFormat}\n</response_format>`,
-        selection && `<selected_text>\n${selection}\n</selected_text>`,
+        selection && `<selection>\n${selection}\n</selection>`,
         prompt,
       ]
         .filter(Boolean)
         .join("\n\n"),
       systemPrompt: config.systemPrompt || DEFAULT_SYSTEM_PROMPT,
+      responseFormat,
       files,
       abortSignal: abortController.signal,
     });
