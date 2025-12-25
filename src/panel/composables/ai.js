@@ -21,7 +21,9 @@ const PROVIDER_MODEL_MAP = {
 };
 
 /**
- * @returns {Promise<ReturnType<typeof import("ai").streamText>>} A streamable text response from the AI provider.
+ * Streams text from an AI provider using the configured model.
+ *
+ * @returns {Promise<ReturnType<typeof import("ai").streamText>>} A streamable text response from the AI provider
  */
 export async function useStreamText({
   userPrompt,

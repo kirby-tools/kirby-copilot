@@ -2,6 +2,12 @@ import { loadPluginModule, resolvePluginAsset } from "kirbyuse";
 
 let _PDFJS;
 
+/**
+ * Extracts text content from a PDF file.
+ *
+ * @param {File} file - The PDF file to extract text from
+ * @returns {Promise<string>} Extracted text with pages separated by newlines
+ */
 export async function extractTextFromPdf(file) {
   const PDFJS = await resolvePDFJS();
   const data = await file.arrayBuffer();
