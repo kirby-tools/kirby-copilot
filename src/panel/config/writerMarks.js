@@ -26,20 +26,20 @@ const copilot = {
   _insertText(tr, text, cursorPosition, context) {
     const position = cursorPosition;
 
-    // Handle double newline as paragraph break
-    if (text === "\n\n") {
-      const node = this.editor.options.inline
-        ? [
-            context.schema.nodes.hardBreak.create(),
-            context.schema.nodes.hardBreak.create(),
-          ]
-        : context.schema.nodes.paragraph.create();
-      tr = tr.replaceWith(position, position, node);
-      return { tr, newPosition: position + 2 };
-    }
-
-    // Handle single newline as hard break
-    if (text === "\n") {
+    // Handle newline sequences (1+ newlines)
+    if (/^\n+$/.test(text)) {
+      if (text.length >= 2) {
+        // 2+ newlines → paragraph break
+        const node = this.editor.options.inline
+          ? [
+              context.schema.nodes.hardBreak.create(),
+              context.schema.nodes.hardBreak.create(),
+            ]
+          : context.schema.nodes.paragraph.create();
+        tr = tr.replaceWith(position, position, node);
+        return { tr, newPosition: position + 2 };
+      }
+      // Single newline → hard break
       tr = tr.replaceWith(
         position,
         position,
