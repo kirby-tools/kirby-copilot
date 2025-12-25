@@ -10,7 +10,7 @@ import {
   usePluginContext,
   usePromptTemplates,
 } from "../../composables";
-import { findFieldInDefinitions } from "../../utils/fields";
+import { findFieldDefinition } from "../../utils/fields";
 import { renderTemplate } from "../../utils/template";
 import AutoGrowTextarea from "../Ui/AutoGrowTextarea.vue";
 import ContentDropdown from "../Ui/ContentDropdown.vue";
@@ -129,9 +129,10 @@ useEventListener(textarea, "keydown", (event) => {
   modelFields.value = fields;
 
   if (props.activeField) {
-    const fieldDefinition = await findFieldDefinition(
+    const fieldDefinition = findFieldDefinition(
       fields,
-      props.activeField,
+      props.activeField.name,
+      props.activeField.type,
     );
 
     // Use field-specific custom user prompt if configured
@@ -269,27 +270,6 @@ function getFieldPreview(fieldName) {
   return stringifiedValue.length > 30
     ? `${stringifiedValue.slice(0, 30)}…`
     : stringifiedValue;
-}
-
-async function findFieldDefinition(modelFields, activeField) {
-  const { name: fieldName, type: fieldType } = activeField;
-
-  for (const rootField of modelFields) {
-    // Check if this root field matches
-    if (rootField.name === fieldName) {
-      if (!fieldType || rootField.type === fieldType) {
-        return rootField;
-      }
-    }
-
-    // Recursively search nested fields
-    const resolvedField = findFieldInDefinitions(
-      rootField,
-      fieldName,
-      fieldType,
-    );
-    if (resolvedField) return resolvedField;
-  }
 }
 </script>
 

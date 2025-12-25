@@ -2,51 +2,8 @@ import { isAbortError } from "@ai-sdk/provider-utils";
 import { loadPluginModule, usePanel } from "kirbyuse";
 import { usePluginContext, useStreamText } from "../composables";
 import { DEFAULT_SYSTEM_PROMPT, STORAGE_KEY_PREFIX } from "../constants";
+import generatingStyles from "../styles/copilot-generating.css?raw";
 import { CopilotError } from "../utils/error";
-
-const GENERATING_CLASS = "k-copilot-generating";
-const GENERATING_STYLES = /* css */ `
-@property --copilot-angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
-.k-field.${GENERATING_CLASS} .k-input {
-  position: relative;
-  outline: none;
-}
-
-.k-field.${GENERATING_CLASS} .k-input::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  border-radius: calc(var(--input-rounded, var(--rounded)) + 2px);
-  padding: 2px;
-  background: conic-gradient(
-    from var(--copilot-angle),
-    var(--color-purple-500),
-    var(--color-blue-500),
-    transparent 30%,
-    transparent 70%,
-    var(--color-blue-500),
-    var(--color-purple-500)
-  );
-  mask:
-    linear-gradient(#fff, #fff) content-box,
-    linear-gradient(#fff, #fff);
-  mask-composite: exclude;
-  -webkit-mask-composite: xor;
-  animation: k-copilot-rotate 2s linear infinite;
-  pointer-events: none;
-}
-
-@keyframes k-copilot-rotate {
-  to {
-    --copilot-angle: 360deg;
-  }
-}
-`.trimStart();
 
 export async function generateAndInsertText(
   selection,
@@ -91,7 +48,7 @@ export async function generateAndInsertText(
 
   // Show loading indicator on field
   injectGeneratingStyles();
-  activeField?.element.classList.add(GENERATING_CLASS);
+  if (activeField) activeField.element.dataset.copilot = "generating";
 
   panel.isLoading = true;
   document.addEventListener("keydown", handleEscape);
@@ -151,7 +108,7 @@ export async function generateAndInsertText(
       panel.t("johannschopplich.copilot.generator.error"),
     );
   } finally {
-    activeField?.element.classList.remove(GENERATING_CLASS);
+    activeField?.element.removeAttribute("data-copilot");
     panel.isLoading = false;
     document.removeEventListener("keydown", handleEscape);
   }
@@ -209,6 +166,6 @@ function injectGeneratingStyles() {
   cssInjected = true;
 
   const style = document.createElement("style");
-  style.textContent = GENERATING_STYLES;
+  style.textContent = generatingStyles;
   document.head.appendChild(style);
 }

@@ -3,8 +3,23 @@
  *
  * @remarks
  * Traverses through all nested structures including blocks, layouts, structures, etc.
+ *
+ * @param {object | object[]} fields - Single field definition or array of field definitions
+ * @param {string} fieldName - The field name to search for
+ * @param {string} [fieldType] - Optional field type to match
+ * @returns {object | undefined} The matching field definition or undefined
  */
-export function findFieldInDefinitions(fieldDefinition, fieldName, fieldType) {
+export function findFieldDefinition(fields, fieldName, fieldType) {
+  if (Array.isArray(fields)) {
+    for (const field of fields) {
+      const result = findFieldDefinition(field, fieldName, fieldType);
+      if (result) return result;
+    }
+    return;
+  }
+
+  const fieldDefinition = fields;
+
   // Check if this field matches
   if (fieldDefinition.name === fieldName) {
     // If type is specified, verify it matches
@@ -22,12 +37,8 @@ export function findFieldInDefinitions(fieldDefinition, fieldName, fieldType) {
         if (!tab.fields) continue;
 
         for (const field of Object.values(tab.fields)) {
-          const resolvedField = findFieldInDefinitions(
-            field,
-            fieldName,
-            fieldType,
-          );
-          if (resolvedField) return resolvedField;
+          const result = findFieldDefinition(field, fieldName, fieldType);
+          if (result) return result;
         }
       }
     }
@@ -36,8 +47,8 @@ export function findFieldInDefinitions(fieldDefinition, fieldName, fieldType) {
   // Search in fields (structure, object, etc.)
   if (fieldDefinition.fields) {
     for (const field of Object.values(fieldDefinition.fields)) {
-      const resolvedField = findFieldInDefinitions(field, fieldName, fieldType);
-      if (resolvedField) return resolvedField;
+      const result = findFieldDefinition(field, fieldName, fieldType);
+      if (result) return result;
     }
   }
 }
