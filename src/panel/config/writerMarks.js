@@ -39,6 +39,7 @@ const copilot = {
         tr = tr.replaceWith(position, position, node);
         return { tr, newPosition: position + 2 };
       }
+
       // Single newline → hard break
       tr = tr.replaceWith(
         position,
