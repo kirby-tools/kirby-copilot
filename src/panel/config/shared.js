@@ -4,18 +4,20 @@ import { usePluginContext, useStreamText } from "../composables";
 import { DEFAULT_SYSTEM_PROMPT, STORAGE_KEY_PREFIX } from "../constants";
 import { CopilotError } from "../utils/error";
 
+const GENERATING_CLASS = "k-copilot-generating";
+
 export async function generateAndInsertText(
   selection,
   { appendText, replaceText, responseFormat = "text" },
 ) {
   const panel = usePanel();
-  const fieldMeta = getFieldMetadata();
+  const activeField = getActiveField();
 
   if (import.meta.env.DEV) {
     // eslint-disable-next-line no-console
     console.log("Generating text for field:", {
       selection,
-      fieldMeta,
+      activeField,
       responseFormat,
     });
   }
@@ -39,11 +41,15 @@ export async function generateAndInsertText(
     }
   };
 
-  const promptContext = await openPromptDialog({ selection, fieldMeta });
+  const promptContext = await openPromptDialog({ selection, activeField });
   if (!promptContext) return;
 
   const { prompt, files } = promptContext;
   if (!prompt) return;
+
+  // Show loading indicator on field
+  injectGeneratingStyles();
+  activeField?.element.classList.add(GENERATING_CLASS);
 
   panel.isLoading = true;
   document.addEventListener("keydown", handleEscape);
@@ -103,6 +109,7 @@ export async function generateAndInsertText(
       panel.t("johannschopplich.copilot.generator.error"),
     );
   } finally {
+    activeField?.element.classList.remove(GENERATING_CLASS);
     panel.isLoading = false;
     document.removeEventListener("keydown", handleEscape);
   }
@@ -132,23 +139,42 @@ export async function openPromptDialog(props = {}) {
 }
 
 /**
- * Extracts the current field name and type from the active element in the Panel.
+ * Gets the active field element and its metadata from the Panel.
  *
- * @returns {{ name: string, type: string } | undefined} Field metadata or undefined if not in a field
+ * @returns {{ element: HTMLElement, name: string, type: string } | undefined} The active field object or undefined if not found
  */
-function getFieldMetadata() {
-  const fieldElement = document.activeElement?.closest(".k-field");
-  if (!fieldElement) return;
+function getActiveField() {
+  const element = document.activeElement?.closest(".k-field");
+  if (!element) return;
 
-  const fieldNameClass = [...fieldElement.classList].find((i) =>
-    i.startsWith("k-field-name-"),
+  const nameClass = [...element.classList].find((c) =>
+    c.startsWith("k-field-name-"),
   );
-  const fieldTypeClass = [...fieldElement.classList].find((i) =>
-    i.startsWith("k-field-type-"),
+  const typeClass = [...element.classList].find((c) =>
+    c.startsWith("k-field-type-"),
   );
 
-  const name = fieldNameClass?.replace("k-field-name-", "");
-  const type = fieldTypeClass?.replace("k-field-type-", "");
+  const name = nameClass?.replace("k-field-name-", "");
+  const type = typeClass?.replace("k-field-type-", "");
 
-  return name ? { name, type } : undefined;
+  return name ? { element, name, type } : undefined;
+}
+
+let cssInjected = false;
+
+function injectGeneratingStyles() {
+  if (cssInjected) return;
+  cssInjected = true;
+
+  const style = document.createElement("style");
+  style.textContent = `
+.k-field.${GENERATING_CLASS} .k-input {
+  animation: k-copilot-pulse 1.5s ease-in-out infinite;
+}
+@keyframes k-copilot-pulse {
+  0%, 100% { outline: 2px solid transparent; outline-offset: 0; }
+  50% { outline: 2px solid var(--color-focus); outline-offset: 0; }
+}
+`.trimStart();
+  document.head.appendChild(style);
 }

@@ -28,7 +28,7 @@ const props = defineProps({
     type: String,
     default: "",
   },
-  fieldMeta: {
+  activeField: {
     type: Object,
     default: null,
   },
@@ -128,8 +128,11 @@ useEventListener(textarea, "keydown", (event) => {
   const fields = await getViewFields();
   modelFields.value = fields;
 
-  if (props.fieldMeta) {
-    const fieldDefinition = await findFieldDefinition(fields, props.fieldMeta);
+  if (props.activeField) {
+    const fieldDefinition = await findFieldDefinition(
+      fields,
+      props.activeField,
+    );
 
     // Use field-specific custom user prompt if configured
     if (fieldDefinition?.copilot?.userPrompt) {
@@ -268,8 +271,8 @@ function getFieldPreview(fieldName) {
     : stringifiedValue;
 }
 
-async function findFieldDefinition(modelFields, fieldMeta) {
-  const { name: fieldName, type: fieldType } = fieldMeta;
+async function findFieldDefinition(modelFields, activeField) {
+  const { name: fieldName, type: fieldType } = activeField;
 
   for (const rootField of modelFields) {
     // Check if this root field matches
