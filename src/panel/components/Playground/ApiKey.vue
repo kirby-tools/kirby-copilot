@@ -24,15 +24,17 @@ export default {
 <script setup>
 defineProps(propsDefinition);
 
+const STORAGE_KEY = `${STORAGE_KEY_PREFIX}apiKey`;
+
 const text = computed({
   get() {
-    return sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`) || "";
+    return sessionStorage.getItem(STORAGE_KEY) || "";
   },
   set(value) {
     if (value) {
-      sessionStorage.setItem(`${STORAGE_KEY_PREFIX}apiKey`, value);
+      sessionStorage.setItem(STORAGE_KEY, value);
     } else {
-      sessionStorage.removeItem(`${STORAGE_KEY_PREFIX}apiKey`);
+      sessionStorage.removeItem(STORAGE_KEY);
     }
   },
 });

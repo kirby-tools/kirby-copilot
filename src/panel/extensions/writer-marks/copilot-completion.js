@@ -2,16 +2,18 @@ import { isAbortError } from "@ai-sdk/provider-utils";
 import { loadPluginModule } from "kirbyuse";
 import { PluginKey } from "prosemirror-state";
 import { Decoration, DecorationSet } from "prosemirror-view";
-import { resolveLanguageModel } from "../../composables";
+import { resolveLanguageModel, usePluginContext } from "../../composables";
 import {
   COMPLETION_MAX_TOKENS,
   COMPLETION_SYSTEM_PROMPT,
+  STORAGE_KEY_PREFIX,
 } from "../../constants";
 import { getActiveField } from "../shared";
 
-/** @typedef {import("./types").WriterMarkContext} WriterMarkContext */
-
 const DEBOUNCE_MS = 500;
+const LICENSE_TOAST_THRESHOLD = 3; // Show toast after this many completions
+const COMPLETION_COUNT_STORAGE_KEY = `${STORAGE_KEY_PREFIX}completionCount`;
+
 export const completionPluginKey = new PluginKey("copilot-completion");
 
 export const copilotCompletion = {
@@ -20,7 +22,7 @@ export const copilotCompletion = {
   },
 
   /**
-   * @param {WriterMarkContext} _context
+   * @param {import("./types").WriterMarkContext} _context
    */
   keys(_context) {
     return {
@@ -31,7 +33,7 @@ export const copilotCompletion = {
   },
 
   /**
-   * @param {WriterMarkContext} context
+   * @param {import("./types").WriterMarkContext} context
    */
   plugins(context) {
     return [createCompletionPlugin(context, this)];
@@ -51,6 +53,9 @@ export const copilotCompletion = {
       isLoading: false,
     });
     view.dispatch(tr);
+
+    // Show license toast once per session for unlicensed users
+    this._showLicenseToastOnce();
 
     return true;
   },
@@ -78,12 +83,42 @@ export const copilotCompletion = {
     view.dispatch(tr);
     return true;
   },
+
+  async _showLicenseToastOnce() {
+    // eslint-disable-next-line no-undef
+    if (__PLAYGROUND__) return;
+
+    const storedValue = sessionStorage.getItem(COMPLETION_COUNT_STORAGE_KEY);
+    if (storedValue === "done") return;
+
+    let completionCount = Number(storedValue) || 0;
+    completionCount++;
+    sessionStorage.setItem(
+      COMPLETION_COUNT_STORAGE_KEY,
+      String(completionCount),
+    );
+
+    if (completionCount < LICENSE_TOAST_THRESHOLD) return;
+
+    const context = await usePluginContext();
+
+    // Only show toast for unlicensed users, not for users
+    // with version compatibility issues (they already paid)
+    if (["inactive", "invalid"].includes(context.licenseStatus)) {
+      window.panel.notification.info({
+        icon: "key",
+        message: window.panel.t("johannschopplich.copilot.license.toast"),
+      });
+    }
+
+    sessionStorage.setItem(COMPLETION_COUNT_STORAGE_KEY, "done");
+  },
 };
 
 /**
  * Creates the ProseMirror plugin spec for tab completion.
  *
- * @param {WriterMarkContext} _context - The mark context from Kirby
+ * @param {WriterMarkCimport("./types").WriterMarkContextontext} _context - The mark context from Kirby
  * @param {object} _mark - The mark instance
  * @returns {import("prosemirror-state").PluginSpec} Plugin spec with state, view, and props
  */

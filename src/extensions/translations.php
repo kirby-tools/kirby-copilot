@@ -34,7 +34,8 @@ return [
         'johannschopplich.copilot.preview' => 'Preview',
         'johannschopplich.copilot.generator.success' => 'Content generated',
         'johannschopplich.copilot.generator.error' => 'Could not generate text. Please check console logs.',
-        'johannschopplich.copilot.generator.noFields' => 'No fields available for generation'
+        'johannschopplich.copilot.generator.noFields' => 'No fields available for generation',
+        'johannschopplich.copilot.license.toast' => 'Enjoying Copilot? Activate your license.'
     ],
     'de' => [
         'johannschopplich.copilot.label' => 'Copilot',
@@ -69,7 +70,8 @@ return [
         'johannschopplich.copilot.preview' => 'Vorschau',
         'johannschopplich.copilot.generator.success' => 'Content generiert',
         'johannschopplich.copilot.generator.error' => 'Text konnte nicht generiert werden. Bitte Konsolenprotokolle prüfen.',
-        'johannschopplich.copilot.generator.noFields' => 'Keine Felder für die Generierung verfügbar'
+        'johannschopplich.copilot.generator.noFields' => 'Keine Felder für die Generierung verfügbar',
+        'johannschopplich.copilot.license.toast' => 'Gefällt dir Copilot? Aktiviere deine Lizenz.'
     ],
     'fr' => [
         'johannschopplich.copilot.label' => 'Copilot',
@@ -104,7 +106,8 @@ return [
         'johannschopplich.copilot.preview' => 'Aperçu',
         'johannschopplich.copilot.generator.success' => 'Contenu généré',
         'johannschopplich.copilot.generator.error' => 'Impossible de générer le texte. Veuillez vérifier les journaux de la console.',
-        'johannschopplich.copilot.generator.noFields' => 'Aucun champ disponible pour la génération'
+        'johannschopplich.copilot.generator.noFields' => 'Aucun champ disponible pour la génération',
+        'johannschopplich.copilot.license.toast' => 'Vous aimez Copilot ? Activez votre licence.'
     ],
     'nl' => [
         'johannschopplich.copilot.label' => 'Copilot',
@@ -139,6 +142,7 @@ return [
         'johannschopplich.copilot.preview' => 'Voorbeeld',
         'johannschopplich.copilot.generator.success' => 'Inhoud gegenereerd',
         'johannschopplich.copilot.generator.error' => 'Kon geen tekst genereren. Controleer de console logs.',
-        'johannschopplich.copilot.generator.noFields' => 'Geen velden beschikbaar voor generatie'
+        'johannschopplich.copilot.generator.noFields' => 'Geen velden beschikbaar voor generatie',
+        'johannschopplich.copilot.license.toast' => 'Bevalt Copilot? Activeer je licentie.'
     ]
 ];
