@@ -50,8 +50,7 @@ export async function useStreamText({
     logLevel = 3;
   }
 
-  const { AISDKError, APICallError, streamText, smoothStream } =
-    await loadPluginModule("ai");
+  const { AISDKError, streamText, smoothStream } = await loadPluginModule("ai");
 
   const { userPromptWithContext, imageByteArrays, pdfByteArrays } =
     await resolveAttachments({
@@ -102,7 +101,7 @@ export async function useStreamText({
     }),
     abortSignal,
     onError({ error }) {
-      if (AISDKError.isInstance(error) || APICallError.isInstance(error)) {
+      if (AISDKError.isInstance(error)) {
         throw error;
       }
     },

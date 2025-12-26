@@ -364,10 +364,12 @@ function getFieldPreview(fieldName) {
             ref="placeholderDropdown"
             @close="isPlaceholderDropdownOpen = false"
           >
-            <header class="k-copilot-dropdown-content-header">
+            <header
+              v-if="modelFields.length > 5"
+              class="k-copilot-dropdown-content-header"
+            >
               <div class="k-copilot-dropdown-content-search">
                 <k-search-input
-                  v-if="modelFields.length > 5"
                   :value="fieldSearchQuery"
                   type="text"
                   :placeholder="

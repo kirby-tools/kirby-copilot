@@ -54,7 +54,7 @@ export async function generateAndInsertText(
   panel.isLoading = true;
 
   const { config } = await usePluginContext();
-  const { AISDKError, APICallError } = await loadPluginModule("ai");
+  const { AISDKError } = await loadPluginModule("ai");
 
   try {
     const { textStream } = await useStreamText({
@@ -93,11 +93,7 @@ export async function generateAndInsertText(
   } catch (error) {
     if (isAbortError(error)) return;
 
-    if (
-      error instanceof CopilotError ||
-      AISDKError.isInstance(error) ||
-      APICallError.isInstance(error)
-    ) {
+    if (error instanceof CopilotError || AISDKError.isInstance(error)) {
       console.error(error);
       panel.notification.error(error.message);
       return;

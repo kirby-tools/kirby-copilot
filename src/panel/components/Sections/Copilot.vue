@@ -293,13 +293,9 @@ async function generate() {
   } catch (error) {
     if (isAbortError(error)) return;
 
-    const { AISDKError, APICallError } = await loadPluginModule("ai");
+    const { AISDKError } = await loadPluginModule("ai");
 
-    if (
-      error instanceof CopilotError ||
-      AISDKError.isInstance(error) ||
-      APICallError.isInstance(error)
-    ) {
+    if (error instanceof CopilotError || AISDKError.isInstance(error)) {
       let message = error.message;
 
       if (message.includes("levels of nesting exceeds limit")) {

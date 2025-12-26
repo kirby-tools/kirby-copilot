@@ -257,7 +257,7 @@ function createCompletionPlugin(_context, _mark) {
 
       const { text } = await generateText({
         model,
-        system: COMPLETION_SYSTEM_PROMPT,
+        system: COMPLETION_SYSTEM_PROMPT.trim(),
         prompt,
         maxTokens: COMPLETION_MAX_TOKENS,
         abortSignal: abortController.signal,

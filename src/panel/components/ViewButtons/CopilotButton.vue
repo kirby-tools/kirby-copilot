@@ -118,7 +118,7 @@ async function initPromptDialog() {
   const _currentContent = { ...currentContent.value };
 
   const { config } = await usePluginContext();
-  const { AISDKError, APICallError, Output } = await loadPluginModule("ai");
+  const { AISDKError, Output } = await loadPluginModule("ai");
 
   const systemPrompt =
     props.systemPrompt || config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
@@ -176,11 +176,7 @@ async function initPromptDialog() {
   } catch (error) {
     if (isAbortError(error)) return;
 
-    if (
-      error instanceof CopilotError ||
-      AISDKError.isInstance(error) ||
-      APICallError.isInstance(error)
-    ) {
+    if (error instanceof CopilotError || AISDKError.isInstance(error)) {
       let message = error.message;
 
       if (message.includes("levels of nesting exceeds limit")) {
