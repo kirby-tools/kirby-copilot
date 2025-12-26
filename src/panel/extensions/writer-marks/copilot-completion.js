@@ -82,6 +82,13 @@ function createCompletionPlugin(_context, _mark) {
   let debounceTimer;
   let abortController;
 
+  const deduplicateRequest = () => {
+    if (abortController) {
+      abortController.abort();
+      abortController = undefined;
+    }
+  };
+
   return {
     key: completionPluginKey,
 
@@ -101,11 +108,7 @@ function createCompletionPlugin(_context, _mark) {
         if (meta !== undefined) {
           // Handle skip action from Copilot prompt dialog
           if (meta.action === "skip") {
-            if (abortController) {
-              abortController.abort();
-              abortController = undefined;
-            }
-
+            deduplicateRequest();
             return {
               suggestion: null,
               position: null,
@@ -115,9 +118,8 @@ function createCompletionPlugin(_context, _mark) {
           }
 
           // Abort any active request when loading ends (dismiss, accept, error)
-          if (meta.isLoading === false && abortController) {
-            abortController.abort();
-            abortController = undefined;
+          if (meta.isLoading === false) {
+            deduplicateRequest();
           }
 
           const { action, ...stateUpdates } = meta;
@@ -126,11 +128,7 @@ function createCompletionPlugin(_context, _mark) {
 
         // Clear suggestion on document change
         if (tr.docChanged) {
-          if (abortController) {
-            abortController.abort();
-            abortController = undefined;
-          }
-
+          deduplicateRequest();
           return {
             suggestion: null,
             position: null,
@@ -183,10 +181,7 @@ function createCompletionPlugin(_context, _mark) {
         },
         destroy() {
           clearTimeout(debounceTimer);
-          if (abortController) {
-            abortController.abort();
-            abortController = undefined;
-          }
+          deduplicateRequest();
         },
       };
     },

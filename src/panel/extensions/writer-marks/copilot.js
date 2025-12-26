@@ -85,10 +85,10 @@ export const copilot = {
     const { from, to } = state.selection;
 
     // Get HTML-formatted selection and normalize to rich-text format
-    let selection = "";
+    let currentSelection = "";
     if (from !== to) {
       const fragment = state.doc.slice(from, to).content;
-      selection = normalizeHtmlToRichText(this.editor.getHTML(fragment));
+      currentSelection = normalizeHtmlToRichText(this.editor.getHTML(fragment));
     }
 
     let cursorPosition;
@@ -140,7 +140,7 @@ export const copilot = {
       view.dispatch(newTr);
     };
 
-    generateAndInsertText(selection, {
+    generateAndInsertText(currentSelection, {
       responseFormat: "rich-text",
       replaceText,
       appendText,

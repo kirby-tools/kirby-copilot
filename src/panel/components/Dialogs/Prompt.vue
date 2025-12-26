@@ -315,7 +315,7 @@ function getFieldPreview(fieldName) {
         </summary>
         <div class="kai-px-1.5 kai-py-2">
           <p
-            class="kai-whitespace-pre-wrap kai-leading-[1.25]"
+            class="kai-whitespace-pre-wrap kai-leading-[1.375]"
             v-text="resolvedPrompt"
           />
         </div>
