@@ -195,6 +195,8 @@ tabs:
               - Use the toolbar button to open a prompt dialog. To open it programmatically, use the shortcut:
                 `Cmd + .` (macOS) or `Ctrl + .` (Windows/Linux).
 
+              **Auto-Completion** (Writer fields only): Get AI-powered text suggestions as you type! Press `Tab` to accept, `Escape` to dismiss, or `Cmd + ,` / `Ctrl + ,` to trigger manually.
+
           headlineWriter:
             type: headline
             label: Writer Fields
@@ -213,6 +215,7 @@ tabs:
               - underline
               - "|"
               - copilot
+              - copilot-completion
             copilot:
               userPrompt: Write a compelling introduction about the future of web development.
 

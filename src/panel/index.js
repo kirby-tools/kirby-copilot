@@ -9,6 +9,7 @@ import { copilotCompletion as copilotCompletionMark } from "./extensions/writer-
 import { legacyViewButtonMixin } from "./utils/legacy";
 import "./index.css";
 import "./styles/copilot-completion.css";
+import "./styles/copilot-generating.css";
 
 window.panel.plugin("johannschopplich/copilot", {
   viewButtons: {

@@ -2,6 +2,8 @@ import { DOMParser } from "prosemirror-model";
 import { generateAndInsertText } from "../shared";
 import { completionPluginKey } from "./copilot-completion";
 
+/** @typedef {import("./types").WriterMarkContext} WriterMarkContext */
+
 export const copilot = {
   get button() {
     return {
@@ -10,10 +12,16 @@ export const copilot = {
     };
   },
 
+  /**
+   * @param {WriterMarkContext} context
+   */
   commands(context) {
     return () => this._openPromptDialog(context);
   },
 
+  /**
+   * @param {WriterMarkContext} context
+   */
   keys(context) {
     return {
       "Mod-.": () => {
@@ -27,6 +35,12 @@ export const copilot = {
     return "copilot";
   },
 
+  /**
+   * @param {import("prosemirror-state").Transaction} tr
+   * @param {string} text
+   * @param {number} cursorPosition
+   * @param {WriterMarkContext} context
+   */
   _insertText(tr, text, cursorPosition, context) {
     const position = cursorPosition;
 
@@ -80,6 +94,9 @@ export const copilot = {
     return { tr, newPosition: position + text.length };
   },
 
+  /**
+   * @param {WriterMarkContext} context
+   */
   _openPromptDialog(context) {
     const { state } = this.editor;
     const { from, to } = state.selection;

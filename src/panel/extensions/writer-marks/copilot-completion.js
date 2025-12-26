@@ -7,6 +7,9 @@ import {
   COMPLETION_MAX_TOKENS,
   COMPLETION_SYSTEM_PROMPT,
 } from "../../constants";
+import { getActiveField } from "../shared";
+
+/** @typedef {import("./types").WriterMarkContext} WriterMarkContext */
 
 const DEBOUNCE_MS = 500;
 export const completionPluginKey = new PluginKey("copilot-completion");
@@ -16,7 +19,10 @@ export const copilotCompletion = {
     return "copilot-completion";
   },
 
-  keys() {
+  /**
+   * @param {WriterMarkContext} _context
+   */
+  keys(_context) {
     return {
       Tab: () => this._acceptSuggestion(),
       Escape: () => this._dismissSuggestion(),
@@ -24,6 +30,9 @@ export const copilotCompletion = {
     };
   },
 
+  /**
+   * @param {WriterMarkContext} context
+   */
   plugins(context) {
     return [createCompletionPlugin(context, this)];
   },
@@ -74,7 +83,7 @@ export const copilotCompletion = {
 /**
  * Creates the ProseMirror plugin spec for tab completion.
  *
- * @param {object} _context - The mark context from Kirby
+ * @param {WriterMarkContext} _context - The mark context from Kirby
  * @param {object} _mark - The mark instance
  * @returns {import("prosemirror-state").PluginSpec} Plugin spec with state, view, and props
  */
@@ -153,7 +162,7 @@ function createCompletionPlugin(_context, _mark) {
               manualTrigger: false,
             });
             view.dispatch(tr);
-            generateCompletion(view);
+            generateCompletion(view, { includeSuffix: true });
             return;
           }
 
@@ -213,16 +222,21 @@ function createCompletionPlugin(_context, _mark) {
     },
   };
 
-  async function generateCompletion(view) {
+  async function generateCompletion(view, { includeSuffix = false } = {}) {
     abortController?.abort();
     abortController = new AbortController();
 
     const { state } = view;
     const position = state.selection.head;
 
-    // Get text before cursor
-    const textBefore = getTextBeforeCursor(state, 500);
-    if (!textBefore.trim()) return;
+    // Get text context around cursor
+    const { prefix, suffix } = getCursorContext(state, {
+      suffixLength: includeSuffix ? 200 : 0,
+    });
+    if (!prefix.trim()) return;
+
+    const activeField = getActiveField();
+    if (activeField) activeField.element.dataset.copilot = "generating";
 
     // Mark as loading
     const tr = state.tr.setMeta(completionPluginKey, {
@@ -236,16 +250,21 @@ function createCompletionPlugin(_context, _mark) {
       const { model } = await resolveLanguageModel({ forCompletion: true });
       const { generateText } = await loadPluginModule("ai");
 
+      // Use prefix/suffix format when there's text after cursor (manual trigger mid-text)
+      const prompt = suffix
+        ? `<prefix>${prefix}</prefix>\n<suffix>${suffix}</suffix>`
+        : prefix;
+
       const { text } = await generateText({
         model,
         system: COMPLETION_SYSTEM_PROMPT,
-        prompt: textBefore,
+        prompt,
         maxTokens: COMPLETION_MAX_TOKENS,
         abortSignal: abortController.signal,
       });
 
       // Apply space prefix logic
-      const needsSpace = textBefore.length > 0 && !/\s$/.test(textBefore);
+      const needsSpace = prefix.length > 0 && !/\s$/.test(prefix);
       const suggestion =
         needsSpace && !text.startsWith(" ") ? ` ${text}` : text;
 
@@ -269,6 +288,7 @@ function createCompletionPlugin(_context, _mark) {
       });
       view.dispatch(errorTr);
     } finally {
+      if (activeField) delete activeField.element.dataset.copilot;
       abortController = undefined;
     }
   }
@@ -286,21 +306,29 @@ function isCursorAtEndOfBlock(state) {
 }
 
 /**
- * Gets text before the cursor, limited to a maximum length.
+ * Gets text context around the cursor for completion (FIM pattern).
  *
  * @param {import("prosemirror-state").EditorState} state - The editor state
- * @param {number} [maxLength] - Maximum length of text to return
- * @returns {string} Text before the cursor
+ * @param {object} [options]
+ * @param {number} [options.prefixLength] - Max chars before cursor
+ * @param {number} [options.suffixLength] - Max chars after cursor (0 = no suffix)
+ * @returns {{ prefix: string, suffix: string | undefined }} Text before and optionally after cursor
  */
-function getTextBeforeCursor(state, maxLength = 500) {
+function getCursorContext(
+  state,
+  { prefixLength = 500, suffixLength = 0 } = {},
+) {
   const { $head } = state.selection;
-
-  // Get text from current block
   const blockText = $head.parent.textContent;
   const offset = $head.parentOffset;
-  const textInBlock = blockText.slice(0, offset);
 
-  return textInBlock.slice(-maxLength);
+  const prefix = blockText.slice(0, offset).slice(-prefixLength);
+  const suffix =
+    suffixLength > 0
+      ? blockText.slice(offset, offset + suffixLength)
+      : undefined;
+
+  return { prefix, suffix };
 }
 
 /**

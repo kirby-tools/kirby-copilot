@@ -6,7 +6,6 @@ import {
   useStreamText,
 } from "../composables";
 import { DEFAULT_SYSTEM_PROMPT, STORAGE_KEY_PREFIX } from "../constants";
-import generatingStyles from "../styles/copilot-generating.css?raw";
 import { CopilotError } from "../utils/error";
 
 export async function generateAndInsertText(
@@ -50,12 +49,9 @@ export async function generateAndInsertText(
   const { prompt, files } = promptContext;
   if (!prompt) return;
 
-  // Show loading indicator on field
-  injectGeneratingStyles();
   if (activeField) activeField.element.dataset.copilot = "generating";
-
-  panel.isLoading = true;
   document.addEventListener("keydown", handleEscape);
+  panel.isLoading = true;
 
   const { config } = await usePluginContext();
   const { AISDKError, APICallError } = await loadPluginModule("ai");
@@ -112,9 +108,9 @@ export async function generateAndInsertText(
       panel.t("johannschopplich.copilot.generator.error"),
     );
   } finally {
-    activeField?.element.removeAttribute("data-copilot");
-    panel.isLoading = false;
+    if (activeField) delete activeField.element.dataset.copilot;
     document.removeEventListener("keydown", handleEscape);
+    panel.isLoading = false;
   }
 }
 
@@ -123,7 +119,7 @@ export async function generateAndInsertText(
  *
  * @returns {{ element: HTMLElement, name: string, type: string } | undefined} The active field object or undefined if not found
  */
-function getActiveField() {
+export function getActiveField() {
   const element = document.activeElement?.closest(".k-field");
   if (!element) return;
 
@@ -138,15 +134,4 @@ function getActiveField() {
   const type = typeClass?.replace("k-field-type-", "");
 
   return name ? { element, name, type } : undefined;
-}
-
-let cssInjected = false;
-
-function injectGeneratingStyles() {
-  if (cssInjected) return;
-  cssInjected = true;
-
-  const style = document.createElement("style");
-  style.textContent = generatingStyles;
-  document.head.appendChild(style);
 }

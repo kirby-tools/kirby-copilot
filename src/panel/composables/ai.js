@@ -112,7 +112,7 @@ export async function useStreamText({
 /**
  * Resolves the language model and provider options for the configured AI provider.
  *
- * @param {object} [options] - Model resolution options
+ * @param {object} [options]
  * @param {boolean} [options.forCompletion] - Whether to use a fast, lightweight model for inline text completions instead of the main model configured for generation tasks
  * @returns {Promise<{model: import("@ai-sdk/provider").LanguageModelV3, providerOptions?: Record<string, any>}>} The resolved language model instance and optional provider-specific options
  */
