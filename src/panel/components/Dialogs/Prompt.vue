@@ -51,31 +51,36 @@ const contentContext = createContentContext();
 
 const textareaComponent = ref();
 const textarea = computed(() => textareaComponent.value?.el);
+const prompt = ref(props.userPrompt || "");
+const files = ref([]);
+const licenseStatus = ref();
+
+const viewFields = ref(props.fields);
 const fieldsDropdown = ref();
+const selectedFields = ref([]);
 const placeholderDropdown = ref();
 const isPlaceholderDropdownOpen = ref(false);
+const placeholderSearch = ref("");
 const templateDropdown = ref();
 const historyDropdown = ref();
-const fieldSearchQuery = ref("");
-const files = ref([]);
-const selectedFields = ref([]);
 const insertOption = ref("append");
-const prompt = ref(props.userPrompt || "");
-const licenseStatus = ref();
-const modelFields = ref([]);
+
+// Prompt dialog is used in two contexts:
+// 1. Field selection mode (Panel view button): Generate content for multiple fields
+// 2. Inline mode (Writer toolbar): Append/replace text within a single field
+const isFieldSelectionMode = computed(() => props.fields.length > 0);
 
 const recentPrompts = computed(() => getRecentEntries(10));
-
 const hasPlaceholders = computed(() => /\{\w+\}/.test(prompt.value));
 const resolvedPrompt = computed(() =>
   renderTemplate(prompt.value, contentContext, (key) => `{${key}}`).trim(),
 );
 
-const filteredModelFields = computed(() => {
-  const query = fieldSearchQuery.value.toLowerCase();
-  if (!query.trim()) return modelFields.value;
+const filteredPlaceholderFields = computed(() => {
+  const query = placeholderSearch.value.toLowerCase();
+  if (!query.trim()) return viewFields.value;
 
-  return modelFields.value.filter(
+  return viewFields.value.filter(
     (field) =>
       field.name.toLowerCase().includes(query) ||
       (field.label && field.label.toLowerCase().includes(query)),
@@ -89,7 +94,7 @@ useEventListener(textarea, "keydown", (event) => {
 
     if (
       !prompt.value.trim() ||
-      (props.fields.length > 0 && selectedFields.value.length === 0)
+      (isFieldSelectionMode.value && selectedFields.value.length === 0)
     )
       return;
 
@@ -124,13 +129,14 @@ useEventListener(textarea, "keydown", (event) => {
     // eslint-disable-next-line no-undef
     __PLAYGROUND__ ? "active" : context.licenseStatus;
 
-  // Fetch model fields for placeholder insertion
-  const fields = await getViewFields();
-  modelFields.value = fields;
+  // Fetch view fields for placeholder insertion if not passed as props
+  if (viewFields.value.length === 0) {
+    viewFields.value = await getViewFields();
+  }
 
   if (props.activeField) {
     const fieldDefinition = findFieldDefinition(
-      fields,
+      viewFields.value,
       props.activeField.name,
       props.activeField.type,
     );
@@ -143,7 +149,7 @@ useEventListener(textarea, "keydown", (event) => {
 })();
 
 function submit() {
-  if (props.fields.length > 0 && selectedFields.value.length === 0) {
+  if (isFieldSelectionMode.value && selectedFields.value.length === 0) {
     panel.notification.info(panel.t("johannschopplich.copilot.selectFields"));
     return;
   }
@@ -165,7 +171,7 @@ async function pickFiles() {
 function togglePlaceholderDropdown() {
   if (!isPlaceholderDropdownOpen.value) {
     // Reset search when opening dropdown
-    fieldSearchQuery.value = "";
+    placeholderSearch.value = "";
   }
 
   isPlaceholderDropdownOpen.value = !isPlaceholderDropdownOpen.value;
@@ -357,7 +363,7 @@ function getFieldPreview(fieldName) {
           />
 
           <!-- Placeholder insertion dropdown -->
-          <template v-if="modelFields.length > 0">
+          <template v-if="viewFields.length > 0">
             <k-button
               icon="copilot-text-snippet"
               :dropdown="true"
@@ -372,17 +378,17 @@ function getFieldPreview(fieldName) {
               @close="isPlaceholderDropdownOpen = false"
             >
               <header
-                v-if="modelFields.length > 5"
+                v-if="viewFields.length > 5"
                 class="k-copilot-dropdown-content-header"
               >
                 <div class="k-copilot-dropdown-content-search">
                   <k-search-input
-                    :value="fieldSearchQuery"
+                    :value="placeholderSearch"
                     type="text"
                     :placeholder="
                       panel.t('johannschopplich.copilot.placeholder.search')
                     "
-                    @input="fieldSearchQuery = $event"
+                    @input="placeholderSearch = $event"
                     @click.native.stop
                     @keydown.native.stop
                     @keydown.escape.native.prevent="togglePlaceholderDropdown()"
@@ -392,7 +398,7 @@ function getFieldPreview(fieldName) {
 
               <div class="k-copilot-dropdown-content-body">
                 <k-dropdown-item
-                  v-for="field in filteredModelFields"
+                  v-for="field in filteredPlaceholderFields"
                   :key="field.name"
                   @click="insertFieldPlaceholder(field.name)"
                 >
@@ -407,7 +413,7 @@ function getFieldPreview(fieldName) {
                   </span>
                 </k-dropdown-item>
                 <k-dropdown-item
-                  v-if="filteredModelFields.length === 0"
+                  v-if="filteredPlaceholderFields.length === 0"
                   disabled
                 >
                   {{ panel.t("johannschopplich.copilot.placeholder.notFound") }}
@@ -487,7 +493,7 @@ function getFieldPreview(fieldName) {
 
         <!-- Action buttons -->
         <div class="kai-flex kai-gap-2">
-          <template v-if="fields.length > 0">
+          <template v-if="isFieldSelectionMode">
             <k-button
               :text="panel.t('johannschopplich.copilot.fields')"
               variant="filled"
@@ -505,7 +511,7 @@ function getFieldPreview(fieldName) {
             <k-picklist-dropdown
               ref="fieldsDropdown"
               :options="
-                fields.map((field) => ({
+                viewFields.map((field) => ({
                   value: field.name,
                   text: field.label || field.name,
                 }))
