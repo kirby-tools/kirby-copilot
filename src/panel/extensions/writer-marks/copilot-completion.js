@@ -1,4 +1,3 @@
-import { isAbortError } from "@ai-sdk/provider-utils";
 import { loadPluginModule } from "kirbyuse";
 import { PluginKey } from "prosemirror-state";
 import { Decoration, DecorationSet } from "prosemirror-view";
@@ -270,6 +269,9 @@ function createCompletionPlugin(_context, _mark) {
     });
     view.dispatch(tr);
 
+    // Capture signal reference to detect if this generation gets cancelled
+    const { signal } = abortController;
+
     try {
       const { model } = await resolveLanguageModel({ forCompletion: true });
       const { streamText } = await loadPluginModule("ai");
@@ -292,6 +294,8 @@ function createCompletionPlugin(_context, _mark) {
       let fullText = "";
 
       for await (const chunk of textStream) {
+        if (signal.aborted) return;
+
         fullText += chunk;
 
         // Apply space prefix on first chunk if needed
@@ -308,6 +312,8 @@ function createCompletionPlugin(_context, _mark) {
         view.dispatch(streamTr);
       }
 
+      if (signal.aborted) return;
+
       // Mark streaming complete
       const finalSuggestion =
         shouldPrependSpace && !fullText.startsWith(" ")
@@ -321,11 +327,12 @@ function createCompletionPlugin(_context, _mark) {
       });
       view.dispatch(completeTr);
     } catch (error) {
-      if (isAbortError(error)) return;
+      // If intentionally aborted, state was already cleared by the aborter
+      if (signal.aborted) return;
 
       console.error("Failed to generate completion:", error);
 
-      // Clear state on error
+      // Clear state on unexpected error
       const errorTr = view.state.tr.setMeta(completionPluginKey, {
         suggestion: null,
         position: null,
@@ -353,6 +360,9 @@ function isCursorAtEndOfBlock(state) {
 /**
  * Gets text context around the cursor for completion (FIM pattern).
  *
+ * @remarks
+ * Includes text from previous blocks for better context on new lines.
+ *
  * @param {import("prosemirror-state").EditorState} state - The editor state
  * @param {object} [options]
  * @param {number} [options.prefixLength] - Max chars before cursor
@@ -364,10 +374,16 @@ function getCursorContext(
   { prefixLength = 500, suffixLength = 0 } = {},
 ) {
   const { $head } = state.selection;
+  const cursorPos = $head.pos;
+
+  // Get text from document start to cursor, with double newlines between blocks
+  const prefix = state.doc
+    .textBetween(0, cursorPos, "\n\n")
+    .slice(-prefixLength);
+
+  // For suffix, only look within current block (don't cross block boundaries)
   const blockText = $head.parent.textContent;
   const offset = $head.parentOffset;
-
-  const prefix = blockText.slice(0, offset).slice(-prefixLength);
   const suffix =
     suffixLength > 0
       ? blockText.slice(offset, offset + suffixLength)
