@@ -93,7 +93,7 @@ export async function generateAndInsertText(
 
     panel.notification.success({
       icon: "sparkling",
-      message: panel.t("johannschopplich.copilot.generator.success"),
+      message: panel.t("johannschopplich.copilot.notification.success"),
     });
   } catch (error) {
     if (signal.aborted) return;
@@ -106,7 +106,7 @@ export async function generateAndInsertText(
 
     console.error(error);
     panel.notification.error(
-      panel.t("johannschopplich.copilot.generator.error"),
+      panel.t("johannschopplich.copilot.notification.error"),
     );
   } finally {
     if (activeField) delete activeField.element.dataset.copilot;

@@ -76,9 +76,7 @@ async function initPromptDialog() {
   const fields = await getViewFields();
 
   if (fields.length === 0) {
-    panel.notification.error(
-      panel.t("johannschopplich.copilot.generator.noFields"),
-    );
+    panel.notification.error(panel.t("johannschopplich.copilot.fields.empty"));
     return;
   }
 
@@ -174,7 +172,7 @@ async function initPromptDialog() {
 
     panel.notification.success({
       icon: "sparkling",
-      message: panel.t("johannschopplich.copilot.generator.success"),
+      message: panel.t("johannschopplich.copilot.notification.success"),
     });
   } catch (error) {
     if (signal.aborted) return;
@@ -194,7 +192,7 @@ async function initPromptDialog() {
 
     console.error(error);
     panel.notification.error(
-      panel.t("johannschopplich.copilot.generator.error"),
+      panel.t("johannschopplich.copilot.notification.error"),
     );
   } finally {
     abortController = undefined;

@@ -16,13 +16,12 @@ import { createContentContext } from "./content";
 import { useLogger } from "./logger";
 import { usePluginContext } from "./plugin";
 
+const DEFAULT_PLAYGROUND_MODEL_PROVIDER = "google";
 const PLAYGROUND_PROVIDER_MODEL_MAP = {
   openai: "openaimodel",
   google: "googlemodel",
   anthropic: "anthropicmodel",
 };
-
-const DEFAULT_PLAYGROUND_MODEL_PROVIDER = "google";
 
 /**
  * Streams text from an AI provider using the configured model.

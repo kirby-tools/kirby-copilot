@@ -51,7 +51,7 @@ const contentContext = createContentContext();
 
 const textareaComponent = ref();
 const textarea = computed(() => textareaComponent.value?.el);
-const picklist = ref();
+const fieldsDropdown = ref();
 const placeholderDropdown = ref();
 const isPlaceholderDropdownOpen = ref(false);
 const templateDropdown = ref();
@@ -143,6 +143,11 @@ useEventListener(textarea, "keydown", (event) => {
 })();
 
 function submit() {
+  if (props.fields.length > 0 && selectedFields.value.length === 0) {
+    panel.notification.info(panel.t("johannschopplich.copilot.selectFields"));
+    return;
+  }
+
   addToHistory(prompt.value);
   emit("submit", {
     prompt: prompt.value,
@@ -324,7 +329,7 @@ function getFieldPreview(fieldName) {
       <div
         class="kai-flex kai-items-center kai-justify-between kai-px-2 kai-pb-2"
       >
-        <k-button-group class="kai-gap-1">
+        <div class="kai-flex kai-flex-wrap kai-items-center kai-gap-1">
           <!-- File picker button -->
           <k-button
             icon="attachment"
@@ -352,58 +357,64 @@ function getFieldPreview(fieldName) {
           />
 
           <!-- Placeholder insertion dropdown -->
-          <k-button
-            v-if="modelFields.length > 0"
-            icon="copilot-text-snippet"
-            :dropdown="true"
-            :aria-label="panel.t('johannschopplich.copilot.insertPlaceholder')"
-            class="max-sm:kai-hidden"
-            @click="togglePlaceholderDropdown()"
-          />
-          <ContentDropdown
-            ref="placeholderDropdown"
-            @close="isPlaceholderDropdownOpen = false"
-          >
-            <header
-              v-if="modelFields.length > 5"
-              class="k-copilot-dropdown-content-header"
+          <template v-if="modelFields.length > 0">
+            <k-button
+              icon="copilot-text-snippet"
+              :dropdown="true"
+              :aria-label="
+                panel.t('johannschopplich.copilot.placeholder.insert')
+              "
+              class="max-sm:kai-hidden"
+              @click="togglePlaceholderDropdown()"
+            />
+            <ContentDropdown
+              ref="placeholderDropdown"
+              @close="isPlaceholderDropdownOpen = false"
             >
-              <div class="k-copilot-dropdown-content-search">
-                <k-search-input
-                  :value="fieldSearchQuery"
-                  type="text"
-                  :placeholder="
-                    panel.t('johannschopplich.copilot.searchFields')
-                  "
-                  @input="fieldSearchQuery = $event"
-                  @click.native.stop
-                  @keydown.native.stop
-                  @keydown.escape.native.prevent="togglePlaceholderDropdown()"
-                />
-              </div>
-            </header>
-
-            <div class="k-copilot-dropdown-content-body">
-              <k-dropdown-item
-                v-for="field in filteredModelFields"
-                :key="field.name"
-                @click="insertFieldPlaceholder(field.name)"
+              <header
+                v-if="modelFields.length > 5"
+                class="k-copilot-dropdown-content-header"
               >
-                <span class="kai-inline-flex kai-w-full kai-gap-3">
-                  <span>{{ field.label || field.name }}</span>
-                  <span
-                    v-if="getFieldPreview(field.name)"
-                    class="kai-truncate kai-text-[var(--color-text-dimmed)] [font-size:var(--font-size-tiny)]"
-                  >
-                    {{ getFieldPreview(field.name) }}
+                <div class="k-copilot-dropdown-content-search">
+                  <k-search-input
+                    :value="fieldSearchQuery"
+                    type="text"
+                    :placeholder="
+                      panel.t('johannschopplich.copilot.placeholder.search')
+                    "
+                    @input="fieldSearchQuery = $event"
+                    @click.native.stop
+                    @keydown.native.stop
+                    @keydown.escape.native.prevent="togglePlaceholderDropdown()"
+                  />
+                </div>
+              </header>
+
+              <div class="k-copilot-dropdown-content-body">
+                <k-dropdown-item
+                  v-for="field in filteredModelFields"
+                  :key="field.name"
+                  @click="insertFieldPlaceholder(field.name)"
+                >
+                  <span class="kai-inline-flex kai-w-full kai-gap-3">
+                    <span>{{ field.label || field.name }}</span>
+                    <span
+                      v-if="getFieldPreview(field.name)"
+                      class="kai-truncate kai-text-[var(--color-text-dimmed)] [font-size:var(--font-size-tiny)]"
+                    >
+                      {{ getFieldPreview(field.name) }}
+                    </span>
                   </span>
-                </span>
-              </k-dropdown-item>
-              <k-dropdown-item v-if="filteredModelFields.length === 0" disabled>
-                {{ panel.t("johannschopplich.copilot.noFieldsFound") }}
-              </k-dropdown-item>
-            </div>
-          </ContentDropdown>
+                </k-dropdown-item>
+                <k-dropdown-item
+                  v-if="filteredModelFields.length === 0"
+                  disabled
+                >
+                  {{ panel.t("johannschopplich.copilot.placeholder.notFound") }}
+                </k-dropdown-item>
+              </div>
+            </ContentDropdown>
+          </template>
 
           <!-- Templates dropdown -->
           <k-button
@@ -452,29 +463,27 @@ function getFieldPreview(fieldName) {
           </ContentDropdown>
 
           <!-- History dropdown -->
-          <k-button
-            v-if="recentPrompts.length > 0"
-            icon="clock"
-            :aria-label="panel.t('johannschopplich.copilot.history')"
-            :dropdown="true"
-            class="max-sm:kai-hidden"
-            @click="historyDropdown?.toggle()"
-          />
-          <ContentDropdown
-            v-if="recentPrompts.length > 0"
-            ref="historyDropdown"
-          >
-            <div class="k-copilot-dropdown-content-body">
-              <k-dropdown-item
-                v-for="(promptText, index) in recentPrompts"
-                :key="index"
-                @click="loadPromptFromHistory(promptText)"
-              >
-                <span class="kai-truncate">{{ promptText }}</span>
-              </k-dropdown-item>
-            </div>
-          </ContentDropdown>
-        </k-button-group>
+          <template v-if="recentPrompts.length > 0">
+            <k-button
+              icon="clock"
+              :aria-label="panel.t('johannschopplich.copilot.history')"
+              :dropdown="true"
+              class="max-sm:kai-hidden"
+              @click="historyDropdown?.toggle()"
+            />
+            <ContentDropdown ref="historyDropdown">
+              <div class="k-copilot-dropdown-content-body">
+                <k-dropdown-item
+                  v-for="(promptText, index) in recentPrompts"
+                  :key="index"
+                  @click="loadPromptFromHistory(promptText)"
+                >
+                  <span class="kai-truncate">{{ promptText }}</span>
+                </k-dropdown-item>
+              </div>
+            </ContentDropdown>
+          </template>
+        </div>
 
         <!-- Action buttons -->
         <div class="kai-flex kai-gap-2">
@@ -491,10 +500,10 @@ function getFieldPreview(fieldName) {
                   : undefined
               "
               dropdown
-              @click="picklist.toggle()"
+              @click="fieldsDropdown?.toggle()"
             />
             <k-picklist-dropdown
-              ref="picklist"
+              ref="fieldsDropdown"
               :options="
                 fields.map((field) => ({
                   value: field.name,
@@ -528,10 +537,7 @@ function getFieldPreview(fieldName) {
             theme="notice-icon"
             variant="filled"
             icon="sparkling"
-            :disabled="
-              !prompt.trim() ||
-              (fields.length > 0 && selectedFields.length === 0)
-            "
+            :disabled="!prompt.trim()"
             @click="submit()"
           >
             {{ panel.t("johannschopplich.copilot.generate") }}

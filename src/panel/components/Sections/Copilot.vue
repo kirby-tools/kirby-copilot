@@ -292,7 +292,7 @@ async function generate() {
 
     panel.notification.success({
       icon: "sparkling",
-      message: panel.t("johannschopplich.copilot.generator.success"),
+      message: panel.t("johannschopplich.copilot.notification.success"),
     });
   } catch (error) {
     if (signal.aborted) return;
@@ -313,7 +313,7 @@ async function generate() {
 
     console.error(error);
     panel.notification.error(
-      panel.t("johannschopplich.copilot.generator.error"),
+      panel.t("johannschopplich.copilot.notification.error"),
     );
   } finally {
     abortController = undefined;
@@ -506,7 +506,7 @@ function onModelSave() {
                 currentPrompt !== userPrompt
               "
               icon="undo"
-              :text="panel.t('johannschopplich.copilot.reset')"
+              :text="panel.t('johannschopplich.copilot.context.reset')"
               variant="dimmed"
               size="xs"
               class="kai-ml-auto"
