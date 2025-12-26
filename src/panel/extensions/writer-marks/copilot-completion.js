@@ -269,7 +269,7 @@ function createCompletionPlugin(context, mark) {
     });
     view.dispatch(tr);
 
-    // Capture signal reference to detect if this generation gets cancelled
+    // Capture signal reference to detect if generation gets cancelled
     const { signal } = abortController;
 
     try {

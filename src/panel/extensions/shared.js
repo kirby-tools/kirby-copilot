@@ -1,4 +1,3 @@
-import { isAbortError } from "@ai-sdk/provider-utils";
 import { loadPluginModule, usePanel } from "kirbyuse";
 import {
   openPromptDialog,
@@ -56,6 +55,9 @@ export async function generateAndInsertText(
   const { config } = await usePluginContext();
   const { AISDKError } = await loadPluginModule("ai");
 
+  // Capture signal reference to detect if generation gets cancelled
+  const { signal } = abortController;
+
   try {
     const { textStream } = await useStreamText({
       userPrompt: [
@@ -74,6 +76,8 @@ export async function generateAndInsertText(
     let isFirstInsertion = true;
 
     for await (let textPart of textStream) {
+      if (signal.aborted) return;
+
       if (promptContext.append) {
         if (isFirstInsertion) {
           textPart =
@@ -92,7 +96,7 @@ export async function generateAndInsertText(
       message: panel.t("johannschopplich.copilot.generator.success"),
     });
   } catch (error) {
-    if (isAbortError(error)) return;
+    if (signal.aborted) return;
 
     if (error instanceof CopilotError || AISDKError.isInstance(error)) {
       console.error(error);

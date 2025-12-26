@@ -1,5 +1,4 @@
 <script setup>
-import { isAbortError } from "@ai-sdk/provider-utils";
 import { loadPluginModule, ref, useContent, usePanel } from "kirbyuse";
 import { z } from "zod";
 import {
@@ -123,6 +122,9 @@ async function initPromptDialog() {
   const systemPrompt =
     props.systemPrompt || config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
 
+  // Capture signal reference to detect if generation gets cancelled
+  const { signal } = abortController;
+
   try {
     const { partialOutputStream, output: finalOutput } = await useStreamText({
       userPrompt: prompt,
@@ -141,6 +143,7 @@ async function initPromptDialog() {
 
     // Stream partial updates
     for await (const partialOutput of partialOutputStream) {
+      if (signal.aborted) return;
       if (!partialOutput) continue;
 
       const updatedContent = processFieldValues({
@@ -174,7 +177,7 @@ async function initPromptDialog() {
       message: panel.t("johannschopplich.copilot.generator.success"),
     });
   } catch (error) {
-    if (isAbortError(error)) return;
+    if (signal.aborted) return;
 
     if (error instanceof CopilotError || AISDKError.isInstance(error)) {
       let message = error.message;

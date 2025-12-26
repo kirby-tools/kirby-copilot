@@ -1,5 +1,4 @@
 <script>
-import { isAbortError } from "@ai-sdk/provider-utils";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import {
   computed,
@@ -207,6 +206,9 @@ async function generate() {
   const { getZodSchema: getLayoutZodSchema, normalizeLayout } = useLayouts();
   const { Output } = await loadPluginModule("ai");
 
+  // Capture signal reference to detect if generation gets cancelled
+  const { signal } = abortController;
+
   try {
     let text = "";
     let structuredOutput = [];
@@ -230,6 +232,7 @@ async function generate() {
 
       // Stream partial updates
       for await (const partialOutput of partialOutputStream) {
+        if (signal.aborted) return;
         if (!partialOutput || !Array.isArray(partialOutput)) continue;
 
         await updateContent(
@@ -259,6 +262,7 @@ async function generate() {
       });
 
       for await (const textPart of textStream) {
+        if (signal.aborted) return;
         text += textPart;
 
         await updateContent(
@@ -291,7 +295,7 @@ async function generate() {
       message: panel.t("johannschopplich.copilot.generator.success"),
     });
   } catch (error) {
-    if (isAbortError(error)) return;
+    if (signal.aborted) return;
 
     const { AISDKError } = await loadPluginModule("ai");
 
