@@ -30,6 +30,14 @@ export const PROVIDER_REASONING_MAP = {
 export const DEFAULT_REASONING_EFFORT = "low";
 
 /// keep-sorted
+export const DEFAULT_COMPLETION_MODELS = {
+  anthropic: "claude-haiku-4-5-20251001",
+  google: "gemini-3-flash-preview",
+  mistral: "mistral-small-latest",
+  openai: "gpt-5-nano",
+};
+
+/// keep-sorted
 export const SUPPORTED_IMAGE_MIME_TYPES = [
   "image/gif",
   "image/jpeg",
@@ -73,3 +81,16 @@ When <response_format> is provided, format your response as:
 
 When <selection> is provided, use it as context for your response. If <selection> contains formatting, preserve similar formatting in your response.
 `;
+
+export const COMPLETION_SYSTEM_PROMPT = `
+You are a writing assistant providing inline autocompletions.
+
+CRITICAL RULES:
+- Output ONLY the NEW text that continues the user's input
+- NEVER repeat any words from the end of the user's text
+- Keep completions short (1-2 sentences max)
+- Match the tone and style of the existing text
+- Do not include any explanations or meta-commentary
+`;
+
+export const COMPLETION_MAX_TOKENS = 50;

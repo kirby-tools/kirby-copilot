@@ -1,5 +1,6 @@
 import { DOMParser } from "prosemirror-model";
 import { generateAndInsertText } from "../shared";
+import { completionPluginKey } from "./copilot-completion";
 
 export const copilot = {
   get button() {
@@ -15,7 +16,10 @@ export const copilot = {
 
   keys(context) {
     return {
-      "Mod-.": () => this._openPromptDialog(context),
+      "Mod-.": () => {
+        this._openPromptDialog(context);
+        return true;
+      },
     };
   },
 
@@ -107,6 +111,7 @@ export const copilot = {
       );
 
       cursorPosition = newPosition;
+      newTr.setMeta(completionPluginKey, { action: "skip" });
       view.dispatch(newTr);
     };
 
@@ -131,6 +136,7 @@ export const copilot = {
         context,
       );
       cursorPosition = newPosition;
+      newTr.setMeta(completionPluginKey, { action: "skip" });
       view.dispatch(newTr);
     };
 

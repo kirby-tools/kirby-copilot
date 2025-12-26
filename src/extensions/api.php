@@ -19,8 +19,20 @@ return [
                 $defaultConfig = [
                     'provider' => 'google',
                     'providers' => [
+                        'openai' => [
+                            'model' => 'gpt-5.2',
+                            'completionModel' => 'gpt-5-nano'
+                        ],
                         'google' => [
-                            'model' => 'gemini-3-flash-preview'
+                            'model' => 'gemini-3-flash-preview',
+                            'completionModel' => 'gemini-3-flash-preview'
+                        ],
+                        'anthropic' => [
+                            'model' => 'claude-sonnet-4-5-20250929',
+                            'completionModel' => 'claude-haiku-4-5-20251001'
+                        ],
+                        'mistral' => [
+                            'completionModel' => 'mistral-small-latest'
                         ]
                     ],
                     'logLevel' => 'warn',

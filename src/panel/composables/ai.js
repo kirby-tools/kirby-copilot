@@ -1,5 +1,6 @@
 import { loadPluginModule, useContent } from "kirbyuse";
 import {
+  DEFAULT_COMPLETION_MODELS,
   DEFAULT_REASONING_EFFORT,
   PDF_SIZE_LIMIT,
   PROVIDER_REASONING_MAP,
@@ -14,7 +15,7 @@ import { createContentContext } from "./content";
 import { useLogger } from "./logger";
 import { usePluginContext } from "./plugin";
 
-const PROVIDER_MODEL_MAP = {
+const PLAYGROUND_PROVIDER_MODEL_MAP = {
   openai: "openaimodel",
   google: "googlemodel",
   anthropic: "anthropicmodel",
@@ -23,7 +24,15 @@ const PROVIDER_MODEL_MAP = {
 /**
  * Streams text from an AI provider using the configured model.
  *
- * @returns {Promise<ReturnType<typeof import("ai").streamText>>} A streamable text response from the AI provider
+ * @param {object} options - Text streaming configuration
+ * @param {string} options.userPrompt - The prompt text to send to the AI model
+ * @param {string} [options.systemPrompt] - System instructions for the AI
+ * @param {import("ai").Output} [options.output] - Output schema for structured object/array responses
+ * @param {string} [options.responseFormat] - Response format: `text`, `markdown`, or `rich-text`
+ * @param {File[]} [options.files] - File attachments (images or PDF documents)
+ * @param {number} [options.logLevel] - Logging verbosity: 0 (error), 1 (warn), 2 (info), 3 (debug)
+ * @param {AbortSignal} [options.abortSignal] - Signal to abort the streaming request
+ * @returns {Promise<ReturnType<typeof import("ai").streamText>>} A streamable response with `textStream` and other properties
  */
 export async function useStreamText({
   userPrompt,
@@ -100,18 +109,29 @@ export async function useStreamText({
   });
 }
 
-async function resolveLanguageModel() {
+/**
+ * Resolves the language model and provider options for the configured AI provider.
+ *
+ * @param {object} [options] - Model resolution options
+ * @param {boolean} [options.forCompletion] - Whether to use a fast, lightweight model for inline text completions instead of the main model configured for generation tasks
+ * @returns {Promise<{model: import("@ai-sdk/provider").LanguageModelV3, providerOptions?: Record<string, any>}>} The resolved language model instance and optional provider-specific options
+ */
+export async function resolveLanguageModel({ forCompletion = false } = {}) {
   let { config } = await usePluginContext();
 
-  // eslint-disable-next-line no-undef
-  if (__PLAYGROUND__ && !window.location.hostname.includes("localhost")) {
+  if (
+    // eslint-disable-next-line no-undef
+    __PLAYGROUND__ &&
+    !forCompletion &&
+    !window.location.hostname.includes("localhost")
+  ) {
     config = JSON.parse(JSON.stringify(config));
     const { currentContent } = useContent();
 
     const selectedProvider = currentContent.value.modelprovider || "openai";
     config.provider = selectedProvider;
 
-    const modelField = PROVIDER_MODEL_MAP[selectedProvider];
+    const modelField = PLAYGROUND_PROVIDER_MODEL_MAP[selectedProvider];
     const selectedModel = currentContent.value[modelField];
 
     if (selectedModel) {
@@ -127,7 +147,7 @@ async function resolveLanguageModel() {
   }
 
   // eslint-disable-next-line no-undef
-  if (!__PLAYGROUND__) {
+  if (!__PLAYGROUND__ && !forCompletion) {
     for (const field of ["apiKey", "model"]) {
       if (!config.providers?.[config.provider]?.[field]) {
         throw new CopilotError(
@@ -145,7 +165,7 @@ async function resolveLanguageModel() {
   } = await loadPluginModule("ai");
 
   const provider = config.provider;
-  const providerConfig = config.providers[provider];
+  const providerConfig = config.providers[provider] ?? {};
 
   /// keep-sorted
   const createProvider = {
@@ -169,14 +189,28 @@ async function resolveLanguageModel() {
       : undefined),
   });
 
-  const model = api.languageModel(providerConfig.model);
-  const reasoningEffort = config.reasoningEffort ?? DEFAULT_REASONING_EFFORT;
+  // Model selection (different for completion)
+  const modelId = forCompletion
+    ? providerConfig.completionModel || DEFAULT_COMPLETION_MODELS[provider]
+    : providerConfig.model;
+
+  if (!modelId) {
+    throw new CopilotError(
+      forCompletion
+        ? `Missing "completionModel" property in the "johannschopplich.copilot.providers.${provider}" global configuration.`
+        : `Missing "model" property in the "johannschopplich.copilot.providers.${provider}" global configuration.`,
+    );
+  }
+
+  const model = api.languageModel(modelId);
+  const reasoningEffort = forCompletion
+    ? "none"
+    : (config.reasoningEffort ?? DEFAULT_REASONING_EFFORT);
   const reasoningConfig = PROVIDER_REASONING_MAP[reasoningEffort];
 
   // Get reasoning value with model-specific override support
-  const modelName = providerConfig.model;
-  const reasoningValue = supportsReasoning(modelName)
-    ? (reasoningConfig?.[`${provider}:${modelName}`] ??
+  const reasoningValue = supportsReasoning(modelId)
+    ? (reasoningConfig?.[`${provider}:${modelId}`] ??
       reasoningConfig?.[provider])
     : undefined;
 
