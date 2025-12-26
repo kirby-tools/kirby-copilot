@@ -1,6 +1,7 @@
 export const PLUGIN_CONTEXT_API_ROUTE = "__copilot__/context";
 export const PLUGIN_MODEL_FIELDS_API_ROUTE = "__copilot__/model-fields";
 export const PLUGIN_FIELDSETS_API_ROUTE = "__copilot__/fieldsets";
+export const PLUGIN_PROXY_API_ROUTE = "__copilot__/proxy";
 
 /// keep-sorted
 export const SUPPORTED_PROVIDERS = ["anthropic", "google", "mistral", "openai"];

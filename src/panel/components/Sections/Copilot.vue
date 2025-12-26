@@ -365,18 +365,6 @@ function onModelSave() {
       </k-text>
     </k-box>
     <k-box
-      v-else-if="!config.providers?.[config.provider]?.apiKey"
-      theme="empty"
-    >
-      <k-text>
-        Missing <code>apiKey</code> property in the
-        <code>{{
-          `johannschopplich.copilot.providers.${config.provider}`
-        }}</code>
-        global configuration.
-      </k-text>
-    </k-box>
-    <k-box
       v-else-if="!config.providers?.[config.provider]?.model"
       theme="empty"
     >

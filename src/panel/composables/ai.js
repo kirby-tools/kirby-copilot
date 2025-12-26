@@ -1,8 +1,9 @@
-import { loadPluginModule, useContent } from "kirbyuse";
+import { loadPluginModule, useContent, usePanel } from "kirbyuse";
 import {
   DEFAULT_COMPLETION_MODELS,
   DEFAULT_REASONING_EFFORT,
   PDF_SIZE_LIMIT,
+  PLUGIN_PROXY_API_ROUTE,
   PROVIDER_REASONING_MAP,
   STORAGE_KEY_PREFIX,
   SUPPORTED_PROVIDERS,
@@ -20,6 +21,8 @@ const PLAYGROUND_PROVIDER_MODEL_MAP = {
   google: "googlemodel",
   anthropic: "anthropicmodel",
 };
+
+const DEFAULT_PLAYGROUND_MODEL_PROVIDER = "google";
 
 /**
  * Streams text from an AI provider using the configured model.
@@ -116,18 +119,18 @@ export async function useStreamText({
  * @returns {Promise<{model: import("@ai-sdk/provider").LanguageModelV3, providerOptions?: Record<string, any>}>} The resolved language model instance and optional provider-specific options
  */
 export async function resolveLanguageModel({ forCompletion = false } = {}) {
+  const panel = usePanel();
   let { config } = await usePluginContext();
 
-  if (
-    // eslint-disable-next-line no-undef
-    __PLAYGROUND__ &&
-    !forCompletion &&
-    !window.location.hostname.includes("localhost")
-  ) {
+  const isPlayground = // eslint-disable-next-line no-undef
+    __PLAYGROUND__ && !window.location.hostname.includes("localhost");
+
+  if (!forCompletion && isPlayground) {
     config = JSON.parse(JSON.stringify(config));
     const { currentContent } = useContent();
 
-    const selectedProvider = currentContent.value.modelprovider || "openai";
+    const selectedProvider =
+      currentContent.value.modelprovider || DEFAULT_PLAYGROUND_MODEL_PROVIDER;
     config.provider = selectedProvider;
 
     const modelField = PLAYGROUND_PROVIDER_MODEL_MAP[selectedProvider];
@@ -143,17 +146,6 @@ export async function resolveLanguageModel({ forCompletion = false } = {}) {
     throw new CopilotError(
       `Unsupported provider "${config.provider}" in the "johannschopplich.copilot.provider" global configuration.`,
     );
-  }
-
-  // eslint-disable-next-line no-undef
-  if (!__PLAYGROUND__ && !forCompletion) {
-    for (const field of ["apiKey", "model"]) {
-      if (!config.providers?.[config.provider]?.[field]) {
-        throw new CopilotError(
-          `Missing "${field}" property in the "johannschopplich.copilot.providers.${config.provider}" global configuration.`,
-        );
-      }
-    }
   }
 
   const {
@@ -174,17 +166,36 @@ export async function resolveLanguageModel({ forCompletion = false } = {}) {
     openai: createOpenAI,
   }[provider];
 
+  // Validate API key is configured on the server when using proxy
+  if (!isPlayground && !providerConfig.hasApiKey) {
+    throw new CopilotError(
+      `Missing "apiKey" property in the "johannschopplich.copilot.providers.${provider}" global configuration.`,
+    );
+  }
+
+  // Create custom fetch that routes through PHP proxy
+  const proxyFetch = (url, options) =>
+    fetch(
+      `${panel.api.endpoint}/${PLUGIN_PROXY_API_ROUTE}?provider=${provider}`,
+      {
+        ...options,
+        credentials: "same-origin",
+        headers: {
+          ...options.headers,
+          "X-CSRF": panel.api.csrf,
+          "X-Proxy-Target": url,
+        },
+      },
+    );
+
   const api = createProvider({
     baseUrl: providerConfig.baseUrl || undefined,
-    apiKey:
-      // eslint-disable-next-line no-undef
-      __PLAYGROUND__ && !window.location.hostname.includes("localhost")
-        ? sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`)
-        : providerConfig.apiKey,
-    ...(provider === "anthropic"
-      ? {
-          headers: { "anthropic-dangerous-direct-browser-access": "true" },
-        }
+    apiKey: !isPlayground
+      ? "__KIRBY_COPILOT_PROXY__"
+      : sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`),
+    fetch: !isPlayground ? proxyFetch : undefined,
+    ...(provider === "anthropic" && !isPlayground
+      ? { headers: { "anthropic-dangerous-direct-browser-access": "true" } }
       : undefined),
   });
 
@@ -195,9 +206,7 @@ export async function resolveLanguageModel({ forCompletion = false } = {}) {
 
   if (!modelId) {
     throw new CopilotError(
-      forCompletion
-        ? `Missing "completionModel" property in the "johannschopplich.copilot.providers.${provider}" global configuration.`
-        : `Missing "model" property in the "johannschopplich.copilot.providers.${provider}" global configuration.`,
+      `Missing ${forCompletion ? '"completionModel"' : '"model"'} property in the "johannschopplich.copilot.providers.${provider}" global configuration.`,
     );
   }
 
