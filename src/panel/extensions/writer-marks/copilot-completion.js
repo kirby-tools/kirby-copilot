@@ -117,11 +117,11 @@ export const copilotCompletion = {
 /**
  * Creates the ProseMirror plugin spec for tab completion.
  *
- * @param {WriterMarkCimport("./types").WriterMarkContextontext} _context - The mark context from Kirby
- * @param {object} _mark - The mark instance
+ * @param {WriterMarkCimport("./types").WriterMarkContextontext} context - The mark context from Kirby
+ * @param {object} mark - The mark instance
  * @returns {import("prosemirror-state").PluginSpec} Plugin spec with state, view, and props
  */
-function createCompletionPlugin(_context, _mark) {
+function createCompletionPlugin(context, mark) {
   let debounceTimer;
   let abortController;
 
@@ -240,7 +240,7 @@ function createCompletionPlugin(_context, _mark) {
         return DecorationSet.create(state.doc, [widget]);
       },
       handleDOMEvents: {
-        blur: (view) => dismissSuggestion(view),
+        blur: () => mark._dismissSuggestion(),
       },
     },
   };
@@ -390,21 +390,4 @@ function getCursorContext(
       : undefined;
 
   return { prefix, suffix };
-}
-
-/**
- * Dismisses any active suggestion.
- *
- * @param {import("prosemirror-view").EditorView} view - The ProseMirror editor view
- */
-function dismissSuggestion(view) {
-  const pluginState = completionPluginKey.getState(view.state);
-  if (!pluginState?.suggestion && !pluginState?.isLoading) return;
-
-  const tr = view.state.tr.setMeta(completionPluginKey, {
-    suggestion: null,
-    position: null,
-    isLoading: false,
-  });
-  view.dispatch(tr);
 }
