@@ -283,14 +283,14 @@ function createCompletionPlugin(_context, _mark) {
 
     try {
       const { model } = await resolveLanguageModel({ forCompletion: true });
-      const { generateText } = await loadPluginModule("ai");
+      const { streamText } = await loadPluginModule("ai");
 
       // Use prefix/suffix format when there's text after cursor (manual trigger mid-text)
       const prompt = suffix
         ? `<prefix>${prefix}</prefix>\n<suffix>${suffix}</suffix>`
         : prefix;
 
-      const { text } = await generateText({
+      const { textStream } = await streamText({
         model,
         system: COMPLETION_SYSTEM_PROMPT.trim(),
         prompt,
@@ -298,14 +298,35 @@ function createCompletionPlugin(_context, _mark) {
         abortSignal: abortController.signal,
       });
 
-      // Apply space prefix logic
-      const needsSpace = prefix.length > 0 && !/\s$/.test(prefix);
-      const suggestion =
-        needsSpace && !text.startsWith(" ") ? ` ${text}` : text;
+      // Stream chunks and update ghost text progressively
+      const shouldPrependSpace = prefix.length > 0 && !/\s$/.test(prefix);
+      let fullText = "";
 
-      // Show final result
+      for await (const chunk of textStream) {
+        fullText += chunk;
+
+        // Apply space prefix on first chunk if needed
+        const suggestion =
+          shouldPrependSpace && !fullText.startsWith(" ")
+            ? ` ${fullText}`
+            : fullText;
+
+        const streamTr = view.state.tr.setMeta(completionPluginKey, {
+          suggestion,
+          position,
+          isLoading: true,
+        });
+        view.dispatch(streamTr);
+      }
+
+      // Mark streaming complete
+      const finalSuggestion =
+        shouldPrependSpace && !fullText.startsWith(" ")
+          ? ` ${fullText}`
+          : fullText;
+
       const completeTr = view.state.tr.setMeta(completionPluginKey, {
-        suggestion,
+        suggestion: finalSuggestion,
         position,
         isLoading: false,
       });

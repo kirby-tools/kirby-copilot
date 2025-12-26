@@ -76,7 +76,8 @@ export async function generateAndInsertText(
     for await (let textPart of textStream) {
       if (promptContext.append) {
         if (isFirstInsertion) {
-          textPart = selection ? ` ${textPart}` : textPart;
+          textPart =
+            selection && !textPart.startsWith(" ") ? ` ${textPart}` : textPart;
           isFirstInsertion = false;
         }
 
