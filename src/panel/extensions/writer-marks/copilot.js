@@ -128,7 +128,7 @@ export const copilot = {
       );
 
       cursorPosition = newPosition;
-      newTr.setMeta(completionPluginKey, { action: "skip" });
+      newTr.setMeta(completionPluginKey, { skipNextTrigger: true });
       view.dispatch(newTr);
     };
 
@@ -153,7 +153,7 @@ export const copilot = {
         context,
       );
       cursorPosition = newPosition;
-      newTr.setMeta(completionPluginKey, { action: "skip" });
+      newTr.setMeta(completionPluginKey, { skipNextTrigger: true });
       view.dispatch(newTr);
     };
 

@@ -150,30 +150,19 @@ function createCompletionPlugin(_context, _mark) {
         const meta = tr.getMeta(completionPluginKey);
 
         if (meta !== undefined) {
-          // Handle skip action from Copilot prompt dialog
-          if (meta.action === "skip") {
-            deduplicateRequest();
-            return {
-              suggestion: null,
-              position: null,
-              isLoading: false,
-              skipNextTrigger: true,
-            };
-          }
-
           // Abort any active request when loading ends (dismiss, accept, error)
           if (meta.isLoading === false) {
             deduplicateRequest();
           }
 
-          const { action, ...stateUpdates } = meta;
-          return { ...pluginState, ...stateUpdates };
+          return { ...pluginState, ...meta };
         }
 
         // Clear suggestion on document change
         if (tr.docChanged) {
           deduplicateRequest();
           return {
+            ...pluginState,
             suggestion: null,
             position: null,
             isLoading: false,

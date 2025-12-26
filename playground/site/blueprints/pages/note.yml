@@ -11,22 +11,8 @@ buttons:
 columns:
   - width: 2/3
     fields:
-      intro:
-        label: Introduction
-        type: writer
-        toolbar:
-          inline: false
-        marks:
-          - bold
-          - italic
-          - link
-          - copilot
-          - copilot-completion
-        placeholder: Start writing your introduction…
-        help: A brief introduction to your note.
-
-      body:
-        label: Body
+      text:
+        label: Content
         type: writer
         toolbar:
           inline: false
@@ -37,24 +23,11 @@ columns:
           - underline
           - code
           - link
+          - "|"
           - copilot
           - copilot-completion
         placeholder: Write your thoughts here…
-        help: The main content of your note.
-
-      conclusion:
-        label: Conclusion
-        type: writer
-        toolbar:
-          inline: false
-        marks:
-          - bold
-          - italic
-          - link
-          - copilot
-          - copilot-completion
-        placeholder: Wrap up your thoughts…
-        help: Summarize the key takeaways.
+        help: The main content of this article.
 
   - width: 1/3
     fields:
