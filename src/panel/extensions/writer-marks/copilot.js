@@ -5,10 +5,14 @@ import { completionPluginKey } from "./copilot-completion";
 /** @typedef {import("./types").WriterMarkContext} WriterMarkContext */
 
 export const copilot = {
+  get name() {
+    return "copilot";
+  },
+
   get button() {
     return {
       icon: "sparkling",
-      label: "Copilot Prompt",
+      label: window.panel.t("johannschopplich.copilot.label"),
     };
   },
 
@@ -29,10 +33,6 @@ export const copilot = {
         return true;
       },
     };
-  },
-
-  get name() {
-    return "copilot";
   },
 
   /**
