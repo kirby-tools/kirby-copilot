@@ -4,10 +4,11 @@ import { Decoration, DecorationSet } from "prosemirror-view";
 import { resolveLanguageModel, usePluginContext } from "../../composables";
 import {
   COMPLETION_MAX_TOKENS,
+  COMPLETION_PREFIX_LENGTH,
+  COMPLETION_SUFFIX_LENGTH,
   COMPLETION_SYSTEM_PROMPT,
   STORAGE_KEY_PREFIX,
 } from "../../constants";
-import { getActiveField } from "../shared";
 
 const DEBOUNCE_MS = 500;
 const LICENSE_TOAST_THRESHOLD = 3; // Show toast after this many completions
@@ -202,14 +203,19 @@ function createCompletionPlugin(context, mark) {
           clearTimeout(debounceTimer);
 
           // Only trigger if document changed
-          if (!view.state.doc.eq(prevState.doc)) {
-            debounceTimer = setTimeout(() => {
-              // Only trigger if cursor is at the end of a text block
-              if (!isCursorAtEndOfBlock(view.state)) return;
+          if (view.state.doc.eq(prevState.doc)) return;
 
-              generateCompletion(view);
-            }, DEBOUNCE_MS);
-          }
+          debounceTimer = setTimeout(() => {
+            const { $head } = view.state.selection;
+
+            // Only trigger if cursor is at the end of a non-empty text block
+            const isAtEndOfBlock =
+              $head.parentOffset === $head.parent.content.size;
+            const isEmptyBlock = $head.parent.textContent.length === 0;
+            if (!isAtEndOfBlock || isEmptyBlock) return;
+
+            generateCompletion(view);
+          }, DEBOUNCE_MS);
         },
         destroy() {
           clearTimeout(debounceTimer);
@@ -221,23 +227,41 @@ function createCompletionPlugin(context, mark) {
     props: {
       decorations(state) {
         const pluginState = completionPluginKey.getState(state);
-        if (!pluginState?.suggestion || pluginState.position === null) {
-          return DecorationSet.empty;
+
+        // Show loader when loading and no suggestion yet
+        if (
+          pluginState?.isLoading &&
+          !pluginState?.suggestion &&
+          pluginState.position !== null
+        ) {
+          const loader = Decoration.widget(
+            pluginState.position,
+            () => {
+              const span = document.createElement("span");
+              span.className = "k-copilot-suggestion-indicator";
+              return span;
+            },
+            { side: 1 },
+          );
+          return DecorationSet.create(state.doc, [loader]);
         }
 
-        // Create widget decoration for ghost text
-        const widget = Decoration.widget(
-          pluginState.position,
-          () => {
-            const span = document.createElement("span");
-            span.className = "k-copilot-ghost-text";
-            span.textContent = pluginState.suggestion;
-            return span;
-          },
-          { side: 1 }, // Place after the cursor position
-        );
+        // Show suggestion text when available
+        if (pluginState?.suggestion && pluginState.position !== null) {
+          const widget = Decoration.widget(
+            pluginState.position,
+            () => {
+              const span = document.createElement("span");
+              span.className = "k-copilot-suggestion-text";
+              span.textContent = pluginState.suggestion;
+              return span;
+            },
+            { side: 1 }, // Place after the cursor position
+          );
+          return DecorationSet.create(state.doc, [widget]);
+        }
 
-        return DecorationSet.create(state.doc, [widget]);
+        return DecorationSet.empty;
       },
       handleDOMEvents: {
         blur: () => mark._dismissSuggestion(),
@@ -254,12 +278,9 @@ function createCompletionPlugin(context, mark) {
 
     // Get text context around cursor
     const { prefix, suffix } = getCursorContext(state, {
-      suffixLength: includeSuffix ? 200 : 0,
+      suffixLength: includeSuffix ? COMPLETION_SUFFIX_LENGTH : 0,
     });
     if (!prefix.trim()) return;
-
-    const activeField = getActiveField();
-    if (activeField) activeField.element.dataset.copilot = "generating";
 
     // Mark as loading
     const tr = state.tr.setMeta(completionPluginKey, {
@@ -283,7 +304,7 @@ function createCompletionPlugin(context, mark) {
 
       const { textStream } = await streamText({
         model,
-        system: COMPLETION_SYSTEM_PROMPT.trim(),
+        system: COMPLETION_SYSTEM_PROMPT,
         prompt,
         maxTokens: COMPLETION_MAX_TOKENS,
         abortSignal: abortController.signal,
@@ -340,21 +361,9 @@ function createCompletionPlugin(context, mark) {
       });
       view.dispatch(errorTr);
     } finally {
-      if (activeField) delete activeField.element.dataset.copilot;
       abortController = undefined;
     }
   }
-}
-
-/**
- * Checks if the cursor is at the end of a text block (paragraph, heading, etc.).
- *
- * @param {import("prosemirror-state").EditorState} state - The editor state
- * @returns {boolean} True if no content follows the cursor in the current block
- */
-function isCursorAtEndOfBlock(state) {
-  const { $head } = state.selection;
-  return $head.parentOffset === $head.parent.content.size;
 }
 
 /**
@@ -371,7 +380,7 @@ function isCursorAtEndOfBlock(state) {
  */
 function getCursorContext(
   state,
-  { prefixLength = 500, suffixLength = 0 } = {},
+  { prefixLength = COMPLETION_PREFIX_LENGTH, suffixLength = 0 } = {},
 ) {
   const { $head } = state.selection;
   const cursorPos = $head.pos;

@@ -1,4 +1,31 @@
-.k-copilot-ghost-text {
+.k-copilot-suggestion-indicator {
+  display: inline-block;
+  width: 0.75em;
+  height: 0.75em;
+  margin-left: 0.5em;
+  margin-right: 0.25em;
+  border-radius: 50%;
+  background-color: currentColor;
+  opacity: 0.3;
+  vertical-align: 0;
+  animation: copilot-pulse 1.5s ease-in-out infinite;
+  pointer-events: none;
+  user-select: none;
+}
+
+@keyframes copilot-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.9;
+  }
+}
+
+.k-copilot-suggestion-text {
   color: light-dark(var(--color-gray-600), var(--color-gray-500));
   pointer-events: none;
   user-select: none;

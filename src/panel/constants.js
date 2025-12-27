@@ -80,7 +80,7 @@ When <response_format> is provided, format your response as:
 - "markdown": Raw Markdown, no code fence wrappers.
 - "rich-text": Use double newlines to separate paragraphs. For inline formatting, use HTML tags (<strong>, <em>, <code>, <a href="...">, etc.). Do NOT wrap paragraphs in <p> tags.
 
-When <selection> is provided, use it as context for your response. If <selection> contains formatting, preserve similar formatting in your response.
+When <selection> is provided, use it as context for your response. Preserve any formatting (bold, italic, links, etc.) present in the selection unless the task explicitly requires different formatting.
 `;
 
 export const COMPLETION_SYSTEM_PROMPT = `
@@ -101,4 +101,6 @@ Input: "The quick brown fox"
 Output: " jumps over the lazy dog."
 `;
 
-export const COMPLETION_MAX_TOKENS = 75;
+export const COMPLETION_MAX_TOKENS = 100;
+export const COMPLETION_PREFIX_LENGTH = 4000;
+export const COMPLETION_SUFFIX_LENGTH = 500;
