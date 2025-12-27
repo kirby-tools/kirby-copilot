@@ -143,7 +143,7 @@ export async function resolveLanguageModel({ forCompletion = false } = {}) {
 
   if (!config.provider || !SUPPORTED_PROVIDERS.includes(config.provider)) {
     throw new CopilotError(
-      `Unsupported provider "${config.provider}" in the "johannschopplich.copilot.provider" global configuration.`,
+      `Unsupported provider "${config.provider}". Supported providers: ${SUPPORTED_PROVIDERS.join(", ")}. Check "johannschopplich.copilot.provider" in your Kirby config.`,
     );
   }
 
@@ -168,7 +168,7 @@ export async function resolveLanguageModel({ forCompletion = false } = {}) {
   // Validate API key is configured on the server when using proxy
   if (!isPlayground && !providerConfig.hasApiKey) {
     throw new CopilotError(
-      `Missing "apiKey" property in the "johannschopplich.copilot.providers.${provider}" global configuration.`,
+      `Missing API key for the "${provider}" provider. Add "apiKey" to "johannschopplich.copilot.providers.${provider}" in your Kirby config.`,
     );
   }
 
@@ -205,7 +205,7 @@ export async function resolveLanguageModel({ forCompletion = false } = {}) {
 
   if (!modelId) {
     throw new CopilotError(
-      `Missing ${forCompletion ? '"completionModel"' : '"model"'} property in the "johannschopplich.copilot.providers.${provider}" global configuration.`,
+      `Missing ${forCompletion ? "completionModel" : "model"} for the "${provider}" provider. Add it to "johannschopplich.copilot.providers.${provider}" in your Kirby config.`,
     );
   }
 
