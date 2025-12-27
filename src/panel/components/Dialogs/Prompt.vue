@@ -294,7 +294,7 @@ function getFieldPreview(fieldName) {
     @cancel="emit('cancel')"
   >
     <div
-      class="kai-relative kai-rounded-[var(--rounded)] focus-within:kai-outline focus-within:kai-outline-[2px] focus-within:kai-outline-[var(--color-focus,currentColor)]"
+      class="kai-relative kai-rounded-[var(--rounded)] has-[textarea:focus]:kai-outline has-[textarea:focus]:kai-outline-[2px] has-[textarea:focus]:kai-outline-[var(--color-focus,currentColor)]"
     >
       <AutoGrowTextarea
         ref="textareaComponent"
@@ -565,7 +565,7 @@ function getFieldPreview(fieldName) {
 
 <style>
 .k-copilot-prompt-dialog {
-  --dialog-color-back: var(--toolbar-back);
+  --dialog-color-back: var(--input-color-back);
   --dialog-padding: 0;
   --dialog-rounded: var(--rounded);
   overflow: visible;
