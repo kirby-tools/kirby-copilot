@@ -10,7 +10,7 @@ import {
   STORAGE_KEY_PREFIX,
 } from "../../constants";
 
-const DEBOUNCE_MS = 500;
+const COMPLETION_DEBOUNCE_MS = 500;
 const LICENSE_TOAST_THRESHOLD = 3; // Show toast after this many completions
 const COMPLETION_COUNT_STORAGE_KEY = `${STORAGE_KEY_PREFIX}completionCount`;
 
@@ -215,7 +215,7 @@ function createCompletionPlugin(context, mark) {
             if (!isAtEndOfBlock || isEmptyBlock) return;
 
             generateCompletion(view);
-          }, DEBOUNCE_MS);
+          }, COMPLETION_DEBOUNCE_MS);
         },
         destroy() {
           clearTimeout(debounceTimer);
