@@ -118,7 +118,7 @@ export const copilotCompletion = {
 /**
  * Creates the ProseMirror plugin spec for tab completion.
  *
- * @param {WriterMarkCimport("./types").WriterMarkContextontext} context - The mark context from Kirby
+ * @param {import("./types").WriterMarkContext} context - The mark context from Kirby
  * @param {object} mark - The mark instance
  * @returns {import("prosemirror-state").PluginSpec} Plugin spec with state, view, and props
  */
