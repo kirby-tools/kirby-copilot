@@ -25,7 +25,7 @@ return [
                             'completionModel' => 'gpt-5-nano'
                         ],
                         'google' => [
-                            'model' => 'gemini-3-flash-preview',
+                            'model' => 'gemini-3-pro-preview',
                             'completionModel' => 'gemini-3-flash-preview'
                         ],
                         'anthropic' => [
@@ -33,6 +33,7 @@ return [
                             'completionModel' => 'claude-haiku-4-5-20251001'
                         ],
                         'mistral' => [
+                            'model' => 'mistral-large-latest',
                             'completionModel' => 'mistral-small-latest'
                         ]
                     ],
