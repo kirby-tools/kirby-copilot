@@ -43,7 +43,7 @@ const prompt = ref(props.userPrompt || "");
 const files = ref([]);
 const licenseStatus = ref();
 
-const modelFields = ref(resolveModelFields(props.fields));
+const modelFields = ref([...(props.fields ?? [])]);
 const fieldsDropdown = ref();
 const selectedFieldNames = ref([]);
 const placeholderDropdown = ref();
@@ -84,11 +84,18 @@ const resolvedPrompt = computed(() =>
   renderTemplate(prompt.value, contentContext, (key) => `{${key}}`).trim(),
 );
 
+const placeholderFields = computed(() => [
+  {
+    name: "title",
+    label: panel.t("title"),
+  },
+  ...modelFields.value,
+]);
 const filteredPlaceholderFields = computed(() => {
   const query = placeholderSearch.value.toLowerCase();
-  if (!query.trim()) return modelFields.value;
+  if (!query.trim()) return placeholderFields.value;
 
-  return modelFields.value.filter(
+  return placeholderFields.value.filter(
     (field) =>
       field.name.toLowerCase().includes(query) ||
       (field.label && field.label.toLowerCase().includes(query)),
@@ -139,7 +146,7 @@ useEventListener(textarea, "keydown", (event) => {
 
   // Fetch view fields for placeholder insertion if not passed as props
   if (!props.fields) {
-    modelFields.value = resolveModelFields(await getViewFields());
+    modelFields.value = await getViewFields();
   }
 
   if (props.activeField) {
@@ -155,16 +162,6 @@ useEventListener(textarea, "keydown", (event) => {
     }
   }
 })();
-
-function resolveModelFields(fields) {
-  return [
-    {
-      name: "title",
-      label: panel.t("title"),
-    },
-    ...(fields ?? []),
-  ];
-}
 
 function submit() {
   if (isFieldGenerationMode.value && selectedFieldNames.value.length === 0) {
