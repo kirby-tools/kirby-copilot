@@ -65,9 +65,9 @@ const selectionInsertOptions = [
 const insertOption = ref(selectionInsertOptions[0].value);
 
 // Prompt dialog is used in two contexts:
-// 1. Field selection mode (Panel view button): Generate content for multiple fields
-// 2. Inline mode (Writer toolbar): Append/replace text within a single field
-const isFieldSelectionMode = computed(
+// 1. Multi-field generation mode (Panel view button)
+// 2. Inline mode (toolbar) with append/replace selection option
+const isFieldGenerationMode = computed(
   () => props.fields && props.fields.length > 0,
 );
 
@@ -102,7 +102,7 @@ useEventListener(textarea, "keydown", (event) => {
 
     if (
       !prompt.value.trim() ||
-      (isFieldSelectionMode.value && selectedFieldNames.value.length === 0)
+      (isFieldGenerationMode.value && selectedFieldNames.value.length === 0)
     )
       return;
 
@@ -167,7 +167,7 @@ function resolveModelFields(fields) {
 }
 
 function submit() {
-  if (isFieldSelectionMode.value && selectedFieldNames.value.length === 0) {
+  if (isFieldGenerationMode.value && selectedFieldNames.value.length === 0) {
     panel.notification.info(panel.t("johannschopplich.copilot.selectFields"));
     return;
   }
@@ -508,7 +508,7 @@ function getFieldPreview(fieldName) {
 
         <!-- Action buttons -->
         <div class="kai-flex kai-gap-2">
-          <template v-if="isFieldSelectionMode">
+          <template v-if="isFieldGenerationMode">
             <k-button
               :text="panel.t('johannschopplich.copilot.fields')"
               variant="filled"
