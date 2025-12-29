@@ -124,7 +124,6 @@ return [
                 // Determine CA certificate
                 $systemCaInfo = ini_get('curl.cainfo');
                 $hasSystemCa = !empty($systemCaInfo) && @is_file($systemCaInfo);
-                $internalCaFile = $kirby->root('kirby') . '/cacert.pem';
 
                 // Disable output buffering for real-time streaming
                 while (ob_get_level()) {
@@ -180,7 +179,7 @@ return [
                     CURLOPT_LOW_SPEED_TIME => 120,
                     // SSL/TLS
                     CURLOPT_SSL_VERIFYPEER => true,
-                    ...($hasSystemCa ? [] : [CURLOPT_CAINFO => $internalCaFile]),
+                    ...($hasSystemCa ? [] : [CURLOPT_CAINFO => $kirby->root('kirby') . '/cacert.pem']),
                     // Accept all supported content encodings (gzip, deflate, br)
                     CURLOPT_ENCODING => '',
                 ]);
