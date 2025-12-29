@@ -19,6 +19,6 @@ columns:
       copilot:
         type: copilot
         field: alt
-        userPrompt: Write an alternative text for the provided image. Use a maximum of 10 words.
+        userPrompt: Describe this image for alternative text. Include key features, colors, and context. Max 125 characters.
         editable: false
         files: auto

@@ -2,7 +2,7 @@ title: Article
 
 buttons:
   copilot:
-    userPrompt: Write a detailed article about the impact of artificial intelligence on modern society.
+    userPrompt: Write a detailed article about Kirby CMS and why it appeals to developers and designers alike.
     theme: blue-icon
   preview: true
   settings: true
@@ -28,6 +28,20 @@ tabs:
 
       - width: 1/3
         fields:
+          # metaDescription:
+          #   label: Meta Description
+          #   type: textarea
+          #   maxlength: 160
+          #   buttons:
+          #     - copilot
+          #   copilot:
+          #     userPrompt: |
+          #       Summarize this article "{title}" in a meta description (max 155 characters). Include the main benefit and end with a subtle call-to-action. No quotes.
+
+          #       This is the article:
+          #       {content}
+          #   help: Brief description for search engine results
+
           author:
             label: Author
             type: text
