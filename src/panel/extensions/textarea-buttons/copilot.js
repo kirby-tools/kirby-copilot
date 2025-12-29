@@ -2,7 +2,9 @@ import { generateAndInsertText } from "../shared";
 
 export const copilot = {
   icon: "sparkling",
-  label: "Copilot Prompt",
+  label: "Copilot",
+  shortcut: ".",
+
   click() {
     let currentSelection = "";
 
@@ -35,5 +37,4 @@ export const copilot = {
       replaceText,
     });
   },
-  shortcut: ".",
 };
