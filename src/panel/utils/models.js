@@ -6,9 +6,19 @@
  */
 export function supportsReasoning(modelName) {
   return (
+    // OpenAI: GPT-5 series (gpt-5, gpt-5-mini, gpt-5-nano, gpt-5.1, gpt-5.2, etc.)
+    // and o-series reasoning models (o1, o3, o3-mini, o4-mini)
     modelName.startsWith("gpt-5") ||
-    modelName.startsWith("gemini-3-") ||
-    /^claude-.*?-4/.test(modelName)
+    /^o[134]-/.test(modelName) ||
+    modelName === "o1" ||
+    modelName === "o3" ||
+    // Google: Gemini 2.5+ supports thinking (2.5 Pro, 2.5 Flash, 3 Pro, 3 Flash)
+    modelName.startsWith("gemini-2.5") ||
+    modelName.startsWith("gemini-3") ||
+    // Anthropic: Claude 4+ supports extended thinking (claude-sonnet-4, claude-opus-4, claude-haiku-4-5, etc.)
+    /^claude-[^-]+-4/.test(modelName) ||
+    // Mistral: Magistral models are reasoning models
+    modelName.startsWith("magistral")
   );
 }
 

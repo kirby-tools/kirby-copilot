@@ -249,6 +249,9 @@ export async function resolveLanguageModel({ forCompletion = false } = {}) {
           },
         },
       }),
+    // Note: Mistral magistral models have built-in reasoning with no configurable
+    // effort level. Reasoning is always enabled for magistral models and outputs
+    // <think> tags automatically.
   };
 
   // Merge custom provider options (takes precedence)
