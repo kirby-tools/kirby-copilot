@@ -51,7 +51,18 @@ const isPlaceholderDropdownOpen = ref(false);
 const placeholderSearch = ref("");
 const templateDropdown = ref();
 const historyDropdown = ref();
-const insertOption = ref("append");
+
+const selectionInsertOptions = [
+  {
+    value: "append",
+    text: panel.t("johannschopplich.copilot.append"),
+  },
+  {
+    value: "replace",
+    text: panel.t("johannschopplich.copilot.replace"),
+  },
+];
+const insertOption = ref(selectionInsertOptions[0].value);
 
 // Prompt dialog is used in two contexts:
 // 1. Field selection mode (Panel view button): Generate content for multiple fields
@@ -215,7 +226,7 @@ function openSaveTemplateDialog() {
     },
     on: {
       submit(values) {
-        if (values.name && prompt.value.trim()) {
+        if (values.name) {
           addTemplate(values.name, prompt.value);
         }
 
@@ -528,16 +539,7 @@ function getFieldPreview(fieldName) {
           <k-select-input
             v-else-if="selection"
             class="kai-underline kai-underline-offset-[var(--link-underline-offset)]"
-            :options="[
-              {
-                value: 'append',
-                text: panel.t('johannschopplich.copilot.append'),
-              },
-              {
-                value: 'replace',
-                text: panel.t('johannschopplich.copilot.replace'),
-              },
-            ]"
+            :options="selectionInsertOptions"
             :empty="false"
             :value="insertOption"
             @input="insertOption = $event"
