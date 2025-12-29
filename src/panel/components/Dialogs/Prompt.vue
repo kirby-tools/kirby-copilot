@@ -566,11 +566,4 @@ function getFieldPreview(fieldName) {
   --dialog-rounded: var(--rounded);
   overflow: visible;
 }
-
-@media screen and (min-width: 60rem) {
-  .k-dialog.k-copilot-prompt-dialog[data-size="large"] {
-    /** Between 40rem (large) and 60rem (huge) */
-    --dialog-width: 50rem;
-  }
-}
 </style>
