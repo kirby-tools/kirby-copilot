@@ -39,6 +39,9 @@ return [
                     ],
                     'logLevel' => 'warn',
                     'reasoningEffort' => 'low',
+                    'completion' => [
+                        'debounce' => 1000
+                    ],
                     'excludedBlocks' => []
                 ];
 
@@ -54,6 +57,18 @@ return [
                 // Validate reasoning effort
                 if (!in_array($config['reasoningEffort'], ['none', 'low', 'medium', 'high'], true)) {
                     $config['reasoningEffort'] = 'low';
+                }
+
+                // Validate completion config (can be `false` to disable or array with options)
+                if (isset($config['completion']) && $config['completion'] === false) {
+                    $config['completion'] = false;
+                } else {
+                    $config['completion'] = array_replace_recursive(
+                        $defaultConfig['completion'],
+                        $config['completion'] ?? []
+                    );
+                    // Enforce minimum debounce of 500ms
+                    $config['completion']['debounce'] = max(500, (int)$config['completion']['debounce']);
                 }
 
                 // Convert API keys to boolean flags (frontend validation without exposing secrets)

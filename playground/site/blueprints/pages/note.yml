@@ -25,7 +25,6 @@ columns:
           - link
           - "|"
           - copilot
-          - copilot-completion
         placeholder: Write your thoughts here…
         help: The main content of this article.
 

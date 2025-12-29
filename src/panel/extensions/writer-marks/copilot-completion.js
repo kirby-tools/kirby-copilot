@@ -10,7 +10,7 @@ import {
   STORAGE_KEY_PREFIX,
 } from "../../constants";
 
-const COMPLETION_DEBOUNCE_MS = 500;
+const DEFAULT_DEBOUNCE_MS = 1000;
 const LICENSE_TOAST_THRESHOLD = 3; // Show toast after this many completions
 const COMPLETION_COUNT_STORAGE_KEY = `${STORAGE_KEY_PREFIX}completionCount`;
 
@@ -78,6 +78,9 @@ export const copilotCompletion = {
 
   _triggerCompletion() {
     const { view } = this.editor;
+    const pluginState = completionPluginKey.getState(view.state);
+    if (!pluginState) return false;
+
     const tr = view.state.tr.setMeta(completionPluginKey, {
       manualTrigger: true,
     });
@@ -175,6 +178,13 @@ function createCompletionPlugin(context, mark) {
     },
 
     view() {
+      let completionConfig = { debounce: DEFAULT_DEBOUNCE_MS };
+
+      // Fetch config and cache completion settings
+      usePluginContext().then((ctx) => {
+        completionConfig = ctx.config.completion;
+      });
+
       return {
         update(view, prevState) {
           const pluginState = completionPluginKey.getState(view.state);
@@ -206,6 +216,9 @@ function createCompletionPlugin(context, mark) {
           // Only trigger if document changed
           if (view.state.doc.eq(prevState.doc)) return;
 
+          // Skip auto-completion if disabled
+          if (completionConfig === false) return;
+
           debounceTimer = setTimeout(() => {
             const { $head } = view.state.selection;
 
@@ -216,7 +229,7 @@ function createCompletionPlugin(context, mark) {
             if (!isAtEndOfBlock || isEmptyBlock) return;
 
             generateCompletion(view);
-          }, COMPLETION_DEBOUNCE_MS);
+          }, completionConfig.debounce);
         },
         destroy() {
           clearTimeout(debounceTimer);
