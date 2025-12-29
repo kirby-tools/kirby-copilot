@@ -19,22 +19,10 @@ import { fieldToZodSchema } from "../../schemas/fields";
 import { CopilotError } from "../../utils/error";
 
 const props = defineProps({
-  label: {
-    type: String,
-    required: false,
-  },
-  userPrompt: {
-    type: String,
-    required: false,
-  },
-  systemPrompt: {
-    type: String,
-    required: false,
-  },
-  logLevel: {
-    type: String,
-    default: "",
-  },
+  label: String,
+  userPrompt: String,
+  systemPrompt: String,
+  logLevel: String,
   icon: {
     type: String,
     default: "sparkling",

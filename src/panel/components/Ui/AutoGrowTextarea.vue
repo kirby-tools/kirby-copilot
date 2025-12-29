@@ -14,7 +14,6 @@ const props = defineProps({
   },
   sharedClass: {
     type: String,
-    default: undefined,
   },
 });
 

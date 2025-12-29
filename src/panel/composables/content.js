@@ -1,10 +1,11 @@
-import { useContent } from "kirbyuse";
+import { useContent, usePanel } from "kirbyuse";
 
 export function createContentContext() {
+  const panel = usePanel();
   const { currentContent } = useContent();
   const context = {
     ...currentContent.value,
-    title: window.panel.view.title,
+    title: panel.view.title,
   };
 
   // JSON-encode non-primitive values
