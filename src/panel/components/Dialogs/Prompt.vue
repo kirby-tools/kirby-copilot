@@ -563,7 +563,7 @@ function getFieldPreview(fieldName) {
         api-namespace="__copilot__"
         :license-status="licenseStatus"
         pricing-url="https://kirby.tools/copilot/buy"
-        class="kai-absolute kai-right-0 kai-top-[calc(-0.25rem-24px-2px)]"
+        class="k-copilot-prompt-dialog-licensing-buttons kai-absolute kai-right-0 kai-top-[calc(-0.25rem-24px-2px)]"
       />
     </div>
   </k-dialog>
@@ -575,5 +575,10 @@ function getFieldPreview(fieldName) {
   --dialog-padding: 0;
   --dialog-rounded: var(--rounded);
   overflow: visible;
+}
+
+.k-copilot-prompt-dialog-licensing-buttons[data-layout="collapsed"]
+  > .k-button {
+  --theme-color-border: var(--color-pink-900);
 }
 </style>
