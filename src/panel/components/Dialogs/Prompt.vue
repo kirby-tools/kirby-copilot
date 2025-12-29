@@ -11,7 +11,7 @@ import {
   usePromptTemplates,
 } from "../../composables";
 import { findFieldDefinition } from "../../utils/fields";
-import { renderTemplate } from "../../utils/template";
+import { PLACEHOLDER_PATTERN, renderTemplate } from "../../utils/template";
 import AutoGrowTextarea from "../Ui/AutoGrowTextarea.vue";
 import ContentDropdown from "../Ui/ContentDropdown.vue";
 
@@ -61,7 +61,14 @@ const isFieldSelectionMode = computed(
 );
 
 const recentPrompts = computed(() => getRecentEntries(10));
-const hasPlaceholders = computed(() => /\{\w+\}/.test(prompt.value));
+const hasPlaceholders = computed(() => {
+  const matches = prompt.value.match(PLACEHOLDER_PATTERN);
+  if (!matches) return false;
+
+  // Only show preview if at least one placeholder is present in the content context
+  const keys = matches.map((match) => match.slice(1, -1));
+  return keys.some((key) => key in contentContext);
+});
 const resolvedPrompt = computed(() =>
   renderTemplate(prompt.value, contentContext, (key) => `{${key}}`).trim(),
 );
@@ -399,14 +406,15 @@ function getFieldPreview(fieldName) {
                 :key="field.name"
                 @click="insertFieldPlaceholder(field.name)"
               >
-                <span class="kai-inline-flex kai-w-full kai-gap-3">
+                <span
+                  class="kai-inline-flex kai-w-full kai-items-center kai-gap-3"
+                >
                   <span>{{ field.label || field.name }}</span>
                   <span
                     v-if="getFieldPreview(field.name)"
-                    class="kai-truncate kai-text-[var(--color-text-dimmed)] [font-size:var(--font-size-tiny)]"
+                    class="kai-truncate kai-leading-[1.5] kai-text-[var(--color-text-dimmed)] [font-size:var(--font-size-tiny)]"
+                    >{{ getFieldPreview(field.name) }}</span
                   >
-                    {{ getFieldPreview(field.name) }}
-                  </span>
                 </span>
               </k-dropdown-item>
               <k-dropdown-item

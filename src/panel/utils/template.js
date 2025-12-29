@@ -1,4 +1,9 @@
 /**
+ * Regex pattern to match placeholders in the format `{key}`.
+ */
+export const PLACEHOLDER_PATTERN = /\{(\w+)\}/g;
+
+/**
  * Replaces placeholders in a template string with corresponding variable values.
  *
  * @param {string} input - The template string containing placeholders in the format `{key}`.
@@ -16,7 +21,7 @@
  */
 export function renderTemplate(input, variables, fallback) {
   return input.replace(
-    /\{(\w+)\}/g,
+    PLACEHOLDER_PATTERN,
     (_, key) =>
       variables[key.toLowerCase()] ||
       ((typeof fallback === "function" ? fallback(key) : fallback) ?? key),
