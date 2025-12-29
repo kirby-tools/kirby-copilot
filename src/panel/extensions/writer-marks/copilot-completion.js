@@ -9,10 +9,10 @@ import {
   COMPLETION_SYSTEM_PROMPT,
   STORAGE_KEY_PREFIX,
 } from "../../constants";
-
-const DEFAULT_DEBOUNCE_MS = 1000;
 const LICENSE_TOAST_THRESHOLD = 3; // Show toast after this many completions
 const COMPLETION_COUNT_STORAGE_KEY = `${STORAGE_KEY_PREFIX}completionCount`;
+
+let completionConfig;
 
 export const completionPluginKey = new PluginKey("copilot-completion");
 
@@ -178,12 +178,11 @@ function createCompletionPlugin(context, mark) {
     },
 
     view() {
-      let completionConfig = { debounce: DEFAULT_DEBOUNCE_MS };
-
-      // Fetch config and cache completion settings
-      usePluginContext().then((ctx) => {
-        completionConfig = ctx.config.completion;
-      });
+      if (completionConfig === undefined) {
+        usePluginContext().then(({ config }) => {
+          completionConfig = config.completion;
+        });
+      }
 
       return {
         update(view, prevState) {
@@ -216,8 +215,8 @@ function createCompletionPlugin(context, mark) {
           // Only trigger if document changed
           if (view.state.doc.eq(prevState.doc)) return;
 
-          // Skip auto-completion if disabled
-          if (completionConfig === false) return;
+          // Skip auto-completion if disabled or config not loaded yet
+          if (!completionConfig) return;
 
           debounceTimer = setTimeout(() => {
             const { $head } = view.state.selection;

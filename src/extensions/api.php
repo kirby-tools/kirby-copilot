@@ -59,8 +59,8 @@ return [
                     $config['reasoningEffort'] = 'low';
                 }
 
-                // Validate completion config (can be `false` to disable or array with options)
-                if (isset($config['completion']) && $config['completion'] === false) {
+                // Validate completion config
+                if (isset($config['completion']) && ($config['completion'] === false || $config['completion'] === [])) {
                     $config['completion'] = false;
                 } else {
                     $config['completion'] = array_replace_recursive(
