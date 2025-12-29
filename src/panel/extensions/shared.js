@@ -6,6 +6,7 @@ import {
 } from "../composables";
 import { DEFAULT_SYSTEM_PROMPT, STORAGE_KEY_PREFIX } from "../constants";
 import { CopilotError } from "../utils/error";
+import { buildUserPrompt } from "../utils/models";
 
 export async function generateAndInsertText(
   selection,
@@ -60,13 +61,7 @@ export async function generateAndInsertText(
 
   try {
     const { textStream } = await useStreamText({
-      userPrompt: [
-        `<response_format>\n${responseFormat}\n</response_format>`,
-        selection && `<selection>\n${selection}\n</selection>`,
-        prompt,
-      ]
-        .filter(Boolean)
-        .join("\n\n"),
+      userPrompt: buildUserPrompt(prompt, { responseFormat, selection }),
       systemPrompt: config.systemPrompt || DEFAULT_SYSTEM_PROMPT,
       responseFormat,
       files,

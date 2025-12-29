@@ -24,13 +24,14 @@ import {
 import {
   DEFAULT_LOG_LEVEL,
   DEFAULT_SYSTEM_PROMPT,
-  FIELD_TYPE_RESPONSE_FORMAT,
   LOG_LEVELS,
   STORAGE_KEY_PREFIX,
   SUPPORTED_IMAGE_MIME_TYPES,
   SUPPORTED_PROVIDERS,
 } from "../../constants";
 import { CopilotError } from "../../utils/error";
+import { getResponseFormat } from "../../utils/fields";
+import { buildUserPrompt } from "../../utils/models";
 import { getHashedStorageKey } from "../../utils/storage";
 
 const propsDefinition = {
@@ -250,12 +251,11 @@ async function generate() {
       // Set final result
       structuredOutput = await finalOutput;
     } else {
+      const responseFormat = getResponseFormat(field.value.type);
       const { textStream } = await useStreamText({
-        userPrompt: [
-          `<response_format>\n${FIELD_TYPE_RESPONSE_FORMAT[field.value.type] || "text"}\n</response_format>`,
-          currentPrompt.value,
-        ].join("\n\n"),
+        userPrompt: buildUserPrompt(currentPrompt.value, { responseFormat }),
         systemPrompt: systemPrompt.value,
+        responseFormat,
         files: files.value,
         logLevel: logLevel.value,
         abortSignal: abortController.signal,

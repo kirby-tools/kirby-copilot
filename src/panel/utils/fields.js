@@ -1,4 +1,26 @@
 /**
+ * @typedef {"text" | "markdown" | "rich-text"} OutputFormat
+ */
+
+/// keep-sorted
+const FIELD_TYPE_RESPONSE_FORMAT = {
+  list: "rich-text",
+  markdown: "markdown", // Community plugin field type
+  textarea: "markdown",
+  writer: "rich-text",
+};
+
+/**
+ * Returns the output format for a given Kirby field type.
+ *
+ * @param {string} fieldType - The Kirby field type (e.g., `writer`, `textarea`, `blocks`)
+ * @returns {OutputFormat} The output format to use for AI-generated content
+ */
+export function getResponseFormat(fieldType) {
+  return FIELD_TYPE_RESPONSE_FORMAT[fieldType] || "text";
+}
+
+/**
  * Recursively searches for a field definition by name and optionally by type.
  *
  * @remarks

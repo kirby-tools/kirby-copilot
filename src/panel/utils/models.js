@@ -1,3 +1,24 @@
+const HTML_VOID_ELEMENTS = new Set(["br", "hr", "img", "wbr"]);
+
+/**
+ * Builds a user prompt with output format and optional selection context.
+ *
+ * @param {string} prompt - The user's prompt text
+ * @param {object} [options]
+ * @param {import("./fields.js").OutputFormat} [options.responseFormat] - The output format for AI-generated content
+ * @param {string} [options.selection] - Selected text to include as context
+ * @returns {string} The formatted prompt with XML tags
+ */
+export function buildUserPrompt(prompt, { responseFormat, selection } = {}) {
+  return [
+    responseFormat && `<response_format>${responseFormat}</response_format>`,
+    selection && `<selection>\n${selection}\n</selection>`,
+    prompt,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+}
+
 /**
  * Checks if a model supports reasoning/thinking capabilities.
  *
@@ -7,11 +28,7 @@
 export function supportsReasoning(modelName) {
   return (
     // OpenAI: GPT-5 series (gpt-5, gpt-5-mini, gpt-5-nano, gpt-5.1, gpt-5.2, etc.)
-    // and o-series reasoning models (o1, o3, o3-mini, o4-mini)
     modelName.startsWith("gpt-5") ||
-    /^o[134]-/.test(modelName) ||
-    modelName === "o1" ||
-    modelName === "o3" ||
     // Google: Gemini 2.5+ supports thinking (2.5 Pro, 2.5 Flash, 3 Pro, 3 Flash)
     modelName.startsWith("gemini-2.5") ||
     modelName.startsWith("gemini-3") ||
@@ -65,8 +82,6 @@ export function createHtmlChunking() {
     return parseHtmlElement(buffer);
   };
 }
-
-const HTML_VOID_ELEMENTS = new Set(["br", "hr", "img", "wbr"]);
 
 /**
  * Parses a complete HTML element from the start of the buffer.

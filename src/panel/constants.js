@@ -11,7 +11,8 @@ export const PROVIDER_REASONING_MAP = {
   none: {
     anthropic: undefined,
     openai: "none",
-    "openai:gpt-5-mini": "minimal", // GPT-5-mini also allows `minimal`
+    "openai:gpt-5": "minimal", // GPT-5 does not support `none`
+    "openai:gpt-5-mini": "minimal", // GPT-5-mini does not support `none`
     google: "low",
     "google:gemini-3-flash-preview": "minimal", // Gemini 3 Flash Preview also supports `minimal`
     "google:gemini-3-flash": "minimal", // Future-proofing for Gemini 3 Flash
@@ -38,39 +39,9 @@ export const DEFAULT_COMPLETION_MODELS = {
   openai: "gpt-5-nano",
 };
 
-/// keep-sorted
-export const SUPPORTED_IMAGE_MIME_TYPES = [
-  "image/gif",
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-];
-
-/// keep-sorted
-export const SUPPORTED_FILE_MIME_TYPES = [
-  ...SUPPORTED_IMAGE_MIME_TYPES,
-  "application/pdf",
-];
-
-/**
- * Maximum total size for PDF files in bytes (50 MB)
- *
- * @remarks
- * If exceeded, fall back to text extraction
- */
-export const PDF_SIZE_LIMIT = 50 * 1024 * 1024;
-
-export const LOG_LEVELS = ["error", "warn", "info", "debug"];
-export const DEFAULT_LOG_LEVEL = "warn";
-export const STORAGE_KEY_PREFIX = "kirby$copilot$";
-
-/// keep-sorted
-export const FIELD_TYPE_RESPONSE_FORMAT = {
-  list: "rich-text",
-  markdown: "markdown", // Community plugin field type
-  textarea: "markdown",
-  writer: "rich-text",
-};
+export const COMPLETION_MAX_TOKENS = 100;
+export const COMPLETION_PREFIX_LENGTH = 4000;
+export const COMPLETION_SUFFIX_LENGTH = 500;
 
 export const DEFAULT_SYSTEM_PROMPT = `
 You are a content assistant.
@@ -101,6 +72,28 @@ Input: "The quick brown fox"
 Output: " jumps over the lazy dog."
 `;
 
-export const COMPLETION_MAX_TOKENS = 100;
-export const COMPLETION_PREFIX_LENGTH = 4000;
-export const COMPLETION_SUFFIX_LENGTH = 500;
+/// keep-sorted
+export const SUPPORTED_IMAGE_MIME_TYPES = [
+  "image/gif",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+];
+
+/// keep-sorted
+export const SUPPORTED_FILE_MIME_TYPES = [
+  ...SUPPORTED_IMAGE_MIME_TYPES,
+  "application/pdf",
+];
+
+/**
+ * Maximum total size for PDF files in bytes (50 MB)
+ *
+ * @remarks
+ * If exceeded, fall back to text extraction
+ */
+export const PDF_SIZE_LIMIT = 50 * 1024 * 1024;
+
+export const LOG_LEVELS = ["error", "warn", "info", "debug"];
+export const DEFAULT_LOG_LEVEL = "warn";
+export const STORAGE_KEY_PREFIX = "kirby$copilot$";
