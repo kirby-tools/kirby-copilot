@@ -294,7 +294,7 @@ function getFieldPreview(fieldName) {
     @cancel="emit('cancel')"
   >
     <div
-      class="kai-relative kai-rounded-[var(--rounded)] has-[textarea:focus]:kai-outline has-[textarea:focus]:kai-outline-[2px] has-[textarea:focus]:kai-outline-[var(--color-focus,currentColor)]"
+      class="kai-relative kai-rounded-[var(--rounded)] has-[textarea:focus]:kai-outline has-[textarea:focus]:kai-outline-[2px] has-[textarea:focus]:kai-outline-[var(--color-focus)]"
     >
       <AutoGrowTextarea
         ref="textareaComponent"
@@ -316,7 +316,7 @@ function getFieldPreview(fieldName) {
         class="kai-group kai-mx-2 kai-mb-2 kai-rounded-[var(--rounded)] kai-bg-[var(--color-background)]"
       >
         <summary
-          class="kai-flex kai-cursor-pointer kai-list-none kai-items-center kai-gap-0.5 kai-rounded-[var(--rounded)] kai-p-1.5 [&::-webkit-details-marker]:kai-hidden"
+          class="kai-flex kai-cursor-pointer kai-list-none kai-items-center kai-gap-0.5 kai-rounded-[var(--rounded)] kai-p-1.5 focus:kai-outline focus:kai-outline-[2px] focus:kai-outline-[var(--color-focus)] [&::-webkit-details-marker]:kai-hidden"
         >
           <k-icon
             type="angle-dropdown"
