@@ -1,7 +1,3 @@
-/**
- * @typedef {"text" | "markdown" | "rich-text"} OutputFormat
- */
-
 /// keep-sorted
 const FIELD_TYPE_RESPONSE_FORMAT = {
   list: "rich-text",
@@ -14,7 +10,7 @@ const FIELD_TYPE_RESPONSE_FORMAT = {
  * Returns the output format for a given Kirby field type.
  *
  * @param {string} fieldType - The Kirby field type (e.g., `writer`, `textarea`, `blocks`)
- * @returns {OutputFormat} The output format to use for AI-generated content
+ * @returns {import("../types.js").OutputFormat} The output format to use for AI-generated content
  */
 export function getResponseFormat(fieldType) {
   return FIELD_TYPE_RESPONSE_FORMAT[fieldType] || "text";

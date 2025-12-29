@@ -8,6 +8,15 @@ import { DEFAULT_SYSTEM_PROMPT, STORAGE_KEY_PREFIX } from "../constants";
 import { CopilotError } from "../utils/error";
 import { buildUserPrompt } from "../utils/models";
 
+/**
+ * Generates AI text and inserts it into the active field.
+ *
+ * @param {string} [selection] - Currently selected text to use as context
+ * @param {object} options
+ * @param {(text: string) => void} options.appendText - Callback to append text
+ * @param {(text: string) => void} options.replaceText - Callback to replace text
+ * @param {import("../types.js").OutputFormat} [options.responseFormat] - Output format for the generated content
+ */
 export async function generateAndInsertText(
   selection,
   { appendText, replaceText, responseFormat = "text" },
@@ -113,7 +122,7 @@ export async function generateAndInsertText(
 /**
  * Gets the active field element and its metadata from the Panel.
  *
- * @returns {{ element: HTMLElement, name: string, type: string } | undefined} The active field object or undefined if not found
+ * @returns {import("../types.js").ActiveField | undefined} The active field object or undefined if not found
  */
 export function getActiveField() {
   const element = document.activeElement?.closest(".k-field");

@@ -5,7 +5,7 @@ const HTML_VOID_ELEMENTS = new Set(["br", "hr", "img", "wbr"]);
  *
  * @param {string} prompt - The user's prompt text
  * @param {object} [options]
- * @param {import("./fields.js").OutputFormat} [options.responseFormat] - The output format for AI-generated content
+ * @param {import("../types.js").OutputFormat} [options.responseFormat] - The output format for AI-generated content
  * @param {string} [options.selection] - Selected text to include as context
  * @returns {string} The formatted prompt with XML tags
  */

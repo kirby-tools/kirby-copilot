@@ -31,7 +31,7 @@ const PLAYGROUND_PROVIDER_MODEL_MAP = {
  * @param {string} options.userPrompt - The prompt text to send to the AI model
  * @param {string} [options.systemPrompt] - System instructions for the AI
  * @param {import("ai").Output} [options.output] - Output schema for structured object/array responses
- * @param {string} [options.responseFormat] - Response format: `text`, `markdown`, or `rich-text`
+ * @param {import("../types.js").OutputFormat} [options.responseFormat] - Response format: `text`, `markdown`, or `rich-text`
  * @param {File[]} [options.files] - File attachments (images or PDF documents)
  * @param {number} [options.logLevel] - Logging verbosity: 0 (error), 1 (warn), 2 (info), 3 (debug)
  * @param {AbortSignal} [options.abortSignal] - Signal to abort the streaming request
