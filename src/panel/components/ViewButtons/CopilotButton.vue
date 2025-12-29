@@ -147,6 +147,9 @@ async function initPromptDialog() {
       }
     }
 
+    // Handle cancellation before stream started or after it completed
+    if (signal.aborted) return;
+
     // Set final result
     const structuredOutput = await finalOutput;
     const finalContent = processFieldValues({

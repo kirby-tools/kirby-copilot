@@ -95,6 +95,9 @@ export async function generateAndInsertText(
       }
     }
 
+    // Handle cancellation before stream started or after it completed
+    if (signal.aborted) return;
+
     panel.notification.success({
       icon: "sparkling",
       message: panel.t("johannschopplich.copilot.notification.success"),

@@ -275,6 +275,9 @@ async function generate() {
       }
     }
 
+    // Handle cancellation before stream started or after it completed
+    if (signal.aborted) return;
+
     // Store the final content
     await updateContent({
       [field.value.name.toLowerCase()]:

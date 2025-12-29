@@ -333,6 +333,7 @@ function createCompletionPlugin(context, mark) {
         view.dispatch(streamTr);
       }
 
+      // Handle cancellation before stream started or after it completed
       if (signal.aborted) return;
 
       // Mark streaming complete
