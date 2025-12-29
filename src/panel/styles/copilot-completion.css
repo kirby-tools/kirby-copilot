@@ -5,8 +5,7 @@
   margin-left: 0.5em;
   margin-right: 0.25em;
   border-radius: 50%;
-  background-color: currentColor;
-  opacity: 0.3;
+  background-color: light-dark(var(--color-gray-500), var(--color-gray-600));
   vertical-align: 0;
   animation: copilot-pulse 1.5s ease-in-out infinite;
   pointer-events: none;
@@ -17,11 +16,11 @@
   0%,
   100% {
     transform: scale(1);
-    opacity: 0.3;
+    background-color: light-dark(var(--color-gray-500), var(--color-gray-600));
   }
   50% {
     transform: scale(1.4);
-    opacity: 0.9;
+    background-color: light-dark(var(--color-gray-700), var(--color-gray-400));
   }
 }
 

@@ -22,9 +22,10 @@ export const copilotCompletion = {
   },
 
   /**
-   * @param {import("./types").WriterMarkContext} _context
+   * @param {import("./types").WriterMarkContext} context
    */
-  keys(_context) {
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  keys(context) {
     return {
       Tab: () => this._acceptSuggestion(),
       Escape: () => this._dismissSuggestion(),
