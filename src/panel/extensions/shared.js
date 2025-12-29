@@ -99,7 +99,7 @@ export async function generateAndInsertText(
     if (signal.aborted) return;
 
     panel.notification.success({
-      icon: "sparkling",
+      icon: "check",
       message: panel.t("johannschopplich.copilot.notification.success"),
     });
   } catch (error) {

@@ -162,7 +162,7 @@ async function initPromptDialog() {
     await updateContent(finalContent);
 
     panel.notification.success({
-      icon: "sparkling",
+      icon: "check",
       message: panel.t("johannschopplich.copilot.notification.success"),
     });
   } catch (error) {
@@ -211,15 +211,15 @@ function processFieldValues({ object, selectedFields, currentContent }) {
     if (fieldValue == null) continue;
 
     const currentFieldContent = currentContent[field.name];
+    const normalizer =
+      field.type === "layout" ? normalizeLayout : normalizeBlock;
 
     // Handle layouts and blocks field normalization
     if (field.type === "layout" || field.type === "blocks") {
       if (Array.isArray(fieldValue)) {
         processedContent[field.name] = [
           ...currentFieldContent,
-          ...fieldValue.map(
-            field.type === "layout" ? normalizeLayout : normalizeBlock,
-          ),
+          ...fieldValue.map(normalizer),
         ];
       }
     } else {

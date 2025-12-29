@@ -294,7 +294,7 @@ async function generate() {
     });
 
     panel.notification.success({
-      icon: "sparkling",
+      icon: "check",
       message: panel.t("johannschopplich.copilot.notification.success"),
     });
   } catch (error) {
