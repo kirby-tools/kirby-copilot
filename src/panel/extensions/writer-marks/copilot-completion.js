@@ -13,8 +13,23 @@ const LICENSE_TOAST_THRESHOLD = 3; // Show toast after this many completions
 const COMPLETION_COUNT_STORAGE_KEY = `${STORAGE_KEY_PREFIX}completionCount`;
 
 let completionConfig;
+let isCompletionPaused = false;
 
 export const completionPluginKey = new PluginKey("copilot-completion");
+
+/**
+ * Pauses auto-completion while external content generation is in progress.
+ */
+export function pauseCompletion() {
+  isCompletionPaused = true;
+}
+
+/**
+ * Resumes auto-completion after external content generation completes.
+ */
+export function resumeCompletion() {
+  isCompletionPaused = false;
+}
 
 export const copilotCompletion = {
   get name() {
@@ -215,8 +230,8 @@ function createCompletionPlugin(context, mark) {
           // Only trigger if document changed
           if (view.state.doc.eq(prevState.doc)) return;
 
-          // Skip auto-completion if disabled or config not loaded yet
-          if (!completionConfig) return;
+          // Skip auto-completion if disabled, config not loaded, or externally paused
+          if (!completionConfig || isCompletionPaused) return;
 
           debounceTimer = setTimeout(() => {
             const { $head } = view.state.selection;

@@ -15,6 +15,10 @@ import {
   LOG_LEVELS,
   STORAGE_KEY_PREFIX,
 } from "../../constants";
+import {
+  pauseCompletion,
+  resumeCompletion,
+} from "../../extensions/writer-marks/copilot-completion";
 import { fieldToZodSchema } from "../../schemas/fields";
 import { CopilotError } from "../../utils/error";
 
@@ -98,6 +102,7 @@ async function initPromptDialog() {
 
   panel.isLoading = true;
   isGenerating.value = true;
+  pauseCompletion();
   document.addEventListener("keydown", handleEscape);
 
   const _currentContent = { ...currentContent.value };
@@ -189,6 +194,7 @@ async function initPromptDialog() {
     abortController = undefined;
     panel.isLoading = false;
     isGenerating.value = false;
+    resumeCompletion();
     document.removeEventListener("keydown", handleEscape);
   }
 }
