@@ -18,14 +18,14 @@ let isCompletionPaused = false;
 export const completionPluginKey = new PluginKey("copilot-completion");
 
 /**
- * Pauses auto-completion while external content generation is in progress.
+ * Pauses inline suggestions while external content generation is in progress.
  */
 export function pauseCompletion() {
   isCompletionPaused = true;
 }
 
 /**
- * Resumes auto-completion after external content generation completes.
+ * Resumes inline suggestions after external content generation completes.
  */
 export function resumeCompletion() {
   isCompletionPaused = false;
@@ -230,7 +230,7 @@ function createCompletionPlugin(context, mark) {
           // Only trigger if document changed
           if (view.state.doc.eq(prevState.doc)) return;
 
-          // Skip auto-completion if disabled, config not loaded, or externally paused
+          // Skip inline suggestions if disabled, config not loaded, or externally paused
           if (!completionConfig || isCompletionPaused) return;
 
           debounceTimer = setTimeout(() => {
