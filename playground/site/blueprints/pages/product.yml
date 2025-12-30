@@ -14,7 +14,7 @@ tabs:
         fields:
           description:
             label: Product Description
-            type: textarea
+            type: writer
             help: Detailed description highlighting key features and benefits
 
           features:
@@ -27,7 +27,7 @@ tabs:
                 help: Brief feature name
               description:
                 label: Feature Description
-                type: textarea
+                type: writer
                 help: Detailed explanation of this feature
               icon:
                 label: Icon
@@ -37,7 +37,7 @@ tabs:
 
           specifications:
             label: Technical Specifications
-            type: textarea
+            type: writer
             help: Technical details, dimensions, compatibility, etc.
 
           benefits:
@@ -90,7 +90,7 @@ tabs:
 
       targetAudience:
         label: Target Audience
-        type: textarea
+        type: writer
         help: Description of ideal customers and use cases
 
       competitiveAdvantages:
@@ -108,7 +108,7 @@ tabs:
             help: Brief title of the use case
           description:
             label: Description
-            type: textarea
+            type: writer
             help: Detailed explanation of how the product solves this scenario
           targetUser:
             label: Target User
@@ -128,6 +128,7 @@ tabs:
         label: Meta Description
         type: textarea
         maxlength: 160
+        buttons: false
         help: Compelling description for search results
 
       keywords:

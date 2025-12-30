@@ -2,4 +2,77 @@ Title: ZEHA Leather Shoe Liga
 
 ----
 
+Description: <p>The <strong>ZEHA Leather Shoe Liga</strong> is a masterpiece of retro-inspired footwear, blending classic 1950s sports aesthetics with modern urban style. Handcrafted with precision, these shoes feature high-quality leather in a striking blue, cream, and red color palette. Whether you are navigating city streets or attending a casual event, the Liga provides a unique look that pays homage to Berlin's rich athletic heritage.</p>
+
+----
+
+Features:
+
+- 
+  title: Premium Leather Construction
+  description: '<p>Made from <em>soft, high-grade calfskin leather</em> that adapts to the shape of your foot for maximum comfort.</p>'
+  icon: leather-texture
+- 
+  title: Signature Zeha Double Stripes
+  description: '<p>Features the iconic <strong>double-stripe design</strong> in red and cream, an unmistakable mark of Zeha craftsmanship since 1897.</p>'
+  icon: brand-logo
+- 
+  title: Rugged Outsole
+  description: '<p>Equipped with a durable, honey-colored rubber lug sole that offers <strong>superior grip</strong> and longevity.</p>'
+  icon: shoe-sole
+
+----
+
+Specifications: <p><strong>Material:</strong> 100% Genuine Leather upper and lining. <strong>Sole:</strong> Anti-slip rubber lug sole. <strong>Closure:</strong> Lace-up with reinforced eyelets. <strong>Origin:</strong> Handcrafted in Portugal. <strong>Style:</strong> Low-top retro trainer.</p>
+
+----
+
+Benefits: <ul><li><strong>Unmatched Durability:</strong> Robust construction ensures these shoes last for years.</li><li><strong>Breathable Comfort:</strong> Full leather lining allows for natural temperature regulation.</li><li><strong>Timeless Design:</strong> A versatile look that pairs perfectly with denim or chinos.</li><li><strong>Superior Traction:</strong> The lugged profile provides stability on various urban surfaces.</li></ul>
+
+----
+
+Price: €249.00
+
+----
+
+Category: Accessories
+
+----
+
+Tags: Footwear, Retro, Leather, Berlin Style, Handmade
+
+----
+
+Availability: In Stock
+
+----
+
+Tagline: 
+
+----
+
+Targetaudience: 
+
+----
+
+Competitiveadvantages: 
+
+----
+
+Usecases: 
+
+----
+
+Metatitle: 
+
+----
+
+Metadescription: 
+
+----
+
+Keywords: 
+
+----
+
 Uuid: VRMQMkcI5QXtOK9f
