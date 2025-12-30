@@ -2,20 +2,22 @@
 
 # Kirby Copilot
 
-Kirby Copilot is a plugin for [Kirby CMS](https://getkirby.com) that integrates AI features into your Kirby projects, allowing you to generate structured content and entire page layouts directly from the Panel.
+Kirby Copilot is a plugin for [Kirby CMS](https://getkirby.com) that integrates AI features into your Kirby projects, letting you generate and refine content – from simple text to complex page layouts – directly from the Panel. This documentation guides you through the installation, configuration, and usage of the plugin.
 
 > [!TIP]
 > Explore the [interactive playground](https://try.kirbycopilot.com) or [install the plugin](https://kirby.tools/docs/copilot/getting-started/installation) to try Kirby Copilot for yourself.
 
 ## Features
 
-Kirby Copilot offers a variety of features for AI-assisted content creation and editing. These features make the process easy for you, your clients, and your editors.
+Whether you are building sites for clients or managing content yourself, Kirby Copilot brings AI-assisted creation and editing to the Panel.
 
-- 🦙 **Multi-model**: Use OpenAI models, Google Gemini, Anthropic Claude, or Mistral AI models to generate content.
+- 🦙 **Multi-Provider**: Choose from leading AI providers – configure once and switch anytime.
 - 🧱 **Structure-Aware Generation**: Generate entire layouts from a single prompt, based on your project's unique block definitions.
-- 📇 **In-Context Editing**: Use the Copilot button in writer/textarea fields to refine text with AI assistance. Works perfectly with selected text.
-- 🌞 **Customizable prompts**: Tailor AI responses with user and system instructions.
-- 🎀 **Rich Context**: Go beyond text. Use other fields, images, and even PDF documents as context for more accurate and relevant AI responses.
+- ⚡ **Inline Suggestions**: Ghost text appears after a brief pause. Press Tab to accept.
+- 📇 **In-Context Editing**: Use the Copilot button in writer/textarea fields to refine text. Works perfectly with selected text.
+- 🌞 **Prompt Templates**: Tailor AI responses with user instructions. Save frequently used prompts as templates.
+- 🎀 **Rich Context**: Use other fields, images, and PDF documents as context for relevant AI responses.
+- 🔒 **Secure by Default**: API keys are protected via server-side proxy – never exposed to Panel users.
 
 ## Licensing
 
