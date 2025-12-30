@@ -1,6 +1,7 @@
 /* Improved tabs layout */
 .k-tabs {
   padding-top: var(--spacing-4);
+  margin-inline: 0 !important;
 }
 
 .k-tabs-button[aria-current] {

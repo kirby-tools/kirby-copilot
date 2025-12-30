@@ -6,51 +6,33 @@ buttons:
   settings: true
   status: true
 
-tabs:
-  content:
-    label: Content
-    fields:
-      # subtitle:
-      #   label: Subtitle
-      #   type: text
-      #   help: A compelling tagline or description
+fields:
+  # subtitle:
+  #   label: Subtitle
+  #   type: text
+  #   help: A compelling tagline or description
 
-      layout:
-        label: Page Layout
-        type: layout
-        layouts:
-          - 1/1
-          - 1/2, 1/2
-          - 1/3, 2/3
-          - 2/3, 1/3
-          - 1/4, 1/4, 1/4, 1/4
-          - 1/2, 1/2, 1/3, 1/3, 1/3
-        fieldsets:
-          - hero
-          - features
-          - showcase
-          - stats
-          - testimonials
-          - team
-          - faq
-          - cta
-          - contact
-          # Core Kirby blocks
-          - heading
-          - text
-        help: Describe what kind of landing page you need and let AI build the layout structure for you.
-
-  settings:
-    label: Settings
-    fields:
-      seo:
-        label: SEO
-        type: structure
-        fields:
-          metaTitle:
-            label: Meta Title
-            type: text
-          metaDescription:
-            label: Meta Description
-            type: textarea
-            maxlength: 160
+  layout:
+    label: Page Layout
+    type: layout
+    layouts:
+      - 1/1
+      - 1/2, 1/2
+      - 1/3, 2/3
+      - 2/3, 1/3
+      - 1/4, 1/4, 1/4, 1/4
+      - 1/2, 1/2, 1/3, 1/3, 1/3
+    fieldsets:
+      - hero
+      - features
+      - showcase
+      - stats
+      - testimonials
+      - team
+      - faq
+      - cta
+      - contact
+      # Core Kirby blocks
+      - heading
+      - text
+    help: Describe what kind of landing page you need and let AI build the layout structure for you.

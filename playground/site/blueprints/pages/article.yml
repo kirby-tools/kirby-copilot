@@ -8,94 +8,46 @@ buttons:
   settings: true
   status: true
 
-tabs:
-  content:
-    label: Content
-    columns:
-      - width: 2/3
-        fields:
-          content:
-            label: Article Content
-            type: blocks
-            fieldsets:
-              - heading
-              - text
-              - quote
-              - image
-              - list
-              - code
-            help: Build your article content with structured blocks
-
-      - width: 1/3
-        fields:
-          # metaDescription:
-          #   label: Meta Description
-          #   type: textarea
-          #   maxlength: 160
-          #   buttons:
-          #     - copilot
-          #   copilot:
-          #     userPrompt: |
-          #       Summarize this article "{title}" in a meta description (max 155 characters). Include the main benefit and end with a subtle call-to-action. No quotes.
-
-          #       This is the article:
-          #       {content}
-          #   help: Brief description for search engine results
-
-          author:
-            label: Author
-            type: text
-            help: The author's name
-
-          publishDate:
-            label: Publish Date
-            type: date
-            default: today
-            help: When this article was or will be published
-
-          excerpt:
-            label: Excerpt
-            type: textarea
-            maxlength: 300
-            buttons: false
-            help: A brief summary or teaser for the article
-
-  settings:
-    label: Settings
+columns:
+  - width: 2/3
     fields:
-      category:
-        label: Category
-        type: select
-        options:
-          - Technology
-          - Business
-          - Lifestyle
-          - Education
-          - News
-        width: 1/2
+      content:
+        label: Article Content
+        type: blocks
+        fieldsets:
+          - heading
+          - text
+          - quote
+          - image
+          - list
+          - code
+        help: Build your article content with structured blocks
 
-      tags:
-        label: Tags
-        type: tags
-        width: 1/2
-        help: Add relevant keywords for better organization
+  - width: 1/3
+    fields:
+      metaDescription:
+        label: Meta Description
+        type: textarea
+        maxlength: 160
+        buttons:
+          - copilot
+        copilot:
+          userPrompt: |
+            Summarize this article "{title}" in a meta description (max 155 characters). Include the main benefit and end with a subtle call-to-action. No quotes.
 
-      featured:
-        label: Featured Article
-        type: toggle
-        width: 1/2
-        help: Mark as featured to highlight on your homepage
+            This is the article:
+            {content}
+        help: Brief description for search engine results
 
-      seo:
-        label: SEO Settings
-        type: structure
-        fields:
-          metaTitle:
-            label: Meta Title
-            type: text
-            help: Override the default title for search engines
-          metaDescription:
-            label: Meta Description
-            type: textarea
-            maxlength: 160
-            help: Brief description for search engine results
+      publishDate:
+        label: Publish Date
+        type: date
+        default: today
+        help: When this article was or will be published
+
+      excerpt:
+        label: Excerpt
+        type: textarea
+        maxlength: 300
+        buttons: false
+        help: A brief summary or teaser for the article
