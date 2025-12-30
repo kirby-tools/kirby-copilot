@@ -118,47 +118,6 @@ tabs:
                   - Expert
                 default: Medium
 
-          cuisine:
-            label: Cuisine Type
-            type: select
-            options:
-              - Italian
-              - French
-              - Asian
-              - Mediterranean
-              - Mexican
-              - American
-              - Middle Eastern
-              - Indian
-              - Fusion
-            help: Culinary tradition or style
-
-          dietaryInfo:
-            label: Dietary Information
-            type: checkboxes
-            options:
-              vegetarian: Vegetarian
-              vegan: Vegan
-              glutenFree: Gluten-Free
-              dairyFree: Dairy-Free
-              nutFree: Nut-Free
-              lowCarb: Low-Carb
-            help: Applicable dietary categories
-
-          mealType:
-            label: Meal Type
-            type: multiselect
-            options:
-              - Breakfast
-              - Brunch
-              - Lunch
-              - Dinner
-              - Appetizer
-              - Dessert
-              - Snack
-              - Side Dish
-            help: When this dish is typically served
-
   # nutritionAndPairing:
   #   label: Nutrition & Pairing
   #   columns:
