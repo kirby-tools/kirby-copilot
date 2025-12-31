@@ -91,13 +91,12 @@ async function initPromptDialog() {
   const fieldsSchema = {};
 
   for (const field of selectedFields) {
-    if (field.type === "layout") {
-      fieldsSchema[field.name] = z.array(await getLayoutZodSchema(field));
-    } else if (field.type === "blocks") {
-      fieldsSchema[field.name] = z.array(await getBlocksZodSchema(field));
-    } else {
-      fieldsSchema[field.name] = fieldToZodSchema(field);
-    }
+    fieldsSchema[field.name] =
+      field.type === "layout"
+        ? z.array(await getLayoutZodSchema(field))
+        : field.type === "blocks"
+          ? z.array(await getBlocksZodSchema(field))
+          : fieldToZodSchema(field);
   }
 
   panel.isLoading = true;
