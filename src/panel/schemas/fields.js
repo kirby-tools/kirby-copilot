@@ -243,7 +243,7 @@ function createNestedFieldsSchema(field) {
     });
   }
 
-  return z.object(nestedContentSchema);
+  return z.object(nestedContentSchema).strict();
 }
 
 /**

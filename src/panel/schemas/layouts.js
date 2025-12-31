@@ -43,12 +43,14 @@ function extractLayoutWidths(layouts) {
 function generateLayoutSchema(fieldsets, layoutWidths) {
   const columnSchema = generateLayoutColumnSchema(fieldsets, layoutWidths);
 
-  return z.object({
-    columns: z
-      .array(columnSchema)
-      .min(1)
-      .describe("Array of columns in this layout"),
-  });
+  return z
+    .object({
+      columns: z
+        .array(columnSchema)
+        .min(1)
+        .describe("Array of columns in this layout"),
+    })
+    .strict();
 }
 
 /**
@@ -59,12 +61,14 @@ function generateLayoutColumnSchema(fieldsets, layoutWidths) {
   const blockUnion =
     blockSchemas.length > 1 ? z.union(blockSchemas) : blockSchemas[0];
 
-  return z.object({
-    width: z
-      .enum(layoutWidths)
-      .describe(`Column width fraction to use, e.g. "1/2"`),
-    blocks: z
-      .array(blockUnion)
-      .describe("Array of blocks contained in this column"),
-  });
+  return z
+    .object({
+      width: z
+        .enum(layoutWidths)
+        .describe(`Column width fraction to use, e.g. "1/2"`),
+      blocks: z
+        .array(blockUnion)
+        .describe("Array of blocks contained in this column"),
+    })
+    .strict();
 }

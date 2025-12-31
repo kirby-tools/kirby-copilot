@@ -24,8 +24,9 @@ export function generateBlockSchema(fieldsets) {
   return z
     .object({
       type: z.literal(type),
-      content: z.object(contentSchema),
+      content: z.object(contentSchema).strict(),
     })
+    .strict()
     .describe(`Kirby block: ${name}`);
 }
 
