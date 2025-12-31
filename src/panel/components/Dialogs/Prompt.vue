@@ -54,12 +54,12 @@ const historyDropdown = ref();
 
 const selectionInsertOptions = [
   {
-    value: "append",
-    text: panel.t("johannschopplich.copilot.append"),
-  },
-  {
     value: "replace",
     text: panel.t("johannschopplich.copilot.replace"),
+  },
+  {
+    value: "append",
+    text: panel.t("johannschopplich.copilot.append"),
   },
 ];
 const insertOption = ref(selectionInsertOptions[0].value);
@@ -174,7 +174,7 @@ function submit() {
     prompt: prompt.value,
     files: files.value,
     fields: selectedFieldNames.value,
-    append: insertOption.value === "append",
+    insertMode: insertOption.value,
   });
 }
 

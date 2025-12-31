@@ -82,7 +82,9 @@ export async function generateAndInsertText(
     for await (let textPart of textStream) {
       if (signal.aborted) return;
 
-      if (promptContext.append) {
+      if (promptContext.insertMode === "replace") {
+        replaceText(textPart);
+      } else {
         if (isFirstInsertion) {
           textPart =
             selection && !textPart.startsWith(" ") ? ` ${textPart}` : textPart;
@@ -90,8 +92,6 @@ export async function generateAndInsertText(
         }
 
         appendText(textPart);
-      } else {
-        replaceText(textPart);
       }
     }
 
