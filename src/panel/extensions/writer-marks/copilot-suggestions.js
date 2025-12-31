@@ -337,7 +337,7 @@ function createCompletionPlugin(context, mark) {
         system: COMPLETION_SYSTEM_PROMPT,
         prompt,
         maxTokens: COMPLETION_MAX_TOKENS,
-        abortSignal: abortController.signal,
+        abortSignal: signal,
       });
 
       // Stream chunks and update ghost text progressively

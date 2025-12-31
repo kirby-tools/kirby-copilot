@@ -74,7 +74,7 @@ export async function streamTextToField(
       systemPrompt: config.systemPrompt || DEFAULT_SYSTEM_PROMPT,
       responseFormat,
       files,
-      abortSignal: abortController.signal,
+      abortSignal: signal,
     });
 
     let isFirstInsertion = true;

@@ -228,7 +228,7 @@ async function generate() {
         output: Output.array({ element: schema }),
         files: files.value,
         logLevel: logLevel.value,
-        abortSignal: abortController.signal,
+        abortSignal: signal,
       });
 
       // Stream partial updates
@@ -258,7 +258,7 @@ async function generate() {
         responseFormat,
         files: files.value,
         logLevel: logLevel.value,
-        abortSignal: abortController.signal,
+        abortSignal: signal,
       });
 
       for await (const textPart of textStream) {
