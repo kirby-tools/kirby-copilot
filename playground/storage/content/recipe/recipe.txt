@@ -1,41 +1,85 @@
-Title: Whole Wheat Sourdough Bread Recipe
+Title: Sourdough Bread Recipe
 
 ----
 
-Instructions: 
+Instructions: <p><strong>1 Levain (12:30 p.m.)</strong><br>In a small container, mix the Levain ingredients and keep it at a warm temperature for 3 hours.</p><p><strong>2 Autolyse (1:30 p.m)</strong><br>In a medium mixing bowl, add the autolyse ingredients and mix until no dry bits remain. Cover the bowl and let rest for 2 hours.</p><p><strong>3 Mix (3:30 p.m.)</strong><br>To the mixing bowl holding your dough, add the levain and a splash of water. Mix thoroughly and strengthen the dough for about 4-5 minutes. Add the salt, another splash of water, and mix until incorporated. Strengthen the dough further if necessary until it’s elastic and smooth. Transfer the dough to a bulk fermentation container and cover.</p><p><strong>4 Bulk Fermentation (3:40 p.m. to 7:10 p.m.)</strong><br>This dough will need 5 sets of stretch and folds during bulk fermentation, at 30-minute intervals. After the last set, let the dough rest for the remaining time in bulk fermentation.</p><p><strong>5 Divide and Preshape (7:10 p.m.)</strong><br>Lightly flour your work surface and scrape out your dough. Using your bench knife, divide the dough in half. Lightly shape each half into a round shape. Let the dough rest for 20 minutes, uncovered.</p><p><strong>6 Shape (7:30 p.m.)</strong><br>Shape each piece of dough into a round (boule) or oval (batard) and place the dough in proofing baskets.</p><p><strong>7 Proof (7:35 p.m. to 9:00 a.m. the next day)</strong><br>Cover proofing baskets with reusable plastic and seal shut. Then, place both baskets into the refrigerator and proof overnight.</p><p><strong>8 Bake (The next day, bake at 9:00 a.m.)</strong><br>Preheat your oven with a baking surface or combo cooker/Dutch oven inside to 450°F (230°C). When the oven is preheated, remove your dough from the fridge, score it, and transfer it to the preheated baking surface or combo cooker. Bake for 20 minutes with steam. After this time, vent the steam in the oven or remove the lid (you can keep it in the oven or remove it) and continue to bake for 30 minutes longer. When done, the internal temperature should be around 206°F (96°C).<br>Let the loaves cool for 2 hours on a wire rack before slicing.</p>
 
 ----
 
 Ingredients:
 
 - 
-  amount: ""
-  ingredient: ""
-  notes: ""
+  amount: 24g
+  ingredient: >
+    medium protein bread flour (or
+    all-purpose flour)
+  notes: Levain
+- 
+  amount: 24g
+  ingredient: whole wheat flour
+  notes: Levain
+- 
+  amount: 48g
+  ingredient: water
+  notes: Levain
+- 
+  amount: 48g
+  ingredient: ripe sourdough starter
+  notes: Levain
+- 
+  amount: 453g
+  ingredient: whole wheat flour
+  notes: Autolyse
+- 
+  amount: 214g
+  ingredient: >
+    medium-protein flour (or all-purpose
+    flour)
+  notes: Autolyse
+- 
+  amount: 238g
+  ingredient: high-protein bread flour
+  notes: Autolyse
+- 
+  amount: 634g
+  ingredient: water
+  notes: Autolyse
+- 
+  amount: 18g
+  ingredient: salt
+  notes: Main Dough
+- 
+  amount: 143g
+  ingredient: ripe levain
+  notes: Main Dough
+- 
+  amount: 100g
+  ingredient: water
+  notes: Main Dough
+
+----
+
+Description: A delicious loaf of sourdough bread with 50% whole grains. This bread is airy, light in hand, and it has a deep, complex flavor profile from the assertive wheat and fermentation flavor.
+
+----
+
+Servings: 2
+
+----
+
+Preptime: 24 hours
+
+----
+
+Cooktime: 50 minutes
+
+----
+
+Difficulty: Medium
 
 ----
 
 Tips: 
-
-----
-
-Description: 
-
-----
-
-Servings: 6
-
-----
-
-Preptime: 
-
-----
-
-Cooktime: 
-
-----
-
-Difficulty: 
 
 ----
 

@@ -1,9 +1,7 @@
 title: Recipe
 
 buttons:
-  # copilot:
-  #   userPrompt: Create a delicious and detailed recipe for a seasonal dish with interesting flavors.
-  #   icon: copilot-ai-generate
+  copilot: true
   open: true
   settings: true
   status: true
@@ -32,6 +30,7 @@ tabs:
               - clear
               - "|"
               - copilot
+              - copilot-suggestions
             help: Step-by-step cooking instructions with rich formatting
           # instructions:
           #   label: Cooking Instructions
@@ -74,13 +73,6 @@ tabs:
                 width: 1/4
                 help: Optional preparation notes
             help: List all ingredients with measurements
-
-          tips:
-            label: Chef's Tips & Variations
-            type: textarea
-            help: Pro tips, substitutions, and creative variations
-            buttons:
-              - copilot
 
       - width: 1/3
         fields:

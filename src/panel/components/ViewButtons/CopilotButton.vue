@@ -18,7 +18,7 @@ import {
 import {
   pauseCompletion,
   resumeCompletion,
-} from "../../extensions/writer-marks/copilot-completion";
+} from "../../extensions/writer-marks/copilot-suggestions";
 import { fieldToZodSchema } from "../../schemas/fields";
 import { CopilotError } from "../../utils/error";
 

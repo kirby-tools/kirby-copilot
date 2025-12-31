@@ -5,10 +5,10 @@ import CopilotButton from "./components/ViewButtons/CopilotButton.vue";
 import { icons } from "./config/icons";
 import { copilot as copilotButton } from "./extensions/textarea-buttons/copilot";
 import { copilot as copilotMark } from "./extensions/writer-marks/copilot";
-import { copilotCompletion as copilotCompletionMark } from "./extensions/writer-marks/copilot-completion";
+import { copilotSuggestions as copilotSuggestionsMark } from "./extensions/writer-marks/copilot-suggestions";
 import { legacyViewButtonMixin } from "./utils/legacy";
 import "./index.css";
-import "./styles/copilot-completion.css";
+import "./styles/copilot-suggestions.css";
 import "./styles/copilot-generating.css";
 
 window.panel.plugin("johannschopplich/copilot", {
@@ -32,7 +32,7 @@ window.panel.plugin("johannschopplich/copilot", {
   },
   writerMarks: {
     copilot: copilotMark,
-    "copilot-completion": copilotCompletionMark,
+    "copilot-suggestions": copilotSuggestionsMark,
   },
   icons,
   use: [legacyViewButtonMixin],

@@ -1,6 +1,6 @@
 import { DOMParser } from "prosemirror-model";
 import { generateAndInsertText } from "../shared";
-import { completionPluginKey } from "./copilot-completion";
+import { completionPluginKey } from "./copilot-suggestions";
 
 /** @typedef {import("./types").WriterMarkContext} WriterMarkContext */
 

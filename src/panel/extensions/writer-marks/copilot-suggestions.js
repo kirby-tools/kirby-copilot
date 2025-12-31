@@ -15,7 +15,7 @@ const COMPLETION_COUNT_STORAGE_KEY = `${STORAGE_KEY_PREFIX}completionCount`;
 let completionConfig;
 let isCompletionPaused = false;
 
-export const completionPluginKey = new PluginKey("copilot-completion");
+export const completionPluginKey = new PluginKey("copilot-suggestions");
 
 /**
  * Pauses inline suggestions while external content generation is in progress.
@@ -31,9 +31,9 @@ export function resumeCompletion() {
   isCompletionPaused = false;
 }
 
-export const copilotCompletion = {
+export const copilotSuggestions = {
   get name() {
-    return "copilot-completion";
+    return "copilot-suggestions";
   },
 
   /**
