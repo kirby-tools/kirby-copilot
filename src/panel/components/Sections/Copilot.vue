@@ -231,6 +231,9 @@ async function generate() {
         abortSignal: signal,
       });
 
+      // Prevent unhandled rejection when aborting before `finalOutput` is awaited
+      finalOutput.catch(() => {});
+
       // Stream partial updates
       for await (const partialOutput of partialOutputStream) {
         if (signal.aborted) return;

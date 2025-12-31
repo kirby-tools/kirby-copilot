@@ -107,7 +107,7 @@ async function initPromptDialog() {
   const _currentContent = { ...currentContent.value };
 
   const { config } = await usePluginContext();
-  const { AISDKError, Output } = await loadPluginModule("ai");
+  const { Output, AISDKError } = await loadPluginModule("ai");
 
   const systemPrompt =
     props.systemPrompt || config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
@@ -128,8 +128,11 @@ async function initPromptDialog() {
             ? config.logLevel
             : DEFAULT_LOG_LEVEL,
       ),
-      abortSignal: abortController.signal,
+      abortSignal: signal,
     });
+
+    // Prevent unhandled rejection when aborting before `finalOutput` is awaited
+    finalOutput.catch(() => {});
 
     // Stream partial updates
     for await (const partialOutput of partialOutputStream) {
