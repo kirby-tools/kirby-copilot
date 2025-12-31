@@ -79,16 +79,18 @@ export const copilotSuggestions = {
   _dismissSuggestion() {
     const { view } = this.editor;
     const pluginState = completionPluginKey.getState(view.state);
-    if (!pluginState?.suggestion && !pluginState?.isLoading) return false;
 
+    // Always dispatch dismiss (also cancels pending debounced completions)
     const tr = view.state.tr.setMeta(completionPluginKey, {
       suggestion: null,
       position: null,
       isLoading: false,
+      skipNextTrigger: true,
     });
     view.dispatch(tr);
 
-    return true;
+    // Return true if there was something visible to dismiss
+    return Boolean(pluginState?.suggestion || pluginState?.isLoading);
   },
 
   _triggerCompletion() {
@@ -215,7 +217,7 @@ function createCompletionPlugin(context, mark) {
             return;
           }
 
-          // Check skip flag from copilot prompt dialog
+          // Check skip flag (from prompt dialog or pre-emptive dismiss)
           if (pluginState?.skipNextTrigger) {
             clearTimeout(debounceTimer);
             const tr = view.state.tr.setMeta(completionPluginKey, {
