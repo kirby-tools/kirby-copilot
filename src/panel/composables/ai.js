@@ -5,6 +5,7 @@ import {
   PDF_SIZE_LIMIT,
   PLUGIN_PROXY_API_ROUTE,
   PROVIDER_REASONING_MAP,
+  PROXY_API_KEY_MARKER,
   STORAGE_KEY_PREFIX,
   SUPPORTED_PROVIDERS,
 } from "../constants";
@@ -107,6 +108,8 @@ export async function useStreamText({
       if (AISDKError.isInstance(error)) {
         throw error;
       }
+
+      console.error("Unexpected error during text streaming:", error);
     },
   });
 }
@@ -191,7 +194,7 @@ export async function resolveLanguageModel({ forCompletion = false } = {}) {
   const api = createProvider({
     baseUrl: providerConfig.baseUrl || undefined,
     apiKey: !isPlayground
-      ? "__KIRBY_COPILOT_PROXY__"
+      ? PROXY_API_KEY_MARKER
       : sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`),
     fetch: !isPlayground ? proxyFetch : undefined,
     ...(provider === "anthropic" && !isPlayground
