@@ -1,5 +1,5 @@
 import { DOMParser } from "prosemirror-model";
-import { generateAndInsertText } from "../shared";
+import { streamTextToField } from "../shared";
 import { completionPluginKey } from "./copilot-suggestions";
 
 /** @typedef {import("./types").WriterMarkContext} WriterMarkContext */
@@ -157,7 +157,7 @@ export const copilot = {
       view.dispatch(newTr);
     };
 
-    generateAndInsertText(currentSelection, {
+    streamTextToField(currentSelection, {
       responseFormat: "rich-text",
       replaceText,
       appendText,

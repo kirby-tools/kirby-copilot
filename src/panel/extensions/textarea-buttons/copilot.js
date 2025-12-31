@@ -1,4 +1,4 @@
-import { generateAndInsertText } from "../shared";
+import { streamTextToField } from "../shared";
 
 export const copilot = {
   icon: "sparkling",
@@ -31,7 +31,7 @@ export const copilot = {
       this.command("insert", () => text);
     };
 
-    generateAndInsertText(currentSelection, {
+    streamTextToField(currentSelection, {
       responseFormat: "markdown",
       appendText,
       replaceText,

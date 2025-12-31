@@ -9,7 +9,7 @@ import { CopilotError } from "../utils/error";
 import { buildUserPrompt } from "../utils/models";
 
 /**
- * Generates AI text and inserts it into the active field.
+ * Streams AI-generated text into the active field.
  *
  * @param {string} [selection] - Currently selected text to use as context
  * @param {object} options
@@ -17,7 +17,7 @@ import { buildUserPrompt } from "../utils/models";
  * @param {(text: string) => void} options.replaceText - Callback to replace text
  * @param {import("../types.js").OutputFormat} [options.responseFormat] - Output format for the generated content
  */
-export async function generateAndInsertText(
+export async function streamTextToField(
   selection,
   { appendText, replaceText, responseFormat = "text" },
 ) {
