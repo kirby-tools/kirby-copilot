@@ -37,12 +37,12 @@ return [
                             'completionModel' => 'mistral-small-latest'
                         ]
                     ],
-                    'logLevel' => 'warn',
                     'reasoningEffort' => 'low',
                     'completion' => [
                         'debounce' => 1000
                     ],
-                    'excludedBlocks' => []
+                    'excludedBlocks' => [],
+                    'logLevel' => 'warn'
                 ];
 
                 // Merge user configuration with defaults
@@ -51,16 +51,41 @@ return [
                 // Lowercase model provider name
                 $config['provider'] = strtolower($config['provider']);
 
+                // Validate provider
+                $validProviders = ['openai', 'google', 'anthropic', 'mistral'];
+                if (!in_array($config['provider'], $validProviders, true)) {
+                    if ($kirby->option('debug')) {
+                        throw new InvalidArgumentException(
+                            'Invalid provider: ' . $config['provider'] .
+                            '. Must be one of: ' . implode(', ', $validProviders)
+                        );
+                    }
+                    $config['provider'] = 'google';
+                }
+
                 // Lowercase model providers configuration keys
                 $config['providers'] = array_change_key_case($config['providers'], CASE_LOWER);
 
+                // Convert API keys to boolean flags (frontend validation without exposing secrets)
+                $config['providers'] = array_map(
+                    fn ($provider) => ['hasApiKey' => !empty($provider['apiKey'])] + array_diff_key($provider, ['apiKey' => true]),
+                    $config['providers']
+                );
+
                 // Validate reasoning effort
-                if (!in_array($config['reasoningEffort'], ['none', 'low', 'medium', 'high'], true)) {
+                $validReasoningEfforts = ['none', 'low', 'medium', 'high'];
+                if (!in_array($config['reasoningEffort'], $validReasoningEfforts, true)) {
+                    if ($kirby->option('debug')) {
+                        throw new InvalidArgumentException(
+                            'Invalid reasoningEffort: ' . $config['reasoningEffort'] .
+                            '. Must be one of: ' . implode(', ', $validReasoningEfforts)
+                        );
+                    }
                     $config['reasoningEffort'] = 'low';
                 }
 
                 // Validate completion config
-                if (isset($config['completion']) && ($config['completion'] === false || $config['completion'] === [])) {
+                if ($config['completion'] === false || $config['completion'] === []) {
                     $config['completion'] = false;
                 } else {
                     $config['completion'] = array_replace_recursive(
@@ -70,12 +95,6 @@ return [
                     // Enforce minimum debounce of 500ms
                     $config['completion']['debounce'] = max(500, (int)$config['completion']['debounce']);
                 }
-
-                // Convert API keys to boolean flags (frontend validation without exposing secrets)
-                $config['providers'] = array_map(
-                    fn ($provider) => ['hasApiKey' => !empty($provider['apiKey'])] + array_diff_key($provider, ['apiKey' => true]),
-                    $config['providers']
-                );
 
                 $assets = $kirby
                     ->plugin('johannschopplich/copilot')
