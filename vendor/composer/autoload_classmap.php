@@ -7,6 +7,8 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
+    'JohannSchopplich\\KirbyPlugins\\FieldResolver' => $baseDir . '/src/classes/KirbyPlugins/FieldResolver.php',
+    'JohannSchopplich\\KirbyPlugins\\ModelResolver' => $baseDir . '/src/classes/KirbyPlugins/ModelResolver.php',
     'JohannSchopplich\\Licensing\\Http\\HttpClientInterface' => $vendorDir . '/johannschopplich/kirby-tools-licensing/src/Http/HttpClientInterface.php',
     'JohannSchopplich\\Licensing\\Http\\KirbyHttpClient' => $vendorDir . '/johannschopplich/kirby-tools-licensing/src/Http/KirbyHttpClient.php',
     'JohannSchopplich\\Licensing\\Licenses' => $vendorDir . '/johannschopplich/kirby-tools-licensing/src/Licenses.php',

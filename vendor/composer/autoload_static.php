@@ -14,6 +14,7 @@ class ComposerStaticInit5bff1d0570d206d53d6e6252d07f89e6
         'J' =>
         array (
             'JohannSchopplich\\Licensing\\' => 27,
+            'JohannSchopplich\\KirbyPlugins\\' => 30,
         ),
     );
 
@@ -26,10 +27,16 @@ class ComposerStaticInit5bff1d0570d206d53d6e6252d07f89e6
         array (
             0 => __DIR__ . '/..' . '/johannschopplich/kirby-tools-licensing/src',
         ),
+        'JohannSchopplich\\KirbyPlugins\\' =>
+        array (
+            0 => __DIR__ . '/../..' . '/src/classes/KirbyPlugins',
+        ),
     );
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'JohannSchopplich\\KirbyPlugins\\FieldResolver' => __DIR__ . '/../..' . '/src/classes/KirbyPlugins/FieldResolver.php',
+        'JohannSchopplich\\KirbyPlugins\\ModelResolver' => __DIR__ . '/../..' . '/src/classes/KirbyPlugins/ModelResolver.php',
         'JohannSchopplich\\Licensing\\Http\\HttpClientInterface' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-licensing/src/Http/HttpClientInterface.php',
         'JohannSchopplich\\Licensing\\Http\\KirbyHttpClient' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-licensing/src/Http/KirbyHttpClient.php',
         'JohannSchopplich\\Licensing\\Licenses' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-licensing/src/Licenses.php',
