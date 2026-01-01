@@ -90,6 +90,11 @@ export function createHtmlChunking() {
  * @returns {string | null} The complete element, or `null` if incomplete
  */
 function parseHtmlElement(buffer) {
+  // Invalid tag-like text (e.g. `<123>`, `<>`) - release `<` as plain text
+  if (!/^<\/?[a-z]/i.test(buffer)) {
+    return buffer.length > 1 ? "<" : null;
+  }
+
   // Closing tag - return it immediately
   if (buffer.startsWith("</")) {
     const closeEnd = buffer.indexOf(">");
