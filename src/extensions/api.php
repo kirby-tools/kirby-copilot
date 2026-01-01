@@ -155,10 +155,6 @@ return [
                     $curlHeaders[] = "{$name}: {$value}";
                 }
 
-                // Determine CA certificate
-                $systemCaInfo = ini_get('curl.cainfo');
-                $hasSystemCa = !empty($systemCaInfo) && @is_file($systemCaInfo);
-
                 // Disable output buffering for real-time streaming
                 while (ob_get_level()) {
                     ob_end_clean();
@@ -173,7 +169,8 @@ return [
 
                 $httpCode = 200;
                 $ch = curl_init($targetUrl);
-                curl_setopt_array($ch, [
+
+                $curlOptions = [
                     // Request options
                     CURLOPT_POST => true,
                     CURLOPT_POSTFIELDS => $body,
@@ -213,13 +210,24 @@ return [
                     CURLOPT_LOW_SPEED_TIME => 120,
                     // SSL/TLS
                     CURLOPT_SSL_VERIFYPEER => true,
-                    ...($hasSystemCa ? [] : [CURLOPT_CAINFO => $kirby->root('kirby') . '/cacert.pem']),
                     // Accept all supported content encodings (gzip, deflate, br)
                     CURLOPT_ENCODING => '',
-                ]);
+                ];
 
+                // Use bundled CA certificate if system doesn't have one configured
+                $systemCaInfo = ini_get('curl.cainfo');
+                if (empty($systemCaInfo) || !@is_file($systemCaInfo)) {
+                    $curlOptions[CURLOPT_CAINFO] = $kirby->root('kirby') . '/cacert.pem';
+                }
+
+                curl_setopt_array($ch, $curlOptions);
                 curl_exec($ch);
-                curl_close($ch);
+
+                // Log cURL errors for debugging (response already streamed to client)
+                if ($errorCode = curl_errno($ch)) {
+                    error_log("Kirby Copilot proxy cURL error ({$errorCode}): " . curl_error($ch));
+                }
+
                 exit;
             }
         ],
