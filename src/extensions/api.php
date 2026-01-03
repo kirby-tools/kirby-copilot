@@ -69,11 +69,11 @@ return [
 
                 // Convert API keys to boolean flags (frontend validation without exposing secrets)
                 $config['providers'] = array_map(
-                    function ($provider) {
+                    function ($provider) use ($kirby) {
                         $apiKey = $provider['apiKey'] ?? null;
                         // Resolve closure if provided
                         if ($apiKey instanceof Closure) {
-                            $apiKey = $apiKey();
+                            $apiKey = $apiKey($kirby);
                         }
                         return ['hasApiKey' => !empty($apiKey)] + array_diff_key($provider, ['apiKey' => true]);
                     },
@@ -134,9 +134,8 @@ return [
                 $config = $kirby->option('johannschopplich.copilot', []);
                 $apiKey = $config['providers'][$provider]['apiKey'] ?? null;
 
-
                 if ($apiKey instanceof Closure) {
-                    $apiKey = $apiKey();
+                    $apiKey = $apiKey($kirby);
                 }
 
                 if (!$apiKey) {
