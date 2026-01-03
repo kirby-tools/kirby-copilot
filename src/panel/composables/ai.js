@@ -9,12 +9,12 @@ import {
   STORAGE_KEY_PREFIX,
   SUPPORTED_PROVIDERS,
 } from "../constants";
+import { createContentContext } from "../utils/content";
 import { CopilotError } from "../utils/error";
 import { createHtmlChunking, supportsReasoning } from "../utils/models";
 import { extractTextFromPdf } from "../utils/pdf";
 import { renderTemplate } from "../utils/template";
 import { toReducedBlob } from "../utils/upload";
-import { createContentContext } from "./content";
 import { useLogger } from "./logger";
 import { usePluginContext } from "./plugin";
 

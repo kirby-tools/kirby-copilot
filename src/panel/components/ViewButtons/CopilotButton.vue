@@ -2,7 +2,6 @@
 import { loadPluginModule, ref, useContent, usePanel } from "kirbyuse";
 import { z } from "zod";
 import {
-  openPromptDialog,
   useBlocks,
   useFields,
   useLayouts,
@@ -20,6 +19,7 @@ import {
   resumeCompletion,
 } from "../../extensions/writer-marks/copilot-suggestions";
 import { fieldToZodSchema } from "../../schemas/fields";
+import { openPromptDialog } from "../../utils/dialog";
 import { handleStreamError } from "../../utils/error";
 
 const props = defineProps({

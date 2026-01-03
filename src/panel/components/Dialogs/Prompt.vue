@@ -2,16 +2,17 @@
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import { computed, isKirby5, ref, usePanel } from "kirbyuse";
 import {
-  createContentContext,
   useEventListener,
   useFields,
-  useFilePicker,
   useGenerationHistory,
   usePluginContext,
   usePromptTemplates,
 } from "../../composables";
+import { SUPPORTED_FILE_MIME_TYPES } from "../../constants";
+import { createContentContext } from "../../utils/content";
 import { findFieldDefinition } from "../../utils/fields";
 import { PLACEHOLDER_PATTERN, renderTemplate } from "../../utils/template";
+import { openFilePicker } from "../../utils/upload";
 import AutoGrowTextarea from "../Ui/AutoGrowTextarea.vue";
 import ContentDropdown from "../Ui/ContentDropdown.vue";
 
@@ -179,7 +180,9 @@ function submit() {
 }
 
 async function pickFiles() {
-  const selectedFiles = await useFilePicker();
+  const selectedFiles = await openFilePicker({
+    accept: SUPPORTED_FILE_MIME_TYPES.join(","),
+  });
   files.value = [...files.value, ...selectedFiles];
 }
 

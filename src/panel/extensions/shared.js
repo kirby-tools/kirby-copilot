@@ -1,10 +1,7 @@
 import { usePanel } from "kirbyuse";
-import {
-  openPromptDialog,
-  usePluginContext,
-  useStreamText,
-} from "../composables";
+import { usePluginContext, useStreamText } from "../composables";
 import { DEFAULT_SYSTEM_PROMPT, STORAGE_KEY_PREFIX } from "../constants";
+import { openPromptDialog } from "../utils/dialog";
 import { handleStreamError } from "../utils/error";
 import { buildUserPrompt } from "../utils/models";
 

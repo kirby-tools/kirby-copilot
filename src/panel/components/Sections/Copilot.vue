@@ -16,7 +16,6 @@ import {
 import { section } from "kirbyuse/props";
 import {
   useBlocks,
-  useFilePicker,
   useLayouts,
   usePluginContext,
   useStreamText,
@@ -26,6 +25,7 @@ import {
   DEFAULT_SYSTEM_PROMPT,
   LOG_LEVELS,
   STORAGE_KEY_PREFIX,
+  SUPPORTED_FILE_MIME_TYPES,
   SUPPORTED_IMAGE_MIME_TYPES,
   SUPPORTED_PROVIDERS,
 } from "../../constants";
@@ -33,6 +33,7 @@ import { handleStreamError } from "../../utils/error";
 import { getResponseFormat } from "../../utils/fields";
 import { buildUserPrompt } from "../../utils/models";
 import { getHashedStorageKey } from "../../utils/storage";
+import { openFilePicker } from "../../utils/upload";
 
 const propsDefinition = {
   ...section,
@@ -325,7 +326,9 @@ function undo() {
 }
 
 async function pickFiles() {
-  const selectedFiles = await useFilePicker();
+  const selectedFiles = await openFilePicker({
+    accept: SUPPORTED_FILE_MIME_TYPES.join(","),
+  });
   files.value = [...files.value, ...selectedFiles];
 }
 
