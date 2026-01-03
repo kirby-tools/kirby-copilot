@@ -2,16 +2,16 @@ import { usePanel } from "kirbyuse";
 import { PLUGIN_MODEL_FIELDS_API_ROUTE } from "../constants";
 import { EXCLUDED_FIELD_TYPES } from "../schemas/fields";
 
-const fieldsCache = new Map();
+const modelFieldsCache = new Map();
 
-export function useFields() {
+export function useModelFields() {
   const panel = usePanel();
 
-  async function getViewFields() {
+  async function getModelFields() {
     const { path: id } = panel.view;
 
-    if (fieldsCache.has(id)) {
-      return fieldsCache.get(id);
+    if (modelFieldsCache.has(id)) {
+      return modelFieldsCache.get(id);
     }
 
     let fields = await panel.api.get(
@@ -29,16 +29,16 @@ export function useFields() {
         !field.hidden,
     );
 
-    fieldsCache.set(id, fields);
+    modelFieldsCache.set(id, fields);
     return fields;
   }
 
-  function clearViewFields() {
-    fieldsCache.delete(panel.view.path);
+  function clearModelFields() {
+    modelFieldsCache.delete(panel.view.path);
   }
 
   return {
-    getViewFields,
-    clearViewFields,
+    getModelFields,
+    clearModelFields,
   };
 }

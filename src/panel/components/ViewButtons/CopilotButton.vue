@@ -3,8 +3,8 @@ import { loadPluginModule, ref, useContent, usePanel } from "kirbyuse";
 import { z } from "zod";
 import {
   useBlocks,
-  useFields,
   useLayouts,
+  useModelFields,
   usePluginContext,
   useStreamText,
 } from "../../composables";
@@ -39,7 +39,7 @@ const props = defineProps({
 
 const panel = usePanel();
 const { currentContent, update: updateContent } = useContent();
-const { getViewFields } = useFields();
+const { getModelFields } = useModelFields();
 
 const isGenerating = ref(false);
 const isHovering = ref(false);
@@ -65,7 +65,7 @@ async function initPromptDialog() {
     }
   };
 
-  const fields = await getViewFields();
+  const fields = await getModelFields();
 
   if (fields.length === 0) {
     panel.notification.error(panel.t("johannschopplich.copilot.fields.empty"));

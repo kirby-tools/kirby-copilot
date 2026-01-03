@@ -3,8 +3,8 @@ import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import { computed, isKirby5, ref, usePanel } from "kirbyuse";
 import {
   useEventListener,
-  useFields,
   useGenerationHistory,
+  useModelFields,
   usePluginContext,
   usePromptTemplates,
 } from "../../composables";
@@ -35,7 +35,7 @@ const {
   getRecentEntries,
 } = useGenerationHistory();
 const { templates, addTemplate, setTemplates } = usePromptTemplates();
-const { getViewFields } = useFields();
+const { getModelFields } = useModelFields();
 const contentContext = createContentContext();
 
 const textareaComponent = ref();
@@ -147,7 +147,7 @@ useEventListener(textarea, "keydown", (event) => {
 
   // Fetch view fields for placeholder insertion if not passed as props
   if (!props.fields) {
-    modelFields.value = await getViewFields();
+    modelFields.value = await getModelFields();
   }
 
   if (props.activeField) {
