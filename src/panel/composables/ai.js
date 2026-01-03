@@ -1,4 +1,4 @@
-import { loadPluginModule, useContent, usePanel } from "kirbyuse";
+import { useContent, usePanel } from "kirbyuse";
 import {
   DEFAULT_COMPLETION_MODELS,
   DEFAULT_REASONING_EFFORT,
@@ -9,6 +9,7 @@ import {
   STORAGE_KEY_PREFIX,
   SUPPORTED_PROVIDERS,
 } from "../constants";
+import { loadAISDK } from "../utils/ai";
 import { createContentContext } from "../utils/content";
 import { CopilotError } from "../utils/error";
 import { createHtmlChunking, supportsReasoning } from "../utils/models";
@@ -54,7 +55,7 @@ export async function useStreamText({
     logLevel = 3;
   }
 
-  const { AISDKError, streamText, smoothStream } = await loadPluginModule("ai");
+  const { AISDKError, streamText, smoothStream } = await loadAISDK();
 
   const { userPromptWithContext, imageByteArrays, pdfByteArrays } =
     await resolveAttachments({
@@ -64,7 +65,7 @@ export async function useStreamText({
 
   if (logLevel > 1) {
     logger.info("System prompt:", systemPrompt);
-    logger.info("User prompt with context:", userPromptWithContext);
+    logger.info("User prompt:", userPromptWithContext);
   }
 
   const hasFiles = imageByteArrays.length > 0 || pdfByteArrays.length > 0;
@@ -156,7 +157,7 @@ export async function resolveLanguageModel({ forCompletion = false } = {}) {
     createGoogleGenerativeAI,
     createMistral,
     createOpenAI,
-  } = await loadPluginModule("ai");
+  } = await loadAISDK();
 
   const provider = config.provider;
   const providerConfig = config.providers[provider] ?? {};

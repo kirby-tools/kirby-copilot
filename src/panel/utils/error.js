@@ -1,4 +1,5 @@
-import { loadPluginModule, usePanel } from "kirbyuse";
+import { usePanel } from "kirbyuse";
+import { loadAISDK } from "./ai";
 
 /**
  * Custom error class for Copilot-specific errors.
@@ -14,7 +15,7 @@ export class CopilotError extends Error {}
  */
 export async function handleStreamError(error) {
   const panel = usePanel();
-  const { AISDKError } = await loadPluginModule("ai");
+  const { AISDKError } = await loadAISDK();
 
   if (error instanceof CopilotError || AISDKError.isInstance(error)) {
     let message = error.message;

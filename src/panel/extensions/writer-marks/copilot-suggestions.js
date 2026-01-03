@@ -1,4 +1,3 @@
-import { loadPluginModule } from "kirbyuse";
 import { PluginKey } from "prosemirror-state";
 import { Decoration, DecorationSet } from "prosemirror-view";
 import { resolveLanguageModel, usePluginContext } from "../../composables";
@@ -9,6 +8,8 @@ import {
   COMPLETION_SYSTEM_PROMPT,
   STORAGE_KEY_PREFIX,
 } from "../../constants";
+import { loadAISDK } from "../../utils/ai";
+
 const LICENSE_TOAST_THRESHOLD = 3; // Show toast after this many completions
 const COMPLETION_COUNT_STORAGE_KEY = `${STORAGE_KEY_PREFIX}completionCount`;
 
@@ -325,7 +326,7 @@ function createCompletionPlugin(context, mark) {
 
     try {
       const { model } = await resolveLanguageModel({ forCompletion: true });
-      const { streamText } = await loadPluginModule("ai");
+      const { streamText } = await loadAISDK();
 
       // Use prefix/suffix format when there's text after cursor (manual trigger mid-text)
       const prompt = suffix

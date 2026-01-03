@@ -1,5 +1,5 @@
 <script setup>
-import { loadPluginModule, ref, useContent, usePanel } from "kirbyuse";
+import { ref, useContent, usePanel } from "kirbyuse";
 import { z } from "zod";
 import {
   useBlocks,
@@ -19,6 +19,7 @@ import {
   resumeCompletion,
 } from "../../extensions/writer-marks/copilot-suggestions";
 import { fieldToZodSchema } from "../../schemas/fields";
+import { loadAISDK } from "../../utils/ai";
 import { openPromptDialog } from "../../utils/dialog";
 import { handleStreamError } from "../../utils/error";
 
@@ -107,7 +108,7 @@ async function initPromptDialog() {
   const _currentContent = { ...currentContent.value };
 
   const { config } = await usePluginContext();
-  const { Output } = await loadPluginModule("ai");
+  const { Output } = await loadAISDK();
 
   const systemPrompt =
     props.systemPrompt || config.systemPrompt || DEFAULT_SYSTEM_PROMPT;

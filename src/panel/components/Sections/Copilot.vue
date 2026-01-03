@@ -3,7 +3,6 @@ import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import {
   computed,
   isKirby5,
-  loadPluginModule,
   nextTick,
   onBeforeUnmount,
   ref,
@@ -29,6 +28,7 @@ import {
   SUPPORTED_IMAGE_MIME_TYPES,
   SUPPORTED_PROVIDERS,
 } from "../../constants";
+import { loadAISDK } from "../../utils/ai";
 import { handleStreamError } from "../../utils/error";
 import { getResponseFormat } from "../../utils/fields";
 import { buildUserPrompt } from "../../utils/models";
@@ -206,7 +206,7 @@ async function generate() {
 
   const { getZodSchema: getBlocksZodSchema, normalizeBlock } = useBlocks();
   const { getZodSchema: getLayoutZodSchema, normalizeLayout } = useLayouts();
-  const { Output } = await loadPluginModule("ai");
+  const { Output } = await loadAISDK();
 
   // Capture signal reference to detect if generation gets cancelled
   const { signal } = abortController;

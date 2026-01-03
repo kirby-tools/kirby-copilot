@@ -1,5 +1,5 @@
-export { createAnthropic } from "@ai-sdk/anthropic";
-export { createGoogleGenerativeAI } from "@ai-sdk/google";
-export { createMistral } from "@ai-sdk/mistral";
-export { createOpenAI } from "@ai-sdk/openai";
+export * from "@ai-sdk/anthropic";
+export * from "@ai-sdk/google";
+export * from "@ai-sdk/mistral";
+export * from "@ai-sdk/openai";
 export * from "ai";
