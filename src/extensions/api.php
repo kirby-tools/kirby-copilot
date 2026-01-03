@@ -1,5 +1,6 @@
 <?php
 
+use Closure;
 use JohannSchopplich\KirbyPlugins\FieldResolver;
 use JohannSchopplich\KirbyPlugins\ModelResolver;
 use JohannSchopplich\Licensing\Licenses;
@@ -68,7 +69,14 @@ return [
 
                 // Convert API keys to boolean flags (frontend validation without exposing secrets)
                 $config['providers'] = array_map(
-                    fn ($provider) => ['hasApiKey' => !empty($provider['apiKey'])] + array_diff_key($provider, ['apiKey' => true]),
+                    function ($provider) {
+                        $apiKey = $provider['apiKey'] ?? null;
+                        // Resolve closure if provided
+                        if ($apiKey instanceof Closure) {
+                            $apiKey = $apiKey();
+                        }
+                        return ['hasApiKey' => !empty($apiKey)] + array_diff_key($provider, ['apiKey' => true]);
+                    },
                     $config['providers']
                 );
 
@@ -125,6 +133,11 @@ return [
 
                 $config = $kirby->option('johannschopplich.copilot', []);
                 $apiKey = $config['providers'][$provider]['apiKey'] ?? null;
+
+
+                if ($apiKey instanceof Closure) {
+                    $apiKey = $apiKey();
+                }
 
                 if (!$apiKey) {
                     throw new InvalidArgumentException('Missing API key for provider: ' . $provider);
