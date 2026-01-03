@@ -8,7 +8,7 @@
     "dev": "PLAYGROUND=true kirbyup serve src/panel/index.js",
     "build": "kirbyup src/panel/index.js",
     "build:assets": "rm -rf assets && tsdown --config src/assets/tsdown.config.js",
-    "build:playground": "PLAYGROUND=true pnpm run build && pnpm run build:assets",
+    "build:playground": "PLAYGROUND=true pnpm run build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier \"src/panel/**\" --write",
