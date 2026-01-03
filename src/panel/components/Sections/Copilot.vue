@@ -29,7 +29,7 @@ import {
   SUPPORTED_IMAGE_MIME_TYPES,
   SUPPORTED_PROVIDERS,
 } from "../../constants";
-import { CopilotError } from "../../utils/error";
+import { handleStreamError } from "../../utils/error";
 import { getResponseFormat } from "../../utils/fields";
 import { buildUserPrompt } from "../../utils/models";
 import { getHashedStorageKey } from "../../utils/storage";
@@ -302,25 +302,7 @@ async function generate() {
     });
   } catch (error) {
     if (signal.aborted) return;
-
-    const { AISDKError } = await loadPluginModule("ai");
-
-    if (error instanceof CopilotError || AISDKError.isInstance(error)) {
-      let message = error.message;
-
-      if (message.includes("levels of nesting exceeds limit")) {
-        message = `The ${field.value.type} generation for the "${field.value.name}" field exceeds OpenAI's architectural constraints for nested data structures. This is a known limitation of OpenAI's API. Please use Google Gemini or Anthropic Claude instead, which support complex schemas.`;
-      }
-
-      console.error(error);
-      panel.notification.error(message);
-      return;
-    }
-
-    console.error(error);
-    panel.notification.error(
-      panel.t("johannschopplich.copilot.notification.error"),
-    );
+    await handleStreamError(error);
   } finally {
     abortController = undefined;
     panel.isLoading = false;

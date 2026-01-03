@@ -1,11 +1,11 @@
-import { loadPluginModule, usePanel } from "kirbyuse";
+import { usePanel } from "kirbyuse";
 import {
   openPromptDialog,
   usePluginContext,
   useStreamText,
 } from "../composables";
 import { DEFAULT_SYSTEM_PROMPT, STORAGE_KEY_PREFIX } from "../constants";
-import { CopilotError } from "../utils/error";
+import { handleStreamError } from "../utils/error";
 import { buildUserPrompt } from "../utils/models";
 
 /**
@@ -63,7 +63,6 @@ export async function streamTextToField(
   panel.isLoading = true;
 
   const { config } = await usePluginContext();
-  const { AISDKError } = await loadPluginModule("ai");
 
   // Capture signal reference to detect if generation gets cancelled
   const { signal } = abortController;
@@ -104,17 +103,7 @@ export async function streamTextToField(
     });
   } catch (error) {
     if (signal.aborted) return;
-
-    if (error instanceof CopilotError || AISDKError.isInstance(error)) {
-      console.error(error);
-      panel.notification.error(error.message);
-      return;
-    }
-
-    console.error(error);
-    panel.notification.error(
-      panel.t("johannschopplich.copilot.notification.error"),
-    );
+    await handleStreamError(error);
   } finally {
     if (activeField) delete activeField.element.dataset.copilot;
     document.removeEventListener("keydown", handleEscape);

@@ -20,7 +20,7 @@ import {
   resumeCompletion,
 } from "../../extensions/writer-marks/copilot-suggestions";
 import { fieldToZodSchema } from "../../schemas/fields";
-import { CopilotError } from "../../utils/error";
+import { handleStreamError } from "../../utils/error";
 
 const props = defineProps({
   label: String,
@@ -78,7 +78,7 @@ async function initPromptDialog() {
   });
   if (!promptContext) return;
 
-  const { prompt, files, fields: selectedFieldNames } = promptContext;
+  const { prompt, files, selectedFieldNames } = promptContext;
   const selectedFields = fields.filter((field) =>
     selectedFieldNames.includes(field.name),
   );
@@ -107,7 +107,7 @@ async function initPromptDialog() {
   const _currentContent = { ...currentContent.value };
 
   const { config } = await usePluginContext();
-  const { Output, AISDKError } = await loadPluginModule("ai");
+  const { Output } = await loadPluginModule("ai");
 
   const systemPrompt =
     props.systemPrompt || config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
@@ -174,24 +174,7 @@ async function initPromptDialog() {
     });
   } catch (error) {
     if (signal.aborted) return;
-
-    if (error instanceof CopilotError || AISDKError.isInstance(error)) {
-      let message = error.message;
-
-      if (message.includes("levels of nesting exceeds limit")) {
-        message =
-          "The fields generation exceeds OpenAI's architectural constraints for nested data structures. This is a known limitation of OpenAI's API. Please use Google Gemini or Anthropic Claude instead, which support complex schemas.";
-      }
-
-      console.error(error);
-      panel.notification.error(message);
-      return;
-    }
-
-    console.error(error);
-    panel.notification.error(
-      panel.t("johannschopplich.copilot.notification.error"),
-    );
+    await handleStreamError(error);
   } finally {
     abortController = undefined;
     panel.isLoading = false;

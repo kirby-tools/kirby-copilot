@@ -173,7 +173,7 @@ function submit() {
   emit("submit", {
     prompt: prompt.value,
     files: files.value,
-    fields: selectedFieldNames.value,
+    selectedFieldNames: selectedFieldNames.value,
     insertMode: insertOption.value,
   });
 }
