@@ -38,7 +38,7 @@ export const copilotSuggestions = {
   },
 
   /**
-   * @param {import("./types").WriterMarkContext} context
+   * @param {import("kirby-types").WriterMarkContext} context
    */
   // eslint-disable-next-line unused-imports/no-unused-vars
   keys(context) {
@@ -50,7 +50,7 @@ export const copilotSuggestions = {
   },
 
   /**
-   * @param {import("./types").WriterMarkContext} context
+   * @param {import("kirby-types").WriterMarkContext} context
    */
   plugins(context) {
     return [createCompletionPlugin(context, this)];
@@ -140,7 +140,7 @@ export const copilotSuggestions = {
 /**
  * Creates the ProseMirror plugin spec for tab completion.
  *
- * @param {import("./types").WriterMarkContext} context - The mark context from Kirby
+ * @param {import("kirby-types").WriterMarkContext} context - The mark context from Kirby
  * @param {object} mark - The mark instance
  * @returns {import("prosemirror-state").PluginSpec} Plugin spec with state, view, and props
  */

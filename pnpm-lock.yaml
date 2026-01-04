@@ -44,6 +44,9 @@ importers:
       eslint:
         specifier: ^9.39.2
         version: 9.39.2(jiti@1.21.7)
+      kirby-types:
+        specifier: ^1.1.1
+        version: 1.1.1(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(vue@2.7.16)
       kirbyup:
         specifier: ^3.4.1
         version: 3.4.1(jiti@1.21.7)(rollup@4.54.0)(yaml@2.8.2)
@@ -1953,6 +1956,29 @@ packages:
 
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
+
+  kirby-types@1.1.1:
+    resolution: {integrity: sha512-Ea227rOBifp5TQOG0te1gB5GoNQDTE1lTaQZsJcjr9HuvX6rzzpHfwy+xOb9SuVz1ZE5u8jChBrYftbDc9QhOA==}
+    peerDependencies:
+      prosemirror-commands: ^1.0.0
+      prosemirror-inputrules: ^1.0.0
+      prosemirror-model: ^1.0.0
+      prosemirror-schema-list: ^1.0.0
+      prosemirror-state: ^1.0.0
+      vue: ^2.7.0
+    peerDependenciesMeta:
+      prosemirror-commands:
+        optional: true
+      prosemirror-inputrules:
+        optional: true
+      prosemirror-model:
+        optional: true
+      prosemirror-schema-list:
+        optional: true
+      prosemirror-state:
+        optional: true
+      vue:
+        optional: true
 
   kirbyup@3.4.1:
     resolution: {integrity: sha512-CcSwDHFAgnN1h05oGqiBCyUg/DbLz5fqgWMguy5B6xMoTuU5CwsiOh8fBE4QfT6iv5ncsJgOxvyf0XjYBzFtFg==}
@@ -4699,6 +4725,12 @@ snapshots:
   keyv@4.5.4:
     dependencies:
       json-buffer: 3.0.1
+
+  kirby-types@1.1.1(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(vue@2.7.16):
+    optionalDependencies:
+      prosemirror-model: 1.25.4
+      prosemirror-state: 1.4.4
+      vue: 2.7.16
 
   kirbyup@3.4.1(jiti@1.21.7)(rollup@4.54.0)(yaml@2.8.2):
     dependencies:

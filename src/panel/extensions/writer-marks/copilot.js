@@ -2,7 +2,7 @@ import { DOMParser } from "prosemirror-model";
 import { streamTextToField } from "../shared";
 import { completionPluginKey } from "./copilot-suggestions";
 
-/** @typedef {import("./types").WriterMarkContext} WriterMarkContext */
+/** @typedef {import("kirby-types").WriterMarkContext} WriterMarkContext */
 
 export const copilot = {
   get name() {
