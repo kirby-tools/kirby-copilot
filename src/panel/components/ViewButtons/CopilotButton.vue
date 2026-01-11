@@ -47,7 +47,6 @@ const isHovering = ref(false);
 let abortController;
 
 async function initPromptDialog() {
-  // eslint-disable-next-line no-undef
   if (__PLAYGROUND__ && !window.location.hostname.includes("localhost")) {
     const apiKey = sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`);
     if (!apiKey) {

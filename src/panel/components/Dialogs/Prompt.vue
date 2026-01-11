@@ -11,8 +11,8 @@ import {
 import { SUPPORTED_FILE_MIME_TYPES } from "../../constants";
 import { createContentContext } from "../../utils/content";
 import { findFieldDefinition } from "../../utils/fields";
+import { openFilePicker } from "../../utils/image";
 import { PLACEHOLDER_PATTERN, renderTemplate } from "../../utils/template";
-import { openFilePicker } from "../../utils/upload";
 import AutoGrowTextarea from "../Ui/AutoGrowTextarea.vue";
 import ContentDropdown from "../Ui/ContentDropdown.vue";
 
@@ -141,9 +141,7 @@ useEventListener(textarea, "keydown", (event) => {
 
 (async () => {
   const context = await usePluginContext();
-  licenseStatus.value =
-    // eslint-disable-next-line no-undef
-    __PLAYGROUND__ ? "active" : context.licenseStatus;
+  licenseStatus.value = __PLAYGROUND__ ? "active" : context.licenseStatus;
 
   // Fetch view fields for placeholder insertion if not passed as props
   if (!props.fields) {

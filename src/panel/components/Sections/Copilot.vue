@@ -31,9 +31,9 @@ import {
 import { loadAISDK } from "../../utils/ai";
 import { handleStreamError } from "../../utils/error";
 import { getResponseFormat } from "../../utils/fields";
+import { openFilePicker } from "../../utils/image";
 import { buildUserPrompt } from "../../utils/models";
 import { getHashedStorageKey } from "../../utils/storage";
-import { openFilePicker } from "../../utils/upload";
 
 const propsDefinition = {
   ...section,
@@ -141,9 +141,7 @@ watch(isDetailsOpen, (value) => {
   );
   help.value = response.help ? t(response.help) : undefined;
   config.value = context.config;
-  licenseStatus.value =
-    // eslint-disable-next-line no-undef
-    __PLAYGROUND__ ? "active" : context.licenseStatus;
+  licenseStatus.value = __PLAYGROUND__ ? "active" : context.licenseStatus;
 
   if (response.files === "auto" && response.modelFile) {
     modelFile.value = response.modelFile;
@@ -182,7 +180,6 @@ onBeforeUnmount(() => {
 });
 
 async function generate() {
-  // eslint-disable-next-line no-undef
   if (__PLAYGROUND__ && !window.location.hostname.includes("localhost")) {
     const apiKey = sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`);
     if (!apiKey) {
