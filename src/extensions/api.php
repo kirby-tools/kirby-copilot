@@ -125,6 +125,11 @@ return [
             'pattern' => '__copilot__/proxy',
             'method' => 'POST',
             'action' => function () use ($kirby) {
+                // Ensure PHP doesn't timeout during long AI generations
+                @set_time_limit(0);
+                @ini_set('zlib.output_compression', '0');
+                @ob_implicit_flush(true);
+
                 $providerParam = $kirby->request()->query()->get('provider');
                 $provider = match ($providerParam) {
                     'openai', 'google', 'anthropic', 'mistral' => $providerParam,
@@ -178,6 +183,9 @@ return [
                 header('Connection: keep-alive');
                 // Disable nginx proxy buffering
                 header('X-Accel-Buffering: no');
+                // Avoid downstream/proxy content encoding that could buffer or
+                // delay streaming chunks.
+                header('Content-Encoding: identity');
 
                 $httpCode = 200;
                 $ch = curl_init($targetUrl);
@@ -212,6 +220,7 @@ return [
                     CURLOPT_RETURNTRANSFER => false,
                     CURLOPT_WRITEFUNCTION => function ($ch, $chunk) {
                         echo $chunk;
+                        @ob_flush();
                         flush();
                         return strlen($chunk);
                     },
@@ -219,7 +228,9 @@ return [
                     CURLOPT_CONNECTTIMEOUT => 10,
                     CURLOPT_TIMEOUT => 0,
                     CURLOPT_LOW_SPEED_LIMIT => 1,
-                    CURLOPT_LOW_SPEED_TIME => 120,
+                    // Some providers pause briefly while generating long outputs.
+                    // Keep the stream alive longer to avoid truncating JSON.
+                    CURLOPT_LOW_SPEED_TIME => 240,
                     // SSL/TLS
                     CURLOPT_SSL_VERIFYPEER => true,
                     // Accept all supported content encodings (gzip, deflate, br)
