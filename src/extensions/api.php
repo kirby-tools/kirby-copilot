@@ -1,6 +1,5 @@
 <?php
 
-use Closure;
 use JohannSchopplich\KirbyPlugins\FieldResolver;
 use JohannSchopplich\KirbyPlugins\ModelResolver;
 use JohannSchopplich\Licensing\Licenses;
@@ -157,7 +156,7 @@ return [
 
                 // Build headers, replacing marker with real key
                 $curlHeaders = [];
-                $skipHeaders = ['Host', 'Content-Length', 'X-Proxy-Target', 'X-Csrf'];
+                $skipHeaders = ['Host', 'X-Proxy-Target', 'X-Csrf'];
 
                 foreach ($kirby->request()->headers() as $name => $value) {
                     if (in_array($name, $skipHeaders, true)) {
@@ -170,6 +169,15 @@ return [
                     }
 
                     $curlHeaders[] = "{$name}: {$value}";
+                }
+
+                // Content-Type isn't prefixed with `HTTP_` in `$_SERVER`, so Kirby's
+                // `headers()` excludes it. Forward it to prevent body misinterpretation.
+                $contentType = $_SERVER['CONTENT_TYPE'] ?? $_SERVER['HTTP_CONTENT_TYPE'] ?? null;
+                if ($contentType) {
+                    $curlHeaders[] = "Content-Type: {$contentType}";
+                } elseif (is_string($body) && preg_match('/^\s*[\[{]/', $body)) {
+                    $curlHeaders[] = 'Content-Type: application/json';
                 }
 
                 // Disable output buffering for real-time streaming
