@@ -136,13 +136,12 @@ export async function resolveLanguageModel({
     const { currentContent } = useContent();
 
     const selectedProvider =
-      (currentContent.value.modelprovider as string) ||
-      DEFAULT_PLAYGROUND_MODEL_PROVIDER;
+      currentContent.value.modelprovider || DEFAULT_PLAYGROUND_MODEL_PROVIDER;
     config.provider = selectedProvider;
 
     const modelField = PLAYGROUND_PROVIDER_MODEL_MAP[selectedProvider];
     const selectedModel = modelField
-      ? (currentContent.value[modelField] as string)
+      ? currentContent.value[modelField]
       : undefined;
 
     if (selectedModel) {
