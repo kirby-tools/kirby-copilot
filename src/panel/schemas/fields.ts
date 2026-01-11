@@ -1,3 +1,16 @@
+import type {
+  KirbyAnyFieldProps,
+  KirbyDateFieldProps,
+  KirbyEntriesFieldProps,
+  KirbyFieldProps,
+  KirbyNumberFieldProps,
+  KirbyObjectFieldProps,
+  KirbyOptionsFieldProps,
+  KirbyRangeFieldProps,
+  KirbyStructureFieldProps,
+  KirbyTextFieldProps,
+  KirbyWriterFieldProps,
+} from "kirby-types";
 import { z } from "zod";
 
 /**
@@ -10,55 +23,58 @@ export const EXCLUDED_FIELD_TYPES = new Set(
   ["files", "gap", "headline", "hidden", "info", "line", "pages", "users"],
 );
 
-/**
- * Maps Kirby fields to Zod schemas based on their expected data structure
- */
-export const FIELD_TYPE_TO_SCHEMA = {
+type SchemaBuilder = (field: KirbyAnyFieldProps) => z.ZodType;
+
+/** Maps Kirby fields to Zod schemas based on their expected data structure */
+export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
   // Text fields
   text: (field) =>
     createTextSchema(
-      field,
+      field as KirbyTextFieldProps,
       `"${field.label}", single-line plain text without line breaks or formatting`,
     ),
   textarea: (field) =>
     createTextSchema(
-      field,
+      field as KirbyTextFieldProps,
       `"${field.label}", multi-line text with line breaks for paragraphs. Markdown formatting is allowed if content requires it.`,
     ),
   markdown: (field) =>
     createTextSchema(
-      field,
+      field as KirbyTextFieldProps,
       `"${field.label}", multi-line text with Markdown formatting`,
     ),
   slug: (field) =>
     createTextSchema(
-      field,
+      field as KirbyTextFieldProps,
       `"${field.label}", a URL-friendly slug (lowercase, hyphens, no spaces or special characters)`,
     ),
   url: (field) =>
     createTextSchema(
-      field,
+      field as KirbyTextFieldProps,
       `"${field.label}", a valid URL starting with http:// or https://`,
     ),
   email: (field) =>
-    createTextSchema(field, `"${field.label}", a valid email address`),
+    createTextSchema(
+      field as KirbyTextFieldProps,
+      `"${field.label}", a valid email address`,
+    ),
   password: (field) =>
     createTextSchema(
-      field,
+      field as KirbyTextFieldProps,
       `"${field.label}", a secure password (not for actual use)`,
     ),
   tel: (field) =>
     createTextSchema(
-      field,
+      field as KirbyTextFieldProps,
       `"${field.label}", a telephone number in appropriate format for the context`,
     ),
 
   // Rich text fields
   writer: (field) =>
     createTextSchema(
-      field,
+      field as KirbyWriterFieldProps,
       `"${field.label}" (WYSIWYG), ${
-        field.inline === true
+        (field as KirbyWriterFieldProps).inline === true
           ? "text with inline formatting only (bold, italic, underline, code, links, email, sub, sup). NO wrapping paragraph <p> tags allowed."
           : "text wrapped in paragraph <p> tags (can contain one or multiple paragraphs). Inline formatting (bold, italic, underline, code, links, email, sub, sup) is allowed."
       }`,
@@ -71,21 +87,27 @@ export const FIELD_TYPE_TO_SCHEMA = {
       ),
 
   // Number fields
-  number: (field) => createNumericSchema(field),
-  range: (field) => createNumericSchema(field),
+  number: (field) => createNumericSchema(field as KirbyNumberFieldProps),
+  range: (field) => createNumericSchema(field as KirbyRangeFieldProps),
 
   // Boolean fields
   toggle: (field) => z.boolean().describe(`"${field.label}", a boolean`),
 
   // Single selection fields (all store a single string value)
-  select: (field) => createSingleSelectionSchema(field),
-  radio: (field) => createSingleSelectionSchema(field),
-  toggles: (field) => createSingleSelectionSchema(field),
+  select: (field) =>
+    createSingleSelectionSchema(field as KirbyOptionsFieldProps),
+  radio: (field) =>
+    createSingleSelectionSchema(field as KirbyOptionsFieldProps),
+  toggles: (field) =>
+    createSingleSelectionSchema(field as KirbyOptionsFieldProps),
 
   // Multiple selection fields (all store arrays of strings)
-  checkboxes: (field) => createMultipleSelectionSchema(field),
-  multiselect: (field) => createMultipleSelectionSchema(field),
-  tags: (field) => createMultipleSelectionSchema(field),
+  checkboxes: (field) =>
+    createMultipleSelectionSchema(field as KirbyOptionsFieldProps),
+  multiselect: (field) =>
+    createMultipleSelectionSchema(field as KirbyOptionsFieldProps),
+  tags: (field) =>
+    createMultipleSelectionSchema(field as KirbyOptionsFieldProps),
 
   // Date/time fields
   date: (field) =>
@@ -93,7 +115,7 @@ export const FIELD_TYPE_TO_SCHEMA = {
       .string()
       .describe(
         `"${field.label}", a date ${
-          field.time
+          (field as KirbyDateFieldProps).time
             ? "with time in YYYY-MM-DD HH:MM:SS format (ISO 8601)"
             : "in YYYY-MM-DD format (ISO 8601)"
         }`,
@@ -121,7 +143,9 @@ export const FIELD_TYPE_TO_SCHEMA = {
 
   // Structure field
   structure: (field) => {
-    const objectSchema = createNestedFieldsSchema(field);
+    const objectSchema = createNestedFieldsSchema(
+      field as KirbyStructureFieldProps,
+    );
 
     if (objectSchema) {
       return z
@@ -141,7 +165,9 @@ export const FIELD_TYPE_TO_SCHEMA = {
 
   // Object field
   object: (field) => {
-    const objectSchema = createNestedFieldsSchema(field);
+    const objectSchema = createNestedFieldsSchema(
+      field as KirbyObjectFieldProps,
+    );
 
     if (objectSchema) {
       return objectSchema.describe(
@@ -159,26 +185,27 @@ export const FIELD_TYPE_TO_SCHEMA = {
 
   // Entries field
   entries: (field) => {
-    const { field: innerField } = field.field;
+    const _field = field as KirbyEntriesFieldProps;
+    const innerField = _field.field;
 
     // Create a temporary field object for schema generation
-    const tempField = {
+    const tempField: KirbyFieldProps = {
       ...innerField,
       name: "entry",
       label: field.label || "Entry",
     };
 
     // Generate schema for the inner field type
-    const innerFieldSchemaBuilder = FIELD_TYPE_TO_SCHEMA[innerField.type];
+    const innerFieldSchemaBuilder = FIELD_TYPE_TO_SCHEMA[innerField.type]!;
     const innerSchema = innerFieldSchemaBuilder(tempField);
     let arraySchema = z.array(innerSchema);
 
-    if (field.min != null) arraySchema = arraySchema.min(field.min);
-    if (field.max != null) arraySchema = arraySchema.max(field.max);
+    if (_field.min != null) arraySchema = arraySchema.min(_field.min);
+    if (_field.max != null) arraySchema = arraySchema.max(_field.max);
 
     return arraySchema.describe(
       `"${field.label}", multiple entries of ${innerField.type} values${
-        field.min != null || field.max != null
+        _field.min != null || _field.max != null
           ? " within the defined count range"
           : ""
       }`,
@@ -186,10 +213,8 @@ export const FIELD_TYPE_TO_SCHEMA = {
   },
 };
 
-/**
- * Converts a Kirby field definition to a Zod schema
- */
-export function fieldToZodSchema(field) {
+/** Converts a Kirby field definition to a Zod schema */
+export function fieldToZodSchema(field: KirbyFieldProps) {
   const schemaBuilder = FIELD_TYPE_TO_SCHEMA[field.type];
 
   if (!schemaBuilder) {
@@ -205,16 +230,18 @@ export function fieldToZodSchema(field) {
     // Required fields must have content
     if (schemaType === "string") {
       // Only add minimum validation if not already set
-      if (schema.minLength == null) {
-        schema = schema.min(1);
+      if ((schema as z.ZodString).minLength == null) {
+        schema = (schema as z.ZodString).min(1);
       }
     } else if (schemaType === "array") {
       // Only add minimum validation if not already set
-      const hasMinCheck = schema._zod?.def?.checks?.some(
+      const hasMinCheck = (
+        schema as z.ZodArray<z.ZodType>
+      )._zod?.def?.checks?.some(
         (check) => check._zod?.def?.check === "min_length",
       );
       if (!hasMinCheck) {
-        schema = schema.min(1);
+        schema = (schema as z.ZodArray<z.ZodType>).min(1);
       }
     }
   } else {
@@ -225,13 +252,13 @@ export function fieldToZodSchema(field) {
   return schema;
 }
 
-/**
- * Creates a Zod object schema for fields that contain nested sub-fields (structure, object)
- */
-function createNestedFieldsSchema(field) {
+/** Creates a Zod object schema for fields that contain nested sub-fields (structure, object) */
+function createNestedFieldsSchema(
+  field: KirbyStructureFieldProps | KirbyObjectFieldProps,
+) {
   if (typeof field.fields !== "object" || field.fields === null) return;
 
-  const nestedContentSchema = {};
+  const nestedContentSchema: Record<string, z.ZodType> = {};
 
   for (const [fieldName, subField] of Object.entries(field.fields)) {
     if (subField.disabled || subField.hidden) continue;
@@ -246,10 +273,11 @@ function createNestedFieldsSchema(field) {
   return z.object(nestedContentSchema).strict();
 }
 
-/**
- * Creates a Zod schema for text-like fields with minlength/maxlength support
- */
-function createTextSchema(field, description) {
+/** Creates a Zod schema for text-like fields with minlength/maxlength support */
+function createTextSchema(
+  field: KirbyTextFieldProps | KirbyWriterFieldProps,
+  description: string,
+) {
   let schema = z.string();
 
   if (field.minlength != null) schema = schema.min(field.minlength);
@@ -258,10 +286,10 @@ function createTextSchema(field, description) {
   return schema.describe(description);
 }
 
-/**
- * Creates a Zod schema for numeric fields (number, range)
- */
-function createNumericSchema(field) {
+/** Creates a Zod schema for numeric fields (number, range) */
+function createNumericSchema(
+  field: KirbyNumberFieldProps | KirbyRangeFieldProps,
+) {
   let schema = z.number();
 
   if (field.min != null) schema = schema.min(field.min);
@@ -274,13 +302,11 @@ function createNumericSchema(field) {
   );
 }
 
-/**
- * Creates a Zod schema for single selection fields (select, radio, toggles)
- */
-function createSingleSelectionSchema(field) {
+/** Creates a Zod schema for single selection fields (select, radio, toggles) */
+function createSingleSelectionSchema(field: KirbyOptionsFieldProps) {
   const values = (field.options ?? [])
-    .map((option) => (typeof option === "string" ? option : option.value))
-    .filter(Boolean);
+    .map((option) => option.value)
+    .filter((v): v is string => typeof v === "string" && Boolean(v));
 
   if (values.length > 0) {
     return z
@@ -293,13 +319,11 @@ function createSingleSelectionSchema(field) {
   return z.string().describe(`"${field.label}", single selection value`);
 }
 
-/**
- * Creates a Zod schema for multiple selection fields (checkboxes, multiselect, tags)
- */
-function createMultipleSelectionSchema(field) {
+/** Creates a Zod schema for multiple selection fields (checkboxes, multiselect, tags) */
+function createMultipleSelectionSchema(field: KirbyOptionsFieldProps) {
   const values = (field.options ?? [])
-    .map((option) => (typeof option === "string" ? option : option.value))
-    .filter(Boolean);
+    .map((option) => option.value)
+    .filter((v): v is string => typeof v === "string" && Boolean(v));
 
   if (values.length > 0) {
     return z

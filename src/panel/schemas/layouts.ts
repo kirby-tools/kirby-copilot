@@ -1,10 +1,13 @@
+import type { KirbyLayoutFieldProps } from "kirby-types";
+import type { KirbyFieldset } from "../types";
 import { z } from "zod";
 import { generateBlockSchema } from "./blocks";
 
-/**
- * Generates a complete Zod schema for Kirby layouts.
- */
-export function generateKirbyLayoutsSchema(fieldsets, fieldConfig = {}) {
+/** Generates a complete Zod schema for Kirby layouts. */
+export function generateKirbyLayoutsSchema(
+  fieldsets: KirbyFieldset[],
+  fieldConfig: Partial<KirbyLayoutFieldProps> = {},
+) {
   if (!fieldsets || fieldsets.length === 0) {
     throw new Error("No fieldsets available for layout schema generation");
   }
@@ -20,11 +23,9 @@ export function generateKirbyLayoutsSchema(fieldsets, fieldConfig = {}) {
   );
 }
 
-/**
- * Extracts all unique layout widths from layouts array.
- */
-function extractLayoutWidths(layouts) {
-  const widths = new Set();
+/** Extracts all unique layout widths from layouts array. */
+function extractLayoutWidths(layouts: KirbyLayoutFieldProps["layouts"]) {
+  const widths = new Set<string>();
 
   for (const layout of layouts) {
     for (const width of layout) {
@@ -37,10 +38,11 @@ function extractLayoutWidths(layouts) {
   return [...widths];
 }
 
-/**
- * Generates a Zod schema for a single layout.
- */
-function generateLayoutSchema(fieldsets, layoutWidths) {
+/** Generates a Zod schema for a single layout. */
+function generateLayoutSchema(
+  fieldsets: KirbyFieldset[],
+  layoutWidths: string[],
+) {
   const columnSchema = generateLayoutColumnSchema(fieldsets, layoutWidths);
 
   return z
@@ -53,13 +55,17 @@ function generateLayoutSchema(fieldsets, layoutWidths) {
     .strict();
 }
 
-/**
- * Generates a Zod schema for layout column.
- */
-function generateLayoutColumnSchema(fieldsets, layoutWidths) {
-  const blockSchemas = fieldsets.map(generateBlockSchema).filter(Boolean);
+/** Generates a Zod schema for layout column. */
+function generateLayoutColumnSchema(
+  fieldsets: KirbyFieldset[],
+  layoutWidths: string[],
+) {
+  const blockSchemas = fieldsets
+    .map(generateBlockSchema)
+    .filter((schema) => schema != null);
+
   const blockUnion =
-    blockSchemas.length > 1 ? z.union(blockSchemas) : blockSchemas[0];
+    blockSchemas.length > 1 ? z.union(blockSchemas) : blockSchemas[0]!;
 
   return z
     .object({
