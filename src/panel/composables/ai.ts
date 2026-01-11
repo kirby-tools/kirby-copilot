@@ -189,11 +189,10 @@ export async function resolveLanguageModel({
       {
         ...options,
         credentials: "same-origin",
-        headers: {
-          ...options?.headers,
+        headers: mergeHeaders(options?.headers, {
           "X-CSRF": panel.api.csrf,
           "X-Proxy-Target": String(url),
-        },
+        }),
       },
     );
 
@@ -336,4 +335,10 @@ async function resolveAttachments({
     imageByteArrays,
     pdfByteArrays,
   };
+}
+
+function mergeHeaders(...headers: (HeadersInit | undefined)[]) {
+  return new Headers(
+    headers.filter(Boolean).flatMap((h) => [...new Headers(h)]),
+  );
 }
