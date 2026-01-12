@@ -1,25 +1,9 @@
 import type { LicenseStatus } from "@kirby-tools/licensing";
-import type {
-  KirbyBlock,
-  KirbyFieldProps,
-  KirbyLayout,
-  KirbyLayoutColumn,
-} from "kirby-types";
+import type { KirbyFieldProps } from "kirby-types";
 import type { PluginAsset } from "kirbyuse";
 import type { LogLevel, ReasoningEffort } from "./constants";
 
-// Re-export kirby-types for convenience
-export type { KirbyBlock, KirbyLayout, KirbyLayoutColumn };
-
-// =============================================================================
-// Output Formats
-// =============================================================================
-
 export type OutputFormat = "text" | "markdown" | "rich-text";
-
-// =============================================================================
-// Active Field
-// =============================================================================
 
 export interface ActiveField {
   element: HTMLElement;
@@ -27,43 +11,12 @@ export interface ActiveField {
   type?: string;
 }
 
-// =============================================================================
-// Prompt Context
-// =============================================================================
-
 export interface PromptContext {
   prompt: string;
   files: File[];
   selectedFieldNames?: string[];
   insertMode?: "append" | "replace";
 }
-
-// =============================================================================
-// Kirby Fieldset (Block Type Definition)
-// =============================================================================
-
-/**
- * Kirby fieldset definition for blocks.
- *
- * Returned by the `__copilot__/fieldsets` API endpoint.
- * Represents a block type with its name, type identifier, and field definitions.
- *
- * Note: This is a simplified structure from the API, not the full `KirbyFieldsetProps`.
- *
- * @see https://getkirby.com/docs/reference/panel/fields/blocks
- */
-export interface KirbyFieldset {
-  /** Human-readable block name */
-  name: string;
-  /** Block type identifier (e.g., `text`, `heading`, `image`) */
-  type: string;
-  /** Field definitions within the block */
-  fields?: Record<string, KirbyFieldProps>;
-}
-
-// =============================================================================
-// Plugin Configuration
-// =============================================================================
 
 export interface ProviderConfig {
   baseUrl?: string;
@@ -87,37 +40,28 @@ export interface PluginConfig {
   logLevel?: LogLevel;
 }
 
-// =============================================================================
-// API Response Types
-// =============================================================================
+/** Response from `__copilot__/context` API endpoint. */
+export interface PluginContextResponse {
+  config: PluginConfig;
+  assets: PluginAsset[];
+  licenseStatus?: LicenseStatus;
+}
 
 /**
- * Response from `__copilot__/context` API endpoint.
+ * Kirby fieldset definition for blocks.
  *
- * Returns plugin configuration, registered assets, and license status.
- * Called once on plugin initialization to configure the AI provider
- * and load required assets.
+ * Returned by the `__copilot__/fieldsets` API endpoint.
+ * Represents a block type with its name, type identifier, and field definitions.
  *
- * @example
- * ```ts
- * const context = await panel.api.get("__copilot__/context");
- * registerPluginAssets(context.assets);
- * ```
+ * Note: This is a simplified structure from the API, not the full `KirbyFieldsetProps`.
+ *
+ * @see https://getkirby.com/docs/reference/panel/fields/blocks
  */
-export interface PluginContextResponse {
-  /**
-   * Plugin configuration merged from defaults and user config.
-   * Contains provider settings, model selection, and feature flags.
-   */
-  config: PluginConfig;
-  /**
-   * Plugin assets to register (AI SDK modules, PDF.js worker).
-   * Each asset has a filename and URL for dynamic loading.
-   */
-  assets: PluginAsset[];
-  /**
-   * License validation status.
-   * Used to determine feature availability and show license prompts.
-   */
-  licenseStatus?: LicenseStatus;
+export interface KirbyFieldset {
+  /** Human-readable block name */
+  name: string;
+  /** Block type identifier (e.g., `text`, `heading`, `image`) */
+  type: string;
+  /** Field definitions within the block */
+  fields?: Record<string, KirbyFieldProps>;
 }
