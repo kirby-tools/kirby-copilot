@@ -2,9 +2,7 @@ import type { ActiveField, OutputFormat } from "../types";
 import { usePanel } from "kirbyuse";
 import { usePluginContext, useStreamText } from "../composables";
 import { DEFAULT_SYSTEM_PROMPT, STORAGE_KEY_PREFIX } from "../constants";
-import { openPromptDialog } from "../utils/dialog";
-import { handleStreamError } from "../utils/error";
-import { buildUserPrompt } from "../utils/models";
+import { buildUserPrompt, handleStreamError, openPromptDialog } from "../utils";
 
 export interface PromptContext {
   prompt: string;

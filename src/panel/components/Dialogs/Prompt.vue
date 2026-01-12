@@ -9,10 +9,13 @@ import {
   usePromptTemplates,
 } from "../../composables";
 import { SUPPORTED_FILE_MIME_TYPES } from "../../constants";
-import { createContentContext } from "../../utils/content";
-import { findFieldDefinition } from "../../utils/fields";
-import { openFilePicker } from "../../utils/image";
-import { PLACEHOLDER_PATTERN, renderTemplate } from "../../utils/template";
+import {
+  createContentContext,
+  findFieldDefinition,
+  openFilePicker,
+  PLACEHOLDER_PATTERN,
+  renderTemplate,
+} from "../../utils";
 import AutoGrowTextarea from "../Ui/AutoGrowTextarea.vue";
 import ContentDropdown from "../Ui/ContentDropdown.vue";
 

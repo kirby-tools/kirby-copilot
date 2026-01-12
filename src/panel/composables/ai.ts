@@ -13,13 +13,16 @@ import {
   STORAGE_KEY_PREFIX,
   SUPPORTED_PROVIDERS,
 } from "../constants";
-import { loadAISDK } from "../utils/ai";
-import { createContentContext } from "../utils/content";
-import { CopilotError } from "../utils/error";
-import { toReducedBlob } from "../utils/image";
-import { createHtmlChunking, supportsReasoning } from "../utils/models";
-import { extractTextFromPdf } from "../utils/pdf";
-import { renderTemplate } from "../utils/template";
+import {
+  CopilotError,
+  createContentContext,
+  createHtmlChunking,
+  extractTextFromPdf,
+  loadAISDK,
+  renderTemplate,
+  supportsReasoning,
+  toReducedBlob,
+} from "../utils";
 import { useLogger } from "./logger";
 import { usePluginContext } from "./plugin";
 

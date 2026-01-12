@@ -1,6 +1,6 @@
 import { ref, usePanel } from "kirbyuse";
 import { generateRandomId } from "utilful";
-import { getHashedStorageKey } from "../utils/storage";
+import { getHashedStorageKey } from "../utils";
 
 export interface PromptTemplate {
   id: string;

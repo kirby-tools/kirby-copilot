@@ -28,12 +28,14 @@ import {
   SUPPORTED_IMAGE_MIME_TYPES,
   SUPPORTED_PROVIDERS,
 } from "../../constants";
-import { loadAISDK } from "../../utils/ai";
-import { handleStreamError } from "../../utils/error";
-import { getResponseFormat } from "../../utils/fields";
-import { openFilePicker } from "../../utils/image";
-import { buildUserPrompt } from "../../utils/models";
-import { getHashedStorageKey } from "../../utils/storage";
+import {
+  buildUserPrompt,
+  getHashedStorageKey,
+  getResponseFormat,
+  handleStreamError,
+  loadAISDK,
+  openFilePicker,
+} from "../../utils";
 
 const propsDefinition = {
   ...section,

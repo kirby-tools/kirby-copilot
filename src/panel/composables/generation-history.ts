@@ -1,11 +1,13 @@
 import { ref } from "kirbyuse";
-import { getHashedStorageKey } from "../utils/storage";
+import { getHashedStorageKey } from "../utils";
 
 const MAX_HISTORY = 50;
 
 export function useGenerationHistory() {
   const storageKey = getHashedStorageKey("history", window.location.hostname);
-  const history = ref<string[]>(JSON.parse(localStorage.getItem(storageKey) || "[]"));
+  const history = ref<string[]>(
+    JSON.parse(localStorage.getItem(storageKey) || "[]"),
+  );
   const lastPrompt = ref("");
   const currentIndex = ref(-1);
 

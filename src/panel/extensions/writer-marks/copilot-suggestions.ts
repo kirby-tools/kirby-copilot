@@ -11,7 +11,7 @@ import {
   COMPLETION_SYSTEM_PROMPT,
   STORAGE_KEY_PREFIX,
 } from "../../constants";
-import { loadAISDK } from "../../utils/ai";
+import { loadAISDK } from "../../utils";
 
 const LICENSE_TOAST_THRESHOLD = 3; // Show toast after this many completions
 const COMPLETION_COUNT_STORAGE_KEY = `${STORAGE_KEY_PREFIX}completionCount`;

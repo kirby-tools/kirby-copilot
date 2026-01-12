@@ -19,9 +19,7 @@ import {
   resumeCompletion,
 } from "../../extensions/writer-marks/copilot-suggestions";
 import { fieldToZodSchema } from "../../schemas/fields";
-import { loadAISDK } from "../../utils/ai";
-import { openPromptDialog } from "../../utils/dialog";
-import { handleStreamError } from "../../utils/error";
+import { handleStreamError, loadAISDK, openPromptDialog } from "../../utils";
 
 const props = defineProps({
   label: String,
