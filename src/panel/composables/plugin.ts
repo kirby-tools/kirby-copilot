@@ -2,13 +2,6 @@ import type { PluginContextResponse } from "../types";
 import { registerPluginAssets } from "kirbyuse";
 import { PLUGIN_CONTEXT_API_ROUTE } from "../constants";
 
-export type {
-  CompletionConfig,
-  PluginConfig,
-  PluginContextResponse,
-  ProviderConfig,
-} from "../types";
-
 let context: PluginContextResponse | undefined;
 let pendingPromise: Promise<PluginContextResponse> | undefined;
 

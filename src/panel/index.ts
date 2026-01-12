@@ -7,7 +7,11 @@ import PlaygroundApiKeyField from "./components/Playground/ApiKey.vue";
 import CopilotSection from "./components/Sections/Copilot.vue";
 // @ts-ignore - Vue component
 import CopilotButton from "./components/ViewButtons/CopilotButton.vue";
-import { resolveLanguageModel, useStreamText } from "./composables/ai";
+import {
+  resolveLanguageModel,
+  usePluginContext,
+  useStreamText,
+} from "./composables";
 import { icons } from "./config/icons";
 import { copilot as copilotButton } from "./extensions/textarea-buttons/copilot";
 import { copilot as copilotMark } from "./extensions/writer-marks/copilot";
@@ -41,6 +45,7 @@ window.panel.plugin("johannschopplich/copilot", {
   },
   thirdParty: {
     copilot: {
+      resolvePluginContext: usePluginContext,
       streamText: useStreamText,
       resolveLanguageModel,
       loadAISDK,

@@ -1,5 +1,5 @@
 import type { SharedV3ProviderOptions } from "@ai-sdk/provider";
-import type { Output as AIOutput } from "ai";
+import type { Output as OutputNamespace } from "ai";
 import type { ReasoningEffort } from "../constants";
 import type { OutputFormat } from "../types";
 import { useContent, usePanel } from "kirbyuse";
@@ -48,7 +48,7 @@ export async function useStreamText({
 }: {
   userPrompt: string;
   systemPrompt?: string;
-  output?: AIOutput.Output;
+  output?: OutputNamespace.Output;
   responseFormat?: OutputFormat;
   files?: File[];
   logLevel?: number;

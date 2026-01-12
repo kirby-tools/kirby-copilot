@@ -6,6 +6,8 @@ export const PLUGIN_PROXY_API_ROUTE = "__copilot__/proxy";
 // Marker replaced by the PHP proxy with the real API key
 export const PROXY_API_KEY_MARKER = "__KIRBY_COPILOT_PROXY__";
 
+export const STORAGE_KEY_PREFIX = "kirby$copilot$";
+
 export const LOG_LEVELS = ["error", "warn", "info", "debug"] as const;
 export type LogLevel = (typeof LOG_LEVELS)[number];
 export const DEFAULT_LOG_LEVEL: LogLevel = "warn";
@@ -56,17 +58,6 @@ export const PROVIDER_REASONING_MAP: Record<
   high: { anthropic: 32_000, openai: "high", google: "high" },
 };
 
-/// keep-sorted
-export const DEFAULT_COMPLETION_MODELS = {
-  anthropic: "claude-haiku-4-5-20251001",
-  google: "gemini-3-flash-preview",
-  mistral: "mistral-small-latest",
-  openai: "gpt-5-nano",
-};
-
-export const COMPLETION_PREFIX_LENGTH = 4000;
-export const COMPLETION_SUFFIX_LENGTH = 500;
-
 export const DEFAULT_SYSTEM_PROMPT = `
 You are a content assistant.
 
@@ -77,6 +68,17 @@ When <response_format> is provided, format your response as:
 
 When <selection> is provided, use it as context for your response. Preserve any formatting (bold, italic, links, etc.) present in the selection unless the task explicitly requires different formatting.
 `;
+
+/// keep-sorted
+export const DEFAULT_COMPLETION_MODELS = {
+  anthropic: "claude-haiku-4-5-20251001",
+  google: "gemini-3-flash-preview",
+  mistral: "mistral-small-latest",
+  openai: "gpt-5-nano",
+};
+
+export const COMPLETION_PREFIX_LENGTH = 4000;
+export const COMPLETION_SUFFIX_LENGTH = 500;
 
 export const COMPLETION_SYSTEM_PROMPT = `
 You are a writing assistant providing inline autocompletions.
@@ -117,5 +119,3 @@ export const SUPPORTED_FILE_MIME_TYPES = [
  * If exceeded, fall back to text extraction
  */
 export const PDF_SIZE_LIMIT = 50 * 1024 * 1024;
-
-export const STORAGE_KEY_PREFIX = "kirby$copilot$";

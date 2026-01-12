@@ -154,9 +154,16 @@ return [
 
                 $body = file_get_contents('php://input');
 
-                // Build headers, replacing marker with real key
                 $curlHeaders = [];
-                $skipHeaders = ['Host', 'X-Proxy-Target', 'X-Csrf'];
+                $skipHeaders = [
+                    'Host',
+                    'Content-Type',     // Handled explicitly below (not always in Kirby's headers())
+                    'Content-Length',   // cURL calculates from CURLOPT_POSTFIELDS
+                    'Connection',       // Hop-by-hop, connection-specific
+                    'Transfer-Encoding', // Hop-by-hop, handled by cURL
+                    'X-Proxy-Target',
+                    'X-Csrf'
+                ];
 
                 foreach ($kirby->request()->headers() as $name => $value) {
                     if (in_array($name, $skipHeaders, true)) {
