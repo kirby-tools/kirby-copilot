@@ -5,3 +5,7 @@ import { STORAGE_KEY_PREFIX } from "../constants";
 export function getHashedStorageKey(...args: unknown[]) {
   return `${STORAGE_KEY_PREFIX}${hash([...args])}`;
 }
+
+export function isObject(value: unknown): value is Record<any, any> {
+  return Object.prototype.toString.call(value) === "[object Object]";
+}

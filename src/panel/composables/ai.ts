@@ -18,6 +18,7 @@ import {
   createContentContext,
   createHtmlChunking,
   extractTextFromPdf,
+  isObject,
   loadAISDK,
   renderTemplate,
   supportsReasoning,
@@ -268,10 +269,7 @@ export async function resolveLanguageModel({
   };
 
   // Merge custom provider options (takes precedence)
-  if (
-    typeof providerConfig.options === "object" &&
-    providerConfig.options !== null
-  ) {
+  if (isObject(providerConfig.options)) {
     providerOptions[provider] = {
       ...providerOptions[provider],
       ...providerConfig.options,

@@ -1,5 +1,6 @@
 import type { KirbyBlock } from "kirby-types";
 import { useContent, usePanel } from "kirbyuse";
+import { isObject } from "./shared";
 
 /**
  * Creates a context object from the current Panel content.
@@ -20,7 +21,7 @@ export function createContentContext(): Record<string, string> {
   return Object.fromEntries(
     Object.entries(context).map(([key, value]) => [
       key,
-      Array.isArray(value) || (typeof value === "object" && value !== null)
+      Array.isArray(value) || isObject(value)
         ? JSON.stringify(isBlocksArray(value) ? normalizeBlocks(value) : value)
         : String(value),
     ]),
@@ -33,8 +34,7 @@ function isBlocksArray(value: unknown): value is KirbyBlock[] {
     value.length > 0 &&
     value.every(
       (item): item is KirbyBlock =>
-        typeof item === "object" &&
-        item !== null &&
+        isObject(item) &&
         "id" in item &&
         "type" in item &&
         "isHidden" in item &&

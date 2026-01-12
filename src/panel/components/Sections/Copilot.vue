@@ -33,6 +33,7 @@ import {
   getHashedStorageKey,
   getResponseFormat,
   handleStreamError,
+  isObject,
   loadAISDK,
   openFilePicker,
 } from "../../utils";
@@ -376,8 +377,7 @@ function onModelSave() {
       v-else-if="
         !field ||
         typeof field === 'string' ||
-        (typeof field === 'object' &&
-          !(field?.name.toLowerCase() in currentContent))
+        (isObject(field) && !(field?.name.toLowerCase() in currentContent))
       "
       theme="empty"
     >

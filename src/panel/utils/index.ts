@@ -7,5 +7,5 @@ export * from "./image";
 export * from "./legacy";
 export * from "./models";
 export * from "./pdf";
-export * from "./storage";
+export * from "./shared";
 export * from "./template";
