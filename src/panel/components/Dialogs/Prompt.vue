@@ -1,4 +1,9 @@
-<script setup>
+<script setup lang="ts">
+import type { LicenseStatus } from "@kirby-tools/licensing";
+import type { KirbyFieldProps } from "kirby-types";
+import type { PropType } from "vue";
+import type { PromptTemplate } from "../../composables";
+import type { ActiveField } from "../../types";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import { computed, isKirby5, ref, usePanel } from "kirbyuse";
 import {
@@ -20,10 +25,10 @@ import AutoGrowTextarea from "../Ui/AutoGrowTextarea.vue";
 import ContentDropdown from "../Ui/ContentDropdown.vue";
 
 const props = defineProps({
-  fields: Array,
+  fields: Array as PropType<KirbyFieldProps[]>,
   selection: String,
   userPrompt: String,
-  activeField: Object,
+  activeField: Object as PropType<ActiveField>,
 });
 
 const emit = defineEmits(["cancel", "close", "input", "submit", "success"]);
@@ -41,20 +46,20 @@ const { templates, addTemplate, setTemplates } = usePromptTemplates();
 const { getModelFields } = useModelFields();
 const contentContext = createContentContext();
 
-const textareaComponent = ref();
+const textareaComponent = ref<InstanceType<typeof AutoGrowTextarea>>();
 const textarea = computed(() => textareaComponent.value?.el);
 const prompt = ref(props.userPrompt || "");
-const files = ref([]);
-const licenseStatus = ref();
+const files = ref<File[]>([]);
+const licenseStatus = ref<LicenseStatus>();
 
-const modelFields = ref([...(props.fields ?? [])]);
-const fieldsDropdown = ref();
-const selectedFieldNames = ref([]);
-const placeholderDropdown = ref();
+const modelFields = ref<KirbyFieldProps[]>([...(props.fields ?? [])]);
+const fieldsDropdown = ref<{ toggle: () => void }>();
+const selectedFieldNames = ref<string[]>([]);
+const placeholderDropdown = ref<InstanceType<typeof ContentDropdown>>();
 const isPlaceholderDropdownOpen = ref(false);
 const placeholderSearch = ref("");
-const templateDropdown = ref();
-const historyDropdown = ref();
+const templateDropdown = ref<InstanceType<typeof ContentDropdown>>();
+const historyDropdown = ref<InstanceType<typeof ContentDropdown>>();
 
 const selectionInsertOptions = [
   {
@@ -66,7 +71,7 @@ const selectionInsertOptions = [
     text: panel.t("johannschopplich.copilot.append"),
   },
 ];
-const insertOption = ref(selectionInsertOptions[0].value);
+const insertOption = ref(selectionInsertOptions[0]!.value);
 
 // Prompt dialog is used in two contexts:
 // 1. Multi-field generation mode (Panel view button)
@@ -106,7 +111,7 @@ const filteredPlaceholderFields = computed(() => {
   );
 });
 
-useEventListener(textarea, "keydown", (event) => {
+useEventListener(textarea, "keydown", (event: KeyboardEvent) => {
   // Listen to `Cmd/Ctrl + Enter` to submit the prompt
   if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
     event.preventDefault();
@@ -121,10 +126,11 @@ useEventListener(textarea, "keydown", (event) => {
   }
 
   // Listen to arrow up and down to navigate the prompt history
+  const target = event.target as HTMLTextAreaElement | null;
   if (
-    (event.key === "ArrowUp" && event.target.selectionStart === 0) ||
+    (event.key === "ArrowUp" && target?.selectionStart === 0) ||
     (event.key === "ArrowDown" &&
-      event.target.selectionStart === event.target.value.length)
+      target?.selectionStart === target?.value.length)
   ) {
     // Prevent cursor movement
     event.preventDefault();
@@ -156,7 +162,7 @@ useEventListener(textarea, "keydown", (event) => {
       modelFields.value,
       props.activeField.name,
       props.activeField.type,
-    );
+    ) as (KirbyFieldProps & { copilot?: { userPrompt?: string } }) | undefined;
 
     // Use field-specific custom user prompt if configured
     if (typeof fieldDefinition?.copilot?.userPrompt === "string") {
@@ -197,13 +203,13 @@ function togglePlaceholderDropdown() {
   placeholderDropdown.value?.toggle();
 }
 
-function insertFieldPlaceholder(fieldName) {
+function insertFieldPlaceholder(fieldName: string) {
   const placeholder = `{${fieldName}}`;
   textareaComponent.value?.insertAtCursor(placeholder);
   isPlaceholderDropdownOpen.value = false;
 }
 
-function loadTemplate(template) {
+function loadTemplate(template: PromptTemplate) {
   prompt.value = template.prompt;
   templateDropdown.value?.close();
   textarea.value?.focus();
@@ -287,13 +293,13 @@ function openEditTemplatesDialog() {
   });
 }
 
-function loadPromptFromHistory(promptText) {
+function loadPromptFromHistory(promptText: string) {
   prompt.value = promptText;
   historyDropdown.value?.close();
   textarea.value?.focus();
 }
 
-function getFieldPreview(fieldName) {
+function getFieldPreview(fieldName: string) {
   const value = contentContext[fieldName] ?? "";
   const stringifiedValue = String(value);
 

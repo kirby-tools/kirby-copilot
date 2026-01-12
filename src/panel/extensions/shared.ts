@@ -1,14 +1,8 @@
-import type { ActiveField, OutputFormat } from "../types";
+import type { ActiveField, OutputFormat, PromptContext } from "../types";
 import { usePanel } from "kirbyuse";
 import { usePluginContext, useStreamText } from "../composables";
 import { DEFAULT_SYSTEM_PROMPT, STORAGE_KEY_PREFIX } from "../constants";
 import { buildUserPrompt, handleStreamError, openPromptDialog } from "../utils";
-
-export interface PromptContext {
-  prompt: string;
-  files: File[];
-  insertMode?: "append" | "replace";
-}
 
 /** Streams AI-generated text into the active field. */
 export async function streamTextToField(

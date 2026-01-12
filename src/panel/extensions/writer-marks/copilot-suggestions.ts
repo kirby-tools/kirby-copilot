@@ -24,7 +24,7 @@ interface CompletionPluginState {
   manualTrigger: boolean;
 }
 
-let completionConfig: false | CompletionConfig | undefined;
+let completionConfig: CompletionConfig | undefined;
 let isCompletionPaused = false;
 
 export const completionPluginKey = new PluginKey<CompletionPluginState>(
@@ -210,7 +210,7 @@ function createCompletionPlugin(
     view() {
       if (completionConfig === undefined) {
         usePluginContext().then(({ config }) => {
-          completionConfig = config.completion;
+          completionConfig = config.completion || undefined;
         });
       }
 

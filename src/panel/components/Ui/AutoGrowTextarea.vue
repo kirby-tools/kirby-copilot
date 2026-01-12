@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 import { computed, ref } from "kirbyuse";
 
 export default {
@@ -6,7 +6,7 @@ export default {
 };
 </script>
 
-<script setup>
+<script setup lang="ts">
 const props = defineProps({
   value: {
     type: String,
@@ -19,7 +19,7 @@ const props = defineProps({
 
 const emit = defineEmits(["input"]);
 
-const textarea = ref();
+const textarea = ref<HTMLTextAreaElement>();
 const text = computed({
   get() {
     return props.value;
@@ -40,7 +40,7 @@ function updateCursorPosition() {
   }
 }
 
-function insertAtCursor(textToInsert) {
+function insertAtCursor(textToInsert: string) {
   const { start, end } = cursorPosition.value;
   const currentValue = props.value;
 

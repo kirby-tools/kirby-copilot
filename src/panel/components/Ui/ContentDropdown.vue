@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from "kirbyuse";
 
 const emit = defineEmits(["close"]);
@@ -9,7 +9,7 @@ function close() {
   dropdown.value?.close();
 }
 
-function open(opener) {
+function open(opener?: HTMLElement) {
   dropdown.value?.open(opener);
 }
 

@@ -6,6 +6,10 @@ export const PLUGIN_PROXY_API_ROUTE = "__copilot__/proxy";
 // Marker replaced by the PHP proxy with the real API key
 export const PROXY_API_KEY_MARKER = "__KIRBY_COPILOT_PROXY__";
 
+export const LOG_LEVELS = ["error", "warn", "info", "debug"] as const;
+export type LogLevel = (typeof LOG_LEVELS)[number];
+export const DEFAULT_LOG_LEVEL: LogLevel = "warn";
+
 /// keep-sorted
 export const SUPPORTED_PROVIDERS = ["anthropic", "google", "mistral", "openai"];
 export type ModelProvider = (typeof SUPPORTED_PROVIDERS)[number];
@@ -114,6 +118,4 @@ export const SUPPORTED_FILE_MIME_TYPES = [
  */
 export const PDF_SIZE_LIMIT = 50 * 1024 * 1024;
 
-export const LOG_LEVELS = ["error", "warn", "info", "debug"];
-export const DEFAULT_LOG_LEVEL = "warn";
 export const STORAGE_KEY_PREFIX = "kirby$copilot$";

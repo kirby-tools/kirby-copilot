@@ -1,4 +1,12 @@
-<script setup>
+<script setup lang="ts">
+import type {
+  KirbyBlocksFieldProps,
+  KirbyFieldProps,
+  KirbyLayoutFieldProps,
+} from "kirby-types";
+import type { PropType } from "vue";
+import type { LogLevel } from "../../constants";
+import type { PromptContext } from "../../types";
 import { ref, useContent, usePanel } from "kirbyuse";
 import { z } from "zod";
 import {
@@ -25,7 +33,7 @@ const props = defineProps({
   label: String,
   userPrompt: String,
   systemPrompt: String,
-  logLevel: String,
+  logLevel: String as PropType<LogLevel>,
   icon: {
     type: String,
     default: "sparkling",
@@ -42,7 +50,7 @@ const { getModelFields } = useModelFields();
 
 const isGenerating = ref(false);
 const isHovering = ref(false);
-let abortController;
+let abortController: AbortController | undefined;
 
 async function initPromptDialog() {
   if (__PLAYGROUND__ && !window.location.hostname.includes("localhost")) {
@@ -57,7 +65,7 @@ async function initPromptDialog() {
 
   abortController = new AbortController();
 
-  const handleEscape = (event) => {
+  const handleEscape = (event: KeyboardEvent) => {
     if (event.key === "Escape") {
       abort();
     }
@@ -70,7 +78,7 @@ async function initPromptDialog() {
     return;
   }
 
-  const promptContext = await openPromptDialog({
+  const promptContext = await openPromptDialog<PromptContext>({
     fields,
     userPrompt: props.userPrompt,
   });
@@ -78,7 +86,7 @@ async function initPromptDialog() {
 
   const { prompt, files, selectedFieldNames } = promptContext;
   const selectedFields = fields.filter((field) =>
-    selectedFieldNames.includes(field.name),
+    selectedFieldNames?.includes(field.name),
   );
   if (!prompt || selectedFields.length === 0) return;
 
@@ -86,14 +94,14 @@ async function initPromptDialog() {
   const { getZodSchema: getLayoutZodSchema } = useLayouts();
 
   // Build schema for all selected fields
-  const fieldsSchema = {};
+  const fieldsSchema: Record<string, z.ZodType> = {};
 
   for (const field of selectedFields) {
     fieldsSchema[field.name] =
       field.type === "layout"
-        ? z.array(await getLayoutZodSchema(field))
+        ? z.array(await getLayoutZodSchema(field as KirbyLayoutFieldProps))
         : field.type === "blocks"
-          ? z.array(await getBlocksZodSchema(field))
+          ? z.array(await getBlocksZodSchema(field as KirbyBlocksFieldProps))
           : fieldToZodSchema(field);
   }
 
@@ -130,7 +138,7 @@ async function initPromptDialog() {
     });
 
     // Prevent unhandled rejection when aborting before `finalOutput` is awaited
-    finalOutput.catch(() => {});
+    (finalOutput as Promise<unknown>).catch(() => {});
 
     // Stream partial updates
     for await (const partialOutput of partialOutputStream) {
@@ -172,7 +180,7 @@ async function initPromptDialog() {
     });
   } catch (error) {
     if (signal.aborted) return;
-    await handleStreamError(error);
+    await handleStreamError(error as Error);
   } finally {
     abortController = undefined;
     panel.isLoading = false;
@@ -189,17 +197,25 @@ function abort() {
   panel.isLoading = false;
 }
 
-function processFieldValues({ object, selectedFields, currentContent }) {
+function processFieldValues({
+  object,
+  selectedFields,
+  currentContent,
+}: {
+  object: Record<string, unknown>;
+  selectedFields: KirbyFieldProps[];
+  currentContent: Record<string, unknown>;
+}) {
   const { normalizeBlock } = useBlocks();
   const { normalizeLayout } = useLayouts();
 
-  const processedContent = {};
+  const processedContent: Record<string, unknown> = {};
 
   for (const field of selectedFields) {
     const fieldValue = object[field.name];
     if (fieldValue == null) continue;
 
-    const currentFieldContent = currentContent[field.name];
+    const currentFieldContent = currentContent[field.name] as unknown[];
     const normalizer =
       field.type === "layout" ? normalizeLayout : normalizeBlock;
 
@@ -208,7 +224,7 @@ function processFieldValues({ object, selectedFields, currentContent }) {
       if (Array.isArray(fieldValue)) {
         processedContent[field.name] = [
           ...currentFieldContent,
-          ...fieldValue.map(normalizer),
+          ...fieldValue.map(normalizer as (item: unknown) => unknown),
         ];
       }
     } else {

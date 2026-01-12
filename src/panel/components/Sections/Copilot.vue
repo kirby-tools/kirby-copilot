@@ -1,4 +1,12 @@
-<script>
+<script lang="ts">
+import type { LicenseStatus } from "@kirby-tools/licensing";
+import type {
+  KirbyBlocksFieldProps,
+  KirbyFieldProps,
+  KirbyLayoutFieldProps,
+} from "kirby-types";
+import type z from "zod";
+import type { PluginConfig } from "../../types";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import {
   computed,
@@ -47,7 +55,7 @@ export default {
 };
 </script>
 
-<script setup>
+<script setup lang="ts">
 const props = defineProps(propsDefinition);
 
 const _isKirby5 = isKirby5();
@@ -56,35 +64,35 @@ const { t } = useI18n();
 const { currentContent, update: updateContent } = useContent();
 
 // Section props
-const label = ref();
-const field = ref();
-const userPrompt = ref();
-const systemPrompt = ref();
-const storage = ref();
-const icon = ref();
-const theme = ref();
-const size = ref();
-const logLevel = ref();
+const label = ref<string>();
+const field = ref<KirbyFieldProps>();
+const userPrompt = ref<string>();
+const systemPrompt = ref<string>();
+const storage = ref<boolean>();
+const icon = ref<string>();
+const theme = ref<string>();
+const size = ref<string>();
+const logLevel = ref<number>();
 
 // Section computed
-const modelFile = ref();
-const help = ref();
+const modelFile = ref<{ mime: string; url: string }>();
+const help = ref<string>();
 
 // Runtime state
-const config = ref();
+const config = ref<PluginConfig>();
 const isInitialized = ref(false);
 const isGenerating = ref(false);
 const isDetailsOpen = ref(false);
-const detailsElement = ref();
-const currentPrompt = ref();
-const currentFieldContent = ref();
-const permissions = ref([]);
-const files = ref([]);
-const licenseStatus = ref();
+const detailsElement = ref<HTMLDetailsElement>();
+const currentPrompt = ref<string>();
+const currentFieldContent = ref<any>();
+const permissions = ref<string[]>([]);
+const files = ref<File[]>([]);
+const licenseStatus = ref<LicenseStatus>();
 
 // Non-reactive data
-let storageKey;
-let abortController;
+let storageKey: string;
+let abortController: AbortController | undefined;
 
 const canUndo = computed(
   () => !isGenerating.value && currentFieldContent.value !== undefined,
@@ -117,8 +125,8 @@ watch(isDetailsOpen, (value) => {
   const [context, response] = await Promise.all([
     usePluginContext(),
     load({
-      parent: props.parent,
-      name: props.name,
+      parent: props.parent!,
+      name: props.name!,
     }),
   ]);
 
@@ -153,7 +161,8 @@ watch(isDetailsOpen, (value) => {
       fetch(url)
         .then((response) => response.blob())
         .then((blob) => {
-          files.value = [blob];
+          const filename = url.split("/").pop() || "file";
+          files.value = [new File([blob], filename, { type: mime })];
         });
     }
   }
@@ -198,6 +207,8 @@ async function generate() {
     return;
   }
 
+  if (!field.value) return;
+
   panel.isLoading = true;
   isGenerating.value = true;
   currentFieldContent.value =
@@ -217,23 +228,24 @@ async function generate() {
 
     // Handle layouts by streaming the object
     if (field.value.type === "layout" || field.value.type === "blocks") {
-      const getSchema =
-        field.value.type === "layout" ? getLayoutZodSchema : getBlocksZodSchema;
       const normalizer =
         field.value.type === "layout" ? normalizeLayout : normalizeBlock;
-      const schema = await getSchema(field.value);
+      const schema =
+        field.value.type === "layout"
+          ? await getLayoutZodSchema(field.value as KirbyLayoutFieldProps)
+          : await getBlocksZodSchema(field.value as KirbyBlocksFieldProps);
 
       const { partialOutputStream, output: finalOutput } = await useStreamText({
         userPrompt: currentPrompt.value,
         systemPrompt: systemPrompt.value,
-        output: Output.array({ element: schema }),
+        output: Output.array({ element: schema as z.ZodObject }),
         files: files.value,
         logLevel: logLevel.value,
         abortSignal: signal,
       });
 
       // Prevent unhandled rejection when aborting before `finalOutput` is awaited
-      finalOutput.catch(() => {});
+      (finalOutput as Promise<unknown>).catch(() => {});
 
       // Stream partial updates
       for await (const partialOutput of partialOutputStream) {
@@ -244,7 +256,7 @@ async function generate() {
           {
             [field.value.name.toLowerCase()]: [
               ...currentFieldContent.value,
-              ...partialOutput.map(normalizer),
+              ...partialOutput.map(normalizer as (item: unknown) => unknown),
             ],
           },
           // Disable saving content to storage in Kirby 5
@@ -303,7 +315,7 @@ async function generate() {
     });
   } catch (error) {
     if (signal.aborted) return;
-    await handleStreamError(error);
+    await handleStreamError(error as Error);
   } finally {
     abortController = undefined;
     panel.isLoading = false;
@@ -319,6 +331,7 @@ function abort() {
 }
 
 function undo() {
+  if (!field.value) return;
   updateContent({
     [field.value.name.toLowerCase()]: currentFieldContent.value,
   });
@@ -350,8 +363,15 @@ function onModelSave() {
       />
     </template>
 
+    <k-box v-if="!config" theme="empty">
+      <k-text>
+        Missing <code>johannschopplich.copilot</code> global configuration.
+      </k-text>
+    </k-box>
     <k-box
-      v-if="!config.provider || !SUPPORTED_PROVIDERS.includes(config.provider)"
+      v-else-if="
+        !config.provider || !SUPPORTED_PROVIDERS.includes(config.provider)
+      "
       theme="empty"
     >
       <k-text>

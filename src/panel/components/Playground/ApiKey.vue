@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 import { computed } from "kirbyuse";
 import {
   after as _after,
@@ -21,7 +21,7 @@ export default {
 };
 </script>
 
-<script setup>
+<script setup lang="ts">
 defineProps(propsDefinition);
 
 const STORAGE_KEY = `${STORAGE_KEY_PREFIX}apiKey`;

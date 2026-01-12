@@ -1,3 +1,4 @@
+import type { LicenseStatus } from "@kirby-tools/licensing";
 import type {
   KirbyBlock,
   KirbyFieldProps,
@@ -5,7 +6,7 @@ import type {
   KirbyLayoutColumn,
 } from "kirby-types";
 import type { PluginAsset } from "kirbyuse";
-import type { ReasoningEffort } from "./constants";
+import type { LogLevel, ReasoningEffort } from "./constants";
 
 // Re-export kirby-types for convenience
 export type { KirbyBlock, KirbyLayout, KirbyLayoutColumn };
@@ -24,6 +25,17 @@ export interface ActiveField {
   element: HTMLElement;
   name: string;
   type?: string;
+}
+
+// =============================================================================
+// Prompt Context
+// =============================================================================
+
+export interface PromptContext {
+  prompt: string;
+  files: File[];
+  selectedFieldNames?: string[];
+  insertMode?: "append" | "replace";
 }
 
 // =============================================================================
@@ -72,6 +84,7 @@ export interface PluginConfig {
   reasoningEffort?: ReasoningEffort;
   excludedBlocks?: string[];
   completion?: false | CompletionConfig;
+  logLevel?: LogLevel;
 }
 
 // =============================================================================
@@ -106,5 +119,5 @@ export interface PluginContextResponse {
    * License validation status.
    * Used to determine feature availability and show license prompts.
    */
-  licenseStatus?: string;
+  licenseStatus?: LicenseStatus;
 }
