@@ -41,7 +41,7 @@ window.panel.plugin("johannschopplich/copilot", {
   },
   thirdParty: {
     copilot: {
-      useStreamText,
+      streamText: useStreamText,
       resolveLanguageModel,
       loadAISDK,
     },

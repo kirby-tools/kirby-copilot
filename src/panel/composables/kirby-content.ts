@@ -18,8 +18,8 @@ function getFieldsets() {
   if (pendingPromise) return pendingPromise;
 
   pendingPromise = window.panel.api
-    .get(PLUGIN_FIELDSETS_API_ROUTE)
-    .then((response: KirbyFieldset[]) => {
+    .get<KirbyFieldset[]>(PLUGIN_FIELDSETS_API_ROUTE)
+    .then((response) => {
       fieldsets = response;
       pendingPromise = undefined;
       return fieldsets;
@@ -53,10 +53,10 @@ export function useBlocks() {
     return generateKirbyBlocksSchema(currentFieldsets);
   }
 
-  function normalizeBlock(block: KirbyBlock) {
+  function normalizeBlock(block: Partial<KirbyBlock>) {
     block.isHidden ??= false;
     block.id ??= crypto.randomUUID();
-    return block;
+    return block as KirbyBlock;
   }
 
   return {
@@ -91,7 +91,7 @@ export function useLayouts() {
     return generateKirbyLayoutsSchema(currentFieldsets, fieldConfig);
   }
 
-  function normalizeLayout(layout: KirbyLayout) {
+  function normalizeLayout(layout: Partial<KirbyLayout>) {
     layout.id ??= crypto.randomUUID();
     layout.attrs ??= [];
     layout.columns = (layout.columns ?? []).map((column) => {
@@ -106,7 +106,7 @@ export function useLayouts() {
       return column;
     });
 
-    return layout;
+    return layout as KirbyLayout;
   }
 
   return {

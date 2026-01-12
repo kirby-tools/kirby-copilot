@@ -17,8 +17,8 @@ export function usePluginContext() {
   if (pendingPromise) return pendingPromise;
 
   pendingPromise = window.panel.api
-    .get(PLUGIN_CONTEXT_API_ROUTE)
-    .then((response: PluginContextResponse) => {
+    .get<PluginContextResponse>(PLUGIN_CONTEXT_API_ROUTE)
+    .then((response) => {
       registerPluginAssets(response.assets);
       context = response;
       pendingPromise = undefined;
