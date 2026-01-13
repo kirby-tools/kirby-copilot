@@ -7,31 +7,28 @@ import { getHashedStorageKey } from "../utils";
 const TEMPLATE_LIMIT = 50;
 
 let isInitialized = false;
+let hasStoredTemplates = false;
+let storageKey = "";
 
 const store = reactive({
   templates: [] as PromptTemplate[],
   configTemplates: [] as PromptTemplate[],
-  hasStoredTemplates: false,
-  storageKey: "",
 });
 
 export function usePromptTemplates() {
   // Initialize store only once
   if (!isInitialized) {
     isInitialized = true;
-    store.storageKey = getHashedStorageKey(
-      "templates",
-      window.location.hostname,
-    );
-    const storedTemplates = localStorage.getItem(store.storageKey);
-    store.hasStoredTemplates = !!storedTemplates;
+    storageKey = getHashedStorageKey("templates", window.location.hostname);
+    const storedTemplates = localStorage.getItem(storageKey);
+    hasStoredTemplates = !!storedTemplates;
 
     let initialTemplates: PromptTemplate[];
 
     if (storedTemplates) {
       initialTemplates = migrateTemplates(storedTemplates);
       // Persist migrated templates back to storage
-      localStorage.setItem(store.storageKey, JSON.stringify(initialTemplates));
+      localStorage.setItem(storageKey, JSON.stringify(initialTemplates));
     } else {
       initialTemplates = getDefaultTemplates();
     }
@@ -46,7 +43,7 @@ export function usePromptTemplates() {
   ]);
 
   function saveTemplates() {
-    localStorage.setItem(store.storageKey, JSON.stringify(store.templates));
+    localStorage.setItem(storageKey, JSON.stringify(store.templates));
   }
 
   function addTemplate(label: string, prompt: string) {
@@ -151,7 +148,7 @@ export function usePromptTemplates() {
     }));
 
     // Clear default templates if config templates are provided and user hasn't customized
-    if (newTemplates.length > 0 && !store.hasStoredTemplates) {
+    if (newTemplates.length > 0 && !hasStoredTemplates) {
       store.templates = [];
       saveTemplates();
     }
