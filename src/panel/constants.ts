@@ -119,3 +119,108 @@ export const SUPPORTED_FILE_MIME_TYPES = [
  * If exceeded, fall back to text extraction
  */
 export const PDF_SIZE_LIMIT = 50 * 1024 * 1024;
+
+export const PROMPT_FORMATTING_INSTRUCTIONS: Record<string, string> = {
+  en: "IMPORTANT: Preserve all formatting (bold, italic, links, code, headings, lists, etc.) exactly as in the original.",
+  de: "WICHTIG: Bewahre alle Formatierungen (fett, kursiv, Links, Code, Überschriften, Listen usw.) exakt wie im Original.",
+  fr: "IMPORTANT : Conservez toutes les mises en forme (gras, italique, liens, code, titres, listes, etc.) exactement comme dans l'original.",
+  nl: "BELANGRIJK: Behoud alle opmaak (vet, cursief, links, code, koppen, lijsten, enz.) exact zoals in het origineel.",
+};
+
+export const DEFAULT_PROMPT_TEMPLATES: Record<
+  string,
+  { label: string; prompt: string }[]
+> = {
+  en: [
+    {
+      label: "Fix Grammar & Spelling",
+      prompt: `Fix all spelling and grammar errors in the given text. ${PROMPT_FORMATTING_INSTRUCTIONS.en} Only output the corrected text, nothing else.`,
+    },
+    {
+      label: "Make Concise",
+      prompt: `Make the given text more concise by removing unnecessary words while keeping the meaning intact. ${PROMPT_FORMATTING_INSTRUCTIONS.en} Only output the reduced text, nothing else.`,
+    },
+    {
+      label: "Simplify",
+      prompt: `Simplify the given text to make it easier to understand, using simpler words and shorter sentences. ${PROMPT_FORMATTING_INSTRUCTIONS.en} Only output the simplified text, nothing else.`,
+    },
+    {
+      label: "Extend",
+      prompt: `Extend the given text with more details, examples, or explanations while maintaining the same style and tone. ${PROMPT_FORMATTING_INSTRUCTIONS.en} Only output the extended text, nothing else.`,
+    },
+    {
+      label: "Summarize",
+      prompt:
+        "Summarize the given text concisely while keeping the key points. Only output the summary, nothing else.",
+    },
+  ],
+  de: [
+    {
+      label: "Grammatik & Rechtschreibung korrigieren",
+      prompt: `Korrigiere alle Rechtschreib- und Grammatikfehler im gegebenen Text. ${PROMPT_FORMATTING_INSTRUCTIONS.de} Gib nur den korrigierten Text aus, sonst nichts.`,
+    },
+    {
+      label: "Kürzen",
+      prompt: `Mache den gegebenen Text prägnanter, indem du unnötige Wörter entfernst, aber die Bedeutung beibehältst. ${PROMPT_FORMATTING_INSTRUCTIONS.de} Gib nur den gekürzten Text aus, sonst nichts.`,
+    },
+    {
+      label: "Vereinfachen",
+      prompt: `Vereinfache den gegebenen Text, um ihn verständlicher zu machen, indem du einfachere Wörter und kürzere Sätze verwendest. ${PROMPT_FORMATTING_INSTRUCTIONS.de} Gib nur den vereinfachten Text aus, sonst nichts.`,
+    },
+    {
+      label: "Erweitern",
+      prompt: `Erweitere den gegebenen Text mit mehr Details, Beispielen oder Erklärungen, während du den gleichen Stil und Ton beibehältst. ${PROMPT_FORMATTING_INSTRUCTIONS.de} Gib nur den erweiterten Text aus, sonst nichts.`,
+    },
+    {
+      label: "Zusammenfassen",
+      prompt:
+        "Fasse den gegebenen Text prägnant zusammen und behalte dabei die wichtigsten Punkte bei. Gib nur die Zusammenfassung aus, sonst nichts.",
+    },
+  ],
+  fr: [
+    {
+      label: "Corriger grammaire et orthographe",
+      prompt: `Corrigez toutes les erreurs d'orthographe et de grammaire dans le texte donné. ${PROMPT_FORMATTING_INSTRUCTIONS.fr} N'affichez que le texte corrigé, rien d'autre.`,
+    },
+    {
+      label: "Rendre concis",
+      prompt: `Rendez le texte donné plus concis en supprimant les mots inutiles tout en conservant le sens. ${PROMPT_FORMATTING_INSTRUCTIONS.fr} N'affichez que le texte réduit, rien d'autre.`,
+    },
+    {
+      label: "Simplifier",
+      prompt: `Simplifiez le texte donné pour le rendre plus facile à comprendre, en utilisant des mots plus simples et des phrases plus courtes. ${PROMPT_FORMATTING_INSTRUCTIONS.fr} N'affichez que le texte simplifié, rien d'autre.`,
+    },
+    {
+      label: "Développer",
+      prompt: `Développez le texte donné avec plus de détails, d'exemples ou d'explications tout en conservant le même style et le même ton. ${PROMPT_FORMATTING_INSTRUCTIONS.fr} N'affichez que le texte développé, rien d'autre.`,
+    },
+    {
+      label: "Résumer",
+      prompt:
+        "Résumez le texte donné de manière concise tout en conservant les points clés. N'affichez que le résumé, rien d'autre.",
+    },
+  ],
+  nl: [
+    {
+      label: "Grammatica & spelling corrigeren",
+      prompt: `Corrigeer alle spelling- en grammaticafouten in de gegeven tekst. ${PROMPT_FORMATTING_INSTRUCTIONS.nl} Geef alleen de gecorrigeerde tekst weer, niets anders.`,
+    },
+    {
+      label: "Beknopter maken",
+      prompt: `Maak de gegeven tekst beknopter door onnodige woorden te verwijderen terwijl de betekenis behouden blijft. ${PROMPT_FORMATTING_INSTRUCTIONS.nl} Geef alleen de verkorte tekst weer, niets anders.`,
+    },
+    {
+      label: "Vereenvoudigen",
+      prompt: `Vereenvoudig de gegeven tekst om deze gemakkelijker te begrijpen, door eenvoudigere woorden en kortere zinnen te gebruiken. ${PROMPT_FORMATTING_INSTRUCTIONS.nl} Geef alleen de vereenvoudigde tekst weer, niets anders.`,
+    },
+    {
+      label: "Uitbreiden",
+      prompt: `Breid de gegeven tekst uit met meer details, voorbeelden of uitleg terwijl dezelfde stijl en toon behouden blijven. ${PROMPT_FORMATTING_INSTRUCTIONS.nl} Geef alleen de uitgebreide tekst weer, niets anders.`,
+    },
+    {
+      label: "Samenvatten",
+      prompt:
+        "Vat de gegeven tekst beknopt samen terwijl de belangrijkste punten behouden blijven. Geef alleen de samenvatting weer, niets anders.",
+    },
+  ],
+};

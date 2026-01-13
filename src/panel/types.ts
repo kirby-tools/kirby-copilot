@@ -30,11 +30,23 @@ export interface CompletionConfig {
   debounce: number;
 }
 
+export interface PromptTemplate {
+  id: string;
+  label: string;
+  prompt: string;
+  createdAt: number;
+  /** Config-defined templates are read-only for editors */
+  readOnly?: boolean;
+}
+
+export type PromptTemplateInput = Pick<PromptTemplate, "label" | "prompt">;
+
 export interface PluginConfig {
   provider: string;
   providers: Record<string, ProviderConfig>;
   systemPrompt?: string;
   reasoningEffort?: ReasoningEffort;
+  promptTemplates?: PromptTemplateInput[];
   excludedBlocks?: string[];
   completion?: false | CompletionConfig;
   logLevel?: LogLevel;

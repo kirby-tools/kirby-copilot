@@ -1,4 +1,4 @@
-import type { PromptTemplate } from "./templates";
+import type { PromptTemplateInput } from "../types";
 import { useDialog, usePanel } from "kirbyuse";
 import { usePromptTemplates } from "./templates";
 
@@ -8,28 +8,28 @@ export function useTemplateDialogs() {
   const { templates, addTemplate, setTemplates } = usePromptTemplates();
 
   async function openSaveTemplateDialog(currentPrompt: string) {
-    const result = await openFieldsDialog<{ name: string }>({
+    const result = await openFieldsDialog<{ label: string }>({
       fields: {
-        name: {
-          label: panel.t("johannschopplich.copilot.template.name"),
+        label: {
+          label: panel.t("johannschopplich.copilot.template.label"),
           type: "text",
           required: true,
           autofocus: true,
         },
       },
       value: {
-        name: "",
+        label: "",
       },
     });
 
-    if (result?.name) {
-      addTemplate(result.name, currentPrompt);
+    if (result?.label) {
+      addTemplate(result.label, currentPrompt);
     }
   }
 
   async function openEditTemplatesDialog() {
     const result = await openFieldsDialog<{
-      templates: Pick<PromptTemplate, "name" | "prompt">[];
+      templates: PromptTemplateInput[];
     }>({
       size: "huge",
       fields: {
@@ -38,8 +38,8 @@ export function useTemplateDialogs() {
           type: "structure",
           empty: panel.t("johannschopplich.copilot.template.empty"),
           columns: {
-            name: {
-              label: panel.t("johannschopplich.copilot.template.name"),
+            label: {
+              label: panel.t("johannschopplich.copilot.template.label"),
               width: "1/3",
             },
             prompt: {
@@ -48,8 +48,8 @@ export function useTemplateDialogs() {
             },
           },
           fields: {
-            name: {
-              label: panel.t("johannschopplich.copilot.template.name"),
+            label: {
+              label: panel.t("johannschopplich.copilot.template.label"),
               type: "text",
               required: true,
             },
@@ -63,7 +63,7 @@ export function useTemplateDialogs() {
       },
       value: {
         templates: templates.value.map((template) => ({
-          name: template.name,
+          label: template.label,
           prompt: template.prompt,
         })),
       },

@@ -2,8 +2,7 @@
 import type { LicenseStatus } from "@kirby-tools/licensing";
 import type { KirbyFieldProps } from "kirby-types";
 import type { PropType } from "vue";
-import type { PromptTemplate } from "../../composables";
-import type { ActiveField } from "../../types";
+import type { ActiveField, PromptTemplate } from "../../types";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import { computed, isKirby5, ref, usePanel } from "kirbyuse";
 import {
@@ -43,8 +42,9 @@ const {
   navigateHistory,
   getRecentEntries,
 } = useGenerationHistory();
-const { templates } = usePromptTemplates();
-const { openSaveTemplateDialog, openEditTemplatesDialog } = useTemplateDialogs();
+const { allTemplates, templates, setConfigTemplates } = usePromptTemplates();
+const { openSaveTemplateDialog, openEditTemplatesDialog } =
+  useTemplateDialogs();
 const { getModelFields } = useModelFields();
 const contentContext = createContentContext();
 
@@ -153,6 +153,7 @@ useEventListener(textarea, "keydown", (event: KeyboardEvent) => {
 (async () => {
   const context = await usePluginContext();
   licenseStatus.value = __PLAYGROUND__ ? "active" : context.licenseStatus;
+  setConfigTemplates(context.config.promptTemplates ?? []);
 
   // Fetch view fields for placeholder insertion if not passed as props
   if (!props.fields) {
@@ -387,7 +388,7 @@ function getFieldPreview(fieldName: string) {
                 {{ panel.t("johannschopplich.copilot.template.saveAs") }}
               </k-dropdown-item>
 
-              <!-- Edit templates button -->
+              <!-- Edit templates button (only for user templates) -->
               <k-dropdown-item
                 v-if="templates.length > 0"
                 icon="settings"
@@ -396,19 +397,19 @@ function getFieldPreview(fieldName: string) {
                 {{ panel.t("johannschopplich.copilot.template.edit") }}
               </k-dropdown-item>
 
-              <hr v-if="templates.length > 0" />
+              <hr v-if="allTemplates.length > 0" />
 
-              <!-- Saved templates list -->
+              <!-- Templates list (config + user) -->
               <k-dropdown-item
-                v-for="template in templates"
+                v-for="template in allTemplates"
                 :key="template.id"
                 @click="loadTemplate(template)"
               >
-                <span class="kai-truncate">{{ template.name }}</span>
+                <span class="kai-truncate">{{ template.label }}</span>
               </k-dropdown-item>
 
               <!-- Empty state -->
-              <k-dropdown-item v-if="templates.length === 0" disabled>
+              <k-dropdown-item v-if="allTemplates.length === 0" disabled>
                 {{ panel.t("johannschopplich.copilot.template.empty") }}
               </k-dropdown-item>
             </div>

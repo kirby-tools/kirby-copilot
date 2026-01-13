@@ -38,10 +38,6 @@ return [
                         ]
                     ],
                     'reasoningEffort' => 'low',
-                    'completion' => [
-                        'debounce' => 1000
-                    ],
-                    'excludedBlocks' => [],
                     'logLevel' => 'warn'
                 ];
 
@@ -91,17 +87,37 @@ return [
                     $config['reasoningEffort'] = 'low';
                 }
 
-                // Validate completion config
-                if ($config['completion'] === false || $config['completion'] === []) {
+                // Validate and normalize completion config
+                $completionDefaults = ['debounce' => 1000];
+                $completion = $config['completion'] ?? true;
+
+                if ($completion === false || $completion === []) {
                     $config['completion'] = false;
+                } elseif ($completion === true) {
+                    $config['completion'] = $completionDefaults;
                 } else {
-                    $config['completion'] = array_replace_recursive(
-                        $defaultConfig['completion'],
-                        $config['completion'] ?? []
-                    );
+                    $config['completion'] = array_replace_recursive($completionDefaults, $completion);
                     // Enforce minimum debounce of 500ms
                     $config['completion']['debounce'] = max(500, (int)$config['completion']['debounce']);
                 }
+
+                // Process config templates with multilang support
+                $language = $kirby->user()?->language() ?? $kirby->defaultLanguage()?->code() ?? 'en';
+                $resolveMultilang = fn (mixed $value): string|null => match (true) {
+                    is_string($value) && $value !== '' => $value,
+                    is_array($value) => $value[$language] ?? $value['en'] ?? current($value) ?: null,
+                    default => null,
+                };
+
+                $config['promptTemplates'] = array_values(array_filter(array_map(
+                    function ($template) use ($resolveMultilang) {
+                        $label = $resolveMultilang($template['label'] ?? null);
+                        $prompt = $resolveMultilang($template['prompt'] ?? null);
+
+                        return $label && $prompt ? compact('label', 'prompt') : null;
+                    },
+                    $config['promptTemplates'] ?? []
+                )));
 
                 $assets = $kirby
                     ->plugin('johannschopplich/copilot')
