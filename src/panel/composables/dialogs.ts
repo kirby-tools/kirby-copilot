@@ -29,7 +29,7 @@ export function useTemplateDialogs() {
 
   async function openEditTemplatesDialog() {
     const result = await openFieldsDialog<{
-      templates: PromptTemplateInput[];
+      templates: (PromptTemplateInput & { toDelete?: boolean })[];
     }>({
       size: "huge",
       fields: {
@@ -40,11 +40,16 @@ export function useTemplateDialogs() {
           columns: {
             label: {
               label: panel.t("johannschopplich.copilot.template.label"),
-              width: "1/3",
+              width: "1/4",
             },
             prompt: {
               label: panel.t("johannschopplich.copilot.prompt.label"),
-              width: "2/3",
+              width: "2/4",
+            },
+            toDelete: {
+              label: panel.t("johannschopplich.copilot.template.delete"),
+              width: "1/4",
+              mobile: true,
             },
           },
           fields: {
@@ -58,6 +63,13 @@ export function useTemplateDialogs() {
               type: "textarea",
               required: true,
             },
+            toDelete: {
+              label: panel.t("johannschopplich.copilot.template.delete"),
+              type: "toggle",
+              text: panel.t(
+                "johannschopplich.copilot.template.markForDeletion",
+              ),
+            },
           },
         },
       },
@@ -65,12 +77,17 @@ export function useTemplateDialogs() {
         templates: templates.value.map((template) => ({
           label: template.label,
           prompt: template.prompt,
+          toDelete: false,
         })),
       },
     });
 
     if (result?.templates) {
-      setTemplates(result.templates);
+      // Filter out templates marked for deletion
+      const templatesToKeep = result.templates.filter(
+        (template) => !template.toDelete,
+      );
+      setTemplates(templatesToKeep);
     }
   }
 
