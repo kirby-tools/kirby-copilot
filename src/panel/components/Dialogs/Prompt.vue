@@ -12,6 +12,7 @@ import {
   useModelFields,
   usePluginContext,
   usePromptTemplates,
+  useTemplateDialogs,
 } from "../../composables";
 import { SUPPORTED_FILE_MIME_TYPES } from "../../constants";
 import {
@@ -42,7 +43,8 @@ const {
   navigateHistory,
   getRecentEntries,
 } = useGenerationHistory();
-const { templates, addTemplate, setTemplates } = usePromptTemplates();
+const { templates } = usePromptTemplates();
+const { openSaveTemplateDialog, openEditTemplatesDialog } = useTemplateDialogs();
 const { getModelFields } = useModelFields();
 const contentContext = createContentContext();
 
@@ -215,84 +217,6 @@ function loadTemplate(template: PromptTemplate) {
   textarea.value?.focus();
 }
 
-function openSaveTemplateDialog() {
-  panel.dialog.open({
-    component: "k-form-dialog",
-    props: {
-      fields: {
-        name: {
-          label: panel.t("johannschopplich.copilot.template.name"),
-          type: "text",
-          required: true,
-          autofocus: true,
-        },
-      },
-      value: {
-        name: "",
-      },
-    },
-    on: {
-      submit(values) {
-        if (values.name) {
-          addTemplate(values.name, prompt.value);
-        }
-
-        panel.dialog.close();
-      },
-    },
-  });
-}
-
-function openEditTemplatesDialog() {
-  panel.dialog.open({
-    component: "k-form-dialog",
-    props: {
-      size: "huge",
-      fields: {
-        templates: {
-          label: panel.t("johannschopplich.copilot.templates"),
-          type: "structure",
-          empty: panel.t("johannschopplich.copilot.template.empty"),
-          columns: {
-            name: {
-              label: panel.t("johannschopplich.copilot.template.name"),
-              width: "1/3",
-            },
-            prompt: {
-              label: panel.t("johannschopplich.copilot.prompt.label"),
-              width: "2/3",
-            },
-          },
-          fields: {
-            name: {
-              label: panel.t("johannschopplich.copilot.template.name"),
-              type: "text",
-              required: true,
-            },
-            prompt: {
-              label: panel.t("johannschopplich.copilot.prompt.label"),
-              type: "textarea",
-              required: true,
-            },
-          },
-        },
-      },
-      value: {
-        templates: templates.value.map((template) => ({
-          name: template.name,
-          prompt: template.prompt,
-        })),
-      },
-    },
-    on: {
-      submit(values) {
-        setTemplates(values.templates);
-        panel.dialog.close();
-      },
-    },
-  });
-}
-
 function loadPromptFromHistory(promptText: string) {
   prompt.value = promptText;
   historyDropdown.value?.close();
@@ -458,7 +382,7 @@ function getFieldPreview(fieldName: string) {
               <k-dropdown-item
                 v-if="prompt.trim()"
                 icon="add"
-                @click="openSaveTemplateDialog()"
+                @click="openSaveTemplateDialog(prompt)"
               >
                 {{ panel.t("johannschopplich.copilot.template.saveAs") }}
               </k-dropdown-item>

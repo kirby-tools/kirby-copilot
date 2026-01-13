@@ -1,3 +1,4 @@
+import type { Ref } from "vue";
 import { ref, usePanel } from "kirbyuse";
 import { generateRandomId } from "utilful";
 import { getHashedStorageKey } from "../utils";
@@ -10,6 +11,10 @@ export interface PromptTemplate {
 }
 
 const TEMPLATE_LIMIT = 50;
+
+// Singleton state
+let templates: Ref<PromptTemplate[]>;
+let storageKey: string;
 
 const FORMATTING_PRESERVATION_INSTRUCTIONS: Record<string, string> = {
   en: "IMPORTANT: Preserve all formatting (bold, italic, links, code, headings, lists, etc.) exactly as in the original.",
@@ -133,18 +138,21 @@ function getDefaultTemplates(): PromptTemplate[] {
 }
 
 export function usePromptTemplates() {
-  const storageKey = getHashedStorageKey("templates", window.location.hostname);
-  const storedTemplates = localStorage.getItem(storageKey);
+  // Initialize singleton state only once
+  if (!templates) {
+    storageKey = getHashedStorageKey("templates", window.location.hostname);
+    const storedTemplates = localStorage.getItem(storageKey);
 
-  const initialTemplates: PromptTemplate[] = storedTemplates
-    ? JSON.parse(storedTemplates)
-    : getDefaultTemplates();
+    const initialTemplates: PromptTemplate[] = storedTemplates
+      ? JSON.parse(storedTemplates)
+      : getDefaultTemplates();
 
-  const templates = ref<PromptTemplate[]>(initialTemplates);
+    templates = ref<PromptTemplate[]>(initialTemplates);
 
-  // Save defaults to storage if this is the first time
-  if (!storedTemplates) {
-    localStorage.setItem(storageKey, JSON.stringify(initialTemplates));
+    // Save defaults to storage if this is the first time
+    if (!storedTemplates) {
+      localStorage.setItem(storageKey, JSON.stringify(initialTemplates));
+    }
   }
 
   function saveTemplates() {

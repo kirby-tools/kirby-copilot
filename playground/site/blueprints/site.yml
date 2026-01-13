@@ -178,7 +178,7 @@ tabs:
             type: info
             theme: notice
             text: |
-              Please use **Google Gemini** models, since OpenAI's models have [limitations on nested structured outputs](https://platform.openai.com/docs/guides/structured-outputs/supported-schemas?api-mode=responses#objects-have-limitations-on-nesting-depth-and-size). Gemini models have superior structured output capabilities.
+              Please use **Google Gemini** models, since OpenAI's models have [limitations on nested structured outputs](https://platform.openai.com/docs/guides/structured-outputs#objects-have-limitations-on-nesting-depth-and-size). Gemini models have superior structured output capabilities.
 
   textFields:
     label: Writer & Textareas
