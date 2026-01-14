@@ -2,7 +2,7 @@
 import type { ComponentPublicInstance, PluginFunction } from "vue";
 import { isKirby5 } from "kirbyuse";
 // @ts-ignore - Vue component
-import CopilotButton from "../components/ViewButtons/CopilotButton.vue";
+import CopilotButton from "./components/ViewButtons/CopilotButton.vue";
 
 export const legacyViewButtonMixin: PluginFunction<any> = (Vue) => {
   if (isKirby5()) {
