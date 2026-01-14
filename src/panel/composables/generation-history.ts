@@ -1,5 +1,5 @@
 import { ref } from "kirbyuse";
-import { getHashedStorageKey } from "../utils";
+import { getHashedStorageKey } from "../utils/shared";
 
 const MAX_HISTORY = 50;
 

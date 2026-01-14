@@ -4,8 +4,8 @@ import { z } from "zod";
 import {
   EXCLUDED_FIELD_TYPES,
   fieldToZodSchema,
-} from "../../src/panel/schemas/fields";
-import { field } from "./utils";
+} from "../../../src/panel/schemas/fields";
+import { field } from "../utils";
 
 describe("fieldToZodSchema", () => {
   describe("text-like fields", () => {

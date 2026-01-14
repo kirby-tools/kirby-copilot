@@ -10,14 +10,14 @@ export const copilot: TextareaButton = {
     let currentSelection = "";
 
     // Extract current selection
-    this.command("insert", (_input: any, selection: string) => {
+    this.command("insert", (input: any, selection: string) => {
       currentSelection = selection;
       return selection;
     });
 
     let isFirstInsertion = true;
     const appendText = (text: string) => {
-      this.command("insert", (_input: any, selection: string) => {
+      this.command("insert", (input: any, selection: string) => {
         if (isFirstInsertion) {
           isFirstInsertion = false;
           // Concatenating space is handled by the generator function

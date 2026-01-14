@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { generateKirbyBlocksSchema } from "../../src/panel/schemas/blocks";
-import { field, fieldset } from "./utils";
+import { generateKirbyBlocksSchema } from "../../../src/panel/schemas/blocks";
+import { field, fieldset } from "../utils";
 
 describe("generateKirbyBlocksSchema", () => {
   // Basic block configurations for testing

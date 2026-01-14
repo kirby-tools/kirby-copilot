@@ -1,4 +1,7 @@
-import type { SharedV3ProviderOptions } from "@ai-sdk/provider";
+import type {
+  LanguageModelV3,
+  SharedV3ProviderOptions,
+} from "@ai-sdk/provider";
 import type { Output as OutputNamespace } from "ai";
 import type { ReasoningEffort } from "../constants";
 import type { OutputFormat } from "../types";
@@ -13,17 +16,14 @@ import {
   STORAGE_KEY_PREFIX,
   SUPPORTED_PROVIDERS,
 } from "../constants";
-import {
-  CopilotError,
-  createContentContext,
-  createHtmlChunking,
-  extractTextFromPdf,
-  isObject,
-  loadAISDK,
-  renderTemplate,
-  supportsReasoning,
-  toReducedBlob,
-} from "../utils";
+import { loadAISDK } from "../utils/ai";
+import { createContentContext } from "../utils/content";
+import { CopilotError } from "../utils/error";
+import { toReducedBlob } from "../utils/image";
+import { createHtmlChunking, supportsReasoning } from "../utils/models";
+import { extractTextFromPdf } from "../utils/pdf";
+import { isObject } from "../utils/shared";
+import { renderTemplate } from "../utils/template";
 import { useLogger } from "./logger";
 import { usePluginContext } from "./plugin";
 
@@ -45,6 +45,8 @@ export async function useStreamText({
   files = [],
   logLevel = 1,
   abortSignal,
+  model: injectedModel,
+  providerOptions: injectedProviderOptions,
 }: {
   userPrompt: string;
   systemPrompt?: string;
@@ -53,9 +55,16 @@ export async function useStreamText({
   files?: File[];
   logLevel?: number;
   abortSignal?: AbortSignal;
+  /** Inject a language model directly (useful for testing). */
+  model?: LanguageModelV3;
+  /** Inject provider options directly (useful for testing). */
+  providerOptions?: SharedV3ProviderOptions;
 }) {
   const logger = useLogger();
-  const { model, providerOptions } = await resolveLanguageModel();
+
+  const { model, providerOptions } = injectedModel
+    ? { model: injectedModel, providerOptions: injectedProviderOptions }
+    : await resolveLanguageModel();
 
   if (import.meta.env.DEV) {
     logLevel = 3;
@@ -283,7 +292,7 @@ export async function resolveLanguageModel({
   };
 }
 
-async function resolveAttachments({
+export async function resolveAttachments({
   userPrompt,
   files = [],
 }: {

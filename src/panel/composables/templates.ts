@@ -2,7 +2,7 @@ import type { PromptTemplate, PromptTemplateInput } from "../types";
 import { computed, reactive, usePanel } from "kirbyuse";
 import { generateRandomId } from "utilful";
 import { DEFAULT_PROMPT_TEMPLATES } from "../constants";
-import { getHashedStorageKey } from "../utils";
+import { getHashedStorageKey } from "../utils/shared";
 
 const TEMPLATE_LIMIT = 50;
 
