@@ -1,7 +1,7 @@
 import type { PluginConfig } from "../../../src/panel/types";
 import { simulateReadableStream } from "ai";
 import { MockLanguageModelV3 } from "ai/test";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   resolveAttachments,
   resolveLanguageModel,
@@ -53,19 +53,30 @@ vi.mock("../../../src/panel/utils/ai", () => ({
     }),
 }));
 
-let mockPluginConfig: Pick<
-  PluginConfig,
-  "provider" | "providers" | "reasoningEffort"
-> = {
-  provider: "openai",
-  providers: {
-    openai: { model: "gpt-5-nano", hasApiKey: true },
-  },
-};
+const mockUsePluginContext = vi.fn();
 
 vi.mock("../../../src/panel/composables/plugin", () => ({
-  usePluginContext: () => Promise.resolve({ config: mockPluginConfig }),
+  usePluginContext: () => mockUsePluginContext(),
 }));
+
+type PluginConfigSubset = Pick<
+  PluginConfig,
+  "provider" | "providers" | "reasoningEffort"
+>;
+
+function createPluginConfig(
+  overrides?: Partial<PluginConfigSubset>,
+): Promise<{ config: PluginConfigSubset }> {
+  return Promise.resolve({
+    config: {
+      provider: overrides?.provider ?? "openai",
+      providers: {
+        openai: { model: "gpt-5-nano", hasApiKey: true },
+        ...overrides?.providers,
+      },
+    },
+  });
+}
 
 vi.mock("../../../src/panel/composables/logger", () => ({
   useLogger: () => ({
@@ -78,11 +89,7 @@ vi.mock("../../../src/panel/composables/logger", () => ({
 describe("useStreamText", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    resetPluginConfig();
-  });
-
-  afterEach(() => {
-    vi.resetAllMocks();
+    mockUsePluginContext.mockReturnValue(createPluginConfig());
   });
 
   describe("prompt handling", () => {
@@ -263,11 +270,7 @@ describe("useStreamText", () => {
 describe("resolveLanguageModel", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    resetPluginConfig();
-  });
-
-  afterEach(() => {
-    vi.resetAllMocks();
+    mockUsePluginContext.mockReturnValue(createPluginConfig());
   });
 
   describe("model resolution", () => {
@@ -279,7 +282,17 @@ describe("resolveLanguageModel", () => {
     });
 
     it("uses completionModel when forCompletion is true", async () => {
-      mockPluginConfig.providers.openai!.completionModel = "gpt-5-mini";
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({
+          providers: {
+            openai: {
+              model: "gpt-5-nano",
+              hasApiKey: true,
+              completionModel: "gpt-5-mini",
+            },
+          },
+        }),
+      );
 
       const result = await resolveLanguageModel({ forCompletion: true });
 
@@ -303,12 +316,12 @@ describe("resolveLanguageModel", () => {
     ] as const)(
       "creates %s provider when configured",
       async (provider, mockFn, model) => {
-        mockPluginConfig = {
-          provider,
-          providers: {
-            [provider]: { model, hasApiKey: true },
-          },
-        };
+        mockUsePluginContext.mockReturnValue(
+          createPluginConfig({
+            provider,
+            providers: { [provider]: { model, hasApiKey: true } },
+          }),
+        );
 
         await resolveLanguageModel();
 
@@ -320,11 +333,13 @@ describe("resolveLanguageModel", () => {
   describe("custom provider options", () => {
     it("merges custom options from providerConfig", async () => {
       const customOptions = { temperature: 0.5, maxTokens: 1000 };
-      mockPluginConfig.providers.openai = {
-        model: "gpt-5",
-        hasApiKey: true,
-        options: customOptions,
-      };
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({
+          providers: {
+            openai: { model: "gpt-5", hasApiKey: true, options: customOptions },
+          },
+        }),
+      );
 
       const { providerOptions } = await resolveLanguageModel();
 
@@ -334,11 +349,17 @@ describe("resolveLanguageModel", () => {
     });
 
     it("custom options take precedence over defaults", async () => {
-      mockPluginConfig.providers.openai = {
-        model: "gpt-5",
-        hasApiKey: true,
-        options: { reasoningEffort: "high" },
-      };
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({
+          providers: {
+            openai: {
+              model: "gpt-5",
+              hasApiKey: true,
+              options: { reasoningEffort: "high" },
+            },
+          },
+        }),
+      );
 
       const { providerOptions } = await resolveLanguageModel();
 
@@ -348,32 +369,41 @@ describe("resolveLanguageModel", () => {
 
   describe("error handling", () => {
     it("throws CopilotError for unsupported provider", async () => {
-      mockPluginConfig.provider = "invalid-provider";
-
-      await expect(resolveLanguageModel()).rejects.toThrow(CopilotError);
-      await expect(resolveLanguageModel()).rejects.toThrow(
-        /Unsupported provider/,
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({ provider: "invalid-provider" }),
       );
+
+      const error = await resolveLanguageModel().catch((e) => e);
+
+      expect(error).toBeInstanceOf(CopilotError);
+      expect(error.message).toMatch(/Unsupported provider/);
     });
 
     it("throws CopilotError when API key is missing", async () => {
-      mockPluginConfig.providers.openai!.hasApiKey = false;
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({
+          providers: { openai: { model: "gpt-5-nano", hasApiKey: false } },
+        }),
+      );
 
-      await expect(resolveLanguageModel()).rejects.toThrow(CopilotError);
-      await expect(resolveLanguageModel()).rejects.toThrow(/Missing API key/);
+      const error = await resolveLanguageModel().catch((e) => e);
+
+      expect(error).toBeInstanceOf(CopilotError);
+      expect(error.message).toMatch(/Missing API key/);
     });
 
-    it("throws CopilotError when model is not configured", async () => {
-      mockPluginConfig.providers.openai!.model = undefined;
+    it("throws CopilotError with provider name when model is not configured", async () => {
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({
+          providers: { openai: { model: undefined, hasApiKey: true } },
+        }),
+      );
 
-      await expect(resolveLanguageModel()).rejects.toThrow(CopilotError);
-      await expect(resolveLanguageModel()).rejects.toThrow(/Missing.*model/);
-    });
+      const error = await resolveLanguageModel().catch((e) => e);
 
-    it("includes provider name in error message for missing model", async () => {
-      mockPluginConfig.providers.openai!.model = undefined;
-
-      await expect(resolveLanguageModel()).rejects.toThrow(/openai/);
+      expect(error).toBeInstanceOf(CopilotError);
+      expect(error.message).toMatch(/Missing.*model/);
+      expect(error.message).toMatch(/openai/);
     });
   });
 });
@@ -543,13 +573,4 @@ function createMockModel() {
       stream: simulateReadableStream({ chunks: [] }),
     }),
   });
-}
-
-function resetPluginConfig() {
-  mockPluginConfig = {
-    provider: "openai",
-    providers: {
-      openai: { model: "gpt-5-nano", hasApiKey: true },
-    },
-  };
 }
