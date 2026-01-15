@@ -1,0 +1,9 @@
+procs:
+  kirbyup:
+    cmd: [pnpm, kirbyup, serve, src/panel/index.ts]
+    env:
+      PLAYGROUND: "true"
+    autostart: true
+  composer:
+    cmd: [composer, dev]
+    autostart: true
