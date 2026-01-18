@@ -3,6 +3,7 @@ import type {
   SharedV3ProviderOptions,
 } from "@ai-sdk/provider";
 import type { Output as OutputNamespace } from "ai";
+import type { LogLevel } from "kirbyuse";
 import type { ReasoningEffort } from "../constants";
 import type { OutputFormat } from "../types";
 import { useContent, usePanel } from "kirbyuse";
@@ -53,7 +54,7 @@ export async function useStreamText({
   output?: OutputNamespace.Output;
   responseFormat?: OutputFormat;
   files?: File[];
-  logLevel?: number;
+  logLevel?: LogLevel;
   abortSignal?: AbortSignal;
   /** Inject a language model directly (useful for testing). */
   model?: LanguageModelV3;
