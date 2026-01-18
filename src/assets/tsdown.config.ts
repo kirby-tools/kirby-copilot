@@ -17,7 +17,6 @@ export default defineConfig(
       ({
         entry,
         outDir: `${rootDir}/assets`,
-        outExtensions: () => ({ js: ".js" }),
         outputOptions: {
           inlineDynamicImports: true,
         },
