@@ -3,6 +3,7 @@
 use JohannSchopplich\KirbyPlugins\FieldResolver;
 use JohannSchopplich\KirbyPlugins\ModelResolver;
 use JohannSchopplich\Licensing\Licenses;
+use JohannSchopplich\Licensing\PluginLicenseExtensions;
 use Kirby\Cms\App;
 use Kirby\Cms\Fieldset;
 use Kirby\Cms\Fieldsets;
@@ -10,6 +11,7 @@ use Kirby\Exception\InvalidArgumentException;
 
 return [
     'routes' => fn (App $kirby) => [
+        ...PluginLicenseExtensions::api('johannschopplich/kirby-copilot'),
         [
             'pattern' => '__copilot__/context',
             'method' => 'GET',
@@ -327,14 +329,6 @@ return [
                 $id = $kirby->request()->query()->get('id');
                 $model = ModelResolver::resolveFromPath($id);
                 return FieldResolver::resolveModelFields($model);
-            }
-        ],
-        [
-            'pattern' => '__copilot__/activate',
-            'method' => 'POST',
-            'action' => function () {
-                $licenses = Licenses::read('johannschopplich/kirby-copilot');
-                return $licenses->activateFromRequest();
             }
         ]
     ]

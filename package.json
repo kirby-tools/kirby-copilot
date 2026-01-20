@@ -24,7 +24,7 @@
     "@ai-sdk/provider": "^3.0.4",
     "@ai-sdk/provider-utils": "^4.0.8",
     "@antfu/eslint-config": "^7.0.1",
-    "@kirby-tools/licensing": "^0.6.6",
+    "@kirby-tools/licensing": "^0.6.10",
     "@types/node": "^25.0.9",
     "ai": "^6.0.39",
     "autoprefixer": "^10.4.23",

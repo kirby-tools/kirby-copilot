@@ -30,8 +30,8 @@ importers:
         specifier: ^7.0.1
         version: 7.0.1(@vue/compiler-sfc@2.7.16)(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3)(vitest@4.0.17(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(jiti@1.21.7)(sass@1.97.2)(yaml@2.8.2))
       '@kirby-tools/licensing':
-        specifier: ^0.6.6
-        version: 0.6.6(kirbyuse@1.2.12(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.5))
+        specifier: ^0.6.10
+        version: 0.6.10(kirbyuse@1.2.12(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.5))
       '@types/node':
         specifier: ^25.0.9
         version: 25.0.9
@@ -614,8 +614,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@kirby-tools/licensing@0.6.6':
-    resolution: {integrity: sha512-vFLu+q7Dj9/NiiP6QVnXWEtzY2kQ0DZVY5YWVtF3CSn95qjafGv9eA6689ZHk1ohiIXrjmOMP7OY0iaHt/bO2A==}
+  '@kirby-tools/licensing@0.6.10':
+    resolution: {integrity: sha512-nQoTanuy4va4vkYgp+Ztgnwpu/TpFCDVIP2Y7K6Iaj336RNotUQWf1eCz0vJWYFHnv52Otf30sOPhKWa4wWqyA==}
     peerDependencies:
       kirbyuse: '*'
 
@@ -3575,7 +3575,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@kirby-tools/licensing@0.6.6(kirbyuse@1.2.12(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.5))':
+  '@kirby-tools/licensing@0.6.10(kirbyuse@1.2.12(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.5))':
     dependencies:
       kirbyuse: 1.2.12(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.5)
       vue: 2.7.16
