@@ -24,22 +24,11 @@ interface CompletionPluginState {
   manualTrigger: boolean;
 }
 
-let completionConfig: CompletionConfig | undefined;
-let isCompletionPaused = false;
+let completionConfig: false | CompletionConfig | undefined;
 
 export const completionPluginKey = new PluginKey<CompletionPluginState>(
   "copilot-suggestions",
 );
-
-/** Pauses inline suggestions while external content generation is in progress. */
-export function pauseCompletion() {
-  isCompletionPaused = true;
-}
-
-/** Resumes inline suggestions after external content generation completes. */
-export function resumeCompletion() {
-  isCompletionPaused = false;
-}
 
 interface CopilotSuggestionsMark extends WriterMarkExtension {
   _acceptSuggestion: () => boolean;
@@ -210,7 +199,7 @@ function createCompletionPlugin(
     view() {
       if (completionConfig === undefined) {
         usePluginContext().then(({ config }) => {
-          completionConfig = config.completion || undefined;
+          completionConfig = config.completion;
         });
       }
 
@@ -245,8 +234,12 @@ function createCompletionPlugin(
           // Only trigger if document changed
           if (view.state.doc.eq(prevState.doc)) return;
 
-          // Skip inline suggestions if disabled, config not loaded, or externally paused
-          if (!completionConfig || isCompletionPaused) return;
+          // Only trigger if editor is focused (prevents completion on external
+          // updates like content insertion from prompt dialog or undo/redo)
+          if (!view.hasFocus()) return;
+
+          // Skip inline suggestions if disabled or config not loaded
+          if (!completionConfig) return;
 
           debounceTimer = setTimeout(() => {
             const { $head } = view.state.selection;

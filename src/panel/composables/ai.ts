@@ -196,7 +196,7 @@ export async function resolveLanguageModel({
   }
 
   // Create custom fetch that routes through PHP proxy
-  const proxyFetch = (url: string | URL | Request, options?: RequestInit) =>
+  const proxyFetch: typeof globalThis.fetch = (url, options) =>
     fetch(
       `${panel.api.endpoint}/${PLUGIN_PROXY_API_ROUTE}?provider=${provider}`,
       {

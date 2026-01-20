@@ -4,6 +4,7 @@ import type {
   KirbyFieldProps,
   KirbyLayoutFieldProps,
 } from "kirby-types";
+import type { LogLevel as LogLevelIndex } from "kirbyuse";
 import type { PropType } from "vue";
 import type { LogLevel } from "../../constants";
 import type { PromptContext } from "../../types";
@@ -22,10 +23,6 @@ import {
   LOG_LEVELS,
   STORAGE_KEY_PREFIX,
 } from "../../constants";
-import {
-  pauseCompletion,
-  resumeCompletion,
-} from "../../extensions/writer-marks/copilot-suggestions";
 import { fieldToZodSchema } from "../../schemas/fields";
 import { handleStreamError, loadAISDK, openPromptDialog } from "../../utils";
 
@@ -107,7 +104,6 @@ async function initPromptDialog() {
 
   panel.isLoading = true;
   isGenerating.value = true;
-  pauseCompletion();
   document.addEventListener("keydown", handleEscape);
 
   const _currentContent = { ...currentContent.value };
@@ -133,7 +129,7 @@ async function initPromptDialog() {
           : config.logLevel && LOG_LEVELS.includes(config.logLevel)
             ? config.logLevel
             : DEFAULT_LOG_LEVEL,
-      ),
+      ) as LogLevelIndex,
       abortSignal: signal,
     });
 
@@ -185,7 +181,6 @@ async function initPromptDialog() {
     abortController = undefined;
     panel.isLoading = false;
     isGenerating.value = false;
-    resumeCompletion();
     document.removeEventListener("keydown", handleEscape);
   }
 }

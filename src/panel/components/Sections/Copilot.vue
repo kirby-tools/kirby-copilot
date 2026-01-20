@@ -5,6 +5,7 @@ import type {
   KirbyFieldProps,
   KirbyLayoutFieldProps,
 } from "kirby-types";
+import type { LogLevel as LogLevelIndex } from "kirbyuse";
 import type z from "zod";
 import type { PluginConfig } from "../../types";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
@@ -72,7 +73,7 @@ const storage = ref<boolean>();
 const icon = ref<string>();
 const theme = ref<string>();
 const size = ref<string>();
-const logLevel = ref<number>();
+const logLevel = ref<LogLevelIndex>();
 
 // Section computed
 const modelFile = ref<{ mime: string; url: string }>();
@@ -149,7 +150,7 @@ watch(isDetailsOpen, (value) => {
       : context.config.logLevel && LOG_LEVELS.includes(context.config.logLevel)
         ? context.config.logLevel
         : DEFAULT_LOG_LEVEL,
-  );
+  ) as LogLevelIndex;
   help.value = response.help ? t(response.help) : undefined;
   config.value = context.config;
   licenseStatus.value = __PLAYGROUND__ ? "active" : context.licenseStatus;
