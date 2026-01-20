@@ -2,6 +2,7 @@ import type { WriterMarkContext, WriterMarkExtension } from "kirby-types";
 import type { EditorState, PluginSpec, Transaction } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
 import type { CompletionConfig } from "../../types";
+import { isLocalDev } from "kirbyuse";
 import { PluginKey } from "prosemirror-state";
 import { Decoration, DecorationSet } from "prosemirror-view";
 import { resolveLanguageModel, usePluginContext } from "../../composables";
@@ -106,6 +107,7 @@ export const copilotSuggestions: CopilotSuggestionsMark = {
 
   async _showLicenseToastOnce() {
     if (__PLAYGROUND__) return;
+    if (isLocalDev()) return;
 
     const storedValue = sessionStorage.getItem(COMPLETION_COUNT_STORAGE_KEY);
     if (storedValue === "done") return;
@@ -121,9 +123,8 @@ export const copilotSuggestions: CopilotSuggestionsMark = {
 
     const context = await usePluginContext();
 
-    // Only show toast for unlicensed users, not for users
-    // with version compatibility issues (they already paid)
-    if (["inactive", "invalid"].includes(context.licenseStatus ?? "")) {
+    // Only show toast for unlicensed users
+    if (["inactive", "invalid"].includes(context.licenseStatus!)) {
       window.panel.notification.info({
         icon: "key",
         message: window.panel.t("johannschopplich.copilot.license.toast"),
