@@ -3,47 +3,47 @@ import { computed, reactive, usePanel } from "kirbyuse";
 import { generateRandomId } from "utilful";
 import { DEFAULT_PROMPT_TEMPLATES } from "../constants";
 import { getHashedStorageKey } from "../utils/shared";
+import { createGlobalState } from "./state";
 
 const TEMPLATE_LIMIT = 50;
 
-let isInitialized = false;
-let hasStoredTemplates = false;
-let storageKey = "";
+const usePromptTemplatesState = createGlobalState(() => {
+  const storageKey = getHashedStorageKey("templates", window.location.hostname);
+  const storedTemplates = localStorage.getItem(storageKey);
+  const hasStoredTemplates = !!storedTemplates;
 
-const store = reactive({
-  templates: [] as PromptTemplate[],
-  configTemplates: [] as PromptTemplate[],
+  let initialTemplates: PromptTemplate[];
+
+  if (storedTemplates) {
+    initialTemplates = migrateTemplates(storedTemplates);
+    // Persist migrated templates back to storage
+    localStorage.setItem(storageKey, JSON.stringify(initialTemplates));
+  } else {
+    initialTemplates = getDefaultTemplates();
+  }
+
+  const state = reactive({
+    templates: initialTemplates,
+    configTemplates: [] as PromptTemplate[],
+  });
+
+  return {
+    state,
+    storageKey,
+    hasStoredTemplates,
+  };
 });
 
 export function usePromptTemplates() {
-  // Initialize store only once
-  if (!isInitialized) {
-    isInitialized = true;
-    storageKey = getHashedStorageKey("templates", window.location.hostname);
-    const storedTemplates = localStorage.getItem(storageKey);
-    hasStoredTemplates = !!storedTemplates;
-
-    let initialTemplates: PromptTemplate[];
-
-    if (storedTemplates) {
-      initialTemplates = migrateTemplates(storedTemplates);
-      // Persist migrated templates back to storage
-      localStorage.setItem(storageKey, JSON.stringify(initialTemplates));
-    } else {
-      initialTemplates = getDefaultTemplates();
-    }
-
-    store.templates = initialTemplates;
-    store.configTemplates = [];
-  }
+  const { state, storageKey, hasStoredTemplates } = usePromptTemplatesState();
 
   const allTemplates = computed(() => [
-    ...store.configTemplates,
-    ...store.templates,
+    ...state.configTemplates,
+    ...state.templates,
   ]);
 
   function saveTemplates() {
-    localStorage.setItem(storageKey, JSON.stringify(store.templates));
+    localStorage.setItem(storageKey, JSON.stringify(state.templates));
   }
 
   function addTemplate(label: string, prompt: string) {
@@ -59,11 +59,11 @@ export function usePromptTemplates() {
       createdAt: Date.now(),
     };
 
-    store.templates.unshift(template);
+    state.templates.unshift(template);
 
     // Limit templates count
-    if (store.templates.length > TEMPLATE_LIMIT) {
-      store.templates.splice(TEMPLATE_LIMIT);
+    if (state.templates.length > TEMPLATE_LIMIT) {
+      state.templates.splice(TEMPLATE_LIMIT);
     }
 
     saveTemplates();
@@ -71,32 +71,32 @@ export function usePromptTemplates() {
   }
 
   function updateTemplate(id: string, updates: Partial<PromptTemplate>) {
-    const index = store.templates.findIndex((template) => template.id === id);
+    const index = state.templates.findIndex((template) => template.id === id);
     if (index === -1) return false;
 
     // Use Object.assign for Vue 2 reactivity on object properties
-    Object.assign(store.templates[index]!, updates);
+    Object.assign(state.templates[index]!, updates);
 
     saveTemplates();
     return true;
   }
 
   function deleteTemplate(id: string) {
-    const index = store.templates.findIndex((template) => template.id === id);
+    const index = state.templates.findIndex((template) => template.id === id);
     if (index === -1) return false;
 
-    store.templates.splice(index, 1);
+    state.templates.splice(index, 1);
     saveTemplates();
     return true;
   }
 
   function clearTemplates() {
-    store.templates = [];
+    state.templates = [];
     saveTemplates();
   }
 
   function setTemplates(newTemplates: PromptTemplateInput[]) {
-    const existingTemplates = [...store.templates];
+    const existingTemplates = [...state.templates];
     const result: PromptTemplate[] = [];
 
     for (const newTemplate of newTemplates) {
@@ -135,22 +135,21 @@ export function usePromptTemplates() {
       }
     }
 
-    store.templates = result.slice(0, TEMPLATE_LIMIT);
+    state.templates = result.slice(0, TEMPLATE_LIMIT);
     saveTemplates();
   }
 
   function setConfigTemplates(newTemplates: PromptTemplateInput[]) {
-    store.configTemplates = newTemplates.map((template, index) => ({
+    state.configTemplates = newTemplates.map((template, index) => ({
       ...template,
       id: `config-${index}`,
       createdAt: 0,
       readOnly: true,
     }));
 
-    // Clear default templates if config templates are provided and user hasn't customized
+    // Clear defaults if config templates exist and user hasn't customized yet
     if (newTemplates.length > 0 && !hasStoredTemplates) {
-      store.templates = [];
-      saveTemplates();
+      state.templates = [];
     }
   }
 
@@ -159,7 +158,7 @@ export function usePromptTemplates() {
   }
 
   return {
-    templates: computed(() => store.templates),
+    templates: computed(() => state.templates),
     allTemplates,
     addTemplate,
     updateTemplate,

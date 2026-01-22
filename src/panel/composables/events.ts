@@ -9,6 +9,11 @@ import { getCurrentScope, onScopeDispose, unref, watch } from "kirbyuse";
 type MaybeRef<T> = T | Ref<T> | ShallowRef<T> | WritableComputedRef<T>; // TODO: Remove in Vue 3
 type MaybeElement = HTMLElement | ComponentPublicInstance | undefined | null;
 
+/**
+ * Register using addEventListener on mounted, and removeEventListener automatically on unmounted.
+ *
+ * @see https://vueuse.org/useEventListener
+ */
 export function useEventListener<K extends keyof HTMLElementEventMap>(
   target: MaybeRef<MaybeElement>,
   event: K,
