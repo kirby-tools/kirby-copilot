@@ -13,9 +13,7 @@ Commercial Kirby CMS plugin for AI-assisted content generation in the Kirby Pane
 
 ## Commands
 
-- `pnpm run dev` - start playground with hot reload
-- `pnpm run build` - build Panel bundle
-- `pnpm run test` - run Vitest tests
+- `pnpm run test --run` - run Vitest tests
 - `pnpm run test:types` - typecheck
 
 ## Entry Points
