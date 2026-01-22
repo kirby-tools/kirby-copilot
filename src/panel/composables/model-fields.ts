@@ -15,11 +15,11 @@ export function useModelFields() {
       return modelFieldsCache.get(id)!;
     }
 
-    const fields: Record<string, KirbyFieldProps> = await panel.api.get(
+    const fields = await panel.api.get<Record<string, KirbyFieldProps>>(
       PLUGIN_MODEL_FIELDS_API_ROUTE,
       { id },
       undefined,
-      // Silent
+      // Avoid showing Panel loading indicator
       true,
     );
 
