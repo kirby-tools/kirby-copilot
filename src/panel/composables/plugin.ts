@@ -10,7 +10,13 @@ export function usePluginContext() {
   if (pendingPromise) return pendingPromise;
 
   pendingPromise = window.panel.api
-    .get<PluginContextResponse>(PLUGIN_CONTEXT_API_ROUTE)
+    .get<PluginContextResponse>(
+      PLUGIN_CONTEXT_API_ROUTE,
+      undefined,
+      undefined,
+      // Avoid showing Panel loading indicator
+      true,
+    )
     .then((response) => {
       registerPluginAssets(response.assets);
       context = response;
