@@ -7,6 +7,7 @@ import type { LogLevel } from "kirbyuse";
 import type { ReasoningEffort } from "../constants";
 import type { OutputFormat } from "../types";
 import { useContent, usePanel } from "kirbyuse";
+import { isObject } from "utilful";
 import {
   DEFAULT_COMPLETION_MODELS,
   DEFAULT_REASONING_EFFORT,
@@ -23,7 +24,6 @@ import { CopilotError } from "../utils/error";
 import { toReducedBlob } from "../utils/image";
 import { createHtmlChunking, supportsReasoning } from "../utils/models";
 import { extractTextFromPdf } from "../utils/pdf";
-import { isObject } from "../utils/shared";
 import { renderTemplate } from "../utils/template";
 import { useLogger } from "./logger";
 import { usePluginContext } from "./plugin";

@@ -22,6 +22,7 @@ import {
   watch,
 } from "kirbyuse";
 import { section } from "kirbyuse/props";
+import { isObject } from "utilful";
 import {
   useBlocks,
   useLayouts,
@@ -42,7 +43,6 @@ import {
   getHashedStorageKey,
   getResponseFormat,
   handleStreamError,
-  isObject,
   loadAISDK,
   openFilePicker,
 } from "../../utils";

@@ -1,6 +1,6 @@
 import type { KirbyBlock } from "kirby-types";
 import { useContent, usePanel } from "kirbyuse";
-import { isObject } from "./shared";
+import { isObject } from "utilful";
 
 /**
  * Creates a context object from the current Panel content.
