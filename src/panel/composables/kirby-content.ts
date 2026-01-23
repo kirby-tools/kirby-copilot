@@ -18,7 +18,13 @@ function getFieldsets() {
   if (pendingPromise) return pendingPromise;
 
   pendingPromise = window.panel.api
-    .get<KirbyFieldset[]>(PLUGIN_FIELDSETS_API_ROUTE)
+    .get<KirbyFieldset[]>(
+      PLUGIN_FIELDSETS_API_ROUTE,
+      undefined,
+      undefined,
+      // Avoid showing Panel loading indicator
+      true,
+    )
     .then((response) => {
       fieldsets = response;
       pendingPromise = undefined;
