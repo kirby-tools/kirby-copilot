@@ -11,7 +11,7 @@ return [
     'panel' => [
         'css' => array_filter([
             'assets/panel.css',
-            env('ADMIN') ? null : 'assets/panel-demo.css'
+            env('PLAYGROUND') ? 'assets/panel-demo.css' : null
         ]),
         'js' => 'assets/panel.js',
         'favicon' => 'favicon.ico',
