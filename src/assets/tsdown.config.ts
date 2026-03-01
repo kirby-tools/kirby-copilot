@@ -18,9 +18,10 @@ export default defineConfig(
         entry,
         outDir: `${rootDir}/assets`,
         outputOptions: {
-          inlineDynamicImports: true,
+          codeSplitting: false,
         },
         platform: "browser",
+        inlineOnly: false,
         minify: true,
       }) satisfies UserConfig,
   ),
