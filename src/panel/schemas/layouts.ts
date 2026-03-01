@@ -1,5 +1,6 @@
 import type { KirbyLayoutFieldProps } from "kirby-types";
 import type { KirbyFieldset } from "../types";
+import type { SchemaContext } from "./types";
 import { z } from "zod";
 import { generateBlockSchema } from "./blocks";
 
@@ -14,7 +15,15 @@ export function generateKirbyLayoutsSchema(
 
   const layouts = fieldConfig.layouts ?? [["1/1"]];
   const layoutWidths = extractLayoutWidths(layouts);
-  const layoutSchema = generateLayoutSchema(fieldsets, layoutWidths);
+
+  const context: SchemaContext = {
+    fieldsets,
+    // Context is omitted to prevent infinite recursion (self-referential blocks)
+    // and to keep the generated JSON schema small for AI structured output
+    generateBlockSchema: (fieldset) => generateBlockSchema(fieldset),
+  };
+
+  const layoutSchema = generateLayoutSchema(fieldsets, layoutWidths, context);
 
   const layoutCombinations = layouts.map((layout) => `"${layout}"`).join(", ");
 
@@ -42,8 +51,13 @@ function extractLayoutWidths(layouts: KirbyLayoutFieldProps["layouts"]) {
 function generateLayoutSchema(
   fieldsets: KirbyFieldset[],
   layoutWidths: string[],
+  context: SchemaContext,
 ) {
-  const columnSchema = generateLayoutColumnSchema(fieldsets, layoutWidths);
+  const columnSchema = generateLayoutColumnSchema(
+    fieldsets,
+    layoutWidths,
+    context,
+  );
 
   return z
     .object({
@@ -59,9 +73,10 @@ function generateLayoutSchema(
 function generateLayoutColumnSchema(
   fieldsets: KirbyFieldset[],
   layoutWidths: string[],
+  context: SchemaContext,
 ) {
   const blockSchemas = fieldsets
-    .map(generateBlockSchema)
+    .map((fieldset) => generateBlockSchema(fieldset, context))
     .filter((schema) => schema != null);
 
   const blockUnion =

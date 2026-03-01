@@ -1,0 +1,22 @@
+name: Rich Text Section
+icon: text
+preview: fields
+wysiwyg: true
+fields:
+  heading:
+    label: Section Heading
+    type: text
+    placeholder: Section Title
+  intro:
+    label: Introduction
+    type: writer
+    placeholder: A brief introduction to this section
+  content:
+    label: Content Blocks
+    type: blocks
+    fieldsets:
+      - heading
+      - text
+      - list
+      - image
+      - quote

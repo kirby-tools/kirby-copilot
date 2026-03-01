@@ -1,5 +1,5 @@
 import type {
-  KirbyAnyFieldProps,
+  KirbyBlocksFieldProps,
   KirbyDateFieldProps,
   KirbyEntriesFieldProps,
   KirbyFieldProps,
@@ -11,6 +11,7 @@ import type {
   KirbyTextFieldProps,
   KirbyWriterFieldProps,
 } from "kirby-types";
+import type { SchemaBuilder, SchemaContext } from "./types";
 import { z } from "zod";
 
 /**
@@ -22,8 +23,6 @@ export const EXCLUDED_FIELD_TYPES = new Set(
   /// keep-sorted
   ["files", "gap", "headline", "hidden", "info", "line", "pages", "users"],
 );
-
-type SchemaBuilder = (field: KirbyAnyFieldProps) => z.ZodType;
 
 /** Maps Kirby fields to Zod schemas based on their expected data structure */
 export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
@@ -142,9 +141,10 @@ export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
       ),
 
   // Structure field
-  structure: (field) => {
+  structure: (field, context) => {
     const objectSchema = createNestedFieldsSchema(
       field as KirbyStructureFieldProps,
+      context,
     );
 
     if (objectSchema) {
@@ -164,9 +164,10 @@ export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
   },
 
   // Object field
-  object: (field) => {
+  object: (field, context) => {
     const objectSchema = createNestedFieldsSchema(
       field as KirbyObjectFieldProps,
+      context,
     );
 
     if (objectSchema) {
@@ -181,6 +182,48 @@ export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
       .describe(
         `"${field.label}", object data based on expected content structure`,
       );
+  },
+
+  // Nested blocks field
+  blocks: (field, context) => {
+    const _field = field as KirbyBlocksFieldProps;
+    const availableFieldsets = context?.fieldsets;
+    const generateBlockSchema = context?.generateBlockSchema;
+
+    if (!availableFieldsets?.length || !generateBlockSchema) {
+      return z
+        .array(z.record(z.string(), z.unknown()))
+        .describe(`"${field.label}", nested content blocks`);
+    }
+
+    // Determine which block types are allowed by this field
+    let nestedFieldsets = availableFieldsets;
+    if (_field.fieldsets) {
+      const allowedTypes = Array.isArray(_field.fieldsets)
+        ? _field.fieldsets
+        : Object.keys(_field.fieldsets);
+      nestedFieldsets = availableFieldsets.filter((fieldset) =>
+        allowedTypes.includes(fieldset.type),
+      );
+    }
+
+    const blockSchemas = nestedFieldsets
+      // No context passed to prevent further nesting
+      .map((fieldset) => generateBlockSchema(fieldset))
+      .filter((schema) => schema != null);
+
+    if (blockSchemas.length === 0) {
+      return z
+        .array(z.record(z.string(), z.unknown()))
+        .describe(`"${field.label}", nested content blocks`);
+    }
+
+    const blockUnion =
+      blockSchemas.length > 1 ? z.union(blockSchemas) : blockSchemas[0]!;
+
+    return z
+      .array(blockUnion)
+      .describe(`"${field.label}", nested content blocks`);
   },
 
   // Entries field
@@ -214,14 +257,17 @@ export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
 };
 
 /** Converts a Kirby field definition to a Zod schema */
-export function fieldToZodSchema(field: KirbyFieldProps) {
+export function fieldToZodSchema(
+  field: KirbyFieldProps,
+  context?: SchemaContext,
+) {
   const schemaBuilder = FIELD_TYPE_TO_SCHEMA[field.type];
 
   if (!schemaBuilder) {
     throw new Error(`Unsupported field type: ${field.type}`);
   }
 
-  let schema = schemaBuilder(field);
+  let schema = schemaBuilder(field, context);
 
   // Handle required fields
   if (field.required === true) {
@@ -255,6 +301,7 @@ export function fieldToZodSchema(field: KirbyFieldProps) {
 /** Creates a Zod object schema for fields that contain nested sub-fields (structure, object) */
 function createNestedFieldsSchema(
   field: KirbyStructureFieldProps | KirbyObjectFieldProps,
+  context?: SchemaContext,
 ) {
   if (typeof field.fields !== "object" || field.fields === null) return;
 
@@ -264,10 +311,13 @@ function createNestedFieldsSchema(
     if (subField.disabled || subField.hidden) continue;
     if (EXCLUDED_FIELD_TYPES.has(subField.type)) continue;
 
-    nestedContentSchema[fieldName] = fieldToZodSchema({
-      ...subField,
-      name: fieldName,
-    });
+    nestedContentSchema[fieldName] = fieldToZodSchema(
+      {
+        ...subField,
+        name: fieldName,
+      },
+      context,
+    );
   }
 
   return z.object(nestedContentSchema).strict();

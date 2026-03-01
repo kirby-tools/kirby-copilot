@@ -360,4 +360,116 @@ describe("generateKirbyBlocksSchema", () => {
       ).not.toThrow();
     });
   });
+
+  describe("nested blocks field", () => {
+    const nestedBlocksConfig = [
+      fieldset({
+        type: "text",
+        name: "Text Block",
+        fields: {
+          content: field({
+            type: "writer",
+            label: "Content",
+            name: "content",
+          }),
+        },
+      }),
+      fieldset({
+        type: "heading",
+        name: "Heading Block",
+        fields: {
+          text: field({
+            type: "text",
+            label: "Text",
+            name: "text",
+            required: true,
+          }),
+        },
+      }),
+      fieldset({
+        type: "rich-text",
+        name: "Rich Text Section",
+        fields: {
+          heading: field({
+            type: "text",
+            label: "Section Heading",
+            name: "heading",
+          }),
+          content: field({
+            type: "blocks",
+            label: "Content Blocks",
+            name: "content",
+            fieldsets: {
+              text: {},
+              heading: {},
+            },
+          }),
+        },
+      }),
+    ];
+
+    it("should generate schemas for blocks containing nested blocks fields", () => {
+      const schema = generateKirbyBlocksSchema(nestedBlocksConfig);
+
+      // A rich-text block with nested text and heading blocks
+      expect(() =>
+        schema.parse({
+          type: "rich-text",
+          content: {
+            heading: null,
+            content: [
+              {
+                type: "text",
+                content: { content: "<p>Hello</p>" },
+              },
+              {
+                type: "heading",
+                content: { text: "Title" },
+              },
+            ],
+          },
+        }),
+      ).not.toThrow();
+    });
+
+    it("should reject invalid nested block types", () => {
+      const schema = generateKirbyBlocksSchema(nestedBlocksConfig);
+
+      // "rich-text" is not allowed in the nested blocks fieldsets
+      expect(() =>
+        schema.parse({
+          type: "rich-text",
+          content: {
+            heading: null,
+            content: [
+              {
+                type: "rich-text",
+                content: { heading: "Nope", content: [] },
+              },
+            ],
+          },
+        }),
+      ).toThrow();
+    });
+
+    it("should validate nested block content fields", () => {
+      const schema = generateKirbyBlocksSchema(nestedBlocksConfig);
+
+      // Nested heading block missing required text field
+      expect(() =>
+        schema.parse({
+          type: "rich-text",
+          content: {
+            heading: null,
+            content: [
+              {
+                type: "heading",
+                content: {},
+              },
+            ],
+          },
+        }),
+      ).toThrow();
+    });
+  });
 });

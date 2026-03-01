@@ -1,9 +1,13 @@
 import type { KirbyFieldset } from "../types";
+import type { SchemaContext } from "./types";
 import { z } from "zod";
 import { EXCLUDED_FIELD_TYPES, fieldToZodSchema } from "./fields";
 
 /** Generates a Zod schema for a single block type. */
-export function generateBlockSchema(fieldset: KirbyFieldset) {
+export function generateBlockSchema(
+  fieldset: KirbyFieldset,
+  context?: SchemaContext,
+) {
   const { name, type, fields } = fieldset;
 
   if (!fields || Object.keys(fields).length === 0) {
@@ -16,7 +20,7 @@ export function generateBlockSchema(fieldset: KirbyFieldset) {
     if (field.disabled || field.hidden) continue;
     if (EXCLUDED_FIELD_TYPES.has(field.type)) continue;
 
-    const fieldSchema = fieldToZodSchema(field);
+    const fieldSchema = fieldToZodSchema(field, context);
     contentSchema[field.name] = fieldSchema;
   }
 
@@ -35,8 +39,15 @@ export function generateKirbyBlocksSchema(fieldsets: KirbyFieldset[]) {
     throw new Error("Invalid fieldsets configuration");
   }
 
+  const context: SchemaContext = {
+    fieldsets,
+    // Context is omitted to prevent infinite recursion (self-referential blocks)
+    // and to keep the generated JSON schema small for AI structured output
+    generateBlockSchema: (fieldset) => generateBlockSchema(fieldset),
+  };
+
   const blockSchemas = fieldsets
-    .map(generateBlockSchema)
+    .map((fieldset) => generateBlockSchema(fieldset, context))
     .filter((schema) => schema != null);
 
   return z.union(blockSchemas).describe("Union of all Kirby block types");
