@@ -20,8 +20,8 @@ export default defineConfig(
         outputOptions: {
           codeSplitting: false,
         },
-        platform: "browser",
         inlineOnly: false,
+        platform: "browser",
         minify: true,
       }) satisfies UserConfig,
   ),
