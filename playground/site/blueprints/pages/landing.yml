@@ -23,16 +23,27 @@ fields:
       - 1/4, 1/4, 1/4, 1/4
       - 1/2, 1/2, 1/3, 1/3, 1/3
     fieldsets:
-      - hero
-      - features
-      - showcase
-      - stats
-      - testimonials
-      - team
-      - faq
-      - cta
-      - contact
-      # Core Kirby blocks
-      - heading
-      - text
+      heroes:
+        label: Heroes
+        type: group
+        fieldsets:
+          - hero
+      content:
+        label: Content
+        type: group
+        fieldsets:
+          - features
+          - showcase
+          - stats
+          - testimonials
+          - team
+          - faq
+          - cta
+          - contact
+      basics:
+        label: Basics
+        type: group
+        fieldsets:
+          - heading
+          - text
     help: Describe what kind of landing page you need and let AI build the layout structure for you.
