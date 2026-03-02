@@ -1,4 +1,5 @@
 import { loadPluginModule } from "kirbyuse";
+import { usePluginContext } from "../composables/plugin";
 
 export type AISDKModule = typeof import("@ai-sdk/anthropic") &
   typeof import("@ai-sdk/google") &
@@ -7,6 +8,10 @@ export type AISDKModule = typeof import("@ai-sdk/anthropic") &
   typeof import("ai");
 
 /** Loads the AI SDK module with provider factories and utilities. */
-export function loadAISDK(): Promise<AISDKModule> {
-  return loadPluginModule("ai");
+export async function loadAISDK(): Promise<AISDKModule> {
+  // Ensure plugin assets are registered before loading modules.
+  // This is necessary when `loadAISDK` is called (e.g. by Content Translator)
+  // before any Copilot UI has rendered.
+  await usePluginContext();
+  return await loadPluginModule("ai");
 }
