@@ -8,7 +8,7 @@ export function generateBlockSchema(
   fieldset: KirbyFieldset,
   context?: SchemaContext,
 ) {
-  const { name, type, fields } = fieldset;
+  const { name, type, description, fields } = fieldset;
 
   if (!fields || Object.keys(fields).length === 0) {
     return;
@@ -24,13 +24,17 @@ export function generateBlockSchema(
     contentSchema[field.name] = fieldSchema;
   }
 
+  const schemaDescription = description
+    ? `Kirby block: ${name}. ${description}`
+    : `Kirby block: ${name}`;
+
   return z
     .object({
       type: z.literal(type),
       content: z.object(contentSchema).strict(),
     })
     .strict()
-    .describe(`Kirby block: ${name}`);
+    .describe(schemaDescription);
 }
 
 /** Generates a Zod schema from a Kirby blocks fieldsets configuration. */

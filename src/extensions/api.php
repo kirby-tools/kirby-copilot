@@ -5,6 +5,7 @@ use JohannSchopplich\KirbyPlugins\ModelResolver;
 use JohannSchopplich\Licensing\Licenses;
 use JohannSchopplich\Licensing\PluginLicenseExtensions;
 use Kirby\Cms\App;
+use Kirby\Cms\Blueprint;
 use Kirby\Cms\Fieldset;
 use Kirby\Cms\Fieldsets;
 use Kirby\Exception\InvalidArgumentException;
@@ -315,11 +316,18 @@ return [
 
                 $fieldsets = Fieldsets::factory($blockBlueprints);
 
-                return $fieldsets->values(fn (Fieldset $fieldset) => [
-                    'name' => $fieldset->name(),
-                    'type' => $fieldset->type(),
-                    'fields' => $fieldset->fields(),
-                ]);
+                return $fieldsets->values(function (Fieldset $fieldset) use ($blockBlueprints) {
+                    // Resolve raw blueprint to extract custom keys like `description`
+                    // that are not part of Kirby's `Fieldset` class
+                    $raw = Blueprint::extend($blockBlueprints[$fieldset->type()] ?? []);
+
+                    return [
+                        'name' => $fieldset->name(),
+                        'type' => $fieldset->type(),
+                        'description' => $raw['description'] ?? null,
+                        'fields' => $fieldset->fields(),
+                    ];
+                });
             }
         ],
         [

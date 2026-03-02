@@ -74,6 +74,8 @@ export interface KirbyFieldset {
   name: string;
   /** Block type identifier (e.g., `text`, `heading`, `image`) */
   type: string;
+  /** Optional description of the block's purpose, defined in the block blueprint */
+  description: string | null;
   /** Field definitions within the block */
   fields?: Record<string, KirbyFieldProps>;
 }
