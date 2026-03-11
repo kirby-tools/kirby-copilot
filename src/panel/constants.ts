@@ -45,15 +45,14 @@ export const PROVIDER_REASONING_MAP: Record<
     "openai:gpt-5-mini": "minimal", // GPT-5-mini does not support `none`
     google: "low",
     "google:gemini-3-flash-preview": "minimal", // Gemini 3 Flash Preview also supports `minimal`
-    "google:gemini-3-flash": "minimal", // Future-proofing for Gemini 3 Flash
   },
   low: { anthropic: 8_000, openai: "low", google: "low" },
   medium: {
     anthropic: 16_000,
     openai: "medium",
     google: "medium",
+    "google:gemini-3.1-pro-preview": "high", // Gemini 3.1 Pro only supports `low` or `high`
     "google:gemini-3-pro-preview": "high", // Gemini 3 Pro only supports `low` or `high`
-    "google:gemini-3-pro": "high", // Future-proofing for Gemini 3 Pro
   },
   high: { anthropic: 32_000, openai: "high", google: "high" },
 };

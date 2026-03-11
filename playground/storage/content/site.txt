@@ -18,7 +18,7 @@ Googlemodel: gemini-3-flash-preview
 
 ----
 
-Anthropicmodel: claude-sonnet-4-20250514
+Anthropicmodel: claude-sonnet-4-6
 
 ----
 

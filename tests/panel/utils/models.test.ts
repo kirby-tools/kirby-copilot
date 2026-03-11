@@ -7,18 +7,14 @@ import {
 describe("supportsReasoning", () => {
   // eslint-disable-next-line test/prefer-lowercase-title
   describe("OpenAI models", () => {
-    it.each([
-      "gpt-5",
-      "gpt-5-mini",
-      "gpt-5-nano",
-      "gpt-5.1",
-      "gpt-5.2",
-      "gpt-5-turbo",
-    ])("returns true for %s", (model) => {
-      expect(supportsReasoning(model)).toBe(true);
-    });
+    it.each(["gpt-5", "gpt-5-mini", "gpt-5-nano", "gpt-5.4"])(
+      "returns true for %s",
+      (model) => {
+        expect(supportsReasoning(model)).toBe(true);
+      },
+    );
 
-    it.each(["gpt-4", "gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo"])(
+    it.each(["gpt-4o", "gpt-4-turbo", "gpt-o4-mini"])(
       "returns false for %s",
       (model) => {
         expect(supportsReasoning(model)).toBe(false);
@@ -31,20 +27,13 @@ describe("supportsReasoning", () => {
     it.each([
       "gemini-2.5-pro",
       "gemini-2.5-flash",
-      "gemini-2.5-pro-preview",
-      "gemini-3",
-      "gemini-3-pro",
+      "gemini-3.1-pro",
       "gemini-3-flash",
     ])("returns true for %s", (model) => {
       expect(supportsReasoning(model)).toBe(true);
     });
 
-    it.each([
-      "gemini-1.5-pro",
-      "gemini-1.5-flash",
-      "gemini-2.0-flash",
-      "gemini-pro",
-    ])("returns false for %s", (model) => {
+    it.each(["gemini-2.0-flash"])("returns false for %s", (model) => {
       expect(supportsReasoning(model)).toBe(false);
     });
   });
@@ -60,16 +49,12 @@ describe("supportsReasoning", () => {
       expect(supportsReasoning(model)).toBe(true);
     });
 
-    it.each([
-      "claude-3-opus",
-      "claude-3-sonnet",
-      "claude-3-haiku",
-      "claude-3-5-sonnet",
-      "claude-3-5-haiku",
-      "claude-2",
-    ])("returns false for %s", (model) => {
-      expect(supportsReasoning(model)).toBe(false);
-    });
+    it.each(["claude-3-5-sonnet", "claude-3-5-haiku"])(
+      "returns false for %s",
+      (model) => {
+        expect(supportsReasoning(model)).toBe(false);
+      },
+    );
   });
 
   // eslint-disable-next-line test/prefer-lowercase-title

@@ -25,15 +25,15 @@ return [
                     'provider' => 'google',
                     'providers' => [
                         'openai' => [
-                            'model' => 'gpt-5.2',
+                            'model' => 'gpt-5.4',
                             'completionModel' => 'gpt-5-nano'
                         ],
                         'google' => [
-                            'model' => 'gemini-3-pro-preview',
+                            'model' => 'gemini-3.1-pro-preview',
                             'completionModel' => 'gemini-3-flash-preview'
                         ],
                         'anthropic' => [
-                            'model' => 'claude-sonnet-4-5-20250929',
+                            'model' => 'claude-sonnet-4-6',
                             'completionModel' => 'claude-haiku-4-5-20251001'
                         ],
                         'mistral' => [
