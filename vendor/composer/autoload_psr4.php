@@ -8,5 +8,5 @@ $baseDir = dirname($vendorDir);
 return array(
     'Kirby\\' => array($vendorDir . '/getkirby/composer-installer/src'),
     'JohannSchopplich\\Licensing\\' => array($vendorDir . '/johannschopplich/kirby-tools-licensing/src'),
-    'JohannSchopplich\\KirbyPlugins\\' => array($baseDir . '/src/classes/KirbyPlugins'),
+    'JohannSchopplich\\KirbyTools\\' => array($vendorDir . '/johannschopplich/kirby-tools-utils/src'),
 );
