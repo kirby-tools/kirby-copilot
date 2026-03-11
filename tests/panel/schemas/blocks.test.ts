@@ -199,6 +199,85 @@ describe("generateKirbyBlocksSchema", () => {
     });
   });
 
+  describe("unknown field types in blocks", () => {
+    it("should skip unknown field types and keep known fields", () => {
+      const config = [
+        fieldset({
+          type: "custom",
+          name: "Custom Block",
+          fields: {
+            title: field({
+              type: "text",
+              label: "Title",
+              name: "title",
+              required: true,
+            }),
+            mywidget: field({
+              type: "mywidget",
+              label: "Widget",
+              name: "mywidget",
+            }),
+          },
+        }),
+      ];
+
+      const schema = generateKirbyBlocksSchema(config);
+
+      // Should accept block with only the known field
+      expect(() =>
+        schema.parse({
+          type: "custom",
+          content: { title: "Hello" },
+        }),
+      ).not.toThrow();
+
+      // Unknown field should not be in the schema (strict mode rejects it)
+      expect(() =>
+        schema.parse({
+          type: "custom",
+          content: { title: "Hello", mywidget: "value" },
+        }),
+      ).toThrow();
+    });
+
+    it("should handle blocks where all fields are unknown types", () => {
+      const config = [
+        fieldset({
+          type: "text",
+          name: "Text Block",
+          fields: {
+            content: field({
+              type: "writer",
+              label: "Content",
+              name: "content",
+            }),
+          },
+        }),
+        fieldset({
+          type: "all-unknown",
+          name: "All Unknown",
+          fields: {
+            widget: field({
+              type: "mywidget",
+              label: "Widget",
+              name: "widget",
+            }),
+          },
+        }),
+      ];
+
+      const schema = generateKirbyBlocksSchema(config);
+
+      // Known block type still works
+      expect(() =>
+        schema.parse({
+          type: "text",
+          content: { content: "<p>Test</p>" },
+        }),
+      ).not.toThrow();
+    });
+  });
+
   describe("complex field integration", () => {
     const complexBlocksConfig = [
       fieldset({

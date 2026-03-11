@@ -21,7 +21,7 @@ export function generateBlockSchema(
     if (EXCLUDED_FIELD_TYPES.has(field.type)) continue;
 
     const fieldSchema = fieldToZodSchema(field, context);
-    contentSchema[field.name] = fieldSchema;
+    if (fieldSchema) contentSchema[field.name] = fieldSchema;
   }
 
   const schemaDescription = description

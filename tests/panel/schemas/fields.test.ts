@@ -5,7 +5,7 @@ import {
   EXCLUDED_FIELD_TYPES,
   fieldToZodSchema,
 } from "../../../src/panel/schemas/fields";
-import { field } from "../utils";
+import { assertSchema, field } from "../utils";
 
 describe("fieldToZodSchema", () => {
   describe("text-like fields", () => {
@@ -19,13 +19,13 @@ describe("fieldToZodSchema", () => {
       ["slug", "Slug"],
       ["password", "Password"],
     ] as const)("should handle %s field", (type, label) => {
-      const schema = fieldToZodSchema(field({ type, label, name: type }));
+      const schema = assertSchema(fieldToZodSchema(field({ type, label, name: type })));
       expect(schema).toBeInstanceOf(z.ZodNullable);
       expect(() => schema.parse("sample-value")).not.toThrow();
     });
 
     it("should enforce minlength/maxlength constraints", () => {
-      const schema = fieldToZodSchema(
+      const schema = assertSchema(fieldToZodSchema(
         field({
           type: "text",
           label: "Username",
@@ -33,7 +33,7 @@ describe("fieldToZodSchema", () => {
           minlength: 3,
           maxlength: 10,
         }),
-      );
+      ));
 
       expect(() => schema.parse("ab")).toThrow();
       expect(() => schema.parse("a".repeat(11))).toThrow();
@@ -43,7 +43,7 @@ describe("fieldToZodSchema", () => {
 
   describe("rich text fields", () => {
     it("should handle writer field in block and inline modes", () => {
-      const blockSchema = fieldToZodSchema(
+      const blockSchema = assertSchema(fieldToZodSchema(
         field({
           type: "writer",
           label: "Content",
@@ -51,8 +51,8 @@ describe("fieldToZodSchema", () => {
           inline: false,
           counter: false,
         }),
-      );
-      const inlineSchema = fieldToZodSchema(
+      ));
+      const inlineSchema = assertSchema(fieldToZodSchema(
         field({
           type: "writer",
           label: "Content",
@@ -60,7 +60,7 @@ describe("fieldToZodSchema", () => {
           inline: true,
           counter: false,
         }),
-      );
+      ));
 
       expect(() => blockSchema.parse("<p>Block content</p>")).not.toThrow();
       expect(() =>
@@ -69,13 +69,13 @@ describe("fieldToZodSchema", () => {
     });
 
     it("should handle list field", () => {
-      const schema = fieldToZodSchema(
+      const schema = assertSchema(fieldToZodSchema(
         field({
           type: "list",
           label: "Items",
           name: "items",
         }),
-      );
+      ));
       expect(() =>
         schema.parse("<ul><li>Item 1</li><li>Item 2</li></ul>"),
       ).not.toThrow();
@@ -84,14 +84,14 @@ describe("fieldToZodSchema", () => {
 
   describe("number fields", () => {
     it("should handle number and range fields with constraints", () => {
-      const numberSchema = fieldToZodSchema(
+      const numberSchema = assertSchema(fieldToZodSchema(
         field({
           type: "number",
           label: "Count",
           name: "count",
         }),
-      );
-      const rangeSchema = fieldToZodSchema(
+      ));
+      const rangeSchema = assertSchema(fieldToZodSchema(
         field({
           type: "range",
           label: "Rating",
@@ -99,7 +99,7 @@ describe("fieldToZodSchema", () => {
           min: 1,
           max: 5,
         }),
-      );
+      ));
 
       expect(() => numberSchema.parse(42)).not.toThrow();
       expect(() => numberSchema.parse("not a number")).toThrow();
@@ -111,9 +111,9 @@ describe("fieldToZodSchema", () => {
 
   describe("boolean fields", () => {
     it("should handle toggle field", () => {
-      const schema = fieldToZodSchema(
+      const schema = assertSchema(fieldToZodSchema(
         field({ type: "toggle", label: "Featured", name: "featured" }),
-      );
+      ));
 
       expect(() => schema.parse(true)).not.toThrow();
       expect(() => schema.parse(false)).not.toThrow();
@@ -136,14 +136,14 @@ describe("fieldToZodSchema", () => {
       ["radio", ["draft", "published"]],
       ["toggles", ["light", "dark"]],
     ] as const)("should handle %s field (single selection)", (type, values) => {
-      const schema = fieldToZodSchema(
+      const schema = assertSchema(fieldToZodSchema(
         field({
           type,
           label: "Choice",
           name: "choice",
           options: toOptions([...values]),
         }),
-      );
+      ));
       expect(() => schema.parse(values[0])).not.toThrow();
       expect(() => schema.parse("invalid")).toThrow();
     });
@@ -155,14 +155,14 @@ describe("fieldToZodSchema", () => {
     ] as const)(
       "should handle %s field (multiple selection)",
       (type, values) => {
-        const schema = fieldToZodSchema(
+        const schema = assertSchema(fieldToZodSchema(
           field({
             type,
             label: "Choices",
             name: "choices",
             options: toOptions([...values]),
           }),
-        );
+        ));
         expect(() => schema.parse([values[0], values[1]])).not.toThrow();
         expect(() => schema.parse(["invalid"])).toThrow();
         expect(() => schema.parse([])).not.toThrow();
@@ -172,28 +172,28 @@ describe("fieldToZodSchema", () => {
 
   describe("date/time fields", () => {
     it("should handle date field with and without time", () => {
-      const dateSchema = fieldToZodSchema(
+      const dateSchema = assertSchema(fieldToZodSchema(
         field({
           type: "date",
           label: "Published",
           name: "published",
         }),
-      );
-      const dateTimeSchema = fieldToZodSchema(
+      ));
+      const dateTimeSchema = assertSchema(fieldToZodSchema(
         field({
           type: "date",
           label: "Published",
           name: "published",
           time: true,
         }),
-      );
-      const timeSchema = fieldToZodSchema(
+      ));
+      const timeSchema = assertSchema(fieldToZodSchema(
         field({
           type: "time",
           label: "Start",
           name: "start",
         }),
-      );
+      ));
 
       expect(() => dateSchema.parse("2023-12-25")).not.toThrow();
       expect(() => dateTimeSchema.parse("2023-12-25 14:30:00")).not.toThrow();
@@ -203,20 +203,20 @@ describe("fieldToZodSchema", () => {
 
   describe("other fields", () => {
     it("should handle color and link fields", () => {
-      const colorSchema = fieldToZodSchema(
+      const colorSchema = assertSchema(fieldToZodSchema(
         field({
           type: "color",
           label: "Theme",
           name: "theme",
         }),
-      );
-      const linkSchema = fieldToZodSchema(
+      ));
+      const linkSchema = assertSchema(fieldToZodSchema(
         field({
           type: "link",
           label: "Related",
           name: "related",
         }),
-      );
+      ));
 
       expect(() => colorSchema.parse("#ff0000")).not.toThrow();
       expect(() => linkSchema.parse("page://abc123")).not.toThrow();
@@ -226,7 +226,7 @@ describe("fieldToZodSchema", () => {
 
   describe("complex fields", () => {
     it("should handle structure with and without defined fields", () => {
-      const withFields = fieldToZodSchema(
+      const withFields = assertSchema(fieldToZodSchema(
         field({
           type: "structure",
           label: "Items",
@@ -240,15 +240,15 @@ describe("fieldToZodSchema", () => {
             }),
           },
         }),
-      );
-      const withoutFields = fieldToZodSchema(
+      ));
+      const withoutFields = assertSchema(fieldToZodSchema(
         field({
           type: "structure",
           label: "Items",
           name: "items",
           // Intentionally omit fields to test fallback
         }) as any,
-      );
+      ));
 
       expect(() =>
         withFields.parse([{ title: "Item", description: "Desc" }]),
@@ -257,7 +257,7 @@ describe("fieldToZodSchema", () => {
     });
 
     it("should handle object with and without defined fields", () => {
-      const withFields = fieldToZodSchema(
+      const withFields = assertSchema(fieldToZodSchema(
         field({
           type: "object",
           label: "Settings",
@@ -271,15 +271,15 @@ describe("fieldToZodSchema", () => {
             }),
           },
         }),
-      );
-      const withoutFields = fieldToZodSchema(
+      ));
+      const withoutFields = assertSchema(fieldToZodSchema(
         field({
           type: "object",
           label: "Data",
           name: "data",
           // Intentionally omit fields to test fallback
         }) as any,
-      );
+      ));
 
       expect(() =>
         withFields.parse({ title: "Test", enabled: true }),
@@ -288,7 +288,7 @@ describe("fieldToZodSchema", () => {
     });
 
     it("should handle entries field with constraints", () => {
-      const schema = fieldToZodSchema(
+      const schema = assertSchema(fieldToZodSchema(
         field({
           type: "entries",
           label: "Tags",
@@ -297,7 +297,7 @@ describe("fieldToZodSchema", () => {
           max: 4,
           field: field({ type: "text", name: "entry", label: "Entry" }),
         }),
-      );
+      ));
 
       expect(() => schema.parse(["tag1"])).toThrow();
       expect(() => schema.parse(["t1", "t2", "t3", "t4", "t5"])).toThrow();
@@ -307,21 +307,21 @@ describe("fieldToZodSchema", () => {
 
   describe("required field handling", () => {
     it("should add min(1) for required string fields without existing minlength", () => {
-      const schema = fieldToZodSchema(
+      const schema = assertSchema(fieldToZodSchema(
         field({
           type: "text",
           label: "Title",
           name: "title",
           required: true,
         }),
-      );
+      ));
 
       expect(() => schema.parse("")).toThrow();
       expect(() => schema.parse("Valid")).not.toThrow();
     });
 
     it("should preserve existing minlength for required string fields", () => {
-      const schema = fieldToZodSchema(
+      const schema = assertSchema(fieldToZodSchema(
         field({
           type: "text",
           label: "Username",
@@ -329,7 +329,7 @@ describe("fieldToZodSchema", () => {
           minlength: 3,
           required: true,
         }),
-      );
+      ));
 
       // minlength=3 should take precedence, not min(1)
       expect(() => schema.parse("ab")).toThrow();
@@ -337,21 +337,21 @@ describe("fieldToZodSchema", () => {
     });
 
     it("should add min(1) for required array fields without existing min", () => {
-      const schema = fieldToZodSchema(
+      const schema = assertSchema(fieldToZodSchema(
         field({
           type: "tags",
           label: "Tags",
           name: "tags",
           required: true,
         }),
-      );
+      ));
 
       expect(() => schema.parse([])).toThrow();
       expect(() => schema.parse(["tag1"])).not.toThrow();
     });
 
     it("should preserve existing min for required array fields", () => {
-      const schema = fieldToZodSchema(
+      const schema = assertSchema(fieldToZodSchema(
         field({
           type: "entries",
           label: "Items",
@@ -360,7 +360,7 @@ describe("fieldToZodSchema", () => {
           required: true,
           field: field({ type: "text", name: "entry", label: "Entry" }),
         }),
-      );
+      ));
 
       // min=2 should take precedence, not min(1)
       expect(() => schema.parse(["single"])).toThrow();
@@ -368,22 +368,22 @@ describe("fieldToZodSchema", () => {
     });
 
     it("should handle required number and boolean fields", () => {
-      const numberSchema = fieldToZodSchema(
+      const numberSchema = assertSchema(fieldToZodSchema(
         field({
           type: "number",
           label: "Count",
           name: "count",
           required: true,
         }),
-      );
-      const toggleSchema = fieldToZodSchema(
+      ));
+      const toggleSchema = assertSchema(fieldToZodSchema(
         field({
           type: "toggle",
           label: "Active",
           name: "active",
           required: true,
         }),
-      );
+      ));
 
       // Required numbers/booleans don't get min(1), they just aren't nullable
       expect(() => numberSchema.parse(0)).not.toThrow();
@@ -402,7 +402,7 @@ describe("fieldToZodSchema", () => {
           info: null,
         }));
 
-      const schema = fieldToZodSchema(
+      const schema = assertSchema(fieldToZodSchema(
         field({
           type: "select",
           label: "Status",
@@ -410,24 +410,69 @@ describe("fieldToZodSchema", () => {
           options: toOptions(["draft", "published"]),
           required: true,
         }),
-      );
+      ));
 
       expect(() => schema.parse("draft")).not.toThrow();
       expect(() => schema.parse(null)).toThrow();
     });
 
     it("should make non-required fields nullable", () => {
-      const schema = fieldToZodSchema(
+      const schema = assertSchema(fieldToZodSchema(
         field({
           type: "text",
           label: "Description",
           name: "description",
           required: false,
         }),
-      );
+      ));
 
       expect(schema.safeParse(null).success).toBe(true);
       expect(() => schema.parse(null)).not.toThrow();
+    });
+  });
+
+  describe("unknown sub-field types in nested fields", () => {
+    it("should skip unknown sub-field types in structure fields", () => {
+      const schema = assertSchema(fieldToZodSchema(
+        field({
+          type: "structure",
+          label: "Items",
+          name: "items",
+          fields: {
+            title: field({ type: "text", label: "Title", name: "title" }),
+            custom: field({ type: "fancy-widget", label: "Custom", name: "custom" }),
+          },
+        }),
+      ));
+
+      // Should still parse with only the known field
+      expect(() => schema.parse([{ title: "Item" }])).not.toThrow();
+    });
+
+    it("should skip unknown sub-field types in object fields", () => {
+      const schema = assertSchema(fieldToZodSchema(
+        field({
+          type: "object",
+          label: "Settings",
+          name: "settings",
+          fields: {
+            title: field({ type: "text", label: "Title", name: "title" }),
+            custom: field({ type: "fancy-widget", label: "Custom", name: "custom" }),
+          },
+        }),
+      ));
+
+      // Should still parse with only the known field
+      expect(() => schema.parse({ title: "Test" })).not.toThrow();
+    });
+  });
+
+  describe("unknown field types", () => {
+    it("should return undefined for unknown field types instead of throwing", () => {
+      const result = fieldToZodSchema(
+        field({ type: "fancy-widget", label: "Custom", name: "custom" }),
+      );
+      expect(result).toBeUndefined();
     });
   });
 

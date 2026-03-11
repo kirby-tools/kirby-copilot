@@ -7,7 +7,17 @@ import type {
   KirbyObjectFieldProps,
   KirbyStructureFieldProps,
 } from "kirby-types";
+import { expect } from "vitest";
+import type { z } from "zod";
 import type { KirbyFieldset } from "../../src/panel/types";
+
+/**
+ * Asserts that a schema is defined and returns it typed.
+ */
+export function assertSchema(schema: z.ZodType | undefined): z.ZodType {
+  expect(schema).toBeDefined();
+  return schema!;
+}
 
 /**
  * Helper to create a field definition with sensible defaults for testing.

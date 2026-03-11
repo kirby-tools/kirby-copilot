@@ -94,12 +94,13 @@ async function initPromptDialog() {
   const fieldsSchema: Record<string, z.ZodType> = {};
 
   for (const field of selectedFields) {
-    fieldsSchema[field.name] =
+    const schema =
       field.type === "layout"
         ? z.array(await getLayoutZodSchema(field as KirbyLayoutFieldProps))
         : field.type === "blocks"
           ? z.array(await getBlocksZodSchema(field as KirbyBlocksFieldProps))
           : fieldToZodSchema(field);
+    if (schema) fieldsSchema[field.name] = schema;
   }
 
   panel.isLoading = true;

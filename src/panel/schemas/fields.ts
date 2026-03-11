@@ -260,11 +260,12 @@ export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
 export function fieldToZodSchema(
   field: KirbyFieldProps,
   context?: SchemaContext,
-) {
+): z.ZodType | undefined {
   const schemaBuilder = FIELD_TYPE_TO_SCHEMA[field.type];
 
   if (!schemaBuilder) {
-    throw new Error(`Unsupported field type: ${field.type}`);
+    console.warn(`[Copilot] Skipping unsupported field type: ${field.type}`);
+    return;
   }
 
   let schema = schemaBuilder(field, context);
@@ -311,13 +312,14 @@ function createNestedFieldsSchema(
     if (subField.disabled || subField.hidden) continue;
     if (EXCLUDED_FIELD_TYPES.has(subField.type)) continue;
 
-    nestedContentSchema[fieldName] = fieldToZodSchema(
+    const schema = fieldToZodSchema(
       {
         ...subField,
         name: fieldName,
       },
       context,
     );
+    if (schema) nestedContentSchema[fieldName] = schema;
   }
 
   return z.object(nestedContentSchema).strict();
