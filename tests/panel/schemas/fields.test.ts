@@ -433,7 +433,7 @@ describe("fieldToZodSchema", () => {
 
   describe("excluded field types", () => {
     it("should exclude UI elements and reference types (not layout)", () => {
-      const excluded = Array.from(EXCLUDED_FIELD_TYPES);
+      const excluded = [...EXCLUDED_FIELD_TYPES];
 
       expect(excluded).toEqual(
         expect.arrayContaining([

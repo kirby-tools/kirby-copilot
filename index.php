@@ -17,7 +17,7 @@ $pluginConfig = [
 if (class_exists('Kirby\Plugin\License')) {
     $pluginConfig['extends']['areas'] = [
         'system' => fn () => [
-            'dialogs' => \JohannSchopplich\Licensing\PluginLicenseExtensions::dialogs($packageName, 'Kirby Copilot')
+            'dialogs' => \JohannSchopplich\Licensing\LicensePanel::dialogs($packageName, 'Kirby Copilot')
         ]
     ];
 
