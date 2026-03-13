@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
+    'JohannSchopplich\\Copilot\\FieldTypeResolver' => $baseDir . '/src/classes/Copilot/FieldTypeResolver.php',
     'JohannSchopplich\\KirbyTools\\FieldResolver' => $vendorDir . '/johannschopplich/kirby-tools-utils/src/FieldResolver.php',
     'JohannSchopplich\\KirbyTools\\ModelResolver' => $vendorDir . '/johannschopplich/kirby-tools-utils/src/ModelResolver.php',
     'JohannSchopplich\\Licensing\\Http\\HttpClientInterface' => $vendorDir . '/johannschopplich/kirby-tools-licensing/src/Http/HttpClientInterface.php',

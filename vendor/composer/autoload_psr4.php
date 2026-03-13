@@ -9,4 +9,5 @@ return array(
     'Kirby\\' => array($vendorDir . '/getkirby/composer-installer/src'),
     'JohannSchopplich\\Licensing\\' => array($vendorDir . '/johannschopplich/kirby-tools-licensing/src'),
     'JohannSchopplich\\KirbyTools\\' => array($vendorDir . '/johannschopplich/kirby-tools-utils/src'),
+    'JohannSchopplich\\' => array($baseDir . '/src/classes'),
 );
