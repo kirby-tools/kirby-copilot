@@ -6,10 +6,10 @@ import type { ActiveField, PromptTemplate } from "../../types";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import { computed, isKirby5, ref, usePanel } from "kirbyuse";
 import {
-  useEventListener,
   useGenerationHistory,
   useModelFields,
   usePluginContext,
+  usePromptDialogState,
   usePromptTemplates,
   useTemplateDialogs,
 } from "../../composables";
@@ -21,7 +21,8 @@ import {
   PLACEHOLDER_PATTERN,
   renderTemplate,
 } from "../../utils";
-import AutoGrowTextarea from "../Ui/AutoGrowTextarea.vue";
+import { extractPageRefIds } from "../Ui/prompt-editor";
+import PromptEditor from "../Ui/PromptEditor.vue";
 import ContentDropdown from "../Ui/ContentDropdown.vue";
 
 const props = defineProps({
@@ -48,15 +49,14 @@ const { openSaveTemplateDialog, openEditTemplatesDialog } =
 const { getModelFields } = useModelFields();
 const contentContext = createContentContext();
 
-const textareaComponent = ref<InstanceType<typeof AutoGrowTextarea>>();
-const textarea = computed(() => textareaComponent.value?.el);
-const prompt = ref(props.userPrompt || "");
-const files = ref<File[]>([]);
+const { prompt, files, selectedFieldNames, insertOption } =
+  usePromptDialogState();
+
+const editorComponent = ref<InstanceType<typeof PromptEditor>>();
 const licenseStatus = ref<LicenseStatus>();
 
 const modelFields = ref<KirbyFieldProps[]>([...(props.fields ?? [])]);
 const fieldsDropdown = ref<{ toggle: () => void }>();
-const selectedFieldNames = ref<string[]>([]);
 const placeholderDropdown = ref<InstanceType<typeof ContentDropdown>>();
 const isPlaceholderDropdownOpen = ref(false);
 const placeholderSearch = ref("");
@@ -73,8 +73,6 @@ const selectionInsertOptions = [
     text: panel.t("johannschopplich.copilot.append"),
   },
 ];
-const insertOption = ref(selectionInsertOptions[0]!.value);
-
 // Prompt dialog is used in two contexts:
 // 1. Multi-field generation mode (Panel view button)
 // 2. Inline mode (toolbar) with append/replace selection option
@@ -113,28 +111,14 @@ const filteredPlaceholderFields = computed(() => {
   );
 });
 
-useEventListener(textarea, "keydown", (event: KeyboardEvent) => {
-  // Listen to `Cmd/Ctrl + Enter` to submit the prompt
-  if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
-    event.preventDefault();
+function handleEditorSubmit() {
+  if (!prompt.value.trim()) return;
+  submit();
+}
 
-    if (
-      !prompt.value.trim() ||
-      (isFieldGenerationMode.value && selectedFieldNames.value.length === 0)
-    )
-      return;
-
-    submit();
-  }
-
+function handleEditorKeydown(event: KeyboardEvent) {
   // Listen to arrow up and down to navigate the prompt history
-  const target = event.target as HTMLTextAreaElement | null;
-  if (
-    (event.key === "ArrowUp" && target?.selectionStart === 0) ||
-    (event.key === "ArrowDown" &&
-      target?.selectionStart === target?.value.length)
-  ) {
-    // Prevent cursor movement
+  if (event.key === "ArrowUp" || event.key === "ArrowDown") {
     event.preventDefault();
 
     // Store current prompt when starting to navigate
@@ -148,7 +132,7 @@ useEventListener(textarea, "keydown", (event: KeyboardEvent) => {
       prompt.value = newPrompt;
     }
   }
-});
+}
 
 (async () => {
   const context = await usePluginContext();
@@ -181,9 +165,11 @@ function submit() {
   }
 
   addToHistory(prompt.value);
+
   emit("submit", {
     prompt: prompt.value,
     files: files.value,
+    pageIds: extractPageRefIds(prompt.value),
     selectedFieldNames: selectedFieldNames.value,
     insertMode: insertOption.value,
   });
@@ -194,6 +180,44 @@ async function pickFiles() {
     accept: SUPPORTED_FILE_MIME_TYPES.join(","),
   });
   files.value = [...files.value, ...selectedFiles];
+}
+
+function pickPages() {
+  placeholderDropdown.value?.close();
+  isPlaceholderDropdownOpen.value = false;
+
+  // Save cursor position before the dialog unmounts the editor
+  const cursorOffset =
+    editorComponent.value?.getCursorOffset() ?? prompt.value.length;
+
+  panel.dialog.open({
+    component: "k-pages-dialog",
+    props: {
+      endpoint: "site/children",
+      multiple: true,
+      hasSearch: true,
+      // The raw API response only has `title`, but `k-item` renders `text`
+      item: (page: Record<string, string>) => ({
+        ...page,
+        text: page.title,
+      }),
+    },
+    on: {
+      submit: (pages: Record<string, string>[]) => {
+        let insertPos = cursorOffset;
+        for (const page of pages) {
+          if (!page.id) continue;
+          const token = `@page://${page.id} `;
+          prompt.value =
+            prompt.value.slice(0, insertPos) +
+            token +
+            prompt.value.slice(insertPos);
+          insertPos += token.length;
+        }
+        panel.dialog.close();
+      },
+    },
+  });
 }
 
 function togglePlaceholderDropdown() {
@@ -208,20 +232,20 @@ function togglePlaceholderDropdown() {
 
 function insertFieldPlaceholder(fieldName: string) {
   const placeholder = `{${fieldName}}`;
-  textareaComponent.value?.insertAtCursor(placeholder);
+  editorComponent.value?.insertAtCursor(placeholder);
   isPlaceholderDropdownOpen.value = false;
 }
 
 function loadTemplate(template: PromptTemplate) {
   prompt.value = template.prompt;
   templateDropdown.value?.close();
-  textarea.value?.focus();
+  editorComponent.value?.focus();
 }
 
 function loadPromptFromHistory(promptText: string) {
   prompt.value = promptText;
   historyDropdown.value?.close();
-  textarea.value?.focus();
+  editorComponent.value?.focus();
 }
 
 function getFieldPreview(fieldName: string) {
@@ -244,20 +268,20 @@ function getFieldPreview(fieldName: string) {
     @cancel="emit('cancel')"
   >
     <div
-      class="kai-relative kai-rounded-[var(--rounded)] has-[textarea:focus]:kai-outline has-[textarea:focus]:kai-outline-[2px] has-[textarea:focus]:kai-outline-[var(--color-focus)]"
+      class="kai-relative kai-rounded-[var(--rounded)] has-[.ProseMirror:focus]:kai-outline has-[.ProseMirror:focus]:kai-outline-[2px] has-[.ProseMirror:focus]:kai-outline-[var(--color-focus)]"
     >
-      <AutoGrowTextarea
-        ref="textareaComponent"
+      <PromptEditor
+        ref="editorComponent"
         :value="prompt"
-        shared-class="kai-p-2 kai-leading-[1.5] focus:kai-outline-none"
         :placeholder="
           panel.t('johannschopplich.copilot.prompt.placeholder') +
           (selection
             ? ` (${panel.t('johannschopplich.copilot.prompt.selectionContext')})`
             : '')
         "
-        rows="3"
         @input="prompt = $event"
+        @submit="handleEditorSubmit"
+        @keydown="handleEditorKeydown"
       />
 
       <!-- Placeholder preview panel -->
@@ -344,6 +368,10 @@ function getFieldPreview(fieldName: string) {
             </header>
 
             <div class="k-copilot-dropdown-content-body">
+              <k-dropdown-item icon="url" @click="pickPages()">
+                {{ panel.t("johannschopplich.copilot.pages.select") }}
+              </k-dropdown-item>
+              <hr />
               <k-dropdown-item
                 v-for="field in filteredPlaceholderFields"
                 :key="field.name"

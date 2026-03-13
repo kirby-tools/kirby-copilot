@@ -13,7 +13,12 @@ export type LogLevel = (typeof LOG_LEVELS)[number];
 export const DEFAULT_LOG_LEVEL: LogLevel = "warn";
 
 /// keep-sorted
-export const SUPPORTED_PROVIDERS = ["anthropic", "google", "mistral", "openai"];
+export const SUPPORTED_PROVIDERS = [
+  "anthropic",
+  "google",
+  "mistral",
+  "openai",
+] as const;
 export type ModelProvider = (typeof SUPPORTED_PROVIDERS)[number];
 
 // Universal reasoning efforts used across all providers
@@ -66,6 +71,8 @@ When <response_format> is provided, format your response as:
 - "rich-text": Use double newlines to separate paragraphs. For inline formatting, use HTML tags (<strong>, <em>, <code>, <a href="...">, etc.). Do NOT wrap paragraphs in <p> tags.
 
 When <selection> is provided, use it as context for your response. Preserve any formatting (bold, italic, links, etc.) present in the selection unless the task explicitly requires different formatting.
+
+When <reference_page> is provided, use it as reference material. Draw on its structure, style, or content as instructed by the user.
 `;
 
 /// keep-sorted

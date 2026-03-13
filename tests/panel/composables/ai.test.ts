@@ -3,15 +3,24 @@ import { simulateReadableStream } from "ai";
 import { MockLanguageModelV3 } from "ai/test";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  resolveAttachments,
+  resolvePromptContext,
   resolveLanguageModel,
   useStreamText,
 } from "../../../src/panel/composables/ai";
 import { CopilotError } from "../../../src/panel/utils/error";
 
+const mockPagesGet = vi.fn();
+
 vi.mock("kirbyuse", () => ({
   usePanel: () => ({
-    api: { endpoint: "/api", csrf: "test-csrf" },
+    api: {
+      endpoint: "/api",
+      csrf: "test-csrf",
+      pages: {
+        get: mockPagesGet,
+        id: (id: string) => id.replaceAll("/", "+"),
+      },
+    },
     view: { title: "Test Page" },
   }),
   useContent: () => ({
@@ -70,6 +79,7 @@ function createPluginConfig(
   return Promise.resolve({
     config: {
       provider: overrides?.provider ?? "openai",
+      reasoningEffort: overrides?.reasoningEffort,
       providers: {
         openai: { model: "gpt-5-nano", hasApiKey: true },
         ...overrides?.providers,
@@ -331,6 +341,70 @@ describe("resolveLanguageModel", () => {
   });
 
   describe("custom provider options", () => {
+    it("maps Anthropic reasoning effort to thinking budget", async () => {
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({
+          provider: "anthropic",
+          reasoningEffort: "high",
+          providers: {
+            anthropic: {
+              model: "claude-haiku-4-5-20251001",
+              hasApiKey: true,
+            },
+          },
+        }),
+      );
+
+      const { providerOptions } = await resolveLanguageModel();
+
+      expect(providerOptions?.anthropic).toEqual({
+        thinking: {
+          type: "enabled",
+          budgetTokens: 32000,
+        },
+      });
+    });
+
+    it("uses model-specific Google reasoning overrides", async () => {
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({
+          provider: "google",
+          reasoningEffort: "none",
+          providers: {
+            google: {
+              model: "gemini-3-flash-preview",
+              hasApiKey: true,
+            },
+          },
+        }),
+      );
+
+      const { providerOptions } = await resolveLanguageModel();
+
+      expect(providerOptions?.google).toEqual({
+        thinkingConfig: {
+          thinkingLevel: "minimal",
+        },
+      });
+    });
+
+    it("omits reasoning options for models without reasoning support", async () => {
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({
+          providers: {
+            openai: {
+              model: "gpt-4o-mini",
+              hasApiKey: true,
+            },
+          },
+        }),
+      );
+
+      const { providerOptions } = await resolveLanguageModel();
+
+      expect(providerOptions).toBeUndefined();
+    });
+
     it("merges custom options from providerConfig", async () => {
       const customOptions = { temperature: 0.5, maxTokens: 1000 };
       mockUsePluginContext.mockReturnValue(
@@ -408,14 +482,15 @@ describe("resolveLanguageModel", () => {
   });
 });
 
-describe("resolveAttachments", () => {
+describe("resolvePromptContext", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockPagesGet.mockReset();
   });
 
   describe("prompt processing", () => {
     it("returns the user prompt unchanged when no template variables", async () => {
-      const { userPromptWithContext } = await resolveAttachments({
+      const { userPromptWithContext } = await resolvePromptContext({
         userPrompt: "Simple prompt without variables",
       });
 
@@ -423,7 +498,7 @@ describe("resolveAttachments", () => {
     });
 
     it("renders template variables in user prompt", async () => {
-      const { userPromptWithContext } = await resolveAttachments({
+      const { userPromptWithContext } = await resolvePromptContext({
         userPrompt: "Page title: {title}",
       });
 
@@ -437,7 +512,7 @@ describe("resolveAttachments", () => {
         type: "image/png",
       });
 
-      const { imageByteArrays } = await resolveAttachments({
+      const { imageByteArrays } = await resolvePromptContext({
         userPrompt: "Test",
         files: [imageFile],
       });
@@ -453,7 +528,7 @@ describe("resolveAttachments", () => {
         new File(["img3"], "c.webp", { type: "image/webp" }),
       ];
 
-      const { imageByteArrays } = await resolveAttachments({
+      const { imageByteArrays } = await resolvePromptContext({
         userPrompt: "Test",
         files,
       });
@@ -467,7 +542,7 @@ describe("resolveAttachments", () => {
         new File(["text"], "doc.txt", { type: "text/plain" }),
       ];
 
-      const { imageByteArrays } = await resolveAttachments({
+      const { imageByteArrays } = await resolvePromptContext({
         userPrompt: "Test",
         files,
       });
@@ -476,9 +551,79 @@ describe("resolveAttachments", () => {
     });
   });
 
+  describe("page IDs", () => {
+    it("appends reference_page blocks with fetched page content", async () => {
+      mockPagesGet.mockResolvedValue({
+        title: "About",
+        content: { headline: "About Us", body: "We are great" },
+      });
+
+      const { userPromptWithContext } = await resolvePromptContext({
+        userPrompt: "Summarize @page://about",
+        pageIds: ["about"],
+      });
+
+      expect(userPromptWithContext).toMatchInlineSnapshot(`
+        "Summarize @page://about
+
+        <reference_page id="about">
+        {"title":"About","headline":"About Us","body":"We are great"}
+        </reference_page>"
+      `);
+    });
+
+    it("filters out empty and null content values", async () => {
+      mockPagesGet.mockResolvedValue({
+        title: "Page",
+        content: { filled: "value", empty: "", nullable: null },
+      });
+
+      const { userPromptWithContext } = await resolvePromptContext({
+        userPrompt: "Read @page://page",
+        pageIds: ["page"],
+      });
+
+      expect(userPromptWithContext).toContain('"filled":"value"');
+      expect(userPromptWithContext).not.toContain('"empty":');
+      expect(userPromptWithContext).not.toContain('"nullable":');
+    });
+
+    it("normalizes blocks by stripping internal metadata", async () => {
+      mockPagesGet.mockResolvedValue({
+        title: "Blocks Page",
+        content: {
+          body: [
+            {
+              id: "abc-123",
+              type: "text",
+              isHidden: false,
+              content: { text: "<p>Hello</p>" },
+            },
+            {
+              id: "def-456",
+              type: "heading",
+              isHidden: true,
+              content: { text: "Title", level: "h2" },
+            },
+          ],
+        },
+      });
+
+      const { userPromptWithContext } = await resolvePromptContext({
+        userPrompt: "Read @page://blocks-page",
+        pageIds: ["blocks-page"],
+      });
+
+      expect(userPromptWithContext).not.toContain('"id"');
+      expect(userPromptWithContext).not.toContain('"isHidden"');
+      expect(userPromptWithContext).toContain('"type":"text"');
+      expect(userPromptWithContext).toContain('"type":"heading"');
+    });
+  });
+
   describe("mixed file handling", () => {
     it("returns empty arrays when no files provided", async () => {
-      const result = await resolveAttachments({ userPrompt: "Test" });
+      const result = await resolvePromptContext({ userPrompt: "Test" });
 
       expect(result.imageByteArrays).toHaveLength(0);
       expect(result.pdfByteArrays).toHaveLength(0);
@@ -490,7 +635,7 @@ describe("resolveAttachments", () => {
         new File(["pdf"], "doc.pdf", { type: "application/pdf" }),
       ];
 
-      const { imageByteArrays, pdfByteArrays } = await resolveAttachments({
+      const { imageByteArrays, pdfByteArrays } = await resolvePromptContext({
         userPrompt: "Test",
         files,
       });

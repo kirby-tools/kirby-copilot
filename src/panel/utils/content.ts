@@ -22,10 +22,32 @@ export function createContentContext(): Record<string, string> {
     Object.entries(context).map(([key, value]) => [
       key,
       Array.isArray(value) || isObject(value)
-        ? JSON.stringify(isBlocksArray(value) ? normalizeBlocks(value) : value)
+        ? JSON.stringify(
+            isBlocksArray(value) ? normalizeBlocks(value) : value,
+            undefined,
+            2,
+          )
         : String(value),
     ]),
   );
+}
+
+export function createReferencePageContent({
+  title,
+  content,
+}: {
+  title: string;
+  content: Record<string, unknown>;
+}) {
+  return Object.fromEntries([
+    ["title", title],
+    ...Object.entries(content)
+      .filter(([, value]) => value != null && value !== "")
+      .map(([key, value]) => [
+        key,
+        isBlocksArray(value) ? normalizeBlocks(value) : value,
+      ]),
+  ]);
 }
 
 function isBlocksArray(value: unknown): value is KirbyBlock[] {

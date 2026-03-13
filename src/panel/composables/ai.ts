@@ -4,8 +4,8 @@ import type {
 } from "@ai-sdk/provider";
 import type { Output as OutputNamespace } from "ai";
 import type { LogLevel } from "kirbyuse";
-import type { ReasoningEffort } from "../constants";
-import type { OutputFormat } from "../types";
+import type { ModelProvider, ReasoningEffort } from "../constants";
+import type { OutputFormat, ProviderConfig } from "../types";
 import { useContent, usePanel } from "kirbyuse";
 import { isObject } from "utilful";
 import {
@@ -19,7 +19,10 @@ import {
   SUPPORTED_PROVIDERS,
 } from "../constants";
 import { loadAISDK } from "../utils/ai";
-import { createContentContext } from "../utils/content";
+import {
+  createContentContext,
+  createReferencePageContent,
+} from "../utils/content";
 import { CopilotError } from "../utils/error";
 import { toReducedBlob } from "../utils/image";
 import { createHtmlChunking, supportsReasoning } from "../utils/models";
@@ -44,6 +47,7 @@ export async function useStreamText({
   output,
   responseFormat,
   files = [],
+  pageIds = [],
   logLevel = 1,
   abortSignal,
   model: injectedModel,
@@ -54,6 +58,7 @@ export async function useStreamText({
   output?: OutputNamespace.Output;
   responseFormat?: OutputFormat;
   files?: File[];
+  pageIds?: string[];
   logLevel?: LogLevel;
   abortSignal?: AbortSignal;
   /** Inject a language model directly (useful for testing). */
@@ -74,9 +79,10 @@ export async function useStreamText({
   const { AISDKError, streamText, smoothStream } = await loadAISDK();
 
   const { userPromptWithContext, imageByteArrays, pdfByteArrays } =
-    await resolveAttachments({
+    await resolvePromptContext({
       userPrompt,
       files,
+      pageIds,
     });
 
   if (logLevel > 1) {
@@ -164,7 +170,10 @@ export async function resolveLanguageModel({
     }
   }
 
-  if (!config.provider || !SUPPORTED_PROVIDERS.includes(config.provider)) {
+  if (
+    !config.provider ||
+    !SUPPORTED_PROVIDERS.includes(config.provider as ModelProvider)
+  ) {
     throw new CopilotError(
       `Unsupported provider "${config.provider}". Supported providers: ${SUPPORTED_PROVIDERS.join(", ")}. Check "johannschopplich.copilot.provider" in your Kirby config.`,
     );
@@ -177,7 +186,7 @@ export async function resolveLanguageModel({
     createOpenAI,
   } = await loadAISDK();
 
-  const provider = config.provider;
+  const provider = config.provider as ModelProvider;
   const providerConfig = config.providers[provider] ?? {};
 
   /// keep-sorted
@@ -238,70 +247,54 @@ export async function resolveLanguageModel({
   const reasoningEffort: ReasoningEffort = forCompletion
     ? "none"
     : (config.reasoningEffort ?? DEFAULT_REASONING_EFFORT);
-  const reasoningConfig = PROVIDER_REASONING_MAP[reasoningEffort];
-
-  // Get reasoning value with model-specific override support
-  const reasoningValue = supportsReasoning(modelId)
-    ? (reasoningConfig?.[`${provider}:${modelId}`] ??
-      reasoningConfig?.[provider])
-    : undefined;
-
-  const providerOptions: SharedV3ProviderOptions = {
-    // Enable reasoning for Anthropic models
-    ...(provider === "anthropic" &&
-      reasoningValue && {
-        anthropic: {
-          thinking: {
-            type: "enabled",
-            budgetTokens: reasoningValue,
-          },
-        },
-      }),
-    // Set reasoning effort for OpenAI models
-    ...(provider === "openai" &&
-      reasoningValue && {
-        openai: {
-          reasoningEffort: reasoningValue,
-        },
-      }),
-    // Set thinking level for Google models
-    ...(provider === "google" &&
-      reasoningValue && {
-        google: {
-          thinkingConfig: {
-            thinkingLevel: reasoningValue,
-          },
-        },
-      }),
-    // Note: Mistral magistral models have built-in reasoning with no configurable
-    // effort level. Reasoning is always enabled for magistral models and outputs
-    // <think> tags automatically.
-  };
-
-  // Merge custom provider options (takes precedence)
-  if (isObject(providerConfig.options)) {
-    providerOptions[provider] = {
-      ...providerOptions[provider],
-      ...providerConfig.options,
-    };
-  }
+  const providerOptions = resolveProviderOptions({
+    provider,
+    providerConfig,
+    modelId,
+    reasoningEffort,
+  });
 
   return {
     model,
-    providerOptions:
-      Object.keys(providerOptions).length > 0 ? providerOptions : undefined,
+    providerOptions,
   };
 }
 
-export async function resolveAttachments({
+export async function resolvePromptContext({
   userPrompt,
   files = [],
+  pageIds = [],
 }: {
   userPrompt: string;
   files?: File[];
+  pageIds?: string[];
 }) {
   const contentContext = createContentContext();
   let userPromptWithContext = renderTemplate(userPrompt, contentContext);
+
+  // Fetch referenced pages and append their content
+  const uniquePageIds = [...new Set(pageIds)];
+  if (uniquePageIds.length > 0) {
+    const panel = usePanel();
+
+    const referencedPages = await Promise.all(
+      uniquePageIds.map(async (requestedPageId) => ({
+        requestedPageId,
+        page: (await panel.api.pages.get(panel.api.pages.id(requestedPageId), {
+          select: ["id", "title", "content"],
+        })) as { id: string; title: string; content: Record<string, unknown> },
+      })),
+    );
+
+    const pageContextBlocks = referencedPages
+      .map(
+        ({ requestedPageId, page }) =>
+          `<reference_page id="${requestedPageId}">\n${JSON.stringify(createReferencePageContent(page))}\n</reference_page>`,
+      )
+      .join("\n\n");
+
+    userPromptWithContext += `\n\n${pageContextBlocks}`;
+  }
 
   const images = files.filter((file) => file.type.startsWith("image/"));
   const pdfs = files.filter((file) => file.type === "application/pdf");
@@ -345,6 +338,77 @@ export async function resolveAttachments({
     imageByteArrays,
     pdfByteArrays,
   };
+}
+
+function resolveProviderOptions({
+  provider,
+  providerConfig,
+  modelId,
+  reasoningEffort,
+}: {
+  provider: ModelProvider;
+  providerConfig: ProviderConfig;
+  modelId: string;
+  reasoningEffort: ReasoningEffort;
+}) {
+  const reasoningValue = resolveReasoningValue({
+    provider,
+    modelId,
+    reasoningEffort,
+  });
+
+  const providerOptions: SharedV3ProviderOptions = {
+    ...(provider === "anthropic" &&
+      reasoningValue && {
+        anthropic: {
+          thinking: {
+            type: "enabled",
+            budgetTokens: reasoningValue,
+          },
+        },
+      }),
+    ...(provider === "openai" &&
+      reasoningValue && {
+        openai: {
+          reasoningEffort: reasoningValue,
+        },
+      }),
+    ...(provider === "google" &&
+      reasoningValue && {
+        google: {
+          thinkingConfig: {
+            thinkingLevel: reasoningValue,
+          },
+        },
+      }),
+  };
+
+  if (isObject(providerConfig.options)) {
+    providerOptions[provider] = {
+      ...providerOptions[provider],
+      ...providerConfig.options,
+    };
+  }
+
+  return Object.keys(providerOptions).length > 0 ? providerOptions : undefined;
+}
+
+function resolveReasoningValue({
+  provider,
+  modelId,
+  reasoningEffort,
+}: {
+  provider: ModelProvider;
+  modelId: string;
+  reasoningEffort: ReasoningEffort;
+}) {
+  if (!supportsReasoning(modelId)) return;
+
+  const reasoningConfig = PROVIDER_REASONING_MAP[reasoningEffort];
+
+  return (
+    reasoningConfig?.[`${provider}:${modelId}`] ?? reasoningConfig?.[provider]
+  );
 }
 
 function mergeHeaders(...headers: (HeadersInit | undefined)[]) {

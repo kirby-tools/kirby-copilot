@@ -6,4 +6,5 @@ export * from "./kirby-content";
 export * from "./logger";
 export * from "./model-fields";
 export * from "./plugin";
+export * from "./prompt-dialog-state";
 export * from "./templates";

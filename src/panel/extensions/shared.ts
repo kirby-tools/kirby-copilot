@@ -53,7 +53,7 @@ export async function streamTextToField(
   });
   if (!promptContext) return;
 
-  const { prompt, files } = promptContext;
+  const { prompt, files, pageIds } = promptContext;
   if (!prompt) return;
 
   if (activeField) activeField.element.dataset.copilot = "generating";
@@ -71,6 +71,7 @@ export async function streamTextToField(
       systemPrompt: config.systemPrompt || DEFAULT_SYSTEM_PROMPT,
       responseFormat,
       files,
+      pageIds,
       abortSignal: signal,
     });
 
