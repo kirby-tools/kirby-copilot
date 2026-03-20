@@ -1,0 +1,32 @@
+name: Related Pages
+description: Display links to related pages selected via query
+icon: page
+preview: fields
+wysiwyg: true
+fields:
+  heading:
+    label: Section Heading
+    type: text
+    placeholder: Related Pages
+  style:
+    label: Display Style
+    type: select
+    options:
+      grid: Grid
+      list: List
+      carousel: Carousel
+    default: grid
+  source:
+    label: Page Source
+    type: select
+    options:
+      type: query
+      query: page.siblings
+      text: "{{ page.title }}"
+      value: "{{ page.id }}"
+  limit:
+    label: Maximum Pages
+    type: number
+    default: 3
+    min: 1
+    max: 12

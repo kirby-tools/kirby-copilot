@@ -3,13 +3,13 @@
 use JohannSchopplich\Copilot\FieldTypeResolver;
 use JohannSchopplich\KirbyTools\FieldResolver;
 use JohannSchopplich\KirbyTools\ModelResolver;
-use JohannSchopplich\Licensing\Licenses;
 use JohannSchopplich\Licensing\LicensePanel;
+use JohannSchopplich\Licensing\Licenses;
 use Kirby\Cms\App;
 use Kirby\Cms\Blueprint;
-use Kirby\Cms\Fieldset;
-use Kirby\Cms\Fieldsets;
 use Kirby\Exception\InvalidArgumentException;
+use Kirby\Toolkit\I18n;
+use Kirby\Toolkit\Str;
 
 return [
     'routes' => fn (App $kirby) => [
@@ -315,20 +315,44 @@ return [
                     }
                 }
 
-                $fieldsets = Fieldsets::factory($blockBlueprints);
+                $result = [];
 
-                return $fieldsets->values(function (Fieldset $fieldset) use ($blockBlueprints) {
-                    // Resolve raw blueprint to extract custom keys like `description`
-                    // that are not part of Kirby's `Fieldset` class
-                    $raw = Blueprint::extend($blockBlueprints[$fieldset->type()] ?? []);
+                foreach ($blockBlueprints as $blockType => $blueprintName) {
+                    try {
+                        $props = Blueprint::extend($blueprintName);
+                        $props['type'] ??= $blockType;
 
-                    return [
-                        'name' => $fieldset->name(),
-                        'type' => $fieldset->type(),
-                        'description' => $raw['description'] ?? null,
-                        'fields' => FieldTypeResolver::normalizeFields($fieldset->fields()),
-                    ];
-                });
+                        // Extract fields from blueprint props (tabs or direct fields)
+                        $fields = [];
+                        $tabs = $props['tabs'] ?? [];
+
+                        if (empty($tabs)) {
+                            $fields = Blueprint::fieldsProps($props['fields'] ?? []);
+                        } else {
+                            foreach ($tabs as $tab) {
+                                $tab = Blueprint::extend($tab);
+                                $tabFields = Blueprint::fieldsProps($tab['fields'] ?? []);
+                                $fields = array_merge($fields, $tabFields);
+                            }
+                        }
+
+                        $name = $props['name'] ?? $props['title'] ?? Str::label($blockType);
+                        $name = I18n::translate($name, $name);
+
+                        $result[] = [
+                            'name' => $name,
+                            'type' => $blockType,
+                            'description' => $props['description'] ?? null,
+                            'fields' => FieldTypeResolver::normalizeFields($fields),
+                        ];
+                    } catch (\Throwable) {
+                        // Skip blocks with invalid blueprints so one bad
+                        // block doesn't break the entire endpoint
+                        continue;
+                    }
+                }
+
+                return $result;
             }
         ],
         [

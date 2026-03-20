@@ -358,7 +358,9 @@ function createNumericSchema(
 function createSingleSelectionSchema(field: KirbyOptionsFieldProps) {
   const values = (field.options ?? [])
     .map((option) => option.value)
-    .filter((v): v is string => typeof v === "string" && Boolean(v));
+    .filter(
+      (value): value is string => typeof value === "string" && Boolean(value),
+    );
 
   if (values.length > 0) {
     return z
@@ -375,7 +377,9 @@ function createSingleSelectionSchema(field: KirbyOptionsFieldProps) {
 function createMultipleSelectionSchema(field: KirbyOptionsFieldProps) {
   const values = (field.options ?? [])
     .map((option) => option.value)
-    .filter((v): v is string => typeof v === "string" && Boolean(v));
+    .filter(
+      (value): value is string => typeof value === "string" && Boolean(value),
+    );
 
   if (values.length > 0) {
     return z

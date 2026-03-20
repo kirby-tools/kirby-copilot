@@ -1,14 +1,15 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace JohannSchopplich\Copilot;
 
 use Kirby\Form\Field;
 
 /**
- * Resolves custom Kirby field types to their standard base types
- * by following the `extends` chain in field definitions.
+ * Normalizes Kirby field definitions: resolves custom types to their
+ * standard base types and converts blueprint-level options
+ * to the Panel's sequential format.
  */
 final class FieldTypeResolver
 {
@@ -25,8 +26,8 @@ final class FieldTypeResolver
     private static array|null $supportedTypesMap = null;
 
     /**
-     * Resolves a custom field type to its standard base type by following
-     * the `extends` chain. Stops at the first known type.
+     * Resolves a custom field type to its standard base type
+     * by following the `extends` chain.
      */
     public static function resolveBaseType(string $type, int $depth = 0): string
     {
@@ -52,8 +53,8 @@ final class FieldTypeResolver
     }
 
     /**
-     * Normalizes field types in a fields array by resolving custom types
-     * to their standard base types. Recurses into nested fields.
+     * Normalizes a fields array by resolving custom types and
+     * converting blueprint-level options. Recurses into nested `fields`.
      */
     public static function normalizeFields(array $fields): array
     {
@@ -62,11 +63,52 @@ final class FieldTypeResolver
                 $field['type'] = static::resolveBaseType($field['type']);
             }
 
+            if (isset($field['options']) && is_array($field['options'])) {
+                $field['options'] = static::normalizeOptions($field['options']);
+            }
+
             if (isset($field['fields']) && is_array($field['fields'])) {
                 $field['fields'] = static::normalizeFields($field['fields']);
             }
         }
 
         return $fields;
+    }
+
+    /**
+     * Converts blueprint-level options (`['key' => 'label']`) to the sequential
+     * `[['value' => …, 'text' => …]]` format the Panel expects.
+     */
+    private static function normalizeOptions(array $options): array
+    {
+        // Already in resolved format
+        if (isset($options[0]['value'])) {
+            return $options;
+        }
+
+        // Query/API definitions can't be resolved without a model
+        if (isset($options['type'])) {
+            return [];
+        }
+
+        $normalizedOptions = [];
+
+        foreach ($options as $key => $option) {
+            if (is_array($option)) {
+                $normalizedOptions[] = $option;
+            } elseif (is_string($key)) {
+                $normalizedOptions[] = [
+                    'text' => (string)$option,
+                    'value' => $key,
+                ];
+            } else {
+                $normalizedOptions[] = [
+                    'text' => (string)$option,
+                    'value' => $option,
+                ];
+            }
+        }
+
+        return $normalizedOptions;
     }
 }

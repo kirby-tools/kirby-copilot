@@ -21,6 +21,7 @@ columns:
           - image
           - list
           - code
+          - related-pages
         help: Build your article content with structured blocks
 
   - width: 1/3

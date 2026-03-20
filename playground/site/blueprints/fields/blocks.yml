@@ -11,7 +11,7 @@ fieldsets:
   - faq
   - cta
   - contact
-  # # Core Kirby blocks
+  # Core Kirby blocks
   - heading
   - text
   # - list
