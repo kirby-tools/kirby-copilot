@@ -2,11 +2,11 @@
 
 declare(strict_types = 1);
 
-use JohannSchopplich\Copilot\FieldTypeResolver;
+use JohannSchopplich\Copilot\FieldNormalizer;
 use Kirby\Cms\App;
 use PHPUnit\Framework\TestCase;
 
-final class FieldTypeResolverTest extends TestCase
+final class FieldNormalizerTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -32,25 +32,25 @@ final class FieldTypeResolverTest extends TestCase
 
     public function testResolveBaseTypeReturnsKnownTypeAsIs(): void
     {
-        $this->assertSame('text', FieldTypeResolver::resolveBaseType('text'));
-        $this->assertSame('writer', FieldTypeResolver::resolveBaseType('writer'));
+        $this->assertSame('text', FieldNormalizer::resolveBaseType('text'));
+        $this->assertSame('writer', FieldNormalizer::resolveBaseType('writer'));
     }
 
     public function testResolveBaseTypeResolvesCustomType(): void
     {
-        $this->assertSame('writer', FieldTypeResolver::resolveBaseType('custom-writer'));
-        $this->assertSame('files', FieldTypeResolver::resolveBaseType('custom-files'));
+        $this->assertSame('writer', FieldNormalizer::resolveBaseType('custom-writer'));
+        $this->assertSame('files', FieldNormalizer::resolveBaseType('custom-files'));
     }
 
     public function testResolveBaseTypeResolvesMultiLevelChain(): void
     {
         // deep-custom → custom-writer → writer
-        $this->assertSame('writer', FieldTypeResolver::resolveBaseType('deep-custom'));
+        $this->assertSame('writer', FieldNormalizer::resolveBaseType('deep-custom'));
     }
 
     public function testResolveBaseTypeReturnsUnknownTypeAsIs(): void
     {
-        $result = @FieldTypeResolver::resolveBaseType('nonexistent-field-type');
+        $result = @FieldNormalizer::resolveBaseType('nonexistent-field-type');
         $this->assertSame('nonexistent-field-type', $result);
     }
 
@@ -67,7 +67,7 @@ final class FieldTypeResolverTest extends TestCase
             ],
         ];
 
-        $normalized = FieldTypeResolver::normalizeFields($fields);
+        $normalized = FieldNormalizer::normalizeFields($fields);
 
         $this->assertSame('writer', $normalized['content']['fields']['body']['type']);
     }
@@ -84,7 +84,7 @@ final class FieldTypeResolverTest extends TestCase
             ],
         ];
 
-        $normalized = FieldTypeResolver::normalizeFields($fields);
+        $normalized = FieldNormalizer::normalizeFields($fields);
         $options = $normalized['style']['options'];
 
         $this->assertCount(2, $options);
@@ -107,7 +107,7 @@ final class FieldTypeResolverTest extends TestCase
             ],
         ];
 
-        $normalized = FieldTypeResolver::normalizeFields($fields);
+        $normalized = FieldNormalizer::normalizeFields($fields);
 
         $this->assertSame([], $normalized['querySource']['options']);
         $this->assertSame([], $normalized['apiSource']['options']);
@@ -122,7 +122,7 @@ final class FieldTypeResolverTest extends TestCase
             ],
         ];
 
-        $normalized = FieldTypeResolver::normalizeFields($fields);
+        $normalized = FieldNormalizer::normalizeFields($fields);
 
         $this->assertSame('draft', $normalized['status']['options'][0]['value']);
         $this->assertSame('draft', $normalized['status']['options'][0]['text']);
@@ -140,7 +140,7 @@ final class FieldTypeResolverTest extends TestCase
             ],
         ];
 
-        $normalized = FieldTypeResolver::normalizeFields($fields);
+        $normalized = FieldNormalizer::normalizeFields($fields);
 
         $this->assertSame('left', $normalized['alignment']['options'][0]['value']);
         $this->assertSame('center', $normalized['alignment']['options'][1]['value']);

@@ -11,7 +11,7 @@ use Kirby\Form\Field;
  * standard base types and converts blueprint-level options
  * to the Panel's sequential format.
  */
-final class FieldTypeResolver
+final class FieldNormalizer
 {
     private const SUPPORTED_TYPES = [
         'blocks', 'checkboxes', 'color', 'date', 'email', 'entries', 'files',
@@ -78,6 +78,8 @@ final class FieldTypeResolver
     /**
      * Converts blueprint-level options (`['key' => 'label']`) to the sequential
      * `[['value' => …, 'text' => …]]` format the Panel expects.
+     * Dynamic sources (query, API) are dropped to `[]` because they
+     * require a model context that isn't available here.
      */
     private static function normalizeOptions(array $options): array
     {

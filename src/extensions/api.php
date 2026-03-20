@@ -1,6 +1,6 @@
 <?php
 
-use JohannSchopplich\Copilot\FieldTypeResolver;
+use JohannSchopplich\Copilot\FieldNormalizer;
 use JohannSchopplich\KirbyTools\FieldResolver;
 use JohannSchopplich\KirbyTools\ModelResolver;
 use JohannSchopplich\Licensing\LicensePanel;
@@ -293,6 +293,10 @@ return [
             'pattern' => '__copilot__/fieldsets',
             'method' => 'GET',
             'action' => function () use ($kirby) {
+                // Use `Blueprint::extend()` + `Blueprint::fieldsProps()` instead of
+                // `Fieldsets::factory()`, which internally evaluates computed field
+                // properties (e.g. query-based options) and crashes without a model.
+
                 // Collect all block blueprints from the extension registry
                 // (includes core blocks and plugin-registered blocks)
                 $blockBlueprints = [];
@@ -343,7 +347,7 @@ return [
                             'name' => $name,
                             'type' => $blockType,
                             'description' => $props['description'] ?? null,
-                            'fields' => FieldTypeResolver::normalizeFields($fields),
+                            'fields' => FieldNormalizer::normalizeFields($fields),
                         ];
                     } catch (\Throwable) {
                         // Skip blocks with invalid blueprints so one bad
@@ -361,7 +365,7 @@ return [
             'action' => function () use ($kirby) {
                 $id = $kirby->request()->query()->get('id');
                 $model = ModelResolver::resolveFromPath($id);
-                return FieldTypeResolver::normalizeFields(FieldResolver::resolveModelFields($model));
+                return FieldNormalizer::normalizeFields(FieldResolver::resolveModelFields($model));
             }
         ]
     ]
