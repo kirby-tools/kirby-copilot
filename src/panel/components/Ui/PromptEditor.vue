@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { EditorState, TextSelection } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
-import { onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import {
   createDocFromText,
   createEditorPlugins,
@@ -32,7 +32,7 @@ let updatingFromProp = false;
 
 const placeholder = createPlaceholderPlugin(props.placeholder);
 
-onMounted(() => {
+onMounted(async () => {
   if (!editor.value) return;
 
   const state = EditorState.create({
@@ -56,6 +56,9 @@ onMounted(() => {
       }
     },
   });
+
+  await nextTick();
+  view?.focus();
 });
 
 onBeforeUnmount(() => {
