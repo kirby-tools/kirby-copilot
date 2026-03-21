@@ -1,6 +1,6 @@
 <?php
 
-use JohannSchopplich\Copilot\FieldNormalizer;
+use JohannSchopplich\KirbyTools\FieldNormalizer;
 use JohannSchopplich\KirbyTools\FieldResolver;
 use JohannSchopplich\KirbyTools\ModelResolver;
 use JohannSchopplich\Licensing\LicensePanel;
@@ -343,11 +343,46 @@ return [
                         $name = $props['name'] ?? $props['title'] ?? Str::label($blockType);
                         $name = I18n::translate($name, $name);
 
+                        $normalizeFieldOptions = static function (array $fields) use (&$normalizeFieldOptions): array {
+                            foreach ($fields as &$field) {
+                                if (isset($field['options']) && is_array($field['options'])) {
+                                    $options = $field['options'];
+
+                                    // Already in resolved format
+                                    if (isset($options[0]['value'])) {
+                                        // Pass through
+                                    } elseif (isset($options['type'])) {
+                                        // Query/API definitions can't be resolved without a model
+                                        $field['options'] = [];
+                                    } else {
+                                        $normalizedData = [];
+                                        foreach ($options as $key => $option) {
+                                            if (is_array($option)) {
+                                                $normalizedData[] = $option;
+                                            } elseif (is_string($key)) {
+                                                $normalizedData[] = ['text' => (string)$option, 'value' => $key];
+                                            } else {
+                                                $normalizedData[] = ['text' => (string)$option, 'value' => $option];
+                                            }
+                                        }
+                                        $field['options'] = $normalizedData;
+                                    }
+                                }
+
+                                // Recurse into nested fields (structure, object)
+                                if (isset($field['fields']) && is_array($field['fields'])) {
+                                    $field['fields'] = $normalizeFieldOptions($field['fields']);
+                                }
+                            }
+
+                            return $fields;
+                        };
+
                         $result[] = [
                             'name' => $name,
                             'type' => $blockType,
                             'description' => $props['description'] ?? null,
-                            'fields' => FieldNormalizer::normalizeFields($fields),
+                            'fields' => FieldNormalizer::normalizeFields($normalizeFieldOptions($fields)),
                         ];
                     } catch (\Throwable) {
                         // Skip blocks with invalid blueprints so one bad

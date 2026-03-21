@@ -28,7 +28,7 @@
   },
   "require-dev": {
     "getkirby/cms": "^5",
-    "phpunit/phpunit": "^11",
+    "phpunit/phpunit": "^12",
     "vlucas/phpdotenv": "^5"
   },
   "scripts": {

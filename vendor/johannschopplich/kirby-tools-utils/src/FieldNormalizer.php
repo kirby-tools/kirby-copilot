@@ -2,14 +2,13 @@
 
 declare(strict_types = 1);
 
-namespace JohannSchopplich\Copilot;
+namespace JohannSchopplich\KirbyTools;
 
 use Kirby\Form\Field;
 
 /**
  * Normalizes Kirby field definitions: resolves custom types to their
- * standard base types and converts blueprint-level options
- * to the Panel's sequential format.
+ * standard base types and recurses into nested fields and fieldsets.
  */
 final class FieldNormalizer
 {
@@ -54,7 +53,7 @@ final class FieldNormalizer
 
     /**
      * Normalizes a fields array by resolving custom types and
-     * converting blueprint-level options. Recurses into nested `fields`.
+     * recursing into nested `fields` and `fieldsets[*].tabs[*].fields`.
      */
     public static function normalizeFields(array $fields): array
     {
@@ -63,54 +62,25 @@ final class FieldNormalizer
                 $field['type'] = static::resolveBaseType($field['type']);
             }
 
-            if (isset($field['options']) && is_array($field['options'])) {
-                $field['options'] = static::normalizeOptions($field['options']);
-            }
-
+            // Recurse into nested fields (structure, object)
             if (isset($field['fields']) && is_array($field['fields'])) {
                 $field['fields'] = static::normalizeFields($field['fields']);
+            }
+
+            // Recurse into block/layout fieldsets
+            if (isset($field['fieldsets']) && is_array($field['fieldsets'])) {
+                foreach ($field['fieldsets'] as &$fieldset) {
+                    if (isset($fieldset['tabs']) && is_array($fieldset['tabs'])) {
+                        foreach ($fieldset['tabs'] as &$tab) {
+                            if (isset($tab['fields']) && is_array($tab['fields'])) {
+                                $tab['fields'] = static::normalizeFields($tab['fields']);
+                            }
+                        }
+                    }
+                }
             }
         }
 
         return $fields;
-    }
-
-    /**
-     * Converts blueprint-level options (`['key' => 'label']`) to the sequential
-     * `[['value' => …, 'text' => …]]` format the Panel expects.
-     * Dynamic sources (query, API) are dropped to `[]` because they
-     * require a model context that isn't available here.
-     */
-    private static function normalizeOptions(array $options): array
-    {
-        // Already in resolved format
-        if (isset($options[0]['value'])) {
-            return $options;
-        }
-
-        // Query/API definitions can't be resolved without a model
-        if (isset($options['type'])) {
-            return [];
-        }
-
-        $normalizedOptions = [];
-
-        foreach ($options as $key => $option) {
-            if (is_array($option)) {
-                $normalizedOptions[] = $option;
-            } elseif (is_string($key)) {
-                $normalizedOptions[] = [
-                    'text' => (string)$option,
-                    'value' => $key,
-                ];
-            } else {
-                $normalizedOptions[] = [
-                    'text' => (string)$option,
-                    'value' => $option,
-                ];
-            }
-        }
-
-        return $normalizedOptions;
     }
 }
