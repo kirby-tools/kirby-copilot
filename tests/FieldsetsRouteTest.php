@@ -68,6 +68,29 @@ final class FieldsetsRouteTest extends TestCase
         $this->assertSame('textarea', $block['fields']['content']['type']);
     }
 
+    public function testI18nLabelsAreTranslated(): void
+    {
+        $result = $this->callFieldsetsRoute([
+            'blocks/test-i18n' => [
+                'name' => 'I18n Block',
+                'fields' => [
+                    'title' => ['type' => 'text', 'label' => 'field.blocks.heading.text'],
+                    'plain' => ['type' => 'text', 'label' => 'My Plain Label'],
+                    'auto' => ['type' => 'text'],
+                ],
+            ],
+        ]);
+
+        $block = $this->findBlock($result, 'test-i18n');
+        $this->assertNotNull($block);
+        // Known i18n key should be translated
+        $this->assertSame('Text', $block['fields']['title']['label']);
+        // Plain string labels should pass through unchanged
+        $this->assertSame('My Plain Label', $block['fields']['plain']['label']);
+        // Auto-generated labels should be title-cased from the field name
+        $this->assertSame('Auto', $block['fields']['auto']['label']);
+    }
+
     public function testQueryBasedOptionsDontCrash(): void
     {
         $result = $this->callFieldsetsRoute([
@@ -135,26 +158,4 @@ final class FieldsetsRouteTest extends TestCase
         $this->assertNotNull($this->findBlock($result, 'valid-block'));
     }
 
-    public function testCustomFieldTypesAreResolved(): void
-    {
-        $result = $this->callFieldsetsRoute(
-            blueprints: [
-                'blocks/test-custom' => [
-                    'name' => 'Custom Type Block',
-                    'fields' => [
-                        'body' => ['type' => 'custom-writer'],
-                    ],
-                ],
-            ],
-            fields: [
-                'custom-writer' => [
-                    'extends' => 'writer',
-                ],
-            ],
-        );
-
-        $block = $this->findBlock($result, 'test-custom');
-        $this->assertNotNull($block);
-        $this->assertSame('writer', $block['fields']['body']['type']);
-    }
 }

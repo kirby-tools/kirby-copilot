@@ -343,8 +343,13 @@ return [
                         $name = $props['name'] ?? $props['title'] ?? Str::label($blockType);
                         $name = I18n::translate($name, $name);
 
-                        $normalizeFieldOptions = static function (array $fields) use (&$normalizeFieldOptions): array {
+                        $normalizeFieldProps = static function (array $fields) use (&$normalizeFieldProps): array {
                             foreach ($fields as &$field) {
+                                // Translate i18n keys in labels (e.g. `field.blocks.heading.text` → `Text`)
+                                if (isset($field['label'])) {
+                                    $field['label'] = I18n::translate($field['label'], $field['label']);
+                                }
+
                                 if (isset($field['options']) && is_array($field['options'])) {
                                     $options = $field['options'];
 
@@ -371,7 +376,7 @@ return [
 
                                 // Recurse into nested fields (structure, object)
                                 if (isset($field['fields']) && is_array($field['fields'])) {
-                                    $field['fields'] = $normalizeFieldOptions($field['fields']);
+                                    $field['fields'] = $normalizeFieldProps($field['fields']);
                                 }
                             }
 
@@ -382,7 +387,7 @@ return [
                             'name' => $name,
                             'type' => $blockType,
                             'description' => $props['description'] ?? null,
-                            'fields' => FieldNormalizer::normalizeFields($normalizeFieldOptions($fields)),
+                            'fields' => FieldNormalizer::normalizeFields($normalizeFieldProps($fields)),
                         ];
                     } catch (\Throwable) {
                         // Skip blocks with invalid blueprints so one bad
