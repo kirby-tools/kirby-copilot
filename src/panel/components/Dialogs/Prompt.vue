@@ -233,17 +233,18 @@ function togglePlaceholderDropdown() {
 function insertFieldPlaceholder(fieldName: string) {
   const placeholder = `{${fieldName}}`;
   editorComponent.value?.insertAtCursor(placeholder);
-  isPlaceholderDropdownOpen.value = false;
 }
 
 function loadTemplate(template: PromptTemplate) {
   prompt.value = template.prompt;
+  currentIndex.value = -1;
   templateDropdown.value?.close();
   editorComponent.value?.focus();
 }
 
 function loadPromptFromHistory(promptText: string) {
   prompt.value = promptText;
+  currentIndex.value = -1;
   historyDropdown.value?.close();
   editorComponent.value?.focus();
 }
