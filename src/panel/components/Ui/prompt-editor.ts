@@ -120,12 +120,17 @@ export function createPlaceholderPlugin(initialText: string) {
       decorations(state) {
         if (state.doc.textContent.length > 0) return DecorationSet.empty;
 
+        const firstChild = state.doc.firstChild;
+        if (!firstChild) return DecorationSet.empty;
+
+        // Use a node decoration with CSS `::before` instead of a widget
+        // decoration. Chrome's caret positioning breaks when an
+        // absolutely-positioned widget span is the only child of an
+        // empty contenteditable paragraph.
         return DecorationSet.create(state.doc, [
-          Decoration.widget(1, () => {
-            const span = document.createElement("span");
-            span.className = "k-copilot-prompt-placeholder";
-            span.textContent = placeholderText;
-            return span;
+          Decoration.node(0, firstChild.nodeSize, {
+            class: "k-copilot-prompt-has-placeholder",
+            "data-placeholder": placeholderText,
           }),
         ]);
       },

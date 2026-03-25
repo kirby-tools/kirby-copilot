@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { EditorState, TextSelection } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
-import { nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 import {
   createDocFromText,
   createEditorPlugins,
@@ -32,11 +32,13 @@ let updatingFromProp = false;
 
 const placeholder = createPlaceholderPlugin(props.placeholder);
 
-onMounted(async () => {
+onMounted(() => {
   if (!editor.value) return;
 
+  const doc = createDocFromText(props.value);
   const state = EditorState.create({
-    doc: createDocFromText(props.value),
+    doc,
+    selection: TextSelection.atEnd(doc),
     plugins: createEditorPlugins({
       onSubmit: () => emit("submit"),
       onKeydown: (event) => emit("keydown", event),
@@ -56,9 +58,6 @@ onMounted(async () => {
       }
     },
   });
-
-  await nextTick();
-  view?.focus();
 });
 
 onBeforeUnmount(() => {
@@ -111,7 +110,11 @@ function getCursorOffset(): number {
 }
 
 function focus() {
-  view?.focus();
+  if (!view) return;
+  const { doc } = view.state;
+  const tr = view.state.tr.setSelection(TextSelection.atEnd(doc));
+  view.dispatch(tr);
+  view.focus();
 }
 
 defineExpose({
@@ -139,7 +142,12 @@ defineExpose({
   overflow-wrap: break-word;
 }
 
-.k-copilot-prompt-placeholder {
+.k-copilot-prompt-has-placeholder {
+  position: relative;
+}
+
+.k-copilot-prompt-has-placeholder::before {
+  content: attr(data-placeholder);
   color: var(--color-text-dimmed);
   pointer-events: none;
   position: absolute;
