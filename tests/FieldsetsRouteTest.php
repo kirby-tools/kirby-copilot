@@ -3,6 +3,7 @@
 declare(strict_types = 1);
 
 use Kirby\Cms\App;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 final class FieldsetsRouteTest extends TestCase
@@ -49,7 +50,8 @@ final class FieldsetsRouteTest extends TestCase
         return null;
     }
 
-    public function testBlockFieldsAreExtracted(): void
+    #[Test]
+    public function block_fields_are_extracted(): void
     {
         $result = $this->callFieldsetsRoute([
             'blocks/test-basic' => [
@@ -68,7 +70,8 @@ final class FieldsetsRouteTest extends TestCase
         $this->assertSame('textarea', $block['fields']['content']['type']);
     }
 
-    public function testI18nLabelsAreTranslated(): void
+    #[Test]
+    public function i18n_labels_are_translated(): void
     {
         $result = $this->callFieldsetsRoute([
             'blocks/test-i18n' => [
@@ -91,7 +94,8 @@ final class FieldsetsRouteTest extends TestCase
         $this->assertSame('Auto', $block['fields']['auto']['label']);
     }
 
-    public function testQueryBasedOptionsDontCrash(): void
+    #[Test]
+    public function query_based_options_dont_crash(): void
     {
         $result = $this->callFieldsetsRoute([
             'blocks/test-query' => [
@@ -115,7 +119,8 @@ final class FieldsetsRouteTest extends TestCase
         $this->assertSame([], $block['fields']['source']['options']);
     }
 
-    public function testTabbedBlockFieldsAreMerged(): void
+    #[Test]
+    public function tabbed_block_fields_are_merged(): void
     {
         $result = $this->callFieldsetsRoute([
             'blocks/test-tabs' => [
@@ -141,7 +146,8 @@ final class FieldsetsRouteTest extends TestCase
         $this->assertArrayHasKey('color', $block['fields']);
     }
 
-    public function testInvalidBlueprintIsSkipped(): void
+    #[Test]
+    public function invalid_blueprint_is_skipped(): void
     {
         $result = $this->callFieldsetsRoute([
             'blocks/valid-block' => [
@@ -157,5 +163,4 @@ final class FieldsetsRouteTest extends TestCase
 
         $this->assertNotNull($this->findBlock($result, 'valid-block'));
     }
-
 }
