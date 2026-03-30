@@ -1,9 +1,9 @@
+import type { EditorState } from "prosemirror-state";
 import { baseKeymap } from "prosemirror-commands";
 import { history, redo, undo } from "prosemirror-history";
 import { keymap } from "prosemirror-keymap";
-import { Schema } from "prosemirror-model";
-import { Slice } from "prosemirror-model";
-import { EditorState, Plugin } from "prosemirror-state";
+import { Schema, Slice } from "prosemirror-model";
+import { Plugin } from "prosemirror-state";
 import { Decoration, DecorationSet } from "prosemirror-view";
 
 const PAGE_REF_TOKEN_REGEX_SOURCE = String.raw`@page://([\w\-/]+)`;
@@ -162,14 +162,11 @@ function buildDecorations(state: EditorState): DecorationSet {
     if (!node.isText || !node.text) return;
 
     for (const pattern of TOKEN_HIGHLIGHT_PATTERNS) {
-      const regex = pattern.createRegex();
-      let match: RegExpExecArray | null;
-
-      while ((match = regex.exec(node.text)) !== null) {
+      for (const match of node.text.matchAll(pattern.createRegex())) {
         decorations.push(
           Decoration.inline(
-            pos + match.index,
-            pos + match.index + match[0].length,
+            pos + match.index!,
+            pos + match.index! + match[0].length,
             { class: pattern.className },
           ),
         );

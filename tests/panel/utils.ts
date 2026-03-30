@@ -7,9 +7,9 @@ import type {
   KirbyObjectFieldProps,
   KirbyStructureFieldProps,
 } from "kirby-types";
-import { expect } from "vitest";
 import type { z } from "zod";
 import type { KirbyFieldset } from "../../src/panel/types";
+import { expect } from "vitest";
 
 /**
  * Asserts that a schema is defined and returns it typed.

@@ -21,9 +21,9 @@ import {
   PLACEHOLDER_PATTERN,
   renderTemplate,
 } from "../../utils";
+import ContentDropdown from "../Ui/ContentDropdown.vue";
 import { extractPageRefIds } from "../Ui/prompt-editor";
 import PromptEditor from "../Ui/PromptEditor.vue";
-import ContentDropdown from "../Ui/ContentDropdown.vue";
 
 const props = defineProps({
   fields: Array as PropType<KirbyFieldProps[]>,

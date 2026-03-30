@@ -3,8 +3,8 @@ import { simulateReadableStream } from "ai";
 import { MockLanguageModelV3 } from "ai/test";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  resolvePromptContext,
   resolveLanguageModel,
+  resolvePromptContext,
   useStreamText,
 } from "../../../src/panel/composables/ai";
 import { CopilotError } from "../../../src/panel/utils/error";
