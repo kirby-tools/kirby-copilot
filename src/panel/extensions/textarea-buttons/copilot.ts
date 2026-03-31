@@ -3,7 +3,9 @@ import { streamTextToField } from "../shared";
 
 export const copilot: TextareaButton = {
   icon: "sparkling",
-  label: "Copilot",
+  get label() {
+    return window.panel.t("johannschopplich.copilot.label");
+  },
   shortcut: ".",
 
   click(this: TextareaToolbarContext) {
