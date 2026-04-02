@@ -5,6 +5,7 @@ import type { PropType } from "vue";
 import type { ActiveField, PromptTemplate } from "../../types";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import { computed, isKirby5, ref, usePanel } from "kirbyuse";
+import { template, TEMPLATE_PLACEHOLDER_RE } from "utilful";
 import {
   useGenerationHistory,
   useModelFields,
@@ -17,9 +18,8 @@ import { SUPPORTED_FILE_MIME_TYPES } from "../../constants";
 import {
   createContentContext,
   findFieldDefinition,
+  normalizePlaceholders,
   openFilePicker,
-  PLACEHOLDER_PATTERN,
-  renderTemplate,
 } from "../../utils";
 import ContentDropdown from "../Ui/ContentDropdown.vue";
 import { extractPageRefIds } from "../Ui/prompt-editor";
@@ -82,15 +82,19 @@ const isFieldGenerationMode = computed(
 
 const recentPrompts = computed(() => getRecentEntries(10));
 const hasPlaceholders = computed(() => {
-  const matches = prompt.value.match(PLACEHOLDER_PATTERN);
+  const matches = prompt.value.match(TEMPLATE_PLACEHOLDER_RE);
   if (!matches) return false;
 
   // Only show preview if at least one placeholder is present in the content context
-  const keys = matches.map((match) => match.slice(1, -1));
+  const keys = matches.map((match) => match.slice(1, -1).toLowerCase());
   return keys.some((key) => key in contentContext);
 });
 const resolvedPrompt = computed(() =>
-  renderTemplate(prompt.value, contentContext, (key) => `{${key}}`).trim(),
+  template(
+    normalizePlaceholders(prompt.value),
+    contentContext,
+    (key) => `{${key}}`,
+  ).trim(),
 );
 
 const placeholderFields = computed(() => [

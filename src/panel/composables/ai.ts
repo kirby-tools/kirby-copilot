@@ -7,7 +7,7 @@ import type { LogLevel } from "kirbyuse";
 import type { ModelProvider, ReasoningEffort } from "../constants";
 import type { OutputFormat, ProviderConfig } from "../types";
 import { useContent, usePanel } from "kirbyuse";
-import { isObject } from "utilful";
+import { isObject, template } from "utilful";
 import {
   DEFAULT_COMPLETION_MODELS,
   DEFAULT_REASONING_EFFORT,
@@ -27,7 +27,7 @@ import { CopilotError } from "../utils/error";
 import { toReducedBlob } from "../utils/image";
 import { createHtmlChunking, supportsReasoning } from "../utils/models";
 import { extractTextFromPdf } from "../utils/pdf";
-import { renderTemplate } from "../utils/template";
+import { normalizePlaceholders } from "../utils/template";
 import { useLogger } from "./logger";
 import { usePluginContext } from "./plugin";
 
@@ -270,7 +270,10 @@ export async function resolvePromptContext({
   pageIds?: string[];
 }) {
   const contentContext = createContentContext();
-  let userPromptWithContext = renderTemplate(userPrompt, contentContext);
+  let userPromptWithContext = template(
+    normalizePlaceholders(userPrompt),
+    contentContext,
+  );
 
   // Fetch referenced pages and append their content
   const uniquePageIds = [...new Set(pageIds)];
