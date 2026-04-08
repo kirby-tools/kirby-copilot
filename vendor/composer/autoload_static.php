@@ -15,7 +15,6 @@ class ComposerStaticInit5bff1d0570d206d53d6e6252d07f89e6
         array (
             'JohannSchopplich\\Licensing\\' => 27,
             'JohannSchopplich\\KirbyTools\\' => 28,
-            'JohannSchopplich\\' => 17,
         ),
     );
 
@@ -31,10 +30,6 @@ class ComposerStaticInit5bff1d0570d206d53d6e6252d07f89e6
         'JohannSchopplich\\KirbyTools\\' =>
         array (
             0 => __DIR__ . '/..' . '/johannschopplich/kirby-tools-utils/src',
-        ),
-        'JohannSchopplich\\' =>
-        array (
-            0 => __DIR__ . '/../..' . '/src/classes',
         ),
     );
 
