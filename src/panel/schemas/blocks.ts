@@ -24,6 +24,11 @@ export function generateBlockSchema(
     if (fieldSchema) contentSchema[field.name] = fieldSchema;
   }
 
+  // Skip blocks where all fields were filtered out (unknown/excluded types)
+  if (Object.keys(contentSchema).length === 0) {
+    return;
+  }
+
   const schemaDescription = description
     ? `Kirby block: ${name}. ${description}`
     : `Kirby block: ${name}`;
@@ -53,6 +58,12 @@ export function generateKirbyBlocksSchema(fieldsets: KirbyFieldset[]) {
   const blockSchemas = fieldsets
     .map((fieldset) => generateBlockSchema(fieldset, context))
     .filter((schema) => schema != null);
+
+  if (blockSchemas.length === 0) {
+    throw new Error(
+      "No valid block schemas could be generated from the provided fieldsets",
+    );
+  }
 
   return z.union(blockSchemas).describe("Union of all Kirby block types");
 }
