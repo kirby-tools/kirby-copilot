@@ -80,7 +80,7 @@ export const DEFAULT_COMPLETION_MODELS = {
   anthropic: "claude-haiku-4-5-20251001",
   google: "gemini-3-flash-preview",
   mistral: "mistral-small-latest",
-  openai: "gpt-5-nano",
+  openai: "gpt-5.4-nano",
 };
 
 export const COMPLETION_PREFIX_LENGTH = 4000;

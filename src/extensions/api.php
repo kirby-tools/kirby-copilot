@@ -26,7 +26,7 @@ return [
                     'providers' => [
                         'openai' => [
                             'model' => 'gpt-5.4',
-                            'completionModel' => 'gpt-5-nano'
+                            'completionModel' => 'gpt-5.4-nano'
                         ],
                         'google' => [
                             'model' => 'gemini-3.1-pro-preview',

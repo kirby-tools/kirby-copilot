@@ -26,7 +26,7 @@ export function buildUserPrompt(
 /** Checks if a model supports reasoning/thinking capabilities. */
 export function supportsReasoning(modelName: string) {
   return (
-    // OpenAI: GPT-5 series (gpt-5, gpt-5-mini, gpt-5-nano, gpt-5.1, gpt-5.2, etc.)
+    // OpenAI: GPT-5 series (gpt-5, gpt-5.4-mini, gpt-5.4-nano, gpt-5.1, gpt-5.2, etc.)
     modelName.startsWith("gpt-5") ||
     // Google: Gemini 2.5+ supports thinking (2.5 Pro, 2.5 Flash, 3 Pro, 3 Flash)
     modelName.startsWith("gemini-2.5") ||
