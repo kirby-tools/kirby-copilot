@@ -7,7 +7,7 @@ import {
 describe("supportsReasoning", () => {
   // eslint-disable-next-line test/prefer-lowercase-title
   describe("OpenAI models", () => {
-    it.each(["gpt-5", "gpt-5-mini", "gpt-5-nano", "gpt-5.4"])(
+    it.each(["gpt-5", "gpt-5.4-mini", "gpt-5.4-nano", "gpt-5.4"])(
       "returns true for %s",
       (model) => {
         expect(supportsReasoning(model)).toBe(true);

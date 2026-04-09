@@ -81,7 +81,7 @@ function createPluginConfig(
       provider: overrides?.provider ?? "openai",
       reasoningEffort: overrides?.reasoningEffort,
       providers: {
-        openai: { model: "gpt-5-nano", hasApiKey: true },
+        openai: { model: "gpt-5.4-nano", hasApiKey: true },
         ...overrides?.providers,
       },
     },
@@ -292,34 +292,49 @@ describe("resolveLanguageModel", () => {
     });
 
     it("uses completionModel when forCompletion is true", async () => {
+      let resolvedModelId: string | undefined;
+      mockCreateOpenAI.mockReturnValue({
+        languageModel: (...args: unknown[]) => {
+          resolvedModelId = args[0] as string;
+          return createMockModel();
+        },
+      });
+
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({
           providers: {
             openai: {
-              model: "gpt-5-nano",
+              model: "gpt-5.4-nano",
               hasApiKey: true,
-              completionModel: "gpt-5-mini",
+              completionModel: "gpt-5.4-mini",
             },
           },
         }),
       );
 
-      const result = await resolveLanguageModel({ forCompletion: true });
+      await resolveLanguageModel({ forCompletion: true });
 
-      expect(result).toHaveProperty("model");
-      expect(mockCreateOpenAI).toHaveBeenCalled();
+      expect(resolvedModelId).toBe("gpt-5.4-mini");
     });
 
     it("falls back to default completion model when not configured", async () => {
-      const result = await resolveLanguageModel({ forCompletion: true });
+      let resolvedModelId: string | undefined;
+      mockCreateOpenAI.mockReturnValue({
+        languageModel: (...args: unknown[]) => {
+          resolvedModelId = args[0] as string;
+          return createMockModel();
+        },
+      });
 
-      expect(result).toHaveProperty("model");
+      await resolveLanguageModel({ forCompletion: true });
+
+      expect(resolvedModelId).toBe("gpt-5.4-nano");
     });
   });
 
   describe("provider selection", () => {
     it.each([
-      ["openai", mockCreateOpenAI, "gpt-5-nano"],
+      ["openai", mockCreateOpenAI, "gpt-5.4-nano"],
       ["anthropic", mockCreateAnthropic, "claude-haiku-4-5-20251001"],
       ["google", mockCreateGoogle, "gemini-3-flash-preview"],
       ["mistral", mockCreateMistral, "mistral-small-latest"],
@@ -456,7 +471,7 @@ describe("resolveLanguageModel", () => {
     it("throws CopilotError when API key is missing", async () => {
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({
-          providers: { openai: { model: "gpt-5-nano", hasApiKey: false } },
+          providers: { openai: { model: "gpt-5.4-nano", hasApiKey: false } },
         }),
       );
 
@@ -642,72 +657,6 @@ describe("resolvePromptContext", () => {
 
       expect(imageByteArrays).toHaveLength(1);
       expect(pdfByteArrays).toHaveLength(1);
-    });
-  });
-});
-
-// eslint-disable-next-line test/prefer-lowercase-title
-describe("AI SDK Test Utilities", () => {
-  describe("mockLanguageModelV3", () => {
-    it("creates valid v3 model specification", () => {
-      const model = new MockLanguageModelV3({
-        doGenerate: async () => ({
-          content: [{ type: "text", text: "Hello" }],
-          finishReason: { unified: "stop", raw: undefined },
-          usage: {
-            inputTokens: {
-              total: 5,
-              noCache: 5,
-              cacheRead: undefined,
-              cacheWrite: undefined,
-            },
-            outputTokens: { total: 10, text: 10, reasoning: undefined },
-          },
-          warnings: [],
-        }),
-      });
-
-      expect(model.specificationVersion).toBe("v3");
-    });
-  });
-
-  describe("simulateReadableStream", () => {
-    it("creates consumable stream with text deltas", async () => {
-      const stream = simulateReadableStream({
-        chunks: [
-          { type: "text-start", id: "1" },
-          { type: "text-delta", id: "1", delta: "A" },
-          { type: "text-delta", id: "1", delta: "B" },
-          { type: "text-end", id: "1" },
-          {
-            type: "finish",
-            finishReason: { unified: "stop", raw: undefined },
-            logprobs: undefined,
-            usage: {
-              inputTokens: {
-                total: 1,
-                noCache: 1,
-                cacheRead: undefined,
-                cacheWrite: undefined,
-              },
-              outputTokens: { total: 2, text: 2, reasoning: undefined },
-            },
-          },
-        ],
-      });
-
-      const chunks: string[] = [];
-      const reader = stream.getReader();
-      let result = await reader.read();
-
-      while (!result.done) {
-        if (result.value.type === "text-delta") {
-          chunks.push(result.value.delta!);
-        }
-        result = await reader.read();
-      }
-
-      expect(chunks).toEqual(["A", "B"]);
     });
   });
 });

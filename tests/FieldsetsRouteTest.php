@@ -151,7 +151,7 @@ final class FieldsetsRouteTest extends TestCase
     }
 
     #[Test]
-    public function invalid_blueprint_is_skipped(): void
+    public function broken_extends_does_not_crash(): void
     {
         $result = $this->callFieldsetsRoute([
             'blocks/valid-block' => [
