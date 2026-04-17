@@ -25,6 +25,8 @@ export interface ProviderConfig {
   model?: string;
   completionModel?: string;
   options?: Record<string, any>;
+  /** OpenAI only: force Chat Completions API instead of the default Responses API. */
+  api?: "chat" | "responses";
 }
 
 export interface CompletionConfig {

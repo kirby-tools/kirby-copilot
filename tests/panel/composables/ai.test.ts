@@ -42,6 +42,12 @@ const createMockProvider = () => ({
         stream: simulateReadableStream({ chunks: [] }),
       }),
     }),
+  chat: () =>
+    new MockLanguageModelV3({
+      doStream: async () => ({
+        stream: simulateReadableStream({ chunks: [] }),
+      }),
+    }),
 });
 
 const mockCreateOpenAI = vi.fn(createMockProvider);
@@ -298,6 +304,7 @@ describe("resolveLanguageModel", () => {
           resolvedModelId = args[0] as string;
           return createMockModel();
         },
+        chat: () => createMockModel(),
       });
 
       mockUsePluginContext.mockReturnValue(
@@ -324,6 +331,7 @@ describe("resolveLanguageModel", () => {
           resolvedModelId = args[0] as string;
           return createMockModel();
         },
+        chat: () => createMockModel(),
       });
 
       await resolveLanguageModel({ forCompletion: true });
@@ -453,6 +461,35 @@ describe("resolveLanguageModel", () => {
       const { providerOptions } = await resolveLanguageModel();
 
       expect(providerOptions?.openai?.reasoningEffort).toBe("high");
+    });
+  });
+
+  // eslint-disable-next-line test/prefer-lowercase-title
+  describe("OpenAI API variant", () => {
+    it("uses chat() when providers.openai.api is 'chat'", async () => {
+      const chatSpy = vi.fn(() => createMockModel());
+      const languageModelSpy = vi.fn(() => createMockModel());
+      mockCreateOpenAI.mockReturnValue({
+        languageModel: languageModelSpy,
+        chat: chatSpy,
+      });
+
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({
+          providers: {
+            openai: {
+              model: "gpt-5.4-nano",
+              hasApiKey: true,
+              api: "chat",
+            },
+          },
+        }),
+      );
+
+      await resolveLanguageModel();
+
+      expect(chatSpy).toHaveBeenCalledWith("gpt-5.4-nano");
+      expect(languageModelSpy).not.toHaveBeenCalled();
     });
   });
 

@@ -51,14 +51,17 @@ return [
                 // Lowercase model provider name
                 $config['provider'] = strtolower($config['provider']);
 
+                $invalidValueError = fn (string $field, mixed $value, array $valid): InvalidArgumentException =>
+                    new InvalidArgumentException(
+                        'Invalid ' . $field . ': ' . (is_scalar($value) ? (string)$value : json_encode($value)) .
+                        '. Must be one of: ' . implode(', ', $valid)
+                    );
+
                 // Validate provider
                 $validProviders = ['openai', 'google', 'anthropic', 'mistral'];
                 if (!in_array($config['provider'], $validProviders, true)) {
                     if ($kirby->option('debug')) {
-                        throw new InvalidArgumentException(
-                            'Invalid provider: ' . $config['provider'] .
-                            '. Must be one of: ' . implode(', ', $validProviders)
-                        );
+                        throw $invalidValueError('provider', $config['provider'], $validProviders);
                     }
                     $config['provider'] = 'google';
                 }
@@ -83,12 +86,21 @@ return [
                 $validReasoningEfforts = ['none', 'low', 'medium', 'high'];
                 if (!in_array($config['reasoningEffort'], $validReasoningEfforts, true)) {
                     if ($kirby->option('debug')) {
-                        throw new InvalidArgumentException(
-                            'Invalid reasoningEffort: ' . $config['reasoningEffort'] .
-                            '. Must be one of: ' . implode(', ', $validReasoningEfforts)
-                        );
+                        throw $invalidValueError('reasoningEffort', $config['reasoningEffort'], $validReasoningEfforts);
                     }
                     $config['reasoningEffort'] = 'low';
+                }
+
+                // Validate OpenAI API variant (only set for OpenAI-compatible gateways)
+                $openaiApi = $config['providers']['openai']['api'] ?? null;
+                if ($openaiApi !== null) {
+                    $validApiVariants = ['chat', 'responses'];
+                    if (!in_array($openaiApi, $validApiVariants, true)) {
+                        if ($kirby->option('debug')) {
+                            throw $invalidValueError('providers.openai.api', $openaiApi, $validApiVariants);
+                        }
+                        unset($config['providers']['openai']['api']);
+                    }
                 }
 
                 // Validate and normalize completion config

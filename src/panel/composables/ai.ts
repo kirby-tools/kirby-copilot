@@ -1,3 +1,4 @@
+import type { OpenAIProvider } from "@ai-sdk/openai";
 import type {
   LanguageModelV3,
   SharedV3ProviderOptions,
@@ -243,7 +244,12 @@ export async function resolveLanguageModel({
     );
   }
 
-  const model = api.languageModel(modelId);
+  // Support for OpenAI-compatible gateways (e.g. Cloudflare AI Gateway)
+  // that don't support `/v1/responses`
+  const model =
+    provider === "openai" && providerConfig.api === "chat"
+      ? (api as OpenAIProvider).chat(modelId)
+      : api.languageModel(modelId);
   const reasoningEffort: ReasoningEffort = forCompletion
     ? "none"
     : (config.reasoningEffort ?? DEFAULT_REASONING_EFFORT);
