@@ -145,11 +145,7 @@ watch(isDetailsOpen, (value) => {
   theme.value = response.theme || "notice-icon";
   size.value = response.size || "md";
   logLevel.value = LOG_LEVELS.indexOf(
-    response.logLevel && LOG_LEVELS.includes(response.logLevel)
-      ? response.logLevel
-      : context.config.logLevel && LOG_LEVELS.includes(context.config.logLevel)
-        ? context.config.logLevel
-        : DEFAULT_LOG_LEVEL,
+    response.logLevel ?? context.config.logLevel ?? DEFAULT_LOG_LEVEL,
   ) as LogLevelIndex;
   help.value = response.help ? t(response.help) : undefined;
   config.value = context.config;

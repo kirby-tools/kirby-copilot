@@ -45,10 +45,7 @@ return [
                     'logLevel' => 'warn'
                 ];
 
-                // Merge user configuration with defaults
                 $config = array_replace_recursive($defaultConfig, $config);
-
-                // Lowercase model provider name
                 $config['provider'] = strtolower($config['provider']);
 
                 $invalidValueError = fn (string $field, mixed $value, array $valid): InvalidArgumentException =>
@@ -57,23 +54,48 @@ return [
                         '. Must be one of: ' . implode(', ', $valid)
                     );
 
-                // Validate provider
-                $validProviders = ['openai', 'google', 'anthropic', 'mistral'];
-                if (!in_array($config['provider'], $validProviders, true)) {
-                    if ($kirby->option('debug')) {
-                        throw $invalidValueError('provider', $config['provider'], $validProviders);
-                    }
-                    $config['provider'] = 'google';
-                }
+                // Walks a dot-notated config path and enforces an enum. On mismatch:
+                // throws in debug mode, else applies `$fallback` (or unsets when null).
+                $validateEnum = function (array &$config, string $path, array $allowed, mixed $fallback = null) use ($kirby, $invalidValueError): void {
+                    $keys = explode('.', $path);
+                    $lastKey = array_pop($keys);
+                    $parent = &$config;
 
-                // Lowercase model providers configuration keys
+                    foreach ($keys as $key) {
+                        if (!isset($parent[$key]) || !is_array($parent[$key])) {
+                            return;
+                        }
+                        $parent = &$parent[$key];
+                    }
+
+                    if (!array_key_exists($lastKey, $parent) || $parent[$lastKey] === null) {
+                        return;
+                    }
+
+                    if (in_array($parent[$lastKey], $allowed, true)) {
+                        return;
+                    }
+
+                    if ($kirby->option('debug')) {
+                        throw $invalidValueError($path, $parent[$lastKey], $allowed);
+                    }
+
+                    if ($fallback === null) {
+                        unset($parent[$lastKey]);
+                    } else {
+                        $parent[$lastKey] = $fallback;
+                    }
+                };
+
+                $validateEnum($config, 'provider', ['openai', 'google', 'anthropic', 'mistral'], 'google');
+
                 $config['providers'] = array_change_key_case($config['providers'], CASE_LOWER);
 
-                // Convert API keys to boolean flags (frontend validation without exposing secrets)
+                // Convert API keys to boolean flags so the frontend can validate
+                // presence without exposing secrets.
                 $config['providers'] = array_map(
                     function ($provider) use ($kirby) {
                         $apiKey = $provider['apiKey'] ?? null;
-                        // Resolve closure if provided
                         if ($apiKey instanceof Closure) {
                             $apiKey = $apiKey($kirby);
                         }
@@ -82,28 +104,10 @@ return [
                     $config['providers']
                 );
 
-                // Validate reasoning effort
-                $validReasoningEfforts = ['none', 'low', 'medium', 'high'];
-                if (!in_array($config['reasoningEffort'], $validReasoningEfforts, true)) {
-                    if ($kirby->option('debug')) {
-                        throw $invalidValueError('reasoningEffort', $config['reasoningEffort'], $validReasoningEfforts);
-                    }
-                    $config['reasoningEffort'] = 'low';
-                }
+                $validateEnum($config, 'reasoningEffort', ['none', 'low', 'medium', 'high'], 'low');
+                $validateEnum($config, 'providers.openai.api', ['chat', 'responses']);
+                $validateEnum($config, 'logLevel', ['error', 'warn', 'info', 'debug'], 'warn');
 
-                // Validate OpenAI API variant (only set for OpenAI-compatible gateways)
-                $openaiApi = $config['providers']['openai']['api'] ?? null;
-                if ($openaiApi !== null) {
-                    $validApiVariants = ['chat', 'responses'];
-                    if (!in_array($openaiApi, $validApiVariants, true)) {
-                        if ($kirby->option('debug')) {
-                            throw $invalidValueError('providers.openai.api', $openaiApi, $validApiVariants);
-                        }
-                        unset($config['providers']['openai']['api']);
-                    }
-                }
-
-                // Validate and normalize completion config
                 $completionDefaults = ['debounce' => 1000];
                 $completion = $config['completion'] ?? true;
 
@@ -117,7 +121,6 @@ return [
                     $config['completion']['debounce'] = max(500, (int)$config['completion']['debounce']);
                 }
 
-                // Process config templates with multilang support
                 $language = $kirby->user()?->language() ?? $kirby->defaultLanguage()?->code() ?? 'en';
                 $resolveMultilang = fn (mixed $value): string|null => match (true) {
                     is_string($value) && $value !== '' => $value,

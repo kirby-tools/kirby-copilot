@@ -297,7 +297,36 @@ describe("resolveLanguageModel", () => {
       expect(mockCreateOpenAI).toHaveBeenCalled();
     });
 
-    it("uses completionModel when forCompletion is true", async () => {
+    it.each([
+      {
+        name: "uses explicit completionModel",
+        openai: {
+          model: "gpt-5.4-nano",
+          completionModel: "gpt-5.4-mini",
+          hasApiKey: true,
+        },
+        expected: "gpt-5.4-mini",
+      },
+      {
+        name: "falls back to default completion model when not configured",
+        openai: undefined,
+        expected: "gpt-5.4-nano",
+      },
+      {
+        name: "applies gateway prefix from model to default fallback",
+        openai: { model: "openai/gpt-5.4", hasApiKey: true },
+        expected: "openai/gpt-5.4-nano",
+      },
+      {
+        name: "explicit completionModel wins over gateway-prefix derivation",
+        openai: {
+          model: "openai/gpt-5.4",
+          completionModel: "google-ai-studio/gemini-3-flash-preview",
+          hasApiKey: true,
+        },
+        expected: "google-ai-studio/gemini-3-flash-preview",
+      },
+    ])("completion model resolution: $name", async ({ openai, expected }) => {
       let resolvedModelId: string | undefined;
       mockCreateOpenAI.mockReturnValue({
         languageModel: (...args: unknown[]) => {
@@ -307,36 +336,15 @@ describe("resolveLanguageModel", () => {
         chat: () => createMockModel(),
       });
 
-      mockUsePluginContext.mockReturnValue(
-        createPluginConfig({
-          providers: {
-            openai: {
-              model: "gpt-5.4-nano",
-              hasApiKey: true,
-              completionModel: "gpt-5.4-mini",
-            },
-          },
-        }),
-      );
+      if (openai) {
+        mockUsePluginContext.mockReturnValue(
+          createPluginConfig({ providers: { openai } }),
+        );
+      }
 
       await resolveLanguageModel({ forCompletion: true });
 
-      expect(resolvedModelId).toBe("gpt-5.4-mini");
-    });
-
-    it("falls back to default completion model when not configured", async () => {
-      let resolvedModelId: string | undefined;
-      mockCreateOpenAI.mockReturnValue({
-        languageModel: (...args: unknown[]) => {
-          resolvedModelId = args[0] as string;
-          return createMockModel();
-        },
-        chat: () => createMockModel(),
-      });
-
-      await resolveLanguageModel({ forCompletion: true });
-
-      expect(resolvedModelId).toBe("gpt-5.4-nano");
+      expect(resolvedModelId).toBe(expected);
     });
   });
 
