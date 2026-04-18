@@ -3,7 +3,9 @@ import type { OutputFormat } from "../types";
 
 const HTML_VOID_ELEMENTS = new Set(["br", "hr", "img", "wbr"]);
 
-/** Builds a user prompt with output format and optional selection context. */
+/**
+ * Builds a user prompt with output format and optional selection context.
+ */
 export function buildUserPrompt(
   prompt: string,
   {
@@ -23,7 +25,22 @@ export function buildUserPrompt(
     .join("\n\n");
 }
 
-/** Checks if a model supports reasoning/thinking capabilities. */
+/**
+ * Extracts the native model ID from a gateway-prefixed identifier.
+ *
+ * @remarks
+ * Some gateways (Vercel AI Gateway, Cloudflare AI Gateway `/compat`) require
+ * `{provider}/{model}` model IDs. Returns the part after the first slash so
+ * reasoning detection and config lookups see the upstream-native name.
+ */
+export function extractNativeModelId(modelId: string): string {
+  const index = modelId.indexOf("/");
+  return index === -1 ? modelId : modelId.slice(index + 1);
+}
+
+/**
+ * Checks if a model supports reasoning/thinking capabilities.
+ */
 export function supportsReasoning(modelName: string) {
   return (
     // OpenAI: GPT-5 series (gpt-5, gpt-5.4-mini, gpt-5.4-nano, gpt-5.1, gpt-5.2, etc.)
@@ -81,7 +98,9 @@ export function createHtmlChunking(): ChunkDetector {
   };
 }
 
-/** Parses a complete HTML element from the start of the buffer. */
+/**
+ * Parses a complete HTML element from the start of the buffer.
+ */
 function parseHtmlElement(buffer: string): string | null {
   // Invalid tag-like text (e.g. `<123>`, `<>`) - release `<` as plain text
   if (!/^<\/?[a-z]/i.test(buffer)) {

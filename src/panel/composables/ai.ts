@@ -26,7 +26,11 @@ import {
 } from "../utils/content";
 import { CopilotError } from "../utils/error";
 import { toReducedBlob } from "../utils/image";
-import { createHtmlChunking, supportsReasoning } from "../utils/models";
+import {
+  createHtmlChunking,
+  extractNativeModelId,
+  supportsReasoning,
+} from "../utils/models";
 import { extractTextFromPdf } from "../utils/pdf";
 import { normalizePlaceholders } from "../utils/template";
 import { useLogger } from "./logger";
@@ -411,12 +415,14 @@ function resolveReasoningValue({
   modelId: string;
   reasoningEffort: ReasoningEffort;
 }) {
-  if (!supportsReasoning(modelId)) return;
+  const nativeModelId = extractNativeModelId(modelId);
+  if (!supportsReasoning(nativeModelId)) return;
 
   const reasoningConfig = PROVIDER_REASONING_MAP[reasoningEffort];
 
   return (
-    reasoningConfig?.[`${provider}:${modelId}`] ?? reasoningConfig?.[provider]
+    reasoningConfig?.[`${provider}:${nativeModelId}`] ??
+    reasoningConfig?.[provider]
   );
 }
 
