@@ -462,6 +462,63 @@ describe("resolveLanguageModel", () => {
 
       expect(providerOptions?.openai?.reasoningEffort).toBe("high");
     });
+
+    it("applies reasoning for provider-namespaced model IDs", async () => {
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({
+          reasoningEffort: "medium",
+          providers: {
+            openai: {
+              model: "openai/gpt-5.4-mini",
+              hasApiKey: true,
+              api: "chat",
+            },
+          },
+        }),
+      );
+
+      const { providerOptions } = await resolveLanguageModel();
+
+      expect(providerOptions?.openai?.reasoningEffort).toBe("medium");
+    });
+
+    it("applies reasoning for cross-provider namespaced model IDs", async () => {
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({
+          reasoningEffort: "medium",
+          providers: {
+            openai: {
+              model: "google-ai-studio/gemini-2.5-flash",
+              hasApiKey: true,
+              api: "chat",
+            },
+          },
+        }),
+      );
+
+      const { providerOptions } = await resolveLanguageModel();
+
+      expect(providerOptions?.openai?.reasoningEffort).toBe("medium");
+    });
+
+    it("omits reasoning for namespaced non-reasoning models", async () => {
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({
+          reasoningEffort: "medium",
+          providers: {
+            openai: {
+              model: "openai/gpt-4o-mini",
+              hasApiKey: true,
+              api: "chat",
+            },
+          },
+        }),
+      );
+
+      const { providerOptions } = await resolveLanguageModel();
+
+      expect(providerOptions).toBeUndefined();
+    });
   });
 
   // eslint-disable-next-line test/prefer-lowercase-title
