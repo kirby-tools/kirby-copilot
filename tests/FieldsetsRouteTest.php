@@ -6,17 +6,11 @@ use Kirby\Cms\App;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 
 #[RunTestsInSeparateProcesses]
 #[PreserveGlobalState(false)]
-final class FieldsetsRouteTest extends TestCase
+final class FieldsetsRouteTest extends ApiRouteTestCase
 {
-    protected function tearDown(): void
-    {
-        App::destroy();
-    }
-
     private function callFieldsetsRoute(array $blueprints = [], array $fields = []): array
     {
         $appConfig = ['blueprints' => $blueprints];
@@ -25,22 +19,7 @@ final class FieldsetsRouteTest extends TestCase
             $appConfig['fields'] = $fields;
         }
 
-        $kirby = new App($appConfig);
-
-        $api = require dirname(__DIR__) . '/src/extensions/api.php';
-        $routes = $api['routes']($kirby);
-
-        $action = null;
-        foreach ($routes as $route) {
-            if (($route['pattern'] ?? '') === '__copilot__/fieldsets') {
-                $action = $route['action'];
-                break;
-            }
-        }
-
-        $this->assertNotNull($action, 'Fieldsets route not found');
-
-        return $action();
+        return $this->callRoute(new App($appConfig), '__copilot__/fieldsets');
     }
 
     private function findBlock(array $result, string $type): array|null
