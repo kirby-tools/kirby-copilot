@@ -7,6 +7,7 @@ use JohannSchopplich\Licensing\LicensePanel;
 use JohannSchopplich\Licensing\Licenses;
 use Kirby\Cms\App;
 use Kirby\Cms\Blueprint;
+use Kirby\Cms\Response;
 use Kirby\Exception\InvalidArgumentException;
 use Kirby\Toolkit\I18n;
 use Kirby\Toolkit\Str;
@@ -355,16 +356,21 @@ return [
                 curl_setopt_array($ch, $curlOptions);
                 curl_exec($ch);
 
-                // Upstream returned 204/bodyless or the network failed before any
-                // header callback fired. Emit a sensible default so the client
-                // doesn't receive PHP's default `text/html` response.
-                if (!headers_sent()) {
-                    header('Content-Type: text/event-stream');
-                }
+                $errorCode = curl_errno($ch);
 
-                // Log cURL errors for debugging (response already streamed to client)
-                if ($errorCode = curl_errno($ch)) {
+                if ($errorCode !== 0) {
+                    // Surface transport failures as 502 JSON so the Panel shows
+                    // an error instead of a silent empty stream.
                     error_log("Kirby Copilot proxy cURL error ({$errorCode}): " . curl_error($ch));
+
+                    if (!headers_sent()) {
+                        return Response::json([
+                            'error' => [
+                                'message' => 'Upstream request failed: ' . curl_error($ch),
+                                'code'    => $errorCode,
+                            ],
+                        ], 502);
+                    }
                 }
 
                 exit;
