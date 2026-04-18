@@ -187,26 +187,67 @@ return [
                     throw new InvalidArgumentException('Missing X-Proxy-Target header');
                 }
 
-                $body = file_get_contents('php://input');
+                // Restrict proxy target to known AI SDK default hosts plus the
+                // host of any configured `providers.<provider>.baseUrl`. Prevents
+                // SSRF and API-key exfiltration via attacker-supplied targets.
+                $parsedTarget = parse_url($targetUrl);
+                $targetScheme = strtolower($parsedTarget['scheme'] ?? '');
+                $targetHost = strtolower($parsedTarget['host'] ?? '');
 
-                $curlHeaders = [];
-                $skipHeaders = [
-                    'Host',
-                    'Content-Type',     // Handled explicitly below (not always in Kirby's headers())
-                    'Content-Length',   // cURL calculates from CURLOPT_POSTFIELDS
-                    'Connection',       // Hop-by-hop, connection-specific
-                    'Transfer-Encoding', // Hop-by-hop, handled by cURL
-                    'X-Proxy-Target',
-                    'X-Csrf'
+                if (!in_array($targetScheme, ['http', 'https'], true) || $targetHost === '') {
+                    throw new InvalidArgumentException('Invalid proxy target URL');
+                }
+
+                $allowedHosts = [
+                    'api.openai.com',
+                    'api.anthropic.com',
+                    'generativelanguage.googleapis.com',
+                    'api.mistral.ai',
                 ];
 
+                $configuredBaseUrl = $config['providers'][$provider]['baseUrl'] ?? null;
+                if (is_string($configuredBaseUrl)) {
+                    $configuredHost = parse_url($configuredBaseUrl, PHP_URL_HOST);
+                    if (is_string($configuredHost) && $configuredHost !== '') {
+                        $allowedHosts[] = strtolower($configuredHost);
+                    }
+                }
+
+                if (!in_array($targetHost, $allowedHosts, true)) {
+                    throw new InvalidArgumentException('Proxy target host not allowed: ' . $targetHost);
+                }
+
+                $body = file_get_contents('php://input');
+
+                // Upstream headers that the Vercel AI SDK provider packages actually send
+                $allowedUpstreamHeaders = [
+                    'user-agent',
+                    'authorization',                              // OpenAI, Mistral (Bearer)
+                    'x-api-key',                                  // Anthropic
+                    'x-goog-api-key',                             // Google
+                    'openai-organization',
+                    'openai-project',
+                    'anthropic-version',
+                    'anthropic-beta',
+                    'anthropic-dangerous-direct-browser-access',
+                ];
+
+                // Restrict marker substitution to the actual header names,
+                // so an attacker-injected marker in any other header cannot
+                // exfiltrate the real API key to upstream.
+                $markerAuthHeaders = ['authorization', 'x-api-key', 'x-goog-api-key'];
+
+                $curlHeaders = [];
                 foreach ($kirby->request()->headers() as $name => $value) {
-                    if (in_array($name, $skipHeaders, true)) {
+                    $nameLower = strtolower($name);
+                    if (!in_array($nameLower, $allowedUpstreamHeaders, true)) {
                         continue;
                     }
 
-                    // Replace marker with real API key
                     if (str_contains($value, '__KIRBY_COPILOT_PROXY__')) {
+                        if (!in_array($nameLower, $markerAuthHeaders, true)) {
+                            continue;
+                        }
                         $value = str_replace('__KIRBY_COPILOT_PROXY__', $apiKey, $value);
                     }
 
@@ -227,9 +268,13 @@ return [
                     ob_end_clean();
                 }
 
-                // SSE headers
-                header('Content-Type: text/event-stream');
-                header('Cache-Control: no-store');
+                // Pre-emit infra/transport hints that are deterministic and needed
+                // by the web server to disable buffering before the first byte.
+                // Status and Content-Type are emitted later from the upstream
+                // response so error JSON (e.g. Gateway 404) surfaces correctly.
+                // `no-transform` prevents CDNs (e.g. Cloudflare) from auto-
+                // compressing text/event-stream responses, which buffers chunks.
+                header('Cache-Control: no-store, no-transform');
                 header('Connection: keep-alive');
                 // Disable nginx proxy buffering
                 header('X-Accel-Buffering: no');
@@ -237,36 +282,49 @@ return [
                 // delay streaming chunks.
                 header('Content-Encoding: identity');
 
-                $httpCode = 200;
                 $ch = curl_init($targetUrl);
+                $contentTypeSet = false;
+                $lastStatus = 0;
 
                 $curlOptions = [
-                    // Request options
+                    // Request body + headers
                     CURLOPT_POST => true,
                     CURLOPT_POSTFIELDS => $body,
                     CURLOPT_HTTPHEADER => $curlHeaders,
-                    // Forward error status codes and relevant headers from upstream
-                    CURLOPT_HEADERFUNCTION => function ($ch, $header) use (&$httpCode) {
-                        // Parse HTTP status line (`HTTP/1.1 200 OK`, `HTTP/2 200`, etc.)
+                    // Forward upstream status + Content-Type so upstream errors
+                    // (e.g. Gateway 404 JSON) surface to the client correctly.
+                    CURLOPT_HEADERFUNCTION => function ($ch, $header) use (&$contentTypeSet, &$lastStatus) {
                         if (preg_match('/^HTTP\/\S+\s+(\d+)/', $header, $matches)) {
-                            $httpCode = (int)$matches[1];
-                            if ($httpCode >= 400) {
-                                http_response_code($httpCode);
+                            $statusCode = (int)$matches[1];
+                            // 1xx responses (100 Continue, 103 Early Hints) precede
+                            // the final status line; skip them so the real 2xx-5xx wins.
+                            if ($statusCode < 200) {
+                                return strlen($header);
                             }
+                            $lastStatus = $statusCode;
+                            if (!headers_sent()) {
+                                http_response_code($statusCode);
+                            }
+                            $contentTypeSet = false;
+                            return strlen($header);
                         }
 
-                        // Forward relevant headers on errors
-                        if ($httpCode >= 400) {
-                            $headerLower = strtolower($header);
-                            if (str_starts_with($headerLower, 'content-type:') ||
-                                str_starts_with($headerLower, 'retry-after:')) {
-                                header(trim($header));
-                            }
+                        if (!$contentTypeSet && !headers_sent() &&
+                            preg_match('/^Content-Type:\s*(.+?)\s*$/i', $header, $matches)) {
+                            header('Content-Type: ' . trim($matches[1]));
+                            $contentTypeSet = true;
+                        }
+
+                        // Forward Retry-After and similar variants on error responses so
+                        // the AI SDK retry middleware honors provider backoff.
+                        if ($lastStatus >= 400 && !headers_sent() &&
+                            preg_match('/^(Retry-After(?:-Ms)?):\s*(.+?)\s*$/i', $header, $matches)) {
+                            header($matches[1] . ': ' . $matches[2]);
                         }
 
                         return strlen($header);
                     },
-                    // Streaming
+                    // Stream response chunk-by-chunk to stdout
                     CURLOPT_RETURNTRANSFER => false,
                     CURLOPT_WRITEFUNCTION => function ($ch, $chunk) {
                         echo $chunk;
@@ -283,7 +341,8 @@ return [
                     CURLOPT_LOW_SPEED_TIME => 240,
                     // SSL/TLS
                     CURLOPT_SSL_VERIFYPEER => true,
-                    // Accept all supported content encodings (gzip, deflate, br)
+                    // Transparently decompress gzip/deflate/br responses so
+                    // WRITEFUNCTION always sees plain bytes.
                     CURLOPT_ENCODING => '',
                 ];
 
@@ -295,6 +354,13 @@ return [
 
                 curl_setopt_array($ch, $curlOptions);
                 curl_exec($ch);
+
+                // Upstream returned 204/bodyless or the network failed before any
+                // header callback fired. Emit a sensible default so the client
+                // doesn't receive PHP's default `text/html` response.
+                if (!headers_sent()) {
+                    header('Content-Type: text/event-stream');
+                }
 
                 // Log cURL errors for debugging (response already streamed to client)
                 if ($errorCode = curl_errno($ch)) {
@@ -312,8 +378,6 @@ return [
                 // `Fieldsets::factory()`, which internally evaluates computed field
                 // properties (e.g. query-based options) and crashes without a model.
 
-                // Collect all block blueprints from the extension registry
-                // (includes core blocks and plugin-registered blocks)
                 $blockBlueprints = [];
 
                 foreach ($kirby->extensions('blueprints') as $name => $blueprint) {
@@ -323,8 +387,6 @@ return [
                     }
                 }
 
-                // Discover project-specific blocks from `site/blueprints/blocks`
-                // (these override registry entries following Kirby's priority)
                 $blocksDir = $kirby->root('blueprints') . '/blocks';
 
                 if (is_dir($blocksDir)) {
@@ -341,7 +403,6 @@ return [
                         $props = Blueprint::extend($blueprintName);
                         $props['type'] ??= $blockType;
 
-                        // Extract fields from blueprint props (tabs or direct fields)
                         $fields = [];
                         $tabs = $props['tabs'] ?? [];
 
@@ -360,7 +421,6 @@ return [
 
                         $normalizeFieldProps = static function (array $fields) use (&$normalizeFieldProps): array {
                             foreach ($fields as &$field) {
-                                // Translate i18n keys in labels (e.g. `field.blocks.heading.text` → `Text`)
                                 if (isset($field['label'])) {
                                     $field['label'] = I18n::translate($field['label'], $field['label']);
                                 }
@@ -389,7 +449,6 @@ return [
                                     }
                                 }
 
-                                // Recurse into nested fields (structure, object)
                                 if (isset($field['fields']) && is_array($field['fields'])) {
                                     $field['fields'] = $normalizeFieldProps($field['fields']);
                                 }
