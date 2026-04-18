@@ -126,7 +126,9 @@ async function initPromptDialog() {
       files,
       pageIds,
       logLevel: LOG_LEVELS.indexOf(
-        props.logLevel ?? config.logLevel ?? DEFAULT_LOG_LEVEL,
+        props.logLevel && LOG_LEVELS.includes(props.logLevel)
+          ? props.logLevel
+          : (config.logLevel ?? DEFAULT_LOG_LEVEL),
       ) as LogLevelIndex,
       abortSignal: signal,
     });
