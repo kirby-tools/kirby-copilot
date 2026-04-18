@@ -162,8 +162,6 @@ return [
             'action' => function () use ($kirby) {
                 // Ensure PHP doesn't timeout during long AI generations
                 @set_time_limit(0);
-                @ini_set('zlib.output_compression', '0');
-                @ob_implicit_flush(true);
 
                 $providerParam = $kirby->request()->query()->get('provider');
                 $provider = match ($providerParam) {
@@ -276,12 +274,8 @@ return [
                 // `no-transform` prevents CDNs (e.g. Cloudflare) from auto-
                 // compressing text/event-stream responses, which buffers chunks.
                 header('Cache-Control: no-store, no-transform');
-                header('Connection: keep-alive');
                 // Disable nginx proxy buffering
                 header('X-Accel-Buffering: no');
-                // Avoid downstream/proxy content encoding that could buffer or
-                // delay streaming chunks.
-                header('Content-Encoding: identity');
 
                 $ch = curl_init($targetUrl);
                 $contentTypeSet = false;
@@ -326,10 +320,8 @@ return [
                         return strlen($header);
                     },
                     // Stream response chunk-by-chunk to stdout
-                    CURLOPT_RETURNTRANSFER => false,
                     CURLOPT_WRITEFUNCTION => function ($ch, $chunk) {
                         echo $chunk;
-                        @ob_flush();
                         flush();
                         return strlen($chunk);
                     },
@@ -337,9 +329,7 @@ return [
                     CURLOPT_CONNECTTIMEOUT => 10,
                     CURLOPT_TIMEOUT => 0,
                     CURLOPT_LOW_SPEED_LIMIT => 1,
-                    // Some providers pause briefly while generating long outputs.
-                    // Keep the stream alive longer to avoid truncating JSON.
-                    CURLOPT_LOW_SPEED_TIME => 240,
+                    CURLOPT_LOW_SPEED_TIME => 120,
                     // SSL/TLS
                     CURLOPT_SSL_VERIFYPEER => true,
                     // Transparently decompress gzip/deflate/br responses so
