@@ -235,11 +235,17 @@ export async function resolveLanguageModel({
   });
 
   // Model selection (different for completion)
+  const defaultCompletion =
+    DEFAULT_COMPLETION_MODELS[
+      provider as keyof typeof DEFAULT_COMPLETION_MODELS
+    ];
+  const slashIndex = providerConfig.model?.indexOf("/") ?? -1;
+  const gatewayPrefix =
+    slashIndex > 0 ? providerConfig.model!.slice(0, slashIndex + 1) : "";
+
+  // Apply same prefix for gateway-prefixed models (e.g. `openai/gpt-5.4`)
   const modelId = forCompletion
-    ? providerConfig.completionModel ||
-      DEFAULT_COMPLETION_MODELS[
-        provider as keyof typeof DEFAULT_COMPLETION_MODELS
-      ]
+    ? providerConfig.completionModel || gatewayPrefix + defaultCompletion
     : providerConfig.model;
 
   if (!modelId) {
