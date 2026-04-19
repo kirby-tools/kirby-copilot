@@ -346,6 +346,27 @@ describe("resolveLanguageModel", () => {
 
       expect(resolvedModelId).toBe(expected);
     });
+
+    it("throws when default completion model would cross gateway provider boundaries", async () => {
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({
+          providers: {
+            openai: {
+              model: "google-ai-studio/gemini-2.5-flash",
+              hasApiKey: true,
+              api: "chat",
+            },
+          },
+        }),
+      );
+
+      const error = await resolveLanguageModel({ forCompletion: true }).catch(
+        (e) => e,
+      );
+
+      expect(error).toBeInstanceOf(CopilotError);
+      expect(error.message).toMatch(/completionModel/);
+    });
   });
 
   describe("provider selection", () => {
