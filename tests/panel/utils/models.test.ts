@@ -59,19 +59,23 @@ describe("supportsReasoning", () => {
 
   // eslint-disable-next-line test/prefer-lowercase-title
   describe("Mistral models", () => {
-    it.each(["magistral", "magistral-medium", "magistral-large"])(
-      "returns true for %s",
-      (model) => {
-        expect(supportsReasoning(model)).toBe(true);
-      },
-    );
+    it.each([
+      "mistral-small-latest",
+      "mistral-medium-2508",
+      "mistral-large-latest",
+    ])("returns true for %s", (model) => {
+      expect(supportsReasoning(model)).toBe(true);
+    });
 
-    it.each(["mistral-large", "mistral-small", "mistral-nemo", "codestral"])(
-      "returns false for %s",
-      (model) => {
-        expect(supportsReasoning(model)).toBe(false);
-      },
-    );
+    it.each([
+      "magistral-small-2507",
+      "magistral-medium-2507",
+      "mistral-nemo",
+      "codestral",
+      "ministral-8b-latest",
+    ])("returns false for %s", (model) => {
+      expect(supportsReasoning(model)).toBe(false);
+    });
   });
 
   describe("edge cases", () => {

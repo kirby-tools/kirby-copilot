@@ -458,7 +458,10 @@ describe("resolveLanguageModel", () => {
     });
 
     it("merges custom options from providerConfig", async () => {
-      const customOptions = { temperature: 0.5, maxTokens: 1000 };
+      const customOptions = {
+        parallelToolCalls: false,
+        strictJsonSchema: true,
+      };
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({
           providers: {
@@ -511,7 +514,7 @@ describe("resolveLanguageModel", () => {
       expect(providerOptions?.openai?.reasoningEffort).toBe("medium");
     });
 
-    it("applies reasoning for cross-provider namespaced model IDs", async () => {
+    it("suppresses reasoning for cross-provider namespaced model IDs", async () => {
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({
           reasoningEffort: "medium",
@@ -527,8 +530,55 @@ describe("resolveLanguageModel", () => {
 
       const { providerOptions } = await resolveLanguageModel();
 
-      expect(providerOptions?.openai?.reasoningEffort).toBe("medium");
+      expect(providerOptions).toBeUndefined();
     });
+
+    it("forwards explicit reasoning overrides via options for cross-provider gateways", async () => {
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({
+          reasoningEffort: "medium",
+          providers: {
+            openai: {
+              model: "google-ai-studio/gemini-2.5-flash",
+              hasApiKey: true,
+              api: "chat",
+              options: { reasoningEffort: "high" },
+            },
+          },
+        }),
+      );
+
+      const { providerOptions } = await resolveLanguageModel();
+
+      expect(providerOptions?.openai?.reasoningEffort).toBe("high");
+    });
+
+    it.each([
+      { effort: "none", expected: "none" },
+      { effort: "low", expected: "high" },
+      { effort: "medium", expected: "high" },
+      { effort: "high", expected: "high" },
+    ] as const)(
+      "folds Mistral $effort effort to $expected",
+      async ({ effort, expected }) => {
+        mockUsePluginContext.mockReturnValue(
+          createPluginConfig({
+            provider: "mistral",
+            reasoningEffort: effort,
+            providers: {
+              mistral: {
+                model: "mistral-small-latest",
+                hasApiKey: true,
+              },
+            },
+          }),
+        );
+
+        const { providerOptions } = await resolveLanguageModel();
+
+        expect(providerOptions?.mistral).toEqual({ reasoningEffort: expected });
+      },
+    );
 
     it("omits reasoning for namespaced non-reasoning models", async () => {
       mockUsePluginContext.mockReturnValue(

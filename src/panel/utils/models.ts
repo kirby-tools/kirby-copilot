@@ -50,8 +50,10 @@ export function supportsReasoning(modelName: string) {
     modelName.startsWith("gemini-3") ||
     // Anthropic: Claude 4+ supports extended thinking (claude-sonnet-4, claude-opus-4, claude-haiku-4-5, etc.)
     /^claude-[^-]+-4/.test(modelName) ||
-    // Mistral: Magistral models are reasoning models
-    modelName.startsWith("magistral")
+    // Mistral: `mistral-small|medium|large` expose configurable reasoning
+    modelName.startsWith("mistral-small") ||
+    modelName.startsWith("mistral-medium") ||
+    modelName.startsWith("mistral-large")
   );
 }
 
