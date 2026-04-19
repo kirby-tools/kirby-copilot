@@ -405,6 +405,12 @@ function resolveProviderOptions({
           reasoningEffort: reasoningValue,
         },
       }),
+    ...(provider === "mistral" &&
+      reasoningValue && {
+        mistral: {
+          reasoningEffort: reasoningValue,
+        },
+      }),
     ...(provider === "google" &&
       reasoningValue && {
         google: {
@@ -434,6 +440,12 @@ function resolveReasoningValue({
   modelId: string;
   reasoningEffort: ReasoningEffort;
 }) {
+  // Cross-provider prefix: compat shims typically drop the outer SDK's
+  // reasoning shape. Override via `providers.<provider>.options` if needed.
+  const slashIndex = modelId.indexOf("/");
+  const prefix = slashIndex > 0 ? modelId.slice(0, slashIndex) : "";
+  if (prefix && prefix !== provider) return;
+
   const nativeModelId = extractNativeModelId(modelId);
   if (!supportsReasoning(nativeModelId)) return;
 
