@@ -243,6 +243,19 @@ export async function resolveLanguageModel({
   const gatewayPrefix =
     slashIndex > 0 ? providerConfig.model!.slice(0, slashIndex + 1) : "";
 
+  // Cross-provider gateway prefix: require explicit `completionModel` rather
+  // than derive a 404 (e.g. `google-ai-studio/gpt-5.4-nano`)
+  if (
+    forCompletion &&
+    !providerConfig.completionModel &&
+    gatewayPrefix &&
+    gatewayPrefix.slice(0, -1) !== provider
+  ) {
+    throw new CopilotError(
+      `Cannot derive a default completionModel for the "${provider}" provider with gateway-prefixed model "${providerConfig.model}". Set "completionModel" explicitly in "johannschopplich.copilot.providers.${provider}" in your Kirby config.`,
+    );
+  }
+
   // Apply same prefix for gateway-prefixed models (e.g. `openai/gpt-5.4`)
   const modelId = forCompletion
     ? providerConfig.completionModel || gatewayPrefix + defaultCompletion
