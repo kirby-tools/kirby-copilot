@@ -5,7 +5,7 @@ import type { PropType } from "vue";
 import type { ActiveField, PromptTemplate } from "../../types";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import { computed, isKirby5, ref, usePanel } from "kirbyuse";
-import { template, TEMPLATE_PLACEHOLDER_RE } from "utilful";
+import { template as renderTemplate, TEMPLATE_PLACEHOLDER_RE } from "utilful";
 import {
   useGenerationHistory,
   useModelFields,
@@ -90,7 +90,7 @@ const hasPlaceholders = computed(() => {
   return keys.some((key) => key in contentContext);
 });
 const resolvedPrompt = computed(() =>
-  template(
+  renderTemplate(
     normalizePlaceholders(prompt.value),
     contentContext,
     (key) => `{${key}}`,

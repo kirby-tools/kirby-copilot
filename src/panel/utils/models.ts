@@ -39,21 +39,41 @@ export function extractNativeModelId(modelId: string): string {
 }
 
 /**
- * Checks if a model supports reasoning/thinking capabilities.
+ * Checks if a model exposes a configurable reasoning/thinking knob.
+ *
+ * @remarks
+ * Gemini 2.5 is excluded: it uses numeric `thinkingBudget` instead of the
+ * `thinkingLevel` enum, and emitting an incompatible shape is worse than
+ * the SDK default. Mistral excludes `medium`/`large`: only Small 4 and
+ * `magistral-*` honor `reasoning_effort`; the rest silently ignore it.
  */
 export function supportsReasoning(modelName: string) {
   return (
-    // OpenAI: GPT-5 series (gpt-5, gpt-5.4-mini, gpt-5.4-nano, gpt-5.1, gpt-5.2, etc.)
+    // OpenAI: GPT-5 family (gpt-5, gpt-5-mini/nano, gpt-5.1/.2/.4)
     modelName.startsWith("gpt-5") ||
-    // Google: Gemini 2.5+ supports thinking (2.5 Pro, 2.5 Flash, 3 Pro, 3 Flash)
-    modelName.startsWith("gemini-2.5") ||
+    // Google: Gemini 3+ exposes `thinkingLevel`
     modelName.startsWith("gemini-3") ||
-    // Anthropic: Claude 4+ supports extended thinking (claude-sonnet-4, claude-opus-4, claude-haiku-4-5, etc.)
-    /^claude-[^-]+-4/.test(modelName) ||
-    // Mistral: `mistral-small|medium|large` expose configurable reasoning
+    // Anthropic: Claude 4+ and Mythos
+    /^claude-(?:opus|sonnet|haiku)-\d/.test(modelName) ||
+    modelName.startsWith("claude-mythos-") ||
+    // Mistral: Small 4 (`mistral-small-latest`) and `magistral-*` only
     modelName.startsWith("mistral-small") ||
-    modelName.startsWith("mistral-medium") ||
-    modelName.startsWith("mistral-large")
+    modelName.startsWith("magistral-")
+  );
+}
+
+/**
+ * Checks if a Claude model requires the legacy `{type: "enabled", budget_tokens: N}`
+ * shape instead of adaptive thinking.
+ *
+ * @remarks
+ * Adaptive thinking landed with Opus 4.6 / Sonnet 4.6; Opus 4.7 rejects
+ * `type: "enabled"` outright. This matcher covers 4.0 (bare and dated),
+ * 4.1, and 4.5; everything else falls through to adaptive.
+ */
+export function usesLegacyExtendedThinking(modelName: string) {
+  return /^claude-(?:opus|sonnet|haiku)-4(?:-(?:[0-5](?:-\d{8})?|\d{8}))?$/.test(
+    modelName,
   );
 }
 

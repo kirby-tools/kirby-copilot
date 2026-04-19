@@ -30,6 +30,7 @@ import {
   createHtmlChunking,
   extractNativeModelId,
   supportsReasoning,
+  usesLegacyExtendedThinking,
 } from "../utils/models";
 import { extractTextFromPdf } from "../utils/pdf";
 import { normalizePlaceholders } from "../utils/template";
@@ -202,14 +203,12 @@ export async function resolveLanguageModel({
     openai: createOpenAI,
   }[provider]!;
 
-  // Validate API key is configured on the server when using proxy
   if (!isPlayground && !providerConfig.hasApiKey) {
     throw new CopilotError(
       `Missing API key for the "${provider}" provider. Add "apiKey" to "johannschopplich.copilot.providers.${provider}" in your Kirby config.`,
     );
   }
 
-  // Create custom fetch that routes through PHP proxy
   const proxyFetch: typeof globalThis.fetch = (url, options) =>
     fetch(
       `${panel.api.endpoint}/${PLUGIN_PROXY_API_ROUTE}?provider=${provider}`,
@@ -234,7 +233,6 @@ export async function resolveLanguageModel({
       : undefined),
   });
 
-  // Model selection (different for completion)
   const defaultCompletion =
     DEFAULT_COMPLETION_MODELS[
       provider as keyof typeof DEFAULT_COMPLETION_MODELS
@@ -256,7 +254,9 @@ export async function resolveLanguageModel({
     );
   }
 
-  // Apply same prefix for gateway-prefixed models (e.g. `openai/gpt-5.4`)
+  // Apply the same gateway prefix to the default completion (e.g.
+  // `openai/gpt-5.4` → `openai/gpt-5.4-nano`) so the fallback stays on
+  // the gateway instead of hitting a bare id upstream.
   const modelId = forCompletion
     ? providerConfig.completionModel || gatewayPrefix + defaultCompletion
     : providerConfig.model;
@@ -304,7 +304,6 @@ export async function resolvePromptContext({
     contentContext,
   );
 
-  // Fetch referenced pages and append their content
   const uniquePageIds = [...new Set(pageIds)];
   if (uniquePageIds.length > 0) {
     const panel = usePanel();
@@ -331,11 +330,11 @@ export async function resolvePromptContext({
   const images = files.filter((file) => file.type.startsWith("image/"));
   const pdfs = files.filter((file) => file.type === "application/pdf");
 
-  // Calculate total PDF size
   const totalPdfSize = pdfs.reduce((sum, pdf) => sum + pdf.size, 0);
   const hasNativePdfSupport = totalPdfSize <= PDF_SIZE_LIMIT;
 
-  // If PDFs exceed size limit, fall back to text extraction
+  // Providers reject PDFs above the native-attachment cap; extract text
+  // client-side so the content still reaches the model.
   if (!hasNativePdfSupport && pdfs.length > 0) {
     const pdfTexts = await Promise.all(pdfs.map(extractTextFromPdf));
     userPromptWithContext += `\n\n${pdfTexts
@@ -346,7 +345,6 @@ export async function resolvePromptContext({
       .join("\n\n")}`;
   }
 
-  // Convert images to byte arrays
   const imageByteArrays = await Promise.all(
     images.map(async (file) => {
       const reducedBlob = await toReducedBlob(file, { maxDimension: 2048 });
@@ -355,7 +353,6 @@ export async function resolvePromptContext({
     }),
   );
 
-  // Convert PDFs to byte arrays if under size limit
   const pdfByteArrays = hasNativePdfSupport
     ? await Promise.all(
         pdfs.map(async (file) => {
@@ -383,22 +380,17 @@ function resolveProviderOptions({
   modelId: string;
   reasoningEffort: ReasoningEffort;
 }) {
-  const reasoningValue = resolveReasoningValue({
-    provider,
-    modelId,
-    reasoningEffort,
-  });
+  const anthropicReasoning =
+    provider === "anthropic"
+      ? resolveAnthropicReasoning(modelId, reasoningEffort)
+      : undefined;
+  const reasoningValue =
+    provider === "anthropic"
+      ? undefined
+      : resolveReasoningValue({ provider, modelId, reasoningEffort });
 
   const providerOptions: SharedV3ProviderOptions = {
-    ...(provider === "anthropic" &&
-      reasoningValue && {
-        anthropic: {
-          thinking: {
-            type: "enabled",
-            budgetTokens: reasoningValue,
-          },
-        },
-      }),
+    ...(anthropicReasoning && { anthropic: anthropicReasoning }),
     ...(provider === "openai" &&
       reasoningValue && {
         openai: {
@@ -429,6 +421,35 @@ function resolveProviderOptions({
   }
 
   return Object.keys(providerOptions).length > 0 ? providerOptions : undefined;
+}
+
+function resolveAnthropicReasoning(
+  modelId: string,
+  reasoningEffort: ReasoningEffort,
+) {
+  // Cross-provider prefix: compat shims typically drop the outer SDK's
+  // reasoning shape. Override via `providers.anthropic.options` if needed.
+  const slashIndex = modelId.indexOf("/");
+  const prefix = slashIndex > 0 ? modelId.slice(0, slashIndex) : "";
+  if (prefix && prefix !== "anthropic") return;
+
+  const nativeModelId = extractNativeModelId(modelId);
+  if (!supportsReasoning(nativeModelId)) return;
+  if (reasoningEffort === "none") return;
+
+  // 4.0/4.1/4.5 need manual budget tokens; everything else uses adaptive
+  // thinking with `effort`. `display: "summarized"` overrides Opus 4.7's
+  // "omitted" default so reasoning tokens stream instead of stalling.
+  if (usesLegacyExtendedThinking(nativeModelId)) {
+    const budgetTokens = PROVIDER_REASONING_MAP[reasoningEffort]?.anthropic;
+    if (typeof budgetTokens !== "number") return;
+    return { thinking: { type: "enabled" as const, budgetTokens } };
+  }
+
+  return {
+    thinking: { type: "adaptive" as const, display: "summarized" as const },
+    effort: reasoningEffort,
+  };
 }
 
 function resolveReasoningValue({

@@ -48,8 +48,9 @@ export const PROVIDER_REASONING_MAP: Record<
     openai: "none",
     "openai:gpt-5": "minimal", // GPT-5 does not support `none`
     "openai:gpt-5-mini": "minimal", // GPT-5-mini does not support `none`
+    "openai:gpt-5-nano": "minimal", // GPT-5-nano does not support `none`
     google: "low",
-    "google:gemini-3-flash-preview": "minimal", // Gemini 3 Flash Preview also supports `minimal`
+    "google:gemini-3-flash-preview": "minimal", // Gemini 3 Flash also supports `minimal`
     mistral: "none",
   },
   low: {
@@ -62,7 +63,6 @@ export const PROVIDER_REASONING_MAP: Record<
     anthropic: 16_000,
     openai: "medium",
     google: "medium",
-    "google:gemini-3.1-pro-preview": "high", // Gemini 3.1 Pro only supports `low` or `high`
     "google:gemini-3-pro-preview": "high", // Gemini 3 Pro only supports `low` or `high`
     mistral: "high", // Mistral only exposes `high`/`none`
   },

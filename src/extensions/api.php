@@ -329,7 +329,9 @@ return [
                     CURLOPT_CONNECTTIMEOUT => 10,
                     CURLOPT_TIMEOUT => 0,
                     CURLOPT_LOW_SPEED_LIMIT => 1,
-                    CURLOPT_LOW_SPEED_TIME => 120,
+                    // Reasoning-heavy models stall silently before the first
+                    // token; 4 minutes covers typical first-token latency.
+                    CURLOPT_LOW_SPEED_TIME => 240,
                     // SSL/TLS
                     CURLOPT_SSL_VERIFYPEER => true,
                     // Transparently decompress gzip/deflate/br responses so

@@ -393,7 +393,7 @@ describe("resolveLanguageModel", () => {
   });
 
   describe("custom provider options", () => {
-    it("maps Anthropic reasoning effort to thinking budget", async () => {
+    it("maps Anthropic reasoning effort to thinking budget (legacy)", async () => {
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({
           provider: "anthropic",
@@ -415,6 +415,64 @@ describe("resolveLanguageModel", () => {
           budgetTokens: 32000,
         },
       });
+    });
+
+    it("forces `display: summarized` on Opus 4.7 to keep reasoning visible", async () => {
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({
+          provider: "anthropic",
+          reasoningEffort: "low",
+          providers: {
+            anthropic: { model: "claude-opus-4-7", hasApiKey: true },
+          },
+        }),
+      );
+
+      const { providerOptions } = await resolveLanguageModel();
+
+      expect(providerOptions?.anthropic).toEqual({
+        thinking: { type: "adaptive", display: "summarized" },
+        effort: "low",
+      });
+    });
+
+    it.each([
+      ["claude-opus-4-6", "medium"],
+      ["claude-sonnet-4-6", "high"],
+    ] as const)(
+      "emits adaptive thinking for %s at effort %s",
+      async (model, effort) => {
+        mockUsePluginContext.mockReturnValue(
+          createPluginConfig({
+            provider: "anthropic",
+            reasoningEffort: effort,
+            providers: { anthropic: { model, hasApiKey: true } },
+          }),
+        );
+
+        const { providerOptions } = await resolveLanguageModel();
+
+        expect(providerOptions?.anthropic).toMatchObject({
+          thinking: { type: "adaptive" },
+          effort,
+        });
+      },
+    );
+
+    it("omits thinking entirely for adaptive models at effort none", async () => {
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({
+          provider: "anthropic",
+          reasoningEffort: "none",
+          providers: {
+            anthropic: { model: "claude-opus-4-7", hasApiKey: true },
+          },
+        }),
+      );
+
+      const { providerOptions } = await resolveLanguageModel();
+
+      expect(providerOptions).toBeUndefined();
     });
 
     it("uses model-specific Google reasoning overrides", async () => {
@@ -456,6 +514,40 @@ describe("resolveLanguageModel", () => {
 
       expect(providerOptions).toBeUndefined();
     });
+
+    it.each(["gemini-2.5-pro", "gemini-2.5-flash"])(
+      "omits reasoning for %s (uses thinkingBudget, not thinkingLevel)",
+      async (model) => {
+        mockUsePluginContext.mockReturnValue(
+          createPluginConfig({
+            provider: "google",
+            reasoningEffort: "medium",
+            providers: { google: { model, hasApiKey: true } },
+          }),
+        );
+
+        const { providerOptions } = await resolveLanguageModel();
+
+        expect(providerOptions).toBeUndefined();
+      },
+    );
+
+    it.each(["mistral-medium-latest", "mistral-large-latest"])(
+      "omits reasoning for %s (only Small 4 and magistral honor reasoning_effort)",
+      async (model) => {
+        mockUsePluginContext.mockReturnValue(
+          createPluginConfig({
+            provider: "mistral",
+            reasoningEffort: "high",
+            providers: { mistral: { model, hasApiKey: true } },
+          }),
+        );
+
+        const { providerOptions } = await resolveLanguageModel();
+
+        expect(providerOptions).toBeUndefined();
+      },
+    );
 
     it("merges custom options from providerConfig", async () => {
       const customOptions = {

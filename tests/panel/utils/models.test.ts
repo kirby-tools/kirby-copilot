@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildUserPrompt,
   supportsReasoning,
+  usesLegacyExtendedThinking,
 } from "../../../src/panel/utils/models";
 
 describe("supportsReasoning", () => {
@@ -24,16 +25,19 @@ describe("supportsReasoning", () => {
 
   // eslint-disable-next-line test/prefer-lowercase-title
   describe("Google models", () => {
+    it.each(["gemini-3.1-pro", "gemini-3-flash", "gemini-3-pro-preview"])(
+      "returns true for %s",
+      (model) => {
+        expect(supportsReasoning(model)).toBe(true);
+      },
+    );
+
     it.each([
+      "gemini-2.0-flash",
+      // 2.5 uses `thinkingBudget` (not `thinkingLevel`); SDK default is used
       "gemini-2.5-pro",
       "gemini-2.5-flash",
-      "gemini-3.1-pro",
-      "gemini-3-flash",
-    ])("returns true for %s", (model) => {
-      expect(supportsReasoning(model)).toBe(true);
-    });
-
-    it.each(["gemini-2.0-flash"])("returns false for %s", (model) => {
+    ])("returns false for %s", (model) => {
       expect(supportsReasoning(model)).toBe(false);
     });
   });
@@ -45,6 +49,9 @@ describe("supportsReasoning", () => {
       "claude-opus-4",
       "claude-haiku-4-5",
       "claude-sonnet-4-20250514",
+      "claude-opus-4-7",
+      "claude-sonnet-4-6",
+      "claude-mythos-preview",
     ])("returns true for %s", (model) => {
       expect(supportsReasoning(model)).toBe(true);
     });
@@ -61,15 +68,17 @@ describe("supportsReasoning", () => {
   describe("Mistral models", () => {
     it.each([
       "mistral-small-latest",
-      "mistral-medium-2508",
-      "mistral-large-latest",
+      "magistral-small-2507",
+      "magistral-medium-2507",
     ])("returns true for %s", (model) => {
       expect(supportsReasoning(model)).toBe(true);
     });
 
     it.each([
-      "magistral-small-2507",
-      "magistral-medium-2507",
+      // Only Small 4 and `magistral-*` honor `reasoning_effort`;
+      // `medium`/`large` silently ignore it.
+      "mistral-medium-2508",
+      "mistral-large-latest",
       "mistral-nemo",
       "codestral",
       "ministral-8b-latest",
@@ -87,6 +96,38 @@ describe("supportsReasoning", () => {
       expect(supportsReasoning("GPT-5")).toBe(false);
       expect(supportsReasoning("Claude-Sonnet-4")).toBe(false);
     });
+  });
+});
+
+describe("usesLegacyExtendedThinking", () => {
+  it.each([
+    "claude-opus-4",
+    "claude-sonnet-4",
+    "claude-opus-4-0",
+    "claude-sonnet-4-0",
+    "claude-opus-4-1",
+    "claude-opus-4-1-20250805",
+    "claude-opus-4-5",
+    "claude-opus-4-5-20251101",
+    "claude-sonnet-4-5",
+    "claude-sonnet-4-5-20250929",
+    "claude-haiku-4-5",
+    "claude-haiku-4-5-20251001",
+    // Dated 4.0 snapshots
+    "claude-opus-4-20250514",
+    "claude-sonnet-4-20250514",
+  ])("returns true for %s (needs manual budget tokens)", (model) => {
+    expect(usesLegacyExtendedThinking(model)).toBe(true);
+  });
+
+  it.each([
+    // Adaptive thinking is the default from 4.6 onward
+    "claude-opus-4-6",
+    "claude-sonnet-4-6",
+    "claude-opus-4-7",
+    "claude-mythos-preview",
+  ])("returns false for %s (uses adaptive thinking)", (model) => {
+    expect(usesLegacyExtendedThinking(model)).toBe(false);
   });
 });
 
