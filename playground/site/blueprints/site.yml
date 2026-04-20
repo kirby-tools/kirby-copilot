@@ -61,7 +61,8 @@ tabs:
             when:
               modelProvider: openai
             options:
-              gpt-5-mini: GPT-5 Mini
+              gpt-5.4-nano: GPT-5.4 Nano
+              gpt-5.4-mini: GPT-5.4 Mini
               gpt-5.4: GPT-5.4 (recommended)
             help: GPT-5.4 offers best intelligence from OpenAI, with improved reasoning and creativity.
 
@@ -81,9 +82,10 @@ tabs:
             when:
               modelProvider: anthropic
             options:
+              claude-haiku-4-5: Claude 4.5 Haiku
               claude-sonnet-4-6: Claude 4.6 Sonnet (recommended)
-              claude-opus-4-6: Claude 4.6 Opus
-            help: Claude 4.6 provides excellent reasoning and creativity.
+              claude-opus-4-7: Claude 4.7 Opus
+            help: Sonnet 4.6 balances speed and quality. Opus 4.7 shines at complex reasoning, Haiku 4.5 is fastest for quick drafts.
 
       - width: 1/3
         fields:
