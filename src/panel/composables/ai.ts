@@ -6,7 +6,7 @@ import type {
 import type { Output as OutputNamespace } from "ai";
 import type { LogLevel } from "kirbyuse";
 import type { ModelProvider, ReasoningEffort } from "../constants";
-import type { OutputFormat, ProviderConfig } from "../types";
+import type { OutputFormat, PluginConfig, ProviderConfig } from "../types";
 import { useContent, usePanel } from "kirbyuse";
 import { isObject, template } from "utilful";
 import {
@@ -25,10 +25,10 @@ import {
   createReferencePageContent,
 } from "../utils/content";
 import { CopilotError } from "../utils/error";
+import { createHtmlChunking } from "../utils/html-chunking";
 import { toReducedBlob } from "../utils/image";
 import {
-  createHtmlChunking,
-  extractNativeModelId,
+  parseGatewayPrefix,
   supportsReasoning,
   usesLegacyExtendedThinking,
 } from "../utils/models";
@@ -43,6 +43,17 @@ const PLAYGROUND_PROVIDER_MODEL_MAP: Record<string, string> = {
   google: "googlemodel",
   anthropic: "anthropicmodel",
 };
+
+// Non-Anthropic reasoning-option shapes (Anthropic has its own resolver)
+const REASONING_SHAPERS = {
+  openai: (value: string | number) => ({ reasoningEffort: value }),
+  mistral: (value: string | number) => ({ reasoningEffort: value }),
+  google: (value: string | number) => ({
+    thinkingConfig: { thinkingLevel: value },
+  }),
+} as const satisfies Partial<
+  Record<ModelProvider, (value: string | number) => Record<string, unknown>>
+>;
 
 /**
  * Streams text from an AI provider using the configured model.
@@ -152,120 +163,19 @@ export async function resolveLanguageModel({
   forCompletion?: boolean;
 } = {}) {
   const panel = usePanel();
-  let { config } = await usePluginContext();
+  const { config } = await usePluginContext();
 
-  const isPlayground =
-    __PLAYGROUND__ && !window.location.hostname.includes("localhost");
-
-  if (!forCompletion && isPlayground) {
-    config = JSON.parse(JSON.stringify(config));
-    const { currentContent } = useContent();
-
-    const selectedProvider =
-      currentContent.value.modelprovider || DEFAULT_PLAYGROUND_MODEL_PROVIDER;
-    config.provider = selectedProvider;
-
-    const modelField = PLAYGROUND_PROVIDER_MODEL_MAP[selectedProvider];
-    const selectedModel = modelField
-      ? currentContent.value[modelField]
-      : undefined;
-
-    if (selectedModel) {
-      config.providers[selectedProvider] ??= {};
-      config.providers[selectedProvider]!.model = selectedModel;
-    }
-  }
-
-  if (
-    !config.provider ||
-    !SUPPORTED_PROVIDERS.includes(config.provider as ModelProvider)
-  ) {
-    throw new CopilotError(
-      `Unsupported provider "${config.provider}". Supported providers: ${SUPPORTED_PROVIDERS.join(", ")}. Check "johannschopplich.copilot.provider" in your Kirby config.`,
-    );
-  }
-
-  const {
-    createAnthropic,
-    createGoogleGenerativeAI,
-    createMistral,
-    createOpenAI,
-  } = await loadAISDK();
-
-  const provider = config.provider as ModelProvider;
-  const providerConfig = config.providers[provider] ?? {};
-
-  /// keep-sorted
-  const createProvider = {
-    anthropic: createAnthropic,
-    google: createGoogleGenerativeAI,
-    mistral: createMistral,
-    openai: createOpenAI,
-  }[provider]!;
-
-  if (!isPlayground && !providerConfig.hasApiKey) {
-    throw new CopilotError(
-      `Missing API key for the "${provider}" provider. Add "apiKey" to "johannschopplich.copilot.providers.${provider}" in your Kirby config.`,
-    );
-  }
-
-  const proxyFetch: typeof globalThis.fetch = (url, options) =>
-    fetch(
-      `${panel.api.endpoint}/${PLUGIN_PROXY_API_ROUTE}?provider=${provider}`,
-      {
-        ...options,
-        credentials: "same-origin",
-        headers: mergeHeaders(options?.headers, {
-          "X-CSRF": panel.api.csrf,
-          "X-Proxy-Target": String(url),
-        }),
-      },
-    );
-
-  const api = createProvider({
-    baseURL: providerConfig.baseUrl || undefined,
-    apiKey: !isPlayground
-      ? PROXY_API_KEY_MARKER
-      : (sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`) ?? undefined),
-    fetch: !isPlayground ? proxyFetch : undefined,
-    ...(provider === "anthropic" && !isPlayground
-      ? { headers: { "anthropic-dangerous-direct-browser-access": "true" } }
-      : undefined),
+  const { provider, providerConfig, isPlayground } = resolveProviderSelection(
+    config,
+    forCompletion,
+  );
+  const api = await createProviderClient({
+    provider,
+    providerConfig,
+    isPlayground,
+    panel,
   });
-
-  const defaultCompletion =
-    DEFAULT_COMPLETION_MODELS[
-      provider as keyof typeof DEFAULT_COMPLETION_MODELS
-    ];
-  const slashIndex = providerConfig.model?.indexOf("/") ?? -1;
-  const gatewayPrefix =
-    slashIndex > 0 ? providerConfig.model!.slice(0, slashIndex + 1) : "";
-
-  // Cross-provider gateway prefix: require explicit `completionModel` rather
-  // than derive a 404 (e.g. `google-ai-studio/gpt-5.4-nano`)
-  if (
-    forCompletion &&
-    !providerConfig.completionModel &&
-    gatewayPrefix &&
-    gatewayPrefix.slice(0, -1) !== provider
-  ) {
-    throw new CopilotError(
-      `Cannot derive a default completionModel for the "${provider}" provider with gateway-prefixed model "${providerConfig.model}". Set "completionModel" explicitly in "johannschopplich.copilot.providers.${provider}" in your Kirby config.`,
-    );
-  }
-
-  // Apply the same gateway prefix to the default completion (e.g.
-  // `openai/gpt-5.4` → `openai/gpt-5.4-nano`) so the fallback stays on
-  // the gateway instead of hitting a bare id upstream.
-  const modelId = forCompletion
-    ? providerConfig.completionModel || gatewayPrefix + defaultCompletion
-    : providerConfig.model;
-
-  if (!modelId) {
-    throw new CopilotError(
-      `Missing ${forCompletion ? "completionModel" : "model"} for the "${provider}" provider. Add it to "johannschopplich.copilot.providers.${provider}" in your Kirby config.`,
-    );
-  }
+  const modelId = resolveModelId({ provider, providerConfig, forCompletion });
 
   // Support for OpenAI-compatible gateways (e.g. Cloudflare AI Gateway)
   // that don't support `/v1/responses`
@@ -334,7 +244,7 @@ export async function resolvePromptContext({
   const hasNativePdfSupport = totalPdfSize <= PDF_SIZE_LIMIT;
 
   // Providers reject PDFs above the native-attachment cap; extract text
-  // client-side so the content still reaches the model.
+  // client-side so the content still reaches the model
   if (!hasNativePdfSupport && pdfs.length > 0) {
     const pdfTexts = await Promise.all(pdfs.map(extractTextFromPdf));
     userPromptWithContext += `\n\n${pdfTexts
@@ -369,6 +279,157 @@ export async function resolvePromptContext({
   };
 }
 
+/**
+ * Applies playground overrides and validates the provider selection.
+ */
+function resolveProviderSelection(
+  config: PluginConfig,
+  forCompletion: boolean,
+) {
+  const isPlayground =
+    __PLAYGROUND__ && !window.location.hostname.includes("localhost");
+
+  if (!forCompletion && isPlayground) {
+    config = JSON.parse(JSON.stringify(config));
+    const { currentContent } = useContent();
+
+    const selectedProvider =
+      currentContent.value.modelprovider || DEFAULT_PLAYGROUND_MODEL_PROVIDER;
+    config.provider = selectedProvider;
+
+    const modelField = PLAYGROUND_PROVIDER_MODEL_MAP[selectedProvider];
+    const selectedModel = modelField
+      ? currentContent.value[modelField]
+      : undefined;
+
+    if (selectedModel) {
+      config.providers[selectedProvider] ??= {};
+      config.providers[selectedProvider]!.model = selectedModel;
+    }
+  }
+
+  if (
+    !config.provider ||
+    !SUPPORTED_PROVIDERS.includes(config.provider as ModelProvider)
+  ) {
+    throw new CopilotError(
+      `Unsupported provider "${config.provider}". Supported providers: ${SUPPORTED_PROVIDERS.join(", ")}. Check "johannschopplich.copilot.provider" in your Kirby config.`,
+    );
+  }
+
+  const provider = config.provider as ModelProvider;
+  const providerConfig = config.providers[provider] ?? {};
+
+  return { provider, providerConfig, isPlayground };
+}
+
+/**
+ * Instantiates an AI SDK provider client, wiring the PHP proxy fetch when
+ * running in the Panel and the session-stored key in playground mode.
+ */
+async function createProviderClient({
+  provider,
+  providerConfig,
+  isPlayground,
+  panel,
+}: {
+  provider: ModelProvider;
+  providerConfig: ProviderConfig;
+  isPlayground: boolean;
+  panel: ReturnType<typeof usePanel>;
+}) {
+  const {
+    createAnthropic,
+    createGoogleGenerativeAI,
+    createMistral,
+    createOpenAI,
+  } = await loadAISDK();
+
+  /// keep-sorted
+  const createProvider = {
+    anthropic: createAnthropic,
+    google: createGoogleGenerativeAI,
+    mistral: createMistral,
+    openai: createOpenAI,
+  }[provider];
+
+  if (!isPlayground && !providerConfig.hasApiKey) {
+    throw new CopilotError(
+      `Missing API key for the "${provider}" provider. Add "apiKey" to "johannschopplich.copilot.providers.${provider}" in your Kirby config.`,
+    );
+  }
+
+  const proxyFetch: typeof globalThis.fetch = (url, options) =>
+    fetch(
+      `${panel.api.endpoint}/${PLUGIN_PROXY_API_ROUTE}?provider=${provider}`,
+      {
+        ...options,
+        credentials: "same-origin",
+        headers: mergeHeaders(options?.headers, {
+          "X-CSRF": panel.api.csrf,
+          "X-Proxy-Target": String(url),
+        }),
+      },
+    );
+
+  return createProvider({
+    baseURL: providerConfig.baseUrl || undefined,
+    apiKey: !isPlayground
+      ? PROXY_API_KEY_MARKER
+      : (sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`) ?? undefined),
+    fetch: !isPlayground ? proxyFetch : undefined,
+    ...(provider === "anthropic" && !isPlayground
+      ? { headers: { "anthropic-dangerous-direct-browser-access": "true" } }
+      : undefined),
+  });
+}
+
+/**
+ * Resolves the effective model id, honoring gateway prefixes and completion fallbacks.
+ */
+function resolveModelId({
+  provider,
+  providerConfig,
+  forCompletion,
+}: {
+  provider: ModelProvider;
+  providerConfig: ProviderConfig;
+  forCompletion: boolean;
+}): string {
+  const { prefix } = parseGatewayPrefix(providerConfig.model ?? "");
+
+  // Cross-provider gateway prefix: require explicit `completionModel` rather
+  // than derive a 404 (e.g. `google-ai-studio/gpt-5.4-nano`)
+  if (
+    forCompletion &&
+    !providerConfig.completionModel &&
+    prefix &&
+    prefix !== provider
+  ) {
+    throw new CopilotError(
+      `Cannot derive a default completionModel for the "${provider}" provider with gateway-prefixed model "${providerConfig.model}". Set "completionModel" explicitly in "johannschopplich.copilot.providers.${provider}" in your Kirby config.`,
+    );
+  }
+
+  // Keep the default-completion fallback on the same gateway as the primary model
+  const defaultCompletion =
+    DEFAULT_COMPLETION_MODELS[
+      provider as keyof typeof DEFAULT_COMPLETION_MODELS
+    ];
+  const gatewayPrefix = prefix ? `${prefix}/` : "";
+  const modelId = forCompletion
+    ? providerConfig.completionModel || gatewayPrefix + defaultCompletion
+    : providerConfig.model;
+
+  if (!modelId) {
+    throw new CopilotError(
+      `Missing ${forCompletion ? "completionModel" : "model"} for the "${provider}" provider. Add it to "johannschopplich.copilot.providers.${provider}" in your Kirby config.`,
+    );
+  }
+
+  return modelId;
+}
+
 function resolveProviderOptions({
   provider,
   providerConfig,
@@ -387,30 +448,16 @@ function resolveProviderOptions({
   const reasoningValue =
     provider === "anthropic"
       ? undefined
-      : resolveReasoningValue({ provider, modelId, reasoningEffort });
+      : resolveProviderReasoning({ provider, modelId, reasoningEffort });
+
+  const shape =
+    reasoningValue !== undefined && provider !== "anthropic"
+      ? REASONING_SHAPERS[provider]?.(reasoningValue)
+      : undefined;
 
   const providerOptions: SharedV3ProviderOptions = {
     ...(anthropicReasoning && { anthropic: anthropicReasoning }),
-    ...(provider === "openai" &&
-      reasoningValue && {
-        openai: {
-          reasoningEffort: reasoningValue,
-        },
-      }),
-    ...(provider === "mistral" &&
-      reasoningValue && {
-        mistral: {
-          reasoningEffort: reasoningValue,
-        },
-      }),
-    ...(provider === "google" &&
-      reasoningValue && {
-        google: {
-          thinkingConfig: {
-            thinkingLevel: reasoningValue,
-          },
-        },
-      }),
+    ...(shape && { [provider]: shape }),
   };
 
   if (isObject(providerConfig.options)) {
@@ -429,17 +476,13 @@ function resolveAnthropicReasoning(
 ) {
   // Cross-provider prefix: compat shims typically drop the outer SDK's
   // reasoning shape. Override via `providers.anthropic.options` if needed.
-  const slashIndex = modelId.indexOf("/");
-  const prefix = slashIndex > 0 ? modelId.slice(0, slashIndex) : "";
+  const { prefix, nativeModelId } = parseGatewayPrefix(modelId);
   if (prefix && prefix !== "anthropic") return;
 
-  const nativeModelId = extractNativeModelId(modelId);
   if (!supportsReasoning(nativeModelId)) return;
   if (reasoningEffort === "none") return;
 
-  // 4.0/4.1/4.5 need manual budget tokens; everything else uses adaptive
-  // thinking with `effort`. `display: "summarized"` overrides Opus 4.7's
-  // "omitted" default so reasoning tokens stream instead of stalling.
+  // 4.0/4.1/4.5 need manual budget tokens; everything else uses adaptive thinking with `effort`
   if (usesLegacyExtendedThinking(nativeModelId)) {
     const budgetTokens = PROVIDER_REASONING_MAP[reasoningEffort]?.anthropic;
     if (typeof budgetTokens !== "number") return;
@@ -447,12 +490,16 @@ function resolveAnthropicReasoning(
   }
 
   return {
-    thinking: { type: "adaptive" as const, display: "summarized" as const },
+    thinking: {
+      type: "adaptive" as const,
+      // Skip reasoning text the Panel doesn't render (default: `"summarized"`)
+      display: "omitted" as const,
+    },
     effort: reasoningEffort,
   };
 }
 
-function resolveReasoningValue({
+function resolveProviderReasoning({
   provider,
   modelId,
   reasoningEffort,
@@ -463,11 +510,9 @@ function resolveReasoningValue({
 }) {
   // Cross-provider prefix: compat shims typically drop the outer SDK's
   // reasoning shape. Override via `providers.<provider>.options` if needed.
-  const slashIndex = modelId.indexOf("/");
-  const prefix = slashIndex > 0 ? modelId.slice(0, slashIndex) : "";
+  const { prefix, nativeModelId } = parseGatewayPrefix(modelId);
   if (prefix && prefix !== provider) return;
 
-  const nativeModelId = extractNativeModelId(modelId);
   if (!supportsReasoning(nativeModelId)) return;
 
   const reasoningConfig = PROVIDER_REASONING_MAP[reasoningEffort];

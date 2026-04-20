@@ -417,7 +417,7 @@ describe("resolveLanguageModel", () => {
       });
     });
 
-    it("forces `display: summarized` on Opus 4.7 to keep reasoning visible", async () => {
+    it("forces `display: omitted` on Opus 4.7 to skip unrendered reasoning text", async () => {
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({
           provider: "anthropic",
@@ -431,7 +431,7 @@ describe("resolveLanguageModel", () => {
       const { providerOptions } = await resolveLanguageModel();
 
       expect(providerOptions?.anthropic).toEqual({
-        thinking: { type: "adaptive", display: "summarized" },
+        thinking: { type: "adaptive", display: "omitted" },
         effort: "low",
       });
     });

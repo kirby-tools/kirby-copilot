@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createHtmlChunking } from "../../../src/panel/utils/models";
+import { createHtmlChunking } from "../../../src/panel/utils/html-chunking";
 
 describe("createHtmlChunking", () => {
   describe("plain text", () => {
