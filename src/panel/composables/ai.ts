@@ -378,7 +378,7 @@ async function createProviderClient({
       ? PROXY_API_KEY_MARKER
       : (sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`) ?? undefined),
     fetch: !isPlayground ? proxyFetch : undefined,
-    ...(provider === "anthropic" && !isPlayground
+    ...(provider === "anthropic" && isPlayground
       ? { headers: { "anthropic-dangerous-direct-browser-access": "true" } }
       : undefined),
   });
