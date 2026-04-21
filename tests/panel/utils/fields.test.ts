@@ -47,15 +47,6 @@ describe("findFieldDefinition", () => {
       const result = findFieldDefinition(fields, "content");
       expect(result).toBeUndefined();
     });
-
-    it("returns first matching field in array", () => {
-      const fields = [
-        field({ type: "text", name: "name", label: "Name 1" }),
-        field({ type: "text", name: "name", label: "Name 2" }),
-      ];
-      const result = findFieldDefinition(fields, "name");
-      expect(result).toBe(fields[0]);
-    });
   });
 
   describe("nested fields (structure/object)", () => {

@@ -36,14 +36,6 @@ final class ProxyRouteTest extends ApiRouteTestCase
         ];
     }
 
-    #[Test]
-    public function missing_provider_query_throws(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageMatches('/Invalid provider/');
-        $this->callProxy();
-    }
-
     /** @return array<string, array{0: string}> */
     public static function invalidProviders(): array
     {

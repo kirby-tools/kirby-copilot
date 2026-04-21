@@ -12,15 +12,9 @@ const usePromptTemplatesState = createGlobalState(() => {
   const storedTemplates = localStorage.getItem(storageKey);
   const hasStoredTemplates = !!storedTemplates;
 
-  let initialTemplates: PromptTemplate[];
-
-  if (storedTemplates) {
-    initialTemplates = migrateTemplates(storedTemplates);
-    // Persist migrated templates back to storage
-    localStorage.setItem(storageKey, JSON.stringify(initialTemplates));
-  } else {
-    initialTemplates = getDefaultTemplates();
-  }
+  const initialTemplates: PromptTemplate[] = storedTemplates
+    ? JSON.parse(storedTemplates)
+    : getDefaultTemplates();
 
   const state = reactive({
     templates: initialTemplates,
@@ -61,7 +55,6 @@ export function usePromptTemplates() {
 
     state.templates.unshift(template);
 
-    // Limit templates count
     if (state.templates.length > TEMPLATE_LIMIT) {
       state.templates.splice(TEMPLATE_LIMIT);
     }
@@ -74,7 +67,7 @@ export function usePromptTemplates() {
     const index = state.templates.findIndex((template) => template.id === id);
     if (index === -1) return false;
 
-    // Use Object.assign for Vue 2 reactivity on object properties
+    // `Object.assign` preserves Vue 2 reactivity on the mutated object
     Object.assign(state.templates[index]!, updates);
 
     saveTemplates();
@@ -117,7 +110,6 @@ export function usePromptTemplates() {
       }
 
       if (existingIndex !== -1) {
-        // Preserve existing metadata, update content
         const selectedTemplate = existingTemplates.splice(existingIndex, 1)[0]!;
         result.push({
           ...selectedTemplate,
@@ -125,7 +117,6 @@ export function usePromptTemplates() {
           prompt: trimmedPrompt,
         });
       } else {
-        // Create new template
         result.push({
           id: generateRandomId(),
           label: trimmedLabel,
@@ -147,7 +138,6 @@ export function usePromptTemplates() {
       readOnly: true,
     }));
 
-    // Clear defaults if config templates exist and user hasn't customized yet
     if (newTemplates.length > 0 && !hasStoredTemplates) {
       state.templates = [];
     }
@@ -180,19 +170,4 @@ function getDefaultTemplates(): PromptTemplate[] {
     ...template,
     createdAt: Date.now(),
   }));
-}
-
-/**
- * Migrates legacy templates from `name` to `label` property.
- *
- * @todo Remove in a future version after sufficient migration period.
- */
-function migrateTemplates(data: string): PromptTemplate[] {
-  return JSON.parse(data).map((template: Record<string, unknown>) => {
-    if ("name" in template && !("label" in template)) {
-      const { name, ...rest } = template;
-      return { ...rest, label: name };
-    }
-    return template;
-  });
 }

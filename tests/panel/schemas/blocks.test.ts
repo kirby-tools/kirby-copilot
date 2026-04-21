@@ -71,14 +71,12 @@ describe("generateKirbyBlocksSchema", () => {
       expect(schema.description).toBe("Union of all Kirby block types");
     });
 
-    it("throws error for invalid input", () => {
-      expect(() => generateKirbyBlocksSchema([])).toThrow(
-        "Invalid fieldsets configuration",
-      );
-      expect(() => generateKirbyBlocksSchema(null as any)).toThrow(
-        "Invalid fieldsets configuration",
-      );
-      expect(() => generateKirbyBlocksSchema("invalid" as any)).toThrow(
+    it.each([
+      { label: "empty array", input: [] },
+      { label: "null", input: null as any },
+      { label: "string", input: "invalid" as any },
+    ])("throws for $label input", ({ input }) => {
+      expect(() => generateKirbyBlocksSchema(input)).toThrow(
         "Invalid fieldsets configuration",
       );
     });

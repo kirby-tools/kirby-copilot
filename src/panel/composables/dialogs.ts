@@ -83,7 +83,6 @@ export function useTemplateDialogs() {
     });
 
     if (result?.templates) {
-      // Filter out templates marked for deletion
       const templatesToKeep = result.templates.filter(
         (template) => !template.toDelete,
       );

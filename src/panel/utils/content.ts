@@ -32,6 +32,15 @@ export function createContentContext(): Record<string, string> {
   );
 }
 
+/**
+ * Shapes a fetched reference page into a compact record for the
+ * `<reference_page>` block that the AI resolver appends to the user prompt.
+ *
+ * @remarks
+ * Drops `null` and empty-string fields so the model isn't distracted by
+ * blueprint keys the editor never filled in, and normalizes Kirby blocks
+ * arrays by stripping internal metadata (`id`, `isHidden`).
+ */
 export function createReferencePageContent({
   title,
   content,

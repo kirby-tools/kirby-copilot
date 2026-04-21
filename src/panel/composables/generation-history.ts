@@ -22,7 +22,7 @@ export function useGenerationHistory() {
 
     const trimmedPrompt = prompt.trim();
 
-    // Remove duplicate if exists (move to front)
+    // Move existing entries to the front so ArrowUp cycles don't repeat
     const existingIndex = history.value.indexOf(trimmedPrompt);
     if (existingIndex !== -1) {
       history.value.splice(existingIndex, 1);
@@ -30,7 +30,6 @@ export function useGenerationHistory() {
 
     history.value.unshift(trimmedPrompt);
 
-    // Limit history size
     if (history.value.length > MAX_HISTORY) {
       history.value = history.value.slice(0, MAX_HISTORY);
     }
@@ -52,6 +51,7 @@ export function useGenerationHistory() {
         currentIndex.value--;
         return history.value[currentIndex.value];
       } else if (currentIndex.value === 0) {
+        // Past the freshest entry: return the in-progress prompt so typing isn't lost
         currentIndex.value = -1;
         return lastPrompt.value;
       }

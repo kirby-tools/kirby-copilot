@@ -3,7 +3,6 @@ import { loadAISDK } from "./ai";
 
 export class CopilotError extends Error {}
 
-/** Handles errors from AI stream operations. */
 export async function handleStreamError(error: Error) {
   const panel = usePanel();
   const { AISDKError } = await loadAISDK();
