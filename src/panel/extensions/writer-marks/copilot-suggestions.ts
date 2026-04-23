@@ -22,14 +22,44 @@ interface CompletionPluginState {
   position: number | null;
   isLoading: boolean;
   skipNextTrigger: boolean;
-  manualTrigger: boolean;
 }
+
+export type CompletionMeta =
+  | { type: "startLoading"; position: number }
+  | { type: "streamChunk"; suggestion: string; position: number }
+  | { type: "complete"; suggestion: string; position: number }
+  | { type: "dismiss"; skipNextTrigger?: boolean };
+
+const EMPTY_PLUGIN_STATE: CompletionPluginState = {
+  suggestion: null,
+  position: null,
+  isLoading: false,
+  skipNextTrigger: false,
+};
 
 let completionConfig: false | CompletionConfig | undefined;
 
-export const completionPluginKey = new PluginKey<CompletionPluginState>(
+const completionPluginKey = new PluginKey<CompletionPluginState>(
   "copilot-suggestions",
 );
+
+const triggerHandles = new WeakMap<EditorView, () => void>();
+
+export function setCompletionMeta(tr: Transaction, meta: CompletionMeta) {
+  tr.setMeta(completionPluginKey, meta);
+  return tr;
+}
+
+export function getCompletionState(state: EditorState) {
+  return completionPluginKey.getState(state);
+}
+
+export function triggerCompletion(view: EditorView): boolean {
+  const trigger = triggerHandles.get(view);
+  if (!trigger) return false;
+  trigger();
+  return true;
+}
 
 interface CopilotSuggestionsMark extends WriterMarkExtension {
   _acceptSuggestion: () => boolean;
@@ -45,9 +75,9 @@ export const copilotSuggestions: CopilotSuggestionsMark = {
 
   keys(this: CopilotSuggestionsMark, _context: WriterMarkContext) {
     return {
-      Tab: () => this._acceptSuggestion!(),
-      Escape: () => this._dismissSuggestion!(),
-      "Mod-,": () => this._triggerCompletion!(),
+      Tab: () => this._acceptSuggestion(),
+      Escape: () => this._dismissSuggestion(),
+      "Mod-,": () => this._triggerCompletion(),
     };
   },
 
@@ -57,52 +87,38 @@ export const copilotSuggestions: CopilotSuggestionsMark = {
 
   _acceptSuggestion(this: CopilotSuggestionsMark) {
     const { view } = this.editor!;
-    const pluginState = completionPluginKey.getState(view.state);
+    const pluginState = getCompletionState(view.state);
     if (!pluginState?.suggestion) return false;
 
-    // Insert the suggestion text
-    const { tr } = view.state;
-    tr.insertText(pluginState.suggestion, pluginState.position!);
-    tr.setMeta(completionPluginKey, {
-      suggestion: null,
-      position: null,
-      isLoading: false,
-    });
+    const tr = view.state.tr.insertText(
+      pluginState.suggestion,
+      pluginState.position!,
+    );
+    setCompletionMeta(tr, { type: "dismiss" });
     view.dispatch(tr);
 
     // Show license toast once per session for unlicensed users
-    this._showLicenseToastOnce!();
+    this._showLicenseToastOnce();
 
     return true;
   },
 
   _dismissSuggestion(this: CopilotSuggestionsMark) {
     const { view } = this.editor!;
-    const pluginState = completionPluginKey.getState(view.state);
+    const pluginState = getCompletionState(view.state);
 
-    // Always dispatch dismiss (also cancels pending debounced completions)
-    const tr = view.state.tr.setMeta(completionPluginKey, {
-      suggestion: null,
-      position: null,
-      isLoading: false,
-      skipNextTrigger: true,
-    });
-    view.dispatch(tr);
+    view.dispatch(
+      setCompletionMeta(view.state.tr, {
+        type: "dismiss",
+        skipNextTrigger: true,
+      }),
+    );
 
-    // Return true if there was something visible to dismiss
     return Boolean(pluginState?.suggestion || pluginState?.isLoading);
   },
 
   _triggerCompletion(this: CopilotSuggestionsMark) {
-    const { view } = this.editor!;
-    const pluginState = completionPluginKey.getState(view.state);
-    if (!pluginState) return false;
-
-    const tr = view.state.tr.setMeta(completionPluginKey, {
-      manualTrigger: true,
-    });
-    view.dispatch(tr);
-    return true;
+    return triggerCompletion(this.editor!.view);
   },
 
   async _showLicenseToastOnce() {
@@ -145,7 +161,7 @@ function createCompletionPlugin(
   let debounceTimer: ReturnType<typeof setTimeout>;
   let abortController: AbortController | undefined;
 
-  const deduplicateRequest = () => {
+  const abortActiveRequest = () => {
     if (abortController) {
       abortController.abort();
       abortController = undefined;
@@ -156,48 +172,67 @@ function createCompletionPlugin(
     key: completionPluginKey,
 
     state: {
-      init(): CompletionPluginState {
-        return {
-          suggestion: null,
-          position: null,
-          isLoading: false,
-          skipNextTrigger: false,
-          manualTrigger: false,
-        };
+      init() {
+        return { ...EMPTY_PLUGIN_STATE };
       },
-      apply(
-        tr: Transaction,
-        pluginState: CompletionPluginState,
-      ): CompletionPluginState {
+      apply(tr, value) {
         const meta = tr.getMeta(completionPluginKey) as
-          | Partial<CompletionPluginState>
+          | CompletionMeta
           | undefined;
 
-        if (meta !== undefined) {
-          // Abort any active request when loading ends (dismiss, accept, error)
-          if (meta.isLoading === false) {
-            deduplicateRequest();
+        if (meta) {
+          switch (meta.type) {
+            case "startLoading":
+              return {
+                suggestion: null,
+                position: meta.position,
+                isLoading: true,
+                skipNextTrigger: false,
+              };
+            case "streamChunk":
+              return {
+                suggestion: meta.suggestion,
+                position: meta.position,
+                isLoading: true,
+                skipNextTrigger: false,
+              };
+            case "complete":
+              return {
+                suggestion: meta.suggestion,
+                position: meta.position,
+                isLoading: false,
+                skipNextTrigger: false,
+              };
+            case "dismiss":
+              abortActiveRequest();
+              return {
+                suggestion: null,
+                position: null,
+                isLoading: false,
+                skipNextTrigger: meta.skipNextTrigger ?? false,
+              };
+            default: {
+              const _exhaustive: never = meta;
+              void _exhaustive;
+            }
           }
-
-          return { ...pluginState, ...meta };
         }
 
-        // Clear suggestion on document change
         if (tr.docChanged) {
-          deduplicateRequest();
-          return {
-            ...pluginState,
-            suggestion: null,
-            position: null,
-            isLoading: false,
-          };
+          abortActiveRequest();
+          return { ...EMPTY_PLUGIN_STATE };
         }
 
-        return pluginState;
+        return value;
       },
     },
 
-    view() {
+    view(editorView) {
+      triggerHandles.set(editorView, () => {
+        clearTimeout(debounceTimer);
+        generateCompletion(editorView, { includeSuffix: true });
+      });
+
       if (completionConfig === undefined) {
         usePluginContext().then(({ config }) => {
           completionConfig = config.completion;
@@ -205,28 +240,11 @@ function createCompletionPlugin(
       }
 
       return {
-        update(view: EditorView, prevState: EditorState) {
-          const pluginState = completionPluginKey.getState(view.state);
+        update(view, prevState) {
+          const pluginState = getCompletionState(view.state);
 
-          // Handle manual trigger
-          if (pluginState?.manualTrigger) {
-            clearTimeout(debounceTimer);
-            // Reset the flag
-            const tr = view.state.tr.setMeta(completionPluginKey, {
-              manualTrigger: false,
-            });
-            view.dispatch(tr);
-            generateCompletion(view, { includeSuffix: true });
-            return;
-          }
-
-          // Check skip flag (from prompt dialog or pre-emptive dismiss)
           if (pluginState?.skipNextTrigger) {
             clearTimeout(debounceTimer);
-            const tr = view.state.tr.setMeta(completionPluginKey, {
-              skipNextTrigger: false,
-            });
-            view.dispatch(tr);
             return;
           }
 
@@ -256,14 +274,15 @@ function createCompletionPlugin(
         },
         destroy() {
           clearTimeout(debounceTimer);
-          deduplicateRequest();
+          abortActiveRequest();
+          triggerHandles.delete(editorView);
         },
       };
     },
 
     props: {
-      decorations(state: EditorState) {
-        const pluginState = completionPluginKey.getState(state);
+      decorations(state) {
+        const pluginState = getCompletionState(state);
 
         // Show loader when loading and no suggestion yet
         if (
@@ -293,7 +312,7 @@ function createCompletionPlugin(
               span.textContent = pluginState.suggestion;
               return span;
             },
-            { side: 1 }, // Place after the cursor position
+            { side: 1 },
           );
           return DecorationSet.create(state.doc, [widget]);
         }
@@ -301,7 +320,9 @@ function createCompletionPlugin(
         return DecorationSet.empty;
       },
       handleDOMEvents: {
-        blur: () => mark._dismissSuggestion!(),
+        blur: () => {
+          mark._dismissSuggestion();
+        },
       },
     },
   };
@@ -322,13 +343,9 @@ function createCompletionPlugin(
     });
     if (!prefix.trim()) return;
 
-    // Mark as loading
-    const tr = state.tr.setMeta(completionPluginKey, {
-      suggestion: null,
-      position,
-      isLoading: true,
-    });
-    view.dispatch(tr);
+    view.dispatch(
+      setCompletionMeta(state.tr, { type: "startLoading", position }),
+    );
 
     // Capture signal reference to detect if generation gets cancelled
     const { signal } = abortController;
@@ -349,57 +366,51 @@ function createCompletionPlugin(
         abortSignal: signal,
       });
 
-      // Stream chunks and update ghost text progressively
       const shouldPrependSpace = prefix.length > 0 && !/\s$/.test(prefix);
-      let fullText = "";
+      let streamedText = "";
 
       for await (const chunk of textStream) {
         if (signal.aborted) return;
 
-        fullText += chunk;
+        streamedText += chunk;
 
-        // Apply space prefix on first chunk if needed
         const suggestion =
-          shouldPrependSpace && !fullText.startsWith(" ")
-            ? ` ${fullText}`
-            : fullText;
+          shouldPrependSpace && !streamedText.startsWith(" ")
+            ? ` ${streamedText}`
+            : streamedText;
 
-        const streamTr = view.state.tr.setMeta(completionPluginKey, {
-          suggestion,
-          position,
-          isLoading: true,
-        });
-        view.dispatch(streamTr);
+        view.dispatch(
+          setCompletionMeta(view.state.tr, {
+            type: "streamChunk",
+            suggestion,
+            position,
+          }),
+        );
       }
 
-      // Handle cancellation before stream started or after it completed
       if (signal.aborted) return;
 
-      // Mark streaming complete
       const finalSuggestion =
-        shouldPrependSpace && !fullText.startsWith(" ")
-          ? ` ${fullText}`
-          : fullText;
+        shouldPrependSpace && !streamedText.startsWith(" ")
+          ? ` ${streamedText}`
+          : streamedText;
 
-      const completeTr = view.state.tr.setMeta(completionPluginKey, {
-        suggestion: finalSuggestion,
-        position,
-        isLoading: false,
-      });
-      view.dispatch(completeTr);
+      view.dispatch(
+        setCompletionMeta(view.state.tr, {
+          type: "complete",
+          suggestion: finalSuggestion,
+          position,
+        }),
+      );
     } catch (error) {
       // If intentionally aborted, state was already cleared by the aborter
       if (signal.aborted) return;
 
       console.error("Failed to generate completion:", error);
 
-      // Clear state on unexpected error
-      const errorTr = view.state.tr.setMeta(completionPluginKey, {
-        suggestion: null,
-        position: null,
-        isLoading: false,
-      });
-      view.dispatch(errorTr);
+      view.dispatch(
+        setCompletionMeta(view.state.tr, { type: "dismiss" }),
+      );
     } finally {
       abortController = undefined;
     }

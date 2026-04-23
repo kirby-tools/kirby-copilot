@@ -2,7 +2,7 @@ import type { WriterMarkContext, WriterMarkExtension } from "kirby-types";
 import type { EditorState, Transaction } from "prosemirror-state";
 import { DOMParser } from "prosemirror-model";
 import { streamTextToField } from "../shared";
-import { completionPluginKey } from "./copilot-suggestions";
+import { setCompletionMeta } from "./copilot-suggestions";
 
 interface CopilotMark extends WriterMarkExtension {
   _insertText: (
@@ -134,7 +134,7 @@ export const copilot: CopilotMark = {
       );
 
       cursorPosition = newPosition;
-      newTr.setMeta(completionPluginKey, { skipNextTrigger: true });
+      setCompletionMeta(newTr, { type: "dismiss", skipNextTrigger: true });
       view.dispatch(newTr);
     };
 
@@ -159,7 +159,7 @@ export const copilot: CopilotMark = {
         context,
       );
       cursorPosition = newPosition;
-      newTr.setMeta(completionPluginKey, { skipNextTrigger: true });
+      setCompletionMeta(newTr, { type: "dismiss", skipNextTrigger: true });
       view.dispatch(newTr);
     };
 
