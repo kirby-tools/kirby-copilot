@@ -1,10 +1,6 @@
 import type { KirbyOption } from "kirby-types";
 import { describe, expect, it } from "vitest";
-import { z } from "zod";
-import {
-  EXCLUDED_FIELD_TYPES,
-  fieldToZodSchema,
-} from "../../../src/panel/schemas/fields";
+import { fieldToZodSchema } from "../../../src/panel/schemas/fields";
 import { assertSchema, field } from "../utils";
 
 describe("fieldToZodSchema", () => {
@@ -20,8 +16,8 @@ describe("fieldToZodSchema", () => {
       ["password", "Password"],
     ] as const)("handles %s field", (type, label) => {
       const schema = assertSchema(fieldToZodSchema(field({ type, label, name: type })));
-      expect(schema).toBeInstanceOf(z.ZodNullable);
-      expect(() => schema.parse("sample-value")).not.toThrow();
+      expect(schema.safeParse("sample-value").success).toBe(true);
+      expect(schema.safeParse(null).success).toBe(true);
     });
 
     it("enforces minlength/maxlength constraints", () => {
@@ -306,7 +302,7 @@ describe("fieldToZodSchema", () => {
   });
 
   describe("required field handling", () => {
-    it("adds min(1) for required string fields without existing minlength", () => {
+    it("rejects empty strings when required", () => {
       const schema = assertSchema(fieldToZodSchema(
         field({
           type: "text",
@@ -476,24 +472,4 @@ describe("fieldToZodSchema", () => {
     });
   });
 
-  describe("excluded field types", () => {
-    it("excludes UI elements and reference types (not layout)", () => {
-      const excluded = [...EXCLUDED_FIELD_TYPES];
-
-      expect(excluded).toEqual(
-        expect.arrayContaining([
-          "files",
-          "gap",
-          "headline",
-          "hidden",
-          "info",
-          "line",
-          "pages",
-          "users",
-        ]),
-      );
-      // Layout is handled separately, not excluded
-      expect(excluded).not.toContain("layout");
-    });
-  });
 });

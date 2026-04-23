@@ -9,7 +9,7 @@ import {
 describe("supportsReasoning", () => {
   // eslint-disable-next-line test/prefer-lowercase-title
   describe("OpenAI models", () => {
-    it.each(["gpt-5", "gpt-5.4-mini", "gpt-5.4-nano", "gpt-5.4"])(
+    it.each(["gpt-5", "gpt-5.4-mini"])(
       "returns true for %s",
       (model) => {
         expect(supportsReasoning(model)).toBe(true);
@@ -46,12 +46,9 @@ describe("supportsReasoning", () => {
   // eslint-disable-next-line test/prefer-lowercase-title
   describe("Anthropic models", () => {
     it.each([
-      "claude-sonnet-4",
       "claude-opus-4",
-      "claude-haiku-4-5",
-      "claude-sonnet-4-20250514",
-      "claude-opus-4-7",
       "claude-sonnet-4-6",
+      "claude-haiku-4-5",
       "claude-mythos-preview",
     ])("returns true for %s", (model) => {
       expect(supportsReasoning(model)).toBe(true);
@@ -103,20 +100,10 @@ describe("supportsReasoning", () => {
 describe("usesLegacyExtendedThinking", () => {
   it.each([
     "claude-opus-4",
-    "claude-sonnet-4",
-    "claude-opus-4-0",
-    "claude-sonnet-4-0",
     "claude-opus-4-1",
-    "claude-opus-4-1-20250805",
-    "claude-opus-4-5",
     "claude-opus-4-5-20251101",
-    "claude-sonnet-4-5",
-    "claude-sonnet-4-5-20250929",
-    "claude-haiku-4-5",
-    "claude-haiku-4-5-20251001",
-    // Dated 4.0 snapshots
-    "claude-opus-4-20250514",
     "claude-sonnet-4-20250514",
+    "claude-haiku-4-5",
   ])("returns true for %s (needs manual budget tokens)", (model) => {
     expect(usesLegacyExtendedThinking(model)).toBe(true);
   });

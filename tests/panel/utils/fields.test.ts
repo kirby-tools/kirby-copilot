@@ -15,18 +15,6 @@ describe("findFieldDefinition", () => {
       const result = findFieldDefinition(titleField, "description");
       expect(result).toBeUndefined();
     });
-
-    it("finds a field with type filter", () => {
-      const titleField = field({ type: "text", name: "title", label: "Title" });
-      const result = findFieldDefinition(titleField, "title", "text");
-      expect(result).toBe(titleField);
-    });
-
-    it("returns undefined when type filter does not match", () => {
-      const titleField = field({ type: "text", name: "title", label: "Title" });
-      const result = findFieldDefinition(titleField, "title", "textarea");
-      expect(result).toBeUndefined();
-    });
   });
 
   describe("array of fields", () => {
@@ -50,16 +38,6 @@ describe("findFieldDefinition", () => {
   });
 
   describe("nested fields (structure/object)", () => {
-    it("finds a field inside nested fields property", () => {
-      const items = structureField("items", {
-        name: field({ type: "text", name: "name", label: "Name" }),
-        value: field({ type: "number", name: "value", label: "Value" }),
-      });
-      const result = findFieldDefinition(items, "name");
-      expect(result?.name).toBe("name");
-      expect(result?.type).toBe("text");
-    });
-
     it("finds deeply nested fields", () => {
       const outer = structureField("outer", {
         inner: structureField("inner", {

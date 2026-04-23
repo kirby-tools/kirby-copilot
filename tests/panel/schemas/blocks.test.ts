@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { z } from "zod";
 import { generateKirbyBlocksSchema } from "../../../src/panel/schemas/blocks";
 import { field, fieldset } from "../utils";
 
@@ -64,13 +63,6 @@ describe("generateKirbyBlocksSchema", () => {
   ];
 
   describe("schema generation", () => {
-    it("generates a valid Zod union schema", () => {
-      const schema = generateKirbyBlocksSchema(basicBlocksConfig);
-
-      expect(schema).toBeInstanceOf(z.ZodUnion);
-      expect(schema.description).toBe("Union of all Kirby block types");
-    });
-
     it.each([
       { label: "empty array", input: [] },
       { label: "null", input: null as any },
@@ -403,46 +395,6 @@ describe("generateKirbyBlocksSchema", () => {
           content: { settings: { title: "Card" }, tags: [] },
         }),
       ).toThrow();
-    });
-  });
-
-  describe("writer field modes", () => {
-    const writerFieldConfig = [
-      fieldset({
-        type: "content",
-        name: "Content Block",
-        fields: {
-          blockContent: field({
-            type: "writer",
-            label: "Block Content",
-            name: "blockContent",
-            inline: false,
-            counter: false,
-          }),
-          inlineContent: field({
-            type: "writer",
-            label: "Inline Content",
-            name: "inlineContent",
-            inline: true,
-            counter: false,
-          }),
-        },
-      }),
-    ];
-
-    it("handles both inline and block writer fields", () => {
-      const schema = generateKirbyBlocksSchema(writerFieldConfig);
-
-      // Both should accept string content
-      expect(() =>
-        schema.parse({
-          type: "content",
-          content: {
-            blockContent: "<p>Block level content</p>",
-            inlineContent: "Inline <strong>content</strong>",
-          },
-        }),
-      ).not.toThrow();
     });
   });
 

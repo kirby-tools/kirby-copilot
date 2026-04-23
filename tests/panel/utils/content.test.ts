@@ -1,4 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
+import {
+  createContentContext,
+  createReferencePageContent,
+} from "../../../src/panel/utils/content";
 
 const mockCurrentContent = { value: {} as Record<string, unknown> };
 const mockView = { title: "" };
@@ -7,10 +11,6 @@ vi.mock("kirbyuse", () => ({
   usePanel: () => ({ view: mockView }),
   useContent: () => ({ currentContent: mockCurrentContent }),
 }));
-
-const { createContentContext, createReferencePageContent } = await import(
-  "../../../src/panel/utils/content"
-);
 
 function block(overrides: Record<string, unknown>) {
   return {
@@ -85,7 +85,7 @@ describe("createContentContext", () => {
     expect(result).toEqual({ body: "hello", title: "My Page" });
   });
 
-  it("stringifies primitives with String()", () => {
+  it("stringifies primitives as strings", () => {
     mockCurrentContent.value = { count: 3, flag: false };
     mockView.title = "T";
 

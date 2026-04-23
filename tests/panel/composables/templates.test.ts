@@ -110,17 +110,13 @@ describe("addTemplate", () => {
     expect(added).toMatchObject({ label: "Label", prompt: "prompt" });
   });
 
-  it("returns undefined and does not persist when label is blank", async () => {
+  it.each([
+    { field: "label", label: "   ", prompt: "prompt" },
+    { field: "prompt", label: "label", prompt: "   " },
+  ])("returns undefined and does not persist when $field is blank", async ({ label, prompt }) => {
     const { addTemplate, templates } = await loadComposable();
 
-    expect(addTemplate("   ", "prompt")).toBeUndefined();
-    expect(templates.value).toHaveLength(0);
-  });
-
-  it("returns undefined and does not persist when prompt is blank", async () => {
-    const { addTemplate, templates } = await loadComposable();
-
-    expect(addTemplate("label", "   ")).toBeUndefined();
+    expect(addTemplate(label, prompt)).toBeUndefined();
     expect(templates.value).toHaveLength(0);
   });
 

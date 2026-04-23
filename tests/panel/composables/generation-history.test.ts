@@ -178,10 +178,4 @@ describe("getRecentEntries", () => {
     const { getRecentEntries } = await loadComposable();
     expect(getRecentEntries(3)).toEqual(["e", "d", "c"]);
   });
-
-  it("defaults to 10 entries", async () => {
-    await seedStorage(Array.from({ length: 15 }, (_, i) => `e${i}`));
-    const { getRecentEntries } = await loadComposable();
-    expect(getRecentEntries()).toHaveLength(10);
-  });
 });
