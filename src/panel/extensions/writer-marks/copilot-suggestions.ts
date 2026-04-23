@@ -218,7 +218,7 @@ function createCompletionPlugin(
           }
         }
 
-        if (tr.docChanged) {
+        if (tr.docChanged || tr.selectionSet) {
           abortActiveRequest();
           return { ...EMPTY_PLUGIN_STATE };
         }
