@@ -250,6 +250,9 @@ function createCompletionPlugin(
 
           clearTimeout(debounceTimer);
 
+          // Skip during IME composition
+          if (view.composing) return;
+
           // Only trigger if document changed
           if (view.state.doc.eq(prevState.doc)) return;
 
