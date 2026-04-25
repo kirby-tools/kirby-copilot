@@ -165,6 +165,7 @@ function onEditorFocus() {
 }
 
 function onEditorBlur() {
+  if (!document.hasFocus()) return;
   isFocused.value = false;
 }
 
@@ -227,6 +228,7 @@ defineExpose({
       :selected-index="suggestState.selectedIndex"
       :top="suggestState.top"
       :left="suggestState.left"
+      :anchor-in-token="suggestState.query.length > 0"
       :listbox-id="listboxId"
       @select="onDropdownSelect"
       @hover="onDropdownHover"
