@@ -139,6 +139,35 @@ return [
                     $config['promptTemplates'] ?? []
                 )));
 
+                $config['skills'] = array_values(array_filter(array_map(
+                    function ($skill) use ($resolveMultilang) {
+                        $id = is_string($skill['id'] ?? null) ? trim($skill['id']) : null;
+                        $label = $resolveMultilang($skill['label'] ?? null);
+                        $instructions = $resolveMultilang($skill['instructions'] ?? null);
+
+                        if (is_string($label)) {
+                            $label = trim($label);
+                        }
+
+                        if (is_string($instructions)) {
+                            $instructions = trim($instructions);
+                        }
+
+                        if (!$id || !$label || !$instructions) {
+                            return null;
+                        }
+
+                        // Editors type `@skill://<id>`, so restrict ids to slug-safe
+                        // characters and reject anything that wouldn't round-trip.
+                        if (!preg_match('/^[\w\-]+$/', $id)) {
+                            return null;
+                        }
+
+                        return compact('id', 'label', 'instructions');
+                    },
+                    $config['skills'] ?? []
+                )));
+
                 $assets = $kirby
                     ->plugin('johannschopplich/copilot')
                     ->assets()

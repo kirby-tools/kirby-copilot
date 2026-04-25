@@ -5,7 +5,6 @@ import { loadPluginModule, resolvePluginAsset } from "kirbyuse";
 
 let _PDFJS: typeof PDFJS | undefined;
 
-/** Extracts text content from a PDF file. */
 export async function extractTextFromPdf(file: File) {
   const pdfjs = await resolvePDFJS();
   const data = await file.arrayBuffer();

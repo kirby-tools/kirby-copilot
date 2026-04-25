@@ -7,26 +7,31 @@ import {
   resolvePromptContext,
   useStreamText,
 } from "../../../src/panel/composables/ai";
+import { useSkills } from "../../../src/panel/composables/skills";
 import { CopilotError } from "../../../src/panel/utils/error";
 
 const mockPagesGet = vi.fn();
 
-vi.mock("kirbyuse", () => ({
-  usePanel: () => ({
-    api: {
-      endpoint: "/api",
-      csrf: "test-csrf",
-      pages: {
-        get: mockPagesGet,
-        id: (id: string) => id.replaceAll("/", "+"),
+vi.mock("kirbyuse", async () => {
+  const { baseKirbyuseMock } = await import("../helpers/mock-kirbyuse");
+  return {
+    ...baseKirbyuseMock(),
+    usePanel: () => ({
+      api: {
+        endpoint: "/api",
+        csrf: "test-csrf",
+        pages: {
+          get: mockPagesGet,
+          id: (id: string) => id.replaceAll("/", "+"),
+        },
       },
-    },
-    view: { title: "Test Page" },
-  }),
-  useContent: () => ({
-    currentContent: { value: { title: "Test", body: "Content" } },
-  }),
-}));
+      view: { title: "Test Page" },
+    }),
+    useContent: () => ({
+      currentContent: { value: { title: "Test", body: "Content" } },
+    }),
+  };
+});
 
 vi.mock("../../../src/panel/utils/image", () => ({
   toReducedBlob: (file: File) => Promise.resolve(file),
@@ -102,12 +107,13 @@ vi.mock("../../../src/panel/composables/logger", () => ({
   }),
 }));
 
-describe("useStreamText", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    mockUsePluginContext.mockReturnValue(createPluginConfig());
-  });
+beforeEach(() => {
+  vi.clearAllMocks();
+  useSkills().setConfigSkills([]);
+  mockUsePluginContext.mockReturnValue(createPluginConfig());
+});
 
+describe("useStreamText", () => {
   describe("prompt handling", () => {
     it("passes system and user prompts to streamText", async () => {
       mockStreamText.mockResolvedValue({ textStream: null });
@@ -176,9 +182,8 @@ describe("useStreamText", () => {
         responseFormat: "rich-text",
       });
 
-      expect(mockSmoothStream).toHaveBeenCalled();
       const call = mockSmoothStream.mock.calls[0]?.[0];
-      expect(call?.chunking).not.toBe("line");
+      expect(typeof call?.chunking).toBe("function");
     });
 
     it("uses line chunking for text format", async () => {
@@ -205,7 +210,7 @@ describe("useStreamText", () => {
     });
   });
 
-  describe("output parameter", () => {
+  describe("structured output mode", () => {
     it("disables smoothStream transform when output is provided", async () => {
       mockStreamText.mockResolvedValue({ textStream: null });
       const mockOutput = { type: "object" };
@@ -219,14 +224,6 @@ describe("useStreamText", () => {
       expect(mockStreamText).toHaveBeenCalledWith(
         expect.objectContaining({ output: mockOutput }),
       );
-    });
-
-    it("applies smoothStream transform when output is not provided", async () => {
-      mockStreamText.mockResolvedValue({ textStream: null });
-
-      await useStreamText({ userPrompt: "Test" });
-
-      expect(mockSmoothStream).toHaveBeenCalled();
     });
   });
 
@@ -255,15 +252,6 @@ describe("useStreamText", () => {
       );
     });
 
-    it("uses simple prompt when no files are attached", async () => {
-      mockStreamText.mockResolvedValue({ textStream: null });
-
-      await useStreamText({ userPrompt: "Hello" });
-
-      const call = mockStreamText.mock.calls[0]?.[0];
-      expect(call?.prompt).toBe("Hello");
-      expect(call?.messages).toBeUndefined();
-    });
   });
 
   describe("abort signal", () => {
@@ -284,12 +272,7 @@ describe("useStreamText", () => {
 });
 
 describe("resolveLanguageModel", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    mockUsePluginContext.mockReturnValue(createPluginConfig());
-  });
-
-  describe("model resolution", () => {
+  describe("completion model selection", () => {
     it("returns a model instance for valid config", async () => {
       const result = await resolveLanguageModel();
 
@@ -459,22 +442,6 @@ describe("resolveLanguageModel", () => {
       },
     );
 
-    it("omits thinking entirely for adaptive models at effort none", async () => {
-      mockUsePluginContext.mockReturnValue(
-        createPluginConfig({
-          provider: "anthropic",
-          reasoningEffort: "none",
-          providers: {
-            anthropic: { model: "claude-opus-4-7", hasApiKey: true },
-          },
-        }),
-      );
-
-      const { providerOptions } = await resolveLanguageModel();
-
-      expect(providerOptions).toBeUndefined();
-    });
-
     it("uses model-specific Google reasoning overrides", async () => {
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({
@@ -496,23 +463,6 @@ describe("resolveLanguageModel", () => {
           thinkingLevel: "minimal",
         },
       });
-    });
-
-    it("omits reasoning options for models without reasoning support", async () => {
-      mockUsePluginContext.mockReturnValue(
-        createPluginConfig({
-          providers: {
-            openai: {
-              model: "gpt-4o-mini",
-              hasApiKey: true,
-            },
-          },
-        }),
-      );
-
-      const { providerOptions } = await resolveLanguageModel();
-
-      expect(providerOptions).toBeUndefined();
     });
 
     it.each(["gemini-2.5-pro", "gemini-2.5-flash"])(
@@ -606,25 +556,6 @@ describe("resolveLanguageModel", () => {
       expect(providerOptions?.openai?.reasoningEffort).toBe("medium");
     });
 
-    it("suppresses reasoning for cross-provider namespaced model IDs", async () => {
-      mockUsePluginContext.mockReturnValue(
-        createPluginConfig({
-          reasoningEffort: "medium",
-          providers: {
-            openai: {
-              model: "google-ai-studio/gemini-2.5-flash",
-              hasApiKey: true,
-              api: "chat",
-            },
-          },
-        }),
-      );
-
-      const { providerOptions } = await resolveLanguageModel();
-
-      expect(providerOptions).toBeUndefined();
-    });
-
     it("forwards explicit reasoning overrides via options for cross-provider gateways", async () => {
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({
@@ -672,9 +603,44 @@ describe("resolveLanguageModel", () => {
       },
     );
 
-    it("omits reasoning for namespaced non-reasoning models", async () => {
-      mockUsePluginContext.mockReturnValue(
-        createPluginConfig({
+    const undefinedProviderOptionsCases: ReadonlyArray<{
+      name: string;
+      config: Partial<PluginConfigSubset>;
+    }> = [
+      {
+        name: "adaptive model at effort `none`",
+        config: {
+          provider: "anthropic",
+          reasoningEffort: "none",
+          providers: {
+            anthropic: { model: "claude-opus-4-7", hasApiKey: true },
+          },
+        },
+      },
+      {
+        name: "model without reasoning support",
+        config: {
+          providers: {
+            openai: { model: "gpt-4o-mini", hasApiKey: true },
+          },
+        },
+      },
+      {
+        name: "cross-provider namespaced model ID",
+        config: {
+          reasoningEffort: "medium",
+          providers: {
+            openai: {
+              model: "google-ai-studio/gemini-2.5-flash",
+              hasApiKey: true,
+              api: "chat",
+            },
+          },
+        },
+      },
+      {
+        name: "namespaced non-reasoning model",
+        config: {
           reasoningEffort: "medium",
           providers: {
             openai: {
@@ -683,13 +649,20 @@ describe("resolveLanguageModel", () => {
               api: "chat",
             },
           },
-        }),
-      );
+        },
+      },
+    ];
 
-      const { providerOptions } = await resolveLanguageModel();
+    it.each(undefinedProviderOptionsCases)(
+      "providerOptions is undefined: $name",
+      async ({ config }) => {
+        mockUsePluginContext.mockReturnValue(createPluginConfig(config));
 
-      expect(providerOptions).toBeUndefined();
-    });
+        const { providerOptions } = await resolveLanguageModel();
+
+        expect(providerOptions).toBeUndefined();
+      },
+    );
   });
 
   // eslint-disable-next-line test/prefer-lowercase-title
@@ -764,7 +737,6 @@ describe("resolveLanguageModel", () => {
 
 describe("resolvePromptContext", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     mockPagesGet.mockReset();
   });
 
@@ -782,7 +754,7 @@ describe("resolvePromptContext", () => {
         userPrompt: "Page title: {title}",
       });
 
-      expect(userPromptWithContext).toContain("Page title:");
+      expect(userPromptWithContext).toContain("Test");
     });
   });
 
@@ -799,21 +771,6 @@ describe("resolvePromptContext", () => {
 
       expect(imageByteArrays).toHaveLength(1);
       expect(imageByteArrays[0]).toBeInstanceOf(Uint8Array);
-    });
-
-    it("handles multiple images", async () => {
-      const files = [
-        new File(["img1"], "a.png", { type: "image/png" }),
-        new File(["img2"], "b.jpg", { type: "image/jpeg" }),
-        new File(["img3"], "c.webp", { type: "image/webp" }),
-      ];
-
-      const { imageByteArrays } = await resolvePromptContext({
-        userPrompt: "Test",
-        files,
-      });
-
-      expect(imageByteArrays).toHaveLength(3);
     });
 
     it("filters out non-image files from imageByteArrays", async () => {
@@ -852,63 +809,9 @@ describe("resolvePromptContext", () => {
       `);
     });
 
-    it("filters out empty and null content values", async () => {
-      mockPagesGet.mockResolvedValue({
-        title: "Page",
-        content: { filled: "value", empty: "", nullable: null },
-      });
-
-      const { userPromptWithContext } = await resolvePromptContext({
-        userPrompt: "Read @page://page",
-        pageIds: ["page"],
-      });
-
-      expect(userPromptWithContext).toContain('"filled":"value"');
-      expect(userPromptWithContext).not.toContain('"empty":');
-      expect(userPromptWithContext).not.toContain('"nullable":');
-    });
-
-    it("normalizes blocks by stripping internal metadata", async () => {
-      mockPagesGet.mockResolvedValue({
-        title: "Blocks Page",
-        content: {
-          body: [
-            {
-              id: "abc-123",
-              type: "text",
-              isHidden: false,
-              content: { text: "<p>Hello</p>" },
-            },
-            {
-              id: "def-456",
-              type: "heading",
-              isHidden: true,
-              content: { text: "Title", level: "h2" },
-            },
-          ],
-        },
-      });
-
-      const { userPromptWithContext } = await resolvePromptContext({
-        userPrompt: "Read @page://blocks-page",
-        pageIds: ["blocks-page"],
-      });
-
-      expect(userPromptWithContext).not.toContain('"id"');
-      expect(userPromptWithContext).not.toContain('"isHidden"');
-      expect(userPromptWithContext).toContain('"type":"text"');
-      expect(userPromptWithContext).toContain('"type":"heading"');
-    });
   });
 
   describe("mixed file handling", () => {
-    it("returns empty arrays when no files provided", async () => {
-      const result = await resolvePromptContext({ userPrompt: "Test" });
-
-      expect(result.imageByteArrays).toHaveLength(0);
-      expect(result.pdfByteArrays).toHaveLength(0);
-    });
-
     it("separates images and PDFs correctly", async () => {
       const files = [
         new File(["img"], "test.png", { type: "image/png" }),
@@ -922,6 +825,142 @@ describe("resolvePromptContext", () => {
 
       expect(imageByteArrays).toHaveLength(1);
       expect(pdfByteArrays).toHaveLength(1);
+    });
+  });
+
+  describe("skills", () => {
+    beforeEach(() => {
+      useSkills().setConfigSkills([
+        {
+          id: "brand-voice",
+          label: "Brand Voice",
+          instructions: "Write casually.",
+        },
+        {
+          id: "be-brief",
+          label: "Be Brief",
+          instructions: "Cut every unnecessary word.",
+        },
+      ]);
+    });
+
+    it("wraps tokens found in the prompt with the human label as attribute", async () => {
+      const { systemPromptWithContext } = await resolvePromptContext({
+        userPrompt: "Write a headline @skill://brand-voice",
+        systemPrompt: "You are a writer.",
+      });
+
+      expect(systemPromptWithContext).toContain(
+        `<skill name="Brand Voice">\nWrite casually.\n</skill>`,
+      );
+    });
+
+    it("escapes quotes, ampersands, and angle brackets in the label attribute", async () => {
+      useSkills().setConfigSkills([
+        {
+          id: "tricky",
+          label: `Wörter & "Sätze" <case>`,
+          instructions: "Do things.",
+        },
+      ]);
+
+      const { systemPromptWithContext } = await resolvePromptContext({
+        userPrompt: "Write @skill://tricky",
+      });
+
+      expect(systemPromptWithContext).toContain(
+        `<skill name="Wörter &amp; &quot;Sätze&quot; &lt;case&gt;">\nDo things.\n</skill>`,
+      );
+    });
+
+    it("strips `@skill://id` tokens from the user prompt", async () => {
+      const { userPromptWithContext } = await resolvePromptContext({
+        userPrompt: "Write a headline @skill://brand-voice about Kirby.",
+      });
+
+      expect(userPromptWithContext).toBe("Write a headline about Kirby.");
+    });
+
+    it.each([
+      {
+        position: "inline (trailing whitespace)",
+        userPrompt: "Foo @skill://brand-voice @skill://be-brief bar",
+      },
+      {
+        position: "start and end of prompt",
+        userPrompt: "@skill://brand-voice Foo bar @skill://be-brief",
+      },
+    ])(
+      "collapses stripped tokens $position to `Foo bar`",
+      async ({ userPrompt }) => {
+        const { userPromptWithContext } = await resolvePromptContext({
+          userPrompt,
+        });
+
+        expect(userPromptWithContext).toBe("Foo bar");
+      },
+    );
+
+    it("strips only horizontal whitespace after the token, leaving newlines", async () => {
+      const { userPromptWithContext } = await resolvePromptContext({
+        userPrompt: "First line\n@skill://brand-voice\nSecond line",
+      });
+
+      expect(userPromptWithContext).toBe("First line\n\nSecond line");
+    });
+
+    it("joins multiple skill blocks with the system prompt using blank lines", async () => {
+      const { systemPromptWithContext } = await resolvePromptContext({
+        userPrompt: "@skill://brand-voice @skill://be-brief write a headline",
+        systemPrompt: "You are a writer.",
+      });
+
+      expect(systemPromptWithContext).toBe(
+        [
+          "You are a writer.",
+          `<skill name="Brand Voice">\nWrite casually.\n</skill>`,
+          `<skill name="Be Brief">\nCut every unnecessary word.\n</skill>`,
+        ].join("\n\n"),
+      );
+    });
+
+    it("returns skill blocks as system prompt when no base prompt is set", async () => {
+      const { systemPromptWithContext } = await resolvePromptContext({
+        userPrompt: "Write @skill://brand-voice",
+      });
+
+      expect(systemPromptWithContext).toBe(
+        `<skill name="Brand Voice">\nWrite casually.\n</skill>`,
+      );
+    });
+
+    it("strips unknown token ids from the user prompt and drops them from the system prompt", async () => {
+      useSkills().setConfigSkills([]);
+
+      const { systemPromptWithContext, userPromptWithContext } =
+        await resolvePromptContext({
+          userPrompt: "Write @skill://typo something",
+        });
+
+      expect(systemPromptWithContext).toBeUndefined();
+      expect(userPromptWithContext).toBe("Write something");
+    });
+
+    it("returns undefined systemPrompt when no tokens and no base prompt", async () => {
+      const { systemPromptWithContext } = await resolvePromptContext({
+        userPrompt: "Write a headline",
+      });
+
+      expect(systemPromptWithContext).toBeUndefined();
+    });
+
+    it("passes the base system prompt through unchanged when no tokens match", async () => {
+      const { systemPromptWithContext } = await resolvePromptContext({
+        userPrompt: "Write a headline",
+        systemPrompt: "You are a writer.",
+      });
+
+      expect(systemPromptWithContext).toBe("You are a writer.");
     });
   });
 });

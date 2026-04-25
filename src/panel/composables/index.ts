@@ -7,4 +7,5 @@ export * from "./logger";
 export * from "./model-fields";
 export * from "./plugin";
 export * from "./prompt-dialog-state";
+export * from "./skills";
 export * from "./templates";

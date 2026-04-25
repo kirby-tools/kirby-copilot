@@ -44,12 +44,19 @@ export interface PromptTemplate {
 
 export type PromptTemplateInput = Pick<PromptTemplate, "label" | "prompt">;
 
+export interface Skill {
+  id: string;
+  label: string;
+  instructions: string;
+}
+
 export interface PluginConfig {
   provider: string;
   providers: Record<string, ProviderConfig>;
   systemPrompt?: string;
   reasoningEffort?: ReasoningEffort;
   promptTemplates?: PromptTemplateInput[];
+  skills?: Skill[];
   excludedBlocks?: string[];
   completion?: false | CompletionConfig;
   logLevel?: LogLevel;

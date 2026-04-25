@@ -1,13 +1,22 @@
 <script setup lang="ts">
+import type { SkillSuggestState } from "./plugins/skill-suggest";
 import { EditorState, TextSelection } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
-import { onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { generateRandomId } from "utilful";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { filterSkills, useSkills } from "../../composables/skills";
 import {
   createDocFromText,
   createEditorPlugins,
   createPlaceholderPlugin,
   getPlainText,
-} from "./prompt-editor";
+} from "./editor";
+import {
+  commitSkillSuggestion,
+  dismissSkillSuggestion,
+  setSkillSuggestSelectedIndex,
+} from "./plugins/skill-suggest";
+import SkillSuggestDropdown from "./SkillSuggestDropdown.vue";
 
 const props = defineProps({
   value: {
@@ -17,6 +26,10 @@ const props = defineProps({
   placeholder: {
     type: String,
     default: "",
+  },
+  autofocus: {
+    type: Boolean,
+    default: false,
   },
 });
 
@@ -32,6 +45,23 @@ let updatingFromProp = false;
 
 const placeholder = createPlaceholderPlugin(props.placeholder);
 
+const listboxId = `k-copilot-skill-suggest-${generateRandomId(8)}`;
+
+const { skills, hasSkill } = useSkills();
+const suggestState = ref<SkillSuggestState>({
+  open: false,
+  query: "",
+  top: 0,
+  left: 0,
+  selectedIndex: 0,
+});
+
+const filteredSkills = computed(() =>
+  suggestState.value.open
+    ? filterSkills(skills.value, suggestState.value.query)
+    : [],
+);
+
 onMounted(() => {
   if (!editor.value) return;
 
@@ -43,6 +73,15 @@ onMounted(() => {
       onSubmit: () => emit("submit"),
       onKeydown: (event) => emit("keydown", event),
       placeholder,
+      skills: {
+        has: hasSkill,
+        suggest: {
+          onStateChange: onSuggestStateChange,
+          onCommit: onSuggestCommit,
+          getOptionCount: (query) => filterSkills(skills.value, query).length,
+          listboxId,
+        },
+      },
     }),
   });
 
@@ -58,9 +97,16 @@ onMounted(() => {
       }
     },
   });
+
+  if (props.autofocus) focus();
+
+  window.addEventListener("scroll", onViewportChange, true);
+  window.addEventListener("resize", onViewportChange);
 });
 
 onBeforeUnmount(() => {
+  window.removeEventListener("scroll", onViewportChange, true);
+  window.removeEventListener("resize", onViewportChange);
   view?.destroy();
   view = undefined;
 });
@@ -95,6 +141,34 @@ watch(
   },
 );
 
+// Skills load asynchronously – repaint token decorations when they arrive
+watch(skills, () => view?.dispatch(view.state.tr));
+
+function onViewportChange() {
+  if (view && suggestState.value.open) dismissSkillSuggestion(view);
+}
+
+function onSuggestStateChange(next: SkillSuggestState) {
+  suggestState.value = next;
+}
+
+function onSuggestCommit(index: number) {
+  if (!view) return;
+  const skill = filteredSkills.value[index];
+  if (!skill) return;
+  commitSkillSuggestion(view, skill.id);
+}
+
+function onDropdownSelect(id: string) {
+  if (!view) return;
+  commitSkillSuggestion(view, id);
+}
+
+function onDropdownHover(index: number) {
+  if (!view) return;
+  setSkillSuggestSelectedIndex(view, index);
+}
+
 function insertAtCursor(textToInsert: string) {
   if (!view) return;
   const { from, to } = view.state.selection;
@@ -125,7 +199,19 @@ defineExpose({
 </script>
 
 <template>
-  <div ref="editor" class="k-copilot-prompt-editor" />
+  <div class="k-copilot-prompt-editor-root">
+    <div ref="editor" class="k-copilot-prompt-editor" />
+    <SkillSuggestDropdown
+      v-if="suggestState.open && filteredSkills.length > 0"
+      :skills="filteredSkills"
+      :selected-index="suggestState.selectedIndex"
+      :top="suggestState.top"
+      :left="suggestState.left"
+      :listbox-id="listboxId"
+      @select="onDropdownSelect"
+      @hover="onDropdownHover"
+    />
+  </div>
 </template>
 
 <style>
@@ -153,17 +239,29 @@ defineExpose({
   position: absolute;
 }
 
+[class*="k-copilot-token-"] {
+  border-radius: var(--rounded-xs);
+  padding-inline: var(--spacing-1);
+}
+
 .k-copilot-token-placeholder {
   color: light-dark(var(--color-purple-800), var(--color-purple-900));
   background: var(--color-purple-300);
-  border-radius: var(--rounded-xs);
-  padding-inline: var(--spacing-1);
 }
 
 .k-copilot-token-page-ref {
   color: light-dark(var(--color-blue-800), var(--color-blue-900));
   background: var(--color-blue-300);
-  border-radius: var(--rounded-xs);
-  padding-inline: var(--spacing-1);
+}
+
+.k-copilot-token-skill-ref {
+  color: light-dark(var(--color-green-800), var(--color-green-900));
+  background: var(--color-green-300);
+}
+
+.k-copilot-token-skill-ref-unknown {
+  color: light-dark(var(--color-red-800), var(--color-red-900));
+  background: var(--color-red-300);
+  text-decoration: line-through;
 }
 </style>

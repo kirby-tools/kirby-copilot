@@ -36,6 +36,11 @@ import { extractTextFromPdf } from "../utils/pdf";
 import { normalizePlaceholders } from "../utils/template";
 import { useLogger } from "./logger";
 import { usePluginContext } from "./plugin";
+import {
+  extractSkillRefIds,
+  stripSkillRefTokens,
+  useSkills,
+} from "./skills";
 
 const DEFAULT_PLAYGROUND_MODEL_PROVIDER = "google";
 const PLAYGROUND_PROVIDER_MODEL_MAP: Record<string, string> = {
@@ -95,15 +100,20 @@ export async function useStreamText({
 
   const { AISDKError, streamText, smoothStream } = await loadAISDK();
 
-  const { userPromptWithContext, imageByteArrays, pdfByteArrays } =
-    await resolvePromptContext({
-      userPrompt,
-      files,
-      pageIds,
-    });
+  const {
+    userPromptWithContext,
+    systemPromptWithContext,
+    imageByteArrays,
+    pdfByteArrays,
+  } = await resolvePromptContext({
+    userPrompt,
+    systemPrompt,
+    files,
+    pageIds,
+  });
 
   if (logLevel > 1) {
-    logger.info("System prompt:", systemPrompt);
+    logger.info("System prompt:", systemPromptWithContext);
     logger.info("User prompt:", userPromptWithContext);
   }
 
@@ -113,7 +123,7 @@ export async function useStreamText({
     model,
     providerOptions,
     output,
-    system: systemPrompt || undefined,
+    system: systemPromptWithContext || undefined,
     ...(hasFiles
       ? {
           messages: [
@@ -199,11 +209,28 @@ export async function resolveLanguageModel({
   };
 }
 
+/**
+ * Assembles the final system and user prompts plus any file attachments
+ * that the AI SDK call needs.
+ *
+ * @remarks
+ * Applies four transformations in order:
+ * 1. Renders `{field}` placeholders against the current Panel content.
+ * 2. Extracts `@skill://id` tokens from the user prompt, resolves them into
+ *    `<skill>` blocks on the system prompt, then strips the tokens so they
+ *    never reach the model. Defaults reach this function as explicit tokens
+ *    because the dialog pre-inserts them on open.
+ * 3. Appends `<reference_page>` blocks for any `pageIds` via the Panel API.
+ * 4. Splits attached files into images and PDFs, inlining oversized PDFs as
+ *    extracted text so they still reach models that reject large binaries.
+ */
 export async function resolvePromptContext({
+  systemPrompt,
   userPrompt,
   files = [],
   pageIds = [],
 }: {
+  systemPrompt?: string;
   userPrompt: string;
   files?: File[];
   pageIds?: string[];
@@ -213,6 +240,18 @@ export async function resolvePromptContext({
     normalizePlaceholders(userPrompt),
     contentContext,
   );
+
+  const skillBlocks = useSkills()
+    .getActiveSkills(extractSkillRefIds(userPromptWithContext))
+    .map(
+      (skill) =>
+        `<skill name="${escapeXmlAttr(skill.label)}">\n${skill.instructions}\n</skill>`,
+    );
+
+  const systemPromptWithContext =
+    [systemPrompt, ...skillBlocks].filter(Boolean).join("\n\n") || undefined;
+
+  userPromptWithContext = stripSkillRefTokens(userPromptWithContext).trim();
 
   const uniquePageIds = [...new Set(pageIds)];
   if (uniquePageIds.length > 0) {
@@ -273,6 +312,7 @@ export async function resolvePromptContext({
     : [];
 
   return {
+    systemPromptWithContext,
     userPromptWithContext,
     imageByteArrays,
     pdfByteArrays,
@@ -527,4 +567,13 @@ function mergeHeaders(...headers: (HeadersInit | undefined)[]) {
   return new Headers(
     headers.filter(Boolean).flatMap((h) => [...new Headers(h)]),
   );
+}
+
+/** Escapes the chars that would break a double-quoted XML attribute. */
+function escapeXmlAttr(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
 }

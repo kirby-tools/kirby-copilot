@@ -1,26 +1,15 @@
 import type { EditorState } from "prosemirror-state";
+import type { SkillSuggestHandlers } from "./plugins/skill-suggest";
 import { baseKeymap } from "prosemirror-commands";
 import { history, redo, undo } from "prosemirror-history";
 import { keymap } from "prosemirror-keymap";
 import { Schema, Slice } from "prosemirror-model";
 import { Plugin } from "prosemirror-state";
 import { Decoration, DecorationSet } from "prosemirror-view";
+import { createSkillSuggestPlugin } from "./plugins/skill-suggest";
+import { tokenHighlightPlugin } from "./plugins/token-highlight";
 
-const PAGE_REF_TOKEN_REGEX_SOURCE = String.raw`@page://([\w\-/]+)`;
-const PLACEHOLDER_TOKEN_REGEX_SOURCE = String.raw`\{[^}]+\}`;
-
-const TOKEN_HIGHLIGHT_PATTERNS = [
-  {
-    className: "k-copilot-token-placeholder",
-    createRegex: () => new RegExp(PLACEHOLDER_TOKEN_REGEX_SOURCE, "g"),
-  },
-  {
-    className: "k-copilot-token-page-ref",
-    createRegex: createPageRefTokenRegex,
-  },
-] as const;
-
-export const schema = new Schema({
+const schema = new Schema({
   nodes: {
     doc: { content: "block+" },
     paragraph: {
@@ -33,25 +22,19 @@ export const schema = new Schema({
   },
 });
 
-export function createPageRefTokenRegex() {
-  return new RegExp(PAGE_REF_TOKEN_REGEX_SOURCE, "g");
-}
-
-export function extractPageRefIds(text: string) {
-  return Array.from(
-    text.matchAll(createPageRefTokenRegex()),
-    ([, pageId]) => pageId,
-  );
-}
-
 export function createEditorPlugins({
   onSubmit,
   onKeydown,
   placeholder,
+  skills,
 }: {
   onSubmit: () => void;
   onKeydown: (event: KeyboardEvent) => void;
   placeholder: ReturnType<typeof createPlaceholderPlugin>;
+  skills: {
+    has: (id: string) => boolean;
+    suggest?: SkillSuggestHandlers;
+  };
 }) {
   return [
     // Forward Ctrl/Cmd+Enter to parent
@@ -61,6 +44,9 @@ export function createEditorPlugins({
         return true;
       },
     }),
+    // `@skill://` suggestion plugin – needs to run before the base keymap
+    // to capture keys for dropdown navigation
+    ...(skills.suggest ? [createSkillSuggestPlugin(skills.suggest)] : []),
     // Forward arrow keys to parent for history navigation
     new Plugin({
       props: {
@@ -88,7 +74,7 @@ export function createEditorPlugins({
     }),
     history(),
     keymap({ "Mod-z": undo, "Mod-y": redo, "Mod-Shift-z": redo }),
-    tokenHighlightPlugin(),
+    tokenHighlightPlugin({ skills }),
     placeholder.plugin,
     keymap(baseKeymap),
   ];
@@ -143,36 +129,4 @@ export function createPlaceholderPlugin(initialText: string) {
       placeholderText = text;
     },
   };
-}
-
-function tokenHighlightPlugin() {
-  return new Plugin({
-    props: {
-      decorations(state) {
-        return buildDecorations(state);
-      },
-    },
-  });
-}
-
-function buildDecorations(state: EditorState): DecorationSet {
-  const decorations: Decoration[] = [];
-
-  state.doc.descendants((node, pos) => {
-    if (!node.isText || !node.text) return;
-
-    for (const pattern of TOKEN_HIGHLIGHT_PATTERNS) {
-      for (const match of node.text.matchAll(pattern.createRegex())) {
-        decorations.push(
-          Decoration.inline(
-            pos + match.index!,
-            pos + match.index! + match[0].length,
-            { class: pattern.className },
-          ),
-        );
-      }
-    }
-  });
-
-  return DecorationSet.create(state.doc, decorations);
 }

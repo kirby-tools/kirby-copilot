@@ -12,8 +12,10 @@ import {
   usePluginContext,
   usePromptDialogState,
   usePromptTemplates,
+  useSkills,
   useTemplateDialogs,
 } from "../../composables";
+import { extractPageRefIds } from "../../composables/pages";
 import { SUPPORTED_FILE_MIME_TYPES } from "../../constants";
 import {
   createContentContext,
@@ -21,9 +23,8 @@ import {
   normalizePlaceholders,
   openFilePicker,
 } from "../../utils";
+import PromptEditor from "../PromptEditor/PromptEditor.vue";
 import ContentDropdown from "../Ui/ContentDropdown.vue";
-import { extractPageRefIds } from "../Ui/prompt-editor";
-import PromptEditor from "../Ui/PromptEditor.vue";
 
 const props = defineProps({
   fields: Array as PropType<KirbyFieldProps[]>,
@@ -44,6 +45,7 @@ const {
   getRecentEntries,
 } = useGenerationHistory();
 const { allTemplates, templates, setConfigTemplates } = usePromptTemplates();
+const { setConfigSkills } = useSkills();
 const { openSaveTemplateDialog, openEditTemplatesDialog } =
   useTemplateDialogs();
 const { getModelFields } = useModelFields();
@@ -115,33 +117,11 @@ const filteredPlaceholderFields = computed(() => {
   );
 });
 
-function handleEditorSubmit() {
-  if (!prompt.value.trim()) return;
-  submit();
-}
-
-function handleEditorKeydown(event: KeyboardEvent) {
-  // Listen to arrow up and down to navigate the prompt history
-  if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-    event.preventDefault();
-
-    // Store current prompt when starting to navigate
-    if (event.key === "ArrowUp" && currentIndex.value === -1) {
-      lastPrompt.value = prompt.value;
-    }
-
-    const newPrompt = navigateHistory(event.key === "ArrowUp" ? "up" : "down");
-
-    if (newPrompt !== undefined) {
-      prompt.value = newPrompt;
-    }
-  }
-}
-
 (async () => {
   const context = await usePluginContext();
   licenseStatus.value = __PLAYGROUND__ ? "active" : context.licenseStatus;
   setConfigTemplates(context.config.promptTemplates ?? []);
+  setConfigSkills(context.config.skills ?? []);
 
   // Fetch view fields for placeholder insertion if not passed as props
   if (!props.fields) {
@@ -161,6 +141,30 @@ function handleEditorKeydown(event: KeyboardEvent) {
     }
   }
 })();
+
+function handleEditorSubmit() {
+  if (!prompt.value.trim()) return;
+  submit();
+}
+
+function handleEditorKeydown(event: KeyboardEvent) {
+  // Listen to arrow up and down to navigate the prompt history
+  if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+    event.preventDefault();
+
+    // Store current prompt when starting to navigate
+    if (event.key === "ArrowUp" && currentIndex.value === -1) {
+      lastPrompt.value = prompt.value;
+    }
+
+    const newPrompt = navigateHistory(event.key === "ArrowUp" ? "up" : "down");
+
+    if (newPrompt !== undefined) {
+      prompt.value = newPrompt;
+      editorComponent.value?.focus();
+    }
+  }
+}
 
 function submit() {
   if (isFieldGenerationMode.value && selectedFieldNames.value.length === 0) {
@@ -278,6 +282,7 @@ function getFieldPreview(fieldName: string) {
       <PromptEditor
         ref="editorComponent"
         :value="prompt"
+        autofocus
         :placeholder="
           panel.t('johannschopplich.copilot.prompt.placeholder') +
           (selection
@@ -389,8 +394,8 @@ function getFieldPreview(fieldName: string) {
                   <span
                     v-if="getFieldPreview(field.name)"
                     class="kai-truncate kai-leading-[1.5] kai-text-[var(--color-text-dimmed)] [font-size:var(--font-size-tiny)]"
-                    >{{ getFieldPreview(field.name) }}</span
-                  >
+                    v-text="getFieldPreview(field.name)"
+                  />
                 </span>
               </k-dropdown-item>
               <k-dropdown-item
