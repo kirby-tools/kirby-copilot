@@ -408,9 +408,7 @@ function createCompletionPlugin(
 
       console.error("Failed to generate completion:", error);
 
-      view.dispatch(
-        setCompletionMeta(view.state.tr, { type: "dismiss" }),
-      );
+      view.dispatch(setCompletionMeta(view.state.tr, { type: "dismiss" }));
     } finally {
       abortController = undefined;
     }

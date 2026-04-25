@@ -221,59 +221,43 @@ export function createSkillSuggestPlugin(options: SkillSuggestHandlers) {
       },
     },
     view() {
-      type Snapshot = Pick<
-        SkillSuggestPluginState,
-        "open" | "query" | "from" | "selectedIndex"
-      >;
-      let lastState: Snapshot | null = null;
-
       return {
-        update(view) {
+        update(view, prevState) {
           // Skip during IME composition to avoid mid-character triggers
           if (view.composing) return;
 
           const state = skillSuggestPluginKey.getState(view.state);
           if (!state) return;
 
-          const snapshot: Snapshot = {
+          const prevPluginState = skillSuggestPluginKey.getState(prevState);
+          if (
+            prevPluginState &&
+            prevPluginState.open === state.open &&
+            prevPluginState.from === state.from &&
+            prevPluginState.query === state.query &&
+            prevPluginState.selectedIndex === state.selectedIndex
+          ) {
+            return;
+          }
+
+          const base = {
             open: state.open,
             query: state.query,
             from: state.from,
             selectedIndex: state.selectedIndex,
           };
 
-          if (
-            lastState &&
-            lastState.open === snapshot.open &&
-            lastState.from === snapshot.from &&
-            lastState.query === snapshot.query &&
-            lastState.selectedIndex === snapshot.selectedIndex
-          ) {
-            return;
-          }
-          lastState = snapshot;
-
-          const base = {
-            open: snapshot.open,
-            query: snapshot.query,
-            from: snapshot.from,
-            selectedIndex: snapshot.selectedIndex,
-          };
-
-          if (!snapshot.open) {
+          if (!state.open) {
             options.onStateChange({ ...base, top: 0, left: 0 });
             return;
           }
 
-          const coords = view.coordsAtPos(snapshot.from);
+          const coords = view.coordsAtPos(state.from);
           options.onStateChange({
             ...base,
             top: coords.bottom,
             left: coords.left,
           });
-        },
-        destroy() {
-          lastState = null;
         },
       };
     },
