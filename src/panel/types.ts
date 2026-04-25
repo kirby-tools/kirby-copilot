@@ -14,7 +14,6 @@ export interface ActiveField {
 export interface PromptContext {
   prompt: string;
   files: File[];
-  pageIds?: string[];
   selectedFieldNames?: string[];
   insertMode?: "append" | "replace";
 }

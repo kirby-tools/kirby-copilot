@@ -797,7 +797,6 @@ describe("resolvePromptContext", () => {
 
       const { userPromptWithContext } = await resolvePromptContext({
         userPrompt: "Summarize @page://about",
-        pageIds: ["about"],
       });
 
       expect(userPromptWithContext).toMatchInlineSnapshot(`

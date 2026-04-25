@@ -35,6 +35,7 @@ import {
 import { extractTextFromPdf } from "../utils/pdf";
 import { normalizePlaceholders } from "../utils/template";
 import { useLogger } from "./logger";
+import { extractPageRefIds } from "./pages";
 import { usePluginContext } from "./plugin";
 import {
   extractSkillRefIds,
@@ -69,7 +70,6 @@ export async function useStreamText({
   output,
   responseFormat,
   files = [],
-  pageIds = [],
   logLevel = 1,
   abortSignal,
   model: injectedModel,
@@ -80,7 +80,6 @@ export async function useStreamText({
   output?: OutputNamespace.Output;
   responseFormat?: OutputFormat;
   files?: File[];
-  pageIds?: string[];
   logLevel?: LogLevel;
   abortSignal?: AbortSignal;
   /** Inject a language model directly (useful for testing). */
@@ -109,7 +108,6 @@ export async function useStreamText({
     userPrompt,
     systemPrompt,
     files,
-    pageIds,
   });
 
   if (logLevel > 1) {
@@ -218,9 +216,10 @@ export async function resolveLanguageModel({
  * 1. Renders `{field}` placeholders against the current Panel content.
  * 2. Extracts `@skill://id` tokens from the user prompt, resolves them into
  *    `<skill>` blocks on the system prompt, then strips the tokens so they
- *    never reach the model. Defaults reach this function as explicit tokens
- *    because the dialog pre-inserts them on open.
- * 3. Appends `<reference_page>` blocks for any `pageIds` via the Panel API.
+ *    never reach the model.
+ * 3. Extracts `@page://id` tokens from the rendered user prompt and appends
+ *    `<reference_page>` blocks fetched via the Panel API. Tokens are left in
+ *    place so the model can correlate them with the appended blocks.
  * 4. Splits attached files into images and PDFs, inlining oversized PDFs as
  *    extracted text so they still reach models that reject large binaries.
  */
@@ -228,12 +227,10 @@ export async function resolvePromptContext({
   systemPrompt,
   userPrompt,
   files = [],
-  pageIds = [],
 }: {
   systemPrompt?: string;
   userPrompt: string;
   files?: File[];
-  pageIds?: string[];
 }) {
   const contentContext = createContentContext();
   let userPromptWithContext = template(
@@ -253,7 +250,7 @@ export async function resolvePromptContext({
 
   userPromptWithContext = stripSkillRefTokens(userPromptWithContext).trim();
 
-  const uniquePageIds = [...new Set(pageIds)];
+  const uniquePageIds = [...new Set(extractPageRefIds(userPromptWithContext))];
   if (uniquePageIds.length > 0) {
     const panel = usePanel();
 

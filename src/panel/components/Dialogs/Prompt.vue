@@ -15,7 +15,6 @@ import {
   useSkills,
   useTemplateDialogs,
 } from "../../composables";
-import { extractPageRefIds } from "../../composables/pages";
 import { SUPPORTED_FILE_MIME_TYPES } from "../../constants";
 import {
   createContentContext,
@@ -177,7 +176,6 @@ function submit() {
   emit("submit", {
     prompt: prompt.value,
     files: files.value,
-    pageIds: extractPageRefIds(prompt.value),
     selectedFieldNames: selectedFieldNames.value,
     insertMode: insertOption.value,
   });

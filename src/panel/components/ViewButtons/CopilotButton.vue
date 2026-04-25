@@ -81,7 +81,7 @@ async function initPromptDialog() {
   });
   if (!promptContext) return;
 
-  const { prompt, files, selectedFieldNames, pageIds } = promptContext;
+  const { prompt, files, selectedFieldNames } = promptContext;
   const selectedFields = fields.filter((field) =>
     selectedFieldNames?.includes(field.name),
   );
@@ -124,7 +124,6 @@ async function initPromptDialog() {
       systemPrompt,
       output: Output.object({ schema: z.object(fieldsSchema) }),
       files,
-      pageIds,
       logLevel: LOG_LEVELS.indexOf(
         props.logLevel && LOG_LEVELS.includes(props.logLevel)
           ? props.logLevel

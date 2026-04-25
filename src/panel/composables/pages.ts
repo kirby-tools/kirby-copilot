@@ -5,8 +5,11 @@ export function createPageRefTokenRegex() {
 }
 
 export function extractPageRefIds(text: string) {
-  return Array.from(
-    text.matchAll(createPageRefTokenRegex()),
-    ([, pageId]) => pageId,
-  );
+  const ids: string[] = [];
+
+  for (const match of text.matchAll(createPageRefTokenRegex())) {
+    if (match[1]) ids.push(match[1]);
+  }
+
+  return ids;
 }
