@@ -6,6 +6,7 @@ import { createSkillTriggerRegex } from "../../../composables/skills";
 export interface SkillSuggestState {
   open: boolean;
   query: string;
+  from: number;
   top: number;
   left: number;
   selectedIndex: number;
@@ -24,17 +25,11 @@ interface SkillSuggestPluginState {
   query: string;
   from: number;
   to: number;
-  /**
-   * Position of a dismissed `@skill://` trigger. While set (and mapped forward
-   * through doc edits), the suggestion stays closed even if the regex matches
-   * at that same position. Cleared once the cursor moves off.
-   */
-  dismissedFrom: number | null;
   selectedIndex: number;
 }
 
 type SkillSuggestMeta =
-  | { type: "dismiss"; at: number }
+  | { type: "dismiss" }
   | { type: "moveSelection"; delta: 1 | -1 }
   | { type: "setSelectedIndex"; index: number };
 
@@ -43,7 +38,6 @@ const EMPTY_PLUGIN_STATE: SkillSuggestPluginState = {
   query: "",
   from: 0,
   to: 0,
-  dismissedFrom: null,
   selectedIndex: 0,
 };
 
@@ -58,16 +52,16 @@ function setSkillSuggestMeta(tr: Transaction, meta: SkillSuggestMeta) {
 
 /**
  * Commits a typeahead pick: replaces the matched range with `@skill://<id>`
- * and dismisses the dropdown at that position. Without the dismissal meta,
- * the plugin would re-detect the just-inserted token as a fresh trigger on
- * the next update tick and reopen the dropdown.
+ * and dismisses the dropdown. The dismiss meta short-circuits the apply
+ * function so the just-inserted token isn't immediately re-detected as a
+ * fresh trigger on the same tick.
  */
 export function commitSkillSuggestion(view: EditorView, id: string) {
   const state = skillSuggestPluginKey.getState(view.state);
   if (!state?.open) return;
 
   const tr = view.state.tr.insertText(`@skill://${id}`, state.from, state.to);
-  setSkillSuggestMeta(tr, { type: "dismiss", at: state.from });
+  setSkillSuggestMeta(tr, { type: "dismiss" });
   view.dispatch(tr);
   view.focus();
 }
@@ -76,9 +70,7 @@ export function dismissSkillSuggestion(view: EditorView) {
   const state = skillSuggestPluginKey.getState(view.state);
   if (!state?.open) return;
 
-  view.dispatch(
-    setSkillSuggestMeta(view.state.tr, { type: "dismiss", at: state.from }),
-  );
+  view.dispatch(setSkillSuggestMeta(view.state.tr, { type: "dismiss" }));
 }
 
 export function setSkillSuggestSelectedIndex(view: EditorView, index: number) {
@@ -125,7 +117,7 @@ export function createSkillSuggestPlugin(options: SkillSuggestHandlers) {
         if (meta) {
           switch (meta.type) {
             case "dismiss":
-              return { ...EMPTY_PLUGIN_STATE, dismissedFrom: meta.at };
+              return EMPTY_PLUGIN_STATE;
             case "moveSelection": {
               const count = options.getOptionCount(value.query);
               if (count === 0) return value;
@@ -151,28 +143,13 @@ export function createSkillSuggestPlugin(options: SkillSuggestHandlers) {
         }
 
         const trigger = detectSkillSuggestion(newState);
-        const mappedDismissedFrom =
-          value.dismissedFrom != null
-            ? tr.mapping.map(value.dismissedFrom)
-            : null;
 
-        // Keep dismissedFrom only while the trigger is still pinned at that position
-        const dismissedFrom =
-          mappedDismissedFrom !== null &&
-          trigger.open &&
-          trigger.from === mappedDismissedFrom
-            ? mappedDismissedFrom
-            : null;
+        // Suppress when there's no trigger, or a pure cursor movement landed
+        // on an existing trigger (so cursor-into-existing-token doesn't pop).
+        const shouldSuppress = !trigger.open || (!value.open && !tr.docChanged);
 
-        // Suppress when: no trigger, trigger pinned at dismissed position,
-        // or a pure cursor movement landed on a fresh trigger (not typing)
-        const suppressed =
-          !trigger.open ||
-          trigger.from === dismissedFrom ||
-          (!value.open && !tr.docChanged);
-
-        if (suppressed) {
-          return { ...EMPTY_PLUGIN_STATE, dismissedFrom };
+        if (shouldSuppress) {
+          return EMPTY_PLUGIN_STATE;
         }
 
         // Reset index on fresh open or query change
@@ -180,7 +157,6 @@ export function createSkillSuggestPlugin(options: SkillSuggestHandlers) {
 
         return {
           ...trigger,
-          dismissedFrom,
           selectedIndex: resetIndex ? 0 : value.selectedIndex,
         };
       },
@@ -243,11 +219,6 @@ export function createSkillSuggestPlugin(options: SkillSuggestHandlers) {
 
         return attrs;
       },
-      handleDOMEvents: {
-        blur: (view) => {
-          dismissSkillSuggestion(view);
-        },
-      },
     },
     view() {
       type Snapshot = Pick<
@@ -285,6 +256,7 @@ export function createSkillSuggestPlugin(options: SkillSuggestHandlers) {
           const base = {
             open: snapshot.open,
             query: snapshot.query,
+            from: snapshot.from,
             selectedIndex: snapshot.selectedIndex,
           };
 

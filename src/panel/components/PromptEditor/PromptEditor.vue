@@ -13,7 +13,6 @@ import {
 } from "./editor";
 import {
   commitSkillSuggestion,
-  dismissSkillSuggestion,
   setSkillSuggestSelectedIndex,
 } from "./plugins/skill-suggest";
 import SkillSuggestDropdown from "./SkillSuggestDropdown.vue";
@@ -51,10 +50,12 @@ const { skills, hasSkill } = useSkills();
 const suggestState = ref<SkillSuggestState>({
   open: false,
   query: "",
+  from: 0,
   top: 0,
   left: 0,
   selectedIndex: 0,
 });
+const isFocused = ref(false);
 
 const filteredSkills = computed(() =>
   suggestState.value.open
@@ -98,6 +99,9 @@ onMounted(() => {
     },
   });
 
+  view.dom.addEventListener("focus", onEditorFocus);
+  view.dom.addEventListener("blur", onEditorBlur);
+
   if (props.autofocus) focus();
 
   window.addEventListener("scroll", onViewportChange, true);
@@ -107,6 +111,8 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener("scroll", onViewportChange, true);
   window.removeEventListener("resize", onViewportChange);
+  view?.dom.removeEventListener("focus", onEditorFocus);
+  view?.dom.removeEventListener("blur", onEditorBlur);
   view?.destroy();
   view = undefined;
 });
@@ -145,7 +151,21 @@ watch(
 watch(skills, () => view?.dispatch(view.state.tr));
 
 function onViewportChange() {
-  if (view && suggestState.value.open) dismissSkillSuggestion(view);
+  if (!view || !suggestState.value.open) return;
+  const coords = view.coordsAtPos(suggestState.value.from);
+  suggestState.value = {
+    ...suggestState.value,
+    top: coords.bottom,
+    left: coords.left,
+  };
+}
+
+function onEditorFocus() {
+  isFocused.value = true;
+}
+
+function onEditorBlur() {
+  isFocused.value = false;
 }
 
 function onSuggestStateChange(next: SkillSuggestState) {
@@ -202,7 +222,7 @@ defineExpose({
   <div class="k-copilot-prompt-editor-root">
     <div ref="editor" class="k-copilot-prompt-editor" />
     <SkillSuggestDropdown
-      v-if="suggestState.open && filteredSkills.length > 0"
+      v-if="suggestState.open && isFocused && filteredSkills.length > 0"
       :skills="filteredSkills"
       :selected-index="suggestState.selectedIndex"
       :top="suggestState.top"
