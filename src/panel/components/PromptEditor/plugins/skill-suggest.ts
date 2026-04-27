@@ -3,14 +3,21 @@ import type { EditorView } from "prosemirror-view";
 import { Plugin, PluginKey } from "prosemirror-state";
 import { createSkillTriggerRegex } from "../../../composables/skills";
 
-export interface SkillSuggestState {
-  open: boolean;
-  query: string;
-  from: number;
-  top: number;
-  left: number;
-  selectedIndex: number;
-}
+const DROPDOWN_MAX_HEIGHT_PX = 256; // max-height (16rem)
+const VIEWPORT_SAFE_SPACE_PX = 10;
+
+export type DropdownPosition =
+  | { top: number; bottom: null; left: number }
+  | { top: null; bottom: number; left: number };
+
+export type SkillSuggestState =
+  | { open: false }
+  | ({
+      open: true;
+      query: string;
+      from: number;
+      selectedIndex: number;
+    } & DropdownPosition);
 
 export interface SkillSuggestHandlers {
   onStateChange: (state: SkillSuggestState) => void;
@@ -240,26 +247,37 @@ export function createSkillSuggestPlugin(options: SkillSuggestHandlers) {
             return;
           }
 
-          const base = {
-            open: state.open,
-            query: state.query,
-            from: state.from,
-            selectedIndex: state.selectedIndex,
-          };
-
           if (!state.open) {
-            options.onStateChange({ ...base, top: 0, left: 0 });
+            options.onStateChange({ open: false });
             return;
           }
 
-          const coords = view.coordsAtPos(state.from);
           options.onStateChange({
-            ...base,
-            top: coords.bottom,
-            left: coords.left,
+            open: true,
+            query: state.query,
+            from: state.from,
+            selectedIndex: state.selectedIndex,
+            ...computeDropdownPosition(view, state.from),
           });
         },
       };
     },
   });
+}
+
+export function computeDropdownPosition(
+  view: EditorView,
+  from: number,
+): DropdownPosition {
+  const coords = view.coordsAtPos(from);
+  const overflowsBelow =
+    coords.bottom + DROPDOWN_MAX_HEIGHT_PX >
+    window.innerHeight - VIEWPORT_SAFE_SPACE_PX;
+  const fitsAbove =
+    coords.top - DROPDOWN_MAX_HEIGHT_PX > VIEWPORT_SAFE_SPACE_PX;
+  const flipUp = overflowsBelow && fitsAbove;
+
+  return flipUp
+    ? { top: null, bottom: window.innerHeight - coords.top, left: coords.left }
+    : { top: coords.bottom, bottom: null, left: coords.left };
 }

@@ -13,6 +13,7 @@ import {
 } from "./editor";
 import {
   commitSkillSuggestion,
+  computeDropdownPosition,
   setSkillSuggestSelectedIndex,
 } from "./plugins/skill-suggest";
 import SkillSuggestDropdown from "./SkillSuggestDropdown.vue";
@@ -47,14 +48,7 @@ const placeholder = createPlaceholderPlugin(props.placeholder);
 const listboxId = `k-copilot-skill-suggest-${generateRandomId(8)}`;
 
 const { skills, hasSkill } = useSkills();
-const suggestState = ref<SkillSuggestState>({
-  open: false,
-  query: "",
-  from: 0,
-  top: 0,
-  left: 0,
-  selectedIndex: 0,
-});
+const suggestState = ref<SkillSuggestState>({ open: false });
 const isFocused = ref(false);
 
 const filteredSkills = computed(() =>
@@ -152,11 +146,9 @@ watch(skills, () => view?.dispatch(view.state.tr));
 
 function onViewportChange() {
   if (!view || !suggestState.value.open) return;
-  const coords = view.coordsAtPos(suggestState.value.from);
   suggestState.value = {
     ...suggestState.value,
-    top: coords.bottom,
-    left: coords.left,
+    ...computeDropdownPosition(view, suggestState.value.from),
   };
 }
 
@@ -227,6 +219,7 @@ defineExpose({
       :skills="filteredSkills"
       :selected-index="suggestState.selectedIndex"
       :top="suggestState.top"
+      :bottom="suggestState.bottom"
       :left="suggestState.left"
       :anchor-in-token="suggestState.query.length > 0"
       :listbox-id="listboxId"

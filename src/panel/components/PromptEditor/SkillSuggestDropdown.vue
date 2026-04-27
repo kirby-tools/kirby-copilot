@@ -13,8 +13,12 @@ defineProps({
     required: true,
   },
   top: {
-    type: Number,
-    required: true,
+    type: Number as PropType<number | null>,
+    default: null,
+  },
+  bottom: {
+    type: Number as PropType<number | null>,
+    default: null,
   },
   left: {
     type: Number,
@@ -43,9 +47,18 @@ const panel = usePanel();
     :id="listboxId"
     role="listbox"
     :aria-label="panel.t('johannschopplich.copilot.skill.suggestions')"
-    class="k-dropdown-content k-copilot-skill-suggest"
-    :class="[anchorInToken && 'kai-ml-[calc(-1*var(--spacing-1))]']"
-    :style="{ top: `${top}px`, left: `${left}px` }"
+    class="k-dropdown-content kai-fixed kai-z-[var(--z-dropdown)] kai-max-h-[16rem] kai-min-w-[14rem] kai-max-w-[24rem] kai-overflow-y-auto"
+    :class="[
+      bottom !== null
+        ? 'kai-mb-[var(--spacing-1)]'
+        : 'kai-mt-[var(--spacing-1)]',
+      anchorInToken && 'kai-ml-[calc(-1*var(--spacing-1))]',
+    ]"
+    :style="{
+      top: top !== null ? `${top}px` : 'auto',
+      bottom: bottom !== null ? `${bottom}px` : 'auto',
+      left: `${left}px`,
+    }"
     @mousedown.prevent
   >
     <li
@@ -57,7 +70,12 @@ const panel = usePanel();
       @mousemove="emit('hover', index)"
       @mousedown.prevent="emit('select', skill.id)"
     >
-      <k-dropdown-item :class="[index === selectedIndex && 'is-active']">
+      <k-dropdown-item
+        :class="[
+          index === selectedIndex &&
+            '[--button-color-back:var(--dropdown-color-hr)]',
+        ]"
+      >
         <span class="kai-inline-flex kai-w-full kai-items-center kai-gap-3">
           <span class="kai-truncate kai-leading-[1.5]">{{ skill.label }}</span>
           <span
@@ -69,19 +87,3 @@ const panel = usePanel();
     </li>
   </ul>
 </template>
-
-<style>
-.k-copilot-skill-suggest {
-  position: fixed;
-  z-index: var(--z-dropdown);
-  min-width: 14rem;
-  max-width: 24rem;
-  max-height: 16rem;
-  margin-top: var(--spacing-1);
-  overflow-y: auto;
-}
-
-.k-copilot-skill-suggest .k-dropdown-item.is-active {
-  --button-color-back: var(--dropdown-color-hr);
-}
-</style>
