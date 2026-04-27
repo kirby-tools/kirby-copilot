@@ -352,7 +352,7 @@ function onModelSave() {
 </script>
 
 <template>
-  <k-section v-if="isInitialized" :label="label">
+  <k-section v-if="isInitialized" class="k-copilot-section" :label="label">
     <template v-if="licenseStatus !== undefined" slot="options">
       <LicensingButtonGroup
         label="Kirby Copilot"
@@ -544,3 +544,10 @@ function onModelSave() {
     </footer>
   </k-section>
 </template>
+
+<style>
+[data-locked="true"] .k-copilot-section {
+  opacity: 0.2;
+  pointer-events: none;
+}
+</style>
