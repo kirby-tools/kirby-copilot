@@ -275,7 +275,7 @@ function getFieldPreview(fieldName: string) {
     @cancel="emit('cancel')"
   >
     <div
-      class="kai-relative kai-rounded-[var(--rounded)] has-[.ProseMirror:focus]:kai-outline has-[.ProseMirror:focus]:kai-outline-[2px] has-[.ProseMirror:focus]:kai-outline-[var(--color-focus)]"
+      class="kai-relative kai-rounded-[var(--rounded)] has-[.ProseMirror:focus]:kai-outline-[2px] has-[.ProseMirror:focus]:kai-outline-[var(--color-focus)] has-[.ProseMirror:focus]:kai-outline"
     >
       <PromptEditor
         ref="editorComponent"
@@ -298,11 +298,11 @@ function getFieldPreview(fieldName: string) {
         class="kai-group kai-mx-2 kai-mb-2 kai-rounded-[var(--rounded)] kai-bg-[var(--color-background)]"
       >
         <summary
-          class="kai-flex kai-cursor-pointer kai-list-none kai-items-center kai-gap-0.5 kai-rounded-[var(--rounded)] kai-p-1.5 focus:kai-outline focus:kai-outline-[2px] focus:kai-outline-[var(--color-focus)] [&::-webkit-details-marker]:kai-hidden"
+          class="kai-flex kai-cursor-pointer kai-list-none kai-items-center kai-gap-0.5 kai-rounded-[var(--rounded)] kai-p-1.5 [&::-webkit-details-marker]:kai-hidden focus:kai-outline-[2px] focus:kai-outline-[var(--color-focus)] focus:kai-outline"
         >
           <k-icon
             type="angle-dropdown"
-            class="kai-size-[var(--icon-size)] kai-transition-transform [transform:rotate(-90deg)] group-open:[transform:rotate(0deg)]"
+            class="kai-[transform:rotate(-90deg)] kai-size-[var(--icon-size)] kai-transition-transform group-open:kai-[transform:rotate(0deg)]"
           />
           <span>{{ panel.t("johannschopplich.copilot.preview") }}</span>
         </summary>
@@ -386,12 +386,12 @@ function getFieldPreview(fieldName: string) {
                 @click="insertFieldPlaceholder(field.name)"
               >
                 <span
-                  class="kai-inline-flex kai-w-full kai-items-center kai-gap-3"
+                  class="kai-w-full kai-inline-flex kai-items-center kai-gap-3"
                 >
                   <span>{{ field.label || field.name }}</span>
                   <span
                     v-if="getFieldPreview(field.name)"
-                    class="kai-truncate kai-leading-[1.5] kai-text-[var(--color-text-dimmed)] [font-size:var(--font-size-tiny)]"
+                    class="kai-[font-size:var(--font-size-tiny)] kai-truncate kai-text-[var(--color-text-dimmed)] kai-leading-[1.5]"
                     v-text="getFieldPreview(field.name)"
                   />
                 </span>

@@ -7,7 +7,7 @@ Commercial Kirby CMS plugin for AI-assisted content generation in the Kirby Pane
 - Panel: Vue 2.7 with Composition API (`<script setup>`, composables)
 - Build: kirbyup (Vite-based bundler for Kirby Panel plugins)
 - Vue utilities: kirbyuse (provides `usePanel`, `useSection`, `useContent`, etc.)
-- Styles: Tailwind CSS (prefixed with `kai-`)
+- Styles: UnoCSS with `presetWind3` (Tailwind v3-compatible utilities, prefixed with `kai-`)
 - AI: Vercel AI SDK (bundled in `assets/` for runtime loading)
 - PHP: Kirby 4/5 compatible
 

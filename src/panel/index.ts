@@ -18,7 +18,7 @@ import { copilot as copilotMark } from "./extensions/writer-marks/copilot";
 import { copilotSuggestions as copilotSuggestionsMark } from "./extensions/writer-marks/copilot-suggestions";
 import { legacyViewButtonMixin } from "./legacy";
 import { loadAISDK } from "./utils";
-import "./index.css";
+import "virtual:uno.css";
 import "./styles/copilot-suggestions.css";
 import "./styles/copilot-generating.css";
 

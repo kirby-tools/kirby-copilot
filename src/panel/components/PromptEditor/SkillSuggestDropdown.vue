@@ -47,7 +47,7 @@ const panel = usePanel();
     :id="listboxId"
     role="listbox"
     :aria-label="panel.t('johannschopplich.copilot.skill.suggestions')"
-    class="k-dropdown-content kai-fixed kai-z-[var(--z-dropdown)] kai-max-h-[16rem] kai-min-w-[14rem] kai-max-w-[24rem] kai-overflow-y-auto"
+    class="k-dropdown-content kai-fixed kai-z-[var(--z-dropdown)] kai-max-h-[16rem] kai-max-w-[24rem] kai-min-w-[14rem] kai-overflow-y-auto"
     :class="[
       bottom !== null
         ? 'kai-mb-[var(--spacing-1)]'
@@ -73,13 +73,13 @@ const panel = usePanel();
       <k-dropdown-item
         :class="[
           index === selectedIndex &&
-            '[--button-color-back:var(--dropdown-color-hr)]',
+            'kai-[--button-color-back:var(--dropdown-color-hr)]',
         ]"
       >
-        <span class="kai-inline-flex kai-w-full kai-items-center kai-gap-3">
+        <span class="kai-w-full kai-inline-flex kai-items-center kai-gap-3">
           <span class="kai-truncate kai-leading-[1.5]">{{ skill.label }}</span>
           <span
-            class="kai-truncate kai-leading-[1.5] kai-text-[var(--color-text-dimmed)] [font-size:var(--font-size-tiny)]"
+            class="kai-[font-size:var(--font-size-tiny)] kai-truncate kai-text-[var(--color-text-dimmed)] kai-leading-[1.5]"
             v-text="skill.id"
           />
         </span>
