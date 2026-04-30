@@ -34,9 +34,9 @@ const props = defineProps({
 });
 
 const emit = defineEmits<{
-  (e: "input", value: string): void;
-  (e: "submit"): void;
-  (e: "keydown", event: KeyboardEvent): void;
+  (event: "input", value: string): void;
+  (event: "submit"): void;
+  (event: "keydown", payload: KeyboardEvent): void;
 }>();
 
 const editor = ref<HTMLDivElement>();

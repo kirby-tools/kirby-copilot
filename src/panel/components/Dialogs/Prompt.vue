@@ -32,7 +32,21 @@ const props = defineProps({
   activeField: Object as PropType<ActiveField>,
 });
 
-const emit = defineEmits(["cancel", "close", "input", "submit", "success"]);
+const emit = defineEmits<{
+  (event: "cancel"): void;
+  (event: "close"): void;
+  (event: "input", value: unknown): void;
+  (
+    event: "submit",
+    value: {
+      prompt: string;
+      files: File[];
+      selectedFieldNames: string[];
+      insertMode: string;
+    },
+  ): void;
+  (event: "success"): void;
+}>();
 
 const _isKirby5 = isKirby5();
 const panel = usePanel();

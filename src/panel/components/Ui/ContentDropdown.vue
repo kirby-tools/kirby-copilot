@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref } from "kirbyuse";
 
-const emit = defineEmits(["close"]);
+const emit = defineEmits<{
+  (event: "close"): void;
+}>();
 
 const dropdown = ref();
 

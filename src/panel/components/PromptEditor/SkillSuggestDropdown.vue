@@ -35,8 +35,8 @@ defineProps({
 });
 
 const emit = defineEmits<{
-  (e: "select", id: string): void;
-  (e: "hover", index: number): void;
+  (event: "select", id: string): void;
+  (event: "hover", index: number): void;
 }>();
 
 const panel = usePanel();
