@@ -348,7 +348,7 @@ function getFieldPreview(fieldName: string) {
           <k-button
             icon="copilot-text-snippet"
             :dropdown="true"
-            :aria-label="panel.t('johannschopplich.copilot.placeholder.insert')"
+            :aria-label="panel.t('johannschopplich.copilot.fieldPicker.insert')"
             class="max-sm:kai-hidden"
             @click="togglePlaceholderDropdown()"
           />
@@ -365,7 +365,7 @@ function getFieldPreview(fieldName: string) {
                   :value="placeholderSearch"
                   type="text"
                   :placeholder="
-                    panel.t('johannschopplich.copilot.placeholder.search')
+                    panel.t('johannschopplich.copilot.fieldPicker.search')
                   "
                   @input="placeholderSearch = $event"
                   @click.native.stop
@@ -400,7 +400,7 @@ function getFieldPreview(fieldName: string) {
                 v-if="filteredPlaceholderFields.length === 0"
                 disabled
               >
-                {{ panel.t("johannschopplich.copilot.placeholder.notFound") }}
+                {{ panel.t("johannschopplich.copilot.fieldPicker.notFound") }}
               </k-dropdown-item>
             </div>
           </ContentDropdown>

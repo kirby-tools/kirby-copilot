@@ -19,14 +19,14 @@ return array_replace_recursive(
             'johannschopplich.copilot.context' => 'Context',
             'johannschopplich.copilot.context.reset' => 'Reset',
             'johannschopplich.copilot.context.file.model' => 'The current file is used as context.',
-            'johannschopplich.copilot.context.model.unsupported' => 'The file type is not supported as context.',
+            'johannschopplich.copilot.context.file.unsupported' => 'The file type is not supported as context.',
             'johannschopplich.copilot.prompt.label' => 'Prompt',
             'johannschopplich.copilot.prompt.empty' => 'Empty prompt',
             'johannschopplich.copilot.prompt.placeholder' => 'What would you like to generate?',
             'johannschopplich.copilot.prompt.selectionContext' => 'Selected text will be used as context.',
-            'johannschopplich.copilot.placeholder.insert' => 'Insert',
-            'johannschopplich.copilot.placeholder.search' => 'Search fields…',
-            'johannschopplich.copilot.placeholder.notFound' => 'No fields found',
+            'johannschopplich.copilot.fieldPicker.insert' => 'Insert',
+            'johannschopplich.copilot.fieldPicker.search' => 'Search fields…',
+            'johannschopplich.copilot.fieldPicker.notFound' => 'No fields found',
             'johannschopplich.copilot.skill.suggestions' => 'Skill suggestions',
             'johannschopplich.copilot.templates' => 'Templates',
             'johannschopplich.copilot.template.saveAs' => 'Save as template',
@@ -41,7 +41,7 @@ return array_replace_recursive(
             'johannschopplich.copilot.preview' => 'Preview',
             'johannschopplich.copilot.notification.success' => 'Content generated',
             'johannschopplich.copilot.notification.error' => 'Could not generate text. Please check console logs.',
-            'johannschopplich.copilot.license.toast' => 'Enjoying Copilot? Activate your license.'
+            'johannschopplich.copilot.licenseToast' => 'Enjoying Copilot? Activate your license.'
         ],
         'de' => [
             'johannschopplich.copilot.label' => 'Copilot',
@@ -57,14 +57,14 @@ return array_replace_recursive(
             'johannschopplich.copilot.context' => 'Kontext',
             'johannschopplich.copilot.context.reset' => 'Zurücksetzen',
             'johannschopplich.copilot.context.file.model' => 'Die aktuelle Datei wird als Kontext verwendet.',
-            'johannschopplich.copilot.context.model.unsupported' => 'Der Dateityp wird als Kontext nicht unterstützt.',
+            'johannschopplich.copilot.context.file.unsupported' => 'Der Dateityp wird als Kontext nicht unterstützt.',
             'johannschopplich.copilot.prompt.label' => 'Prompt',
             'johannschopplich.copilot.prompt.empty' => 'Leere Prompt',
             'johannschopplich.copilot.prompt.placeholder' => 'Was möchtest du generieren lassen?',
             'johannschopplich.copilot.prompt.selectionContext' => 'Ausgewählter Text wird als Kontext verwendet.',
-            'johannschopplich.copilot.placeholder.insert' => 'Einfügen',
-            'johannschopplich.copilot.placeholder.search' => 'Felder suchen…',
-            'johannschopplich.copilot.placeholder.notFound' => 'Keine Felder gefunden',
+            'johannschopplich.copilot.fieldPicker.insert' => 'Einfügen',
+            'johannschopplich.copilot.fieldPicker.search' => 'Felder suchen…',
+            'johannschopplich.copilot.fieldPicker.notFound' => 'Keine Felder gefunden',
             'johannschopplich.copilot.skill.suggestions' => 'Skill-Vorschläge',
             'johannschopplich.copilot.templates' => 'Vorlagen',
             'johannschopplich.copilot.template.saveAs' => 'Als Vorlage speichern',
@@ -79,7 +79,7 @@ return array_replace_recursive(
             'johannschopplich.copilot.preview' => 'Vorschau',
             'johannschopplich.copilot.notification.success' => 'Content generiert',
             'johannschopplich.copilot.notification.error' => 'Text konnte nicht generiert werden. Bitte Konsolenprotokolle prüfen.',
-            'johannschopplich.copilot.license.toast' => 'Gefällt dir Copilot? Aktiviere deine Lizenz.'
+            'johannschopplich.copilot.licenseToast' => 'Gefällt dir Copilot? Aktiviere deine Lizenz.'
         ],
         'fr' => [
             'johannschopplich.copilot.label' => 'Copilot',
@@ -95,14 +95,14 @@ return array_replace_recursive(
             'johannschopplich.copilot.context' => 'Contexte',
             'johannschopplich.copilot.context.reset' => 'Réinitialiser',
             'johannschopplich.copilot.context.file.model' => 'Le fichier actuel est utilisé comme contexte.',
-            'johannschopplich.copilot.context.model.unsupported' => 'Le type de fichier n\'est pas pris en charge comme contexte.',
+            'johannschopplich.copilot.context.file.unsupported' => 'Le type de fichier n\'est pas pris en charge comme contexte.',
             'johannschopplich.copilot.prompt.label' => 'Requête',
             'johannschopplich.copilot.prompt.empty' => 'Requête vide',
             'johannschopplich.copilot.prompt.placeholder' => 'Que souhaitez-vous générer ?',
             'johannschopplich.copilot.prompt.selectionContext' => 'Le texte sélectionné sera utilisé comme contexte.',
-            'johannschopplich.copilot.placeholder.insert' => 'Insérer',
-            'johannschopplich.copilot.placeholder.search' => 'Rechercher des champs…',
-            'johannschopplich.copilot.placeholder.notFound' => 'Aucun champ trouvé',
+            'johannschopplich.copilot.fieldPicker.insert' => 'Insérer',
+            'johannschopplich.copilot.fieldPicker.search' => 'Rechercher des champs…',
+            'johannschopplich.copilot.fieldPicker.notFound' => 'Aucun champ trouvé',
             'johannschopplich.copilot.skill.suggestions' => 'Suggestions de compétences',
             'johannschopplich.copilot.templates' => 'Modèles',
             'johannschopplich.copilot.template.saveAs' => 'Enregistrer comme modèle',
@@ -117,7 +117,7 @@ return array_replace_recursive(
             'johannschopplich.copilot.preview' => 'Aperçu',
             'johannschopplich.copilot.notification.success' => 'Contenu généré',
             'johannschopplich.copilot.notification.error' => 'Impossible de générer le texte. Veuillez vérifier les journaux de la console.',
-            'johannschopplich.copilot.license.toast' => 'Vous aimez Copilot ? Activez votre licence.'
+            'johannschopplich.copilot.licenseToast' => 'Vous aimez Copilot ? Activez votre licence.'
         ],
         'nl' => [
             'johannschopplich.copilot.label' => 'Copilot',
@@ -133,14 +133,14 @@ return array_replace_recursive(
             'johannschopplich.copilot.context' => 'Context',
             'johannschopplich.copilot.context.reset' => 'Resetten',
             'johannschopplich.copilot.context.file.model' => 'Het huidige bestand wordt gebruikt als context.',
-            'johannschopplich.copilot.context.model.unsupported' => 'Dit bestandstype wordt niet ondersteund als context.',
+            'johannschopplich.copilot.context.file.unsupported' => 'Dit bestandstype wordt niet ondersteund als context.',
             'johannschopplich.copilot.prompt.label' => 'Prompt',
             'johannschopplich.copilot.prompt.empty' => 'Lege prompt',
             'johannschopplich.copilot.prompt.placeholder' => 'Wat wil je genereren?',
             'johannschopplich.copilot.prompt.selectionContext' => 'Geselecteerde tekst wordt gebruikt als context.',
-            'johannschopplich.copilot.placeholder.insert' => 'Invoegen',
-            'johannschopplich.copilot.placeholder.search' => 'Velden zoeken…',
-            'johannschopplich.copilot.placeholder.notFound' => 'Geen velden gevonden',
+            'johannschopplich.copilot.fieldPicker.insert' => 'Invoegen',
+            'johannschopplich.copilot.fieldPicker.search' => 'Velden zoeken…',
+            'johannschopplich.copilot.fieldPicker.notFound' => 'Geen velden gevonden',
             'johannschopplich.copilot.skill.suggestions' => 'Skill-suggesties',
             'johannschopplich.copilot.templates' => 'Sjablonen',
             'johannschopplich.copilot.template.saveAs' => 'Opslaan als sjabloon',
@@ -155,7 +155,7 @@ return array_replace_recursive(
             'johannschopplich.copilot.preview' => 'Voorbeeld',
             'johannschopplich.copilot.notification.success' => 'Inhoud gegenereerd',
             'johannschopplich.copilot.notification.error' => 'Kon geen tekst genereren. Controleer de console logs.',
-            'johannschopplich.copilot.license.toast' => 'Bevalt Copilot? Activeer je licentie.'
+            'johannschopplich.copilot.licenseToast' => 'Bevalt Copilot? Activeer je licentie.'
         ]
     ]
 );

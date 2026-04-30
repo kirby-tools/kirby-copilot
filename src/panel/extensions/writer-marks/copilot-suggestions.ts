@@ -143,7 +143,7 @@ export const copilotSuggestions: CopilotSuggestionsMark = {
     if (["inactive", "invalid"].includes(context.licenseStatus!)) {
       window.panel.notification.info({
         icon: "key",
-        message: window.panel.t("johannschopplich.copilot.license.toast"),
+        message: window.panel.t("johannschopplich.copilot.licenseToast"),
       });
     }
 
