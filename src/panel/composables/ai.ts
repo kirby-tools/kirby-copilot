@@ -10,11 +10,12 @@ import type { OutputFormat, PluginConfig, ProviderConfig } from "../types";
 import { useContent, usePanel } from "kirbyuse";
 import { isObject, template } from "utilful";
 import {
+  ANTHROPIC_MANUAL_BUDGET_TOKENS,
   DEFAULT_COMPLETION_MODELS,
   DEFAULT_REASONING_EFFORT,
   PDF_SIZE_LIMIT,
   PLUGIN_PROXY_API_ROUTE,
-  PROVIDER_REASONING_MAP,
+  PROVIDER_REASONING_OVERRIDES,
   PROXY_API_KEY_MARKER,
   STORAGE_KEY_PREFIX,
   SUPPORTED_PROVIDERS,
@@ -28,20 +29,16 @@ import { CopilotError } from "../utils/error";
 import { createHtmlChunking } from "../utils/html-chunking";
 import { toReducedBlob } from "../utils/image";
 import {
+  getAnthropicThinkingMode,
   parseGatewayPrefix,
   supportsReasoning,
-  usesLegacyExtendedThinking,
 } from "../utils/models";
 import { extractTextFromPdf } from "../utils/pdf";
 import { normalizePlaceholders } from "../utils/template";
 import { useLogger } from "./logger";
 import { extractPageRefIds } from "./pages";
 import { usePluginContext } from "./plugin";
-import {
-  extractSkillRefIds,
-  stripSkillRefTokens,
-  useSkills,
-} from "./skills";
+import { extractSkillRefIds, stripSkillRefTokens, useSkills } from "./skills";
 
 const DEFAULT_PLAYGROUND_MODEL_PROVIDER = "google";
 const PLAYGROUND_PROVIDER_MODEL_MAP: Record<string, string> = {
@@ -516,14 +513,17 @@ function resolveAnthropicReasoning(
   const { prefix, nativeModelId } = parseGatewayPrefix(modelId);
   if (prefix && prefix !== "anthropic") return;
 
-  if (!supportsReasoning(nativeModelId)) return;
-  if (reasoningEffort === "none") return;
+  const mode = getAnthropicThinkingMode(nativeModelId);
+  if (mode === "none") return;
 
-  // 4.0/4.1/4.5 need manual budget tokens; everything else uses adaptive thinking with `effort`
-  if (usesLegacyExtendedThinking(nativeModelId)) {
-    const budgetTokens = PROVIDER_REASONING_MAP[reasoningEffort]?.anthropic;
-    if (typeof budgetTokens !== "number") return;
-    return { thinking: { type: "enabled" as const, budgetTokens } };
+  if (mode === "manual") {
+    if (reasoningEffort === "none") return;
+    return {
+      thinking: {
+        type: "enabled" as const,
+        budgetTokens: ANTHROPIC_MANUAL_BUDGET_TOKENS[reasoningEffort],
+      },
+    };
   }
 
   return {
@@ -532,7 +532,11 @@ function resolveAnthropicReasoning(
       // Skip reasoning text the Panel doesn't render (default: `"summarized"`)
       display: "omitted" as const,
     },
-    effort: reasoningEffort,
+    effort: lookupReasoningOverride(
+      "anthropic",
+      nativeModelId,
+      reasoningEffort,
+    ),
   };
 }
 
@@ -552,11 +556,24 @@ function resolveProviderReasoning({
 
   if (!supportsReasoning(nativeModelId)) return;
 
-  const reasoningConfig = PROVIDER_REASONING_MAP[reasoningEffort];
+  return lookupReasoningOverride(provider, nativeModelId, reasoningEffort);
+}
+
+/**
+ * Resolves a provider-specific reasoning value, applying overrides for known
+ * model quirks and falling back to the user's effort string verbatim.
+ */
+function lookupReasoningOverride(
+  provider: ModelProvider,
+  nativeModelId: string,
+  effort: ReasoningEffort,
+) {
+  const overrides = PROVIDER_REASONING_OVERRIDES[effort];
 
   return (
-    reasoningConfig?.[`${provider}:${nativeModelId}`] ??
-    reasoningConfig?.[provider]
+    overrides?.[`${provider}:${nativeModelId}`] ??
+    overrides?.[provider] ??
+    effort
   );
 }
 
@@ -566,7 +583,6 @@ function mergeHeaders(...headers: (HeadersInit | undefined)[]) {
   );
 }
 
-/** Escapes the chars that would break a double-quoted XML attribute. */
 function escapeXmlAttr(value: string) {
   return value
     .replaceAll("&", "&amp;")

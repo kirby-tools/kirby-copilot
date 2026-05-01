@@ -1,20 +1,17 @@
 import { describe, expect, it } from "vitest";
 import {
   buildUserPrompt,
+  getAnthropicThinkingMode,
   parseGatewayPrefix,
   supportsReasoning,
-  usesLegacyExtendedThinking,
 } from "../../../src/panel/utils/models";
 
 describe("supportsReasoning", () => {
   // eslint-disable-next-line test/prefer-lowercase-title
   describe("OpenAI models", () => {
-    it.each(["gpt-5", "gpt-5.4-mini"])(
-      "returns true for %s",
-      (model) => {
-        expect(supportsReasoning(model)).toBe(true);
-      },
-    );
+    it.each(["gpt-5", "gpt-5.4-mini"])("returns true for %s", (model) => {
+      expect(supportsReasoning(model)).toBe(true);
+    });
 
     it.each(["gpt-4o", "gpt-4-turbo", "gpt-o4-mini"])(
       "returns false for %s",
@@ -74,7 +71,7 @@ describe("supportsReasoning", () => {
 
     it.each([
       // Only Small 4 and `magistral-*` honor `reasoning_effort`;
-      // `medium`/`large` silently ignore it.
+      // `medium`/`large` silently ignore it
       "mistral-medium-2508",
       "mistral-large-latest",
       "mistral-nemo",
@@ -97,26 +94,38 @@ describe("supportsReasoning", () => {
   });
 });
 
-describe("usesLegacyExtendedThinking", () => {
+describe("getAnthropicThinkingMode", () => {
+  it.each([
+    "claude-opus-4-6",
+    "claude-opus-4-7",
+    "claude-sonnet-4-6",
+    "claude-mythos-preview",
+    // Forward-compat: future Haiku adaptive variant
+    "claude-haiku-4-6",
+    // Forward-compat: two-digit minor versions
+    "claude-opus-4-10",
+    "claude-sonnet-5",
+  ])("returns `adaptive` for %s", (model) => {
+    expect(getAnthropicThinkingMode(model)).toBe("adaptive");
+  });
+
   it.each([
     "claude-opus-4",
     "claude-opus-4-1",
     "claude-opus-4-5-20251101",
     "claude-sonnet-4-20250514",
     "claude-haiku-4-5",
-  ])("returns true for %s (needs manual budget tokens)", (model) => {
-    expect(usesLegacyExtendedThinking(model)).toBe(true);
+    "claude-haiku-4-5-20251001",
+  ])("returns `manual` for %s (needs budget_tokens)", (model) => {
+    expect(getAnthropicThinkingMode(model)).toBe("manual");
   });
 
-  it.each([
-    // Adaptive thinking is the default from 4.6 onward
-    "claude-opus-4-6",
-    "claude-sonnet-4-6",
-    "claude-opus-4-7",
-    "claude-mythos-preview",
-  ])("returns false for %s (uses adaptive thinking)", (model) => {
-    expect(usesLegacyExtendedThinking(model)).toBe(false);
-  });
+  it.each(["claude-3-5-sonnet", "claude-3-5-haiku", "gpt-5"])(
+    "returns `none` for %s",
+    (model) => {
+      expect(getAnthropicThinkingMode(model)).toBe("none");
+    },
+  );
 });
 
 describe("buildUserPrompt", () => {

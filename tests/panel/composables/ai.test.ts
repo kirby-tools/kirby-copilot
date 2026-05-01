@@ -251,7 +251,6 @@ describe("useStreamText", () => {
         }),
       );
     });
-
   });
 
   describe("abort signal", () => {
@@ -355,7 +354,7 @@ describe("resolveLanguageModel", () => {
   describe("provider selection", () => {
     it.each([
       ["openai", mockCreateOpenAI, "gpt-5.4-nano"],
-      ["anthropic", mockCreateAnthropic, "claude-haiku-4-5-20251001"],
+      ["anthropic", mockCreateAnthropic, "claude-haiku-4-5"],
       ["google", mockCreateGoogle, "gemini-3-flash-preview"],
       ["mistral", mockCreateMistral, "mistral-small-latest"],
     ] as const)(
@@ -376,14 +375,14 @@ describe("resolveLanguageModel", () => {
   });
 
   describe("custom provider options", () => {
-    it("maps Anthropic reasoning effort to thinking budget (legacy)", async () => {
+    it("emits manual extended thinking with budget tokens for Haiku 4.5", async () => {
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({
           provider: "anthropic",
           reasoningEffort: "high",
           providers: {
             anthropic: {
-              model: "claude-haiku-4-5-20251001",
+              model: "claude-haiku-4-5",
               hasApiKey: true,
             },
           },
@@ -395,16 +394,16 @@ describe("resolveLanguageModel", () => {
       expect(providerOptions?.anthropic).toEqual({
         thinking: {
           type: "enabled",
-          budgetTokens: 32000,
+          budgetTokens: 12000,
         },
       });
     });
 
-    it("forces `display: omitted` on Opus 4.7 to skip unrendered reasoning text", async () => {
+    it("maps Anthropic effort `none` to `low` on adaptive models (no SDK `none` value)", async () => {
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({
           provider: "anthropic",
-          reasoningEffort: "low",
+          reasoningEffort: "none",
           providers: {
             anthropic: { model: "claude-opus-4-7", hasApiKey: true },
           },
@@ -608,12 +607,25 @@ describe("resolveLanguageModel", () => {
       config: Partial<PluginConfigSubset>;
     }> = [
       {
-        name: "adaptive model at effort `none`",
+        name: "manual-thinking Anthropic model at effort `none`",
         config: {
           provider: "anthropic",
           reasoningEffort: "none",
           providers: {
-            anthropic: { model: "claude-opus-4-7", hasApiKey: true },
+            anthropic: {
+              model: "claude-haiku-4-5",
+              hasApiKey: true,
+            },
+          },
+        },
+      },
+      {
+        name: "pre-Claude-4 Anthropic model has no thinking mode",
+        config: {
+          provider: "anthropic",
+          reasoningEffort: "high",
+          providers: {
+            anthropic: { model: "claude-3-5-sonnet", hasApiKey: true },
           },
         },
       },
@@ -667,7 +679,7 @@ describe("resolveLanguageModel", () => {
 
   // eslint-disable-next-line test/prefer-lowercase-title
   describe("OpenAI API variant", () => {
-    it("uses chat() when providers.openai.api is 'chat'", async () => {
+    it("uses chat() when providers.openai.api is `chat`", async () => {
       const chatSpy = vi.fn(() => createMockModel());
       const languageModelSpy = vi.fn(() => createMockModel());
       mockCreateOpenAI.mockReturnValue({
@@ -807,7 +819,6 @@ describe("resolvePromptContext", () => {
         </reference_page>"
       `);
     });
-
   });
 
   describe("mixed file handling", () => {

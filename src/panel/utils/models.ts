@@ -69,16 +69,34 @@ export function supportsReasoning(modelName: string) {
 }
 
 /**
- * Checks if a Claude model requires the legacy `{type: "enabled", budget_tokens: N}`
- * shape instead of adaptive thinking.
+ * Resolves which thinking shape a Claude model expects.
  *
  * @remarks
- * Adaptive thinking landed with Opus 4.6 / Sonnet 4.6; Opus 4.7 rejects
- * `type: "enabled"` outright. This matcher covers 4.0 (bare and dated),
- * 4.1, and 4.5; everything else falls through to adaptive.
+ * - `adaptive` – Opus 4.6+ / Sonnet 4.6+ / Mythos. Use
+ *   `thinking: {type: "adaptive"}` plus the `effort` parameter.
+ * - `manual` – Opus 4.0-4.5, Sonnet 4.0-4.5, Haiku 4.5. Use
+ *   `thinking: {type: "enabled", budget_tokens: N}`. Opus 4.7 rejects this.
+ * - `none` – pre-Claude-4 and any model not in the above ranges.
  */
-export function usesLegacyExtendedThinking(modelName: string) {
-  return /^claude-(?:opus|sonnet|haiku)-4(?:-(?:[0-5](?:-\d{8})?|\d{8}))?$/.test(
-    modelName,
-  );
+export function getAnthropicThinkingMode(
+  modelName: string,
+): "adaptive" | "manual" | "none" {
+  if (modelName.startsWith("claude-mythos-")) return "adaptive";
+  // 4.6+ Opus/Sonnet/Haiku (Haiku has no adaptive variant yet)
+  if (
+    /^claude-(?:opus|sonnet|haiku)-(?:[5-9]|[1-9]\d|4-(?:[6-9]|[1-9]\d))(?:-|$)/.test(
+      modelName,
+    )
+  )
+    return "adaptive";
+
+  // 4.0-4.5 (Opus, Sonnet, Haiku) – manual extended thinking
+  if (
+    /^claude-(?:opus|sonnet|haiku)-4(?:-(?:[0-5](?:-\d{8})?|\d{8}))?$/.test(
+      modelName,
+    )
+  )
+    return "manual";
+
+  return "none";
 }
