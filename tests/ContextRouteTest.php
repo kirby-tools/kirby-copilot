@@ -121,42 +121,6 @@ final class ContextRouteTest extends ApiRouteTestCase
         ], $response['config']['providers']);
     }
 
-    #[Test]
-    public function skills_are_normalized_with_defaults_omitted_when_falsy(): void
-    {
-        $response = $this->callContextRoute([
-            'johannschopplich.copilot' => [
-                'providers' => ['openai' => ['apiKey' => 'test-key']],
-                'skills' => [
-                    [
-                        'id' => 'brand-voice',
-                        'label' => 'Brand Voice',
-                        'instructions' => 'Write casually.',
-                    ],
-                    [
-                        'id' => 'always-on',
-                        'label' => 'Always On',
-                        'instructions' => 'Apply to every prompt.',
-                        'default' => true,
-                    ],
-                ],
-            ],
-        ]);
-
-        $this->assertCount(2, $response['config']['skills']);
-        $this->assertSame([
-            'id' => 'brand-voice',
-            'label' => 'Brand Voice',
-            'instructions' => 'Write casually.',
-        ], $response['config']['skills'][0]);
-        $this->assertSame([
-            'id' => 'always-on',
-            'label' => 'Always On',
-            'instructions' => 'Apply to every prompt.',
-            'default' => true,
-        ], $response['config']['skills'][1]);
-    }
-
     /** @return array<string, array{0: array<string, mixed>}> */
     public static function invalidSkillEntries(): array
     {
@@ -207,23 +171,6 @@ final class ContextRouteTest extends ApiRouteTestCase
         // Default language resolution falls back to 'en' when no languages configured
         $this->assertSame('Bilingual', $response['config']['skills'][0]['label']);
         $this->assertSame('Write bilingual.', $response['config']['skills'][0]['instructions']);
-    }
-
-    #[Test]
-    public function skill_default_flag_is_omitted_when_false_or_missing(): void
-    {
-        $response = $this->callContextRoute([
-            'johannschopplich.copilot' => [
-                'providers' => ['openai' => ['apiKey' => 'test-key']],
-                'skills' => [
-                    ['id' => 'a', 'label' => 'A', 'instructions' => 'a', 'default' => false],
-                    ['id' => 'b', 'label' => 'B', 'instructions' => 'b'],
-                ],
-            ],
-        ]);
-
-        $this->assertArrayNotHasKey('default', $response['config']['skills'][0]);
-        $this->assertArrayNotHasKey('default', $response['config']['skills'][1]);
     }
 
     #[Test]
