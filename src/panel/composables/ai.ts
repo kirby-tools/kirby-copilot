@@ -8,14 +8,12 @@ import type { LogLevel } from "kirbyuse";
 import type { ModelProvider, ReasoningEffort } from "../constants";
 import type { OutputFormat, PluginConfig, ProviderConfig } from "../types";
 import { useContent, usePanel } from "kirbyuse";
-import { isObject, template } from "utilful";
+import { template } from "utilful";
 import {
-  ANTHROPIC_MANUAL_BUDGET_TOKENS,
   DEFAULT_COMPLETION_MODELS,
   DEFAULT_REASONING_EFFORT,
   PDF_SIZE_LIMIT,
   PLUGIN_PROXY_API_ROUTE,
-  PROVIDER_REASONING_OVERRIDES,
   PROXY_API_KEY_MARKER,
   STORAGE_KEY_PREFIX,
   SUPPORTED_PROVIDERS,
@@ -28,12 +26,9 @@ import {
 import { CopilotError } from "../utils/error";
 import { createHtmlChunking } from "../utils/html-chunking";
 import { toReducedBlob } from "../utils/image";
-import {
-  getAnthropicThinkingMode,
-  parseGatewayPrefix,
-  supportsReasoning,
-} from "../utils/models";
+import { parseGatewayPrefix } from "../utils/models";
 import { extractTextFromPdf } from "../utils/pdf";
+import { resolveProviderOptions } from "../utils/reasoning";
 import { normalizePlaceholders } from "../utils/template";
 import { useLogger } from "./logger";
 import { extractPageRefIds } from "./pages";
@@ -47,16 +42,27 @@ const PLAYGROUND_PROVIDER_MODEL_MAP: Record<string, string> = {
   anthropic: "anthropicmodel",
 };
 
-// Non-Anthropic reasoning-option shapes (Anthropic has its own resolver)
-const REASONING_SHAPERS = {
-  openai: (value: string | number) => ({ reasoningEffort: value }),
-  mistral: (value: string | number) => ({ reasoningEffort: value }),
-  google: (value: string | number) => ({
-    thinkingConfig: { thinkingLevel: value },
-  }),
-} as const satisfies Partial<
-  Record<ModelProvider, (value: string | number) => Record<string, unknown>>
->;
+/**
+ * Builds a user prompt with output format and optional selection context.
+ */
+export function buildUserPrompt(
+  prompt: string,
+  {
+    responseFormat,
+    selection,
+  }: {
+    responseFormat?: OutputFormat;
+    selection?: string;
+  } = {},
+) {
+  return [
+    responseFormat && `<response_format>${responseFormat}</response_format>`,
+    selection && `<selection>\n${selection}\n</selection>`,
+    prompt,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+}
 
 /**
  * Streams text from an AI provider using the configured model.
@@ -462,119 +468,6 @@ function resolveModelId({
   }
 
   return modelId;
-}
-
-function resolveProviderOptions({
-  provider,
-  providerConfig,
-  modelId,
-  reasoningEffort,
-}: {
-  provider: ModelProvider;
-  providerConfig: ProviderConfig;
-  modelId: string;
-  reasoningEffort: ReasoningEffort;
-}) {
-  const anthropicReasoning =
-    provider === "anthropic"
-      ? resolveAnthropicReasoning(modelId, reasoningEffort)
-      : undefined;
-  const reasoningValue =
-    provider === "anthropic"
-      ? undefined
-      : resolveProviderReasoning({ provider, modelId, reasoningEffort });
-
-  const shape =
-    reasoningValue !== undefined && provider !== "anthropic"
-      ? REASONING_SHAPERS[provider]?.(reasoningValue)
-      : undefined;
-
-  const providerOptions: SharedV3ProviderOptions = {
-    ...(anthropicReasoning && { anthropic: anthropicReasoning }),
-    ...(shape && { [provider]: shape }),
-  };
-
-  if (isObject(providerConfig.options)) {
-    providerOptions[provider] = {
-      ...providerOptions[provider],
-      ...providerConfig.options,
-    };
-  }
-
-  return Object.keys(providerOptions).length > 0 ? providerOptions : undefined;
-}
-
-function resolveAnthropicReasoning(
-  modelId: string,
-  reasoningEffort: ReasoningEffort,
-) {
-  // Cross-provider prefix: compat shims typically drop the outer SDK's
-  // reasoning shape. Override via `providers.anthropic.options` if needed.
-  const { prefix, nativeModelId } = parseGatewayPrefix(modelId);
-  if (prefix && prefix !== "anthropic") return;
-
-  const mode = getAnthropicThinkingMode(nativeModelId);
-  if (mode === "none") return;
-
-  if (mode === "manual") {
-    if (reasoningEffort === "none") return;
-    return {
-      thinking: {
-        type: "enabled" as const,
-        budgetTokens: ANTHROPIC_MANUAL_BUDGET_TOKENS[reasoningEffort],
-      },
-    };
-  }
-
-  return {
-    thinking: {
-      type: "adaptive" as const,
-      // Skip reasoning text the Panel doesn't render (default: `"summarized"`)
-      display: "omitted" as const,
-    },
-    effort: lookupReasoningOverride(
-      "anthropic",
-      nativeModelId,
-      reasoningEffort,
-    ),
-  };
-}
-
-function resolveProviderReasoning({
-  provider,
-  modelId,
-  reasoningEffort,
-}: {
-  provider: ModelProvider;
-  modelId: string;
-  reasoningEffort: ReasoningEffort;
-}) {
-  // Cross-provider prefix: compat shims typically drop the outer SDK's
-  // reasoning shape. Override via `providers.<provider>.options` if needed.
-  const { prefix, nativeModelId } = parseGatewayPrefix(modelId);
-  if (prefix && prefix !== provider) return;
-
-  if (!supportsReasoning(nativeModelId)) return;
-
-  return lookupReasoningOverride(provider, nativeModelId, reasoningEffort);
-}
-
-/**
- * Resolves a provider-specific reasoning value, applying overrides for known
- * model quirks and falling back to the user's effort string verbatim.
- */
-function lookupReasoningOverride(
-  provider: ModelProvider,
-  nativeModelId: string,
-  effort: ReasoningEffort,
-) {
-  const overrides = PROVIDER_REASONING_OVERRIDES[effort];
-
-  return (
-    overrides?.[`${provider}:${nativeModelId}`] ??
-    overrides?.[provider] ??
-    effort
-  );
 }
 
 function mergeHeaders(...headers: (HeadersInit | undefined)[]) {

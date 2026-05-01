@@ -28,54 +28,6 @@ export type ReasoningEffort = (typeof REASONING_EFFORTS)[number];
 // Default reasoning effort level
 export const DEFAULT_REASONING_EFFORT: ReasoningEffort = "low";
 
-/**
- * Where the universal `ReasoningEffort` vocabulary diverges from a provider's
- * own enum. Entry absent ⇒ pass the user's effort string through as-is.
- *
- * @remarks
- * Use `provider:model` keys for model-specific overrides.
- */
-export const PROVIDER_REASONING_OVERRIDES: Partial<
-  Record<
-    ReasoningEffort,
-    Partial<Record<ModelProvider | `${ModelProvider}:${string}`, string>>
-  >
-> = {
-  none: {
-    anthropic: "low", // Adaptive Anthropic effort enum has no `none`
-    "openai:gpt-5": "minimal", // GPT-5 does not support `none`
-    "openai:gpt-5-mini": "minimal", // GPT-5-mini does not support `none`
-    "openai:gpt-5-nano": "minimal", // GPT-5-nano does not support `none`
-    google: "low", // Google rejects `none`; `low` is the minimum
-    "google:gemini-3-flash-preview": "minimal", // Gemini 3 Flash also supports `minimal`
-  },
-  low: {
-    mistral: "high", // Mistral only exposes `high`/`none`
-  },
-  medium: {
-    "google:gemini-3-pro-preview": "high", // Gemini 3 Pro only supports `low`/`high`
-    mistral: "high",
-  },
-};
-
-/**
- * `budget_tokens` per effort level for Anthropic models that require manual
- * extended thinking (Haiku 4.5, Opus/Sonnet 4.0-4.5).
- *
- * @remarks
- * Sized for short content-editing tasks (rewrites, summarization). Anthropic
- * stops thinking once the model has a confident answer, so these are ceilings,
- * not expected spend. Floor is the API minimum (1024).
- */
-export const ANTHROPIC_MANUAL_BUDGET_TOKENS: Record<
-  Exclude<ReasoningEffort, "none">,
-  number
-> = {
-  low: 1024,
-  medium: 4_000,
-  high: 12_000,
-};
-
 export const DEFAULT_SYSTEM_PROMPT = `
 You are a content assistant.
 

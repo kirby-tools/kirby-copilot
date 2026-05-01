@@ -1,10 +1,13 @@
 import type { ActiveField, OutputFormat, PromptContext } from "../types";
 import { usePanel } from "kirbyuse";
-import { usePluginContext, useStreamText } from "../composables";
+import {
+  buildUserPrompt,
+  usePluginContext,
+  useStreamText,
+} from "../composables";
 import { DEFAULT_SYSTEM_PROMPT, STORAGE_KEY_PREFIX } from "../constants";
-import { buildUserPrompt, handleStreamError, openPromptDialog } from "../utils";
+import { handleStreamError, openPromptDialog } from "../utils";
 
-/** Streams AI-generated text into the active field. */
 export async function streamTextToField(
   selection: string | undefined,
   {
@@ -109,7 +112,6 @@ export async function streamTextToField(
   }
 }
 
-/** Gets the active field element and its metadata from the Panel. */
 export function getActiveField(): ActiveField | undefined {
   const element = document.activeElement?.closest<HTMLElement>(".k-field");
   if (!element) return;

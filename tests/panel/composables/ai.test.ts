@@ -3,6 +3,7 @@ import { simulateReadableStream } from "ai";
 import { MockLanguageModelV3 } from "ai/test";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  buildUserPrompt,
   resolveLanguageModel,
   resolvePromptContext,
   useStreamText,
@@ -399,25 +400,6 @@ describe("resolveLanguageModel", () => {
       });
     });
 
-    it("maps Anthropic effort `none` to `low` on adaptive models (no SDK `none` value)", async () => {
-      mockUsePluginContext.mockReturnValue(
-        createPluginConfig({
-          provider: "anthropic",
-          reasoningEffort: "none",
-          providers: {
-            anthropic: { model: "claude-opus-4-7", hasApiKey: true },
-          },
-        }),
-      );
-
-      const { providerOptions } = await resolveLanguageModel();
-
-      expect(providerOptions?.anthropic).toEqual({
-        thinking: { type: "adaptive", display: "omitted" },
-        effort: "low",
-      });
-    });
-
     it.each([
       ["claude-opus-4-6", "medium"],
       ["claude-sonnet-4-6", "high"],
@@ -616,6 +598,16 @@ describe("resolveLanguageModel", () => {
               model: "claude-haiku-4-5",
               hasApiKey: true,
             },
+          },
+        },
+      },
+      {
+        name: "adaptive-thinking Anthropic model at effort `none`",
+        config: {
+          provider: "anthropic",
+          reasoningEffort: "none",
+          providers: {
+            anthropic: { model: "claude-opus-4-7", hasApiKey: true },
           },
         },
       },
@@ -972,6 +964,52 @@ describe("resolvePromptContext", () => {
 
       expect(systemPromptWithContext).toBe("You are a writer.");
     });
+  });
+});
+
+describe("buildUserPrompt", () => {
+  it("returns prompt only when no options provided", () => {
+    expect(buildUserPrompt("Hello world")).toBe("Hello world");
+  });
+
+  it("returns prompt only when options are empty", () => {
+    expect(buildUserPrompt("Hello world", {})).toBe("Hello world");
+  });
+
+  it("prepends response format when provided", () => {
+    const result = buildUserPrompt("Write something", {
+      responseFormat: "markdown",
+    });
+    expect(result).toBe(
+      "<response_format>markdown</response_format>\n\nWrite something",
+    );
+  });
+
+  it("prepends selection when provided", () => {
+    const result = buildUserPrompt("Edit this", {
+      selection: "selected text",
+    });
+    expect(result).toBe(
+      "<selection>\nselected text\n</selection>\n\nEdit this",
+    );
+  });
+
+  it("includes both response format and selection in correct order", () => {
+    const result = buildUserPrompt("Process this", {
+      responseFormat: "rich-text",
+      selection: "some content",
+    });
+    expect(result).toBe(
+      "<response_format>rich-text</response_format>\n\n<selection>\nsome content\n</selection>\n\nProcess this",
+    );
+  });
+
+  it("filters out falsy values", () => {
+    const result = buildUserPrompt("Prompt", {
+      responseFormat: undefined,
+      selection: "",
+    });
+    expect(result).toBe("Prompt");
   });
 });
 
