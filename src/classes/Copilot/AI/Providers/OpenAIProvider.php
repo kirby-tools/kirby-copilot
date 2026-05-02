@@ -103,7 +103,7 @@ class OpenAIProvider implements Provider
     {
         if ($this->config->apiKey === null) {
             throw new AuthException(
-                message: 'Missing API key: johannschopplich.copilot.providers.' . $this->providerName()->value . '.apiKey'
+                'Missing API key: johannschopplich.copilot.providers.' . $this->providerName()->value . '.apiKey'
             );
         }
 

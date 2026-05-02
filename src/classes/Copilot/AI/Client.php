@@ -74,7 +74,7 @@ final class Client
 
         if ($config->apiKey === null) {
             throw new AuthException(
-                message: 'Missing API key: johannschopplich.copilot.providers.' . $name->value . '.apiKey'
+                'Missing API key: johannschopplich.copilot.providers.' . $name->value . '.apiKey'
             );
         }
     }

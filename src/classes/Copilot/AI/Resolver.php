@@ -32,7 +32,7 @@ final readonly class Resolver
 
         if (!isset($config['provider'])) {
             throw new InvalidArgumentException(
-                message: 'The "johannschopplich.copilot.provider" option is required'
+                'The "johannschopplich.copilot.provider" option is required'
             );
         }
 
@@ -41,7 +41,7 @@ final readonly class Resolver
 
         if ($defaultProvider === null) {
             throw new InvalidArgumentException(
-                message: 'Unknown provider "' . $providerName . '" — set "johannschopplich.copilot.provider" to one of: openai, anthropic, google, mistral'
+                'Unknown provider "' . $providerName . '" — set "johannschopplich.copilot.provider" to one of: openai, anthropic, google, mistral'
             );
         }
 
