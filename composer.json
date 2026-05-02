@@ -24,12 +24,15 @@
   "require": {
     "getkirby/composer-installer": "^1",
     "johannschopplich/kirby-tools-licensing": "^0.9",
-    "johannschopplich/kirby-tools-utils": "^0.1"
+    "johannschopplich/kirby-tools-utils": "^0.1",
+    "openai-php/client": "^0.19",
+    "anthropic-ai/sdk": "^0.17"
   },
   "require-dev": {
     "getkirby/cms": "^5",
     "phpunit/phpunit": "^12",
-    "vlucas/phpdotenv": "^5"
+    "vlucas/phpdotenv": "^5",
+    "guzzlehttp/guzzle": "^7.10"
   },
   "scripts": {
     "dev": [
@@ -40,10 +43,16 @@
     "csfix": "@php tools/phpcs/vendor/bin/php-cs-fixer fix",
     "dist": "composer install --no-dev --optimize-autoloader"
   },
+  "autoload": {
+    "psr-4": {
+      "JohannSchopplich\\": "src/classes/"
+    }
+  },
   "config": {
     "optimize-autoloader": true,
     "allow-plugins": {
-      "getkirby/composer-installer": true
+      "getkirby/composer-installer": true,
+      "php-http/discovery": true
     }
   },
   "extra": {
