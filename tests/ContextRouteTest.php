@@ -168,7 +168,7 @@ final class ContextRouteTest extends ApiRouteTestCase
             ],
         ]);
 
-        // Default language resolution falls back to 'en' when no languages configured
+        // Default language resolution falls back to `en` when no languages configured
         $this->assertSame('Bilingual', $response['config']['skills'][0]['label']);
         $this->assertSame('Write bilingual.', $response['config']['skills'][0]['instructions']);
     }
@@ -234,7 +234,7 @@ final class ContextRouteTest extends ApiRouteTestCase
             ],
         ]);
 
-        // Default language resolution falls back to 'en' when no languages configured
+        // Default language resolution falls back to `en` when no languages configured
         $this->assertSame('Summarize', $response['config']['promptTemplates'][0]['label']);
         $this->assertSame('Summarize this.', $response['config']['promptTemplates'][0]['prompt']);
     }
