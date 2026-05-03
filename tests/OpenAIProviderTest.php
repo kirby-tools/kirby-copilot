@@ -114,7 +114,7 @@ final class OpenAIProviderTest extends TestCase
 
     #[Test]
     #[DataProvider('openAIFamilyVendors')]
-    public function provider_exception_carries_vendor_provider_name(
+    public function provider_exception_includes_diagnostic_details(
         string $providerClass,
         string $expectedConfigKey,
         string $expectedModel,
@@ -212,7 +212,7 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    public function does_not_retry_on_4xx_other_than_rate_limit(): void
+    public function treats_non_429_4xx_as_terminal_failure(): void
     {
         [$client, $provider] = $this->fixture(
             responses: [$this->errorException(401)],
@@ -352,7 +352,7 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    public function does_not_retry_on_unserializable_response(): void
+    public function treats_unserializable_response_as_terminal_failure(): void
     {
         $response = $this->createStub(ResponseInterface::class);
         $response->method('getStatusCode')->willReturn(500);

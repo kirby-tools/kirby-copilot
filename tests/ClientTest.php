@@ -102,7 +102,7 @@ final class ClientTest extends TestCase
     }
 
     #[Test]
-    public function require_api_key_does_not_throw_when_provider_override_is_set(): void
+    public function require_api_key_skips_validation_when_provider_override_is_set(): void
     {
         $client = new Client(
             resolver: new Resolver(defaultProvider: ProviderName::OpenAI, providers: []),

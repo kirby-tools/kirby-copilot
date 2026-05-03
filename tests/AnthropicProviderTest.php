@@ -100,7 +100,7 @@ final class AnthropicProviderTest extends TestCase
     }
 
     #[Test]
-    public function provider_exception_carries_provider_name_model_and_response_id(): void
+    public function provider_exception_includes_diagnostic_details(): void
     {
         [, $provider] = $this->fixture(
             responses: [$this->textOnlyResponse('I cannot help with that.')],
