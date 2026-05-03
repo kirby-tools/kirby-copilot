@@ -102,6 +102,7 @@ class OpenAIProvider implements Provider
     protected function apiKey(): string
     {
         if ($this->config->apiKey === null) {
+            // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
             throw new AuthException(
                 'Missing API key: johannschopplich.copilot.providers.' . $this->providerName()->value . '.apiKey'
             );
@@ -113,7 +114,7 @@ class OpenAIProvider implements Provider
     /**
      * @throws ProviderException
      */
-    private function fail(
+    protected function fail(
         string $reason,
         string|null $responseExcerpt = null,
         string|null $responseId = null,
@@ -136,7 +137,7 @@ class OpenAIProvider implements Provider
      * @param Closure(): T $operation
      * @return T
      */
-    private function withRetry(Closure $operation): mixed
+    protected function withRetry(Closure $operation): mixed
     {
         $sleep = $this->sleep ?? \sleep(...);
 
@@ -164,7 +165,7 @@ class OpenAIProvider implements Provider
         }
     }
 
-    private function isRetriable(Throwable $e): bool
+    protected function isRetriable(Throwable $e): bool
     {
         return match (true) {
             $e instanceof RateLimitException,
@@ -175,7 +176,7 @@ class OpenAIProvider implements Provider
         };
     }
 
-    private function statusOf(Throwable $e): int|null
+    protected function statusOf(Throwable $e): int|null
     {
         return match (true) {
             $e instanceof ErrorException => $e->getStatusCode(),
@@ -186,7 +187,7 @@ class OpenAIProvider implements Provider
         };
     }
 
-    private function responseBodyOf(Throwable $e): string|null
+    protected function responseBodyOf(Throwable $e): string|null
     {
         $response = match (true) {
             $e instanceof ErrorException,
@@ -199,7 +200,7 @@ class OpenAIProvider implements Provider
         return $response !== null ? (string)$response->getBody() : null;
     }
 
-    private function retryDelay(Throwable $e, int $attempt): int
+    protected function retryDelay(Throwable $e, int $attempt): int
     {
         $response = match (true) {
             $e instanceof ErrorException,

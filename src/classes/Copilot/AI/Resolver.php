@@ -31,6 +31,7 @@ final readonly class Resolver
         $config = $kirby->option('johannschopplich.copilot', []);
 
         if (!isset($config['provider'])) {
+            // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
             throw new InvalidArgumentException(
                 'The "johannschopplich.copilot.provider" option is required'
             );
@@ -40,6 +41,7 @@ final readonly class Resolver
         $defaultProvider = ProviderName::tryFrom($providerName);
 
         if ($defaultProvider === null) {
+            // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
             throw new InvalidArgumentException(
                 'Unknown provider "' . $providerName . '" — set "johannschopplich.copilot.provider" to one of: openai, anthropic, google, mistral'
             );

@@ -45,17 +45,18 @@ class ProviderException extends Exception
             $message .= ' (' . implode(', ', $context) . ')';
         }
 
-        parent::__construct(
-            message: $message,
-            details: [
+        // TODO: Drop K4 compat in v4 – use named args (message:, details:, httpCode:, previous:) once Kirby 5 is the floor
+        parent::__construct([
+            'fallback' => $message,
+            'details' => [
                 'providerName' => $providerName,
                 'model' => $model,
                 'responseId' => $responseId,
                 'responseExcerpt' => $excerpt,
             ],
-            httpCode: $httpCode,
-            previous: $previous,
-        );
+            'httpCode' => $httpCode,
+            'previous' => $previous,
+        ]);
     }
 
     private static function shorten(string $value): string
