@@ -43,7 +43,7 @@ final class ResolverTest extends TestCase
     }
 
     #[Test]
-    public function lowercases_provider_name_from_options(): void
+    public function accepts_provider_name_case_insensitively(): void
     {
         new App(['options' => ['johannschopplich.copilot' => ['provider' => 'OpenAI']]]);
 
@@ -66,7 +66,7 @@ final class ResolverTest extends TestCase
     }
 
     #[Test]
-    public function evaluates_closure_api_key_with_kirby_app_instance(): void
+    public function api_key_closure_receives_kirby_app(): void
     {
         $kirby = new App();
         $received = null;
@@ -86,7 +86,7 @@ final class ResolverTest extends TestCase
     }
 
     #[Test]
-    public function normalises_empty_api_key_to_null(): void
+    public function treats_empty_api_key_as_unset(): void
     {
         $resolver = new Resolver(
             defaultProvider: ProviderName::OpenAI,
@@ -96,5 +96,64 @@ final class ResolverTest extends TestCase
         $config = $resolver->forProvider(ProviderName::OpenAI);
 
         $this->assertNull($config->apiKey);
+    }
+
+    #[Test]
+    public function exposes_typed_model_and_base_url_from_provider_options(): void
+    {
+        $resolver = new Resolver(
+            defaultProvider: ProviderName::OpenAI,
+            providers: ['openai' => [
+                'model' => 'gpt-4o-2024-08-06',
+                'baseUrl' => 'https://gateway.example.com/openai',
+            ]],
+        );
+
+        $config = $resolver->forProvider(ProviderName::OpenAI);
+
+        $this->assertSame('gpt-4o-2024-08-06', $config->model);
+        $this->assertSame('https://gateway.example.com/openai', $config->baseUrl);
+    }
+
+    #[Test]
+    public function collects_unknown_keys_as_pass_through_options(): void
+    {
+        $resolver = new Resolver(
+            defaultProvider: ProviderName::OpenAI,
+            providers: ['openai' => [
+                'apiKey' => 'sk-test',
+                'model' => 'gpt-4o',
+                'baseUrl' => 'https://api.openai.com/v1',
+                'temperature' => 0.2,
+                'reasoning_effort' => 'low',
+            ]],
+        );
+
+        $config = $resolver->forProvider(ProviderName::OpenAI);
+
+        $this->assertSame(
+            ['temperature' => 0.2, 'reasoning_effort' => 'low'],
+            $config->options,
+        );
+    }
+
+    #[Test]
+    public function returns_isolated_config_per_provider(): void
+    {
+        $resolver = new Resolver(
+            defaultProvider: ProviderName::OpenAI,
+            providers: [
+                'openai' => ['apiKey' => 'sk-openai', 'model' => 'gpt-4o'],
+                'anthropic' => ['apiKey' => 'sk-ant', 'model' => 'claude-sonnet'],
+            ],
+        );
+
+        $openai = $resolver->forProvider(ProviderName::OpenAI);
+        $anthropic = $resolver->forProvider(ProviderName::Anthropic);
+
+        $this->assertSame('sk-openai', $openai->apiKey);
+        $this->assertSame('gpt-4o', $openai->model);
+        $this->assertSame('sk-ant', $anthropic->apiKey);
+        $this->assertSame('claude-sonnet', $anthropic->model);
     }
 }

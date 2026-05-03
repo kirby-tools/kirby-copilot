@@ -94,7 +94,7 @@ tabs:
             type: info
             theme: passive
             text: |
-              **<sparkly-text style="--sparkly-text-size: 2em; --sparkly-text-color: var(--color-yellow-600)">[Install Kirby Copilot](https://kirby.tools/docs/copilot/getting-started/installation)</sparkly-text>** now in your own projects, and buy a license when you're convinced.
+              **[Install Kirby Copilot](https://kirby.tools/docs/copilot/getting-started/installation)** now in your own projects, and buy a license when you're convinced.
 
   blocksFields:
     label: Blocks Fields

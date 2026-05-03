@@ -58,14 +58,20 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    public function throws_auth_exception_when_api_key_is_missing(): void
-    {
-        $provider = new OpenAIProvider(
+    #[DataProvider('openAIFamilyVendors')]
+    public function missing_api_key_error_names_vendor_specific_config_path(
+        string $providerClass,
+        string $expectedConfigKey,
+        string $expectedModel,
+        string $expectedBaseUrl,
+        ProviderName $expectedProviderName,
+    ): void {
+        $provider = new $providerClass(
             config: new ProviderConfig(apiKey: null),
         );
 
         $this->expectException(AuthException::class);
-        $this->expectExceptionMessage('Missing API key: johannschopplich.copilot.providers.openai.apiKey');
+        $this->expectExceptionMessage('Missing API key: johannschopplich.copilot.providers.' . $expectedConfigKey . '.apiKey');
 
         $provider->generateObject(
             messages: [['role' => 'user', 'content' => 'hi']],
@@ -74,9 +80,14 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    #[DataProvider('openAIFamilyDefaults')]
-    public function uses_default_model_when_config_model_is_null(string $providerClass, string $expectedModel): void
-    {
+    #[DataProvider('openAIFamilyVendors')]
+    public function uses_vendor_default_model_when_config_model_is_null(
+        string $providerClass,
+        string $expectedConfigKey,
+        string $expectedModel,
+        string $expectedBaseUrl,
+        ProviderName $expectedProviderName,
+    ): void {
         [$client, $provider] = $this->fixture(providerClass: $providerClass);
 
         $provider->generateObject(
@@ -89,12 +100,67 @@ final class OpenAIProviderTest extends TestCase
         });
     }
 
-    public static function openAIFamilyDefaults(): array
+    #[Test]
+    #[DataProvider('openAIFamilyVendors')]
+    public function exposes_vendor_default_base_url(
+        string $providerClass,
+        string $expectedConfigKey,
+        string $expectedModel,
+        string $expectedBaseUrl,
+        ProviderName $expectedProviderName,
+    ): void {
+        $this->assertSame($expectedBaseUrl, $providerClass::DEFAULT_BASE_URL);
+    }
+
+    #[Test]
+    #[DataProvider('openAIFamilyVendors')]
+    public function provider_exception_carries_vendor_provider_name(
+        string $providerClass,
+        string $expectedConfigKey,
+        string $expectedModel,
+        string $expectedBaseUrl,
+        ProviderName $expectedProviderName,
+    ): void {
+        [, $provider] = $this->fixture(providerClass: $providerClass, content: 'not valid json');
+
+        try {
+            $provider->generateObject(
+                messages: [['role' => 'user', 'content' => 'hi']],
+                schema: ['type' => 'object'],
+            );
+            $this->fail('Expected ProviderException');
+        } catch (ProviderException $e) {
+            $details = $e->getDetails();
+            $this->assertSame($expectedProviderName, $details['providerName']);
+            $this->assertSame($expectedModel, $details['model']);
+            $this->assertSame('not valid json', $details['responseExcerpt']);
+        }
+    }
+
+    public static function openAIFamilyVendors(): array
     {
         return [
-            'OpenAI' => [OpenAIProvider::class, OpenAIProvider::DEFAULT_MODEL],
-            'Gemini' => [GeminiProvider::class, GeminiProvider::DEFAULT_MODEL],
-            'Mistral' => [MistralProvider::class, MistralProvider::DEFAULT_MODEL],
+            'OpenAI' => [
+                OpenAIProvider::class,
+                'openai',
+                OpenAIProvider::DEFAULT_MODEL,
+                OpenAIProvider::DEFAULT_BASE_URL,
+                ProviderName::OpenAI,
+            ],
+            'Gemini' => [
+                GeminiProvider::class,
+                'google',
+                GeminiProvider::DEFAULT_MODEL,
+                GeminiProvider::DEFAULT_BASE_URL,
+                ProviderName::Google,
+            ],
+            'Mistral' => [
+                MistralProvider::class,
+                'mistral',
+                MistralProvider::DEFAULT_MODEL,
+                MistralProvider::DEFAULT_BASE_URL,
+                ProviderName::Mistral,
+            ],
         ];
     }
 
@@ -113,32 +179,24 @@ final class OpenAIProviderTest extends TestCase
         });
     }
 
-    #[Test]
-    public function retries_on_rate_limit_error_then_succeeds(): void
+    /** @return array<string, array{0: int}> */
+    public static function retriableStatusCodes(): array
     {
-        [$client, $provider] = $this->fixture(
-            responses: [
-                $this->errorException(429),
-                $this->successResponse('{"ok": true}'),
-            ],
-            sleep: static fn () => null,
-        );
-
-        $result = $provider->generateObject(
-            messages: [['role' => 'user', 'content' => 'hi']],
-            schema: ['type' => 'object'],
-        );
-
-        $this->assertSame(['ok' => true], $result);
-        $client->assertSent(Chat::class, 2);
+        return [
+            'rate limit (429)' => [429],
+            'server error (500)' => [500],
+            'server error (503)' => [503],
+            'bad gateway (502)' => [502],
+        ];
     }
 
     #[Test]
-    public function retries_on_server_error_then_succeeds(): void
+    #[DataProvider('retriableStatusCodes')]
+    public function retries_on_retriable_status_code_then_succeeds(int $statusCode): void
     {
         [$client, $provider] = $this->fixture(
             responses: [
-                $this->errorException(503),
+                $this->errorException($statusCode),
                 $this->successResponse('{"ok": true}'),
             ],
             sleep: static fn () => null,
@@ -197,7 +255,7 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    public function applies_exponential_backoff_between_attempts(): void
+    public function retries_with_exponential_delay(): void
     {
         $sleeps = [];
         $sleep = static function (int $seconds) use (&$sleeps): void {
@@ -223,7 +281,7 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    public function applies_retry_after_delay_when_header_present(): void
+    public function honours_retry_after_header_for_delay(): void
     {
         $sleeps = [];
         $sleep = static function (int $seconds) use (&$sleeps): void {
@@ -247,7 +305,7 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    public function sends_response_format_with_json_schema_to_openai(): void
+    public function constrains_response_to_supplied_json_schema(): void
     {
         [$client, $provider] = $this->fixture();
 
@@ -332,7 +390,7 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    public function provider_exception_carries_provider_name_model_and_response_excerpt(): void
+    public function provider_exception_includes_response_excerpt_for_diagnostics(): void
     {
         [, $provider] = $this->fixture(content: 'not valid json');
 
@@ -343,10 +401,7 @@ final class OpenAIProviderTest extends TestCase
             );
             $this->fail('Expected ProviderException');
         } catch (ProviderException $e) {
-            $details = $e->getDetails();
-            $this->assertSame(ProviderName::OpenAI, $details['providerName']);
-            $this->assertSame(OpenAIProvider::DEFAULT_MODEL, $details['model']);
-            $this->assertSame('not valid json', $details['responseExcerpt']);
+            $this->assertSame('not valid json', $e->getDetails()['responseExcerpt']);
         }
     }
 
