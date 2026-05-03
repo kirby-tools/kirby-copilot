@@ -142,7 +142,7 @@ describe("useStreamText", () => {
     });
   });
 
-  describe("model injection", () => {
+  describe("explicit model override", () => {
     it("uses injected model instead of resolving from config", async () => {
       mockStreamText.mockResolvedValue({ textStream: null });
       const injectedModel = createMockModel();
@@ -352,7 +352,7 @@ describe("resolveLanguageModel", () => {
     });
   });
 
-  describe("provider selection", () => {
+  describe("provider resolution", () => {
     it.each([
       ["openai", mockCreateOpenAI, "gpt-5.4-nano"],
       ["anthropic", mockCreateAnthropic, "claude-haiku-4-5"],
@@ -451,7 +451,7 @@ describe("resolveLanguageModel", () => {
     });
   });
 
-  describe("error handling", () => {
+  describe("upstream failure handling", () => {
     it("throws CopilotError for unsupported provider", async () => {
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({ provider: "invalid-provider" }),
@@ -515,7 +515,7 @@ describe("resolvePromptContext", () => {
     });
   });
 
-  describe("image processing", () => {
+  describe("image input handling", () => {
     it("converts images to byte arrays", async () => {
       const imageFile = new File(["image-data"], "test.png", {
         type: "image/png",
