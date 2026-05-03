@@ -25,7 +25,7 @@ final readonly class Resolver
     ) {
     }
 
-    public static function fromKirbyOptions(): static
+    public static function fromKirbyOptions(): self
     {
         $kirby = App::instance();
         $config = $kirby->option('johannschopplich.copilot', []);
@@ -33,7 +33,7 @@ final readonly class Resolver
         if (!isset($config['provider'])) {
             // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
             throw new InvalidArgumentException(
-                'The "johannschopplich.copilot.provider" option is required'
+                'Missing required option "johannschopplich.copilot.provider"'
             );
         }
 
@@ -43,13 +43,13 @@ final readonly class Resolver
         if ($defaultProvider === null) {
             // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
             throw new InvalidArgumentException(
-                'Unknown provider "' . $providerName . '" — set "johannschopplich.copilot.provider" to one of: openai, anthropic, google, mistral'
+                'Unknown provider "' . $providerName . '" – set "johannschopplich.copilot.provider" to one of: openai, anthropic, google, mistral'
             );
         }
 
         $providers = array_change_key_case((array)($config['providers'] ?? []), CASE_LOWER);
 
-        return new static(
+        return new self(
             defaultProvider: $defaultProvider,
             providers: $providers,
         );

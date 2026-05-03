@@ -118,7 +118,7 @@ final class AnthropicProvider implements Provider
         if ($this->config->apiKey === null) {
             // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
             throw new AuthException(
-                'Missing API key: johannschopplich.copilot.providers.' . $this->providerName()->value . '.apiKey'
+                'Missing API key in "johannschopplich.copilot.providers.' . $this->providerName()->value . '.apiKey"'
             );
         }
 

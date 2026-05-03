@@ -35,10 +35,6 @@ final class Client
         return self::$instance ??= new self();
     }
 
-    /**
-     * Reset the cached singleton. Intended for tests that need to swap
-     * the resolved provider config between cases.
-     */
     public static function reset(): void
     {
         self::$instance = null;
@@ -75,7 +71,7 @@ final class Client
         if ($config->apiKey === null) {
             // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
             throw new AuthException(
-                'Missing API key: johannschopplich.copilot.providers.' . $name->value . '.apiKey'
+                'Missing API key in "johannschopplich.copilot.providers.' . $name->value . '.apiKey"'
             );
         }
     }

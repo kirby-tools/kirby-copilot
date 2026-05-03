@@ -12,7 +12,7 @@ use Throwable;
 /**
  * Thrown when an upstream AI provider call fails.
  */
-class ProviderException extends Exception
+final class ProviderException extends Exception
 {
     protected static string $defaultKey = 'copilot.ai.provider';
     protected static string $defaultFallback = 'AI provider request failed';
