@@ -168,10 +168,26 @@ describe("extractSkillRefIds", () => {
 describe("createSkillTriggerRegex", () => {
   it.each([
     { position: "start of input", input: "@skill://foo", expected: "foo" },
-    { position: "after whitespace", input: "hello @skill://foo", expected: "foo" },
-    { position: "after opening paren", input: "(@skill://foo", expected: "foo" },
-    { position: "after opening bracket", input: "[@skill://bar", expected: "bar" },
-    { position: "after opening brace", input: "{@skill://baz", expected: "baz" },
+    {
+      position: "after whitespace",
+      input: "hello @skill://foo",
+      expected: "foo",
+    },
+    {
+      position: "after opening paren",
+      input: "(@skill://foo",
+      expected: "foo",
+    },
+    {
+      position: "after opening bracket",
+      input: "[@skill://bar",
+      expected: "bar",
+    },
+    {
+      position: "after opening brace",
+      input: "{@skill://baz",
+      expected: "baz",
+    },
   ])("matches at $position", ({ input, expected }) => {
     expect(input.match(createSkillTriggerRegex())?.[1]).toBe(expected);
   });

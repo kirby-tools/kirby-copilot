@@ -62,7 +62,7 @@ describe("generateKirbyBlocksSchema", () => {
     }),
   ];
 
-  describe("schema generation", () => {
+  describe("input validation", () => {
     it.each([
       { label: "empty array", input: [] },
       { label: "null", input: null as any },

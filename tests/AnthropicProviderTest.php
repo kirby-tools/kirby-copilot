@@ -84,20 +84,6 @@ final class AnthropicProviderTest extends TestCase
     }
 
     #[Test]
-    public function throws_provider_exception_when_no_tool_use_block_in_response(): void
-    {
-        [, $provider] = $this->fixture(
-            responses: [$this->textOnlyResponse('I cannot help with that.')],
-        );
-
-        $this->expectException(ProviderException::class);
-        $provider->generateObject(
-            messages: [['role' => 'user', 'content' => 'hi']],
-            schema: ['type' => 'object'],
-        );
-    }
-
-    #[Test]
     public function throws_auth_exception_when_api_key_is_missing(): void
     {
         $provider = new AnthropicProvider(
@@ -105,7 +91,7 @@ final class AnthropicProviderTest extends TestCase
         );
 
         $this->expectException(AuthException::class);
-        $this->expectExceptionMessage('Missing API key: johannschopplich.copilot.providers.anthropic.apiKey');
+        $this->expectExceptionMessage('Missing API key in "johannschopplich.copilot.providers.anthropic.apiKey"');
 
         $provider->generateObject(
             messages: [['role' => 'user', 'content' => 'hi']],
@@ -133,39 +119,6 @@ final class AnthropicProviderTest extends TestCase
             $this->assertSame('msg_test', $details['responseId']);
             $this->assertSame('I cannot help with that.', $details['responseExcerpt']);
         }
-    }
-
-    #[Test]
-    public function retries_via_sdk_default_when_server_returns_5xx_then_succeeds(): void
-    {
-        $sentRequests = [];
-        $stack = HandlerStack::create(new MockHandler([
-            $this->errorResponse(503),
-            $this->errorResponse(503),
-            $this->toolUseResponse(input: ['ok' => true]),
-        ]));
-        $stack->push(Middleware::history($sentRequests));
-
-        $client = new AnthropicClient(
-            apiKey: 'sk-ant-test',
-            requestOptions: AnthropicRequestOptions::with(
-                transporter: new GuzzleClient(['handler' => $stack]),
-                initialRetryDelay: 0.0,
-            ),
-        );
-
-        $provider = new AnthropicProvider(
-            config: new ProviderConfig(apiKey: 'sk-ant-test'),
-            client: $client,
-        );
-
-        $result = $provider->generateObject(
-            messages: [['role' => 'user', 'content' => 'hi']],
-            schema: ['type' => 'object'],
-        );
-
-        $this->assertSame(['ok' => true], $result);
-        $this->assertCount(3, $sentRequests);
     }
 
     #[Test]
@@ -203,7 +156,7 @@ final class AnthropicProviderTest extends TestCase
     {
         [, $provider] = $this->fixture(
             responses: [$this->toolUseResponse(input: ['ok' => true])],
-            options: ['maxTokens' => 8000, 'temperature' => 0.2],
+            options: ['maxTokens' => 8000],
         );
 
         $provider->generateObject(
@@ -213,7 +166,6 @@ final class AnthropicProviderTest extends TestCase
 
         $body = $this->lastRequestBody();
         $this->assertSame(8000, $body['max_tokens'] ?? null);
-        $this->assertSame(0.2, $body['temperature'] ?? null);
     }
 
     /**

@@ -11,7 +11,7 @@ use Kirby\Exception\AuthException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-final class AIClientTest extends TestCase
+final class ClientTest extends TestCase
 {
     #[Test]
     public function returns_provider_result_unchanged(): void
@@ -82,7 +82,7 @@ final class AIClientTest extends TestCase
         );
 
         $this->expectException(AuthException::class);
-        $this->expectExceptionMessage('Missing API key: johannschopplich.copilot.providers.openai.apiKey');
+        $this->expectExceptionMessage('Missing API key in "johannschopplich.copilot.providers.openai.apiKey"');
 
         $client->requireApiKey();
     }
@@ -102,7 +102,7 @@ final class AIClientTest extends TestCase
     }
 
     #[Test]
-    public function require_api_key_skips_validation_when_provider_override_is_used(): void
+    public function require_api_key_does_not_throw_when_provider_override_is_set(): void
     {
         $client = new Client(
             resolver: new Resolver(defaultProvider: ProviderName::OpenAI, providers: []),

@@ -26,7 +26,7 @@ final class ResolverTest extends TestCase
         new App(['options' => ['johannschopplich.copilot' => []]]);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('"johannschopplich.copilot.provider" option is required');
+        $this->expectExceptionMessage('Missing required option "johannschopplich.copilot.provider"');
 
         Resolver::fromKirbyOptions();
     }
@@ -104,14 +104,14 @@ final class ResolverTest extends TestCase
         $resolver = new Resolver(
             defaultProvider: ProviderName::OpenAI,
             providers: ['openai' => [
-                'model' => 'gpt-4o-2024-08-06',
+                'model' => 'gpt-5.4',
                 'baseUrl' => 'https://gateway.example.com/openai',
             ]],
         );
 
         $config = $resolver->forProvider(ProviderName::OpenAI);
 
-        $this->assertSame('gpt-4o-2024-08-06', $config->model);
+        $this->assertSame('gpt-5.4', $config->model);
         $this->assertSame('https://gateway.example.com/openai', $config->baseUrl);
     }
 
@@ -122,9 +122,8 @@ final class ResolverTest extends TestCase
             defaultProvider: ProviderName::OpenAI,
             providers: ['openai' => [
                 'apiKey' => 'sk-test',
-                'model' => 'gpt-4o',
+                'model' => 'gpt-5.4',
                 'baseUrl' => 'https://api.openai.com/v1',
-                'temperature' => 0.2,
                 'reasoning_effort' => 'low',
             ]],
         );
@@ -132,7 +131,7 @@ final class ResolverTest extends TestCase
         $config = $resolver->forProvider(ProviderName::OpenAI);
 
         $this->assertSame(
-            ['temperature' => 0.2, 'reasoning_effort' => 'low'],
+            ['reasoning_effort' => 'low'],
             $config->options,
         );
     }
@@ -143,7 +142,7 @@ final class ResolverTest extends TestCase
         $resolver = new Resolver(
             defaultProvider: ProviderName::OpenAI,
             providers: [
-                'openai' => ['apiKey' => 'sk-openai', 'model' => 'gpt-4o'],
+                'openai' => ['apiKey' => 'sk-openai', 'model' => 'gpt-5.4'],
                 'anthropic' => ['apiKey' => 'sk-ant', 'model' => 'claude-sonnet'],
             ],
         );
@@ -152,7 +151,7 @@ final class ResolverTest extends TestCase
         $anthropic = $resolver->forProvider(ProviderName::Anthropic);
 
         $this->assertSame('sk-openai', $openai->apiKey);
-        $this->assertSame('gpt-4o', $openai->model);
+        $this->assertSame('gpt-5.4', $openai->model);
         $this->assertSame('sk-ant', $anthropic->apiKey);
         $this->assertSame('claude-sonnet', $anthropic->model);
     }

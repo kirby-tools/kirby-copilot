@@ -1,6 +1,25 @@
 import { describe, expect, it } from "vitest";
-import { findFieldDefinition } from "../../../src/panel/utils/fields";
+import {
+  findFieldDefinition,
+  getResponseFormat,
+} from "../../../src/panel/utils/fields";
 import { blocksField, field, structureField } from "../utils";
+
+describe("getResponseFormat", () => {
+  it.each([
+    { fieldType: "list", expected: "rich-text" },
+    { fieldType: "writer", expected: "rich-text" },
+    { fieldType: "textarea", expected: "markdown" },
+    { fieldType: "markdown", expected: "markdown" },
+  ] as const)("maps `$fieldType` to `$expected`", ({ fieldType, expected }) => {
+    expect(getResponseFormat(fieldType)).toBe(expected);
+  });
+
+  it("falls back to `text` for unmapped field types", () => {
+    expect(getResponseFormat("text")).toBe("text");
+    expect(getResponseFormat("unknown-field-type")).toBe("text");
+  });
+});
 
 describe("findFieldDefinition", () => {
   describe("direct field matching", () => {

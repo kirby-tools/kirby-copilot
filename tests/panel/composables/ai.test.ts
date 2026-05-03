@@ -375,8 +375,9 @@ describe("resolveLanguageModel", () => {
     );
   });
 
-  describe("custom provider options", () => {
-    it("emits manual extended thinking with budget tokens for Haiku 4.5", async () => {
+  describe("provider options wiring", () => {
+    // Reasoning resolution is exhaustively covered in `utils/reasoning.test.ts`
+    it("forwards reasoning options through to providerOptions", async () => {
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({
           provider: "anthropic",
@@ -400,95 +401,15 @@ describe("resolveLanguageModel", () => {
       });
     });
 
-    it.each([
-      ["claude-opus-4-6", "medium"],
-      ["claude-sonnet-4-6", "high"],
-    ] as const)(
-      "emits adaptive thinking for %s at effort %s",
-      async (model, effort) => {
-        mockUsePluginContext.mockReturnValue(
-          createPluginConfig({
-            provider: "anthropic",
-            reasoningEffort: effort,
-            providers: { anthropic: { model, hasApiKey: true } },
-          }),
-        );
-
-        const { providerOptions } = await resolveLanguageModel();
-
-        expect(providerOptions?.anthropic).toMatchObject({
-          thinking: { type: "adaptive" },
-          effort,
-        });
-      },
-    );
-
-    it("uses model-specific Google reasoning overrides", async () => {
+    it("merges providerConfig.options into providerOptions", async () => {
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({
-          provider: "google",
-          reasoningEffort: "none",
           providers: {
-            google: {
-              model: "gemini-3-flash-preview",
+            openai: {
+              model: "gpt-5",
               hasApiKey: true,
+              options: { parallelToolCalls: false },
             },
-          },
-        }),
-      );
-
-      const { providerOptions } = await resolveLanguageModel();
-
-      expect(providerOptions?.google).toEqual({
-        thinkingConfig: {
-          thinkingLevel: "minimal",
-        },
-      });
-    });
-
-    it.each(["gemini-2.5-pro", "gemini-2.5-flash"])(
-      "omits reasoning for %s (uses thinkingBudget, not thinkingLevel)",
-      async (model) => {
-        mockUsePluginContext.mockReturnValue(
-          createPluginConfig({
-            provider: "google",
-            reasoningEffort: "medium",
-            providers: { google: { model, hasApiKey: true } },
-          }),
-        );
-
-        const { providerOptions } = await resolveLanguageModel();
-
-        expect(providerOptions).toBeUndefined();
-      },
-    );
-
-    it.each(["mistral-medium-latest", "mistral-large-latest"])(
-      "omits reasoning for %s (only Small 4 and magistral honor reasoning_effort)",
-      async (model) => {
-        mockUsePluginContext.mockReturnValue(
-          createPluginConfig({
-            provider: "mistral",
-            reasoningEffort: "high",
-            providers: { mistral: { model, hasApiKey: true } },
-          }),
-        );
-
-        const { providerOptions } = await resolveLanguageModel();
-
-        expect(providerOptions).toBeUndefined();
-      },
-    );
-
-    it("merges custom options from providerConfig", async () => {
-      const customOptions = {
-        parallelToolCalls: false,
-        strictJsonSchema: true,
-      };
-      mockUsePluginContext.mockReturnValue(
-        createPluginConfig({
-          providers: {
-            openai: { model: "gpt-5", hasApiKey: true, options: customOptions },
           },
         }),
       );
@@ -496,177 +417,9 @@ describe("resolveLanguageModel", () => {
       const { providerOptions } = await resolveLanguageModel();
 
       expect(providerOptions?.openai).toEqual(
-        expect.objectContaining(customOptions),
+        expect.objectContaining({ parallelToolCalls: false }),
       );
     });
-
-    it("custom options take precedence over defaults", async () => {
-      mockUsePluginContext.mockReturnValue(
-        createPluginConfig({
-          providers: {
-            openai: {
-              model: "gpt-5",
-              hasApiKey: true,
-              options: { reasoningEffort: "high" },
-            },
-          },
-        }),
-      );
-
-      const { providerOptions } = await resolveLanguageModel();
-
-      expect(providerOptions?.openai?.reasoningEffort).toBe("high");
-    });
-
-    it("applies reasoning for provider-namespaced model IDs", async () => {
-      mockUsePluginContext.mockReturnValue(
-        createPluginConfig({
-          reasoningEffort: "medium",
-          providers: {
-            openai: {
-              model: "openai/gpt-5.4-mini",
-              hasApiKey: true,
-              api: "chat",
-            },
-          },
-        }),
-      );
-
-      const { providerOptions } = await resolveLanguageModel();
-
-      expect(providerOptions?.openai?.reasoningEffort).toBe("medium");
-    });
-
-    it("forwards explicit reasoning overrides via options for cross-provider gateways", async () => {
-      mockUsePluginContext.mockReturnValue(
-        createPluginConfig({
-          reasoningEffort: "medium",
-          providers: {
-            openai: {
-              model: "google-ai-studio/gemini-2.5-flash",
-              hasApiKey: true,
-              api: "chat",
-              options: { reasoningEffort: "high" },
-            },
-          },
-        }),
-      );
-
-      const { providerOptions } = await resolveLanguageModel();
-
-      expect(providerOptions?.openai?.reasoningEffort).toBe("high");
-    });
-
-    it.each([
-      { effort: "none", expected: "none" },
-      { effort: "low", expected: "high" },
-      { effort: "medium", expected: "high" },
-      { effort: "high", expected: "high" },
-    ] as const)(
-      "folds Mistral $effort effort to $expected",
-      async ({ effort, expected }) => {
-        mockUsePluginContext.mockReturnValue(
-          createPluginConfig({
-            provider: "mistral",
-            reasoningEffort: effort,
-            providers: {
-              mistral: {
-                model: "mistral-small-latest",
-                hasApiKey: true,
-              },
-            },
-          }),
-        );
-
-        const { providerOptions } = await resolveLanguageModel();
-
-        expect(providerOptions?.mistral).toEqual({ reasoningEffort: expected });
-      },
-    );
-
-    const undefinedProviderOptionsCases: ReadonlyArray<{
-      name: string;
-      config: Partial<PluginConfigSubset>;
-    }> = [
-      {
-        name: "manual-thinking Anthropic model at effort `none`",
-        config: {
-          provider: "anthropic",
-          reasoningEffort: "none",
-          providers: {
-            anthropic: {
-              model: "claude-haiku-4-5",
-              hasApiKey: true,
-            },
-          },
-        },
-      },
-      {
-        name: "adaptive-thinking Anthropic model at effort `none`",
-        config: {
-          provider: "anthropic",
-          reasoningEffort: "none",
-          providers: {
-            anthropic: { model: "claude-opus-4-7", hasApiKey: true },
-          },
-        },
-      },
-      {
-        name: "pre-Claude-4 Anthropic model has no thinking mode",
-        config: {
-          provider: "anthropic",
-          reasoningEffort: "high",
-          providers: {
-            anthropic: { model: "claude-3-5-sonnet", hasApiKey: true },
-          },
-        },
-      },
-      {
-        name: "model without reasoning support",
-        config: {
-          providers: {
-            openai: { model: "gpt-4o-mini", hasApiKey: true },
-          },
-        },
-      },
-      {
-        name: "cross-provider namespaced model ID",
-        config: {
-          reasoningEffort: "medium",
-          providers: {
-            openai: {
-              model: "google-ai-studio/gemini-2.5-flash",
-              hasApiKey: true,
-              api: "chat",
-            },
-          },
-        },
-      },
-      {
-        name: "namespaced non-reasoning model",
-        config: {
-          reasoningEffort: "medium",
-          providers: {
-            openai: {
-              model: "openai/gpt-4o-mini",
-              hasApiKey: true,
-              api: "chat",
-            },
-          },
-        },
-      },
-    ];
-
-    it.each(undefinedProviderOptionsCases)(
-      "providerOptions is undefined: $name",
-      async ({ config }) => {
-        mockUsePluginContext.mockReturnValue(createPluginConfig(config));
-
-        const { providerOptions } = await resolveLanguageModel();
-
-        expect(providerOptions).toBeUndefined();
-      },
-    );
   });
 
   // eslint-disable-next-line test/prefer-lowercase-title

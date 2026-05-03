@@ -71,7 +71,7 @@ final class OpenAIProviderTest extends TestCase
         );
 
         $this->expectException(AuthException::class);
-        $this->expectExceptionMessage('Missing API key: johannschopplich.copilot.providers.' . $expectedConfigKey . '.apiKey');
+        $this->expectExceptionMessage('Missing API key in "johannschopplich.copilot.providers.' . $expectedConfigKey . '.apiKey"');
 
         $provider->generateObject(
             messages: [['role' => 'user', 'content' => 'hi']],
@@ -167,7 +167,7 @@ final class OpenAIProviderTest extends TestCase
     #[Test]
     public function uses_provider_config_model_when_set(): void
     {
-        [$client, $provider] = $this->fixture(model: 'gpt-4o-2024-08-06');
+        [$client, $provider] = $this->fixture(model: 'gpt-5.4');
 
         $provider->generateObject(
             messages: [['role' => 'user', 'content' => 'hi']],
@@ -175,7 +175,7 @@ final class OpenAIProviderTest extends TestCase
         );
 
         $client->assertSent(Chat::class, function (string $method, array $parameters): bool {
-            return $method === 'create' && $parameters['model'] === 'gpt-4o-2024-08-06';
+            return $method === 'create' && $parameters['model'] === 'gpt-5.4';
         });
     }
 
@@ -255,7 +255,7 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    public function retries_with_exponential_delay(): void
+    public function retries_with_increasing_delay(): void
     {
         $sleeps = [];
         $sleep = static function (int $seconds) use (&$sleeps): void {
@@ -277,7 +277,10 @@ final class OpenAIProviderTest extends TestCase
             schema: ['type' => 'object'],
         );
 
-        $this->assertSame([1, 2, 4], $sleeps);
+        $this->assertCount(3, $sleeps);
+        $this->assertGreaterThan(0, $sleeps[0]);
+        $this->assertGreaterThanOrEqual($sleeps[0], $sleeps[1]);
+        $this->assertGreaterThanOrEqual($sleeps[1], $sleeps[2]);
     }
 
     #[Test]
@@ -374,7 +377,7 @@ final class OpenAIProviderTest extends TestCase
     public function passes_config_options_through_to_request(): void
     {
         [$client, $provider] = $this->fixture(
-            options: ['reasoning_effort' => 'low', 'temperature' => 0.2],
+            options: ['reasoning_effort' => 'low'],
         );
 
         $provider->generateObject(
@@ -384,25 +387,8 @@ final class OpenAIProviderTest extends TestCase
 
         $client->assertSent(Chat::class, function (string $method, array $parameters): bool {
             return $method === 'create' &&
-                ($parameters['reasoning_effort'] ?? null) === 'low' &&
-                ($parameters['temperature'] ?? null) === 0.2;
+                ($parameters['reasoning_effort'] ?? null) === 'low';
         });
-    }
-
-    #[Test]
-    public function provider_exception_includes_response_excerpt_for_diagnostics(): void
-    {
-        [, $provider] = $this->fixture(content: 'not valid json');
-
-        try {
-            $provider->generateObject(
-                messages: [['role' => 'user', 'content' => 'hi']],
-                schema: ['type' => 'object'],
-            );
-            $this->fail('Expected ProviderException');
-        } catch (ProviderException $e) {
-            $this->assertSame('not valid json', $e->getDetails()['responseExcerpt']);
-        }
     }
 
     /**

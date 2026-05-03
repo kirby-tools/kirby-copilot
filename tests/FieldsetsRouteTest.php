@@ -78,7 +78,7 @@ final class FieldsetsRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function query_based_options_dont_crash(): void
+    public function query_based_options_resolve_to_empty_array(): void
     {
         $result = $this->callFieldsetsRoute([
             'blocks/test-query' => [
@@ -96,7 +96,7 @@ final class FieldsetsRouteTest extends ApiRouteTestCase
         ]);
 
         $block = $this->findBlock($result, 'test-query');
-        $this->assertNotNull($block, 'Block with query options must not crash');
+        $this->assertNotNull($block);
         $this->assertArrayHasKey('source', $block['fields']);
         $this->assertSame('select', $block['fields']['source']['type']);
         $this->assertSame([], $block['fields']['source']['options']);
@@ -130,7 +130,7 @@ final class FieldsetsRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function broken_extends_does_not_crash(): void
+    public function broken_extends_is_skipped_without_failing_other_blocks(): void
     {
         $result = $this->callFieldsetsRoute([
             'blocks/valid-block' => [
