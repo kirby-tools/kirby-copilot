@@ -38,22 +38,13 @@ final class AnthropicProvider implements Provider
 
     public function generateObject(array $messages, array $schema): array
     {
-        $systemParts = [];
-        $chatMessages = [];
-
-        foreach ($messages as $message) {
-            if (($message['role'] ?? null) === 'system') {
-                $systemParts[] = $message['content'];
-            } else {
-                $chatMessages[] = $message;
-            }
-        }
+        [$chatMessages, $system] = $this->splitSystemPrompt($messages);
 
         $request = [
             'model' => $this->model(),
             'maxTokens' => self::DEFAULT_MAX_TOKENS,
             'messages' => $chatMessages,
-            'system' => $systemParts !== [] ? implode("\n\n", $systemParts) : null,
+            'system' => $system,
             'tools' => [
                 [
                     'name' => 'structured_response',
@@ -85,6 +76,69 @@ final class AnthropicProvider implements Provider
             responseExcerpt: $this->firstTextBlock($message->content),
             responseId: $message->id,
         );
+    }
+
+    public function generateText(array $messages): string
+    {
+        [$chatMessages, $system] = $this->splitSystemPrompt($messages);
+
+        $request = [
+            'model' => $this->model(),
+            'maxTokens' => self::DEFAULT_MAX_TOKENS,
+            'messages' => $chatMessages,
+            'system' => $system,
+            ...$this->config->options,
+        ];
+
+        try {
+            $message = $this->client()->messages->create(...$request);
+        } catch (APIException $e) {
+            $this->fail(
+                reason: 'request failed: ' . $e->getMessage(),
+                httpCode: $e->status,
+                previous: $e,
+            );
+        }
+
+        $textParts = [];
+
+        foreach ($message->content as $block) {
+            if ($block instanceof TextBlock) {
+                $textParts[] = $block->text;
+            }
+        }
+
+        if ($textParts === []) {
+            $this->fail(
+                reason: 'response did not contain a text block',
+                responseId: $message->id,
+            );
+        }
+
+        return implode('', $textParts);
+    }
+
+    /**
+     * @param list<array{role: string, content: string}> $messages
+     * @return array{0: list<array{role: string, content: string}>, 1: string|null}
+     */
+    private function splitSystemPrompt(array $messages): array
+    {
+        $systemParts = [];
+        $chatMessages = [];
+
+        foreach ($messages as $message) {
+            if (($message['role'] ?? null) === 'system') {
+                $systemParts[] = $message['content'];
+            } else {
+                $chatMessages[] = $message;
+            }
+        }
+
+        return [
+            $chatMessages,
+            $systemParts !== [] ? implode("\n\n", $systemParts) : null,
+        ];
     }
 
     private function providerName(): ProviderName

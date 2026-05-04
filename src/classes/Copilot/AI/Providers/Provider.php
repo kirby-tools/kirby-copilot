@@ -23,4 +23,13 @@ interface Provider
      * @throws ProviderException
      */
     public function generateObject(array $messages, array $schema): array;
+
+    /**
+     * Generate plain text.
+     *
+     * @param list<array{role: string, content: string}> $messages
+     *
+     * @throws ProviderException
+     */
+    public function generateText(array $messages): string;
 }

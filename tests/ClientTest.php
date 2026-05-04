@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 final class ClientTest extends TestCase
 {
     #[Test]
-    public function returns_provider_result_unchanged(): void
+    public function returns_provider_object_unchanged(): void
     {
         $stub = $this->createStub(Provider::class);
         $stub->method('generateObject')->willReturn(['hello' => 'world']);
@@ -72,6 +72,24 @@ final class ClientTest extends TestCase
             messages: [['role' => 'user', 'content' => 'hi']],
             schema: ['type' => 'object'],
         );
+    }
+
+    #[Test]
+    public function returns_provider_text_unchanged(): void
+    {
+        $stub = $this->createStub(Provider::class);
+        $stub->method('generateText')->willReturn('hello world');
+
+        $client = new Client(
+            resolver: new Resolver(defaultProvider: ProviderName::OpenAI, providers: []),
+            providerOverride: $stub,
+        );
+
+        $result = $client->generateText(
+            messages: [['role' => 'user', 'content' => 'hi']],
+        );
+
+        $this->assertSame('hello world', $result);
     }
 
     #[Test]

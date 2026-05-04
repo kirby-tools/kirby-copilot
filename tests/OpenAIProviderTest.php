@@ -374,6 +374,53 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
+    public function returns_text_from_chat_completion_content(): void
+    {
+        [, $provider] = $this->fixture(content: 'hello world');
+
+        $result = $provider->generateText(
+            messages: [['role' => 'user', 'content' => 'hi']],
+        );
+
+        $this->assertSame('hello world', $result);
+    }
+
+    #[Test]
+    public function omits_response_format_for_text_generation(): void
+    {
+        [$client, $provider] = $this->fixture(content: 'hi');
+
+        $provider->generateText(
+            messages: [['role' => 'user', 'content' => 'hi']],
+        );
+
+        $client->assertSent(Chat::class, function (string $method, array $parameters): bool {
+            return $method === 'create' && !array_key_exists('response_format', $parameters);
+        });
+    }
+
+    #[Test]
+    public function throws_provider_exception_when_text_content_is_null(): void
+    {
+        $response = CreateResponse::fake([
+            'choices' => [
+                [
+                    'index' => 0,
+                    'message' => ['role' => 'assistant', 'content' => null],
+                    'finish_reason' => 'stop',
+                ],
+            ],
+        ]);
+
+        [, $provider] = $this->fixture(responses: [$response]);
+
+        $this->expectException(ProviderException::class);
+        $provider->generateText(
+            messages: [['role' => 'user', 'content' => 'hi']],
+        );
+    }
+
+    #[Test]
     public function passes_config_options_through_to_request(): void
     {
         [$client, $provider] = $this->fixture(

@@ -23,7 +23,7 @@ final class AnthropicProviderTest extends TestCase
     private array $sentRequests = [];
 
     #[Test]
-    public function returns_tool_use_input_as_decoded_object(): void
+    public function returns_decoded_object_from_response_tool_use_input(): void
     {
         [, $provider] = $this->fixture(
             responses: [$this->toolUseResponse(input: ['greeting' => 'hello'])],
@@ -59,7 +59,7 @@ final class AnthropicProviderTest extends TestCase
     }
 
     #[Test]
-    public function forces_structured_output_via_tool_choice_with_input_schema(): void
+    public function constrains_response_to_supplied_input_schema(): void
     {
         [, $provider] = $this->fixture(
             responses: [$this->toolUseResponse(input: ['ok' => true])],
@@ -168,6 +168,49 @@ final class AnthropicProviderTest extends TestCase
         $this->assertSame(8000, $body['max_tokens'] ?? null);
     }
 
+    #[Test]
+    public function returns_concatenated_text_from_response_content_blocks(): void
+    {
+        [, $provider] = $this->fixture(
+            responses: [$this->textBlocksResponse(['hello', ' ', 'world'])],
+        );
+
+        $result = $provider->generateText(
+            messages: [['role' => 'user', 'content' => 'hi']],
+        );
+
+        $this->assertSame('hello world', $result);
+    }
+
+    #[Test]
+    public function omits_tools_and_tool_choice_for_text_generation(): void
+    {
+        [, $provider] = $this->fixture(
+            responses: [$this->textBlocksResponse(['ok'])],
+        );
+
+        $provider->generateText(
+            messages: [['role' => 'user', 'content' => 'hi']],
+        );
+
+        $body = $this->lastRequestBody();
+        $this->assertArrayNotHasKey('tools', $body);
+        $this->assertArrayNotHasKey('tool_choice', $body);
+    }
+
+    #[Test]
+    public function throws_provider_exception_when_response_has_no_text_block(): void
+    {
+        [, $provider] = $this->fixture(
+            responses: [$this->toolUseResponse(input: ['ok' => true])],
+        );
+
+        $this->expectException(ProviderException::class);
+        $provider->generateText(
+            messages: [['role' => 'user', 'content' => 'hi']],
+        );
+    }
+
     /**
      * @param list<Response> $responses
      * @param array<string, mixed> $options
@@ -238,6 +281,32 @@ final class AnthropicProviderTest extends TestCase
                 'type' => 'message',
                 'role' => 'assistant',
                 'content' => [['type' => 'text', 'text' => $text]],
+                'model' => AnthropicProvider::DEFAULT_MODEL,
+                'stop_reason' => 'end_turn',
+                'usage' => ['input_tokens' => 0, 'output_tokens' => 0],
+            ]),
+        );
+    }
+
+    /**
+     * @param list<string> $texts
+     */
+    private function textBlocksResponse(array $texts): Response
+    {
+        $blocks = [];
+
+        foreach ($texts as $text) {
+            $blocks[] = ['type' => 'text', 'text' => $text];
+        }
+
+        return new Response(
+            status: 200,
+            headers: ['Content-Type' => 'application/json'],
+            body: json_encode([
+                'id' => 'msg_test',
+                'type' => 'message',
+                'role' => 'assistant',
+                'content' => $blocks,
                 'model' => AnthropicProvider::DEFAULT_MODEL,
                 'stop_reason' => 'end_turn',
                 'usage' => ['input_tokens' => 0, 'output_tokens' => 0],

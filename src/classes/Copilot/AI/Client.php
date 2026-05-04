@@ -55,6 +55,18 @@ final class Client
     }
 
     /**
+     * Generate plain text.
+     *
+     * @param list<array{role: string, content: string}> $messages
+     *
+     * @throws ProviderException
+     */
+    public function generateText(array $messages): string
+    {
+        return $this->provider()->generateText($messages);
+    }
+
+    /**
      * Assert the active provider has an API key configured.
      *
      * @throws AuthException

@@ -73,6 +73,28 @@ class OpenAIProvider implements Provider
         return $decoded;
     }
 
+    public function generateText(array $messages): string
+    {
+        $request = [
+            'model' => $this->model(),
+            'messages' => $messages,
+            ...$this->config->options,
+        ];
+
+        $response = $this->withRetry(fn () => $this->client()->chat()->create($request));
+
+        $content = $response->choices[0]->message->content;
+
+        if (!is_string($content)) {
+            $this->fail(
+                reason: 'response did not contain text content',
+                responseId: $response->id,
+            );
+        }
+
+        return $content;
+    }
+
     protected function providerName(): ProviderName
     {
         return ProviderName::OpenAI;
