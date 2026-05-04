@@ -2,7 +2,7 @@
 
 # Kirby Copilot
 
-Kirby Copilot is a plugin for [Kirby CMS](https://getkirby.com) that integrates AI features into your Kirby projects, letting you generate and refine content – from simple text to complex page layouts – directly from the Panel. This documentation guides you through the installation, configuration, and usage of the plugin.
+Kirby Copilot is a plugin for [Kirby CMS](https://getkirby.com) that integrates AI features into your Kirby projects. Generate and refine content – from simple text to complex page layouts – directly from the Panel, or drive AI from PHP for CLI scripts, hooks, and custom workflows.
 
 > [!TIP]
 > Explore the [interactive playground](https://try.kirbycopilot.com) or [install the plugin](https://kirby.tools/docs/copilot/getting-started/installation) to try Kirby Copilot for yourself.
@@ -11,13 +11,14 @@ Kirby Copilot is a plugin for [Kirby CMS](https://getkirby.com) that integrates 
 
 Whether you are building sites for clients or managing content yourself, Kirby Copilot brings AI-assisted creation and editing to the Panel.
 
-- 🦙 **Multi-Provider**: Choose from leading AI providers – configure once and switch anytime.
-- 🧱 **Structure-Aware Generation**: Generate entire layouts from a single prompt, based on your project's unique block definitions.
-- ⚡ **Inline Suggestions**: Ghost text appears after a brief pause. Press Tab to accept.
-- 📇 **In-Context Editing**: Use the Copilot button in writer/textarea fields to refine text. Works perfectly with selected text.
-- 🌞 **Prompt Templates**: Tailor AI responses with user instructions. Save frequently used prompts as templates.
-- 🎀 **Rich Context**: Use other fields, images, and PDF documents as context for relevant AI responses.
-- 🔒 **Secure by Default**: API keys are protected via server-side proxy – never exposed to Panel users.
+- 🦙 **Multi-Provider**: OpenAI, Anthropic, Google, or Mistral – switch anytime.
+- 🧱 **Structure-Aware Generation**: Entire layouts from a single prompt, using your project's blocks.
+- ⚡ **Inline Suggestions**: Ghost text after a brief pause – Tab to accept.
+- 📇 **In-Context Editing**: Refine writer/textarea text, with selection awareness.
+- 🌞 **Prompt Templates**: Save and reuse frequently-used prompts.
+- 🎀 **Rich Context**: Other fields, images, and PDFs feed the AI.
+- 🔒 **Secure by Default**: API keys stay server-side, never exposed to Panel users.
+- 🛠 **PHP API**: Drive AI from CLI, hooks, and custom workflows – see [PHP classes](https://kirby.tools/docs/copilot/php-classes).
 
 ## Licensing
 
