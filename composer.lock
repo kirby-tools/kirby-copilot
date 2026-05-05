@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "anthropic-ai/sdk",
-            "version": "v0.17.0",
+            "version": "v0.17.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/anthropics/anthropic-sdk-php.git",
-                "reference": "93127fabf81f23098a4294bea296b9324a6bd1fc"
+                "reference": "dd575e54fc1a020fc4e98cef85c1a5ac891eb1aa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/anthropics/anthropic-sdk-php/zipball/93127fabf81f23098a4294bea296b9324a6bd1fc",
-                "reference": "93127fabf81f23098a4294bea296b9324a6bd1fc",
+                "url": "https://api.github.com/repos/anthropics/anthropic-sdk-php/zipball/dd575e54fc1a020fc4e98cef85c1a5ac891eb1aa",
+                "reference": "dd575e54fc1a020fc4e98cef85c1a5ac891eb1aa",
                 "shasum": ""
             },
             "require": {
@@ -61,9 +61,9 @@
             "description": "Anthropic PHP SDK",
             "support": {
                 "issues": "https://github.com/anthropics/anthropic-sdk-php/issues",
-                "source": "https://github.com/anthropics/anthropic-sdk-php/tree/v0.17.0"
+                "source": "https://github.com/anthropics/anthropic-sdk-php/tree/v0.17.1"
             },
-            "time": "2026-04-23T20:55:36+00:00"
+            "time": "2026-04-27T18:43:02+00:00"
         },
         {
             "name": "getkirby/composer-installer",
