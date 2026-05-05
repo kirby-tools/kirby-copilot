@@ -6,7 +6,14 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-message/src'),
+    'Psr\\Http\\Client\\' => array($vendorDir . '/psr/http-client/src'),
+    'OpenAI\\' => array($vendorDir . '/openai-php/client/src'),
     'Kirby\\' => array($vendorDir . '/getkirby/composer-installer/src'),
     'JohannSchopplich\\Licensing\\' => array($vendorDir . '/johannschopplich/kirby-tools-licensing/src'),
     'JohannSchopplich\\KirbyTools\\' => array($vendorDir . '/johannschopplich/kirby-tools-utils/src'),
+    'JohannSchopplich\\' => array($baseDir . '/src/classes'),
+    'Http\\Message\\MultipartStream\\' => array($vendorDir . '/php-http/multipart-stream-builder/src'),
+    'Http\\Discovery\\' => array($vendorDir . '/php-http/discovery/src'),
+    'Anthropic\\' => array($vendorDir . '/anthropic-ai/sdk/src'),
 );

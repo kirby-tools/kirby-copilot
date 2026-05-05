@@ -1,8 +1,8 @@
 <?php return array(
     'root' => array(
         'name' => 'johannschopplich/kirby-copilot',
-        'pretty_version' => '3.7.0',
-        'version' => '3.7.0.0',
+        'pretty_version' => '3.8.0',
+        'version' => '3.8.0.0',
         'reference' => null,
         'type' => 'kirby-plugin',
         'install_path' => __DIR__ . '/../../',
@@ -10,6 +10,15 @@
         'dev' => false,
     ),
     'versions' => array(
+        'anthropic-ai/sdk' => array(
+            'pretty_version' => 'v0.17.1',
+            'version' => '0.17.1.0',
+            'reference' => 'dd575e54fc1a020fc4e98cef85c1a5ac891eb1aa',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../anthropic-ai/sdk',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'getkirby/composer-installer' => array(
             'pretty_version' => '1.2.1',
             'version' => '1.2.1.0',
@@ -20,8 +29,8 @@
             'dev_requirement' => false,
         ),
         'johannschopplich/kirby-copilot' => array(
-            'pretty_version' => '3.7.0',
-            'version' => '3.7.0.0',
+            'pretty_version' => '3.8.0',
+            'version' => '3.8.0.0',
             'reference' => null,
             'type' => 'kirby-plugin',
             'install_path' => __DIR__ . '/../../',
@@ -38,13 +47,88 @@
             'dev_requirement' => false,
         ),
         'johannschopplich/kirby-tools-utils' => array(
-            'pretty_version' => '0.1.1',
-            'version' => '0.1.1.0',
-            'reference' => '2d81270db1c95fdafda484292917a6b40dcea12d',
+            'pretty_version' => '0.1.2',
+            'version' => '0.1.2.0',
+            'reference' => 'f36810328810a33d572422fc08d395d69b1b4113',
             'type' => 'library',
             'install_path' => __DIR__ . '/../johannschopplich/kirby-tools-utils',
             'aliases' => array(),
             'dev_requirement' => false,
+        ),
+        'openai-php/client' => array(
+            'pretty_version' => 'v0.19.2',
+            'version' => '0.19.2.0',
+            'reference' => '12e3513527e22d5657f4f9809796f8fe254fd0a9',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../openai-php/client',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'php-http/async-client-implementation' => array(
+            'dev_requirement' => false,
+            'provided' => array(
+                0 => '*',
+            ),
+        ),
+        'php-http/client-implementation' => array(
+            'dev_requirement' => false,
+            'provided' => array(
+                0 => '*',
+            ),
+        ),
+        'php-http/discovery' => array(
+            'pretty_version' => '1.20.0',
+            'version' => '1.20.0.0',
+            'reference' => '82fe4c73ef3363caed49ff8dd1539ba06044910d',
+            'type' => 'composer-plugin',
+            'install_path' => __DIR__ . '/../php-http/discovery',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'php-http/multipart-stream-builder' => array(
+            'pretty_version' => '1.4.2',
+            'version' => '1.4.2.0',
+            'reference' => '10086e6de6f53489cca5ecc45b6f468604d3460e',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../php-http/multipart-stream-builder',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'psr/http-client' => array(
+            'pretty_version' => '1.0.3',
+            'version' => '1.0.3.0',
+            'reference' => 'bb5906edc1c324c9a05aa0873d40117941e5fa90',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../psr/http-client',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'psr/http-client-implementation' => array(
+            'dev_requirement' => false,
+            'provided' => array(
+                0 => '*',
+            ),
+        ),
+        'psr/http-factory-implementation' => array(
+            'dev_requirement' => false,
+            'provided' => array(
+                0 => '*',
+            ),
+        ),
+        'psr/http-message' => array(
+            'pretty_version' => '2.0',
+            'version' => '2.0.0.0',
+            'reference' => '402d35bcb92c70c026d1a6a9883f06b2ead23d71',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../psr/http-message',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'psr/http-message-implementation' => array(
+            'dev_requirement' => false,
+            'provided' => array(
+                0 => '*',
+            ),
         ),
     ),
 );

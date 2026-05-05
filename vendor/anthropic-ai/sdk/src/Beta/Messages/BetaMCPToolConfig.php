@@ -1,0 +1,66 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Beta\Messages;
+
+use Anthropic\Core\Attributes\Optional;
+use Anthropic\Core\Concerns\SdkModel;
+use Anthropic\Core\Contracts\BaseModel;
+
+/**
+ * Configuration for a specific tool in an MCP toolset.
+ *
+ * @phpstan-type BetaMCPToolConfigShape = array{
+ *   deferLoading?: bool|null, enabled?: bool|null
+ * }
+ */
+final class BetaMCPToolConfig implements BaseModel
+{
+    /** @use SdkModel<BetaMCPToolConfigShape> */
+    use SdkModel;
+
+    #[Optional('defer_loading')]
+    public ?bool $deferLoading;
+
+    #[Optional]
+    public ?bool $enabled;
+
+    public function __construct()
+    {
+        $this->initialize();
+    }
+
+    /**
+     * Construct an instance from the required parameters.
+     *
+     * You must use named parameters to construct any parameters with a default value.
+     */
+    public static function with(
+        ?bool $deferLoading = null,
+        ?bool $enabled = null
+    ): self {
+        $self = new self;
+
+        null !== $deferLoading && $self['deferLoading'] = $deferLoading;
+        null !== $enabled && $self['enabled'] = $enabled;
+
+        return $self;
+    }
+
+    public function withDeferLoading(bool $deferLoading): self
+    {
+        $self = clone $this;
+        $self['deferLoading'] = $deferLoading;
+
+        return $self;
+    }
+
+    public function withEnabled(bool $enabled): self
+    {
+        $self = clone $this;
+        $self['enabled'] = $enabled;
+
+        return $self;
+    }
+}

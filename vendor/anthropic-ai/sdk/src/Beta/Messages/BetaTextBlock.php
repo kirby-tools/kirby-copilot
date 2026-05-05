@@ -1,0 +1,137 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Beta\Messages;
+
+use Anthropic\Core\Attributes\Required;
+use Anthropic\Core\Concerns\SdkModel;
+use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Lib\Contracts\StructuredOutputModel;
+
+/**
+ * @phpstan-import-type BetaTextCitationVariants from \Anthropic\Beta\Messages\BetaTextCitation
+ * @phpstan-import-type BetaTextCitationShape from \Anthropic\Beta\Messages\BetaTextCitation
+ *
+ * @phpstan-type BetaTextBlockShape = array{
+ *   citations: list<BetaTextCitationShape>|null, text: string, type: 'text'
+ * }
+ */
+final class BetaTextBlock implements BaseModel
+{
+    /** @use SdkModel<BetaTextBlockShape> */
+    use SdkModel;
+
+    /** @var 'text' $type */
+    #[Required]
+    public string $type = 'text';
+
+    /**
+     * Citations supporting the text block.
+     *
+     * The type of citation returned will depend on the type of document being cited. Citing a PDF results in `page_location`, plain text results in `char_location`, and content document results in `content_block_location`.
+     *
+     * @var list<BetaTextCitationVariants>|null $citations
+     */
+    #[Required(list: BetaTextCitation::class)]
+    public ?array $citations;
+
+    #[Required]
+    public string $text;
+
+    /**
+     * Parsed value of the text when a structured output schema has been specified.
+     *
+     * When using output_config with a StructuredOutputModel class, this property
+     * will contain the parsed model instance. If parsing fails, it contains an
+     * array with an 'error' key.
+     *
+     * @var StructuredOutputModel|array{error: string}|null
+     */
+    public mixed $parsed = null;
+
+    /**
+     * Exclude `parsed` from serialization — it's a client-side property populated
+     * by the structured-outputs layer and must not be sent back to the API, which
+     * rejects it with "Extra inputs are not permitted".
+     *
+     * @return array<string, mixed>
+     */
+    public function toProperties(): array
+    {
+        $properties = [...\Anthropic\Core\Util::get_object_vars($this), ...$this->_data];
+        unset($properties['parsed']);
+
+        return $properties;
+    }
+
+    /**
+     * `new BetaTextBlock()` is missing required properties by the API.
+     *
+     * To enforce required parameters use
+     * ```
+     * BetaTextBlock::with(citations: ..., text: ...)
+     * ```
+     *
+     * Otherwise ensure the following setters are called
+     *
+     * ```
+     * (new BetaTextBlock)->withCitations(...)->withText(...)
+     * ```
+     */
+    public function __construct()
+    {
+        $this->initialize();
+    }
+
+    /**
+     * Construct an instance from the required parameters.
+     *
+     * You must use named parameters to construct any parameters with a default value.
+     *
+     * @param list<BetaTextCitationShape>|null $citations
+     */
+    public static function with(?array $citations, string $text): self
+    {
+        $self = new self;
+
+        $self['citations'] = $citations;
+        $self['text'] = $text;
+
+        return $self;
+    }
+
+    /**
+     * Citations supporting the text block.
+     *
+     * The type of citation returned will depend on the type of document being cited. Citing a PDF results in `page_location`, plain text results in `char_location`, and content document results in `content_block_location`.
+     *
+     * @param list<BetaTextCitationShape>|null $citations
+     */
+    public function withCitations(?array $citations): self
+    {
+        $self = clone $this;
+        $self['citations'] = $citations;
+
+        return $self;
+    }
+
+    public function withText(string $text): self
+    {
+        $self = clone $this;
+        $self['text'] = $text;
+
+        return $self;
+    }
+
+    /**
+     * @param 'text' $type
+     */
+    public function withType(string $type): self
+    {
+        $self = clone $this;
+        $self['type'] = $type;
+
+        return $self;
+    }
+}

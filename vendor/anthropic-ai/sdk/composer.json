@@ -1,0 +1,61 @@
+{
+  "$schema": "https://getcomposer.org/schema.json",
+  "license": "MIT",
+  "autoload": {
+    "files": [
+      "src/Version.php"
+    ],
+    "psr-4": {
+      "Anthropic\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true,
+      "php-http/discovery": false,
+      "phpstan/extension-installer": true
+    },
+    "platform": {
+      "php": "8.3"
+    },
+    "preferred-install": "dist",
+    "sort-packages": true
+  },
+  "description": "Anthropic PHP SDK",
+  "name": "anthropic-ai/sdk",
+  "require": {
+    "php": "^8.1",
+    "php-http/discovery": "^1",
+    "psr/http-client": "^1",
+    "psr/http-client-implementation": "^1",
+    "psr/http-factory-implementation": "^1",
+    "psr/http-message": "^1|^2"
+  },
+  "require-dev": {
+    "aws/aws-sdk-php": "^3.368",
+    "friendsofphp/php-cs-fixer": "^3",
+    "google/auth": "^1.49",
+    "nyholm/psr7": "^1",
+    "pestphp/pest": "^3",
+    "php-http/mock-client": "^1",
+    "phpstan/extension-installer": "^1",
+    "phpstan/phpstan": "^2",
+    "phpstan/phpstan-phpunit": "^2",
+    "phpunit/phpunit": "^11",
+    "symfony/http-client": "^7"
+  },
+  "scripts": {
+    "build:docs": "curl --etag-save ./vendor/ag.etags --etag-compare ./vendor/ag.etags --create-dirs --remote-name --output-dir ./vendor/bin --no-progress-meter -- https://github.com/ApiGen/ApiGen/releases/latest/download/apigen.phar && php ./vendor/bin/apigen.phar --output docs -- src",
+    "lint": "./scripts/lint",
+    "test": "./scripts/test"
+  },
+  "suggest": {
+    "aws/aws-sdk-php": "Allows using the AWS Bedrock, AWS gateway, and Bedrock Mantle SDKs",
+    "google/auth": "Allows using the Google Vertex SDK"
+  }
+}

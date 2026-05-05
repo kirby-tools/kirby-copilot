@@ -1,0 +1,107 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Beta\Messages;
+
+use Anthropic\Core\Attributes\Required;
+use Anthropic\Core\Concerns\SdkModel;
+use Anthropic\Core\Contracts\BaseModel;
+
+/**
+ * @phpstan-import-type ContentVariants from \Anthropic\Beta\Messages\BetaTextEditorCodeExecutionToolResultBlock\Content
+ * @phpstan-import-type ContentShape from \Anthropic\Beta\Messages\BetaTextEditorCodeExecutionToolResultBlock\Content
+ *
+ * @phpstan-type BetaTextEditorCodeExecutionToolResultBlockShape = array{
+ *   content: ContentShape,
+ *   toolUseID: string,
+ *   type: 'text_editor_code_execution_tool_result',
+ * }
+ */
+final class BetaTextEditorCodeExecutionToolResultBlock implements BaseModel
+{
+    /** @use SdkModel<BetaTextEditorCodeExecutionToolResultBlockShape> */
+    use SdkModel;
+
+    /** @var 'text_editor_code_execution_tool_result' $type */
+    #[Required]
+    public string $type = 'text_editor_code_execution_tool_result';
+
+    /** @var ContentVariants $content */
+    #[Required]
+    public BetaTextEditorCodeExecutionToolResultError|BetaTextEditorCodeExecutionViewResultBlock|BetaTextEditorCodeExecutionCreateResultBlock|BetaTextEditorCodeExecutionStrReplaceResultBlock $content;
+
+    #[Required('tool_use_id')]
+    public string $toolUseID;
+
+    /**
+     * `new BetaTextEditorCodeExecutionToolResultBlock()` is missing required properties by the API.
+     *
+     * To enforce required parameters use
+     * ```
+     * BetaTextEditorCodeExecutionToolResultBlock::with(content: ..., toolUseID: ...)
+     * ```
+     *
+     * Otherwise ensure the following setters are called
+     *
+     * ```
+     * (new BetaTextEditorCodeExecutionToolResultBlock)
+     *   ->withContent(...)
+     *   ->withToolUseID(...)
+     * ```
+     */
+    public function __construct()
+    {
+        $this->initialize();
+    }
+
+    /**
+     * Construct an instance from the required parameters.
+     *
+     * You must use named parameters to construct any parameters with a default value.
+     *
+     * @param ContentShape $content
+     */
+    public static function with(
+        BetaTextEditorCodeExecutionToolResultError|array|BetaTextEditorCodeExecutionViewResultBlock|BetaTextEditorCodeExecutionCreateResultBlock|BetaTextEditorCodeExecutionStrReplaceResultBlock $content,
+        string $toolUseID,
+    ): self {
+        $self = new self;
+
+        $self['content'] = $content;
+        $self['toolUseID'] = $toolUseID;
+
+        return $self;
+    }
+
+    /**
+     * @param ContentShape $content
+     */
+    public function withContent(
+        BetaTextEditorCodeExecutionToolResultError|array|BetaTextEditorCodeExecutionViewResultBlock|BetaTextEditorCodeExecutionCreateResultBlock|BetaTextEditorCodeExecutionStrReplaceResultBlock $content,
+    ): self {
+        $self = clone $this;
+        $self['content'] = $content;
+
+        return $self;
+    }
+
+    public function withToolUseID(string $toolUseID): self
+    {
+        $self = clone $this;
+        $self['toolUseID'] = $toolUseID;
+
+        return $self;
+    }
+
+    /**
+     * @param 'text_editor_code_execution_tool_result' $type
+     */
+    public function withType(string $type): self
+    {
+        $self = clone $this;
+        $self['type'] = $type;
+
+        return $self;
+    }
+}

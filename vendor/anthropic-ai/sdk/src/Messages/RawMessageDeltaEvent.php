@@ -1,0 +1,129 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Messages;
+
+use Anthropic\Core\Attributes\Required;
+use Anthropic\Core\Concerns\SdkModel;
+use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Messages\RawMessageDeltaEvent\Delta;
+
+/**
+ * @phpstan-import-type DeltaShape from \Anthropic\Messages\RawMessageDeltaEvent\Delta
+ * @phpstan-import-type MessageDeltaUsageShape from \Anthropic\Messages\MessageDeltaUsage
+ *
+ * @phpstan-type RawMessageDeltaEventShape = array{
+ *   delta: Delta|DeltaShape,
+ *   type: 'message_delta',
+ *   usage: MessageDeltaUsage|MessageDeltaUsageShape,
+ * }
+ */
+final class RawMessageDeltaEvent implements BaseModel
+{
+    /** @use SdkModel<RawMessageDeltaEventShape> */
+    use SdkModel;
+
+    /** @var 'message_delta' $type */
+    #[Required]
+    public string $type = 'message_delta';
+
+    #[Required]
+    public Delta $delta;
+
+    /**
+     * Billing and rate-limit usage.
+     *
+     * Anthropic's API bills and rate-limits by token counts, as tokens represent the underlying cost to our systems.
+     *
+     * Under the hood, the API transforms requests into a format suitable for the model. The model's output then goes through a parsing stage before becoming an API response. As a result, the token counts in `usage` will not match one-to-one with the exact visible content of an API request or response.
+     *
+     * For example, `output_tokens` will be non-zero, even for an empty string response from Claude.
+     *
+     * Total input tokens in a request is the summation of `input_tokens`, `cache_creation_input_tokens`, and `cache_read_input_tokens`.
+     */
+    #[Required]
+    public MessageDeltaUsage $usage;
+
+    /**
+     * `new RawMessageDeltaEvent()` is missing required properties by the API.
+     *
+     * To enforce required parameters use
+     * ```
+     * RawMessageDeltaEvent::with(delta: ..., usage: ...)
+     * ```
+     *
+     * Otherwise ensure the following setters are called
+     *
+     * ```
+     * (new RawMessageDeltaEvent)->withDelta(...)->withUsage(...)
+     * ```
+     */
+    public function __construct()
+    {
+        $this->initialize();
+    }
+
+    /**
+     * Construct an instance from the required parameters.
+     *
+     * You must use named parameters to construct any parameters with a default value.
+     *
+     * @param Delta|DeltaShape $delta
+     * @param MessageDeltaUsage|MessageDeltaUsageShape $usage
+     */
+    public static function with(
+        Delta|array $delta,
+        MessageDeltaUsage|array $usage
+    ): self {
+        $self = new self;
+
+        $self['delta'] = $delta;
+        $self['usage'] = $usage;
+
+        return $self;
+    }
+
+    /**
+     * @param Delta|DeltaShape $delta
+     */
+    public function withDelta(Delta|array $delta): self
+    {
+        $self = clone $this;
+        $self['delta'] = $delta;
+
+        return $self;
+    }
+
+    /**
+     * @param 'message_delta' $type
+     */
+    public function withType(string $type): self
+    {
+        $self = clone $this;
+        $self['type'] = $type;
+
+        return $self;
+    }
+
+    /**
+     * Billing and rate-limit usage.
+     *
+     * Anthropic's API bills and rate-limits by token counts, as tokens represent the underlying cost to our systems.
+     *
+     * Under the hood, the API transforms requests into a format suitable for the model. The model's output then goes through a parsing stage before becoming an API response. As a result, the token counts in `usage` will not match one-to-one with the exact visible content of an API request or response.
+     *
+     * For example, `output_tokens` will be non-zero, even for an empty string response from Claude.
+     *
+     * Total input tokens in a request is the summation of `input_tokens`, `cache_creation_input_tokens`, and `cache_read_input_tokens`.
+     *
+     * @param MessageDeltaUsage|MessageDeltaUsageShape $usage
+     */
+    public function withUsage(MessageDeltaUsage|array $usage): self
+    {
+        $self = clone $this;
+        $self['usage'] = $usage;
+
+        return $self;
+    }
+}

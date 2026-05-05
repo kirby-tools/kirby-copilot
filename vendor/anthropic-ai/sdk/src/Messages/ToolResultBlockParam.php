@@ -1,0 +1,146 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Messages;
+
+use Anthropic\Core\Attributes\Optional;
+use Anthropic\Core\Attributes\Required;
+use Anthropic\Core\Concerns\SdkModel;
+use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Messages\ToolResultBlockParam\Content;
+
+/**
+ * @phpstan-import-type ContentVariants from \Anthropic\Messages\ToolResultBlockParam\Content
+ * @phpstan-import-type CacheControlEphemeralShape from \Anthropic\Messages\CacheControlEphemeral
+ * @phpstan-import-type ContentShape from \Anthropic\Messages\ToolResultBlockParam\Content
+ *
+ * @phpstan-type ToolResultBlockParamShape = array{
+ *   toolUseID: string,
+ *   type: 'tool_result',
+ *   cacheControl?: null|CacheControlEphemeral|CacheControlEphemeralShape,
+ *   content?: ContentShape|null,
+ *   isError?: bool|null,
+ * }
+ */
+final class ToolResultBlockParam implements BaseModel
+{
+    /** @use SdkModel<ToolResultBlockParamShape> */
+    use SdkModel;
+
+    /** @var 'tool_result' $type */
+    #[Required]
+    public string $type = 'tool_result';
+
+    #[Required('tool_use_id')]
+    public string $toolUseID;
+
+    /**
+     * Create a cache control breakpoint at this content block.
+     */
+    #[Optional('cache_control', nullable: true)]
+    public ?CacheControlEphemeral $cacheControl;
+
+    /** @var ContentVariants|null $content */
+    #[Optional(union: Content::class)]
+    public string|array|null $content;
+
+    #[Optional('is_error')]
+    public ?bool $isError;
+
+    /**
+     * `new ToolResultBlockParam()` is missing required properties by the API.
+     *
+     * To enforce required parameters use
+     * ```
+     * ToolResultBlockParam::with(toolUseID: ...)
+     * ```
+     *
+     * Otherwise ensure the following setters are called
+     *
+     * ```
+     * (new ToolResultBlockParam)->withToolUseID(...)
+     * ```
+     */
+    public function __construct()
+    {
+        $this->initialize();
+    }
+
+    /**
+     * Construct an instance from the required parameters.
+     *
+     * You must use named parameters to construct any parameters with a default value.
+     *
+     * @param CacheControlEphemeral|CacheControlEphemeralShape|null $cacheControl
+     * @param ContentShape|null $content
+     */
+    public static function with(
+        string $toolUseID,
+        CacheControlEphemeral|array|null $cacheControl = null,
+        string|array|null $content = null,
+        ?bool $isError = null,
+    ): self {
+        $self = new self;
+
+        $self['toolUseID'] = $toolUseID;
+
+        null !== $cacheControl && $self['cacheControl'] = $cacheControl;
+        null !== $content && $self['content'] = $content;
+        null !== $isError && $self['isError'] = $isError;
+
+        return $self;
+    }
+
+    public function withToolUseID(string $toolUseID): self
+    {
+        $self = clone $this;
+        $self['toolUseID'] = $toolUseID;
+
+        return $self;
+    }
+
+    /**
+     * @param 'tool_result' $type
+     */
+    public function withType(string $type): self
+    {
+        $self = clone $this;
+        $self['type'] = $type;
+
+        return $self;
+    }
+
+    /**
+     * Create a cache control breakpoint at this content block.
+     *
+     * @param CacheControlEphemeral|CacheControlEphemeralShape|null $cacheControl
+     */
+    public function withCacheControl(
+        CacheControlEphemeral|array|null $cacheControl
+    ): self {
+        $self = clone $this;
+        $self['cacheControl'] = $cacheControl;
+
+        return $self;
+    }
+
+    /**
+     * @param ContentShape $content
+     */
+    public function withContent(string|array $content): self
+    {
+        $self = clone $this;
+        $self['content'] = $content;
+
+        return $self;
+    }
+
+    public function withIsError(bool $isError): self
+    {
+        $self = clone $this;
+        $self['isError'] = $isError;
+
+        return $self;
+    }
+}

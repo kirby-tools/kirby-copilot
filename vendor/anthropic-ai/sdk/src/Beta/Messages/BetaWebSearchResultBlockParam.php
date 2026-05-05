@@ -1,0 +1,128 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Beta\Messages;
+
+use Anthropic\Core\Attributes\Optional;
+use Anthropic\Core\Attributes\Required;
+use Anthropic\Core\Concerns\SdkModel;
+use Anthropic\Core\Contracts\BaseModel;
+
+/**
+ * @phpstan-type BetaWebSearchResultBlockParamShape = array{
+ *   encryptedContent: string,
+ *   title: string,
+ *   type: 'web_search_result',
+ *   url: string,
+ *   pageAge?: string|null,
+ * }
+ */
+final class BetaWebSearchResultBlockParam implements BaseModel
+{
+    /** @use SdkModel<BetaWebSearchResultBlockParamShape> */
+    use SdkModel;
+
+    /** @var 'web_search_result' $type */
+    #[Required]
+    public string $type = 'web_search_result';
+
+    #[Required('encrypted_content')]
+    public string $encryptedContent;
+
+    #[Required]
+    public string $title;
+
+    #[Required]
+    public string $url;
+
+    #[Optional('page_age', nullable: true)]
+    public ?string $pageAge;
+
+    /**
+     * `new BetaWebSearchResultBlockParam()` is missing required properties by the API.
+     *
+     * To enforce required parameters use
+     * ```
+     * BetaWebSearchResultBlockParam::with(encryptedContent: ..., title: ..., url: ...)
+     * ```
+     *
+     * Otherwise ensure the following setters are called
+     *
+     * ```
+     * (new BetaWebSearchResultBlockParam)
+     *   ->withEncryptedContent(...)
+     *   ->withTitle(...)
+     *   ->withURL(...)
+     * ```
+     */
+    public function __construct()
+    {
+        $this->initialize();
+    }
+
+    /**
+     * Construct an instance from the required parameters.
+     *
+     * You must use named parameters to construct any parameters with a default value.
+     */
+    public static function with(
+        string $encryptedContent,
+        string $title,
+        string $url,
+        ?string $pageAge = null,
+    ): self {
+        $self = new self;
+
+        $self['encryptedContent'] = $encryptedContent;
+        $self['title'] = $title;
+        $self['url'] = $url;
+
+        null !== $pageAge && $self['pageAge'] = $pageAge;
+
+        return $self;
+    }
+
+    public function withEncryptedContent(string $encryptedContent): self
+    {
+        $self = clone $this;
+        $self['encryptedContent'] = $encryptedContent;
+
+        return $self;
+    }
+
+    public function withTitle(string $title): self
+    {
+        $self = clone $this;
+        $self['title'] = $title;
+
+        return $self;
+    }
+
+    /**
+     * @param 'web_search_result' $type
+     */
+    public function withType(string $type): self
+    {
+        $self = clone $this;
+        $self['type'] = $type;
+
+        return $self;
+    }
+
+    public function withURL(string $url): self
+    {
+        $self = clone $this;
+        $self['url'] = $url;
+
+        return $self;
+    }
+
+    public function withPageAge(?string $pageAge): self
+    {
+        $self = clone $this;
+        $self['pageAge'] = $pageAge;
+
+        return $self;
+    }
+}
