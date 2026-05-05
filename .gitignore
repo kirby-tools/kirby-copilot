@@ -8,12 +8,10 @@
 /node_modules
 /vendor
 
-# Build files
-/index.dev.mjs
-
 # Playground files
 .env
 .license
+.kirby-tools-licenses
 /playground/public/media/*
 /playground/storage/accounts/*
 !/playground/storage/accounts/playgrnd
@@ -23,9 +21,8 @@
 # Cache and temporary files
 /.cache
 /.php-cs-fixer.cache
-/.phpunit.result.cache
-/readme/.vitepress/dist
-/readme/.vitepress/cache
+/.phpunit.*
+/index.dev.mjs
 /tests/coverage
 /tests/*/tmp
 /tools/**/vendor
