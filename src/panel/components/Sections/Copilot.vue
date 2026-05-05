@@ -24,6 +24,7 @@ import {
 import { section } from "kirbyuse/props";
 import { isObject } from "utilful";
 import {
+  buildUserPrompt,
   useBlocks,
   useLayouts,
   usePluginContext,
@@ -39,7 +40,6 @@ import {
   SUPPORTED_PROVIDERS,
 } from "../../constants";
 import {
-  buildUserPrompt,
   getHashedStorageKey,
   getResponseFormat,
   handleStreamError,
