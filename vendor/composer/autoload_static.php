@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit94e330cf250c8edb2b2ad317a3091ad8
+class ComposerStaticInit6bfd534572e2b080fe4df83e14c05baa
 {
     public static $files = array (
         '4b3d45d99f6e4eb65ea80c00519736e4' => __DIR__ . '/..' . '/anthropic-ai/sdk/src/Version.php',
@@ -1831,9 +1831,9 @@ class ComposerStaticInit94e330cf250c8edb2b2ad317a3091ad8
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit94e330cf250c8edb2b2ad317a3091ad8::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit94e330cf250c8edb2b2ad317a3091ad8::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit94e330cf250c8edb2b2ad317a3091ad8::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit6bfd534572e2b080fe4df83e14c05baa::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit6bfd534572e2b080fe4df83e14c05baa::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit6bfd534572e2b080fe4df83e14c05baa::$classMap;
 
         }, null, ClassLoader::class);
     }
