@@ -112,8 +112,22 @@ describe("resolveProviderOptions", () => {
       expect(result?.mistral).toEqual({ reasoningEffort: expected });
     });
 
-    it.each(["mistral-medium-latest", "mistral-large-latest"])(
-      "returns undefined for %s (only Small 4 / magistral honor reasoning_effort)",
+    it.each(["mistral-medium-latest", "mistral-medium-3-5"])(
+      "emits `high` reasoning effort for %s",
+      (model) => {
+        const result = resolveProviderOptions({
+          provider: "mistral",
+          providerConfig: baseConfig,
+          modelId: model,
+          reasoningEffort: "high",
+        });
+
+        expect(result?.mistral).toEqual({ reasoningEffort: "high" });
+      },
+    );
+
+    it.each(["mistral-medium-2508", "mistral-large-latest"])(
+      "returns undefined for %s (pre-3.5 medium and large ignore reasoning_effort)",
       (model) => {
         const result = resolveProviderOptions({
           provider: "mistral",

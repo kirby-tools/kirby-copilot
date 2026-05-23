@@ -117,7 +117,7 @@ final class ContextRouteTest extends ApiRouteTestCase
             'openai'    => ['hasApiKey' => false, 'model' => 'gpt-5.4', 'completionModel' => 'gpt-5.4-nano'],
             'google'    => ['hasApiKey' => false, 'model' => 'gemini-3.1-pro-preview', 'completionModel' => 'gemini-3-flash-preview'],
             'anthropic' => ['hasApiKey' => false, 'model' => 'claude-sonnet-4-6', 'completionModel' => 'claude-haiku-4-5'],
-            'mistral'   => ['hasApiKey' => false, 'model' => 'mistral-small-latest', 'completionModel' => 'mistral-small-latest'],
+            'mistral'   => ['hasApiKey' => false, 'model' => 'mistral-medium-latest', 'completionModel' => 'mistral-small-latest'],
         ], $response['config']['providers']);
     }
 

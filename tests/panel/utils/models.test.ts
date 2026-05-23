@@ -62,17 +62,18 @@ describe("supportsReasoning", () => {
   describe("Mistral models", () => {
     it.each([
       "mistral-small-latest",
-      "magistral-small-2507",
-      "magistral-medium-2507",
+      "mistral-medium-latest",
+      "mistral-medium-3-5",
     ])("returns true for %s", (model) => {
       expect(supportsReasoning(model)).toBe(true);
     });
 
     it.each([
-      // Only Small 4 and `magistral-*` honor `reasoning_effort`;
-      // `medium`/`large` silently ignore it
+      // Only Small 4 and Medium 3.5+ honor `reasoning_effort`
       "mistral-medium-2508",
       "mistral-large-latest",
+      "magistral-small-latest",
+      "magistral-medium-latest",
       "mistral-nemo",
       "codestral",
       "ministral-8b-latest",

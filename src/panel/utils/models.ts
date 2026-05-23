@@ -32,9 +32,10 @@ export function supportsReasoning(modelName: string) {
     // Anthropic: Claude 4+ and Mythos
     /^claude-(?:opus|sonnet|haiku)-\d/.test(modelName) ||
     modelName.startsWith("claude-mythos-") ||
-    // Mistral: Small 4 (`mistral-small-latest`) and `magistral-*` only
+    // Mistral: Small 4 and Medium 3.5+ honor `reasoning_effort`
     modelName.startsWith("mistral-small") ||
-    modelName.startsWith("magistral-")
+    modelName === "mistral-medium-latest" ||
+    modelName.startsWith("mistral-medium-3-")
   );
 }
 

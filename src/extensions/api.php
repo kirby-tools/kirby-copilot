@@ -38,7 +38,7 @@ return [
                             'completionModel' => 'claude-haiku-4-5'
                         ],
                         'mistral' => [
-                            'model' => 'mistral-small-latest',
+                            'model' => 'mistral-medium-latest',
                             'completionModel' => 'mistral-small-latest'
                         ]
                     ],
