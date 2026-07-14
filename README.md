@@ -16,6 +16,7 @@ Whether you are building sites for clients or managing content yourself, Kirby C
 - ⚡ **Inline Suggestions**: Ghost text after a brief pause – Tab to accept.
 - 📇 **In-Context Editing**: Refine writer/textarea text, with selection awareness.
 - 🌞 **Prompt Templates**: Save and reuse frequently-used prompts.
+- 📚 **Skills**: Package reusable instructions and pull them into any prompt with `@skill://`.
 - 🎀 **Rich Context**: Other fields, images, and PDFs feed the AI.
 - 🔒 **Secure by Default**: API keys stay server-side, never exposed to Panel users.
 - 🛠 **PHP API**: Drive AI from CLI, hooks, and custom workflows – see [PHP classes](https://kirby.tools/docs/copilot/php-classes).
