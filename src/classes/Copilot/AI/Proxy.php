@@ -46,7 +46,8 @@ final class Proxy
         };
 
         $config = $kirby->option('johannschopplich.copilot', []);
-        $apiKey = $config['providers'][$provider]['apiKey'] ?? null;
+        $providers = array_change_key_case($config['providers'] ?? [], CASE_LOWER);
+        $apiKey = $providers[$provider]['apiKey'] ?? null;
 
         if ($apiKey instanceof Closure) {
             $apiKey = $apiKey($kirby);
@@ -80,7 +81,7 @@ final class Proxy
             'api.mistral.ai',
         ];
 
-        $configuredBaseUrl = $config['providers'][$provider]['baseUrl'] ?? null;
+        $configuredBaseUrl = $providers[$provider]['baseUrl'] ?? null;
         if (is_string($configuredBaseUrl)) {
             $configuredHost = parse_url($configuredBaseUrl, PHP_URL_HOST);
             if (is_string($configuredHost) && $configuredHost !== '') {

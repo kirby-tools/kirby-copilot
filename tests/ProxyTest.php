@@ -25,11 +25,12 @@ final class ProxyTest extends TestCase
         FakeProxyTransport $transport,
         array $server = [],
         array $providerConfig = ['apiKey' => 'test-key'],
+        string $providerConfigKey = 'openai',
     ): Proxy {
         $kirby = new App([
             'options' => [
                 'johannschopplich.copilot' => [
-                    'providers' => ['openai' => $providerConfig],
+                    'providers' => [$providerConfigKey => $providerConfig],
                 ],
             ],
             'request' => ['query' => ['provider' => 'openai']],
@@ -93,6 +94,23 @@ final class ProxyTest extends TestCase
 
         $this->assertContains(
             'Authorization: Bearer closure-key',
+            $transport->curlOptions[CURLOPT_HTTPHEADER],
+        );
+    }
+
+    #[Test]
+    public function resolves_provider_config_keys_case_insensitively(): void
+    {
+        $transport = new FakeProxyTransport();
+
+        $this->createProxy(
+            $transport,
+            ['HTTP_AUTHORIZATION' => 'Bearer __KIRBY_COPILOT_PROXY__'],
+            providerConfigKey: 'OpenAI',
+        )->handle();
+
+        $this->assertContains(
+            'Authorization: Bearer test-key',
             $transport->curlOptions[CURLOPT_HTTPHEADER],
         );
     }
