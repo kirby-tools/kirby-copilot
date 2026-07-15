@@ -118,8 +118,7 @@ export function createSkillSuggestPlugin(options: SkillSuggestHandlers) {
       init: () => EMPTY_PLUGIN_STATE,
       apply(tr, value, _oldState, newState) {
         const meta = tr.getMeta(skillSuggestPluginKey) as
-          | SkillSuggestMeta
-          | undefined;
+          SkillSuggestMeta | undefined;
 
         if (meta) {
           switch (meta.type) {

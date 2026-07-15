@@ -177,8 +177,7 @@ function createCompletionPlugin(
       },
       apply(tr, value) {
         const meta = tr.getMeta(completionPluginKey) as
-          | CompletionMeta
-          | undefined;
+          CompletionMeta | undefined;
 
         if (meta) {
           switch (meta.type) {
