@@ -41,6 +41,7 @@ return array_replace_recursive(
             'johannschopplich.copilot.preview' => 'Preview',
             'johannschopplich.copilot.notification.success' => 'Content generated',
             'johannschopplich.copilot.notification.error' => 'Could not generate text. Please check console logs.',
+            'johannschopplich.copilot.notification.running' => 'Generation already in progress',
             'johannschopplich.copilot.licenseToast' => 'Enjoying Copilot? Activate your license.'
         ],
         'de' => [
@@ -79,6 +80,7 @@ return array_replace_recursive(
             'johannschopplich.copilot.preview' => 'Vorschau',
             'johannschopplich.copilot.notification.success' => 'Content generiert',
             'johannschopplich.copilot.notification.error' => 'Text konnte nicht generiert werden. Bitte Konsolenprotokolle prüfen.',
+            'johannschopplich.copilot.notification.running' => 'Generierung läuft bereits',
             'johannschopplich.copilot.licenseToast' => 'Gefällt dir Copilot? Aktiviere deine Lizenz.'
         ],
         'fr' => [
@@ -117,6 +119,7 @@ return array_replace_recursive(
             'johannschopplich.copilot.preview' => 'Aperçu',
             'johannschopplich.copilot.notification.success' => 'Contenu généré',
             'johannschopplich.copilot.notification.error' => 'Impossible de générer le texte. Veuillez vérifier les journaux de la console.',
+            'johannschopplich.copilot.notification.running' => 'Génération déjà en cours',
             'johannschopplich.copilot.licenseToast' => 'Vous aimez Copilot ? Activez votre licence.'
         ],
         'nl' => [
@@ -155,6 +158,7 @@ return array_replace_recursive(
             'johannschopplich.copilot.preview' => 'Voorbeeld',
             'johannschopplich.copilot.notification.success' => 'Inhoud gegenereerd',
             'johannschopplich.copilot.notification.error' => 'Kon geen tekst genereren. Controleer de console logs.',
+            'johannschopplich.copilot.notification.running' => 'Generatie al bezig',
             'johannschopplich.copilot.licenseToast' => 'Bevalt Copilot? Activeer je licentie.'
         ]
     ]

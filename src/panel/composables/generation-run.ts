@@ -113,7 +113,14 @@ function startGenerationRun(
   { escapeToAbort = false }: GenerationRunOptions,
   execute: (signal: AbortSignal) => Promise<void>,
 ): GenerationRun | undefined {
-  if (hasActiveRun) return;
+  if (hasActiveRun) {
+    const panel = usePanel();
+    panel.notification.info(
+      panel.t("johannschopplich.copilot.notification.running"),
+    );
+    return;
+  }
+
   hasActiveRun = true;
 
   const abortController = new AbortController();

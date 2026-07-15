@@ -16,6 +16,7 @@ const panel = {
   notification: {
     success: vi.fn(),
     error: vi.fn(),
+    info: vi.fn(),
   },
 };
 
@@ -266,6 +267,9 @@ describe("generation run single-flight", () => {
 
     expect(rejectedRun).toBeUndefined();
     expect(rejectedSinkWrite).not.toHaveBeenCalled();
+    expect(panel.notification.info).toHaveBeenCalledWith(
+      "johannschopplich.copilot.notification.running",
+    );
     expect(panel.notification.success).toHaveBeenCalledOnce();
 
     const followUpRun = runTextGeneration({
