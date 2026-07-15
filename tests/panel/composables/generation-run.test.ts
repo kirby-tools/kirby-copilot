@@ -80,7 +80,6 @@ describe("runTextGeneration", () => {
   it("streams every delta into the sink and reports success once", async () => {
     const writtenDeltas: string[] = [];
     let isLoadingDuringStream: boolean | undefined;
-    const runStateChanges: boolean[] = [];
 
     const run = runTextGeneration({
       streamOptions: {
@@ -93,7 +92,6 @@ describe("runTextGeneration", () => {
           writtenDeltas.push(delta);
         },
       },
-      onRunStateChange: (isRunning) => runStateChanges.push(isRunning),
     });
 
     expect(run).toBeDefined();
@@ -102,7 +100,6 @@ describe("runTextGeneration", () => {
     expect(writtenDeltas.join("")).toBe("Silent pond");
     expect(isLoadingDuringStream).toBe(true);
     expect(panel.isLoading).toBe(false);
-    expect(runStateChanges).toEqual([true, false]);
     expect(panel.notification.success).toHaveBeenCalledOnce();
     expect(panel.notification.error).not.toHaveBeenCalled();
   });
@@ -177,14 +174,11 @@ describe("runTextGeneration", () => {
           events.push("persist");
         },
       },
-      onRunStateChange: (isRunning) => {
-        if (!isRunning) events.push("finished");
-      },
     });
 
     await run!.done;
 
-    expect(events).toEqual(["write", "write", "persist", "finished"]);
+    expect(events).toEqual(["write", "write", "persist"]);
     expect(panel.notification.success).toHaveBeenCalledOnce();
   });
 

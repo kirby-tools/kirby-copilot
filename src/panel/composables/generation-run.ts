@@ -21,7 +21,6 @@ export interface GenerationRunOptions {
    * Escape-to-cancel-dialog never reaches this listener.
    */
   escapeToAbort?: boolean;
-  onRunStateChange?: (isRunning: boolean) => void;
 }
 
 export interface TextGenerationSink {
@@ -111,7 +110,7 @@ export function runStructuredGeneration({
 }
 
 function startGenerationRun(
-  { escapeToAbort = false, onRunStateChange }: GenerationRunOptions,
+  { escapeToAbort = false }: GenerationRunOptions,
   execute: (signal: AbortSignal) => Promise<void>,
 ): GenerationRun | undefined {
   if (hasActiveRun) return;
@@ -128,7 +127,6 @@ function startGenerationRun(
 
   const done = (async () => {
     const panel = usePanel();
-    onRunStateChange?.(true);
     panel.isLoading = true;
     if (escapeToAbort) document.addEventListener("keydown", handleEscape);
 
@@ -149,7 +147,6 @@ function startGenerationRun(
       if (escapeToAbort) document.removeEventListener("keydown", handleEscape);
       hasActiveRun = false;
       panel.isLoading = false;
-      onRunStateChange?.(false);
     }
   })();
 

@@ -191,6 +191,7 @@ onBeforeUnmount(() => {
 });
 
 async function generate() {
+  if (isGenerating.value) return;
   if (!ensurePlaygroundApiKey()) return;
 
   if (!currentPrompt.value) {
@@ -203,94 +204,94 @@ async function generate() {
   const fieldName = field.value.name.toLowerCase();
   currentFieldContent.value = currentContent.value[fieldName];
 
-  const { getZodSchema: getBlocksZodSchema, normalizeBlock } = useBlocks();
-  const { getZodSchema: getLayoutZodSchema, normalizeLayout } = useLayouts();
-  const { Output } = await loadAISDK();
+  isGenerating.value = true;
 
-  const onRunStateChange = (isRunning: boolean) => {
-    isGenerating.value = isRunning;
-  };
+  try {
+    const { getZodSchema: getBlocksZodSchema, normalizeBlock } = useBlocks();
+    const { getZodSchema: getLayoutZodSchema, normalizeLayout } = useLayouts();
+    const { Output } = await loadAISDK();
 
-  // Handle layouts and blocks by streaming the object
-  if (field.value.type === "layout" || field.value.type === "blocks") {
-    const normalizer = (field.value.type === "layout"
-      ? normalizeLayout
-      : normalizeBlock) as unknown as (item: unknown) => unknown;
-    const schema =
-      field.value.type === "layout"
-        ? await getLayoutZodSchema(field.value as KirbyLayoutFieldProps)
-        : await getBlocksZodSchema(field.value as KirbyBlocksFieldProps);
+    // Handle layouts and blocks by streaming the object
+    if (field.value.type === "layout" || field.value.type === "blocks") {
+      const normalizer = (field.value.type === "layout"
+        ? normalizeLayout
+        : normalizeBlock) as unknown as (item: unknown) => unknown;
+      const schema =
+        field.value.type === "layout"
+          ? await getLayoutZodSchema(field.value as KirbyLayoutFieldProps)
+          : await getBlocksZodSchema(field.value as KirbyBlocksFieldProps);
 
-    activeRun = runStructuredGeneration({
-      streamOptions: {
-        userPrompt: currentPrompt.value,
-        systemPrompt: systemPrompt.value,
-        output: Output.array({ element: schema as z.ZodObject }),
-        files: files.value,
-        logLevel: logLevel.value,
-      },
-      sink: {
-        writePartial: async (partialOutput) => {
-          if (!partialOutput || !Array.isArray(partialOutput)) return;
+      activeRun = runStructuredGeneration({
+        streamOptions: {
+          userPrompt: currentPrompt.value,
+          systemPrompt: systemPrompt.value,
+          output: Output.array({ element: schema as z.ZodObject }),
+          files: files.value,
+          logLevel: logLevel.value,
+        },
+        sink: {
+          writePartial: async (partialOutput) => {
+            if (!partialOutput || !Array.isArray(partialOutput)) return;
 
-          await updateContent(
-            {
+            await updateContent(
+              {
+                [fieldName]: [
+                  ...currentFieldContent.value,
+                  ...partialOutput.map(normalizer),
+                ],
+              },
+              // Disable saving content to storage in Kirby 5
+              false,
+            );
+          },
+          persistFinal: async (structuredOutput) => {
+            await updateContent({
               [fieldName]: [
                 ...currentFieldContent.value,
-                ...partialOutput.map(normalizer),
+                ...((structuredOutput as unknown[]) ?? []).map(normalizer),
               ],
-            },
-            // Disable saving content to storage in Kirby 5
-            false,
-          );
+            });
+          },
         },
-        persistFinal: async (structuredOutput) => {
-          await updateContent({
-            [fieldName]: [
-              ...currentFieldContent.value,
-              ...((structuredOutput as unknown[]) ?? []).map(normalizer),
-            ],
-          });
-        },
-      },
-      onRunStateChange,
-    });
-  } else {
-    const responseFormat = getResponseFormat(field.value.type);
-    let text = "";
+      });
+    } else {
+      const responseFormat = getResponseFormat(field.value.type);
+      let text = "";
 
-    activeRun = runTextGeneration({
-      streamOptions: {
-        userPrompt: buildUserPrompt(currentPrompt.value, { responseFormat }),
-        systemPrompt: systemPrompt.value,
-        responseFormat,
-        files: files.value,
-        logLevel: logLevel.value,
-      },
-      sink: {
-        // The section extends the current field value; the view button
-        // replaces scalar values by design
-        write: async (textPart) => {
-          text += textPart;
+      activeRun = runTextGeneration({
+        streamOptions: {
+          userPrompt: buildUserPrompt(currentPrompt.value, { responseFormat }),
+          systemPrompt: systemPrompt.value,
+          responseFormat,
+          files: files.value,
+          logLevel: logLevel.value,
+        },
+        sink: {
+          // The section extends the current field value; the view button
+          // replaces scalar values by design
+          write: async (textPart) => {
+            text += textPart;
 
-          await updateContent(
-            { [fieldName]: currentFieldContent.value + text },
-            // Disable saving content to storage in Kirby 5
-            false,
-          );
+            await updateContent(
+              { [fieldName]: currentFieldContent.value + text },
+              // Disable saving content to storage in Kirby 5
+              false,
+            );
+          },
+          persistFinal: async () => {
+            await updateContent({
+              [fieldName]: currentFieldContent.value + text,
+            });
+          },
         },
-        persistFinal: async () => {
-          await updateContent({
-            [fieldName]: currentFieldContent.value + text,
-          });
-        },
-      },
-      onRunStateChange,
-    });
+      });
+    }
+
+    await activeRun?.done;
+  } finally {
+    isGenerating.value = false;
+    activeRun = undefined;
   }
-
-  await activeRun?.done;
-  activeRun = undefined;
 }
 
 function abort() {

@@ -50,6 +50,7 @@ const isHovering = ref(false);
 let activeRun: ReturnType<typeof runStructuredGeneration>;
 
 async function initPromptDialog() {
+  if (isGenerating.value) return;
   if (!ensurePlaygroundApiKey()) return;
 
   const fields = await getModelFields();
@@ -71,80 +72,83 @@ async function initPromptDialog() {
   );
   if (!prompt || selectedFields.length === 0) return;
 
-  const { getZodSchema: getBlocksZodSchema } = useBlocks();
-  const { getZodSchema: getLayoutZodSchema } = useLayouts();
+  isGenerating.value = true;
 
-  // Build schema for all selected fields
-  const fieldsSchema: Record<string, z.ZodType> = {};
+  try {
+    const { getZodSchema: getBlocksZodSchema } = useBlocks();
+    const { getZodSchema: getLayoutZodSchema } = useLayouts();
 
-  for (const field of selectedFields) {
-    const schema =
-      field.type === "layout"
-        ? z.array(await getLayoutZodSchema(field as KirbyLayoutFieldProps))
-        : field.type === "blocks"
-          ? z.array(await getBlocksZodSchema(field as KirbyBlocksFieldProps))
-          : fieldToZodSchema(field);
-    if (schema) fieldsSchema[field.name] = schema;
+    // Build schema for all selected fields
+    const fieldsSchema: Record<string, z.ZodType> = {};
+
+    for (const field of selectedFields) {
+      const schema =
+        field.type === "layout"
+          ? z.array(await getLayoutZodSchema(field as KirbyLayoutFieldProps))
+          : field.type === "blocks"
+            ? z.array(await getBlocksZodSchema(field as KirbyBlocksFieldProps))
+            : fieldToZodSchema(field);
+      if (schema) fieldsSchema[field.name] = schema;
+    }
+
+    const _currentContent = { ...currentContent.value };
+
+    const { config } = await usePluginContext();
+    const { Output } = await loadAISDK();
+
+    const systemPrompt =
+      props.systemPrompt || config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
+
+    activeRun = runStructuredGeneration({
+      streamOptions: {
+        userPrompt: prompt,
+        systemPrompt,
+        output: Output.object({ schema: z.object(fieldsSchema) }),
+        files,
+        logLevel: LOG_LEVELS.indexOf(
+          props.logLevel && LOG_LEVELS.includes(props.logLevel)
+            ? props.logLevel
+            : (config.logLevel ?? DEFAULT_LOG_LEVEL),
+        ) as LogLevelIndex,
+      },
+      escapeToAbort: true,
+      sink: {
+        writePartial: async (partialOutput) => {
+          if (!partialOutput) return;
+
+          const updatedContent = processFieldValues({
+            object: partialOutput as Record<string, unknown>,
+            selectedFields,
+            currentContent: _currentContent,
+          });
+
+          if (Object.keys(updatedContent).length > 0) {
+            await updateContent(
+              updatedContent,
+              // Disable saving content to storage in Kirby 5
+              false,
+            );
+          }
+        },
+        // Scalar field values are replaced ("fill these fields"), unlike the
+        // section, which extends the current field value
+        persistFinal: async (structuredOutput) => {
+          const finalContent = processFieldValues({
+            object: structuredOutput as Record<string, unknown>,
+            selectedFields,
+            currentContent: _currentContent,
+          });
+
+          await updateContent(finalContent);
+        },
+      },
+    });
+
+    await activeRun?.done;
+  } finally {
+    isGenerating.value = false;
+    activeRun = undefined;
   }
-
-  const _currentContent = { ...currentContent.value };
-
-  const { config } = await usePluginContext();
-  const { Output } = await loadAISDK();
-
-  const systemPrompt =
-    props.systemPrompt || config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
-
-  activeRun = runStructuredGeneration({
-    streamOptions: {
-      userPrompt: prompt,
-      systemPrompt,
-      output: Output.object({ schema: z.object(fieldsSchema) }),
-      files,
-      logLevel: LOG_LEVELS.indexOf(
-        props.logLevel && LOG_LEVELS.includes(props.logLevel)
-          ? props.logLevel
-          : (config.logLevel ?? DEFAULT_LOG_LEVEL),
-      ) as LogLevelIndex,
-    },
-    escapeToAbort: true,
-    sink: {
-      writePartial: async (partialOutput) => {
-        if (!partialOutput) return;
-
-        const updatedContent = processFieldValues({
-          object: partialOutput as Record<string, unknown>,
-          selectedFields,
-          currentContent: _currentContent,
-        });
-
-        if (Object.keys(updatedContent).length > 0) {
-          await updateContent(
-            updatedContent,
-            // Disable saving content to storage in Kirby 5
-            false,
-          );
-        }
-      },
-      // Scalar field values are replaced ("fill these fields"), unlike the
-      // section, which extends the current field value
-      persistFinal: async (structuredOutput) => {
-        const finalContent = processFieldValues({
-          object: structuredOutput as Record<string, unknown>,
-          selectedFields,
-          currentContent: _currentContent,
-        });
-
-        await updateContent(finalContent);
-      },
-    },
-    onRunStateChange: (isRunning) => {
-      isGenerating.value = isRunning;
-    },
-  });
-
-  await activeRun?.done;
-  activeRun = undefined;
 }
 
 function abort() {
