@@ -11,20 +11,20 @@ import type { PromptContext } from "../../types";
 import { ref, useContent, usePanel } from "kirbyuse";
 import { z } from "zod";
 import {
+  ensurePlaygroundApiKey,
+  runStructuredGeneration,
   useBlocks,
   useLayouts,
   useModelFields,
   usePluginContext,
-  useStreamText,
 } from "../../composables";
 import {
   DEFAULT_LOG_LEVEL,
   DEFAULT_SYSTEM_PROMPT,
   LOG_LEVELS,
-  STORAGE_KEY_PREFIX,
 } from "../../constants";
 import { fieldToZodSchema } from "../../schemas/fields";
-import { handleStreamError, loadAISDK, openPromptDialog } from "../../utils";
+import { loadAISDK, openPromptDialog } from "../../utils";
 
 const props = defineProps({
   label: String,
@@ -47,26 +47,10 @@ const { getModelFields } = useModelFields();
 
 const isGenerating = ref(false);
 const isHovering = ref(false);
-let abortController: AbortController | undefined;
+let activeRun: ReturnType<typeof runStructuredGeneration>;
 
 async function initPromptDialog() {
-  if (__PLAYGROUND__ && !window.location.hostname.includes("localhost")) {
-    const apiKey = sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`);
-    if (!apiKey) {
-      panel.notification.error(
-        "Please set your API key in the playground settings.",
-      );
-      return;
-    }
-  }
-
-  abortController = new AbortController();
-
-  const handleEscape = (event: KeyboardEvent) => {
-    if (event.key === "Escape") {
-      abort();
-    }
-  };
+  if (!ensurePlaygroundApiKey()) return;
 
   const fields = await getModelFields();
 
@@ -103,10 +87,6 @@ async function initPromptDialog() {
     if (schema) fieldsSchema[field.name] = schema;
   }
 
-  panel.isLoading = true;
-  isGenerating.value = true;
-  document.addEventListener("keydown", handleEscape);
-
   const _currentContent = { ...currentContent.value };
 
   const { config } = await usePluginContext();
@@ -115,11 +95,8 @@ async function initPromptDialog() {
   const systemPrompt =
     props.systemPrompt || config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
 
-  // Capture signal reference to detect if generation gets cancelled
-  const { signal } = abortController;
-
-  try {
-    const { partialOutputStream, output: finalOutput } = await useStreamText({
+  activeRun = runStructuredGeneration({
+    streamOptions: {
       userPrompt: prompt,
       systemPrompt,
       output: Output.object({ schema: z.object(fieldsSchema) }),
@@ -129,66 +106,50 @@ async function initPromptDialog() {
           ? props.logLevel
           : (config.logLevel ?? DEFAULT_LOG_LEVEL),
       ) as LogLevelIndex,
-      abortSignal: signal,
-    });
+    },
+    escapeToAbort: true,
+    sink: {
+      writePartial: async (partialOutput) => {
+        if (!partialOutput) return;
 
-    // Prevent unhandled rejection when aborting before `finalOutput` is awaited
-    (finalOutput as Promise<unknown>).catch(() => {});
+        const updatedContent = processFieldValues({
+          object: partialOutput as Record<string, unknown>,
+          selectedFields,
+          currentContent: _currentContent,
+        });
 
-    // Stream partial updates
-    for await (const partialOutput of partialOutputStream) {
-      if (signal.aborted) return;
-      if (!partialOutput) continue;
+        if (Object.keys(updatedContent).length > 0) {
+          await updateContent(
+            updatedContent,
+            // Disable saving content to storage in Kirby 5
+            false,
+          );
+        }
+      },
+      // Scalar field values are replaced ("fill these fields"), unlike the
+      // section, which extends the current field value
+      persistFinal: async (structuredOutput) => {
+        const finalContent = processFieldValues({
+          object: structuredOutput as Record<string, unknown>,
+          selectedFields,
+          currentContent: _currentContent,
+        });
 
-      const updatedContent = processFieldValues({
-        object: partialOutput,
-        selectedFields,
-        currentContent: _currentContent,
-      });
+        await updateContent(finalContent);
+      },
+    },
+    onRunStateChange: (isRunning) => {
+      isGenerating.value = isRunning;
+    },
+  });
 
-      if (Object.keys(updatedContent).length > 0) {
-        await updateContent(
-          updatedContent,
-          // Disable saving content to storage in Kirby 5
-          false,
-        );
-      }
-    }
-
-    // Handle cancellation before stream started or after it completed
-    if (signal.aborted) return;
-
-    // Set final result
-    const structuredOutput = await finalOutput;
-    const finalContent = processFieldValues({
-      object: structuredOutput,
-      selectedFields,
-      currentContent: _currentContent,
-    });
-
-    // Store the final content
-    await updateContent(finalContent);
-
-    panel.notification.success({
-      icon: "check",
-      message: panel.t("johannschopplich.copilot.notification.success"),
-    });
-  } catch (error) {
-    if (signal.aborted) return;
-    await handleStreamError(error as Error);
-  } finally {
-    abortController = undefined;
-    panel.isLoading = false;
-    isGenerating.value = false;
-    document.removeEventListener("keydown", handleEscape);
-  }
+  await activeRun?.done;
+  activeRun = undefined;
 }
 
 function abort() {
-  abortController?.abort();
-  abortController = undefined;
-  isGenerating.value = false;
-  panel.isLoading = false;
+  activeRun?.abort();
+  activeRun = undefined;
 }
 
 function processFieldValues({

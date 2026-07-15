@@ -2,6 +2,7 @@ export * from "./ai";
 export * from "./dialogs";
 export * from "./events";
 export * from "./generation-history";
+export * from "./generation-run";
 export * from "./kirby-content";
 export * from "./logger";
 export * from "./model-fields";

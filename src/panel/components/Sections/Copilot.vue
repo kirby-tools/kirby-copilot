@@ -25,16 +25,17 @@ import { section } from "kirbyuse/props";
 import { isObject } from "utilful";
 import {
   buildUserPrompt,
+  ensurePlaygroundApiKey,
+  runStructuredGeneration,
+  runTextGeneration,
   useBlocks,
   useLayouts,
   usePluginContext,
-  useStreamText,
 } from "../../composables";
 import {
   DEFAULT_LOG_LEVEL,
   DEFAULT_SYSTEM_PROMPT,
   LOG_LEVELS,
-  STORAGE_KEY_PREFIX,
   SUPPORTED_FILE_MIME_TYPES,
   SUPPORTED_IMAGE_MIME_TYPES,
   SUPPORTED_PROVIDERS,
@@ -42,7 +43,6 @@ import {
 import {
   getHashedStorageKey,
   getResponseFormat,
-  handleStreamError,
   loadAISDK,
   openFilePicker,
 } from "../../utils";
@@ -93,7 +93,7 @@ const licenseStatus = ref<LicenseStatus>();
 
 // Non-reactive data
 let storageKey: string;
-let abortController: AbortController | undefined;
+let activeRun: ReturnType<typeof runTextGeneration>;
 
 const canUndo = computed(
   () => !isGenerating.value && currentFieldContent.value !== undefined,
@@ -191,15 +191,7 @@ onBeforeUnmount(() => {
 });
 
 async function generate() {
-  if (__PLAYGROUND__ && !window.location.hostname.includes("localhost")) {
-    const apiKey = sessionStorage.getItem(`${STORAGE_KEY_PREFIX}apiKey`);
-    if (!apiKey) {
-      panel.notification.error(
-        "Please set your API key in the playground settings.",
-      );
-      return;
-    }
-  }
+  if (!ensurePlaygroundApiKey()) return;
 
   if (!currentPrompt.value) {
     panel.notification.error(panel.t("johannschopplich.copilot.prompt.empty"));
@@ -208,125 +200,102 @@ async function generate() {
 
   if (!field.value) return;
 
-  panel.isLoading = true;
-  isGenerating.value = true;
-  currentFieldContent.value =
-    currentContent.value[field.value.name.toLowerCase()];
-  abortController = new AbortController();
+  const fieldName = field.value.name.toLowerCase();
+  currentFieldContent.value = currentContent.value[fieldName];
 
   const { getZodSchema: getBlocksZodSchema, normalizeBlock } = useBlocks();
   const { getZodSchema: getLayoutZodSchema, normalizeLayout } = useLayouts();
   const { Output } = await loadAISDK();
 
-  // Capture signal reference to detect if generation gets cancelled
-  const { signal } = abortController;
+  const onRunStateChange = (isRunning: boolean) => {
+    isGenerating.value = isRunning;
+  };
 
-  try {
-    let text = "";
-    let structuredOutput = [];
+  // Handle layouts and blocks by streaming the object
+  if (field.value.type === "layout" || field.value.type === "blocks") {
+    const normalizer = (field.value.type === "layout"
+      ? normalizeLayout
+      : normalizeBlock) as unknown as (item: unknown) => unknown;
+    const schema =
+      field.value.type === "layout"
+        ? await getLayoutZodSchema(field.value as KirbyLayoutFieldProps)
+        : await getBlocksZodSchema(field.value as KirbyBlocksFieldProps);
 
-    // Handle layouts by streaming the object
-    if (field.value.type === "layout" || field.value.type === "blocks") {
-      const normalizer =
-        field.value.type === "layout" ? normalizeLayout : normalizeBlock;
-      const schema =
-        field.value.type === "layout"
-          ? await getLayoutZodSchema(field.value as KirbyLayoutFieldProps)
-          : await getBlocksZodSchema(field.value as KirbyBlocksFieldProps);
-
-      const { partialOutputStream, output: finalOutput } = await useStreamText({
+    activeRun = runStructuredGeneration({
+      streamOptions: {
         userPrompt: currentPrompt.value,
         systemPrompt: systemPrompt.value,
         output: Output.array({ element: schema as z.ZodObject }),
         files: files.value,
         logLevel: logLevel.value,
-        abortSignal: signal,
-      });
+      },
+      sink: {
+        writePartial: async (partialOutput) => {
+          if (!partialOutput || !Array.isArray(partialOutput)) return;
 
-      // Prevent unhandled rejection when aborting before `finalOutput` is awaited
-      (finalOutput as Promise<unknown>).catch(() => {});
-
-      // Stream partial updates
-      for await (const partialOutput of partialOutputStream) {
-        if (signal.aborted) return;
-        if (!partialOutput || !Array.isArray(partialOutput)) continue;
-
-        await updateContent(
-          {
-            [field.value.name.toLowerCase()]: [
+          await updateContent(
+            {
+              [fieldName]: [
+                ...currentFieldContent.value,
+                ...partialOutput.map(normalizer),
+              ],
+            },
+            // Disable saving content to storage in Kirby 5
+            false,
+          );
+        },
+        persistFinal: async (structuredOutput) => {
+          await updateContent({
+            [fieldName]: [
               ...currentFieldContent.value,
-              ...partialOutput.map(normalizer as (item: unknown) => unknown),
+              ...((structuredOutput as unknown[]) ?? []).map(normalizer),
             ],
-          },
-          // Disable saving content to storage in Kirby 5
-          false,
-        );
-      }
+          });
+        },
+      },
+      onRunStateChange,
+    });
+  } else {
+    const responseFormat = getResponseFormat(field.value.type);
+    let text = "";
 
-      // Set final result
-      structuredOutput = await finalOutput;
-    } else {
-      const responseFormat = getResponseFormat(field.value.type);
-      const { textStream } = await useStreamText({
+    activeRun = runTextGeneration({
+      streamOptions: {
         userPrompt: buildUserPrompt(currentPrompt.value, { responseFormat }),
         systemPrompt: systemPrompt.value,
         responseFormat,
         files: files.value,
         logLevel: logLevel.value,
-        abortSignal: signal,
-      });
+      },
+      sink: {
+        // The section extends the current field value; the view button
+        // replaces scalar values by design
+        write: async (textPart) => {
+          text += textPart;
 
-      for await (const textPart of textStream) {
-        if (signal.aborted) return;
-        text += textPart;
-
-        await updateContent(
-          {
-            [field.value.name.toLowerCase()]: currentFieldContent.value + text,
-          },
-          // Disable saving content to storage in Kirby 5
-          false,
-        );
-      }
-    }
-
-    // Handle cancellation before stream started or after it completed
-    if (signal.aborted) return;
-
-    // Store the final content
-    await updateContent({
-      [field.value.name.toLowerCase()]:
-        field.value.type === "layout" || field.value.type === "blocks"
-          ? [
-              ...currentFieldContent.value,
-              ...(structuredOutput ?? []).map(
-                field.value.type === "layout"
-                  ? normalizeLayout
-                  : normalizeBlock,
-              ),
-            ]
-          : currentFieldContent.value + text,
+          await updateContent(
+            { [fieldName]: currentFieldContent.value + text },
+            // Disable saving content to storage in Kirby 5
+            false,
+          );
+        },
+        persistFinal: async () => {
+          await updateContent({
+            [fieldName]: currentFieldContent.value + text,
+          });
+        },
+      },
+      onRunStateChange,
     });
-
-    panel.notification.success({
-      icon: "check",
-      message: panel.t("johannschopplich.copilot.notification.success"),
-    });
-  } catch (error) {
-    if (signal.aborted) return;
-    await handleStreamError(error as Error);
-  } finally {
-    abortController = undefined;
-    panel.isLoading = false;
-    isGenerating.value = false;
   }
+
+  await activeRun?.done;
+  activeRun = undefined;
 }
 
 function abort() {
-  abortController?.abort();
-  abortController = undefined;
-  panel.isLoading = false;
-  isGenerating.value = false;
+  activeRun?.abort();
+  activeRun = undefined;
 }
 
 function undo() {
