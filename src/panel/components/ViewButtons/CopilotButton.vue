@@ -51,6 +51,14 @@ let activeRun: ReturnType<typeof runStructuredGeneration>;
 
 async function initPromptDialog() {
   if (isGenerating.value) return;
+
+  if (panel.content.isLocked()) {
+    panel.notification.error(
+      panel.t("lock.isLocked", { email: panel.content.lock().user.email }),
+    );
+    return;
+  }
+
   if (!ensurePlaygroundApiKey()) return;
 
   const fields = await getModelFields();
