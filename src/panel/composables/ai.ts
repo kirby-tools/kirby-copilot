@@ -268,7 +268,7 @@ export async function resolvePromptContext({
     const pageContextBlocks = referencedPages
       .map(
         ({ requestedPageId, page }) =>
-          `<reference_page id="${requestedPageId}">\n${JSON.stringify(createReferencePageContent(page))}\n</reference_page>`,
+          `<reference_page id="${escapeXmlAttr(requestedPageId)}">\n${JSON.stringify(createReferencePageContent(page))}\n</reference_page>`,
       )
       .join("\n\n");
 

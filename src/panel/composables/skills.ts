@@ -1,18 +1,22 @@
 import type { Skill } from "../types";
 import { ref } from "kirbyuse";
+import { createRefTokenRegex, extractRefIds } from "../utils/reference-tokens";
 import { createGlobalState } from "./state";
 
-const SKILL_REF_TOKEN_REGEX_SOURCE = String.raw`@skill://([\w\-]+)`;
+// Single source for the skill id charset; must stay in sync with the PHP
+// validation in `src/extensions/api.php` (`/^[\w\-]+$/`).
+const SKILL_ID_CHARSET = String.raw`[\w\-]`;
+
 /**
  * Matches `@skill://<query>` at the end of a text slice, preceded by start,
  * whitespace, or an opening bracket. The lookbehind is zero-width so callers
  * can compute `from = cursor - match[0].length`. Caller must pass the slice
  * from block-start to caret.
  */
-const SKILL_TRIGGER_REGEX_SOURCE = String.raw`(?<=^|[\s([{])@skill:\/\/([\w\-]*)$`;
+const SKILL_TRIGGER_REGEX_SOURCE = String.raw`(?<=^|[\s([{])@skill:\/\/(${SKILL_ID_CHARSET}*)$`;
 
 export function createSkillRefTokenRegex() {
-  return new RegExp(SKILL_REF_TOKEN_REGEX_SOURCE, "g");
+  return createRefTokenRegex("skill", SKILL_ID_CHARSET);
 }
 
 export function createSkillTriggerRegex() {
@@ -20,13 +24,7 @@ export function createSkillTriggerRegex() {
 }
 
 export function extractSkillRefIds(text: string) {
-  const ids: string[] = [];
-
-  for (const match of text.matchAll(createSkillRefTokenRegex())) {
-    if (match[1]) ids.push(match[1]);
-  }
-
-  return ids;
+  return extractRefIds(text, createSkillRefTokenRegex());
 }
 
 /**
@@ -35,7 +33,10 @@ export function extractSkillRefIds(text: string) {
  * to `foobar` once the token is gone.
  */
 export function stripSkillRefTokens(text: string): string {
-  return text.replace(/@skill:\/\/[\w-]+[ \t]*/g, "");
+  return text.replace(
+    new RegExp(String.raw`@skill://${SKILL_ID_CHARSET}+[ \t]*`, "g"),
+    "",
+  );
 }
 
 export function filterSkills(skills: readonly Skill[], query: string) {

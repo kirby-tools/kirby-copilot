@@ -1,15 +1,12 @@
-const PAGE_REF_TOKEN_REGEX_SOURCE = String.raw`@page://([\w\-/]+)`;
+import { createRefTokenRegex, extractRefIds } from "../utils/reference-tokens";
+
+// Unlike skill ids, page ids may contain slashes for nested pages
+const PAGE_ID_CHARSET = String.raw`[\w\-/]`;
 
 export function createPageRefTokenRegex() {
-  return new RegExp(PAGE_REF_TOKEN_REGEX_SOURCE, "g");
+  return createRefTokenRegex("page", PAGE_ID_CHARSET);
 }
 
 export function extractPageRefIds(text: string) {
-  const ids: string[] = [];
-
-  for (const match of text.matchAll(createPageRefTokenRegex())) {
-    if (match[1]) ids.push(match[1]);
-  }
-
-  return ids;
+  return extractRefIds(text, createPageRefTokenRegex());
 }

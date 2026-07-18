@@ -163,6 +163,10 @@ describe("extractSkillRefIds", () => {
       extractSkillRefIds("{title} @page://about @skill://brand-voice"),
     ).toEqual(["brand-voice"]);
   });
+
+  it("extracts tokens embedded mid-word, which the typeahead trigger rejects", () => {
+    expect(extractSkillRefIds("foo@skill://bar")).toEqual(["bar"]);
+  });
 });
 
 describe("createSkillTriggerRegex", () => {
@@ -209,5 +213,9 @@ describe("stripSkillRefTokens", () => {
 
   it("preserves newlines after a token (only horizontal whitespace is eaten)", () => {
     expect(stripSkillRefTokens("@skill://brand\nthe rest")).toBe("\nthe rest");
+  });
+
+  it("strips mid-word tokens, collapsing the surrounding word", () => {
+    expect(stripSkillRefTokens("foo@skill://bar baz")).toBe("foobaz");
   });
 });

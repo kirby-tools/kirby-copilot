@@ -59,15 +59,16 @@ function setSkillSuggestMeta(tr: Transaction, meta: SkillSuggestMeta) {
 
 /**
  * Commits a typeahead pick: replaces the matched range with `@skill://<id>`
- * and dismisses the dropdown. The dismiss meta short-circuits the apply
- * function so the just-inserted token isn't immediately re-detected as a
- * fresh trigger on the same tick.
+ * plus a trailing space (matching the page picker's insertion, so typing
+ * continues naturally) and dismisses the dropdown. The dismiss meta
+ * short-circuits the apply function so the just-inserted token isn't
+ * immediately re-detected as a fresh trigger on the same tick.
  */
 export function commitSkillSuggestion(view: EditorView, id: string) {
   const state = skillSuggestPluginKey.getState(view.state);
   if (!state?.open) return;
 
-  const tr = view.state.tr.insertText(`@skill://${id}`, state.from, state.to);
+  const tr = view.state.tr.insertText(`@skill://${id} `, state.from, state.to);
   setSkillSuggestMeta(tr, { type: "dismiss" });
   view.dispatch(tr);
   view.focus();

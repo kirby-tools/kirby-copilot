@@ -689,6 +689,25 @@ describe("resolvePromptContext", () => {
       );
     });
 
+    it("strips skill tokens while retaining page tokens when both share a prompt", async () => {
+      mockPagesGet.mockResolvedValue({
+        title: "About",
+        content: { body: "We are great" },
+      });
+
+      const { systemPromptWithContext, userPromptWithContext } =
+        await resolvePromptContext({
+          userPrompt: "@skill://brand-voice Summarize @page://about",
+        });
+
+      expect(systemPromptWithContext).toBe(
+        `<skill name="Brand Voice">\nWrite casually.\n</skill>`,
+      );
+      expect(userPromptWithContext).toBe(
+        `Summarize @page://about\n\n<reference_page id="about">\n{"title":"About","body":"We are great"}\n</reference_page>`,
+      );
+    });
+
     it("strips unknown token ids from the user prompt and drops them from the system prompt", async () => {
       useSkills().setConfigSkills([]);
 
