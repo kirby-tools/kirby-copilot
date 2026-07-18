@@ -5,15 +5,19 @@ import type {
 } from "@ai-sdk/provider";
 import type { Output as OutputNamespace } from "ai";
 import type { LogLevel } from "kirbyuse";
-import type { ModelProvider, ReasoningEffort } from "../constants";
+import type {
+  ModelProvider,
+  ProviderDefinition,
+  ReasoningEffort,
+} from "../constants";
 import type { OutputFormat, PluginConfig, ProviderConfig } from "../types";
 import { useContent, usePanel } from "kirbyuse";
 import { template } from "utilful";
 import {
-  DEFAULT_COMPLETION_MODELS,
   DEFAULT_REASONING_EFFORT,
   PDF_SIZE_LIMIT,
   PLUGIN_PROXY_API_ROUTE,
+  PROVIDER_REGISTRY,
   PROXY_API_KEY_MARKER,
   STORAGE_KEY_PREFIX,
   SUPPORTED_PROVIDERS,
@@ -36,11 +40,6 @@ import { usePluginContext } from "./plugin";
 import { extractSkillRefIds, stripSkillRefTokens, useSkills } from "./skills";
 
 const DEFAULT_PLAYGROUND_MODEL_PROVIDER = "google";
-const PLAYGROUND_PROVIDER_MODEL_MAP: Record<string, string> = {
-  openai: "openaimodel",
-  google: "googlemodel",
-  anthropic: "anthropicmodel",
-};
 
 /**
  * Builds a user prompt with output format and optional selection context.
@@ -337,7 +336,11 @@ function resolveProviderSelection(
       currentContent.value.modelprovider || DEFAULT_PLAYGROUND_MODEL_PROVIDER;
     config.provider = selectedProvider;
 
-    const modelField = PLAYGROUND_PROVIDER_MODEL_MAP[selectedProvider];
+    // Widened lookup: the content-sourced provider is unvalidated here
+    const providerDefinitions: Record<string, ProviderDefinition | undefined> =
+      PROVIDER_REGISTRY;
+    const modelField =
+      providerDefinitions[selectedProvider]?.playgroundModelField;
     const selectedModel = modelField
       ? currentContent.value[modelField]
       : undefined;
@@ -378,20 +381,8 @@ async function createProviderClient({
   isPlayground: boolean;
   panel: ReturnType<typeof usePanel>;
 }) {
-  const {
-    createAnthropic,
-    createGoogleGenerativeAI,
-    createMistral,
-    createOpenAI,
-  } = await loadAISDK();
-
-  /// keep-sorted
-  const createProvider = {
-    anthropic: createAnthropic,
-    google: createGoogleGenerativeAI,
-    mistral: createMistral,
-    openai: createOpenAI,
-  }[provider];
+  const sdk = await loadAISDK();
+  const createProvider = sdk[PROVIDER_REGISTRY[provider].factory];
 
   if (!isPlayground && !providerConfig.hasApiKey) {
     throw new CopilotError(
@@ -452,10 +443,7 @@ function resolveModelId({
   }
 
   // Keep the default-completion fallback on the same gateway as the primary model
-  const defaultCompletion =
-    DEFAULT_COMPLETION_MODELS[
-      provider as keyof typeof DEFAULT_COMPLETION_MODELS
-    ];
+  const defaultCompletion = PROVIDER_REGISTRY[provider].defaultCompletionModel;
   const gatewayPrefix = prefix ? `${prefix}/` : "";
   const modelId = forCompletion
     ? providerConfig.completionModel || gatewayPrefix + defaultCompletion

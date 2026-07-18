@@ -1,3 +1,5 @@
+import type { AISDKModule } from "./utils/ai";
+
 export const PLUGIN_CONTEXT_API_ROUTE = "__copilot__/context";
 export const PLUGIN_MODEL_FIELDS_API_ROUTE = "__copilot__/model-fields";
 export const PLUGIN_FIELDSETS_API_ROUTE = "__copilot__/fieldsets";
@@ -12,14 +14,43 @@ export const LOG_LEVELS = ["error", "warn", "info", "debug"] as const;
 export type LogLevel = (typeof LOG_LEVELS)[number];
 export const DEFAULT_LOG_LEVEL: LogLevel = "warn";
 
-/// keep-sorted
-export const SUPPORTED_PROVIDERS = [
-  "anthropic",
-  "google",
-  "mistral",
-  "openai",
-] as const;
-export type ModelProvider = (typeof SUPPORTED_PROVIDERS)[number];
+export interface ProviderDefinition {
+  /** AI SDK factory on the lazy-loaded module that instantiates the provider client. */
+  factory: keyof AISDKModule;
+  defaultCompletionModel: string;
+  /**
+   * Content field in the playground blueprint that holds the selected model.
+   * Providers without one are deliberately not exposed in the playground.
+   */
+  playgroundModelField?: string;
+}
+
+export const PROVIDER_REGISTRY = {
+  anthropic: {
+    factory: "createAnthropic",
+    defaultCompletionModel: "claude-haiku-4-5",
+    playgroundModelField: "anthropicmodel",
+  },
+  google: {
+    factory: "createGoogleGenerativeAI",
+    defaultCompletionModel: "gemini-3-flash-preview",
+    playgroundModelField: "googlemodel",
+  },
+  mistral: {
+    factory: "createMistral",
+    defaultCompletionModel: "mistral-small-latest",
+  },
+  openai: {
+    factory: "createOpenAI",
+    defaultCompletionModel: "gpt-5.4-nano",
+    playgroundModelField: "openaimodel",
+  },
+} as const satisfies Record<string, ProviderDefinition>;
+
+export type ModelProvider = keyof typeof PROVIDER_REGISTRY;
+export const SUPPORTED_PROVIDERS = Object.keys(
+  PROVIDER_REGISTRY,
+) as ModelProvider[];
 
 // Universal reasoning efforts used across all providers
 export const REASONING_EFFORTS = ["none", "low", "medium", "high"] as const;
@@ -40,14 +71,6 @@ When <selection> is provided, use it as context for your response. Preserve any 
 
 When <reference_page> is provided, use it as reference material. Draw on its structure, style, or content as instructed by the user.
 `;
-
-/// keep-sorted
-export const DEFAULT_COMPLETION_MODELS = {
-  anthropic: "claude-haiku-4-5",
-  google: "gemini-3-flash-preview",
-  mistral: "mistral-small-latest",
-  openai: "gpt-5.4-nano",
-};
 
 export const COMPLETION_PREFIX_LENGTH = 4000;
 export const COMPLETION_SUFFIX_LENGTH = 500;
