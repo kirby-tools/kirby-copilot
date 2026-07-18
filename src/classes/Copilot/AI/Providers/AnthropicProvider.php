@@ -27,7 +27,6 @@ use Throwable;
 final class AnthropicProvider implements Provider
 {
     public const DEFAULT_BASE_URL = 'https://api.anthropic.com';
-    public const DEFAULT_MODEL = 'claude-sonnet-4-6';
     public const DEFAULT_MAX_TOKENS = 32000;
 
     public function __construct(
@@ -161,7 +160,7 @@ final class AnthropicProvider implements Provider
 
     private function model(): string
     {
-        return $this->config->model ?? self::DEFAULT_MODEL;
+        return $this->config->model ?? $this->providerName()->defaultModel();
     }
 
     /**

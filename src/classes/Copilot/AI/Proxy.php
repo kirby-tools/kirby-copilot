@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace JohannSchopplich\Copilot\AI;
 
-use Closure;
 use Kirby\Cms\App;
 use Kirby\Cms\Response;
 use Kirby\Exception\InvalidArgumentException;
@@ -40,21 +39,13 @@ final class Proxy
         @set_time_limit(0);
 
         $providerParam = $kirby->request()->query()->get('provider');
-        $provider = match ($providerParam) {
-            'openai', 'google', 'anthropic', 'mistral' => $providerParam,
-            default => throw new InvalidArgumentException('Invalid provider: ' . $providerParam),
-        };
+        $provider = ProviderName::tryFrom((string)$providerParam)
+            ?? throw new InvalidArgumentException('Invalid provider: ' . $providerParam);
 
-        $config = $kirby->option('johannschopplich.copilot', []);
-        $providers = array_change_key_case($config['providers'] ?? [], CASE_LOWER);
-        $apiKey = $providers[$provider]['apiKey'] ?? null;
-
-        if ($apiKey instanceof Closure) {
-            $apiKey = $apiKey($kirby);
-        }
+        $apiKey = $provider->apiKey($kirby);
 
         if (!$apiKey) {
-            throw new InvalidArgumentException('Missing API key for provider: ' . $provider);
+            throw new InvalidArgumentException('Missing API key for provider: ' . $provider->value);
         }
 
         $targetUrl = $kirby->request()->header('X-Proxy-Target');
@@ -74,14 +65,12 @@ final class Proxy
             throw new InvalidArgumentException('Invalid proxy target URL');
         }
 
-        $allowedHosts = [
-            'api.openai.com',
-            'api.anthropic.com',
-            'generativelanguage.googleapis.com',
-            'api.mistral.ai',
-        ];
+        $allowedHosts = array_map(
+            fn (ProviderName $supportedProvider) => $supportedProvider->defaultHost(),
+            ProviderName::cases(),
+        );
 
-        $configuredBaseUrl = $providers[$provider]['baseUrl'] ?? null;
+        $configuredBaseUrl = ProviderName::providers($kirby)[$provider->value]['baseUrl'] ?? null;
         if (is_string($configuredBaseUrl)) {
             $configuredHost = parse_url($configuredBaseUrl, PHP_URL_HOST);
             if (is_string($configuredHost) && $configuredHost !== '') {

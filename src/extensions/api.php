@@ -1,6 +1,7 @@
 <?php
 
 use JohannSchopplich\Copilot\AI\CurlProxyTransport;
+use JohannSchopplich\Copilot\AI\ProviderName;
 use JohannSchopplich\Copilot\AI\Proxy;
 use JohannSchopplich\KirbyTools\FieldNormalizer;
 use JohannSchopplich\KirbyTools\FieldResolver;
@@ -24,28 +25,18 @@ return [
                 $config = $kirby->option('johannschopplich.copilot', []);
 
                 $defaultConfig = [
-                    'provider' => 'google',
-                    'providers' => [
-                        'openai' => [
-                            'model' => 'gpt-5.4',
-                            'completionModel' => 'gpt-5.4-nano'
-                        ],
-                        'google' => [
-                            'model' => 'gemini-3.1-pro-preview',
-                            'completionModel' => 'gemini-3-flash-preview'
-                        ],
-                        'anthropic' => [
-                            'model' => 'claude-sonnet-4-6',
-                            'completionModel' => 'claude-haiku-4-5'
-                        ],
-                        'mistral' => [
-                            'model' => 'mistral-medium-latest',
-                            'completionModel' => 'mistral-small-latest'
-                        ]
-                    ],
+                    'provider' => ProviderName::Google->value,
+                    'providers' => [],
                     'reasoningEffort' => 'low',
                     'logLevel' => 'warn'
                 ];
+
+                foreach (ProviderName::cases() as $provider) {
+                    $defaultConfig['providers'][$provider->value] = [
+                        'model' => $provider->defaultModel(),
+                        'completionModel' => $provider->defaultCompletionModel()
+                    ];
+                }
 
                 $config = array_replace_recursive($defaultConfig, $config);
                 $config['provider'] = strtolower($config['provider']);
@@ -89,20 +80,16 @@ return [
                     }
                 };
 
-                $validateEnum($config, 'provider', ['openai', 'google', 'anthropic', 'mistral'], 'google');
+                $validateEnum($config, 'provider', array_column(ProviderName::cases(), 'value'), ProviderName::Google->value);
 
                 $config['providers'] = array_change_key_case($config['providers'], CASE_LOWER);
 
                 // Convert API keys to boolean flags so the frontend can validate
                 // presence without exposing secrets.
                 $config['providers'] = array_map(
-                    function ($provider) use ($kirby) {
-                        $apiKey = $provider['apiKey'] ?? null;
-                        if ($apiKey instanceof Closure) {
-                            $apiKey = $apiKey($kirby);
-                        }
-                        return ['hasApiKey' => !empty($apiKey)] + array_diff_key($provider, ['apiKey' => true]);
-                    },
+                    fn (array $provider) => [
+                        'hasApiKey' => !empty(ProviderName::resolveApiKey($provider['apiKey'] ?? null, $kirby))
+                    ] + array_diff_key($provider, ['apiKey' => true]),
                     $config['providers']
                 );
 

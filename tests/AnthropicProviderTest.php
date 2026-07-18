@@ -115,7 +115,7 @@ final class AnthropicProviderTest extends TestCase
         } catch (ProviderException $e) {
             $details = $e->getDetails();
             $this->assertSame(ProviderName::Anthropic, $details['providerName']);
-            $this->assertSame(AnthropicProvider::DEFAULT_MODEL, $details['model']);
+            $this->assertSame(ProviderName::Anthropic->defaultModel(), $details['model']);
             $this->assertSame('msg_test', $details['responseId']);
             $this->assertSame('I cannot help with that.', $details['responseExcerpt']);
         }
@@ -264,7 +264,7 @@ final class AnthropicProviderTest extends TestCase
                         'input' => $input,
                     ],
                 ],
-                'model' => AnthropicProvider::DEFAULT_MODEL,
+                'model' => ProviderName::Anthropic->defaultModel(),
                 'stop_reason' => 'tool_use',
                 'usage' => ['input_tokens' => 0, 'output_tokens' => 0],
             ]),
@@ -281,7 +281,7 @@ final class AnthropicProviderTest extends TestCase
                 'type' => 'message',
                 'role' => 'assistant',
                 'content' => [['type' => 'text', 'text' => $text]],
-                'model' => AnthropicProvider::DEFAULT_MODEL,
+                'model' => ProviderName::Anthropic->defaultModel(),
                 'stop_reason' => 'end_turn',
                 'usage' => ['input_tokens' => 0, 'output_tokens' => 0],
             ]),
@@ -307,7 +307,7 @@ final class AnthropicProviderTest extends TestCase
                 'type' => 'message',
                 'role' => 'assistant',
                 'content' => $blocks,
-                'model' => AnthropicProvider::DEFAULT_MODEL,
+                'model' => ProviderName::Anthropic->defaultModel(),
                 'stop_reason' => 'end_turn',
                 'usage' => ['input_tokens' => 0, 'output_tokens' => 0],
             ]),

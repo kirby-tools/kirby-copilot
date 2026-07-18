@@ -31,7 +31,6 @@ use Throwable;
 class OpenAIProvider implements Provider
 {
     public const DEFAULT_BASE_URL = 'https://api.openai.com/v1';
-    public const DEFAULT_MODEL = 'gpt-5.4';
     private const MAX_RETRIES = 3;
 
     public function __construct(
@@ -115,7 +114,7 @@ class OpenAIProvider implements Provider
 
     protected function model(): string
     {
-        return $this->config->model ?? static::DEFAULT_MODEL;
+        return $this->config->model ?? $this->providerName()->defaultModel();
     }
 
     /**

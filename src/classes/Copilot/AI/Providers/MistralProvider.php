@@ -16,7 +16,6 @@ use JohannSchopplich\Copilot\AI\ProviderName;
 final class MistralProvider extends OpenAIProvider
 {
     public const DEFAULT_BASE_URL = 'https://api.mistral.ai/v1';
-    public const DEFAULT_MODEL = 'mistral-medium-latest';
 
     protected function providerName(): ProviderName
     {

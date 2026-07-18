@@ -16,7 +16,6 @@ use JohannSchopplich\Copilot\AI\ProviderName;
 final class GeminiProvider extends OpenAIProvider
 {
     public const DEFAULT_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/openai';
-    public const DEFAULT_MODEL = 'gemini-3.1-pro-preview';
 
     protected function providerName(): ProviderName
     {
