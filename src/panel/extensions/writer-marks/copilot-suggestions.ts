@@ -353,7 +353,9 @@ function createCompletionPlugin(
     const { signal } = abortController;
 
     try {
-      const { model } = await resolveLanguageModel({ forCompletion: true });
+      const { model, reasoning } = await resolveLanguageModel({
+        forCompletion: true,
+      });
       const { streamText } = await loadAISDK();
 
       // Use prefix/suffix format when there's text after cursor (manual trigger mid-text)
@@ -363,7 +365,8 @@ function createCompletionPlugin(
 
       const { textStream } = streamText({
         model,
-        system: COMPLETION_SYSTEM_PROMPT,
+        reasoning,
+        instructions: COMPLETION_SYSTEM_PROMPT,
         prompt,
         abortSignal: signal,
       });

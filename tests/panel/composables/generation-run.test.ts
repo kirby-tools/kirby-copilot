@@ -1,6 +1,6 @@
-import type { LanguageModelV3StreamPart } from "@ai-sdk/provider";
+import type { LanguageModelV4StreamPart } from "@ai-sdk/provider";
 import { AISDKError, Output, simulateReadableStream } from "ai";
-import { MockLanguageModelV3 } from "ai/test";
+import { MockLanguageModelV4 } from "ai/test";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import {
@@ -37,11 +37,11 @@ vi.mock("../../../src/panel/utils/ai", () => ({
 }));
 
 function createTextModel(deltas: string[]) {
-  const chunks: LanguageModelV3StreamPart[] = [
+  const chunks: LanguageModelV4StreamPart[] = [
     { type: "stream-start", warnings: [] },
     { type: "text-start", id: "1" },
     ...deltas.map(
-      (delta): LanguageModelV3StreamPart => ({
+      (delta): LanguageModelV4StreamPart => ({
         type: "text-delta",
         id: "1",
         delta,
@@ -63,7 +63,7 @@ function createTextModel(deltas: string[]) {
     },
   ];
 
-  return new MockLanguageModelV3({
+  return new MockLanguageModelV4({
     doStream: async () => ({
       stream: simulateReadableStream({ chunks }),
     }),
@@ -130,7 +130,7 @@ describe("runTextGeneration", () => {
   });
 
   it("surfaces stream failures as an error notification and clears the loading state", async () => {
-    const failingModel = new MockLanguageModelV3({
+    const failingModel = new MockLanguageModelV4({
       doStream: async () => ({
         stream: simulateReadableStream({
           chunks: [

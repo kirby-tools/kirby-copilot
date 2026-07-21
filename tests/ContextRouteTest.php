@@ -86,7 +86,7 @@ final class ContextRouteTest extends ApiRouteTestCase
         $response = $this->callContextRoute([
             'johannschopplich.copilot' => [
                 'provider' => 'anthropic',
-                'reasoningEffort' => 'high',
+                'reasoningEffort' => 'xhigh',
                 'logLevel' => 'debug',
                 'providers' => [
                     'openai' => [
@@ -98,7 +98,7 @@ final class ContextRouteTest extends ApiRouteTestCase
         ]);
 
         $this->assertSame('anthropic', $response['config']['provider']);
-        $this->assertSame('high', $response['config']['reasoningEffort']);
+        $this->assertSame('xhigh', $response['config']['reasoningEffort']);
         $this->assertSame('debug', $response['config']['logLevel']);
         $this->assertSame('chat', $response['config']['providers']['openai']['api']);
     }

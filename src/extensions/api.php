@@ -93,7 +93,7 @@ return [
                     $config['providers']
                 );
 
-                $validateEnum($config, 'reasoningEffort', ['none', 'low', 'medium', 'high'], 'low');
+                $validateEnum($config, 'reasoningEffort', ['provider-default', 'none', 'minimal', 'low', 'medium', 'high', 'xhigh'], 'low');
                 $validateEnum($config, 'providers.openai.api', ['chat', 'responses']);
                 $validateEnum($config, 'logLevel', ['error', 'warn', 'info', 'debug'], 'warn');
 

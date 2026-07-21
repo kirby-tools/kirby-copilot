@@ -32,7 +32,7 @@ export const PROVIDER_REGISTRY = {
     playgroundModelField: "anthropicmodel",
   },
   google: {
-    factory: "createGoogleGenerativeAI",
+    factory: "createGoogle",
     defaultCompletionModel: "gemini-3-flash-preview",
     playgroundModelField: "googlemodel",
   },
@@ -52,8 +52,15 @@ export const SUPPORTED_PROVIDERS = Object.keys(
   PROVIDER_REGISTRY,
 ) as ModelProvider[];
 
-// Universal reasoning efforts used across all providers
-export const REASONING_EFFORTS = ["none", "low", "medium", "high"] as const;
+export const REASONING_EFFORTS = [
+  "provider-default",
+  "none",
+  "minimal",
+  "low",
+  "medium",
+  "high",
+  "xhigh",
+] as const;
 export type ReasoningEffort = (typeof REASONING_EFFORTS)[number];
 
 // Default reasoning effort level

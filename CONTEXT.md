@@ -55,3 +55,13 @@ _Avoid_: provider config, provider map
 
 **Gateway prefix**:
 A provider-qualifying prefix on a model name (e.g. `anthropic/…`) used when a request crosses provider boundaries through an AI gateway.
+
+**Reasoning effort**:
+The universal effort vocabulary users configure once (`provider-default` to `xhigh`); mapping it onto provider-specific knobs is the AI SDK's job, not the plugin's.
+_Avoid_: thinking budget, thinking level
+
+### Interop
+
+**Third-party seam**:
+The versioned API Copilot exposes to other plugins. Only plain data crosses it – never raw AI SDK values – so both plugins can move to a new SDK independently.
+_Avoid_: public API, bridge, integration

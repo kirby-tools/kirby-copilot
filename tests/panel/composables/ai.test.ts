@@ -1,6 +1,6 @@
 import type { PluginConfig } from "../../../src/panel/types";
 import { simulateReadableStream } from "ai";
-import { MockLanguageModelV3 } from "ai/test";
+import { MockLanguageModelV4 } from "ai/test";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildUserPrompt,
@@ -40,16 +40,17 @@ vi.mock("../../../src/panel/utils/image", () => ({
 
 const mockStreamText = vi.fn();
 const mockSmoothStream = vi.fn((_options: { chunking: unknown }) => vi.fn());
+const mockOutputObject = vi.fn();
 
 const createMockProvider = () => ({
   languageModel: () =>
-    new MockLanguageModelV3({
+    new MockLanguageModelV4({
       doStream: async () => ({
         stream: simulateReadableStream({ chunks: [] }),
       }),
     }),
   chat: () =>
-    new MockLanguageModelV3({
+    new MockLanguageModelV4({
       doStream: async () => ({
         stream: simulateReadableStream({ chunks: [] }),
       }),
@@ -66,10 +67,11 @@ vi.mock("../../../src/panel/utils/ai", () => ({
     Promise.resolve({
       streamText: mockStreamText,
       smoothStream: mockSmoothStream,
+      Output: { object: mockOutputObject },
       AISDKError: { isInstance: () => false },
       createOpenAI: mockCreateOpenAI,
       createAnthropic: mockCreateAnthropic,
-      createGoogleGenerativeAI: mockCreateGoogle,
+      createGoogle: mockCreateGoogle,
       createMistral: mockCreateMistral,
     }),
 }));
@@ -100,12 +102,10 @@ function createPluginConfig(
   });
 }
 
+const mockLogger = { info: vi.fn(), error: vi.fn(), warn: vi.fn() };
+
 vi.mock("../../../src/panel/composables/logger", () => ({
-  useLogger: () => ({
-    info: vi.fn(),
-    error: vi.fn(),
-    warn: vi.fn(),
-  }),
+  useLogger: () => mockLogger,
 }));
 
 beforeEach(() => {
@@ -126,7 +126,7 @@ describe("useStreamText", () => {
 
       expect(mockStreamText).toHaveBeenCalledWith(
         expect.objectContaining({
-          system: "Be helpful",
+          instructions: "Be helpful",
           prompt: "Hello",
         }),
       );
@@ -138,7 +138,22 @@ describe("useStreamText", () => {
       await useStreamText({ userPrompt: "Hello" });
 
       const call = mockStreamText.mock.calls[0]?.[0];
-      expect(call?.system).toBeUndefined();
+      expect(call?.instructions).toBeUndefined();
+    });
+  });
+
+  describe("reasoning", () => {
+    it("passes the resolved reasoning effort through to streamText", async () => {
+      mockStreamText.mockResolvedValue({ textStream: null });
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({ reasoningEffort: "medium" }),
+      );
+
+      await useStreamText({ userPrompt: "Hello" });
+
+      expect(mockStreamText).toHaveBeenCalledWith(
+        expect.objectContaining({ reasoning: "medium" }),
+      );
     });
   });
 
@@ -226,6 +241,55 @@ describe("useStreamText", () => {
         expect.objectContaining({ output: mockOutput }),
       );
     });
+
+    it("builds structured output from a plain outputSchema for third-party callers", async () => {
+      mockStreamText.mockResolvedValue({ textStream: null });
+      const schema = { type: "object" };
+      const builtOutput = { responseFormat: "json" };
+      mockOutputObject.mockReturnValue(builtOutput);
+
+      await useStreamText({
+        userPrompt: "Test",
+        outputSchema: schema as never,
+      });
+
+      expect(mockOutputObject).toHaveBeenCalledWith({ schema });
+      expect(mockSmoothStream).not.toHaveBeenCalled();
+      expect(mockStreamText).toHaveBeenCalledWith(
+        expect.objectContaining({ output: builtOutput }),
+      );
+    });
+  });
+
+  describe("provider warnings", () => {
+    it("logs warnings the SDK emits when settings are coerced or unsupported", async () => {
+      const warnings = [{ type: "unsupported", feature: "reasoning" }];
+      mockStreamText.mockResolvedValue({
+        textStream: null,
+        warnings: Promise.resolve(warnings),
+      });
+
+      await useStreamText({ userPrompt: "Hello" });
+
+      await vi.waitFor(() => {
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining("warnings"),
+          warnings,
+        );
+      });
+    });
+
+    it("stays silent when the SDK reports no warnings", async () => {
+      mockStreamText.mockResolvedValue({
+        textStream: null,
+        warnings: Promise.resolve([]),
+      });
+
+      await useStreamText({ userPrompt: "Hello" });
+      await Promise.resolve();
+
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
   });
 
   describe("file attachments", () => {
@@ -245,7 +309,7 @@ describe("useStreamText", () => {
               role: "user",
               content: expect.arrayContaining([
                 expect.objectContaining({ type: "text" }),
-                expect.objectContaining({ type: "image" }),
+                expect.objectContaining({ type: "file", mediaType: "image" }),
               ]),
             }),
           ]),
@@ -375,9 +439,8 @@ describe("resolveLanguageModel", () => {
     );
   });
 
-  describe("provider options wiring", () => {
-    // Reasoning resolution is exhaustively covered in `utils/reasoning.test.ts`
-    it("forwards reasoning options through to providerOptions", async () => {
+  describe("reasoning and provider options", () => {
+    it("passes the configured effort as top-level reasoning without provider-specific shapes", async () => {
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({
           provider: "anthropic",
@@ -391,17 +454,23 @@ describe("resolveLanguageModel", () => {
         }),
       );
 
-      const { providerOptions } = await resolveLanguageModel();
+      const { reasoning, providerOptions } = await resolveLanguageModel();
 
-      expect(providerOptions?.anthropic).toEqual({
-        thinking: {
-          type: "enabled",
-          budgetTokens: 12000,
-        },
-      });
+      expect(reasoning).toBe("high");
+      expect(providerOptions).toBeUndefined();
     });
 
-    it("merges providerConfig.options into providerOptions", async () => {
+    it("applies the default effort and disables reasoning for completions", async () => {
+      const { reasoning } = await resolveLanguageModel();
+      const { reasoning: completionReasoning } = await resolveLanguageModel({
+        forCompletion: true,
+      });
+
+      expect(reasoning).toBe("low");
+      expect(completionReasoning).toBe("none");
+    });
+
+    it("keeps providerConfig.options as the providerOptions escape hatch", async () => {
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({
           providers: {
@@ -416,9 +485,7 @@ describe("resolveLanguageModel", () => {
 
       const { providerOptions } = await resolveLanguageModel();
 
-      expect(providerOptions?.openai).toEqual(
-        expect.objectContaining({ parallelToolCalls: false }),
-      );
+      expect(providerOptions?.openai).toEqual({ parallelToolCalls: false });
     });
   });
 
@@ -786,7 +853,7 @@ describe("buildUserPrompt", () => {
 });
 
 function createMockModel() {
-  return new MockLanguageModelV3({
+  return new MockLanguageModelV4({
     doStream: async () => ({
       stream: simulateReadableStream({ chunks: [] }),
     }),

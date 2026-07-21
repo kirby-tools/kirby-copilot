@@ -7,17 +7,12 @@ import PlaygroundApiKeyField from "./components/Playground/ApiKey.vue";
 import CopilotSection from "./components/Sections/Copilot.vue";
 // @ts-ignore - Vue component
 import CopilotButton from "./components/ViewButtons/CopilotButton.vue";
-import {
-  resolveLanguageModel,
-  usePluginContext,
-  useStreamText,
-} from "./composables";
 import { icons } from "./config/icons";
 import { copilot as copilotButton } from "./extensions/textarea-buttons/copilot";
 import { copilot as copilotMark } from "./extensions/writer-marks/copilot";
 import { copilotSuggestions as copilotSuggestionsMark } from "./extensions/writer-marks/copilot-suggestions";
 import { legacyViewButtonMixin } from "./legacy";
-import { loadAISDK } from "./utils";
+import { copilotThirdPartyApi } from "./third-party";
 import "virtual:uno.css";
 import "./styles/copilot-suggestions.css";
 import "./styles/copilot-generating.css";
@@ -45,12 +40,7 @@ window.panel.plugin("johannschopplich/copilot", {
     "copilot-suggestions": copilotSuggestionsMark,
   },
   thirdParty: {
-    copilot: {
-      resolvePluginContext: usePluginContext,
-      streamText: useStreamText,
-      resolveLanguageModel,
-      loadAISDK,
-    },
+    copilot: copilotThirdPartyApi,
   },
   icons,
   use: {

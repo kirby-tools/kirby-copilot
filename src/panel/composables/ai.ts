@@ -1,9 +1,9 @@
 import type { OpenAIProvider } from "@ai-sdk/openai";
 import type {
-  LanguageModelV3,
-  SharedV3ProviderOptions,
+  LanguageModelV4,
+  SharedV4ProviderOptions,
 } from "@ai-sdk/provider";
-import type { Output as OutputNamespace } from "ai";
+import type { FlexibleSchema, Output as OutputNamespace } from "ai";
 import type { LogLevel } from "kirbyuse";
 import type {
   ModelProvider,
@@ -12,7 +12,7 @@ import type {
 } from "../constants";
 import type { OutputFormat, PluginConfig, ProviderConfig } from "../types";
 import { useContent, usePanel } from "kirbyuse";
-import { template } from "utilful";
+import { isObject, template } from "utilful";
 import {
   DEFAULT_REASONING_EFFORT,
   PDF_SIZE_LIMIT,
@@ -32,7 +32,6 @@ import { createHtmlChunking } from "../utils/html-chunking";
 import { toReducedBlob } from "../utils/image";
 import { parseGatewayPrefix } from "../utils/models";
 import { extractTextFromPdf } from "../utils/pdf";
-import { resolveProviderOptions } from "../utils/reasoning";
 import { normalizePlaceholders } from "../utils/template";
 import { useLogger } from "./logger";
 import { extractPageRefIds } from "./pages";
@@ -70,6 +69,7 @@ export async function useStreamText({
   userPrompt,
   systemPrompt,
   output,
+  outputSchema,
   responseFormat,
   files = [],
   logLevel = 1,
@@ -80,26 +80,39 @@ export async function useStreamText({
   userPrompt: string;
   systemPrompt?: string;
   output?: OutputNamespace.Output;
+  /**
+   * Plain schema alternative to `output` for third-party plugins, so no raw
+   * AI SDK values cross the plugin seam (which would couple both plugins to
+   * the same SDK version).
+   */
+  outputSchema?: FlexibleSchema;
   responseFormat?: OutputFormat;
   files?: File[];
   logLevel?: LogLevel;
   abortSignal?: AbortSignal;
   /** Inject a language model directly (useful for testing). */
-  model?: LanguageModelV3;
+  model?: LanguageModelV4;
   /** Inject provider options directly (useful for testing). */
-  providerOptions?: SharedV3ProviderOptions;
+  providerOptions?: SharedV4ProviderOptions;
 }) {
   const logger = useLogger();
 
-  const { model, providerOptions } = injectedModel
-    ? { model: injectedModel, providerOptions: injectedProviderOptions }
+  const { model, reasoning, providerOptions } = injectedModel
+    ? {
+        model: injectedModel,
+        reasoning: undefined,
+        providerOptions: injectedProviderOptions,
+      }
     : await resolveLanguageModel();
 
   if (import.meta.env.DEV) {
     logLevel = 3;
   }
 
-  const { AISDKError, streamText, smoothStream } = await loadAISDK();
+  const { AISDKError, Output, streamText, smoothStream } = await loadAISDK();
+  const resolvedOutput =
+    output ??
+    (outputSchema ? Output.object({ schema: outputSchema }) : undefined);
 
   const {
     userPromptWithContext,
@@ -119,11 +132,12 @@ export async function useStreamText({
 
   const hasFiles = imageByteArrays.length > 0 || pdfByteArrays.length > 0;
 
-  return streamText({
+  const result = await streamText({
     model,
+    reasoning,
     providerOptions,
-    output,
-    system: systemPromptWithContext || undefined,
+    output: resolvedOutput,
+    instructions: systemPromptWithContext || undefined,
     ...(hasFiles
       ? {
           messages: [
@@ -132,8 +146,10 @@ export async function useStreamText({
               content: [
                 { type: "text" as const, text: userPromptWithContext },
                 ...imageByteArrays.map((image) => ({
-                  type: "image" as const,
-                  image,
+                  type: "file" as const,
+                  // Subtype is auto-detected from the binary data
+                  mediaType: "image" as const,
+                  data: image,
                 })),
                 ...pdfByteArrays.map((data) => ({
                   type: "file" as const,
@@ -147,7 +163,7 @@ export async function useStreamText({
       : {
           prompt: userPromptWithContext,
         }),
-    ...(!output && {
+    ...(!resolvedOutput && {
       experimental_transform: smoothStream({
         chunking:
           responseFormat === "rich-text" ? createHtmlChunking() : "line",
@@ -162,6 +178,18 @@ export async function useStreamText({
       console.error("Unexpected error during text streaming:", error);
     },
   });
+
+  // Surface silent SDK coercions, e.g. reasoning dropped for models that
+  // don't support it (stream errors are already reported via `onError`)
+  Promise.resolve(result.warnings)
+    .then((warnings) => {
+      if (warnings?.length) {
+        logger.warn("AI SDK call warnings:", warnings);
+      }
+    })
+    .catch(() => {});
+
+  return result;
 }
 
 /**
@@ -187,24 +215,22 @@ export async function resolveLanguageModel({
   });
   const modelId = resolveModelId({ provider, providerConfig, forCompletion });
 
-  // Support for OpenAI-compatible gateways (e.g. Cloudflare AI Gateway)
-  // that don't support `/v1/responses`
+  // Support for OpenAI-compatible gateways that don't support `/v1/responses`,
+  // e.g. Cloudflare AI Gateway
   const model =
     provider === "openai" && providerConfig.api === "chat"
       ? (api as OpenAIProvider).chat(modelId)
       : api.languageModel(modelId);
-  const reasoningEffort: ReasoningEffort = forCompletion
+  const reasoning: ReasoningEffort = forCompletion
     ? "none"
     : (config.reasoningEffort ?? DEFAULT_REASONING_EFFORT);
-  const providerOptions = resolveProviderOptions({
-    provider,
-    providerConfig,
-    modelId,
-    reasoningEffort,
-  });
+  const providerOptions = isObject(providerConfig.options)
+    ? { [provider]: providerConfig.options }
+    : undefined;
 
   return {
     model,
+    reasoning,
     providerOptions,
   };
 }
