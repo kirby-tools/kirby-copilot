@@ -23,8 +23,8 @@ enum ProviderName: string
     public function defaultModel(): string
     {
         return match ($this) {
-            self::OpenAI => 'gpt-5.4',
-            self::Anthropic => 'claude-sonnet-4-6',
+            self::OpenAI => 'gpt-5.6-terra',
+            self::Anthropic => 'claude-sonnet-5',
             self::Google => 'gemini-3.1-pro-preview',
             self::Mistral => 'mistral-medium-latest',
         };
@@ -35,7 +35,7 @@ enum ProviderName: string
         return match ($this) {
             self::OpenAI => 'gpt-5.4-nano',
             self::Anthropic => 'claude-haiku-4-5',
-            self::Google => 'gemini-3-flash-preview',
+            self::Google => 'gemini-3.5-flash',
             self::Mistral => 'mistral-small-latest',
         };
     }

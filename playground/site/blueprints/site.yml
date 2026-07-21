@@ -61,10 +61,10 @@ tabs:
             when:
               modelProvider: openai
             options:
-              gpt-5.4-nano: GPT-5.4 Nano
-              gpt-5.4-mini: GPT-5.4 Mini
-              gpt-5.4: GPT-5.4 (recommended)
-            help: GPT-5.4 offers best intelligence from OpenAI, with improved reasoning and creativity.
+              gpt-5.6-luna: GPT-5.6 Luna
+              gpt-5.6-terra: GPT-5.6 Terra (recommended)
+              gpt-5.6-sol: GPT-5.6 Sol
+            help: GPT-5.6 Terra balances quality, speed, and cost. Sol is OpenAI's flagship for complex reasoning, Luna is fastest for quick drafts.
 
           googleModel:
             label: Model
@@ -72,9 +72,9 @@ tabs:
             when:
               modelProvider: google
             options:
-              gemini-3-flash-preview: Gemini 3 Flash (recommended)
-              gemini-3.1-pro-preview: Gemini 3.1 Pro
-            help: Gemini 3 Flash excels at structured content generation. Our overall recommendation!
+              gemini-3.5-flash: Gemini 3.5 Flash
+              gemini-3.1-pro-preview: Gemini 3.1 Pro (recommended)
+            help: Gemini 3.1 Pro excels at structured content generation – our overall recommendation! Gemini 3.5 Flash is the faster choice.
 
           anthropicModel:
             label: Model
@@ -82,10 +82,9 @@ tabs:
             when:
               modelProvider: anthropic
             options:
-              claude-haiku-4-5: Claude 4.5 Haiku
-              claude-sonnet-4-6: Claude 4.6 Sonnet (recommended)
-              claude-opus-4-7: Claude 4.7 Opus
-            help: Sonnet 4.6 balances speed and quality. Opus 4.7 shines at complex reasoning, Haiku 4.5 is fastest for quick drafts.
+              claude-sonnet-5: Claude 5 Sonnet (recommended)
+              claude-opus-4-8: Claude 4.8 Opus
+            help: Sonnet 5 balances speed and quality. Opus 4.8 shines at complex reasoning.
 
       - width: 1/3
         fields:

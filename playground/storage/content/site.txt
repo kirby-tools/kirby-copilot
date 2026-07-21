@@ -10,15 +10,15 @@ Apikey:
 
 ----
 
-Openaimodel: gpt-5-mini
+Openaimodel: gpt-5.6-terra
 
 ----
 
-Googlemodel: gemini-3-flash-preview
+Googlemodel: gemini-3.1-pro-preview
 
 ----
 
-Anthropicmodel: claude-sonnet-4-6
+Anthropicmodel: claude-sonnet-5
 
 ----
 

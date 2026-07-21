@@ -18,10 +18,10 @@ describe("parseGatewayPrefix", () => {
 
   it("returns prefix without trailing slash", () => {
     expect(
-      parseGatewayPrefix("google-ai-studio/gemini-3-flash-preview"),
+      parseGatewayPrefix("google-ai-studio/gemini-3.5-flash"),
     ).toEqual({
       prefix: "google-ai-studio",
-      nativeModelId: "gemini-3-flash-preview",
+      nativeModelId: "gemini-3.5-flash",
     });
   });
 

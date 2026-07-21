@@ -33,7 +33,7 @@ export const PROVIDER_REGISTRY = {
   },
   google: {
     factory: "createGoogle",
-    defaultCompletionModel: "gemini-3-flash-preview",
+    defaultCompletionModel: "gemini-3.5-flash",
     playgroundModelField: "googlemodel",
   },
   mistral: {

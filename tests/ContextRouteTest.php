@@ -114,9 +114,9 @@ final class ContextRouteTest extends ApiRouteTestCase
         $this->assertSame('low', $response['config']['reasoningEffort']);
         $this->assertSame('warn', $response['config']['logLevel']);
         $this->assertSame([
-            'openai'    => ['hasApiKey' => false, 'model' => 'gpt-5.4', 'completionModel' => 'gpt-5.4-nano'],
-            'google'    => ['hasApiKey' => false, 'model' => 'gemini-3.1-pro-preview', 'completionModel' => 'gemini-3-flash-preview'],
-            'anthropic' => ['hasApiKey' => false, 'model' => 'claude-sonnet-4-6', 'completionModel' => 'claude-haiku-4-5'],
+            'openai'    => ['hasApiKey' => false, 'model' => 'gpt-5.6-terra', 'completionModel' => 'gpt-5.4-nano'],
+            'google'    => ['hasApiKey' => false, 'model' => 'gemini-3.1-pro-preview', 'completionModel' => 'gemini-3.5-flash'],
+            'anthropic' => ['hasApiKey' => false, 'model' => 'claude-sonnet-5', 'completionModel' => 'claude-haiku-4-5'],
             'mistral'   => ['hasApiKey' => false, 'model' => 'mistral-medium-latest', 'completionModel' => 'mistral-small-latest'],
         ], $response['config']['providers']);
     }

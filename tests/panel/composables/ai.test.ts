@@ -368,10 +368,10 @@ describe("resolveLanguageModel", () => {
         name: "explicit completionModel wins over gateway-prefix derivation",
         openai: {
           model: "openai/gpt-5.4",
-          completionModel: "google-ai-studio/gemini-3-flash-preview",
+          completionModel: "google-ai-studio/gemini-3.5-flash",
           hasApiKey: true,
         },
-        expected: "google-ai-studio/gemini-3-flash-preview",
+        expected: "google-ai-studio/gemini-3.5-flash",
       },
     ])("completion model resolution: $name", async ({ openai, expected }) => {
       let resolvedModelId: string | undefined;
@@ -420,7 +420,7 @@ describe("resolveLanguageModel", () => {
     it.each([
       ["openai", mockCreateOpenAI, "gpt-5.4-nano"],
       ["anthropic", mockCreateAnthropic, "claude-haiku-4-5"],
-      ["google", mockCreateGoogle, "gemini-3-flash-preview"],
+      ["google", mockCreateGoogle, "gemini-3.5-flash"],
       ["mistral", mockCreateMistral, "mistral-small-latest"],
     ] as const)(
       "creates %s provider when configured",
