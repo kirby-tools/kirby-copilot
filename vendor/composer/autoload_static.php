@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit6bfd534572e2b080fe4df83e14c05baa
+class ComposerStaticInit76a10f26ac064d5dd4f8da8d0834dcb0
 {
     public static $files = array (
         '4b3d45d99f6e4eb65ea80c00519736e4' => __DIR__ . '/..' . '/anthropic-ai/sdk/src/Version.php',
@@ -1288,6 +1288,7 @@ class ComposerStaticInit6bfd534572e2b080fe4df83e14c05baa
         'Http\\Message\\MultipartStream\\MimetypeHelper' => __DIR__ . '/..' . '/php-http/multipart-stream-builder/src/MimetypeHelper.php',
         'Http\\Message\\MultipartStream\\MultipartStreamBuilder' => __DIR__ . '/..' . '/php-http/multipart-stream-builder/src/MultipartStreamBuilder.php',
         'JohannSchopplich\\Copilot\\AI\\Client' => __DIR__ . '/../..' . '/src/classes/Copilot/AI/Client.php',
+        'JohannSchopplich\\Copilot\\AI\\CurlProxyTransport' => __DIR__ . '/../..' . '/src/classes/Copilot/AI/CurlProxyTransport.php',
         'JohannSchopplich\\Copilot\\AI\\Exception\\ProviderException' => __DIR__ . '/../..' . '/src/classes/Copilot/AI/Exception/ProviderException.php',
         'JohannSchopplich\\Copilot\\AI\\ProviderConfig' => __DIR__ . '/../..' . '/src/classes/Copilot/AI/ProviderConfig.php',
         'JohannSchopplich\\Copilot\\AI\\ProviderName' => __DIR__ . '/../..' . '/src/classes/Copilot/AI/ProviderName.php',
@@ -1296,6 +1297,9 @@ class ComposerStaticInit6bfd534572e2b080fe4df83e14c05baa
         'JohannSchopplich\\Copilot\\AI\\Providers\\MistralProvider' => __DIR__ . '/../..' . '/src/classes/Copilot/AI/Providers/MistralProvider.php',
         'JohannSchopplich\\Copilot\\AI\\Providers\\OpenAIProvider' => __DIR__ . '/../..' . '/src/classes/Copilot/AI/Providers/OpenAIProvider.php',
         'JohannSchopplich\\Copilot\\AI\\Providers\\Provider' => __DIR__ . '/../..' . '/src/classes/Copilot/AI/Providers/Provider.php',
+        'JohannSchopplich\\Copilot\\AI\\Proxy' => __DIR__ . '/../..' . '/src/classes/Copilot/AI/Proxy.php',
+        'JohannSchopplich\\Copilot\\AI\\ProxyTransport' => __DIR__ . '/../..' . '/src/classes/Copilot/AI/ProxyTransport.php',
+        'JohannSchopplich\\Copilot\\AI\\ProxyTransportResult' => __DIR__ . '/../..' . '/src/classes/Copilot/AI/ProxyTransportResult.php',
         'JohannSchopplich\\Copilot\\AI\\Resolver' => __DIR__ . '/../..' . '/src/classes/Copilot/AI/Resolver.php',
         'JohannSchopplich\\KirbyTools\\FieldNormalizer' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-utils/src/FieldNormalizer.php',
         'JohannSchopplich\\KirbyTools\\FieldResolver' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-utils/src/FieldResolver.php',
@@ -1831,9 +1835,9 @@ class ComposerStaticInit6bfd534572e2b080fe4df83e14c05baa
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit6bfd534572e2b080fe4df83e14c05baa::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit6bfd534572e2b080fe4df83e14c05baa::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit6bfd534572e2b080fe4df83e14c05baa::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit76a10f26ac064d5dd4f8da8d0834dcb0::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit76a10f26ac064d5dd4f8da8d0834dcb0::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit76a10f26ac064d5dd4f8da8d0834dcb0::$classMap;
 
         }, null, ClassLoader::class);
     }

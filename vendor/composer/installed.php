@@ -1,8 +1,8 @@
 <?php return array(
     'root' => array(
         'name' => 'johannschopplich/kirby-copilot',
-        'pretty_version' => '3.8.1',
-        'version' => '3.8.1.0',
+        'pretty_version' => '3.9.0',
+        'version' => '3.9.0.0',
         'reference' => null,
         'type' => 'kirby-plugin',
         'install_path' => __DIR__ . '/../../',
@@ -29,8 +29,8 @@
             'dev_requirement' => false,
         ),
         'johannschopplich/kirby-copilot' => array(
-            'pretty_version' => '3.8.1',
-            'version' => '3.8.1.0',
+            'pretty_version' => '3.9.0',
+            'version' => '3.9.0.0',
             'reference' => null,
             'type' => 'kirby-plugin',
             'install_path' => __DIR__ . '/../../',
@@ -38,9 +38,9 @@
             'dev_requirement' => false,
         ),
         'johannschopplich/kirby-tools-licensing' => array(
-            'pretty_version' => '0.9.1',
-            'version' => '0.9.1.0',
-            'reference' => 'a0a684e0efaad11958b316a5e197b24b34ba10c8',
+            'pretty_version' => '0.9.2',
+            'version' => '0.9.2.0',
+            'reference' => '5a23898950e54764ebe40fa1bd9054ef06e9771b',
             'type' => 'library',
             'install_path' => __DIR__ . '/../johannschopplich/kirby-tools-licensing',
             'aliases' => array(),
