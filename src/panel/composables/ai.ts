@@ -19,6 +19,7 @@ import {
   PLUGIN_PROXY_API_ROUTE,
   PROVIDER_REGISTRY,
   PROXY_API_KEY_MARKER,
+  REASONING_EFFORTS,
   STORAGE_KEY_PREFIX,
   SUPPORTED_PROVIDERS,
 } from "../constants";
@@ -203,10 +204,8 @@ export async function resolveLanguageModel({
   const panel = usePanel();
   const { config } = await usePluginContext();
 
-  const { provider, providerConfig, isPlayground } = resolveProviderSelection(
-    config,
-    forCompletion,
-  );
+  const { provider, providerConfig, isPlayground, reasoningEffortOverride } =
+    resolveProviderSelection(config, forCompletion);
   const api = await createProviderClient({
     provider,
     providerConfig,
@@ -223,7 +222,9 @@ export async function resolveLanguageModel({
       : api.languageModel(modelId);
   const reasoning: ReasoningEffort = forCompletion
     ? "none"
-    : (config.reasoningEffort ?? DEFAULT_REASONING_EFFORT);
+    : (reasoningEffortOverride ??
+      config.reasoningEffort ??
+      DEFAULT_REASONING_EFFORT);
   const providerOptions = isObject(providerConfig.options)
     ? { [provider]: providerConfig.options }
     : undefined;
@@ -351,10 +352,14 @@ function resolveProviderSelection(
   config: PluginConfig,
   forCompletion: boolean,
 ) {
+  // Direct browser transport (session-stored key) is only for the deployed
+  // playground, where no server-side keys exist – on localhost, requests keep
+  // going through the PHP proxy with the keys from the Kirby config.
   const isPlayground =
     __PLAYGROUND__ && !window.location.hostname.includes("localhost");
+  let reasoningEffortOverride: ReasoningEffort | undefined;
 
-  if (!forCompletion && isPlayground) {
+  if (!forCompletion && __PLAYGROUND__) {
     config = JSON.parse(JSON.stringify(config));
     const { currentContent } = useContent();
 
@@ -375,6 +380,11 @@ function resolveProviderSelection(
       config.providers[selectedProvider] ??= {};
       config.providers[selectedProvider]!.model = selectedModel;
     }
+
+    const selectedReasoningEffort = currentContent.value.reasoningeffort;
+    if (REASONING_EFFORTS.includes(selectedReasoningEffort)) {
+      reasoningEffortOverride = selectedReasoningEffort;
+    }
   }
 
   if (
@@ -389,7 +399,7 @@ function resolveProviderSelection(
   const provider = config.provider as ModelProvider;
   const providerConfig = config.providers[provider] ?? {};
 
-  return { provider, providerConfig, isPlayground };
+  return { provider, providerConfig, isPlayground, reasoningEffortOverride };
 }
 
 /**

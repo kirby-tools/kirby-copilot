@@ -58,6 +58,8 @@ tabs:
           openaiModel:
             label: Model
             type: select
+            required: true
+            default: gpt-5.6-terra
             when:
               modelProvider: openai
             options:
@@ -69,6 +71,8 @@ tabs:
           googleModel:
             label: Model
             type: select
+            required: true
+            default: gemini-3.1-pro-preview
             when:
               modelProvider: google
             options:
@@ -79,12 +83,30 @@ tabs:
           anthropicModel:
             label: Model
             type: select
+            required: true
+            default: claude-sonnet-5
             when:
               modelProvider: anthropic
             options:
+              claude-haiku-4-5: Claude 4.5 Haiku
               claude-sonnet-5: Claude 5 Sonnet (recommended)
               claude-opus-4-8: Claude 4.8 Opus
-            help: Sonnet 5 balances speed and quality. Opus 4.8 shines at complex reasoning.
+            help: Sonnet 5 balances speed and quality. Opus 4.8 shines at complex reasoning, Haiku 4.5 is fastest for quick drafts.
+
+          reasoningEffort:
+            label: Reasoning Effort
+            type: select
+            required: true
+            default: low
+            options:
+              provider-default: Provider default
+              none: None
+              minimal: Minimal
+              low: Low (default)
+              medium: Medium
+              high: High
+              xhigh: Extra high
+            help: Controls the depth of reasoning applied during content generation. The effort is translated to each provider's native reasoning controls automatically – models without reasoning support ignore the setting.
 
       - width: 1/3
         fields:

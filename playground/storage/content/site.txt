@@ -22,6 +22,10 @@ Anthropicmodel: claude-sonnet-5
 
 ----
 
+Reasoningeffort: low
+
+----
+
 Demoblocks: 
 
 ----
