@@ -44,13 +44,13 @@ final class Proxy
 
         $apiKey = $provider->apiKey($kirby);
 
-        if (!$apiKey) {
+        if ($apiKey === null) {
             throw new InvalidArgumentException('Missing API key for provider: ' . $provider->value);
         }
 
         $targetUrl = $kirby->request()->header('X-Proxy-Target');
 
-        if (!$targetUrl) {
+        if ($targetUrl === null || $targetUrl === '') {
             throw new InvalidArgumentException('Missing X-Proxy-Target header');
         }
 

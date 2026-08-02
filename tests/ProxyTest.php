@@ -192,8 +192,10 @@ final class ProxyTest extends TestCase
         $this->assertTrue($curlOptions[CURLOPT_SSL_VERIFYPEER]);
         $this->assertSame('', $curlOptions[CURLOPT_ENCODING]);
 
-        // The bundled CA certificate kicks in when the system has none configured
-        if (empty(ini_get('curl.cainfo'))) {
+        // Mirrors the fallback condition in `Proxy::handle()`: the bundled CA
+        // certificate kicks in when the system has no usable `curl.cainfo`
+        $systemCaInfo = ini_get('curl.cainfo');
+        if ($systemCaInfo === false || $systemCaInfo === '' || !@is_file($systemCaInfo)) {
             $this->assertStringEndsWith('/cacert.pem', $curlOptions[CURLOPT_CAINFO]);
         }
     }

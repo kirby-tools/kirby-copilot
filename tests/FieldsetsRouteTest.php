@@ -15,7 +15,7 @@ final class FieldsetsRouteTest extends ApiRouteTestCase
     {
         $appConfig = ['blueprints' => $blueprints];
 
-        if (!empty($fields)) {
+        if ($fields !== []) {
             $appConfig['fields'] = $fields;
         }
 
