@@ -191,7 +191,7 @@ final class Proxy
 
         // Use bundled CA certificate if system doesn't have one configured
         $systemCaInfo = ini_get('curl.cainfo');
-        if (empty($systemCaInfo) || !@is_file($systemCaInfo)) {
+        if ($systemCaInfo === false || $systemCaInfo === '' || !@is_file($systemCaInfo)) {
             $curlOptions[CURLOPT_CAINFO] = $kirby->root('kirby') . '/cacert.pem';
         }
 

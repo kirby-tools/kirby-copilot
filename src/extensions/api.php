@@ -87,9 +87,15 @@ return [
                 // Convert API keys to boolean flags so the frontend can validate
                 // presence without exposing secrets.
                 $config['providers'] = array_map(
-                    fn (array $provider) => [
-                        'hasApiKey' => !empty(ProviderName::resolveApiKey($provider['apiKey'] ?? null, $kirby))
-                    ] + array_diff_key($provider, ['apiKey' => true]),
+                    function (array $provider) use ($kirby) {
+                        $apiKey = ProviderName::resolveApiKey($provider['apiKey'] ?? null, $kirby);
+
+                        return [
+                            // Same acceptance rule as `ProviderName::apiKey()`, so the
+                            // Panel never reports a key the server would reject
+                            'hasApiKey' => is_string($apiKey) && $apiKey !== ''
+                        ] + array_diff_key($provider, ['apiKey' => true]);
+                    },
                     $config['providers']
                 );
 
@@ -221,9 +227,9 @@ return [
                         $props['type'] ??= $blockType;
 
                         $fields = [];
-                        $tabs = $props['tabs'] ?? [];
+                        $tabs = is_array($props['tabs'] ?? null) ? $props['tabs'] : [];
 
-                        if (empty($tabs)) {
+                        if ($tabs === []) {
                             $fields = Blueprint::fieldsProps($props['fields'] ?? []);
                         } else {
                             foreach ($tabs as $tab) {
