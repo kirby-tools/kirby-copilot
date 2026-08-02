@@ -18,6 +18,31 @@ final class ContextRouteTest extends ApiRouteTestCase
         return $this->callRoute(new App(['options' => $options]), '__copilot__/context');
     }
 
+    private static function buildConfigWithOverride(string $path, mixed $value): array
+    {
+        $keys = explode('.', $path);
+        $override = $value;
+        foreach (array_reverse($keys) as $key) {
+            $override = [$key => $override];
+        }
+
+        return array_replace_recursive(
+            ['providers' => ['openai' => ['apiKey' => 'test-key']]],
+            $override,
+        );
+    }
+
+    private static function readConfigPath(array $config, string $path): mixed
+    {
+        foreach (explode('.', $path) as $key) {
+            if (!is_array($config) || !array_key_exists($key, $config)) {
+                return null;
+            }
+            $config = $config[$key];
+        }
+        return $config;
+    }
+
     /** @return array<string, array{0: string, 1: mixed}> */
     public static function invalidEnumValuesInDebugMode(): array
     {
@@ -278,30 +303,5 @@ final class ContextRouteTest extends ApiRouteTestCase
         $this->assertTrue($response['config']['providers']['openai']['hasApiKey']);
         $this->assertFalse($response['config']['providers']['google']['hasApiKey']);
         $this->assertArrayNotHasKey('apiKey', $response['config']['providers']['openai']);
-    }
-
-    private static function buildConfigWithOverride(string $path, mixed $value): array
-    {
-        $keys = explode('.', $path);
-        $override = $value;
-        foreach (array_reverse($keys) as $key) {
-            $override = [$key => $override];
-        }
-
-        return array_replace_recursive(
-            ['providers' => ['openai' => ['apiKey' => 'test-key']]],
-            $override,
-        );
-    }
-
-    private static function readConfigPath(array $config, string $path): mixed
-    {
-        foreach (explode('.', $path) as $key) {
-            if (!is_array($config) || !array_key_exists($key, $config)) {
-                return null;
-            }
-            $config = $config[$key];
-        }
-        return $config;
     }
 }
