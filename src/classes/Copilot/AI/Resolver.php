@@ -65,7 +65,7 @@ final readonly class Resolver
         }
 
         return new ProviderConfig(
-            apiKey: is_string($apiKey) && $apiKey !== '' ? $apiKey : null,
+            apiKey: ProviderName::isUsableApiKey($apiKey) ? $apiKey : null,
             model: isset($config['model']) ? (string)$config['model'] : null,
             baseUrl: isset($config['baseUrl']) ? (string)$config['baseUrl'] : null,
             options: array_diff_key($config, ['apiKey' => true, 'model' => true, 'baseUrl' => true]),

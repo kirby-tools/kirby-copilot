@@ -76,6 +76,16 @@ enum ProviderName: string
         return $apiKey instanceof Closure ? $apiKey($kirby) : $apiKey;
     }
 
+    /**
+     * The single acceptance rule for a resolved `apiKey` value, shared by the
+     * provider classes and the Panel's `hasApiKey` flag, so the Panel never
+     * reports a key the server would reject.
+     */
+    public static function isUsableApiKey(mixed $apiKey): bool
+    {
+        return is_string($apiKey) && $apiKey !== '';
+    }
+
     public function apiKey(App $kirby): string|null
     {
         $apiKey = self::resolveApiKey(
@@ -83,6 +93,6 @@ enum ProviderName: string
             $kirby,
         );
 
-        return is_string($apiKey) && $apiKey !== '' ? $apiKey : null;
+        return self::isUsableApiKey($apiKey) ? $apiKey : null;
     }
 }

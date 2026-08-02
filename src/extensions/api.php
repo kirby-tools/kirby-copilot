@@ -91,9 +91,7 @@ return [
                         $apiKey = ProviderName::resolveApiKey($provider['apiKey'] ?? null, $kirby);
 
                         return [
-                            // Same acceptance rule as `ProviderName::apiKey()`, so the
-                            // Panel never reports a key the server would reject
-                            'hasApiKey' => is_string($apiKey) && $apiKey !== ''
+                            'hasApiKey' => ProviderName::isUsableApiKey($apiKey)
                         ] + array_diff_key($provider, ['apiKey' => true]);
                     },
                     $config['providers']
