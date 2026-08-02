@@ -76,6 +76,7 @@ export interface PluginContextResponse {
  * @see https://getkirby.com/docs/reference/panel/fields/blocks
  */
 export interface KirbyFieldset {
+  /** Translated, human-readable block label, not an identifier */
   name: string;
   /** Block type identifier (e.g., `text`, `heading`, `image`) */
   type: string;

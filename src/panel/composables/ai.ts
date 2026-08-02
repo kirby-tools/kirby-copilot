@@ -232,16 +232,10 @@ export async function resolveLanguageModel({
  * that the AI SDK call needs.
  *
  * @remarks
- * Applies four transformations in order:
- * 1. Renders `{field}` placeholders against the current Panel content.
- * 2. Extracts `@skill://id` tokens from the user prompt, resolves them into
- *    `<skill>` blocks on the system prompt, then strips the tokens so they
- *    never reach the model.
- * 3. Extracts `@page://id` tokens from the rendered user prompt and appends
- *    `<reference_page>` blocks fetched via the Panel API. Tokens are left in
- *    place so the model can correlate them with the appended blocks.
- * 4. Splits attached files into images and PDFs, inlining oversized PDFs as
- *    extracted text so they still reach models that reject large binaries.
+ * `@skill://id` tokens are stripped once resolved, so they never reach the
+ * model, while `@page://id` tokens stay in place so the model can correlate
+ * them with the appended `<reference_page>` blocks. PDFs beyond the native
+ * attachment cap are inlined as extracted text instead of attached.
  */
 export async function resolvePromptContext({
   systemPrompt,

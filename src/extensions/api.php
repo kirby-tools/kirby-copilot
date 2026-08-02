@@ -226,6 +226,8 @@ return [
                         $props['type'] ??= $blockType;
 
                         $fields = [];
+                        // A non-array `tabs` value counts as "no tabs" and is resolved
+                        // through `fields` instead of being iterated
                         $tabs = is_array($props['tabs'] ?? null) ? $props['tabs'] : [];
 
                         if ($tabs === []) {
