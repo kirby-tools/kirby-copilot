@@ -116,7 +116,6 @@ final class AnthropicProvider implements Provider
 
         return implode('', $textParts);
     }
-
     /**
      * @param list<array{role: string, content: string}> $messages
      * @return array{0: list<array{role: string, content: string}>, 1: string|null}
@@ -140,11 +139,6 @@ final class AnthropicProvider implements Provider
         ];
     }
 
-    private function providerName(): ProviderName
-    {
-        return ProviderName::Anthropic;
-    }
-
     private function client(): AnthropicClient
     {
         return $this->client ?? new AnthropicClient(
@@ -153,43 +147,9 @@ final class AnthropicProvider implements Provider
         );
     }
 
-    private function baseUrl(): string
-    {
-        return $this->config->baseUrl ?? self::DEFAULT_BASE_URL;
-    }
-
     private function model(): string
     {
         return $this->config->model ?? $this->providerName()->defaultModel();
-    }
-
-    /**
-     * @throws AuthException
-     */
-    private function apiKey(): string
-    {
-        if ($this->config->apiKey === null) {
-            // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
-            throw new AuthException(
-                'Missing API key in "johannschopplich.copilot.providers.' . $this->providerName()->value . '.apiKey"'
-            );
-        }
-
-        return $this->config->apiKey;
-    }
-
-    /**
-     * @param array<int, mixed> $blocks
-     */
-    private function firstTextBlock(array $blocks): string|null
-    {
-        foreach ($blocks as $block) {
-            if ($block instanceof TextBlock) {
-                return $block->text;
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -211,5 +171,44 @@ final class AnthropicProvider implements Provider
             httpCode: $httpCode,
             previous: $previous,
         );
+    }
+
+    /**
+     * @param array<int, mixed> $blocks
+     */
+    private function firstTextBlock(array $blocks): string|null
+    {
+        foreach ($blocks as $block) {
+            if ($block instanceof TextBlock) {
+                return $block->text;
+            }
+        }
+
+        return null;
+    }
+
+    private function baseUrl(): string
+    {
+        return $this->config->baseUrl ?? self::DEFAULT_BASE_URL;
+    }
+
+    /**
+     * @throws AuthException
+     */
+    private function apiKey(): string
+    {
+        if ($this->config->apiKey === null) {
+            // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
+            throw new AuthException(
+                'Missing API key in "johannschopplich.copilot.providers.' . $this->providerName()->value . '.apiKey"'
+            );
+        }
+
+        return $this->config->apiKey;
+    }
+
+    private function providerName(): ProviderName
+    {
+        return ProviderName::Anthropic;
     }
 }

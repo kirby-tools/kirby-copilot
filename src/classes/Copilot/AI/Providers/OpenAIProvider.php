@@ -93,66 +93,6 @@ class OpenAIProvider implements Provider
 
         return $content;
     }
-
-    protected function providerName(): ProviderName
-    {
-        return ProviderName::OpenAI;
-    }
-
-    protected function client(): ClientContract
-    {
-        return $this->client ?? OpenAI::factory()
-            ->withApiKey($this->apiKey())
-            ->withBaseUri($this->baseUrl())
-            ->make();
-    }
-
-    protected function baseUrl(): string
-    {
-        return $this->config->baseUrl ?? static::DEFAULT_BASE_URL;
-    }
-
-    protected function model(): string
-    {
-        return $this->config->model ?? $this->providerName()->defaultModel();
-    }
-
-    /**
-     * @throws AuthException
-     */
-    protected function apiKey(): string
-    {
-        if ($this->config->apiKey === null) {
-            // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
-            throw new AuthException(
-                'Missing API key in "johannschopplich.copilot.providers.' . $this->providerName()->value . '.apiKey"'
-            );
-        }
-
-        return $this->config->apiKey;
-    }
-
-    /**
-     * @throws ProviderException
-     */
-    protected function fail(
-        string $reason,
-        string|null $responseExcerpt = null,
-        string|null $responseId = null,
-        int|null $httpCode = null,
-        Throwable|null $previous = null,
-    ): never {
-        throw new ProviderException(
-            providerName: $this->providerName(),
-            reason: $reason,
-            model: $this->model(),
-            responseId: $responseId,
-            responseExcerpt: $responseExcerpt,
-            httpCode: $httpCode,
-            previous: $previous,
-        );
-    }
-
     /**
      * @template T
      * @param Closure(): T $operation
@@ -184,6 +124,40 @@ class OpenAIProvider implements Provider
                 $sleep($this->retryDelay($e, $attempt));
             }
         }
+    }
+
+    protected function client(): ClientContract
+    {
+        return $this->client ?? OpenAI::factory()
+            ->withApiKey($this->apiKey())
+            ->withBaseUri($this->baseUrl())
+            ->make();
+    }
+
+    protected function model(): string
+    {
+        return $this->config->model ?? $this->providerName()->defaultModel();
+    }
+
+    /**
+     * @throws ProviderException
+     */
+    protected function fail(
+        string $reason,
+        string|null $responseExcerpt = null,
+        string|null $responseId = null,
+        int|null $httpCode = null,
+        Throwable|null $previous = null,
+    ): never {
+        throw new ProviderException(
+            providerName: $this->providerName(),
+            reason: $reason,
+            model: $this->model(),
+            responseId: $responseId,
+            responseExcerpt: $responseExcerpt,
+            httpCode: $httpCode,
+            previous: $previous,
+        );
     }
 
     protected function isRetriable(Throwable $e): bool
@@ -238,5 +212,30 @@ class OpenAIProvider implements Provider
         }
 
         return 2 ** $attempt;
+    }
+
+    protected function baseUrl(): string
+    {
+        return $this->config->baseUrl ?? static::DEFAULT_BASE_URL;
+    }
+
+    /**
+     * @throws AuthException
+     */
+    protected function apiKey(): string
+    {
+        if ($this->config->apiKey === null) {
+            // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
+            throw new AuthException(
+                'Missing API key in "johannschopplich.copilot.providers.' . $this->providerName()->value . '.apiKey"'
+            );
+        }
+
+        return $this->config->apiKey;
+    }
+
+    protected function providerName(): ProviderName
+    {
+        return ProviderName::OpenAI;
     }
 }
