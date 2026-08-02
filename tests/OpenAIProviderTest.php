@@ -88,6 +88,14 @@ final class OpenAIProviderTest extends TestCase
         $this->assertSame(['greeting' => 'hello'], $result);
     }
 
+    public static function invalidJsonObjectPayloads(): array
+    {
+        return [
+            'malformed' => ['not valid json {{{'],
+            'list' => ['[1, 2, 3]'],
+        ];
+    }
+
     #[Test]
     #[DataProvider('invalidJsonObjectPayloads')]
     public function throws_provider_exception_when_response_is_not_a_json_object(string $content): void
@@ -101,11 +109,30 @@ final class OpenAIProviderTest extends TestCase
         );
     }
 
-    public static function invalidJsonObjectPayloads(): array
+    public static function openAIFamilyVendors(): array
     {
         return [
-            'malformed' => ['not valid json {{{'],
-            'list' => ['[1, 2, 3]'],
+            'OpenAI' => [
+                OpenAIProvider::class,
+                'openai',
+                ProviderName::OpenAI->defaultModel(),
+                OpenAIProvider::DEFAULT_BASE_URL,
+                ProviderName::OpenAI,
+            ],
+            'Gemini' => [
+                GeminiProvider::class,
+                'google',
+                ProviderName::Google->defaultModel(),
+                GeminiProvider::DEFAULT_BASE_URL,
+                ProviderName::Google,
+            ],
+            'Mistral' => [
+                MistralProvider::class,
+                'mistral',
+                ProviderName::Mistral->defaultModel(),
+                MistralProvider::DEFAULT_BASE_URL,
+                ProviderName::Mistral,
+            ],
         ];
     }
 
@@ -187,33 +214,6 @@ final class OpenAIProviderTest extends TestCase
             $this->assertSame($expectedModel, $details['model']);
             $this->assertSame('not valid json', $details['responseExcerpt']);
         }
-    }
-
-    public static function openAIFamilyVendors(): array
-    {
-        return [
-            'OpenAI' => [
-                OpenAIProvider::class,
-                'openai',
-                ProviderName::OpenAI->defaultModel(),
-                OpenAIProvider::DEFAULT_BASE_URL,
-                ProviderName::OpenAI,
-            ],
-            'Gemini' => [
-                GeminiProvider::class,
-                'google',
-                ProviderName::Google->defaultModel(),
-                GeminiProvider::DEFAULT_BASE_URL,
-                ProviderName::Google,
-            ],
-            'Mistral' => [
-                MistralProvider::class,
-                'mistral',
-                ProviderName::Mistral->defaultModel(),
-                MistralProvider::DEFAULT_BASE_URL,
-                ProviderName::Mistral,
-            ],
-        ];
     }
 
     #[Test]
