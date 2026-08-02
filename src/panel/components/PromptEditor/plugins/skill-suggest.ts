@@ -159,7 +159,6 @@ export function createSkillSuggestPlugin(options: SkillSuggestHandlers) {
           return EMPTY_PLUGIN_STATE;
         }
 
-        // Reset index on fresh open or query change
         const resetIndex = !value.open || trigger.query !== value.query;
 
         return {

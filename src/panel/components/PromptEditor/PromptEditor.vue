@@ -131,7 +131,6 @@ watch(
   },
 );
 
-// Update placeholder text when prop changes
 watch(
   () => props.placeholder,
   (newText) => {

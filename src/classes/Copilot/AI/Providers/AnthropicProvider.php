@@ -153,7 +153,7 @@ final class AnthropicProvider implements Provider
     }
 
     /**
-     * @throws ProviderException
+     * @throws ProviderException Always; this is the single exit for provider failures
      */
     private function fail(
         string $reason,
@@ -193,7 +193,7 @@ final class AnthropicProvider implements Provider
     }
 
     /**
-     * @throws AuthException
+     * @throws AuthException When the provider has no API key configured
      */
     private function apiKey(): string
     {

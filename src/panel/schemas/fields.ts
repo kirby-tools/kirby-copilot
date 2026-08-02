@@ -16,17 +16,16 @@ import { z } from "zod";
 
 /**
  * Field types excluded from AI generation:
- * - UI elements: gap, headline, info, line
- * - Reference types: files, pages, users
+ * - UI elements without content: gap, headline, info, line
+ * - Reference types the model cannot resolve: files, pages, users
+ * - Fields the editor never sees: hidden
  */
 export const EXCLUDED_FIELD_TYPES = new Set(
   /// keep-sorted
   ["files", "gap", "headline", "hidden", "info", "line", "pages", "users"],
 );
 
-/** Maps Kirby fields to Zod schemas based on their expected data structure */
 export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
-  // Text fields
   text: (field) =>
     createTextSchema(
       field as KirbyTextFieldProps,
@@ -68,7 +67,6 @@ export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
       `"${field.label}", a telephone number in appropriate format for the context`,
     ),
 
-  // Rich text fields
   writer: (field) =>
     createTextSchema(
       field as KirbyWriterFieldProps,
@@ -85,11 +83,9 @@ export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
         `"${field.label}" (WYSIWYG), HTML list wrapped in <ul> or <ol>. Use <li> for items with inline formatting (bold, italic, underline, code, links, email, sub, sup).`,
       ),
 
-  // Number fields
   number: (field) => createNumericSchema(field as KirbyNumberFieldProps),
   range: (field) => createNumericSchema(field as KirbyRangeFieldProps),
 
-  // Boolean fields
   toggle: (field) => z.boolean().describe(`"${field.label}", a boolean`),
 
   // Single selection fields (all store a single string value)
@@ -108,7 +104,6 @@ export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
   tags: (field) =>
     createMultipleSelectionSchema(field as KirbyOptionsFieldProps),
 
-  // Date/time fields
   date: (field) =>
     z
       .string()
@@ -126,13 +121,11 @@ export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
         `"${field.label}", a time in HH:MM:SS format (24-hour, ISO 8601)`,
       ),
 
-  // Color field
   color: (field) =>
     z
       .string()
       .describe(`"${field.label}", a color value in hex, rgb or hsl format`),
 
-  // Link field
   link: (field) =>
     z
       .string()
@@ -140,7 +133,6 @@ export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
         `"${field.label}", a link: internal page UUIDs (page://...), external URLs (https://...), email links (mailto:...), or anchors (#section)`,
       ),
 
-  // Structure field
   structure: (field, context) => {
     const objectSchema = createNestedFieldsSchema(
       field as KirbyStructureFieldProps,
@@ -155,7 +147,6 @@ export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
         );
     }
 
-    // Fallback for structures without defined fields
     return z
       .array(z.record(z.string(), z.string()))
       .describe(
@@ -163,7 +154,6 @@ export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
       );
   },
 
-  // Object field
   object: (field, context) => {
     const objectSchema = createNestedFieldsSchema(
       field as KirbyObjectFieldProps,
@@ -176,7 +166,6 @@ export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
       );
     }
 
-    // Fallback for objects without defined fields
     return z
       .record(z.string(), z.string())
       .describe(
@@ -184,7 +173,6 @@ export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
       );
   },
 
-  // Nested blocks field
   blocks: (field, context) => {
     const _field = field as KirbyBlocksFieldProps;
     const availableFieldsets = context?.fieldsets;
@@ -196,7 +184,6 @@ export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
         .describe(`"${field.label}", nested content blocks`);
     }
 
-    // Determine which block types are allowed by this field
     let nestedFieldsets = availableFieldsets;
     if (_field.fieldsets) {
       const allowedTypes = Array.isArray(_field.fieldsets)
@@ -226,19 +213,16 @@ export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
       .describe(`"${field.label}", nested content blocks`);
   },
 
-  // Entries field
   entries: (field) => {
     const _field = field as KirbyEntriesFieldProps;
     const innerField = _field.field;
 
-    // Create a temporary field object for schema generation
     const tempField: KirbyFieldProps = {
       ...innerField,
       name: "entry",
       label: field.label || "Entry",
     };
 
-    // Generate schema for the inner field type
     const innerFieldSchemaBuilder = FIELD_TYPE_TO_SCHEMA[innerField.type]!;
     const innerSchema = innerFieldSchemaBuilder(tempField);
     let arraySchema = z.array(innerSchema);
@@ -256,7 +240,6 @@ export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
   },
 };
 
-/** Converts a Kirby field definition to a Zod schema */
 export function fieldToZodSchema(
   field: KirbyFieldProps,
   context?: SchemaContext,
@@ -270,18 +253,16 @@ export function fieldToZodSchema(
 
   let schema = schemaBuilder(field, context);
 
-  // Handle required fields
   if (field.required === true) {
     const schemaType = schema._zod?.def?.type;
 
-    // Required fields must have content
+    // A required field must not come back empty, so give it a minimum unless
+    // the blueprint already defined one
     if (schemaType === "string") {
-      // Only add minimum validation if not already set
       if ((schema as z.ZodString).minLength == null) {
         schema = (schema as z.ZodString).min(1);
       }
     } else if (schemaType === "array") {
-      // Only add minimum validation if not already set
       const hasMinCheck = (
         schema as z.ZodArray<z.ZodType>
       )._zod?.def?.checks?.some(

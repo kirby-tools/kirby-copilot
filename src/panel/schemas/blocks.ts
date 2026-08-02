@@ -3,7 +3,6 @@ import type { SchemaContext } from "./types";
 import { z } from "zod";
 import { EXCLUDED_FIELD_TYPES, fieldToZodSchema } from "./fields";
 
-/** Generates a Zod schema for a single block type. */
 export function generateBlockSchema(
   fieldset: KirbyFieldset,
   context?: SchemaContext,
@@ -42,7 +41,6 @@ export function generateBlockSchema(
     .describe(schemaDescription);
 }
 
-/** Generates a Zod schema from a Kirby blocks fieldsets configuration. */
 export function generateKirbyBlocksSchema(fieldsets: KirbyFieldset[]) {
   if (!Array.isArray(fieldsets) || fieldsets.length === 0) {
     throw new Error("Invalid fieldsets configuration");

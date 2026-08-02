@@ -4,7 +4,6 @@ import type { SchemaContext } from "./types";
 import { z } from "zod";
 import { generateBlockSchema } from "./blocks";
 
-/** Generates a complete Zod schema for Kirby layouts. */
 export function generateKirbyLayoutsSchema(
   fieldsets: KirbyFieldset[],
   fieldConfig: Partial<KirbyLayoutFieldProps> = {},
@@ -32,7 +31,6 @@ export function generateKirbyLayoutsSchema(
   );
 }
 
-/** Extracts all unique layout widths from layouts array. */
 function extractLayoutWidths(layouts: KirbyLayoutFieldProps["layouts"]) {
   const widths = new Set<string>();
 
@@ -47,7 +45,6 @@ function extractLayoutWidths(layouts: KirbyLayoutFieldProps["layouts"]) {
   return [...widths];
 }
 
-/** Generates a Zod schema for a single layout. */
 function generateLayoutSchema(
   fieldsets: KirbyFieldset[],
   layoutWidths: string[],
@@ -69,7 +66,6 @@ function generateLayoutSchema(
     .strict();
 }
 
-/** Generates a Zod schema for layout column. */
 function generateLayoutColumnSchema(
   fieldsets: KirbyFieldset[],
   layoutWidths: string[],

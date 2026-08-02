@@ -69,22 +69,17 @@ export interface PluginContextResponse {
 }
 
 /**
- * Kirby fieldset definition for blocks.
- *
- * Returned by the `__copilot__/fieldsets` API endpoint.
- * Represents a block type with its name, type identifier, and field definitions.
- *
- * Note: This is a simplified structure from the API, not the full `KirbyFieldsetProps`.
+ * Block type as returned by the `__copilot__/fieldsets` API endpoint: a
+ * simplified shape of the blueprint fieldset, not the full
+ * `KirbyFieldsetProps`.
  *
  * @see https://getkirby.com/docs/reference/panel/fields/blocks
  */
 export interface KirbyFieldset {
-  /** Human-readable block name */
   name: string;
   /** Block type identifier (e.g., `text`, `heading`, `image`) */
   type: string;
   /** Optional description of the block's purpose, defined in the block blueprint */
   description?: string | null;
-  /** Field definitions within the block */
   fields?: Record<string, KirbyFieldProps>;
 }

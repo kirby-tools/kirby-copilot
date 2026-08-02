@@ -99,7 +99,6 @@ export function usePromptTemplates() {
       const trimmedPrompt = newTemplate.prompt.trim();
       if (!trimmedLabel || !trimmedPrompt) continue;
 
-      // Try to find existing template by label first, then by prompt
       let existingIndex = existingTemplates.findIndex(
         (template) => template.label === trimmedLabel,
       );

@@ -148,7 +148,6 @@ const filteredPlaceholderFields = computed(() => {
       props.activeField.type,
     ) as (KirbyFieldProps & { copilot?: { userPrompt?: string } }) | undefined;
 
-    // Use field-specific custom user prompt if configured
     if (typeof fieldDefinition?.copilot?.userPrompt === "string") {
       prompt.value = fieldDefinition.copilot.userPrompt;
     }
@@ -161,7 +160,6 @@ function handleEditorSubmit() {
 }
 
 function handleEditorKeydown(event: KeyboardEvent) {
-  // Listen to arrow up and down to navigate the prompt history
   if (event.key === "ArrowUp" || event.key === "ArrowDown") {
     event.preventDefault();
 
@@ -242,7 +240,6 @@ function pickPages() {
 
 function togglePlaceholderDropdown() {
   if (!isPlaceholderDropdownOpen.value) {
-    // Reset search when opening dropdown
     placeholderSearch.value = "";
   }
 

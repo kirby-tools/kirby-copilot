@@ -2,10 +2,6 @@ const DEFAULT_QUALITY = 0.85;
 const PROGRESSIVE_THRESHOLD = 1024;
 const LOSSY_FORMATS = new Set(["image/jpeg", "image/webp", "image/avif"]);
 
-/**
- * Opens a native file picker dialog and returns selected files.
- * Handles both selection and cancellation properly.
- */
 export function openFilePicker({
   accept = "*",
   multiple = true,
@@ -24,7 +20,6 @@ export function openFilePicker({
       input.remove();
     };
 
-    // Handle file selection
     input.addEventListener(
       "change",
       (event) => {
@@ -147,7 +142,6 @@ async function renderImageToBlob(
   const targetWidth = Math.round(sourceWidth * resizeRatio);
   const targetHeight = Math.round(sourceHeight * resizeRatio);
 
-  // Skip processing if no resize needed and format matches
   if (resizeRatio === 1 && mimeType === image.src) {
     const canvas = renderToCanvas(image, targetWidth, targetHeight);
     return canvasToBlob(canvas, mimeType, quality);
@@ -168,7 +162,6 @@ async function renderImageToBlob(
     );
   }
 
-  // For smaller images or minor resizing, render directly
   const canvas = renderToCanvas(image, targetWidth, targetHeight);
   return canvasToBlob(canvas, mimeType, quality);
 }
@@ -185,9 +178,7 @@ async function progressiveDownsample(
   let currentImage: HTMLImageElement | ImageBitmap = source;
 
   try {
-    // Progressive multi-step downsampling for higher quality results
     while (currentWidth > targetWidth * 2 || currentHeight > targetHeight * 2) {
-      // Calculate intermediate size (halve dimensions, but don't go below target)
       const intermediateWidth = Math.max(
         targetWidth,
         Math.floor(currentWidth * 0.5),
@@ -219,7 +210,6 @@ async function progressiveDownsample(
     const finalCanvas = renderToCanvas(currentImage, targetWidth, targetHeight);
     return canvasToBlob(finalCanvas, mimeType, quality);
   } finally {
-    // Ensure cleanup of the last `ImageBitmap`
     if (currentImage !== source && "close" in currentImage) {
       currentImage.close();
     }

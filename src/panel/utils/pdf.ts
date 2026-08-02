@@ -19,7 +19,6 @@ export async function extractTextFromPdf(file: File) {
     ),
   );
 
-  // Reduce whitespace to single space
   return texts.map((text) => text.replace(/\s+/g, " ")).join("\n");
 }
 

@@ -10,7 +10,8 @@ type MaybeRef<T> = T | Ref<T> | ShallowRef<T> | WritableComputedRef<T>; // TODO:
 type MaybeElement = HTMLElement | ComponentPublicInstance | undefined | null;
 
 /**
- * Register using addEventListener on mounted, and removeEventListener automatically on unmounted.
+ * Registers the listener once the target element exists and removes it again
+ * when the target changes or the surrounding effect scope is disposed.
  *
  * @see https://vueuse.org/useEventListener
  */

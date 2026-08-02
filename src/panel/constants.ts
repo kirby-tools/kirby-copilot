@@ -63,7 +63,6 @@ export const REASONING_EFFORTS = [
 ] as const;
 export type ReasoningEffort = (typeof REASONING_EFFORTS)[number];
 
-// Default reasoning effort level
 export const DEFAULT_REASONING_EFFORT: ReasoningEffort = "low";
 
 export const DEFAULT_SYSTEM_PROMPT = `
@@ -115,10 +114,8 @@ export const SUPPORTED_FILE_MIME_TYPES = [
 ];
 
 /**
- * Maximum total size for PDF files in bytes (50 MB)
- *
- * @remarks
- * If exceeded, fall back to text extraction
+ * Beyond this total size, PDFs are inlined as extracted text instead of being
+ * attached as binaries, since providers reject large attachments.
  */
 export const PDF_SIZE_LIMIT = 50 * 1024 * 1024;
 

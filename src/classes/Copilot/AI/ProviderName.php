@@ -41,8 +41,8 @@ enum ProviderName: string
     }
 
     /**
-     * Host of the provider's AI SDK default base URL, used for the proxy
-     * target allow-list.
+     * Returns the host of the provider's AI SDK default base URL, used for
+     * the proxy target allow-list.
      */
     public function defaultHost(): string
     {
@@ -55,8 +55,10 @@ enum ProviderName: string
     }
 
     /**
-     * Case-lowered providers map from the plugin config, so
-     * `providers.OpenAI` and `providers.openai` resolve identically.
+     * Returns the providers map from the plugin config with lowercased keys,
+     * so `providers.OpenAI` and `providers.openai` resolve identically.
+     *
+     * @return array<string, array<string, mixed>>
      */
     public static function providers(App $kirby): array
     {

@@ -112,7 +112,6 @@ return [
                     $config['completion'] = $completionDefaults;
                 } else {
                     $config['completion'] = array_replace_recursive($completionDefaults, $completion);
-                    // Enforce minimum debounce of 500ms
                     $config['completion']['debounce'] = max(500, (int)$config['completion']['debounce']);
                 }
 
@@ -251,9 +250,8 @@ return [
                                 if (isset($field['options']) && is_array($field['options'])) {
                                     $options = $field['options'];
 
-                                    // Already in resolved format
                                     if (isset($options[0]['value'])) {
-                                        // Pass through
+                                        // Already in resolved format, nothing to normalize
                                     } elseif (isset($options['type'])) {
                                         // Query/API definitions can't be resolved without a model
                                         $field['options'] = [];

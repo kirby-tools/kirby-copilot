@@ -17,12 +17,10 @@ export function createHtmlChunking(): ChunkDetector {
     const tagIndex = buffer.indexOf("<");
     const newlineIndex = buffer.indexOf("\n");
 
-    // No special characters - release entire buffer as plain text
     if (tagIndex === -1 && newlineIndex === -1) {
       return buffer;
     }
 
-    // Find which special character comes first
     const firstSpecialIndex =
       tagIndex === -1
         ? newlineIndex
@@ -30,46 +28,40 @@ export function createHtmlChunking(): ChunkDetector {
           ? tagIndex
           : Math.min(tagIndex, newlineIndex);
 
-    // Plain text before special character - release it
     if (firstSpecialIndex > 0) {
       return buffer.slice(0, firstSpecialIndex);
     }
 
-    // Newline at start - release consecutive newlines as one chunk
+    // Release a newline run as a single chunk so paragraph breaks stay intact
     if (firstSpecialIndex === newlineIndex) {
       return buffer.match(/^\n+/)![0];
     }
 
-    // HTML tag at start - parse and return complete tag
     return parseHtmlElement(buffer);
   };
 }
 
 function parseHtmlElement(buffer: string): string | null {
-  // Invalid tag-like text (e.g. `<123>`, `<>`) - release `<` as plain text
+  // Tag-like text that is not a tag (e.g. `<123>`, `<>`) – release `<` as plain text
   if (!/^<\/?[a-z]/i.test(buffer)) {
     return buffer.length > 1 ? "<" : null;
   }
 
-  // Closing tag - return it immediately
   if (buffer.startsWith("</")) {
     const closeEnd = buffer.indexOf(">");
     return closeEnd === -1 ? null : buffer.slice(0, closeEnd + 1);
   }
 
-  // Opening tag - extract tag name and attributes
   const tagMatch = buffer.match(/^<([a-z][a-z0-9-]*)(?:\s[^>]*)?(\/?)>/i);
   if (!tagMatch) return null;
 
   const [fullMatch, tagName, selfClosing] = tagMatch;
   const tagLower = tagName!.toLowerCase();
 
-  // Self-closing syntax (`/>`) or void element
   if (selfClosing || HTML_VOID_ELEMENTS.has(tagLower)) {
     return fullMatch;
   }
 
-  // Find the matching closing tag (handles nested same-name elements)
   return findMatchingCloseTag(buffer, tagLower, fullMatch.length);
 }
 
@@ -77,7 +69,7 @@ function parseHtmlElement(buffer: string): string | null {
  * Finds the matching closing tag for an element, handling nested same-name tags.
  *
  * @remarks
- * For `<ol><li>item</li></ol>`, only `<ol>` depth is tracked - inner `<li>` tags
+ * For `<ol><li>item</li></ol>`, only `<ol>` depth is tracked – inner `<li>` tags
  * don't affect the search. For `<ol><ol>nested</ol></ol>`, depth tracking ensures
  * the correct outer `</ol>` is matched.
  */
@@ -97,10 +89,9 @@ function findMatchingCloseTag(
     const nextOpen = lowerBuffer.indexOf(openPattern, pos);
     const nextClose = lowerBuffer.indexOf(closePattern, pos);
 
-    // Closing tag not yet in buffer
+    // Wait for more input rather than emitting a half element
     if (nextClose === -1) return null;
 
-    // Nested opening tag found before closing tag - increase depth
     if (nextOpen !== -1 && nextOpen < nextClose) {
       depth++;
       pos = nextOpen + openPattern.length;

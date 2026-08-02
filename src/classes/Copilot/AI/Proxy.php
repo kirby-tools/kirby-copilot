@@ -29,7 +29,7 @@ final class Proxy
      * reached the client, `null` otherwise (the transport has already
      * streamed the response).
      *
-     * @throws InvalidArgumentException
+     * @throws InvalidArgumentException When the provider, its API key or the requested proxy target is invalid
      */
     public function handle(): Response|null
     {
@@ -84,12 +84,14 @@ final class Proxy
 
         $body = file_get_contents('php://input');
 
-        // Upstream headers that the Vercel AI SDK provider packages actually send
+        // Upstream headers that the Vercel AI SDK provider packages actually send.
+        // The auth header differs per provider: `authorization` (OpenAI and
+        // Mistral, Bearer), `x-api-key` (Anthropic), `x-goog-api-key` (Google).
         $allowedUpstreamHeaders = [
             'user-agent',
-            'authorization',                              // OpenAI, Mistral (Bearer)
-            'x-api-key',                                  // Anthropic
-            'x-goog-api-key',                             // Google
+            'authorization',
+            'x-api-key',
+            'x-goog-api-key',
             'openai-organization',
             'openai-project',
             'anthropic-version',
@@ -132,7 +134,6 @@ final class Proxy
         $lastStatus = 0;
 
         $curlOptions = [
-            // Request body + headers
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $body,
             CURLOPT_HTTPHEADER => $curlHeaders,
@@ -169,27 +170,27 @@ final class Proxy
 
                 return strlen($header);
             },
-            // Stream response chunk-by-chunk to stdout
+            // Stream to stdout chunk by chunk instead of buffering the body,
+            // so the Panel renders tokens as they arrive
             CURLOPT_WRITEFUNCTION => function ($ch, $chunk) {
                 echo $chunk;
                 flush();
                 return strlen($chunk);
             },
-            // Timeouts
             CURLOPT_CONNECTTIMEOUT => 10,
             CURLOPT_TIMEOUT => 0,
             CURLOPT_LOW_SPEED_LIMIT => 1,
             // Reasoning-heavy models stall silently before the first
             // token; 4 minutes covers typical first-token latency.
             CURLOPT_LOW_SPEED_TIME => 240,
-            // SSL/TLS
             CURLOPT_SSL_VERIFYPEER => true,
             // Transparently decompress gzip/deflate/br responses so
             // WRITEFUNCTION always sees plain bytes.
             CURLOPT_ENCODING => '',
         ];
 
-        // Use bundled CA certificate if system doesn't have one configured
+        // Fall back to the CA bundle shipped with Kirby when the system has no
+        // usable `curl.cainfo`, otherwise peer verification fails outright
         $systemCaInfo = ini_get('curl.cainfo');
         if ($systemCaInfo === false || $systemCaInfo === '' || !@is_file($systemCaInfo)) {
             $curlOptions[CURLOPT_CAINFO] = $kirby->root('kirby') . '/cacert.pem';

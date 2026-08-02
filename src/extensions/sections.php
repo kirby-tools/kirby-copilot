@@ -76,7 +76,6 @@ return [
                         'quality' => 60
                     ];
 
-                    // Resize images if larger than 2048px
                     if ($width > $targetSize || $height > $targetSize) {
                         if ($width > $height) {
                             $thumb = $model->thumb(array_merge($defaultOptions, ['width' => $targetSize]));

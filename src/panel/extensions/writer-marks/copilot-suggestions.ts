@@ -14,7 +14,7 @@ import {
 } from "../../constants";
 import { loadAISDK } from "../../utils";
 
-const LICENSE_TOAST_THRESHOLD = 3; // Show toast after this many completions
+const LICENSE_TOAST_THRESHOLD = 3;
 const COMPLETION_COUNT_STORAGE_KEY = `${STORAGE_KEY_PREFIX}completionCount`;
 
 interface CompletionPluginState {
@@ -97,7 +97,6 @@ export const copilotSuggestions: CopilotSuggestionsMark = {
     setCompletionMeta(tr, { type: "dismiss" });
     view.dispatch(tr);
 
-    // Show license toast once per session for unlicensed users
     this._showLicenseToastOnce();
 
     return true;
@@ -151,9 +150,6 @@ export const copilotSuggestions: CopilotSuggestionsMark = {
   },
 };
 
-/**
- * Creates the ProseMirror plugin spec for tab completion.
- */
 function createCompletionPlugin(
   context: WriterMarkContext,
   mark: CopilotSuggestionsMark,
@@ -252,7 +248,6 @@ function createCompletionPlugin(
           // Skip during IME composition
           if (view.composing) return;
 
-          // Only trigger if document changed
           if (view.state.doc.eq(prevState.doc)) return;
 
           // Only trigger if editor is focused (prevents completion on external
@@ -265,7 +260,6 @@ function createCompletionPlugin(
           debounceTimer = setTimeout(() => {
             const { $head } = view.state.selection;
 
-            // Only trigger if cursor is at the end of a non-empty text block
             const isAtEndOfBlock =
               $head.parentOffset === $head.parent.content.size;
             const isEmptyBlock = $head.parent.textContent.length === 0;
@@ -286,7 +280,6 @@ function createCompletionPlugin(
       decorations(state) {
         const pluginState = getCompletionState(state);
 
-        // Show loader when loading and no suggestion yet
         if (
           pluginState?.isLoading &&
           !pluginState?.suggestion &&
@@ -304,7 +297,6 @@ function createCompletionPlugin(
           return DecorationSet.create(state.doc, [loader]);
         }
 
-        // Show suggestion text when available
         if (pluginState?.suggestion && pluginState.position !== null) {
           const widget = Decoration.widget(
             pluginState.position,
@@ -339,7 +331,6 @@ function createCompletionPlugin(
     const { state } = view;
     const position = state.selection.head;
 
-    // Get text context around cursor
     const { prefix, suffix } = getCursorContext(state, {
       suffixLength: includeSuffix ? COMPLETION_SUFFIX_LENGTH : 0,
     });

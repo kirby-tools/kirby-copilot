@@ -51,7 +51,6 @@ export const copilot: CopilotMark = {
   ) {
     const position = cursorPosition;
 
-    // Handle newline sequences (1+ newlines)
     if (/^\n+$/.test(text)) {
       if (text.length >= 2) {
         // 2+ newlines → paragraph break
@@ -74,7 +73,8 @@ export const copilot: CopilotMark = {
       return { tr, newPosition: position + 1 };
     }
 
-    // Check if text contains HTML (complete elements from chunking)
+    // The stream is chunked by `createHtmlChunking`, so an opening bracket
+    // always comes with its complete element – never a half tag
     if (text.includes("<")) {
       try {
         // Match Kirby's pattern: https://github.com/getkirby/kirby/blob/42cd286dab62d87a331e53abfe103e4fba118dd6/panel/src/components/Forms/Writer/Editor.js#L100
@@ -105,7 +105,6 @@ export const copilot: CopilotMark = {
     const { state } = this.editor!;
     const { from, to } = state.selection;
 
-    // Get HTML-formatted selection and normalize to rich-text format
     let currentSelection = "";
     if (from !== to) {
       const fragment = state.doc.slice(from, to).content;

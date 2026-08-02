@@ -24,7 +24,7 @@ use Throwable;
  * Doubles as the transport for any OpenAI-compatible endpoint
  * (Mistral, Gemini's `/v1beta/openai/`, OpenRouter, Azure, Ollama, …).
  * {@see GeminiProvider} and {@see MistralProvider} extend this class
- * and override the base-URL / model constants only.
+ * and override the default base URL and the provider name only.
  *
  * @internal
  */
@@ -140,7 +140,7 @@ class OpenAIProvider implements Provider
     }
 
     /**
-     * @throws ProviderException
+     * @throws ProviderException Always; this is the single exit for provider failures
      */
     protected function fail(
         string $reason,
@@ -220,7 +220,7 @@ class OpenAIProvider implements Provider
     }
 
     /**
-     * @throws AuthException
+     * @throws AuthException When the provider has no API key configured
      */
     protected function apiKey(): string
     {

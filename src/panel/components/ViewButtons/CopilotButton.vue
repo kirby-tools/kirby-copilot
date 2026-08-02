@@ -86,7 +86,6 @@ async function initPromptDialog() {
     const { getZodSchema: getBlocksZodSchema } = useBlocks();
     const { getZodSchema: getLayoutZodSchema } = useLayouts();
 
-    // Build schema for all selected fields
     const fieldsSchema: Record<string, z.ZodType> = {};
 
     for (const field of selectedFields) {
@@ -186,7 +185,6 @@ function processFieldValues({
     const normalizer =
       field.type === "layout" ? normalizeLayout : normalizeBlock;
 
-    // Handle layouts and blocks field normalization
     if (field.type === "layout" || field.type === "blocks") {
       if (Array.isArray(fieldValue)) {
         processedContent[field.name] = [

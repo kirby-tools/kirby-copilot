@@ -41,9 +41,6 @@ import { extractSkillRefIds, stripSkillRefTokens, useSkills } from "./skills";
 
 const DEFAULT_PLAYGROUND_MODEL_PROVIDER = "google";
 
-/**
- * Builds a user prompt with output format and optional selection context.
- */
 export function buildUserPrompt(
   prompt: string,
   {
@@ -63,9 +60,6 @@ export function buildUserPrompt(
     .join("\n\n");
 }
 
-/**
- * Streams text from an AI provider using the configured model.
- */
 export async function useStreamText({
   userPrompt,
   systemPrompt,
@@ -193,9 +187,6 @@ export async function useStreamText({
   return result;
 }
 
-/**
- * Resolves the language model and provider options for the configured AI provider.
- */
 export async function resolveLanguageModel({
   forCompletion = false,
 }: {

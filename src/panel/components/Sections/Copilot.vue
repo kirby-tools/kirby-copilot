@@ -75,7 +75,6 @@ const theme = ref<string>();
 const size = ref<string>();
 const logLevel = ref<LogLevelIndex>();
 
-// Section computed
 const modelFile = ref<{ mime: string; url: string }>();
 const help = ref<string>();
 
@@ -91,7 +90,6 @@ const permissions = ref<string[]>([]);
 const files = ref<File[]>([]);
 const licenseStatus = ref<LicenseStatus>();
 
-// Non-reactive data
 let storageKey: string;
 let activeRun: ReturnType<typeof runTextGeneration>;
 
