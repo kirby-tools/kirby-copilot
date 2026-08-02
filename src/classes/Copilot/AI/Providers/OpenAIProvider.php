@@ -93,6 +93,7 @@ class OpenAIProvider implements Provider
 
         return $content;
     }
+
     /**
      * @template T
      * @param Closure(): T $operation

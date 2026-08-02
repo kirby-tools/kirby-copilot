@@ -116,6 +116,7 @@ final class AnthropicProvider implements Provider
 
         return implode('', $textParts);
     }
+
     /**
      * @param list<array{role: string, content: string}> $messages
      * @return array{0: list<array{role: string, content: string}>, 1: string|null}
