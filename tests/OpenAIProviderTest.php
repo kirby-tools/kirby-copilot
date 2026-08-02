@@ -23,6 +23,58 @@ use Psr\Http\Message\ResponseInterface;
 
 final class OpenAIProviderTest extends TestCase
 {
+    /**
+     * @param class-string<OpenAIProvider> $providerClass
+     * @param list<mixed>|null $responses
+     * @param array<string, mixed> $options
+     * @return array{0: ClientFake, 1: OpenAIProvider}
+     */
+    private function fixture(
+        string $content = '{}',
+        string|null $model = null,
+        string $providerClass = OpenAIProvider::class,
+        array|null $responses = null,
+        Closure|null $sleep = null,
+        array $options = [],
+    ): array {
+        $client = new ClientFake($responses ?? [$this->successResponse($content)]);
+
+        $provider = new $providerClass(
+            config: new ProviderConfig(apiKey: 'sk-test', model: $model, options: $options),
+            client: $client,
+            sleep: $sleep,
+        );
+
+        return [$client, $provider];
+    }
+
+    private function successResponse(string $content = '{}'): CreateResponse
+    {
+        return CreateResponse::fake([
+            'choices' => [
+                [
+                    'index' => 0,
+                    'message' => ['role' => 'assistant', 'content' => $content],
+                    'finish_reason' => 'stop',
+                ],
+            ],
+        ]);
+    }
+
+    private function errorException(int $statusCode, string $retryAfter = ''): ErrorException
+    {
+        $response = $this->createStub(ResponseInterface::class);
+        $response->method('getStatusCode')->willReturn($statusCode);
+        $response->method('getHeaderLine')->willReturnMap([
+            ['Retry-After', $retryAfter],
+        ]);
+
+        return new ErrorException(
+            contents: ['message' => 'error', 'type' => 'error'],
+            response: $response,
+        );
+    }
+
     #[Test]
     public function returns_decoded_json_object_from_chat_completion_content(): void
     {
@@ -436,57 +488,5 @@ final class OpenAIProviderTest extends TestCase
             return $method === 'create' &&
                 ($parameters['reasoning_effort'] ?? null) === 'low';
         });
-    }
-
-    /**
-     * @param class-string<OpenAIProvider> $providerClass
-     * @param list<mixed>|null $responses
-     * @param array<string, mixed> $options
-     * @return array{0: ClientFake, 1: OpenAIProvider}
-     */
-    private function fixture(
-        string $content = '{}',
-        string|null $model = null,
-        string $providerClass = OpenAIProvider::class,
-        array|null $responses = null,
-        Closure|null $sleep = null,
-        array $options = [],
-    ): array {
-        $client = new ClientFake($responses ?? [$this->successResponse($content)]);
-
-        $provider = new $providerClass(
-            config: new ProviderConfig(apiKey: 'sk-test', model: $model, options: $options),
-            client: $client,
-            sleep: $sleep,
-        );
-
-        return [$client, $provider];
-    }
-
-    private function successResponse(string $content = '{}'): CreateResponse
-    {
-        return CreateResponse::fake([
-            'choices' => [
-                [
-                    'index' => 0,
-                    'message' => ['role' => 'assistant', 'content' => $content],
-                    'finish_reason' => 'stop',
-                ],
-            ],
-        ]);
-    }
-
-    private function errorException(int $statusCode, string $retryAfter = ''): ErrorException
-    {
-        $response = $this->createStub(ResponseInterface::class);
-        $response->method('getStatusCode')->willReturn($statusCode);
-        $response->method('getHeaderLine')->willReturnMap([
-            ['Retry-After', $retryAfter],
-        ]);
-
-        return new ErrorException(
-            contents: ['message' => 'error', 'type' => 'error'],
-            response: $response,
-        );
     }
 }

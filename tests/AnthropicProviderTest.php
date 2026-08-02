@@ -22,6 +22,121 @@ final class AnthropicProviderTest extends TestCase
     /** @var list<array{request: \Psr\Http\Message\RequestInterface, response: mixed, error: mixed, options: array<string, mixed>}> */
     private array $sentRequests = [];
 
+    /**
+     * @param list<Response> $responses
+     * @param array<string, mixed> $options
+     * @return array{0: MockHandler, 1: AnthropicProvider}
+     */
+    private function fixture(
+        array $responses,
+        array $options = [],
+    ): array {
+        $mockHandler = new MockHandler($responses);
+        $stack = HandlerStack::create($mockHandler);
+        $stack->push(Middleware::history($this->sentRequests));
+
+        $guzzle = new GuzzleClient(['handler' => $stack]);
+
+        $client = new AnthropicClient(
+            apiKey: 'sk-ant-test',
+            requestOptions: AnthropicRequestOptions::with(transporter: $guzzle, maxRetries: 0),
+        );
+
+        $provider = new AnthropicProvider(
+            config: new ProviderConfig(apiKey: 'sk-ant-test', options: $options),
+            client: $client,
+        );
+
+        return [$mockHandler, $provider];
+    }
+
+    /** @return array<string, mixed> */
+    private function lastRequestBody(): array
+    {
+        $request = $this->sentRequests[array_key_last($this->sentRequests)]['request'];
+
+        return json_decode((string)$request->getBody(), associative: true);
+    }
+
+    private function toolUseResponse(array $input, string $name = 'structured_response'): Response
+    {
+        return new Response(
+            status: 200,
+            headers: ['Content-Type' => 'application/json'],
+            body: json_encode([
+                'id' => 'msg_test',
+                'type' => 'message',
+                'role' => 'assistant',
+                'content' => [
+                    [
+                        'type' => 'tool_use',
+                        'id' => 'tool_test',
+                        'name' => $name,
+                        'input' => $input,
+                    ],
+                ],
+                'model' => ProviderName::Anthropic->defaultModel(),
+                'stop_reason' => 'tool_use',
+                'usage' => ['input_tokens' => 0, 'output_tokens' => 0],
+            ]),
+        );
+    }
+
+    private function textOnlyResponse(string $text): Response
+    {
+        return new Response(
+            status: 200,
+            headers: ['Content-Type' => 'application/json'],
+            body: json_encode([
+                'id' => 'msg_test',
+                'type' => 'message',
+                'role' => 'assistant',
+                'content' => [['type' => 'text', 'text' => $text]],
+                'model' => ProviderName::Anthropic->defaultModel(),
+                'stop_reason' => 'end_turn',
+                'usage' => ['input_tokens' => 0, 'output_tokens' => 0],
+            ]),
+        );
+    }
+
+    /**
+     * @param list<string> $texts
+     */
+    private function textBlocksResponse(array $texts): Response
+    {
+        $blocks = [];
+
+        foreach ($texts as $text) {
+            $blocks[] = ['type' => 'text', 'text' => $text];
+        }
+
+        return new Response(
+            status: 200,
+            headers: ['Content-Type' => 'application/json'],
+            body: json_encode([
+                'id' => 'msg_test',
+                'type' => 'message',
+                'role' => 'assistant',
+                'content' => $blocks,
+                'model' => ProviderName::Anthropic->defaultModel(),
+                'stop_reason' => 'end_turn',
+                'usage' => ['input_tokens' => 0, 'output_tokens' => 0],
+            ]),
+        );
+    }
+
+    private function errorResponse(int $status): Response
+    {
+        return new Response(
+            status: $status,
+            headers: ['Content-Type' => 'application/json'],
+            body: json_encode([
+                'type' => 'error',
+                'error' => ['type' => 'error', 'message' => 'error'],
+            ]),
+        );
+    }
+
     #[Test]
     public function returns_decoded_object_from_response_tool_use_input(): void
     {
@@ -208,121 +323,6 @@ final class AnthropicProviderTest extends TestCase
         $this->expectException(ProviderException::class);
         $provider->generateText(
             messages: [['role' => 'user', 'content' => 'hi']],
-        );
-    }
-
-    /**
-     * @param list<Response> $responses
-     * @param array<string, mixed> $options
-     * @return array{0: MockHandler, 1: AnthropicProvider}
-     */
-    private function fixture(
-        array $responses,
-        array $options = [],
-    ): array {
-        $mockHandler = new MockHandler($responses);
-        $stack = HandlerStack::create($mockHandler);
-        $stack->push(Middleware::history($this->sentRequests));
-
-        $guzzle = new GuzzleClient(['handler' => $stack]);
-
-        $client = new AnthropicClient(
-            apiKey: 'sk-ant-test',
-            requestOptions: AnthropicRequestOptions::with(transporter: $guzzle, maxRetries: 0),
-        );
-
-        $provider = new AnthropicProvider(
-            config: new ProviderConfig(apiKey: 'sk-ant-test', options: $options),
-            client: $client,
-        );
-
-        return [$mockHandler, $provider];
-    }
-
-    /** @return array<string, mixed> */
-    private function lastRequestBody(): array
-    {
-        $request = $this->sentRequests[array_key_last($this->sentRequests)]['request'];
-
-        return json_decode((string)$request->getBody(), associative: true);
-    }
-
-    private function toolUseResponse(array $input, string $name = 'structured_response'): Response
-    {
-        return new Response(
-            status: 200,
-            headers: ['Content-Type' => 'application/json'],
-            body: json_encode([
-                'id' => 'msg_test',
-                'type' => 'message',
-                'role' => 'assistant',
-                'content' => [
-                    [
-                        'type' => 'tool_use',
-                        'id' => 'tool_test',
-                        'name' => $name,
-                        'input' => $input,
-                    ],
-                ],
-                'model' => ProviderName::Anthropic->defaultModel(),
-                'stop_reason' => 'tool_use',
-                'usage' => ['input_tokens' => 0, 'output_tokens' => 0],
-            ]),
-        );
-    }
-
-    private function textOnlyResponse(string $text): Response
-    {
-        return new Response(
-            status: 200,
-            headers: ['Content-Type' => 'application/json'],
-            body: json_encode([
-                'id' => 'msg_test',
-                'type' => 'message',
-                'role' => 'assistant',
-                'content' => [['type' => 'text', 'text' => $text]],
-                'model' => ProviderName::Anthropic->defaultModel(),
-                'stop_reason' => 'end_turn',
-                'usage' => ['input_tokens' => 0, 'output_tokens' => 0],
-            ]),
-        );
-    }
-
-    /**
-     * @param list<string> $texts
-     */
-    private function textBlocksResponse(array $texts): Response
-    {
-        $blocks = [];
-
-        foreach ($texts as $text) {
-            $blocks[] = ['type' => 'text', 'text' => $text];
-        }
-
-        return new Response(
-            status: 200,
-            headers: ['Content-Type' => 'application/json'],
-            body: json_encode([
-                'id' => 'msg_test',
-                'type' => 'message',
-                'role' => 'assistant',
-                'content' => $blocks,
-                'model' => ProviderName::Anthropic->defaultModel(),
-                'stop_reason' => 'end_turn',
-                'usage' => ['input_tokens' => 0, 'output_tokens' => 0],
-            ]),
-        );
-    }
-
-    private function errorResponse(int $status): Response
-    {
-        return new Response(
-            status: $status,
-            headers: ['Content-Type' => 'application/json'],
-            body: json_encode([
-                'type' => 'error',
-                'error' => ['type' => 'error', 'message' => 'error'],
-            ]),
         );
     }
 }
