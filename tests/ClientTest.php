@@ -14,26 +14,7 @@ use PHPUnit\Framework\TestCase;
 final class ClientTest extends TestCase
 {
     #[Test]
-    public function returns_provider_object_unchanged(): void
-    {
-        $stub = $this->createStub(Provider::class);
-        $stub->method('generateObject')->willReturn(['hello' => 'world']);
-
-        $client = new Client(
-            resolver: new Resolver(defaultProvider: ProviderName::OpenAI, providers: []),
-            providerOverride: $stub,
-        );
-
-        $result = $client->generateObject(
-            messages: [['role' => 'user', 'content' => 'hi']],
-            schema: ['type' => 'object'],
-        );
-
-        $this->assertSame(['hello' => 'world'], $result);
-    }
-
-    #[Test]
-    public function forwards_messages_and_schema_unchanged_to_provider(): void
+    public function forwards_messages_and_schema_and_returns_the_provider_object_unchanged(): void
     {
         $messages = [['role' => 'user', 'content' => 'hi']];
         $schema = ['type' => 'object', 'properties' => ['x' => ['type' => 'string']]];
@@ -42,14 +23,17 @@ final class ClientTest extends TestCase
         $mock->expects($this->once())
             ->method('generateObject')
             ->with($messages, $schema)
-            ->willReturn([]);
+            ->willReturn(['hello' => 'world']);
 
         $client = new Client(
             resolver: new Resolver(defaultProvider: ProviderName::OpenAI, providers: []),
             providerOverride: $mock,
         );
 
-        $client->generateObject(messages: $messages, schema: $schema);
+        $this->assertSame(
+            ['hello' => 'world'],
+            $client->generateObject(messages: $messages, schema: $schema),
+        );
     }
 
     #[Test]

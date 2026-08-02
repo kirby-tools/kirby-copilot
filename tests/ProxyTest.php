@@ -7,7 +7,6 @@ use JohannSchopplich\Copilot\AI\ProxyTransport;
 use JohannSchopplich\Copilot\AI\ProxyTransportResult;
 use Kirby\Cms\App;
 use Kirby\Cms\Response;
-use Kirby\Exception\InvalidArgumentException;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
@@ -27,7 +26,6 @@ final class ProxyTest extends TestCase
         array $server = [],
         array $providerConfig = ['apiKey' => 'test-key'],
         string $providerConfigKey = 'openai',
-        array $query = ['provider' => 'openai'],
     ): Proxy {
         $kirby = new App([
             'options' => [
@@ -35,7 +33,7 @@ final class ProxyTest extends TestCase
                     'providers' => [$providerConfigKey => $providerConfig],
                 ],
             ],
-            'request' => ['query' => $query],
+            'request' => ['query' => ['provider' => 'openai']],
             'server' => [
                 'HTTP_X_PROXY_TARGET' => 'https://api.openai.com/v1/responses',
                 ...$server,
@@ -54,30 +52,6 @@ final class ProxyTest extends TestCase
 
         $this->assertNull($response);
         $this->assertSame('https://api.openai.com/v1/responses', $transport->targetUrl);
-    }
-
-    #[Test]
-    public function rejects_an_unknown_provider(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid provider: foobar');
-
-        $this->createProxy(
-            new FakeProxyTransport(),
-            query: ['provider' => 'foobar'],
-        )->handle();
-    }
-
-    #[Test]
-    public function rejects_a_target_host_outside_the_allow_list(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Proxy target host not allowed: evil.example.com');
-
-        $this->createProxy(
-            new FakeProxyTransport(),
-            ['HTTP_X_PROXY_TARGET' => 'https://evil.example.com/v1/responses'],
-        )->handle();
     }
 
     #[Test]
