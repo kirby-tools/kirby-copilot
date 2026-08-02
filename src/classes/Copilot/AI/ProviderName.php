@@ -77,9 +77,8 @@ enum ProviderName: string
     }
 
     /**
-     * The single acceptance rule for a resolved `apiKey` value, shared by the
-     * provider classes and the Panel's `hasApiKey` flag, so the Panel never
-     * reports a key the server would reject.
+     * Shared by the providers and the Panel's `hasApiKey` flag, so the Panel
+     * never reports a key the server would reject.
      */
     public static function isUsableApiKey(mixed $apiKey): bool
     {
