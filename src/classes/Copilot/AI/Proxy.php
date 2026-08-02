@@ -124,7 +124,7 @@ final class Proxy
         // Content-Type isn't prefixed with `HTTP_` in `$_SERVER`, so Kirby's
         // `headers()` excludes it. Forward it to prevent body misinterpretation.
         $contentType = $_SERVER['CONTENT_TYPE'] ?? $_SERVER['HTTP_CONTENT_TYPE'] ?? null;
-        if ($contentType) {
+        if ($contentType !== null && $contentType !== '') {
             $curlHeaders[] = "Content-Type: {$contentType}";
         } elseif (is_string($body) && preg_match('/^\s*[\[{]/', $body)) {
             $curlHeaders[] = 'Content-Type: application/json';
