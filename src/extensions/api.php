@@ -31,18 +31,19 @@ return [
                         '. Must be one of: ' . implode(', ', $valid)
                     );
 
-                // Enforces the type a config option is documented to have. On
+                // Enforces the types a config option is documented to accept. On
                 // mismatch: throws in debug mode, else applies `$fallback` so a
                 // single mistyped option can't take the whole Panel down.
-                $validateType = function (mixed $value, string $path, string $type, mixed $fallback) use ($kirby): mixed {
-                    if (get_debug_type($value) === $type) {
+                $validateType = function (mixed $value, string $path, array $types, mixed $fallback) use ($kirby): mixed {
+                    if (in_array(get_debug_type($value), $types, true)) {
                         return $value;
                     }
 
                     if ($kirby->option('debug')) {
                         // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
                         throw new InvalidArgumentException(
-                            'Invalid ' . $path . ': expected ' . $type . ', got ' . get_debug_type($value)
+                            'Invalid ' . $path . ': expected ' . implode(' or ', $types) .
+                            ', got ' . get_debug_type($value)
                         );
                     }
 
@@ -52,9 +53,9 @@ return [
                 // Normalize provider keys before the defaults merge – a
                 // `providers.OpenAI` entry would otherwise shadow the seeded
                 // `providers.openai` and lose its model defaults
-                $providers = $validateType($config['providers'] ?? [], 'providers', 'array', []);
+                $providers = $validateType($config['providers'] ?? [], 'providers', ['array'], []);
                 foreach ($providers as $name => $providerConfig) {
-                    $providers[$name] = $validateType($providerConfig, 'providers.' . $name, 'array', []);
+                    $providers[$name] = $validateType($providerConfig, 'providers.' . $name, ['array'], []);
                 }
                 $config['providers'] = ProviderName::normalizeProviders($providers);
 
@@ -73,7 +74,7 @@ return [
 
                 $config = array_replace_recursive($defaultConfig, $config);
                 $config['provider'] = strtolower(
-                    $validateType($config['provider'], 'provider', 'string', ProviderName::Google->value)
+                    $validateType($config['provider'], 'provider', ['string'], ProviderName::Google->value)
                 );
 
                 // Walks a dot-notated config path and enforces an enum. On mismatch:
@@ -129,7 +130,7 @@ return [
                 $validateEnum($config, 'logLevel', ['error', 'warn', 'info', 'debug'], 'warn');
 
                 $completionDefaults = ['debounce' => 1000];
-                $completion = $config['completion'] ?? true;
+                $completion = $validateType($config['completion'] ?? true, 'completion', ['array', 'bool'], true);
 
                 if ($completion === false || $completion === []) {
                     $config['completion'] = false;
@@ -154,7 +155,7 @@ return [
 
                         return $label && $prompt ? compact('label', 'prompt') : null;
                     },
-                    $validateType($config['promptTemplates'] ?? [], 'promptTemplates', 'array', [])
+                    $validateType($config['promptTemplates'] ?? [], 'promptTemplates', ['array'], [])
                 )));
 
                 $config['skills'] = array_values(array_filter(array_map(
@@ -183,7 +184,7 @@ return [
 
                         return compact('id', 'label', 'instructions');
                     },
-                    $validateType($config['skills'] ?? [], 'skills', 'array', [])
+                    $validateType($config['skills'] ?? [], 'skills', ['array'], [])
                 )));
 
                 $assets = $kirby

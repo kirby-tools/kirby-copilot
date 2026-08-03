@@ -164,19 +164,16 @@ final class ContextRouteTest extends ApiRouteTestCase
     }
 
     /** @return array<string, array{0: string, 1: mixed}> */
-    public static function mistypedOptions(): array
+    public static function mistypedOptionsInDebugMode(): array
     {
-        return [
-            'provider'          => ['provider',        ['openai']],
-            'providers'         => ['providers',       'openai'],
-            'providers.openai'  => ['providers.openai', 'test-key'],
-            'promptTemplates'   => ['promptTemplates', 'nope'],
-            'skills'            => ['skills',          'nope'],
-        ];
+        return array_map(
+            fn (array $case) => [$case[0], $case[1]],
+            self::mistypedOptionFallbacks(),
+        );
     }
 
     #[Test]
-    #[DataProvider('mistypedOptions')]
+    #[DataProvider('mistypedOptionsInDebugMode')]
     public function mistyped_option_throws_in_debug_mode(string $path, mixed $value): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -188,15 +185,32 @@ final class ContextRouteTest extends ApiRouteTestCase
         ]);
     }
 
-    #[Test]
-    #[DataProvider('mistypedOptions')]
-    public function mistyped_option_falls_back_without_debug(string $path, mixed $value): void
+    /** @return array<string, array{0: string, 1: mixed, 2: string, 3: mixed}> */
+    public static function mistypedOptionFallbacks(): array
     {
+        return [
+            'provider'         => ['provider',         ['openai'], 'provider',               'google'],
+            'providers'        => ['providers',        'openai',   'providers.openai.model', 'gpt-5.6-terra'],
+            'providers.openai' => ['providers.openai', 'test-key', 'providers.openai.model', 'gpt-5.6-terra'],
+            'completion'       => ['completion',       'yes',      'completion',             ['debounce' => 1000]],
+            'promptTemplates'  => ['promptTemplates',  'nope',     'promptTemplates',        []],
+            'skills'           => ['skills',           'nope',     'skills',                 []],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('mistypedOptionFallbacks')]
+    public function mistyped_option_falls_back_without_debug(
+        string $path,
+        mixed $value,
+        string $observedPath,
+        mixed $expected,
+    ): void {
         $response = $this->callContextRoute([
             'johannschopplich.copilot' => self::buildConfigWithOverride($path, $value),
         ]);
 
-        $this->assertSame('google', $response['config']['provider']);
+        $this->assertSame($expected, self::readConfigPath($response['config'], $observedPath));
     }
 
     /** @return array<string, array{0: array<string, mixed>}> */
