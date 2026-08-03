@@ -54,9 +54,10 @@ final class Proxy
             throw new InvalidArgumentException('Missing X-Proxy-Target header');
         }
 
-        // Restrict proxy target to known AI SDK default hosts plus the
-        // host of any configured `providers.<provider>.baseUrl`. Prevents
-        // SSRF and API-key exfiltration via attacker-supplied targets.
+        // Restrict the proxy target to the requested provider's default host
+        // plus the host of its configured `providers.<provider>.baseUrl`.
+        // Prevents SSRF via attacker-supplied targets, and pairing the host
+        // with the provider keeps one provider's key out of another vendor.
         $parsedTarget = parse_url($targetUrl);
         $targetScheme = strtolower($parsedTarget['scheme'] ?? '');
         $targetHost = strtolower($parsedTarget['host'] ?? '');
@@ -65,10 +66,7 @@ final class Proxy
             throw new InvalidArgumentException('Invalid proxy target URL');
         }
 
-        $allowedHosts = array_map(
-            fn (ProviderName $supportedProvider) => $supportedProvider->defaultHost(),
-            ProviderName::cases(),
-        );
+        $allowedHosts = [$provider->defaultHost()];
 
         $configuredBaseUrl = ProviderName::providers($kirby)[$provider->value]['baseUrl'] ?? null;
         if (is_string($configuredBaseUrl)) {
