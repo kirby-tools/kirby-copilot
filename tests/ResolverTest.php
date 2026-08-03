@@ -116,7 +116,7 @@ final class ResolverTest extends TestCase
     }
 
     #[Test]
-    public function collects_unknown_keys_as_pass_through_options(): void
+    public function collects_only_unknown_keys_as_pass_through_options(): void
     {
         $resolver = new Resolver(
             defaultProvider: ProviderName::OpenAI,
@@ -124,6 +124,9 @@ final class ResolverTest extends TestCase
                 'apiKey' => 'sk-test',
                 'model' => 'gpt-5.4',
                 'baseUrl' => 'https://api.openai.com/v1',
+                // Panel-owned keys, never a vendor request parameter
+                'completionModel' => 'gpt-5.4-nano',
+                'api' => 'responses',
                 'reasoning_effort' => 'low',
             ]],
         );

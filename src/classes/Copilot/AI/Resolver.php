@@ -66,7 +66,16 @@ final readonly class Resolver
             apiKey: ProviderName::isUsableApiKey($apiKey) ? $apiKey : null,
             model: isset($config['model']) ? (string)$config['model'] : null,
             baseUrl: isset($config['baseUrl']) ? (string)$config['baseUrl'] : null,
-            options: array_diff_key($config, ['apiKey' => true, 'model' => true, 'baseUrl' => true]),
+            // `completionModel` and `api` steer the Panel's AI SDK client and
+            // have no server-side reader, so they are dropped rather than
+            // forwarded to the vendor as request parameters
+            options: array_diff_key($config, [
+                'apiKey' => true,
+                'model' => true,
+                'baseUrl' => true,
+                'completionModel' => true,
+                'api' => true,
+            ]),
         );
     }
 }
