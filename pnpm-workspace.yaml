@@ -1,9 +1,4 @@
 minimumReleaseAgeExclude:
-  - "@ai-sdk/gateway@3.0.151"
-  - "@ai-sdk/google@3.0.94"
-  - "@ai-sdk/mistral@3.0.50"
-  - ai@6.0.228
-  - tsdown@0.22.8
   - utilful@3.0.1
 
 shellEmulator: true
