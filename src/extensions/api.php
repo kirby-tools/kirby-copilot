@@ -25,12 +25,6 @@ return [
                 $licenses = Licenses::read('johannschopplich/kirby-copilot');
                 $config = $kirby->option('johannschopplich.copilot', []);
 
-                $invalidValueError = fn (string $field, mixed $value, array $valid): InvalidArgumentException =>
-                    new InvalidArgumentException(
-                        'Invalid ' . $field . ': ' . (is_scalar($value) ? (string)$value : json_encode($value)) .
-                        '. Must be one of: ' . implode(', ', $valid)
-                    );
-
                 // Enforces the types a config option is documented to accept. On
                 // mismatch: throws in debug mode, else applies `$fallback` so a
                 // single mistyped option can't take the whole Panel down.
@@ -76,6 +70,12 @@ return [
                 $config['provider'] = strtolower(
                     $validateType($config['provider'], 'provider', ['string'], ProviderName::Google->value)
                 );
+
+                $invalidValueError = fn (string $field, mixed $value, array $valid): InvalidArgumentException =>
+                    new InvalidArgumentException(
+                        'Invalid ' . $field . ': ' . (is_scalar($value) ? (string)$value : json_encode($value)) .
+                        '. Must be one of: ' . implode(', ', $valid)
+                    );
 
                 // Walks a dot-notated config path and enforces an enum. On mismatch:
                 // throws in debug mode, else applies `$fallback` (or unsets when null).

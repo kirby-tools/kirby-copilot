@@ -57,7 +57,7 @@ final class Proxy
         // Restrict the proxy target to the requested provider's default host
         // plus the host of its configured `providers.<provider>.baseUrl`.
         // Prevents SSRF via attacker-supplied targets, and pairing the host
-        // with the provider keeps one provider's key out of another vendor.
+        // with the provider keeps one provider's key out of another's hands.
         $parsedTarget = parse_url($targetUrl);
         $targetScheme = strtolower($parsedTarget['scheme'] ?? '');
         $targetHost = strtolower($parsedTarget['host'] ?? '');

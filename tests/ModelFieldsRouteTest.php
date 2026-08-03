@@ -13,10 +13,10 @@ use PHPUnit\Framework\Attributes\Test;
 #[PreserveGlobalState(false)]
 final class ModelFieldsRouteTest extends ApiRouteTestCase
 {
-    private function callModelFieldsRoute(array $query = []): mixed
+    private function callModelFieldsRoute(array $query = [], array $props = []): mixed
     {
         return $this->callRoute(
-            new App(['request' => ['query' => $query]]),
+            new App(['request' => ['query' => $query], ...$props]),
             '__copilot__/model-fields'
         );
     }
@@ -40,12 +40,9 @@ final class ModelFieldsRouteTest extends ApiRouteTestCase
     #[Test]
     public function resolves_the_fields_of_the_requested_model(): void
     {
-        $fields = $this->callRoute(
-            new App([
-                'request' => ['query' => ['id' => 'site']],
-                'site' => ['blueprint' => ['fields' => ['headline' => ['type' => 'text']]]],
-            ]),
-            '__copilot__/model-fields'
+        $fields = $this->callModelFieldsRoute(
+            ['id' => 'site'],
+            ['site' => ['blueprint' => ['fields' => ['headline' => ['type' => 'text']]]]],
         );
 
         $this->assertArrayHasKey('headline', $fields);

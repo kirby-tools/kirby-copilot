@@ -102,31 +102,32 @@ function findMatchingCloseTag(
   startPosition: number,
 ): string | null {
   const lowerBuffer = buffer.toLowerCase();
+  const openTag = `<${tagName}`;
+  const closeTag = `</${tagName}>`;
   // The delimiter keeps a longer name from counting as a nested open tag,
   // which would otherwise let `<br>` raise the depth of an open `<b>`
-  const openPattern = new RegExp(`<${tagName}(?=[\\s/>])`, "g");
-  const closePattern = `</${tagName}>`;
+  const openTagPattern = new RegExp(`${openTag}(?=[\\s/>])`, "g");
 
   let depth = 1;
   let pos = startPosition;
 
   while (depth > 0) {
-    openPattern.lastIndex = pos;
-    const nextOpen = openPattern.exec(lowerBuffer)?.index ?? -1;
-    const nextClose = lowerBuffer.indexOf(closePattern, pos);
+    openTagPattern.lastIndex = pos;
+    const nextOpen = openTagPattern.exec(lowerBuffer)?.index ?? -1;
+    const nextClose = lowerBuffer.indexOf(closeTag, pos);
 
     // Wait for more input rather than emitting a half element
     if (nextClose === -1) return null;
 
     if (nextOpen !== -1 && nextOpen < nextClose) {
       depth++;
-      pos = nextOpen + tagName.length + 1;
+      pos = nextOpen + openTag.length;
     } else {
       depth--;
       if (depth === 0) {
-        return buffer.slice(0, nextClose + closePattern.length);
+        return buffer.slice(0, nextClose + closeTag.length);
       }
-      pos = nextClose + closePattern.length;
+      pos = nextClose + closeTag.length;
     }
   }
 
