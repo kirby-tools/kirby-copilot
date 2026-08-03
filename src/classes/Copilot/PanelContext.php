@@ -64,7 +64,7 @@ final class PanelContext
 
         self::validateEnum($config, 'provider', array_column(ProviderName::cases(), 'value'), ProviderName::Google->value);
 
-        // The Panel only ever needs to know a key is present, never the key.
+        // The Panel only ever needs to know a key is present, never the key
         $config['providers'] = array_map(
             function (array $provider) use ($kirby) {
                 $apiKey = ProviderName::resolveApiKey($provider['apiKey'] ?? null, $kirby);
