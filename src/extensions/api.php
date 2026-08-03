@@ -11,6 +11,7 @@ use JohannSchopplich\Licensing\Licenses;
 use Kirby\Cms\App;
 use Kirby\Cms\Blueprint;
 use Kirby\Exception\InvalidArgumentException;
+use Kirby\Exception\NotFoundException;
 use Kirby\Toolkit\I18n;
 use Kirby\Toolkit\Str;
 
@@ -24,6 +25,39 @@ return [
                 $licenses = Licenses::read('johannschopplich/kirby-copilot');
                 $config = $kirby->option('johannschopplich.copilot', []);
 
+                $invalidValueError = fn (string $field, mixed $value, array $valid): InvalidArgumentException =>
+                    new InvalidArgumentException(
+                        'Invalid ' . $field . ': ' . (is_scalar($value) ? (string)$value : json_encode($value)) .
+                        '. Must be one of: ' . implode(', ', $valid)
+                    );
+
+                // Enforces the type a config option is documented to have. On
+                // mismatch: throws in debug mode, else applies `$fallback` so a
+                // single mistyped option can't take the whole Panel down.
+                $validateType = function (mixed $value, string $path, string $type, mixed $fallback) use ($kirby): mixed {
+                    if (get_debug_type($value) === $type) {
+                        return $value;
+                    }
+
+                    if ($kirby->option('debug')) {
+                        // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
+                        throw new InvalidArgumentException(
+                            'Invalid ' . $path . ': expected ' . $type . ', got ' . get_debug_type($value)
+                        );
+                    }
+
+                    return $fallback;
+                };
+
+                // Normalize provider keys before the defaults merge – a
+                // `providers.OpenAI` entry would otherwise shadow the seeded
+                // `providers.openai` and lose its model defaults
+                $providers = $validateType($config['providers'] ?? [], 'providers', 'array', []);
+                foreach ($providers as $name => $providerConfig) {
+                    $providers[$name] = $validateType($providerConfig, 'providers.' . $name, 'array', []);
+                }
+                $config['providers'] = ProviderName::normalizeProviders($providers);
+
                 $defaultConfig = [
                     'provider' => ProviderName::Google->value,
                     'providers' => [],
@@ -33,19 +67,14 @@ return [
 
                 foreach (ProviderName::cases() as $provider) {
                     $defaultConfig['providers'][$provider->value] = [
-                        'model' => $provider->defaultModel(),
-                        'completionModel' => $provider->defaultCompletionModel()
+                        'model' => $provider->defaultModel()
                     ];
                 }
 
                 $config = array_replace_recursive($defaultConfig, $config);
-                $config['provider'] = strtolower($config['provider']);
-
-                $invalidValueError = fn (string $field, mixed $value, array $valid): InvalidArgumentException =>
-                    new InvalidArgumentException(
-                        'Invalid ' . $field . ': ' . (is_scalar($value) ? (string)$value : json_encode($value)) .
-                        '. Must be one of: ' . implode(', ', $valid)
-                    );
+                $config['provider'] = strtolower(
+                    $validateType($config['provider'], 'provider', 'string', ProviderName::Google->value)
+                );
 
                 // Walks a dot-notated config path and enforces an enum. On mismatch:
                 // throws in debug mode, else applies `$fallback` (or unsets when null).
@@ -81,8 +110,6 @@ return [
                 };
 
                 $validateEnum($config, 'provider', array_column(ProviderName::cases(), 'value'), ProviderName::Google->value);
-
-                $config['providers'] = array_change_key_case($config['providers'], CASE_LOWER);
 
                 // Convert API keys to boolean flags so the frontend can validate
                 // presence without exposing secrets.
@@ -127,7 +154,7 @@ return [
 
                         return $label && $prompt ? compact('label', 'prompt') : null;
                     },
-                    $config['promptTemplates'] ?? []
+                    $validateType($config['promptTemplates'] ?? [], 'promptTemplates', 'array', [])
                 )));
 
                 $config['skills'] = array_values(array_filter(array_map(
@@ -156,7 +183,7 @@ return [
 
                         return compact('id', 'label', 'instructions');
                     },
-                    $config['skills'] ?? []
+                    $validateType($config['skills'] ?? [], 'skills', 'array', [])
                 )));
 
                 $assets = $kirby
@@ -299,7 +326,19 @@ return [
             'method' => 'GET',
             'action' => function () use ($kirby) {
                 $id = $kirby->request()->query()->get('id');
+
+                if (!is_string($id) || $id === '') {
+                    // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
+                    throw new InvalidArgumentException('Missing "id" query parameter');
+                }
+
                 $model = ModelResolver::resolveFromPath($id);
+
+                if ($model === null) {
+                    // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
+                    throw new NotFoundException('No model found for id: ' . $id);
+                }
+
                 return FieldNormalizer::normalizeFields(FieldResolver::resolveModelFields($model));
             }
         ]

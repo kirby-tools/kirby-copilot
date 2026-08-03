@@ -47,11 +47,9 @@ final readonly class Resolver
             );
         }
 
-        $providers = array_change_key_case((array)($config['providers'] ?? []), CASE_LOWER);
-
         return new self(
             defaultProvider: $defaultProvider,
-            providers: $providers,
+            providers: ProviderName::normalizeProviders($config['providers'] ?? null),
         );
     }
 

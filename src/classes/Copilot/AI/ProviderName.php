@@ -30,16 +30,6 @@ enum ProviderName: string
         };
     }
 
-    public function defaultCompletionModel(): string
-    {
-        return match ($this) {
-            self::OpenAI => 'gpt-5.4-nano',
-            self::Anthropic => 'claude-haiku-4-5',
-            self::Google => 'gemini-3.5-flash',
-            self::Mistral => 'mistral-small-latest',
-        };
-    }
-
     /**
      * Returns the host of the provider's AI SDK default base URL, used for
      * the proxy target allow-list.
@@ -55,8 +45,23 @@ enum ProviderName: string
     }
 
     /**
-     * Returns the providers map from the plugin config with lowercased keys,
-     * so `providers.OpenAI` and `providers.openai` resolve identically.
+     * Normalizes a raw `providers` option into the shape every consumer
+     * expects: lowercased keys, so `providers.OpenAI` and `providers.openai`
+     * resolve identically, and array entries only.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public static function normalizeProviders(mixed $providers): array
+    {
+        if (!is_array($providers)) {
+            return [];
+        }
+
+        return array_change_key_case(array_filter($providers, 'is_array'), CASE_LOWER);
+    }
+
+    /**
+     * Returns the normalized providers map from the plugin config.
      *
      * @return array<string, array<string, mixed>>
      */
@@ -64,7 +69,7 @@ enum ProviderName: string
     {
         $config = $kirby->option('johannschopplich.copilot', []);
 
-        return array_change_key_case($config['providers'] ?? [], CASE_LOWER);
+        return self::normalizeProviders($config['providers'] ?? null);
     }
 
     /**

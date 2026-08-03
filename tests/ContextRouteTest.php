@@ -138,12 +138,65 @@ final class ContextRouteTest extends ApiRouteTestCase
         $this->assertSame('google', $response['config']['provider']);
         $this->assertSame('low', $response['config']['reasoningEffort']);
         $this->assertSame('warn', $response['config']['logLevel']);
+        // No `completionModel`: the Panel's provider registry owns that default
+        // so it can keep the fallback on the same gateway as the primary model
         $this->assertSame([
-            'openai'    => ['hasApiKey' => false, 'model' => 'gpt-5.6-terra', 'completionModel' => 'gpt-5.4-nano'],
-            'google'    => ['hasApiKey' => false, 'model' => 'gemini-3.1-pro-preview', 'completionModel' => 'gemini-3.5-flash'],
-            'anthropic' => ['hasApiKey' => false, 'model' => 'claude-sonnet-5', 'completionModel' => 'claude-haiku-4-5'],
-            'mistral'   => ['hasApiKey' => false, 'model' => 'mistral-medium-latest', 'completionModel' => 'mistral-small-latest'],
+            'openai'    => ['hasApiKey' => false, 'model' => 'gpt-5.6-terra'],
+            'google'    => ['hasApiKey' => false, 'model' => 'gemini-3.1-pro-preview'],
+            'anthropic' => ['hasApiKey' => false, 'model' => 'claude-sonnet-5'],
+            'mistral'   => ['hasApiKey' => false, 'model' => 'mistral-medium-latest'],
         ], $response['config']['providers']);
+    }
+
+    #[Test]
+    public function uppercase_provider_keys_still_receive_model_defaults(): void
+    {
+        $response = $this->callContextRoute([
+            'johannschopplich.copilot' => [
+                'providers' => ['OpenAI' => ['apiKey' => 'test-key']],
+            ],
+        ]);
+
+        $this->assertSame(
+            ['hasApiKey' => true, 'model' => 'gpt-5.6-terra'],
+            $response['config']['providers']['openai'],
+        );
+    }
+
+    /** @return array<string, array{0: string, 1: mixed}> */
+    public static function mistypedOptions(): array
+    {
+        return [
+            'provider'          => ['provider',        ['openai']],
+            'providers'         => ['providers',       'openai'],
+            'providers.openai'  => ['providers.openai', 'test-key'],
+            'promptTemplates'   => ['promptTemplates', 'nope'],
+            'skills'            => ['skills',          'nope'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('mistypedOptions')]
+    public function mistyped_option_throws_in_debug_mode(string $path, mixed $value): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/Invalid ' . preg_quote($path, '/') . ': expected/');
+
+        $this->callContextRoute([
+            'debug' => true,
+            'johannschopplich.copilot' => self::buildConfigWithOverride($path, $value),
+        ]);
+    }
+
+    #[Test]
+    #[DataProvider('mistypedOptions')]
+    public function mistyped_option_falls_back_without_debug(string $path, mixed $value): void
+    {
+        $response = $this->callContextRoute([
+            'johannschopplich.copilot' => self::buildConfigWithOverride($path, $value),
+        ]);
+
+        $this->assertSame('google', $response['config']['provider']);
     }
 
     /** @return array<string, array{0: array<string, mixed>}> */
