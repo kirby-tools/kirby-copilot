@@ -92,6 +92,7 @@ const licenseStatus = ref<LicenseStatus>();
 
 let storageKey: string;
 let activeRun: ReturnType<typeof runTextGeneration>;
+let isAbortRequested = false;
 
 const canUndo = computed(
   () => !isGenerating.value && currentFieldContent.value !== undefined,
@@ -180,9 +181,12 @@ watch(isDetailsOpen, (value) => {
     });
   }
 
-  panel.events.on("view.save", onModelSave);
   isInitialized.value = true;
 })();
+
+// Registered outside the async setup above: unmounting before it resolves
+// would run `off` first, leaving the listener behind for good
+panel.events.on("view.save", onModelSave);
 
 onBeforeUnmount(() => {
   panel.events.off("view.save", onModelSave);
@@ -203,6 +207,7 @@ async function generate() {
   currentFieldContent.value = currentContent.value[fieldName];
 
   isGenerating.value = true;
+  isAbortRequested = false;
 
   try {
     const { getZodSchema: getBlocksZodSchema, normalizeBlock } = useBlocks();
@@ -285,6 +290,10 @@ async function generate() {
       });
     }
 
+    // The Stop button goes live with `isGenerating`, but the run only exists
+    // once the SDK chunk and any schema request have loaded
+    if (isAbortRequested) activeRun?.abort();
+
     await activeRun?.done;
   } finally {
     isGenerating.value = false;
@@ -293,6 +302,7 @@ async function generate() {
 }
 
 function abort() {
+  isAbortRequested = true;
   activeRun?.abort();
   activeRun = undefined;
 }
