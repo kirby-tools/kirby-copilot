@@ -28,6 +28,20 @@ final class PanelContext
         foreach ($providers as $name => $providerConfig) {
             $providers[$name] = self::validateType($providerConfig, 'providers.' . $name, ['array'], []);
         }
+
+        // Two spellings of one provider name collapse into a single entry
+        // once the keys are lowercased, so the loser is lost without a trace.
+        $providerNames = array_count_values(array_map('strtolower', array_keys($providers)));
+        $conflictingNames = array_keys(array_filter($providerNames, fn (int $count) => $count > 1));
+
+        if ($conflictingNames !== [] && $kirby->option('debug')) {
+            // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
+            throw new InvalidArgumentException(
+                'Conflicting provider keys: ' . implode(', ', $conflictingNames) .
+                ' – provider names are case-insensitive'
+            );
+        }
+
         $config['providers'] = ProviderName::normalizeProviders($providers);
 
         $defaultConfig = [

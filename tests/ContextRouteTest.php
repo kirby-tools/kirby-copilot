@@ -164,6 +164,23 @@ final class ContextRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
+    public function conflicting_provider_key_cases_throw_in_debug_mode(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/Conflicting provider keys: openai/');
+
+        $this->callContextRoute([
+            'debug' => true,
+            'johannschopplich.copilot' => [
+                'providers' => [
+                    'OpenAI' => ['apiKey' => 'test-key'],
+                    'openai' => ['model' => 'gpt-5.6-terra'],
+                ],
+            ],
+        ]);
+    }
+
+    #[Test]
     public function mistyped_option_throws_in_debug_mode(): void
     {
         $this->expectException(InvalidArgumentException::class);
