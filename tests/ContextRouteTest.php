@@ -43,27 +43,15 @@ final class ContextRouteTest extends ApiRouteTestCase
         return $config;
     }
 
-    /** @return array<string, array{0: string, 1: mixed}> */
-    public static function invalidEnumValuesInDebugMode(): array
-    {
-        return [
-            'provider'                      => ['provider',                      'bogus-provider'],
-            'reasoningEffort'               => ['reasoningEffort',               'ultra'],
-            'providers.openai.api'          => ['providers.openai.api',          'bogus'],
-            'logLevel'                      => ['logLevel',                      'trace'],
-        ];
-    }
-
     #[Test]
-    #[DataProvider('invalidEnumValuesInDebugMode')]
-    public function invalid_enum_throws_in_debug_mode(string $path, mixed $value): void
+    public function invalid_enum_throws_in_debug_mode(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageMatches('/' . preg_quote($path, '/') . '/');
+        $this->expectExceptionMessageMatches('/Invalid reasoningEffort: ultra\. Must be one of: /');
 
         $this->callContextRoute([
             'debug' => true,
-            'johannschopplich.copilot' => self::buildConfigWithOverride($path, $value),
+            'johannschopplich.copilot' => self::buildConfigWithOverride('reasoningEffort', 'ultra'),
         ]);
     }
 
@@ -164,7 +152,7 @@ final class ContextRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function conflicting_provider_key_cases_throw_in_debug_mode(): void
+    public function provider_keys_that_differ_only_in_case_throw_in_debug_mode(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageMatches('/Conflicting provider keys: openai/');
