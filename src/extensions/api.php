@@ -46,7 +46,7 @@ return [
 
                 // Normalize provider keys before the defaults merge – a
                 // `providers.OpenAI` entry would otherwise shadow the seeded
-                // `providers.openai` and lose its model defaults
+                // `providers.openai` and lose its model defaults.
                 $providers = $validateType($config['providers'] ?? [], 'providers', ['array'], []);
                 foreach ($providers as $name => $providerConfig) {
                     $providers[$name] = $validateType($providerConfig, 'providers.' . $name, ['array'], []);
