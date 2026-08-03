@@ -336,7 +336,7 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    public function honors_retry_after_header_for_delay(): void
+    public function respects_retry_after_header_for_delay(): void
     {
         $sleeps = [];
         $sleep = static function (int $seconds) use (&$sleeps): void {
