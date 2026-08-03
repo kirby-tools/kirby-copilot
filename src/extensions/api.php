@@ -1,8 +1,8 @@
 <?php
 
 use JohannSchopplich\Copilot\AI\CurlProxyTransport;
-use JohannSchopplich\Copilot\AI\ProviderName;
 use JohannSchopplich\Copilot\AI\Proxy;
+use JohannSchopplich\Copilot\PanelContext;
 use JohannSchopplich\KirbyTools\FieldNormalizer;
 use JohannSchopplich\KirbyTools\FieldResolver;
 use JohannSchopplich\KirbyTools\ModelResolver;
@@ -23,169 +23,6 @@ return [
             'method' => 'GET',
             'action' => function () use ($kirby) {
                 $licenses = Licenses::read('johannschopplich/kirby-copilot');
-                $config = $kirby->option('johannschopplich.copilot', []);
-
-                // Enforces the types a config option is documented to accept. On
-                // mismatch: throws in debug mode, else applies `$fallback` so a
-                // single mistyped option can't take the whole Panel down.
-                $validateType = function (mixed $value, string $path, array $types, mixed $fallback) use ($kirby): mixed {
-                    if (in_array(get_debug_type($value), $types, true)) {
-                        return $value;
-                    }
-
-                    if ($kirby->option('debug')) {
-                        // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
-                        throw new InvalidArgumentException(
-                            'Invalid ' . $path . ': expected ' . implode(' or ', $types) .
-                            ', got ' . get_debug_type($value)
-                        );
-                    }
-
-                    return $fallback;
-                };
-
-                // Normalize provider keys before the defaults merge – a
-                // `providers.OpenAI` entry would otherwise shadow the seeded
-                // `providers.openai` and lose its model defaults.
-                $providers = $validateType($config['providers'] ?? [], 'providers', ['array'], []);
-                foreach ($providers as $name => $providerConfig) {
-                    $providers[$name] = $validateType($providerConfig, 'providers.' . $name, ['array'], []);
-                }
-                $config['providers'] = ProviderName::normalizeProviders($providers);
-
-                $defaultConfig = [
-                    'provider' => ProviderName::Google->value,
-                    'providers' => [],
-                    'reasoningEffort' => 'low',
-                    'logLevel' => 'warn'
-                ];
-
-                foreach (ProviderName::cases() as $provider) {
-                    $defaultConfig['providers'][$provider->value] = [
-                        'model' => $provider->defaultModel()
-                    ];
-                }
-
-                $config = array_replace_recursive($defaultConfig, $config);
-                $config['provider'] = strtolower(
-                    $validateType($config['provider'], 'provider', ['string'], ProviderName::Google->value)
-                );
-
-                $invalidValueError = fn (string $field, mixed $value, array $valid): InvalidArgumentException =>
-                    new InvalidArgumentException(
-                        'Invalid ' . $field . ': ' . (is_scalar($value) ? (string)$value : json_encode($value)) .
-                        '. Must be one of: ' . implode(', ', $valid)
-                    );
-
-                // Walks a dot-notated config path and enforces an enum. On mismatch:
-                // throws in debug mode, else applies `$fallback` (or unsets when null).
-                $validateEnum = function (array &$config, string $path, array $allowed, mixed $fallback = null) use ($kirby, $invalidValueError): void {
-                    $keys = explode('.', $path);
-                    $lastKey = array_pop($keys);
-                    $parent = &$config;
-
-                    foreach ($keys as $key) {
-                        if (!isset($parent[$key]) || !is_array($parent[$key])) {
-                            return;
-                        }
-                        $parent = &$parent[$key];
-                    }
-
-                    if (!array_key_exists($lastKey, $parent) || $parent[$lastKey] === null) {
-                        return;
-                    }
-
-                    if (in_array($parent[$lastKey], $allowed, true)) {
-                        return;
-                    }
-
-                    if ($kirby->option('debug')) {
-                        throw $invalidValueError($path, $parent[$lastKey], $allowed);
-                    }
-
-                    if ($fallback === null) {
-                        unset($parent[$lastKey]);
-                    } else {
-                        $parent[$lastKey] = $fallback;
-                    }
-                };
-
-                $validateEnum($config, 'provider', array_column(ProviderName::cases(), 'value'), ProviderName::Google->value);
-
-                // Convert API keys to boolean flags so the frontend can validate
-                // presence without exposing secrets.
-                $config['providers'] = array_map(
-                    function (array $provider) use ($kirby) {
-                        $apiKey = ProviderName::resolveApiKey($provider['apiKey'] ?? null, $kirby);
-
-                        return [
-                            'hasApiKey' => ProviderName::isUsableApiKey($apiKey)
-                        ] + array_diff_key($provider, ['apiKey' => true]);
-                    },
-                    $config['providers']
-                );
-
-                $validateEnum($config, 'reasoningEffort', ['provider-default', 'none', 'minimal', 'low', 'medium', 'high', 'xhigh'], 'low');
-                $validateEnum($config, 'providers.openai.api', ['chat', 'responses']);
-                $validateEnum($config, 'logLevel', ['error', 'warn', 'info', 'debug'], 'warn');
-
-                $completionDefaults = ['debounce' => 1000];
-                $completion = $validateType($config['completion'] ?? true, 'completion', ['array', 'bool'], true);
-
-                if ($completion === false || $completion === []) {
-                    $config['completion'] = false;
-                } elseif ($completion === true) {
-                    $config['completion'] = $completionDefaults;
-                } else {
-                    $config['completion'] = array_replace_recursive($completionDefaults, $completion);
-                    $config['completion']['debounce'] = max(500, (int)$config['completion']['debounce']);
-                }
-
-                $language = $kirby->user()?->language() ?? $kirby->defaultLanguage()?->code() ?? 'en';
-                $resolveMultilang = fn (mixed $value): string|null => match (true) {
-                    is_string($value) && $value !== '' => $value,
-                    is_array($value) => $value[$language] ?? $value['en'] ?? current($value) ?: null,
-                    default => null,
-                };
-
-                $config['promptTemplates'] = array_values(array_filter(array_map(
-                    function ($template) use ($resolveMultilang) {
-                        $label = $resolveMultilang($template['label'] ?? null);
-                        $prompt = $resolveMultilang($template['prompt'] ?? null);
-
-                        return $label && $prompt ? compact('label', 'prompt') : null;
-                    },
-                    $validateType($config['promptTemplates'] ?? [], 'promptTemplates', ['array'], [])
-                )));
-
-                $config['skills'] = array_values(array_filter(array_map(
-                    function ($skill) use ($resolveMultilang) {
-                        $id = is_string($skill['id'] ?? null) ? trim($skill['id']) : null;
-                        $label = $resolveMultilang($skill['label'] ?? null);
-                        $instructions = $resolveMultilang($skill['instructions'] ?? null);
-
-                        if (is_string($label)) {
-                            $label = trim($label);
-                        }
-
-                        if (is_string($instructions)) {
-                            $instructions = trim($instructions);
-                        }
-
-                        if (!$id || !$label || !$instructions) {
-                            return null;
-                        }
-
-                        // Editors type `@skill://<id>`, so restrict ids to slug-safe
-                        // characters and reject anything that wouldn't round-trip.
-                        if (!preg_match('/^[\w\-]+$/', $id)) {
-                            return null;
-                        }
-
-                        return compact('id', 'label', 'instructions');
-                    },
-                    $validateType($config['skills'] ?? [], 'skills', ['array'], [])
-                )));
 
                 $assets = $kirby
                     ->plugin('johannschopplich/copilot')
@@ -198,7 +35,7 @@ return [
                     ->values();
 
                 return [
-                    'config' => $config,
+                    'config' => PanelContext::config(),
                     'assets' => $assets,
                     'licenseStatus' => $licenses->getStatus()
                 ];
