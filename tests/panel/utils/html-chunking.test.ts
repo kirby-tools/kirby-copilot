@@ -22,8 +22,10 @@ describe("createHtmlChunking", () => {
       expect(extractChunks("</123>x")).toEqual(["<", "/123>x"]);
     });
 
-    it("buffers lone < at end of input", () => {
+    it("buffers an undecided < or </ at end of input", () => {
       expect(createHtmlChunking()("<")).toBeNull();
+      // Releasing `<` here would strand `/b>` in the stream as literal text
+      expect(createHtmlChunking()("</")).toBeNull();
     });
   });
 
@@ -42,6 +44,7 @@ describe("createHtmlChunking", () => {
       expect(extractChunks("<br>text")[0]).toBe("<br>");
       expect(extractChunks("<img src='x' />text")[0]).toBe("<img src='x' />");
       expect(extractChunks("<hr><br>")[0]).toBe("<hr>");
+      expect(extractChunks("<input><p>x</p>")[0]).toBe("<input>");
     });
   });
 
@@ -85,6 +88,10 @@ describe("createHtmlChunking", () => {
       expect(extractChunks("<ul><li>item</li></ul>x")[0]).toBe(
         "<ul><li>item</li></ul>",
       );
+    });
+
+    it("ignores an inner tag that merely starts with the same name", () => {
+      expect(extractChunks("<b>x<br></b>y")[0]).toBe("<b>x<br></b>");
     });
   });
 

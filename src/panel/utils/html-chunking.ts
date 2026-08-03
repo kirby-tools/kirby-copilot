@@ -1,6 +1,23 @@
 import type { ChunkDetector } from "ai";
 
-const HTML_VOID_ELEMENTS = new Set(["br", "hr", "img", "wbr"]);
+// The full HTML void set: an element missing here never yields a chunk,
+// because the detector waits forever for a closing tag that cannot arrive
+const HTML_VOID_ELEMENTS = new Set([
+  "area",
+  "base",
+  "br",
+  "col",
+  "embed",
+  "hr",
+  "img",
+  "input",
+  "link",
+  "meta",
+  "param",
+  "source",
+  "track",
+  "wbr",
+]);
 
 /**
  * Creates a chunk detector for rich-text streaming that buffers complete HTML elements.
@@ -42,9 +59,15 @@ export function createHtmlChunking(): ChunkDetector {
 }
 
 function parseHtmlElement(buffer: string): string | null {
+  // A lone `<` or `</` is still undecided – releasing `<` here would strand
+  // the rest of the closing tag in the stream as literal text
+  if (buffer === "<" || buffer === "</") {
+    return null;
+  }
+
   // Tag-like text that is not a tag (e.g. `<123>`, `<>`) – release `<` as plain text
   if (!/^<\/?[a-z]/i.test(buffer)) {
-    return buffer.length > 1 ? "<" : null;
+    return "<";
   }
 
   if (buffer.startsWith("</")) {
@@ -79,14 +102,17 @@ function findMatchingCloseTag(
   startPosition: number,
 ): string | null {
   const lowerBuffer = buffer.toLowerCase();
-  const openPattern = `<${tagName}`;
+  // The delimiter keeps a longer name from counting as a nested open tag,
+  // which would otherwise let `<br>` raise the depth of an open `<b>`
+  const openPattern = new RegExp(`<${tagName}(?=[\\s/>])`, "g");
   const closePattern = `</${tagName}>`;
 
   let depth = 1;
   let pos = startPosition;
 
   while (depth > 0) {
-    const nextOpen = lowerBuffer.indexOf(openPattern, pos);
+    openPattern.lastIndex = pos;
+    const nextOpen = openPattern.exec(lowerBuffer)?.index ?? -1;
     const nextClose = lowerBuffer.indexOf(closePattern, pos);
 
     // Wait for more input rather than emitting a half element
@@ -94,7 +120,7 @@ function findMatchingCloseTag(
 
     if (nextOpen !== -1 && nextOpen < nextClose) {
       depth++;
-      pos = nextOpen + openPattern.length;
+      pos = nextOpen + tagName.length + 1;
     } else {
       depth--;
       if (depth === 0) {
