@@ -4,6 +4,7 @@ minimumReleaseAgeExclude:
   - "@ai-sdk/mistral@3.0.50"
   - ai@6.0.228
   - tsdown@0.22.8
+  - utilful@3.0.1
 
 shellEmulator: true
 trustPolicy: no-downgrade
