@@ -97,9 +97,6 @@ final class Proxy
             'anthropic-dangerous-direct-browser-access',
         ];
 
-        // Restrict marker substitution to the actual header names,
-        // so an attacker-injected marker in any other header cannot
-        // exfiltrate the real API key to upstream.
         $markerAuthHeaders = ['authorization', 'x-api-key', 'x-goog-api-key'];
 
         $curlHeaders = [];
@@ -109,11 +106,20 @@ final class Proxy
                 continue;
             }
 
-            if (str_contains($value, '__KIRBY_COPILOT_PROXY__')) {
-                if (!in_array($nameLower, $markerAuthHeaders, true)) {
+            $hasMarker = str_contains($value, '__KIRBY_COPILOT_PROXY__');
+
+            if (in_array($nameLower, $markerAuthHeaders, true)) {
+                // The proxy owns the API key, so an auth header only travels
+                // upstream when it carries the marker. Site-level HTTP auth
+                // otherwise hands the browser's own credentials to the vendor.
+                if (!$hasMarker) {
                     continue;
                 }
+
                 $value = str_replace('__KIRBY_COPILOT_PROXY__', $apiKey, $value);
+            } elseif ($hasMarker) {
+                // A marker anywhere else would exfiltrate the key upstream
+                continue;
             }
 
             $curlHeaders[] = "{$name}: {$value}";

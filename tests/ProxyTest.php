@@ -97,6 +97,30 @@ final class ProxyTest extends TestCase
     }
 
     #[Test]
+    public function drops_auth_headers_without_the_api_key_marker(): void
+    {
+        $transport = new FakeProxyTransport();
+
+        // Site-level HTTP auth makes the browser attach its own credentials
+        // to the same-origin proxy request; Anthropic and Google leave
+        // `Authorization` untouched, so forwarding would leak them upstream
+        $this->createProxy($transport, [
+            'HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('site:secret'),
+            'HTTP_X_API_KEY' => '__KIRBY_COPILOT_PROXY__',
+        ])->handle();
+
+        $forwardedHeaders = $transport->curlOptions[CURLOPT_HTTPHEADER];
+
+        $this->assertContains('X-Api-Key: test-key', $forwardedHeaders);
+
+        $forwardedNames = array_map(
+            fn (string $header) => strtolower(explode(':', $header, 2)[0]),
+            $forwardedHeaders,
+        );
+        $this->assertNotContains('authorization', $forwardedNames);
+    }
+
+    #[Test]
     public function resolves_a_closure_api_key_before_substituting_the_marker(): void
     {
         $transport = new FakeProxyTransport();
