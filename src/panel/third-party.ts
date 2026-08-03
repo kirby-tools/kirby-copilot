@@ -15,6 +15,6 @@ export const copilotThirdPartyApi = {
   resolvePluginContext: usePluginContext,
   streamText: useStreamText,
   resolveLanguageModel,
-  // TODO: Drop `loadAISDK` and the raw `output` option from the third-party seam in v4 – consumers pass `outputSchema` since apiVersion 2; add a composer conflict floor for kirby-content-translator < 3.12.0 alongside
+  // TODO: Drop `loadAISDK` and the raw `output` option from the third-party seam in v4 – consumers pass `outputSchema` since apiVersion 2
   loadAISDK,
 };
