@@ -99,8 +99,8 @@ importers:
         specifier: ^66.7.5
         version: 66.7.5(vite@6.3.7(@types/node@26.1.2)(jiti@2.7.0)(sass@1.102.0)(yaml@2.9.0))
       utilful:
-        specifier: ^3.0.0
-        version: 3.0.0
+        specifier: ^3.0.1
+        version: 3.0.1
       vite:
         specifier: ~6.3.7
         version: 6.3.7(@types/node@26.1.2)(jiti@2.7.0)(sass@1.102.0)(yaml@2.9.0)
@@ -3126,8 +3126,8 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
-  utilful@3.0.0:
-    resolution: {integrity: sha512-X4/0DXxFMdfPAAcnP7a0sOfPd2jEkNJqF86/gxcogkbA1ohbKBxrM6OlHIRToLmvrDKnFTr5FCldnmpQH1SImw==}
+  utilful@3.0.1:
+    resolution: {integrity: sha512-E4iSV0X+1Lzq/Yl1kOOGKMstFZSNzQoVXatqLmSdnaPYvHvJ1mGLod8/eXz4YjJp8+qwXcE6sMu8CUUJwq3i1w==}
 
   verkit@0.3.1:
     resolution: {integrity: sha512-w2Eo8LSIIoW7qxNBzT7/17k+bh8plXo7G3dHjEIDqPlnluhzaxr9JX8F28VSYEtDvc1/a3WBDih6xNUZseebXg==}
@@ -6386,7 +6386,7 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  utilful@3.0.0: {}
+  utilful@3.0.1: {}
 
   verkit@0.3.1: {}
 
