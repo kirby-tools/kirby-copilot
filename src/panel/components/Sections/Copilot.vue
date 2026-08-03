@@ -184,8 +184,8 @@ watch(isDetailsOpen, (value) => {
   isInitialized.value = true;
 })();
 
-// Registered outside the async setup above: unmounting before it resolves
-// would run `off` first, leaving the listener behind for good
+// Keep this synchronous – an unmount before the async setup resolves would
+// run `off` first, which mitt silently ignores
 panel.events.on("view.save", onModelSave);
 
 onBeforeUnmount(() => {
