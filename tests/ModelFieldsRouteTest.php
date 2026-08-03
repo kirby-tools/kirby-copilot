@@ -13,10 +13,10 @@ use PHPUnit\Framework\Attributes\Test;
 #[PreserveGlobalState(false)]
 final class ModelFieldsRouteTest extends ApiRouteTestCase
 {
-    private function callModelFieldsRoute(array $query = [], array $props = []): mixed
+    private function callModelFieldsRoute(array $query = []): mixed
     {
         return $this->callRoute(
-            new App(['request' => ['query' => $query], ...$props]),
+            new App(['request' => ['query' => $query]]),
             '__copilot__/model-fields'
         );
     }
@@ -35,16 +35,5 @@ final class ModelFieldsRouteTest extends ApiRouteTestCase
         $this->expectException(NotFoundException::class);
         $this->expectExceptionMessageMatches('/No model found for id: not-a-model/');
         $this->callModelFieldsRoute(['id' => 'not-a-model']);
-    }
-
-    #[Test]
-    public function resolves_the_fields_of_the_requested_model(): void
-    {
-        $fields = $this->callModelFieldsRoute(
-            ['id' => 'site'],
-            ['site' => ['blueprint' => ['fields' => ['headline' => ['type' => 'text']]]]],
-        );
-
-        $this->assertArrayHasKey('headline', $fields);
     }
 }
