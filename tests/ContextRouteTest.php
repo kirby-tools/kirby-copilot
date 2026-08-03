@@ -276,7 +276,7 @@ final class ContextRouteTest extends ApiRouteTestCase
 
     #[Test]
     #[DataProvider('completionValues')]
-    public function completion_value_is_normalised(mixed $input, mixed $expected): void
+    public function completion_value_is_normalized(mixed $input, mixed $expected): void
     {
         $response = $this->callContextRoute([
             'johannschopplich.copilot' => [
