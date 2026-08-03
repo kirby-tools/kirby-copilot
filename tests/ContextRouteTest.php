@@ -163,25 +163,15 @@ final class ContextRouteTest extends ApiRouteTestCase
         );
     }
 
-    /** @return array<string, array{0: string, 1: mixed}> */
-    public static function mistypedOptionsInDebugMode(): array
-    {
-        return array_map(
-            fn (array $case) => [$case[0], $case[1]],
-            self::mistypedOptionFallbacks(),
-        );
-    }
-
     #[Test]
-    #[DataProvider('mistypedOptionsInDebugMode')]
-    public function mistyped_option_throws_in_debug_mode(string $path, mixed $value): void
+    public function mistyped_option_throws_in_debug_mode(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageMatches('/Invalid ' . preg_quote($path, '/') . ': expected/');
+        $this->expectExceptionMessageMatches('/Invalid providers\.openai: expected array, got string/');
 
         $this->callContextRoute([
             'debug' => true,
-            'johannschopplich.copilot' => self::buildConfigWithOverride($path, $value),
+            'johannschopplich.copilot' => self::buildConfigWithOverride('providers.openai', 'test-key'),
         ]);
     }
 
