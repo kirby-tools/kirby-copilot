@@ -138,7 +138,7 @@ final class ProxyRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function third_party_host_denied_even_with_configured_base_url(): void
+    public function third_party_host_throws_even_with_a_configured_base_url(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageMatches('/Proxy target host not allowed: attacker\.com/');

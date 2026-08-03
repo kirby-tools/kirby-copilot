@@ -14,7 +14,7 @@ describe("fieldToZodSchema", () => {
       ["tel", "Phone"],
       ["slug", "Slug"],
       ["password", "Password"],
-    ] as const)("handles %s field", (type, label) => {
+    ] as const)("accepts a string or null for a %s field", (type, label) => {
       const schema = assertSchema(fieldToZodSchema(field({ type, label, name: type })));
       expect(schema.safeParse("sample-value").success).toBe(true);
       expect(schema.safeParse(null).success).toBe(true);
@@ -38,7 +38,7 @@ describe("fieldToZodSchema", () => {
   });
 
   describe("rich text fields", () => {
-    it("handles writer field in block and inline modes", () => {
+    it("accepts markup in both writer modes", () => {
       const blockSchema = assertSchema(fieldToZodSchema(
         field({
           type: "writer",
@@ -64,7 +64,7 @@ describe("fieldToZodSchema", () => {
       ).not.toThrow();
     });
 
-    it("handles list field", () => {
+    it("accepts an HTML list string for a list field", () => {
       const schema = assertSchema(fieldToZodSchema(
         field({
           type: "list",
@@ -79,7 +79,7 @@ describe("fieldToZodSchema", () => {
   });
 
   describe("number fields", () => {
-    it("handles number and range fields with constraints", () => {
+    it("rejects non-numbers and enforces range bounds", () => {
       const numberSchema = assertSchema(fieldToZodSchema(
         field({
           type: "number",
@@ -106,7 +106,7 @@ describe("fieldToZodSchema", () => {
   });
 
   describe("boolean fields", () => {
-    it("handles toggle field", () => {
+    it("accepts booleans only for a toggle field", () => {
       const schema = assertSchema(fieldToZodSchema(
         field({ type: "toggle", label: "Featured", name: "featured" }),
       ));
@@ -131,7 +131,7 @@ describe("fieldToZodSchema", () => {
       ["select", ["news", "blog", "event"]],
       ["radio", ["draft", "published"]],
       ["toggles", ["light", "dark"]],
-    ] as const)("handles %s field (single selection)", (type, values) => {
+    ] as const)("accepts only declared options for a %s field", (type, values) => {
       const schema = assertSchema(fieldToZodSchema(
         field({
           type,
@@ -149,7 +149,7 @@ describe("fieldToZodSchema", () => {
       ["multiselect", ["cat1", "cat2", "cat3"]],
       ["tags", ["web", "mobile", "api"]],
     ] as const)(
-      "handles %s field (multiple selection)",
+      "accepts declared options and an empty list for a %s field",
       (type, values) => {
         const schema = assertSchema(fieldToZodSchema(
           field({
@@ -167,7 +167,7 @@ describe("fieldToZodSchema", () => {
   });
 
   describe("date/time fields", () => {
-    it("handles date field with and without time", () => {
+    it("accepts the matching format for date, datetime, and time fields", () => {
       const dateSchema = assertSchema(fieldToZodSchema(
         field({
           type: "date",
@@ -198,7 +198,7 @@ describe("fieldToZodSchema", () => {
   });
 
   describe("other fields", () => {
-    it("handles color and link fields", () => {
+    it("accepts hex colors and page or external links", () => {
       const colorSchema = assertSchema(fieldToZodSchema(
         field({
           type: "color",
@@ -221,7 +221,7 @@ describe("fieldToZodSchema", () => {
   });
 
   describe("complex fields", () => {
-    it("handles structure with and without defined fields", () => {
+    it("validates structure rows and accepts any row without field definitions", () => {
       const withFields = assertSchema(fieldToZodSchema(
         field({
           type: "structure",
@@ -252,7 +252,7 @@ describe("fieldToZodSchema", () => {
       expect(() => withoutFields.parse([{ custom: "data" }])).not.toThrow();
     });
 
-    it("handles object with and without defined fields", () => {
+    it("validates object properties and accepts any object without field definitions", () => {
       const withFields = assertSchema(fieldToZodSchema(
         field({
           type: "object",
@@ -283,7 +283,7 @@ describe("fieldToZodSchema", () => {
       expect(() => withoutFields.parse({ custom: "value" })).not.toThrow();
     });
 
-    it("handles entries field with constraints", () => {
+    it("enforces min and max on an entries field", () => {
       const schema = assertSchema(fieldToZodSchema(
         field({
           type: "entries",
@@ -363,7 +363,7 @@ describe("fieldToZodSchema", () => {
       expect(() => schema.parse(["item1", "item2"])).not.toThrow();
     });
 
-    it("handles required number and boolean fields", () => {
+    it("accepts zero and false but not null for required number and toggle fields", () => {
       const numberSchema = assertSchema(fieldToZodSchema(
         field({
           type: "number",
@@ -388,7 +388,7 @@ describe("fieldToZodSchema", () => {
       expect(() => toggleSchema.parse(null)).toThrow();
     });
 
-    it("handles required enum fields", () => {
+    it("rejects null for a required select field", () => {
       const toOptions = (values: string[]): KirbyOption[] =>
         values.map((value) => ({
           value,

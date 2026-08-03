@@ -106,7 +106,7 @@ describe("getActiveSkills", () => {
 });
 
 describe("createSkillRefTokenRegex", () => {
-  it("returns correct results across interleaved usages", () => {
+  it("returns a fresh regex per call so interleaved matchAll runs stay independent", () => {
     // Protects against regressing to a shared-instance regex whose mutable
     // `lastIndex` would make a second matchAll skip or start mid-string.
     const first = createSkillRefTokenRegex();

@@ -241,7 +241,7 @@ describe("runTextGeneration", () => {
 });
 
 describe("generation run single-flight", () => {
-  it("ignores a second run while one is active and accepts runs again afterwards", async () => {
+  it("declines a second run with a notification while one is active and accepts runs again afterwards", async () => {
     const rejectedSinkWrite = vi.fn();
     let rejectedRun: unknown = "unset";
 

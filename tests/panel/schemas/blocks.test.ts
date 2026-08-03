@@ -346,7 +346,7 @@ describe("generateKirbyBlocksSchema", () => {
       }),
     ];
 
-    it("handles structure, object and entries fields in blocks", () => {
+    it("accepts structure, object, and entries content inside blocks", () => {
       const schema = generateKirbyBlocksSchema(complexBlocksConfig);
 
       // Structure field

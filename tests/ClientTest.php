@@ -37,7 +37,7 @@ final class ClientTest extends TestCase
     }
 
     #[Test]
-    public function surfaces_provider_exception_unchanged(): void
+    public function throws_the_provider_exception_with_its_reason_unchanged(): void
     {
         $stub = $this->createStub(Provider::class);
         $stub->method('generateObject')->willThrowException(new ProviderException(

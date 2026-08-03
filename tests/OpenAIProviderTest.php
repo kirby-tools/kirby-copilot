@@ -138,7 +138,7 @@ final class OpenAIProviderTest extends TestCase
 
     #[Test]
     #[DataProvider('openAIFamilyVendors')]
-    public function missing_api_key_error_names_vendor_specific_config_path(
+    public function throws_naming_the_vendor_config_path_when_the_api_key_is_missing(
         string $providerClass,
         string $expectedConfigKey,
         string $expectedModel,

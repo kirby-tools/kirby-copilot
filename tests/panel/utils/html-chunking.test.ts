@@ -59,15 +59,15 @@ describe("createHtmlChunking", () => {
       ]);
     });
 
-    it("handles orphan closing tags", () => {
+    it("releases an orphan closing tag as its own chunk", () => {
       expect(extractChunks("</p>text")[0]).toBe("</p>");
     });
 
-    it("handles empty elements", () => {
+    it("releases an empty element as one chunk", () => {
       expect(extractChunks("<span></span>text")[0]).toBe("<span></span>");
     });
 
-    it("handles elements with attributes", () => {
+    it("releases an element whose opening tag carries attributes", () => {
       expect(extractChunks('<a href="x" class="y">text</a>rest')[0]).toBe(
         '<a href="x" class="y">text</a>',
       );
@@ -81,7 +81,7 @@ describe("createHtmlChunking", () => {
       );
     });
 
-    it("handles different nested elements", () => {
+    it("releases nested elements of different names as one chunk", () => {
       expect(extractChunks("<ul><li>item</li></ul>x")[0]).toBe(
         "<ul><li>item</li></ul>",
       );
@@ -98,7 +98,7 @@ describe("createHtmlChunking", () => {
       );
     });
 
-    it("processes mixed content", () => {
+    it("splits mixed text, elements, and newlines into separate chunks", () => {
       expect(extractChunks("Text <em>x</em>\n<p>y</p>")).toEqual([
         "Text ",
         "<em>x</em>",
