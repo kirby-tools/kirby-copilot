@@ -48,6 +48,7 @@ const { getModelFields } = useModelFields();
 const isGenerating = ref(false);
 const isHovering = ref(false);
 let activeRun: ReturnType<typeof runStructuredGeneration>;
+let isAbortRequested = false;
 
 async function initPromptDialog() {
   if (isGenerating.value) return;
@@ -81,6 +82,7 @@ async function initPromptDialog() {
   if (!prompt || selectedFields.length === 0) return;
 
   isGenerating.value = true;
+  isAbortRequested = false;
 
   try {
     const { getZodSchema: getBlocksZodSchema } = useBlocks();
@@ -151,6 +153,10 @@ async function initPromptDialog() {
       },
     });
 
+    // The Stop button goes live with `isGenerating`, but the run only exists
+    // once the schemas, the plugin context and the SDK chunk have loaded
+    if (isAbortRequested) activeRun?.abort();
+
     await activeRun?.done;
   } finally {
     isGenerating.value = false;
@@ -159,6 +165,7 @@ async function initPromptDialog() {
 }
 
 function abort() {
+  isAbortRequested = true;
   activeRun?.abort();
   activeRun = undefined;
 }
