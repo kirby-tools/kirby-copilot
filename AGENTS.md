@@ -2,49 +2,25 @@
 
 Commercial Kirby CMS plugin for AI-assisted content generation in the Kirby Panel.
 
-## Tech Stack
-
-- Panel: Vue 2.7 with Composition API (`<script setup>`, composables)
-- Build: kirbyup (Vite-based bundler for Kirby Panel plugins)
-- Vue utilities: kirbyuse (provides `usePanel`, `useSection`, `useContent`, etc.)
-- Styles: UnoCSS with `presetWind3` (Tailwind v3-compatible utilities, prefixed with `kai-`)
-- AI: Vercel AI SDK (bundled in `assets/` for runtime loading)
-- PHP: Kirby 4/5 compatible
-
 ## Commands
 
-- `pnpm run test --run` - run Vitest tests
-- `pnpm run test:types` - typecheck
+- `composer test` – PHPUnit
+- `composer csfix` – php-cs-fixer, which lives in `tools/phpcs/vendor/bin/`, not `vendor/bin/`
+- `pnpm run test --run` – Vitest
+- `pnpm run test:types` – typecheck
+- `pnpm run lint` – ESLint
 
-## Entry Points
+## Conventions
 
-- Plugin ID: `johannschopplich/copilot`
-- PHP bootstrap: `index.php` (registers sections, API routes)
-- Panel entry: `src/panel/index.ts` (registers Vue components via `window.panel.plugin()`)
-- API routes: `src/extensions/api.php`
-- Local dev: `playground/` (self-contained Kirby installation)
-
-## Architecture
-
-Panel extensions are registered in `src/panel/index.ts`:
-
-- `sections`: Custom Panel sections (Copilot)
-- `viewButtons`: Header copilot button
-- `components`: Dialog components (k-copilot-prompt-dialog)
-- `textareaButtons`: Textarea field integration
-- `writerMarks`: Writer field ProseMirror marks
-- `thirdParty.copilot`: Public API for external plugins
-- `icons`, `use`: Icons and Kirby 4 compatibility mixins
-
-PHP extensions in `src/extensions/`:
-
-- `api.php`: REST endpoints and AI proxy
-- `sections.php`: Section blueprints and props
-- `translations.php`: i18n strings
+- `CONTEXT.md` carries the domain vocabulary – generation run, sink, inline completion, prompt context. Read it before naming anything new.
+- `__PLAYGROUND__` is a build-time constant from `kirbyup.config.js`, declared to TypeScript in `src/env.d.ts`.
+- Comments explain why, not what. In `src/classes/**` a wrapped comment ends with a full stop and a single-line one does not; comments in `tests/**` and `src/panel/**` never do.
+- Test methods are snake_case and named after the behavior they pin; data providers are camelCase.
 
 ## Search Hints
 
-- `window.panel.plugin("johannschopplich/copilot"` - Panel registration
-- `textareaButtons:` / `writerMarks:` - editor field integrations
-- `PLUGIN_PROXY_API_ROUTE` - AI proxy endpoint constant
-- `useStreamText` - main AI streaming composable
+- `window.panel.plugin("johannschopplich/copilot"` – Panel registration
+- `Kirby::plugin(` – PHP plugin registration
+- `useStreamText` – main AI streaming composable
+- `PLUGIN_PROXY_API_ROUTE` – AI proxy endpoint constant
+- `textareaButtons:` / `writerMarks:` – editor field integrations
