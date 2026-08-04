@@ -14,7 +14,6 @@ Commercial Kirby CMS plugin for AI-assisted content generation in the Kirby Pane
 
 - `CONTEXT.md` carries the domain vocabulary – generation run, sink, inline completion, prompt context. Read it before naming anything new.
 - `__PLAYGROUND__` is a build-time constant from `kirbyup.config.js`, declared to TypeScript in `src/env.d.ts`.
-- Comments explain why, not what. In `src/classes/**` a wrapped comment ends with a full stop and a single-line one does not; comments in `tests/**` and `src/panel/**` never do.
 - Test methods are snake_case and named after the behavior they pin; data providers are camelCase.
 
 ## Search Hints
