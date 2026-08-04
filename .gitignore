@@ -23,6 +23,7 @@
 /.php-cs-fixer.cache
 /.phpunit.*
 /index.dev.mjs
+/phpunit.xml
 /tests/coverage
 /tests/*/tmp
 /tools/**/vendor
