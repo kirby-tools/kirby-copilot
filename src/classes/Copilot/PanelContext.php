@@ -14,6 +14,10 @@ final class PanelContext
      * Builds the plugin configuration the Panel receives: shape-checked,
      * filled with defaults and stripped of every API key.
      *
+     * The return names every key it emits, so an option never reaches the
+     * browser unless the Panel reads it. `systemPrompt` and `excludedBlocks`
+     * are listed for that reason alone – nothing else here touches them.
+     *
      * @return array<string, mixed>
      */
     public static function config(): array
@@ -92,7 +96,17 @@ final class PanelContext
             $language
         );
 
-        return $config;
+        return [
+            'provider' => $config['provider'],
+            'providers' => $config['providers'],
+            'systemPrompt' => $config['systemPrompt'] ?? null,
+            'reasoningEffort' => $config['reasoningEffort'] ?? null,
+            'promptTemplates' => $config['promptTemplates'],
+            'skills' => $config['skills'],
+            'excludedBlocks' => $config['excludedBlocks'] ?? null,
+            'completion' => $config['completion'],
+            'logLevel' => $config['logLevel']
+        ];
     }
 
     /**

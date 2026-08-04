@@ -366,4 +366,35 @@ final class ContextRouteTest extends ApiRouteTestCase
         $this->assertFalse($response['config']['providers']['google']['hasApiKey']);
         $this->assertArrayNotHasKey('apiKey', $response['config']['providers']['openai']);
     }
+
+    #[Test]
+    public function omits_options_the_panel_never_reads(): void
+    {
+        $response = $this->callContextRoute([
+            'johannschopplich.copilot' => [
+                'providers' => ['openai' => ['apiKey' => 'test-key']],
+                'internalWebhook' => 'https://hooks.internal/deploy',
+            ],
+        ]);
+
+        $this->assertArrayNotHasKey('internalWebhook', $response['config']);
+        $this->assertStringNotContainsString('hooks.internal', json_encode($response));
+    }
+
+    #[Test]
+    public function forwards_the_options_the_panel_does_read(): void
+    {
+        // Both keys reach the Panel without any normalization step naming
+        // them, so an explicit return is the only thing keeping them alive
+        $response = $this->callContextRoute([
+            'johannschopplich.copilot' => [
+                'providers' => ['openai' => ['apiKey' => 'test-key']],
+                'systemPrompt' => 'Write like a pirate',
+                'excludedBlocks' => ['gallery'],
+            ],
+        ]);
+
+        $this->assertSame('Write like a pirate', $response['config']['systemPrompt']);
+        $this->assertSame(['gallery'], $response['config']['excludedBlocks']);
+    }
 }
