@@ -14,9 +14,8 @@ final class PanelContext
      * Builds the plugin configuration the Panel receives: shape-checked,
      * filled with defaults and stripped of every API key.
      *
-     * The return names every key it emits, so an option never reaches the
-     * browser unless the Panel reads it. `systemPrompt` and `excludedBlocks`
-     * are listed for that reason alone – nothing else here touches them.
+     * `systemPrompt` and `excludedBlocks` reach the Panel unnormalized – this
+     * literal is the only thing keeping them alive.
      *
      * @return array<string, mixed>
      */

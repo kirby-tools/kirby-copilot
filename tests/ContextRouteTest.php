@@ -382,10 +382,8 @@ final class ContextRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function forwards_the_options_the_panel_does_read(): void
+    public function forwards_the_options_no_normalization_step_names(): void
     {
-        // Both keys reach the Panel without any normalization step naming
-        // them, so an explicit return is the only thing keeping them alive
         $response = $this->callContextRoute([
             'johannschopplich.copilot' => [
                 'providers' => ['openai' => ['apiKey' => 'test-key']],
