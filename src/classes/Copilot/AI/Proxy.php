@@ -118,7 +118,8 @@ final class Proxy
 
                 $value = str_replace('__KIRBY_COPILOT_PROXY__', $apiKey, $value);
             } elseif ($hasMarker) {
-                // A marker anywhere else would exfiltrate the key upstream
+                // Only the auth arm substitutes the marker, so this one would
+                // travel upstream unsubstituted; drop the header instead.
                 continue;
             }
 
