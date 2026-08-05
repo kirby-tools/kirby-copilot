@@ -35,7 +35,7 @@ final class Proxy
     {
         $kirby = $this->kirby;
 
-        // Ensure PHP doesn't timeout during long AI generations
+        // Ensure PHP doesn't time out during long AI generations.
         @set_time_limit(0);
 
         $providerParam = $kirby->request()->query()->get('provider');
@@ -176,7 +176,7 @@ final class Proxy
                 return strlen($header);
             },
             // Stream to stdout chunk by chunk instead of buffering the body,
-            // so the Panel renders tokens as they arrive
+            // so the Panel renders tokens as they arrive.
             CURLOPT_WRITEFUNCTION => function ($ch, $chunk) {
                 echo $chunk;
                 flush();
@@ -195,7 +195,7 @@ final class Proxy
         ];
 
         // Fall back to the CA bundle shipped with Kirby when the system has no
-        // usable `curl.cainfo`, otherwise peer verification fails outright
+        // usable `curl.cainfo`, otherwise peer verification fails outright.
         $systemCaInfo = ini_get('curl.cainfo');
         if ($systemCaInfo === false || $systemCaInfo === '' || !@is_file($systemCaInfo)) {
             $curlOptions[CURLOPT_CAINFO] = $kirby->root('kirby') . '/cacert.pem';

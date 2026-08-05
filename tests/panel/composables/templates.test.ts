@@ -132,9 +132,9 @@ describe("usePromptTemplates", () => {
       }
 
       expect(templates.value).toHaveLength(50);
-      // Most recent add is at index 0
+      // Most recent add is at index 0.
       expect(templates.value[0]?.label).toBe("label-54");
-      // Oldest kept is 55 - 50 = 5
+      // Oldest kept is 55 - 50 = 5.
       expect(templates.value.at(-1)?.label).toBe("label-5");
     });
   });
@@ -322,7 +322,7 @@ describe("usePromptTemplates", () => {
     });
 
     it("clears default templates on first run when config templates are provided", async () => {
-      // Storage is empty → initial state = defaults
+      // Storage is empty → initial state = defaults.
       const { templates, setConfigTemplates } = await loadComposable();
       expect(templates.value.length).toBeGreaterThan(0);
 

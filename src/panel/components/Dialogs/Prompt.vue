@@ -89,8 +89,8 @@ const selectionInsertOptions = [
   },
 ];
 // Prompt dialog is used in two contexts:
-// 1. Multi-field generation mode (Panel view button)
-// 2. Inline mode (toolbar) with append/replace selection option
+// 1. Multi-field generation mode (Panel view button).
+// 2. Inline mode (toolbar) with append/replace selection option.
 const isFieldGenerationMode = computed(
   () => props.fields && props.fields.length > 0,
 );
@@ -100,7 +100,7 @@ const hasPlaceholders = computed(() => {
   const matches = prompt.value.match(TEMPLATE_PLACEHOLDER_RE);
   if (!matches) return false;
 
-  // Only show preview if at least one placeholder is present in the content context
+  // Only show preview if at least one placeholder is present in the content context.
   const keys = matches.map((match) => match.slice(1, -1).toLowerCase());
   return keys.some((key) => key in contentContext);
 });
@@ -136,7 +136,7 @@ const filteredPlaceholderFields = computed(() => {
   setConfigTemplates(context.config.promptTemplates ?? []);
   setConfigSkills(context.config.skills ?? []);
 
-  // Fetch view fields for placeholder insertion if not passed as props
+  // Fetch view fields for placeholder insertion if not passed as props.
   if (!props.fields) {
     modelFields.value = await getModelFields();
   }
@@ -163,7 +163,7 @@ function handleEditorKeydown(event: KeyboardEvent) {
   if (event.key === "ArrowUp" || event.key === "ArrowDown") {
     event.preventDefault();
 
-    // Store current prompt when starting to navigate
+    // Store current prompt when starting to navigate.
     if (event.key === "ArrowUp" && currentIndex.value === -1) {
       lastPrompt.value = prompt.value;
     }
@@ -204,7 +204,7 @@ function pickPages() {
   placeholderDropdown.value?.close();
   isPlaceholderDropdownOpen.value = false;
 
-  // Save cursor position before the dialog unmounts the editor
+  // Save cursor position before the dialog unmounts the editor.
   const cursorOffset =
     editorComponent.value?.getCursorOffset() ?? prompt.value.length;
 
@@ -214,7 +214,7 @@ function pickPages() {
       endpoint: "site/children",
       multiple: true,
       hasSearch: true,
-      // The raw API response only has `title`, but `k-item` renders `text`
+      // The raw API response only has `title`, but `k-item` renders `text`.
       item: (page: Record<string, string>) => ({
         ...page,
         text: page.title,

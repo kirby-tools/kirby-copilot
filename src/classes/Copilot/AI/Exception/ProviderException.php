@@ -45,7 +45,7 @@ final class ProviderException extends Exception
             $message .= ' (' . implode(', ', $context) . ')';
         }
 
-        // TODO: Drop K4 compat in v4 – use named args (message:, details:, httpCode:, previous:) once Kirby 5 is the floor
+        // TODO: Drop K4 compat in v4 – use named args `message:`, `details:`, `httpCode:` and `previous:` once Kirby 5 is the floor.
         parent::__construct([
             'fallback' => $message,
             'details' => [

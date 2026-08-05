@@ -140,7 +140,7 @@ describe("createSkillRefTokenRegex", () => {
       (m) => m[1],
     );
 
-    // Only the first segment before the slash is captured (consistent with PHP validation)
+    // Only the first segment before the slash is captured (consistent with PHP validation).
     expect(ids).toEqual(["foo"]);
   });
 });

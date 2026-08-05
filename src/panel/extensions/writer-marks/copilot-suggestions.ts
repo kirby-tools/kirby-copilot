@@ -138,7 +138,7 @@ export const copilotSuggestions: CopilotSuggestionsMark = {
 
     const context = await usePluginContext();
 
-    // Only show toast for unlicensed users
+    // Only show toast for unlicensed users.
     if (["inactive", "invalid"].includes(context.licenseStatus!)) {
       window.panel.notification.info({
         icon: "key",
@@ -245,16 +245,16 @@ function createCompletionPlugin(
 
           clearTimeout(debounceTimer);
 
-          // Skip during IME composition
+          // Skip during IME composition.
           if (view.composing) return;
 
           if (view.state.doc.eq(prevState.doc)) return;
 
           // Only trigger if editor is focused (prevents completion on external
-          // updates like content insertion from prompt dialog or undo/redo)
+          // updates like content insertion from prompt dialog or undo/redo).
           if (!view.hasFocus()) return;
 
-          // Skip inline suggestions if disabled or config not loaded
+          // Skip inline suggestions if disabled or config not loaded.
           if (!completionConfig) return;
 
           debounceTimer = setTimeout(() => {
@@ -340,7 +340,7 @@ function createCompletionPlugin(
       setCompletionMeta(state.tr, { type: "startLoading", position }),
     );
 
-    // Capture signal reference to detect if generation gets cancelled
+    // Capture signal reference to detect if generation gets canceled.
     const { signal } = abortController;
 
     try {
@@ -349,7 +349,7 @@ function createCompletionPlugin(
       });
       const { streamText } = await loadAISDK();
 
-      // Use prefix/suffix format when there's text after cursor (manual trigger mid-text)
+      // Use prefix/suffix format when there's text after cursor (manual trigger mid-text).
       const prompt = suffix
         ? `<prefix>${prefix}</prefix>\n<suffix>${suffix}</suffix>`
         : prefix;
@@ -399,7 +399,7 @@ function createCompletionPlugin(
         }),
       );
     } catch (error) {
-      // If intentionally aborted, state was already cleared by the aborter
+      // If intentionally aborted, state was already cleared by the aborter.
       if (signal.aborted) return;
 
       console.error("Failed to generate completion:", error);
@@ -430,12 +430,12 @@ function getCursorContext(
   const { $head } = state.selection;
   const cursorPos = $head.pos;
 
-  // Get text from document start to cursor, with double newlines between blocks
+  // Get text from document start to cursor, with double newlines between blocks.
   const prefix = state.doc
     .textBetween(0, cursorPos, "\n\n")
     .slice(-prefixLength);
 
-  // For suffix, only look within current block (don't cross block boundaries)
+  // For suffix, only look within current block (don't cross block boundaries).
   const blockText = $head.parent.textContent;
   const offset = $head.parentOffset;
   const suffix =

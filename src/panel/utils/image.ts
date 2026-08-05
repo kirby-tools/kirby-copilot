@@ -30,11 +30,11 @@ export function openFilePicker({
       { once: true },
     );
 
-    // Handle cancel (focus returns to window without selection)
+    // Handle cancel (focus returns to window without selection).
     window.addEventListener(
       "focus",
       () => {
-        // Delay to allow change event to fire first if files were selected
+        // Delay to allow change event to fire first if files were selected.
         setTimeout(() => {
           if (document.body.contains(input)) {
             resolve([]);
@@ -59,11 +59,11 @@ export function openFilePicker({
 export async function toReducedBlob(
   blob: Blob,
   options: {
-    /** Maximum dimension (width or height) in pixels */
+    /** Maximum dimension (width or height) in pixels. */
     maxDimension?: number;
-    /** Output quality for lossy formats (0-1). Defaults to 0.85 */
+    /** Output quality for lossy formats (0-1). Defaults to 0.85. */
     quality?: number;
-    /** Preferred output MIME type. Falls back to source type if unsupported */
+    /** Preferred output MIME type. Falls back to source type if unsupported. */
     outputType?: "image/webp" | "image/jpeg" | "image/png";
   } = {},
 ): Promise<Blob> {
@@ -80,7 +80,7 @@ export async function toReducedBlob(
       quality,
     });
   } finally {
-    // Clean up the image element's resources
+    // Clean up the image element's resources.
     imageElement.src = "";
   }
 }
@@ -148,7 +148,7 @@ async function renderImageToBlob(
   }
 
   // For large image downscaling (more than 2x reduction), use progressive downsampling
-  // following Nyquist-Shannon sampling theorem to avoid aliasing artifacts
+  // following Nyquist-Shannon sampling theorem to avoid aliasing artifacts.
   if (
     resizeRatio < 0.5 &&
     Math.max(sourceWidth, sourceHeight) > PROGRESSIVE_THRESHOLD
@@ -194,7 +194,7 @@ async function progressiveDownsample(
         intermediateHeight,
       );
 
-      // Clean up previous `ImageBitmap` (but not the original image)
+      // Clean up previous `ImageBitmap` (but not the original image).
       if (currentImage !== source && "close" in currentImage) {
         currentImage.close();
       }
@@ -221,7 +221,7 @@ function renderToCanvas(
   width: number,
   height: number,
 ): HTMLCanvasElement | OffscreenCanvas {
-  // Prefer `OffscreenCanvas` for better performance when available
+  // Prefer `OffscreenCanvas` for better performance when available.
   const canvas =
     typeof OffscreenCanvas !== "undefined"
       ? new OffscreenCanvas(width, height)

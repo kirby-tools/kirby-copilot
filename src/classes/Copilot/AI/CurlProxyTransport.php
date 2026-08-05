@@ -13,7 +13,7 @@ final class CurlProxyTransport implements ProxyTransport
 {
     public function stream(string $targetUrl, array $curlOptions): ProxyTransportResult
     {
-        // Disable output buffering for real-time streaming
+        // Disable output buffering for real-time streaming.
         while (ob_get_level()) {
             ob_end_clean();
         }
@@ -25,7 +25,7 @@ final class CurlProxyTransport implements ProxyTransport
         // `no-transform` prevents CDNs (e.g. Cloudflare) from auto-
         // compressing text/event-stream responses, which buffers chunks.
         header('Cache-Control: no-store, no-transform');
-        // Disable nginx proxy buffering
+        // Disable nginx proxy buffering.
         header('X-Accel-Buffering: no');
 
         $ch = curl_init($targetUrl);

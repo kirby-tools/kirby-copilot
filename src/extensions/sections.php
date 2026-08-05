@@ -64,7 +64,7 @@ return [
                 $mime = $model->mime();
                 $url = $model->url();
 
-                // Ensure the image context is supported by creating a thumbnail
+                // Ensure the image context is supported by creating a thumbnail.
                 if (str_starts_with($mime, 'image/')) {
                     $targetSize = 2048;
                     /** @var \Kirby\Cms\FileVersion|\Kirby\Cms\File|\Kirby\Filesystem\Asset */
@@ -102,7 +102,7 @@ return [
         'methods' => [
             'tryResolveQuery' => function ($value, $fallback = null) {
                 if (is_string($value)) {
-                    // Replace all matches of KQL parts with the query results
+                    // Replace every `{{ … }}` placeholder with the result of the KQL query inside it.
                     $value = preg_replace_callback('!\{\{(.+?)\}\}!', function ($matches) {
                         $result = $this->model()->query(trim($matches[1]));
                         return $result ?? '';

@@ -88,7 +88,7 @@ export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
 
   toggle: (field) => z.boolean().describe(`"${field.label}", a boolean`),
 
-  // Single selection fields (all store a single string value)
+  // Single selection fields (all store a single string value).
   select: (field) =>
     createSingleSelectionSchema(field as KirbyOptionsFieldProps),
   radio: (field) =>
@@ -96,7 +96,7 @@ export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
   toggles: (field) =>
     createSingleSelectionSchema(field as KirbyOptionsFieldProps),
 
-  // Multiple selection fields (all store arrays of strings)
+  // Multiple selection fields (all store arrays of strings).
   checkboxes: (field) =>
     createMultipleSelectionSchema(field as KirbyOptionsFieldProps),
   multiselect: (field) =>
@@ -195,7 +195,7 @@ export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
     }
 
     const blockSchemas = nestedFieldsets
-      // No context passed to prevent further nesting
+      // No context passed to prevent further nesting.
       .map((fieldset) => generateBlockSchema(fieldset))
       .filter((schema) => schema != null);
 
@@ -257,7 +257,7 @@ export function fieldToZodSchema(
     const schemaType = schema._zod?.def?.type;
 
     // A required field must not come back empty, so give it a minimum unless
-    // the blueprint already defined one
+    // the blueprint already defined one.
     if (schemaType === "string") {
       if ((schema as z.ZodString).minLength == null) {
         schema = (schema as z.ZodString).min(1);
@@ -273,14 +273,14 @@ export function fieldToZodSchema(
       }
     }
   } else {
-    // Optional schema properties are not supported by OpenAI
+    // Optional schema properties are not supported by OpenAI.
     schema = schema.nullable();
   }
 
   return schema;
 }
 
-/** Creates a Zod object schema for fields that contain nested sub-fields (structure, object) */
+/** Creates a Zod object schema for fields that contain nested sub-fields (structure, object). */
 function createNestedFieldsSchema(
   field: KirbyStructureFieldProps | KirbyObjectFieldProps,
   context?: SchemaContext,
@@ -306,7 +306,7 @@ function createNestedFieldsSchema(
   return z.object(nestedContentSchema).strict();
 }
 
-/** Creates a Zod schema for text-like fields with minlength/maxlength support */
+/** Creates a Zod schema for text-like fields with minlength/maxlength support. */
 function createTextSchema(
   field: KirbyTextFieldProps | KirbyWriterFieldProps,
   description: string,
@@ -319,7 +319,7 @@ function createTextSchema(
   return schema.describe(description);
 }
 
-/** Creates a Zod schema for numeric fields (number, range) */
+/** Creates a Zod schema for numeric fields (number, range). */
 function createNumericSchema(
   field: KirbyNumberFieldProps | KirbyRangeFieldProps,
 ) {
@@ -335,7 +335,7 @@ function createNumericSchema(
   );
 }
 
-/** Creates a Zod schema for single selection fields (select, radio, toggles) */
+/** Creates a Zod schema for single selection fields (select, radio, toggles). */
 function createSingleSelectionSchema(field: KirbyOptionsFieldProps) {
   const values = (field.options ?? [])
     .map((option) => option.value)
@@ -354,7 +354,7 @@ function createSingleSelectionSchema(field: KirbyOptionsFieldProps) {
   return z.string().describe(`"${field.label}", single selection value`);
 }
 
-/** Creates a Zod schema for multiple selection fields (checkboxes, multiselect, tags) */
+/** Creates a Zod schema for multiple selection fields (checkboxes, multiselect, tags). */
 function createMultipleSelectionSchema(field: KirbyOptionsFieldProps) {
   const values = (field.options ?? [])
     .map((option) => option.value)

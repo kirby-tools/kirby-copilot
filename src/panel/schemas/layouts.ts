@@ -18,7 +18,7 @@ export function generateKirbyLayoutsSchema(
   const context: SchemaContext = {
     fieldsets,
     // Context is omitted to prevent infinite recursion (self-referential blocks)
-    // and to keep the generated JSON schema small for AI structured output
+    // and to keep the generated JSON schema small for AI structured output.
     generateBlockSchema: (fieldset) => generateBlockSchema(fieldset),
   };
 

@@ -169,7 +169,7 @@ export function createSkillSuggestPlugin(options: SkillSuggestHandlers) {
     },
     props: {
       handleKeyDown(view, event) {
-        // Let IME candidate selection own Enter/Arrow keys during composition
+        // Let IME candidate selection own Enter/Arrow keys during composition.
         if (event.isComposing) return false;
 
         const state = skillSuggestPluginKey.getState(view.state);
@@ -229,7 +229,7 @@ export function createSkillSuggestPlugin(options: SkillSuggestHandlers) {
     view() {
       return {
         update(view, prevState) {
-          // Skip during IME composition to avoid mid-character triggers
+          // Skip during IME composition to avoid mid-character triggers.
           if (view.composing) return;
 
           const state = skillSuggestPluginKey.getState(view.state);

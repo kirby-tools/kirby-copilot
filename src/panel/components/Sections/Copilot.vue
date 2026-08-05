@@ -64,7 +64,7 @@ const panel = usePanel();
 const { t } = useI18n();
 const { currentContent, update: updateContent } = useContent();
 
-// Section props
+// #region Section props
 const label = ref<string>();
 const field = ref<KirbyFieldProps>();
 const userPrompt = ref<string>();
@@ -77,8 +77,9 @@ const logLevel = ref<LogLevelIndex>();
 
 const modelFile = ref<{ mime: string; url: string }>();
 const help = ref<string>();
+// #endregion
 
-// Runtime state
+// #region Runtime state
 const config = ref<PluginConfig>();
 const isInitialized = ref(false);
 const isGenerating = ref(false);
@@ -93,6 +94,7 @@ const licenseStatus = ref<LicenseStatus>();
 let storageKey: string;
 let activeRun: ReturnType<typeof runTextGeneration>;
 let isAbortRequested = false;
+// #endregion
 
 const canUndo = computed(
   () => !isGenerating.value && currentFieldContent.value !== undefined,
@@ -185,7 +187,7 @@ watch(isDetailsOpen, (value) => {
 })();
 
 // Keep this synchronous – an unmount before the async setup resolves would
-// run `off` first, which mitt silently ignores
+// run `off` first, which mitt silently ignores.
 panel.events.on("view.save", onModelSave);
 
 onBeforeUnmount(() => {
@@ -214,7 +216,7 @@ async function generate() {
     const { getZodSchema: getLayoutZodSchema, normalizeLayout } = useLayouts();
     const { Output } = await loadAISDK();
 
-    // Handle layouts and blocks by streaming the object
+    // Handle layouts and blocks by streaming the object.
     if (field.value.type === "layout" || field.value.type === "blocks") {
       const normalizer = (field.value.type === "layout"
         ? normalizeLayout
@@ -243,7 +245,7 @@ async function generate() {
                   ...partialOutput.map(normalizer),
                 ],
               },
-              // Disable saving content to storage in Kirby 5
+              // Disable saving content to storage in Kirby 5.
               false,
             );
           },
@@ -271,13 +273,13 @@ async function generate() {
         },
         sink: {
           // The section extends the current field value; the view button
-          // replaces scalar values by design
+          // replaces scalar values by design.
           write: async (textPart) => {
             text += textPart;
 
             await updateContent(
               { [fieldName]: currentFieldContent.value + text },
-              // Disable saving content to storage in Kirby 5
+              // Disable saving content to storage in Kirby 5.
               false,
             );
           },
@@ -291,7 +293,7 @@ async function generate() {
     }
 
     // The Stop button goes live with `isGenerating`, but the run only exists
-    // once the SDK chunk and any schema request have loaded
+    // once the SDK chunk and any schema request have loaded.
     if (isAbortRequested) activeRun?.abort();
 
     await activeRun?.done;

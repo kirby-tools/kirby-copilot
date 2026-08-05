@@ -1,7 +1,7 @@
 import type { ChunkDetector } from "ai";
 
 // The full HTML void set: an element missing here never yields a chunk,
-// because the detector waits forever for a closing tag that cannot arrive
+// because the detector waits forever for a closing tag that cannot arrive.
 const HTML_VOID_ELEMENTS = new Set([
   "area",
   "base",
@@ -49,7 +49,7 @@ export function createHtmlChunking(): ChunkDetector {
       return buffer.slice(0, firstSpecialIndex);
     }
 
-    // Release a newline run as a single chunk so paragraph breaks stay intact
+    // Release a newline run as a single chunk so paragraph breaks stay intact.
     if (firstSpecialIndex === newlineIndex) {
       return buffer.match(/^\n+/)![0];
     }
@@ -60,12 +60,12 @@ export function createHtmlChunking(): ChunkDetector {
 
 function parseHtmlElement(buffer: string): string | null {
   // A lone `<` or `</` is still undecided – releasing `<` here would strand
-  // the rest of the closing tag in the stream as literal text
+  // the rest of the closing tag in the stream as literal text.
   if (buffer === "<" || buffer === "</") {
     return null;
   }
 
-  // Tag-like text that is not a tag (e.g. `<123>`, `<>`) – release `<` as plain text
+  // Tag-like text that is not a tag (e.g. `<123>`, `<>`) – release `<` as plain text.
   if (!/^<\/?[a-z]/i.test(buffer)) {
     return "<";
   }
@@ -105,7 +105,7 @@ function findMatchingCloseTag(
   const openTag = `<${tagName}`;
   const closeTag = `</${tagName}>`;
   // The delimiter keeps a longer name from counting as a nested open tag,
-  // which would otherwise let `<br>` raise the depth of an open `<b>`
+  // which would otherwise let `<br>` raise the depth of an open `<b>`.
   const openTagPattern = new RegExp(`${openTag}(?=[\\s/>])`, "g");
 
   let depth = 1;
@@ -116,7 +116,7 @@ function findMatchingCloseTag(
     const nextOpen = openTagPattern.exec(lowerBuffer)?.index ?? -1;
     const nextClose = lowerBuffer.indexOf(closeTag, pos);
 
-    // Wait for more input rather than emitting a half element
+    // Wait for more input rather than emitting a half element.
     if (nextClose === -1) return null;
 
     if (nextOpen !== -1 && nextOpen < nextClose) {

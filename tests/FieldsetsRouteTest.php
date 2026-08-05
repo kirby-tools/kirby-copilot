@@ -69,11 +69,11 @@ final class FieldsetsRouteTest extends ApiRouteTestCase
 
         $block = $this->findBlock($result, 'test-i18n');
         $this->assertNotNull($block);
-        // Known i18n key should be translated
+        // Known i18n key should be translated.
         $this->assertSame('Text', $block['fields']['title']['label']);
-        // Plain string labels should pass through unchanged
+        // Plain string labels should pass through unchanged.
         $this->assertSame('My Plain Label', $block['fields']['plain']['label']);
-        // Auto-generated labels should be title-cased from the field name
+        // Auto-generated labels should be title-cased from the field name.
         $this->assertSame('Auto', $block['fields']['auto']['label']);
     }
 

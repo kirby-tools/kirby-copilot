@@ -67,7 +67,7 @@ export function usePromptTemplates() {
     const index = state.templates.findIndex((template) => template.id === id);
     if (index === -1) return false;
 
-    // `Object.assign` preserves Vue 2 reactivity on the mutated object
+    // `Object.assign` preserves Vue 2 reactivity on the mutated object.
     Object.assign(state.templates[index]!, updates);
 
     saveTemplates();

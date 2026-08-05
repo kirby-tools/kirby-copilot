@@ -4,7 +4,7 @@ import type { OutputFormat } from "../types";
 /// keep-sorted
 const FIELD_TYPE_RESPONSE_FORMAT: Record<string, OutputFormat> = {
   list: "rich-text",
-  markdown: "markdown", // Community plugin field type
+  markdown: "markdown", // Community plugin field type.
   textarea: "markdown",
   writer: "rich-text",
 };

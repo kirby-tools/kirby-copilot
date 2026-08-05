@@ -16,8 +16,8 @@ export interface GenerationRun {
 
 export interface GenerationRunOptions {
   /**
-   * Abort the run when the user presses Escape. Callers that open a prompt
-   * dialog must start the run only after the dialog has closed, so
+   * Whether to abort the run when the user presses Escape. Callers that open a
+   * prompt dialog must start the run only after the dialog has closed, so
    * Escape-to-cancel-dialog never reaches this listener.
    */
   escapeToAbort?: boolean;
@@ -92,7 +92,7 @@ export function runStructuredGeneration({
       abortSignal: signal,
     });
 
-    // Prevent unhandled rejection when aborting before `finalOutput` is awaited
+    // Prevent unhandled rejection when aborting before `finalOutput` is awaited.
     (finalOutput as Promise<unknown>).catch(() => {});
 
     for await (const partialOutput of partialOutputStream) {
@@ -103,7 +103,7 @@ export function runStructuredGeneration({
     if (signal.aborted) return;
     const structuredOutput = await finalOutput;
 
-    // Abort must never reach the persisting write
+    // Abort must never reach the persisting write.
     if (signal.aborted) return;
     await sink.persistFinal(structuredOutput);
   });
@@ -140,7 +140,7 @@ function startGenerationRun(
     try {
       await execute(signal);
 
-      // Handle cancellation before stream started or after it completed
+      // Handle cancellation before stream started or after it completed.
       if (signal.aborted) return;
 
       panel.notification.success({

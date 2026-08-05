@@ -111,7 +111,7 @@ onBeforeUnmount(() => {
   view = undefined;
 });
 
-// Sync external value changes into ProseMirror
+// Sync external value changes into ProseMirror.
 watch(
   () => props.value,
   (newValue) => {
@@ -140,7 +140,7 @@ watch(
   },
 );
 
-// Skills load asynchronously – repaint token decorations when they arrive
+// Skills load asynchronously – repaint token decorations when they arrive.
 watch(skills, () => view?.dispatch(view.state.tr));
 
 function onViewportChange() {

@@ -124,7 +124,7 @@ final class ResolverTest extends TestCase
                 'apiKey' => 'sk-test',
                 'model' => 'gpt-5.4',
                 'baseUrl' => 'https://api.openai.com/v1',
-                // Panel-owned keys, never a vendor request parameter
+                // Panel-owned keys, never a vendor request parameter.
                 'completionModel' => 'gpt-5.4-nano',
                 'api' => 'responses',
                 'reasoning_effort' => 'low',

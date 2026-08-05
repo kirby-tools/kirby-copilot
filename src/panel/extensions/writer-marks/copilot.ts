@@ -53,7 +53,7 @@ export const copilot: CopilotMark = {
 
     if (/^\n+$/.test(text)) {
       if (text.length >= 2) {
-        // 2+ newlines → paragraph break
+        // 2+ newlines → paragraph break.
         const node = this.editor!.options.inline
           ? [
               context.schema.nodes.hardBreak!.create(),
@@ -64,7 +64,7 @@ export const copilot: CopilotMark = {
         return { tr, newPosition: position + 2 };
       }
 
-      // Single newline → hard break
+      // Single newline → hard break.
       tr = tr.replaceWith(
         position,
         position,
@@ -74,7 +74,7 @@ export const copilot: CopilotMark = {
     }
 
     // The stream is chunked by `createHtmlChunking`, so an opening bracket
-    // always comes with its complete element – never a half tag
+    // always comes with its complete element – never a half tag.
     if (text.includes("<")) {
       try {
         // Match Kirby's pattern: https://github.com/getkirby/kirby/blob/42cd286dab62d87a331e53abfe103e4fba118dd6/panel/src/components/Forms/Writer/Editor.js#L100
@@ -93,7 +93,7 @@ export const copilot: CopilotMark = {
         return { tr, newPosition: position + (sizeAfter - sizeBefore) };
       } catch (error) {
         console.error("Failed to parse HTML:", error);
-        // Fall through to plain text insertion
+        // Fall through to plain text insertion.
       }
     }
 
@@ -141,12 +141,12 @@ export const copilot: CopilotMark = {
       const { state, view } = this.editor!;
       let tr = state.tr;
 
-      // Only delete the selection on the first call
+      // Only delete the selection on the first call.
       if (!hasDeletedSelection) {
         const isFullSelection = isEntireDocumentSelected(state);
         const { from, to } = state.selection;
         tr = tr.deleteRange(from, to);
-        // Required for ProseMirror's 1-based position system
+        // Required for ProseMirror's 1-based position system.
         cursorPosition = isFullSelection ? 1 : from;
         hasDeletedSelection = true;
       }

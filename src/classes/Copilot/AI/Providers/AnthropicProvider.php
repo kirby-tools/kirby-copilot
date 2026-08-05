@@ -154,7 +154,7 @@ final class AnthropicProvider implements Provider
     }
 
     /**
-     * @throws ProviderException Always; this is the single exit for provider failures
+     * @throws ProviderException Always; this is the single exit for provider failures.
      */
     private function fail(
         string $reason,
@@ -199,7 +199,7 @@ final class AnthropicProvider implements Provider
     private function apiKey(): string
     {
         if ($this->config->apiKey === null) {
-            // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
+            // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
             throw new AuthException(
                 'Missing API key in "johannschopplich.copilot.providers.' . $this->providerName()->value . '.apiKey"'
             );

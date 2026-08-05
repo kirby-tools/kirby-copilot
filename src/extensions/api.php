@@ -51,7 +51,7 @@ return [
                     return $response;
                 }
 
-                // Bypass Kirby's response pipeline
+                // Bypass Kirby's response pipeline.
                 exit;
             }
         ],
@@ -90,7 +90,7 @@ return [
 
                         $fields = [];
                         // A non-array `tabs` value counts as "no tabs" and is resolved
-                        // through `fields` instead of being iterated
+                        // through `fields` instead of being iterated.
                         $tabs = is_array($props['tabs'] ?? null) ? $props['tabs'] : [];
 
                         if ($tabs === []) {
@@ -116,9 +116,9 @@ return [
                                     $options = $field['options'];
 
                                     if (isset($options[0]['value'])) {
-                                        // Already in resolved format, nothing to normalize
+                                        // Already in resolved format, nothing to normalize.
                                     } elseif (isset($options['type'])) {
-                                        // Query/API definitions can't be resolved without a model
+                                        // Query/API definitions can't be resolved without a model.
                                         $field['options'] = [];
                                     } else {
                                         $normalizedData = [];
@@ -151,7 +151,7 @@ return [
                         ];
                     } catch (\Throwable) {
                         // Skip blocks with invalid blueprints so one bad
-                        // block doesn't break the entire endpoint
+                        // block doesn't break the entire endpoint.
                         continue;
                     }
                 }
@@ -166,14 +166,14 @@ return [
                 $id = $kirby->request()->query()->get('id');
 
                 if (!is_string($id) || $id === '') {
-                    // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
+                    // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
                     throw new InvalidArgumentException('Missing "id" query parameter');
                 }
 
                 $model = ModelResolver::resolveFromPath($id);
 
                 if ($model === null) {
-                    // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
+                    // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
                     throw new NotFoundException('No model found for id: ' . $id);
                 }
 

@@ -85,9 +85,9 @@ export async function useStreamText({
   files?: File[];
   logLevel?: LogLevel;
   abortSignal?: AbortSignal;
-  /** Inject a language model directly (useful for testing). */
+  /** Language model to use instead of the configured one (useful for testing). */
   model?: LanguageModelV4;
-  /** Inject provider options directly (useful for testing). */
+  /** Provider options to use instead of the configured ones (useful for testing). */
   providerOptions?: SharedV4ProviderOptions;
 }) {
   const logger = useLogger();
@@ -142,7 +142,7 @@ export async function useStreamText({
                 { type: "text" as const, text: userPromptWithContext },
                 ...imageByteArrays.map((image) => ({
                   type: "file" as const,
-                  // Subtype is auto-detected from the binary data
+                  // Subtype is auto-detected from the binary data.
                   mediaType: "image" as const,
                   data: image,
                 })),
@@ -175,7 +175,7 @@ export async function useStreamText({
   });
 
   // Surface silent SDK coercions, e.g. reasoning dropped for models that
-  // don't support it (stream errors are already reported via `onError`)
+  // don't support it (stream errors are already reported via `onError`).
   Promise.resolve(result.warnings)
     .then((warnings) => {
       if (warnings?.length) {
@@ -206,7 +206,7 @@ export async function resolveLanguageModel({
   const modelId = resolveModelId({ provider, providerConfig, forCompletion });
 
   // Support for OpenAI-compatible gateways that don't support `/v1/responses`,
-  // e.g. Cloudflare AI Gateway
+  // e.g. Cloudflare AI Gateway.
   const model =
     provider === "openai" && providerConfig.api === "chat"
       ? (api as OpenAIProvider).chat(modelId)
@@ -294,7 +294,7 @@ export async function resolvePromptContext({
   const hasNativePdfSupport = totalPdfSize <= PDF_SIZE_LIMIT;
 
   // Providers reject PDFs above the native-attachment cap; extract text
-  // client-side so the content still reaches the model
+  // client-side so the content still reaches the model.
   if (!hasNativePdfSupport && pdfs.length > 0) {
     const pdfTexts = await Promise.all(pdfs.map(extractTextFromPdf));
     userPromptWithContext += `\n\n${pdfTexts
@@ -352,7 +352,7 @@ function resolveProviderSelection(
       currentContent.value.modelprovider || DEFAULT_PLAYGROUND_MODEL_PROVIDER;
     config.provider = selectedProvider;
 
-    // Widened lookup: the content-sourced provider is unvalidated here
+    // Widened lookup: the content-sourced provider is unvalidated here.
     const providerDefinitions: Record<string, ProviderDefinition | undefined> =
       PROVIDER_REGISTRY;
     const modelField =
@@ -451,7 +451,7 @@ function resolveModelId({
   const { prefix } = parseGatewayPrefix(providerConfig.model ?? "");
 
   // Cross-provider gateway prefix: require explicit `completionModel` rather
-  // than derive a 404 (e.g. `google-ai-studio/gpt-5.4-nano`)
+  // than derive a 404 (e.g. `google-ai-studio/gpt-5.4-nano`).
   if (
     forCompletion &&
     !providerConfig.completionModel &&
@@ -463,7 +463,7 @@ function resolveModelId({
     );
   }
 
-  // Keep the default-completion fallback on the same gateway as the primary model
+  // Keep the default-completion fallback on the same gateway as the primary model.
   const defaultCompletion = PROVIDER_REGISTRY[provider].defaultCompletionModel;
   const gatewayPrefix = prefix ? `${prefix}/` : "";
   const modelId = forCompletion

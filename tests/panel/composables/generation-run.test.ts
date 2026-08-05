@@ -31,7 +31,7 @@ vi.mock("kirbyuse", async () => {
   };
 });
 
-// Load the real AI SDK so runs stream through the same code path as production
+// Load the real AI SDK so runs stream through the same code path as production.
 vi.mock("../../../src/panel/utils/ai", () => ({
   loadAISDK: () => import("ai"),
 }));
@@ -327,7 +327,7 @@ describe("runStructuredGeneration", () => {
       },
       sink: {
         // Aborting before `output` settles also exercises the unhandled
-        // rejection guard; Vitest fails the test if the rejection leaks
+        // rejection guard; Vitest fails the test if the rejection leaks.
         writePartial: () => run!.abort(),
         persistFinal,
       },

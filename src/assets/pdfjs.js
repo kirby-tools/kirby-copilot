@@ -1,4 +1,4 @@
-// Polyfill for `Promise.withResolvers`
+// Polyfill for `Promise.withResolvers`.
 Promise.withResolvers ??= function () {
   let resolve, reject;
   const promise = new Promise((res, rej) => {

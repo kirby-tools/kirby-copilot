@@ -37,7 +37,7 @@ export function createEditorPlugins({
   };
 }) {
   return [
-    // Forward Ctrl/Cmd+Enter to parent
+    // Forward Ctrl/Cmd+Enter to parent.
     keymap({
       "Mod-Enter": () => {
         onSubmit();
@@ -45,9 +45,9 @@ export function createEditorPlugins({
       },
     }),
     // `@skill://` suggestion plugin – needs to run before the base keymap
-    // to capture keys for dropdown navigation
+    // to capture keys for dropdown navigation.
     ...(skills.suggest ? [createSkillSuggestPlugin(skills.suggest)] : []),
-    // Forward arrow keys to parent for history navigation
+    // Forward arrow keys to parent for history navigation.
     new Plugin({
       props: {
         handleKeyDown(view, event) {
@@ -64,7 +64,7 @@ export function createEditorPlugins({
         },
       },
     }),
-    // Force plain-text paste to avoid HTML artifacts from clipboard
+    // Force plain-text paste to avoid HTML artifacts from clipboard.
     new Plugin({
       props: {
         clipboardTextParser(text) {

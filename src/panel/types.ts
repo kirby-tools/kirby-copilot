@@ -37,7 +37,7 @@ export interface PromptTemplate {
   label: string;
   prompt: string;
   createdAt: number;
-  /** Config-defined templates are read-only for editors */
+  /** Config-defined templates are read-only for editors. */
   readOnly?: boolean;
 }
 
@@ -76,11 +76,11 @@ export interface PluginContextResponse {
  * @see https://getkirby.com/docs/reference/panel/fields/blocks
  */
 export interface KirbyFieldset {
-  /** Translated, human-readable block label, not an identifier */
+  /** Translated, human-readable block label, not an identifier. */
   name: string;
-  /** Block type identifier (e.g., `text`, `heading`, `image`) */
+  /** Block type identifier (e.g., `text`, `heading`, `image`). */
   type: string;
-  /** Optional description of the block's purpose, defined in the block blueprint */
+  /** Description of the block's purpose, defined in the block blueprint. */
   description?: string | null;
   fields?: Record<string, KirbyFieldProps>;
 }

@@ -103,7 +103,7 @@ describe("findFieldDefinition", () => {
         fieldsets: {
           empty: {
             name: "Empty",
-            // No tabs property
+            // No `tabs` property.
           },
           text: {
             name: "Text",
@@ -135,7 +135,7 @@ describe("findFieldDefinition", () => {
             name: "Text",
             tabs: {
               empty: {
-                // No fields property
+                // No `fields` property.
               },
               content: {
                 fields: {

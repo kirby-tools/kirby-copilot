@@ -24,7 +24,7 @@ describe("createHtmlChunking", () => {
 
     it("buffers an undecided < or </ at end of input", () => {
       expect(createHtmlChunking()("<")).toBeNull();
-      // Releasing `<` here would strand `/b>` in the stream as literal text
+      // Releasing `<` here would strand `/b>` in the stream as literal text.
       expect(createHtmlChunking()("</")).toBeNull();
     });
   });

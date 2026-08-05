@@ -127,7 +127,7 @@ final class ContextRouteTest extends ApiRouteTestCase
         $this->assertSame('low', $response['config']['reasoningEffort']);
         $this->assertSame('warn', $response['config']['logLevel']);
         // No `completionModel`: the Panel's provider registry owns that default
-        // so it can keep the fallback on the same gateway as the primary model
+        // so it can keep the fallback on the same gateway as the primary model.
         $this->assertSame([
             'openai'    => ['hasApiKey' => false, 'model' => 'gpt-5.6-terra'],
             'google'    => ['hasApiKey' => false, 'model' => 'gemini-3.1-pro-preview'],

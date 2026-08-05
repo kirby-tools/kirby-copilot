@@ -23,7 +23,7 @@ export function generateBlockSchema(
     if (fieldSchema) contentSchema[field.name] = fieldSchema;
   }
 
-  // Skip blocks where all fields were filtered out (unknown/excluded types)
+  // Skip blocks where all fields were filtered out (unknown/excluded types).
   if (Object.keys(contentSchema).length === 0) {
     return;
   }
@@ -49,7 +49,7 @@ export function generateKirbyBlocksSchema(fieldsets: KirbyFieldset[]) {
   const context: SchemaContext = {
     fieldsets,
     // Context is omitted to prevent infinite recursion (self-referential blocks)
-    // and to keep the generated JSON schema small for AI structured output
+    // and to keep the generated JSON schema small for AI structured output.
     generateBlockSchema: (fieldset) => generateBlockSchema(fieldset),
   };
 

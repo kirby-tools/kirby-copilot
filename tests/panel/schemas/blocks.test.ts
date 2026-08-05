@@ -3,7 +3,6 @@ import { generateKirbyBlocksSchema } from "../../../src/panel/schemas/blocks";
 import { field, fieldset } from "../utils";
 
 describe("generateKirbyBlocksSchema", () => {
-  // Basic block configurations for testing
   const basicBlocksConfig = [
     fieldset({
       type: "text",
@@ -82,7 +81,6 @@ describe("generateKirbyBlocksSchema", () => {
 
       const schema = generateKirbyBlocksSchema(configWithEmptyBlock);
 
-      // Valid blocks still work
       expect(() =>
         schema.parse({
           type: "text",
@@ -90,7 +88,6 @@ describe("generateKirbyBlocksSchema", () => {
         }),
       ).not.toThrow();
 
-      // Empty/no-fields blocks and nonexistent types are rejected
       expect(() => schema.parse({ type: "empty", content: {} })).toThrow();
       expect(() =>
         schema.parse({ type: "nonexistent", content: {} }),
@@ -102,15 +99,13 @@ describe("generateKirbyBlocksSchema", () => {
     it("validates required fields", () => {
       const schema = generateKirbyBlocksSchema(basicBlocksConfig);
 
-      // Should reject missing required field
       expect(() =>
         schema.parse({
           type: "heading",
-          content: { level: "h1" }, // Missing required 'text' field
+          content: { level: "h1" }, // Missing the required `text` field.
         }),
       ).toThrow();
 
-      // Should accept block with all required fields
       expect(() =>
         schema.parse({
           type: "heading",
@@ -122,15 +117,13 @@ describe("generateKirbyBlocksSchema", () => {
     it("validates field types", () => {
       const schema = generateKirbyBlocksSchema(basicBlocksConfig);
 
-      // Should reject invalid enum value
       expect(() =>
         schema.parse({
           type: "heading",
-          content: { level: "h7", text: "Invalid level" }, // h7 not in options
+          content: { level: "h7", text: "Invalid level" }, // `h7` is not in the options.
         }),
       ).toThrow();
 
-      // Should accept valid enum value
       expect(() =>
         schema.parse({
           type: "heading",
@@ -171,7 +164,6 @@ describe("generateKirbyBlocksSchema", () => {
     it("excludes utility field types from schema", () => {
       const schema = generateKirbyBlocksSchema(excludedFieldsConfig);
 
-      // Should validate block with only included fields
       expect(() =>
         schema.parse({
           type: "custom",
@@ -179,7 +171,6 @@ describe("generateKirbyBlocksSchema", () => {
         }),
       ).not.toThrow();
 
-      // Should fail when missing required included field
       expect(() =>
         schema.parse({
           type: "custom",
@@ -213,7 +204,6 @@ describe("generateKirbyBlocksSchema", () => {
 
       const schema = generateKirbyBlocksSchema(config);
 
-      // Should accept block with only the known field
       expect(() =>
         schema.parse({
           type: "custom",
@@ -221,7 +211,7 @@ describe("generateKirbyBlocksSchema", () => {
         }),
       ).not.toThrow();
 
-      // Unknown field should not be in the schema (strict mode rejects it)
+      // The unknown field is not in the schema, so strict mode rejects it.
       expect(() =>
         schema.parse({
           type: "custom",
@@ -258,7 +248,6 @@ describe("generateKirbyBlocksSchema", () => {
 
       const schema = generateKirbyBlocksSchema(config);
 
-      // Known block type still works
       expect(() =>
         schema.parse({
           type: "text",
@@ -266,7 +255,7 @@ describe("generateKirbyBlocksSchema", () => {
         }),
       ).not.toThrow();
 
-      // All-unknown block should be excluded from the union
+      // The all-unknown block is excluded from the union.
       expect(() =>
         schema.parse({
           type: "all-unknown",
@@ -349,7 +338,6 @@ describe("generateKirbyBlocksSchema", () => {
     it("accepts structure, object, and entries content inside blocks", () => {
       const schema = generateKirbyBlocksSchema(complexBlocksConfig);
 
-      // Structure field
       expect(() =>
         schema.parse({
           type: "testimonials",
@@ -357,7 +345,6 @@ describe("generateKirbyBlocksSchema", () => {
         }),
       ).not.toThrow();
 
-      // Object and entries fields
       expect(() =>
         schema.parse({
           type: "card",
@@ -372,7 +359,7 @@ describe("generateKirbyBlocksSchema", () => {
     it("validates complex field constraints", () => {
       const schema = generateKirbyBlocksSchema(complexBlocksConfig);
 
-      // Structure item missing required field
+      // Structure item missing a required field.
       expect(() =>
         schema.parse({
           type: "testimonials",
@@ -380,7 +367,7 @@ describe("generateKirbyBlocksSchema", () => {
         }),
       ).toThrow();
 
-      // Object missing required field
+      // Object missing a required field.
       expect(() =>
         schema.parse({
           type: "card",
@@ -388,7 +375,7 @@ describe("generateKirbyBlocksSchema", () => {
         }),
       ).toThrow();
 
-      // Entries below minimum
+      // Entries below the minimum.
       expect(() =>
         schema.parse({
           type: "card",
@@ -448,7 +435,6 @@ describe("generateKirbyBlocksSchema", () => {
     it("generates schemas for blocks containing nested blocks fields", () => {
       const schema = generateKirbyBlocksSchema(nestedBlocksConfig);
 
-      // A rich-text block with nested text and heading blocks
       expect(() =>
         schema.parse({
           type: "rich-text",
@@ -472,7 +458,7 @@ describe("generateKirbyBlocksSchema", () => {
     it("rejects invalid nested block types", () => {
       const schema = generateKirbyBlocksSchema(nestedBlocksConfig);
 
-      // "rich-text" is not allowed in the nested blocks fieldsets
+      // `rich-text` is not allowed in the nested blocks fieldsets.
       expect(() =>
         schema.parse({
           type: "rich-text",
@@ -492,7 +478,7 @@ describe("generateKirbyBlocksSchema", () => {
     it("validates nested block content fields", () => {
       const schema = generateKirbyBlocksSchema(nestedBlocksConfig);
 
-      // Nested heading block missing required text field
+      // Nested heading block missing the required `text` field.
       expect(() =>
         schema.parse({
           type: "rich-text",

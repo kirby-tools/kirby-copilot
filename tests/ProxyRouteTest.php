@@ -121,7 +121,7 @@ final class ProxyRouteTest extends ApiRouteTestCase
             'subdomain confusion' => ['https://api.openai.com.evil.com/v1'],
             'punycode homoglyph'  => ['https://xn--pi-olaa.openai.com/v1'],
             'trailing dot'        => ['https://api.openai.com./v1'],
-            // Another provider's host would receive this provider's API key
+            // Another provider's host would receive this provider's API key.
             'other provider host' => ['https://api.anthropic.com/v1/messages'],
         ];
     }

@@ -38,7 +38,7 @@ final class PanelContext
         $conflictingNames = array_keys(array_filter($providerNames, fn (int $count) => $count > 1));
 
         if ($conflictingNames !== [] && $kirby->option('debug')) {
-            // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
+            // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
             throw new InvalidArgumentException(
                 'Conflicting provider keys: ' . implode(', ', $conflictingNames) .
                 ' – provider names are case-insensitive'
@@ -67,7 +67,7 @@ final class PanelContext
 
         self::validateEnum($config, 'provider', array_column(ProviderName::cases(), 'value'), ProviderName::Google->value);
 
-        // The Panel only ever needs to know a key is present, never the key
+        // The Panel only ever needs to know a key is present, never the key itself.
         $config['providers'] = array_map(
             function (array $provider) use ($kirby) {
                 $apiKey = ProviderName::resolveApiKey($provider['apiKey'] ?? null, $kirby);
@@ -122,7 +122,7 @@ final class PanelContext
         }
 
         if (App::instance()->option('debug')) {
-            // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
+            // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
             throw new InvalidArgumentException(
                 'Invalid ' . $path . ': expected ' . implode(' or ', $types) .
                 ', got ' . get_debug_type($value)
@@ -163,7 +163,7 @@ final class PanelContext
         if (App::instance()->option('debug')) {
             $value = $parent[$lastKey];
 
-            // TODO: Drop K4 compat in v4 – use named arg (message:) once Kirby 5 is the floor
+            // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
             throw new InvalidArgumentException(
                 'Invalid ' . $path . ': ' . (is_scalar($value) ? (string)$value : json_encode($value)) .
                 '. Must be one of: ' . implode(', ', $allowed)

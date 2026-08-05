@@ -11,16 +11,13 @@ import type { z } from "zod";
 import type { KirbyFieldset } from "../../src/panel/types";
 import { expect } from "vitest";
 
-/**
- * Asserts that a schema is defined and returns it typed.
- */
 export function assertSchema(schema: z.ZodType | undefined): z.ZodType {
   expect(schema).toBeDefined();
   return schema!;
 }
 
 /**
- * Helper to create a field definition with sensible defaults for testing.
+ * Creates a field definition with sensible defaults.
  */
 export function field<T extends Partial<KirbyAnyFieldProps>>(
   partial: T & { type: string; name: string },
@@ -37,9 +34,6 @@ export function field<T extends Partial<KirbyAnyFieldProps>>(
   } as KirbyFieldProps;
 }
 
-/**
- * Helper to create a structure field definition for testing.
- */
 export function structureField(
   name: string,
   fields: Record<string, KirbyFieldProps>,
@@ -51,9 +45,6 @@ export function structureField(
   }) as unknown as KirbyStructureFieldProps;
 }
 
-/**
- * Helper to create an object field definition for testing.
- */
 export function objectField(
   name: string,
   fields: Record<string, KirbyFieldProps>,
@@ -65,9 +56,6 @@ export function objectField(
   }) as unknown as KirbyObjectFieldProps;
 }
 
-/**
- * Helper to create a blocks field definition for testing.
- */
 export function blocksField(
   name: string,
   blockTypes: Record<string, Record<string, KirbyFieldProps>>,
@@ -91,9 +79,6 @@ export function blocksField(
   }) as unknown as KirbyBlocksFieldProps;
 }
 
-/**
- * Helper to create a layout field definition for testing.
- */
 export function layoutField(
   name: string,
   blockTypes: Record<string, Record<string, KirbyFieldProps>>,
@@ -118,7 +103,7 @@ export function layoutField(
 }
 
 /**
- * Helper to create a fieldset (block type) definition for testing.
+ * Creates a fieldset (block type) definition.
  */
 export function fieldset(
   partial: Partial<KirbyFieldset> & Pick<KirbyFieldset, "type" | "name">,

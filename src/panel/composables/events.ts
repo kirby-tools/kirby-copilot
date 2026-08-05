@@ -6,7 +6,7 @@ import type {
 } from "vue";
 import { getCurrentScope, onScopeDispose, unref, watch } from "kirbyuse";
 
-type MaybeRef<T> = T | Ref<T> | ShallowRef<T> | WritableComputedRef<T>; // TODO: Remove in Vue 3
+type MaybeRef<T> = T | Ref<T> | ShallowRef<T> | WritableComputedRef<T>; // TODO: Remove in Vue 3.
 type MaybeElement = HTMLElement | ComponentPublicInstance | undefined | null;
 
 /**

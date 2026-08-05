@@ -113,7 +113,7 @@ describe("fieldToZodSchema", () => {
 
       expect(() => schema.parse(true)).not.toThrow();
       expect(() => schema.parse(false)).not.toThrow();
-      expect(() => schema.parse("true")).toThrow(); // String not allowed
+      expect(() => schema.parse("true")).toThrow();
     });
   });
 
@@ -242,7 +242,7 @@ describe("fieldToZodSchema", () => {
           type: "structure",
           label: "Items",
           name: "items",
-          // Intentionally omit fields to test fallback
+          // Intentionally omit fields to test fallback.
         }) as any,
       ));
 
@@ -273,7 +273,7 @@ describe("fieldToZodSchema", () => {
           type: "object",
           label: "Data",
           name: "data",
-          // Intentionally omit fields to test fallback
+          // Intentionally omit fields to test fallback.
         }) as any,
       ));
 
@@ -327,7 +327,7 @@ describe("fieldToZodSchema", () => {
         }),
       ));
 
-      // minlength=3 should take precedence, not min(1)
+      // `minlength=3` should take precedence, not `min(1)`.
       expect(() => schema.parse("ab")).toThrow();
       expect(() => schema.parse("abc")).not.toThrow();
     });
@@ -358,7 +358,7 @@ describe("fieldToZodSchema", () => {
         }),
       ));
 
-      // min=2 should take precedence, not min(1)
+      // `min=2` should take precedence, not `min(1)`.
       expect(() => schema.parse(["single"])).toThrow();
       expect(() => schema.parse(["item1", "item2"])).not.toThrow();
     });
@@ -381,7 +381,7 @@ describe("fieldToZodSchema", () => {
         }),
       ));
 
-      // Required numbers/booleans don't get min(1), they just aren't nullable
+      // Required numbers/booleans don't get `min(1)`, they just aren't nullable.
       expect(() => numberSchema.parse(0)).not.toThrow();
       expect(() => numberSchema.parse(null)).toThrow();
       expect(() => toggleSchema.parse(false)).not.toThrow();
@@ -441,7 +441,6 @@ describe("fieldToZodSchema", () => {
         }),
       ));
 
-      // Should still parse with only the known field
       expect(() => schema.parse([{ title: "Item" }])).not.toThrow();
     });
 
@@ -458,7 +457,6 @@ describe("fieldToZodSchema", () => {
         }),
       ));
 
-      // Should still parse with only the known field
       expect(() => schema.parse({ title: "Test" })).not.toThrow();
     });
   });

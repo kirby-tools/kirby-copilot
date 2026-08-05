@@ -19,7 +19,7 @@ export function useModelFields() {
       PLUGIN_MODEL_FIELDS_API_ROUTE,
       { id },
       undefined,
-      // Avoid showing Panel loading indicator
+      // Avoid showing Panel loading indicator.
       true,
     );
 

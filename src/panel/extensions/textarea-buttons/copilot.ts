@@ -11,7 +11,7 @@ export const copilot: TextareaButton = {
   click(this: TextareaToolbarContext) {
     let currentSelection = "";
 
-    // Extract current selection
+    // Extract current selection.
     this.command("insert", (input: any, selection: string) => {
       currentSelection = selection;
       return selection;
@@ -22,7 +22,7 @@ export const copilot: TextareaButton = {
       this.command("insert", (input: any, selection: string) => {
         if (isFirstInsertion) {
           isFirstInsertion = false;
-          // Concatenating space is handled by the generator function
+          // Concatenating space is handled by the generator function.
           return selection + text;
         }
 

@@ -22,14 +22,14 @@ function getFieldsets() {
       PLUGIN_FIELDSETS_API_ROUTE,
       undefined,
       undefined,
-      // Avoid showing Panel loading indicator
+      // Avoid showing Panel loading indicator.
       true,
     )
     .then((response) => {
       fieldsets = response;
       return fieldsets;
     })
-    // Without this a failing request stays cached as a rejection and no later view recovers without a full reload
+    // Without this a failing request stays cached as a rejection and no later view recovers without a full reload.
     .finally(() => {
       pendingPromise = undefined;
     });
@@ -42,7 +42,7 @@ export function useBlocks() {
     let currentFieldsets = await getFieldsets();
     const { config } = await usePluginContext();
 
-    // Filter out excluded blocks from global config
+    // Filter out excluded blocks from global config.
     if (config.excludedBlocks && Array.isArray(config.excludedBlocks)) {
       currentFieldsets = currentFieldsets.filter(
         (fieldset) => !config.excludedBlocks!.includes(fieldset.type),
@@ -80,7 +80,7 @@ export function useLayouts() {
     let currentFieldsets = await getFieldsets();
     const { config } = await usePluginContext();
 
-    // Filter out excluded blocks from global config
+    // Filter out excluded blocks from global config.
     if (config.excludedBlocks && Array.isArray(config.excludedBlocks)) {
       currentFieldsets = currentFieldsets.filter(
         (fieldset) => !config.excludedBlocks!.includes(fieldset.type),

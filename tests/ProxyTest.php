@@ -77,7 +77,7 @@ final class ProxyTest extends TestCase
         $this->createProxy($transport, [
             'HTTP_AUTHORIZATION' => 'Bearer __KIRBY_COPILOT_PROXY__',
             // Marker in an allow-listed non-auth header must drop the whole
-            // header, never forward it unsubstituted
+            // header, never forward it unsubstituted.
             'HTTP_ANTHROPIC_BETA' => '__KIRBY_COPILOT_PROXY__',
             'HTTP_USER_AGENT' => 'ai-sdk/6.0',
             'HTTP_COOKIE' => 'kirby_session=secret',
@@ -103,7 +103,7 @@ final class ProxyTest extends TestCase
 
         // Site-level HTTP auth makes the browser attach its own credentials
         // to the same-origin proxy request; Anthropic and Google leave
-        // `Authorization` untouched, so forwarding would leak them upstream
+        // `Authorization` untouched, so forwarding would leak them upstream.
         $this->createProxy($transport, [
             'HTTP_AUTHORIZATION' => 'Basic ' . base64_encode('site:secret'),
             'HTTP_X_API_KEY' => '__KIRBY_COPILOT_PROXY__',
@@ -160,7 +160,7 @@ final class ProxyTest extends TestCase
         $transport = new FakeProxyTransport();
 
         // The proxy reads the raw superglobal (Kirby's `headers()` drops
-        // Content-Type); safe to mutate under process isolation
+        // Content-Type); safe to mutate under process isolation.
         $_SERVER['CONTENT_TYPE'] = 'application/json';
 
         $this->createProxy($transport)->handle();
@@ -191,7 +191,7 @@ final class ProxyTest extends TestCase
         $this->assertSame('', $curlOptions[CURLOPT_ENCODING]);
 
         // Mirrors the fallback condition in `Proxy::handle()`: the bundled CA
-        // certificate kicks in when the system has no usable `curl.cainfo`
+        // certificate kicks in when the system has no usable `curl.cainfo`.
         $systemCaInfo = ini_get('curl.cainfo');
         if ($systemCaInfo === false || $systemCaInfo === '' || !@is_file($systemCaInfo)) {
             $this->assertStringEndsWith('/cacert.pem', $curlOptions[CURLOPT_CAINFO]);
@@ -232,7 +232,7 @@ final class ProxyTest extends TestCase
         $this->assertSame(strlen($rateLimited), $headerCallback(null, $rateLimited));
         $this->assertSame(429, http_response_code());
 
-        // Every branch must report the consumed length or cURL aborts the stream
+        // Every branch must report the consumed length or cURL aborts the stream.
         $retryAfter = "Retry-After: 30\r\n";
         $this->assertSame(strlen($retryAfter), $headerCallback(null, $retryAfter));
 

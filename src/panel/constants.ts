@@ -5,7 +5,7 @@ export const PLUGIN_MODEL_FIELDS_API_ROUTE = "__copilot__/model-fields";
 export const PLUGIN_FIELDSETS_API_ROUTE = "__copilot__/fieldsets";
 export const PLUGIN_PROXY_API_ROUTE = "__copilot__/proxy";
 
-// Marker replaced by the PHP proxy with the real API key
+// Marker replaced by the PHP proxy with the real API key.
 export const PROXY_API_KEY_MARKER = "__KIRBY_COPILOT_PROXY__";
 
 export const STORAGE_KEY_PREFIX = "kirby$copilot$";

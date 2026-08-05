@@ -134,13 +134,13 @@ async function initPromptDialog() {
           if (Object.keys(updatedContent).length > 0) {
             await updateContent(
               updatedContent,
-              // Disable saving content to storage in Kirby 5
+              // Disable saving content to storage in Kirby 5.
               false,
             );
           }
         },
         // Scalar field values are replaced ("fill these fields"), unlike the
-        // section, which extends the current field value
+        // section, which extends the current field value.
         persistFinal: async (structuredOutput) => {
           const finalContent = processFieldValues({
             object: structuredOutput as Record<string, unknown>,
@@ -154,7 +154,7 @@ async function initPromptDialog() {
     });
 
     // The Stop button goes live with `isGenerating`, but the run only exists
-    // once the schemas, the plugin context and the SDK chunk have loaded
+    // once the schemas, the plugin context and the SDK chunk have loaded.
     if (isAbortRequested) activeRun?.abort();
 
     await activeRun?.done;

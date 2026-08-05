@@ -22,7 +22,7 @@ export function useGenerationHistory() {
 
     const trimmedPrompt = prompt.trim();
 
-    // Move existing entries to the front so ArrowUp cycles don't repeat
+    // Move existing entries to the front so ArrowUp cycles don't repeat.
     const existingIndex = history.value.indexOf(trimmedPrompt);
     if (existingIndex !== -1) {
       history.value.splice(existingIndex, 1);
@@ -51,7 +51,7 @@ export function useGenerationHistory() {
         currentIndex.value--;
         return history.value[currentIndex.value];
       } else if (currentIndex.value === 0) {
-        // Past the freshest entry: return the in-progress prompt so typing isn't lost
+        // Past the freshest entry: return the in-progress prompt so typing isn't lost.
         currentIndex.value = -1;
         return lastPrompt.value;
       }
