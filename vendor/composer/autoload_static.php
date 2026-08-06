@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit76a10f26ac064d5dd4f8da8d0834dcb0
+class ComposerStaticInitb019df19525881b0a091efd78781a210
 {
     public static $files = array (
         '4b3d45d99f6e4eb65ea80c00519736e4' => __DIR__ . '/..' . '/anthropic-ai/sdk/src/Version.php',
@@ -1301,6 +1301,7 @@ class ComposerStaticInit76a10f26ac064d5dd4f8da8d0834dcb0
         'JohannSchopplich\\Copilot\\AI\\ProxyTransport' => __DIR__ . '/../..' . '/src/classes/Copilot/AI/ProxyTransport.php',
         'JohannSchopplich\\Copilot\\AI\\ProxyTransportResult' => __DIR__ . '/../..' . '/src/classes/Copilot/AI/ProxyTransportResult.php',
         'JohannSchopplich\\Copilot\\AI\\Resolver' => __DIR__ . '/../..' . '/src/classes/Copilot/AI/Resolver.php',
+        'JohannSchopplich\\Copilot\\PanelContext' => __DIR__ . '/../..' . '/src/classes/Copilot/PanelContext.php',
         'JohannSchopplich\\KirbyTools\\FieldNormalizer' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-utils/src/FieldNormalizer.php',
         'JohannSchopplich\\KirbyTools\\FieldResolver' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-utils/src/FieldResolver.php',
         'JohannSchopplich\\KirbyTools\\ModelResolver' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-utils/src/ModelResolver.php',
@@ -1835,9 +1836,9 @@ class ComposerStaticInit76a10f26ac064d5dd4f8da8d0834dcb0
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit76a10f26ac064d5dd4f8da8d0834dcb0::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit76a10f26ac064d5dd4f8da8d0834dcb0::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit76a10f26ac064d5dd4f8da8d0834dcb0::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitb019df19525881b0a091efd78781a210::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitb019df19525881b0a091efd78781a210::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitb019df19525881b0a091efd78781a210::$classMap;
 
         }, null, ClassLoader::class);
     }

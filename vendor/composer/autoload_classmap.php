@@ -1221,6 +1221,7 @@ return array(
     'JohannSchopplich\\Copilot\\AI\\ProxyTransport' => $baseDir . '/src/classes/Copilot/AI/ProxyTransport.php',
     'JohannSchopplich\\Copilot\\AI\\ProxyTransportResult' => $baseDir . '/src/classes/Copilot/AI/ProxyTransportResult.php',
     'JohannSchopplich\\Copilot\\AI\\Resolver' => $baseDir . '/src/classes/Copilot/AI/Resolver.php',
+    'JohannSchopplich\\Copilot\\PanelContext' => $baseDir . '/src/classes/Copilot/PanelContext.php',
     'JohannSchopplich\\KirbyTools\\FieldNormalizer' => $vendorDir . '/johannschopplich/kirby-tools-utils/src/FieldNormalizer.php',
     'JohannSchopplich\\KirbyTools\\FieldResolver' => $vendorDir . '/johannschopplich/kirby-tools-utils/src/FieldResolver.php',
     'JohannSchopplich\\KirbyTools\\ModelResolver' => $vendorDir . '/johannschopplich/kirby-tools-utils/src/ModelResolver.php',
