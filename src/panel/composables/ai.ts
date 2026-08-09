@@ -269,22 +269,38 @@ export async function resolvePromptContext({
     const panel = usePanel();
 
     const referencedPages = await Promise.all(
-      uniquePageIds.map(async (requestedPageId) => ({
-        requestedPageId,
-        page: (await panel.api.pages.get(panel.api.pages.id(requestedPageId), {
-          select: ["id", "title", "content"],
-        })) as { id: string; title: string; content: Record<string, unknown> },
-      })),
+      uniquePageIds.map(async (requestedPageId) => {
+        try {
+          return {
+            requestedPageId,
+            page: (await panel.api.pages.get(
+              panel.api.pages.id(requestedPageId),
+              { select: ["id", "title", "content"] },
+            )) as {
+              id: string;
+              title: string;
+              content: Record<string, unknown>;
+            },
+          };
+        } catch {
+          // A reference can outlive the page it points at, or point at one the
+          // user may not read. The rest of the prompt still generates.
+          return undefined;
+        }
+      }),
     );
 
     const pageContextBlocks = referencedPages
+      .filter((reference) => reference !== undefined)
       .map(
         ({ requestedPageId, page }) =>
           `<reference_page id="${escapeXmlAttr(requestedPageId)}">\n${JSON.stringify(createReferencePageContent(page))}\n</reference_page>`,
       )
       .join("\n\n");
 
-    userPromptWithContext += `\n\n${pageContextBlocks}`;
+    if (pageContextBlocks) {
+      userPromptWithContext += `\n\n${pageContextBlocks}`;
+    }
   }
 
   const images = files.filter((file) => file.type.startsWith("image/"));
