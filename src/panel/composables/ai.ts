@@ -282,11 +282,7 @@ export async function resolvePromptContext({
               content: Record<string, unknown>;
             },
           };
-        } catch {
-          // A reference can outlive the page it points at, or point at one the
-          // user may not read. The rest of the prompt still generates.
-          return undefined;
-        }
+        } catch {}
       }),
     );
 

@@ -89,8 +89,6 @@ const currentFieldContent = ref<any>();
 const permissions = ref<string[]>([]);
 const files = ref<File[]>([]);
 const licenseStatus = ref<LicenseStatus>();
-// Only true once there is a key to write to, which needs both the `storage`
-// prop and a field to scope the key by.
 const isStorageEnabled = ref(false);
 
 let storageKey: string;
@@ -176,8 +174,7 @@ watch(isDetailsOpen, (value) => {
     );
   }
 
-  // The blueprint defaults apply either way – storage only decides whether a
-  // previous session gets to override them.
+  // Storage only decides whether a previous session overrides the defaults.
   currentPrompt.value =
     (isStorageEnabled.value && localStorage.getItem(`${storageKey}$prompt`)) ||
     userPrompt.value ||
