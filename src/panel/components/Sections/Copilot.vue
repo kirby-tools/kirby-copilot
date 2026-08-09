@@ -69,7 +69,6 @@ const label = ref<string>();
 const field = ref<KirbyFieldProps>();
 const userPrompt = ref<string>();
 const systemPrompt = ref<string>();
-const storage = ref<boolean>();
 const icon = ref<string>();
 const theme = ref<string>();
 const size = ref<string>();
@@ -90,6 +89,9 @@ const currentFieldContent = ref<any>();
 const permissions = ref<string[]>([]);
 const files = ref<File[]>([]);
 const licenseStatus = ref<LicenseStatus>();
+// Only true once there is a key to write to, which needs both the `storage`
+// prop and a field to scope the key by.
+const isStorageEnabled = ref(false);
 
 let storageKey: string;
 let activeRun: ReturnType<typeof runTextGeneration>;
@@ -102,7 +104,7 @@ const canUndo = computed(
 
 watch(currentPrompt, (value) => {
   if (!isInitialized.value) return;
-  if (!storage.value) return;
+  if (!isStorageEnabled.value) return;
 
   if (value && value !== userPrompt.value) {
     localStorage.setItem(`${storageKey}$prompt`, value);
@@ -113,7 +115,7 @@ watch(currentPrompt, (value) => {
 
 watch(isDetailsOpen, (value) => {
   if (!isInitialized.value) return;
-  if (!storage.value) return;
+  if (!isStorageEnabled.value) return;
 
   if (value) {
     localStorage.setItem(`${storageKey}$open`, "true");
@@ -139,7 +141,6 @@ watch(isDetailsOpen, (value) => {
     response.systemPrompt ||
     context.config.systemPrompt ||
     DEFAULT_SYSTEM_PROMPT;
-  storage.value = response.storage;
   if (response.editable === true) permissions.value.push("edit");
   if (response.files === true) permissions.value.push("files");
   icon.value = response.icon || "sparkling";
@@ -167,21 +168,30 @@ watch(isDetailsOpen, (value) => {
     }
   }
 
-  if (storage.value && field.value?.name) {
+  if (response.storage && field.value?.name) {
+    isStorageEnabled.value = true;
     storageKey = getHashedStorageKey(
       panel.view.path,
       field.value.name.toLowerCase(),
     );
-    currentPrompt.value =
-      localStorage.getItem(`${storageKey}$prompt`) || userPrompt.value || "";
-    isDetailsOpen.value =
-      localStorage.getItem(`${storageKey}$open`) === "true" || response.open;
-    nextTick(() => {
-      if (detailsElement.value && isDetailsOpen.value) {
-        detailsElement.value.open = true;
-      }
-    });
   }
+
+  // The blueprint defaults apply either way – storage only decides whether a
+  // previous session gets to override them.
+  currentPrompt.value =
+    (isStorageEnabled.value && localStorage.getItem(`${storageKey}$prompt`)) ||
+    userPrompt.value ||
+    "";
+  isDetailsOpen.value =
+    (isStorageEnabled.value &&
+      localStorage.getItem(`${storageKey}$open`) === "true") ||
+    response.open;
+
+  nextTick(() => {
+    if (detailsElement.value && isDetailsOpen.value) {
+      detailsElement.value.open = true;
+    }
+  });
 
   isInitialized.value = true;
 })();
@@ -234,6 +244,7 @@ async function generate() {
           files: files.value,
           logLevel: logLevel.value,
         },
+        escapeToAbort: true,
         sink: {
           writePartial: async (partialOutput) => {
             if (!partialOutput || !Array.isArray(partialOutput)) return;
@@ -271,6 +282,7 @@ async function generate() {
           files: files.value,
           logLevel: logLevel.value,
         },
+        escapeToAbort: true,
         sink: {
           // The section extends the current field value; the view button
           // replaces scalar values by design.
@@ -459,6 +471,14 @@ function onModelSave() {
               :counter="false"
               @input="currentPrompt = $event"
             />
+            <k-button
+              v-if="userPrompt && currentPrompt !== userPrompt"
+              icon="undo"
+              :text="panel.t('johannschopplich.copilot.context.reset')"
+              variant="dimmed"
+              size="xs"
+              @click="currentPrompt = userPrompt"
+            />
           </div>
 
           <k-button-group
@@ -487,19 +507,6 @@ function onModelSave() {
               variant="dimmed"
               size="sm"
               @click="files = []"
-            />
-            <k-button
-              v-if="
-                permissions.includes('edit') &&
-                userPrompt &&
-                currentPrompt !== userPrompt
-              "
-              icon="undo"
-              :text="panel.t('johannschopplich.copilot.context.reset')"
-              variant="dimmed"
-              size="xs"
-              class="kai-ml-auto"
-              @click="currentPrompt = userPrompt"
             />
           </k-button-group>
           <k-box v-else-if="modelFile" theme="none">
