@@ -1,5 +1,6 @@
 <?php
 
+use JohannSchopplich\KirbyTools\QueryResolver;
 use Kirby\Form\Form;
 use Kirby\Toolkit\I18n;
 
@@ -101,15 +102,7 @@ return [
         ],
         'methods' => [
             'tryResolveQuery' => function ($value, $fallback = null) {
-                if (is_string($value)) {
-                    // Replace every `{{ … }}` placeholder with the result of the KQL query inside it.
-                    $value = preg_replace_callback('!\{\{(.+?)\}\}!', function ($matches) {
-                        $result = $this->model()->query(trim($matches[1]));
-                        return $result ?? '';
-                    }, $value);
-                }
-
-                return $value ?? $fallback;
+                return QueryResolver::resolve($this->model(), $value, $fallback);
             }
         ]
     ]
