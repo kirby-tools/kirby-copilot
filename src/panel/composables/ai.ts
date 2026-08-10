@@ -270,6 +270,8 @@ export async function resolvePromptContext({
 
     const referencedPages = await Promise.all(
       uniquePageIds.map(async (requestedPageId) => {
+        // An unreadable reference – deleted or beyond the user's permissions –
+        // drops out of the context instead of failing the run.
         try {
           return {
             requestedPageId,

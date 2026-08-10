@@ -281,8 +281,6 @@ async function generate() {
         },
         escapeToAbort: true,
         sink: {
-          // The section extends the current field value; the view button
-          // replaces scalar values by design.
           write: async (textPart) => {
             text += textPart;
 
