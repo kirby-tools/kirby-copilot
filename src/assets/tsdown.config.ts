@@ -1,14 +1,12 @@
 import type { UserConfig } from "tsdown/config";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { fileURLToPath } from "node:url";
 import { defineConfig } from "tsdown/config";
 
-const currentDir = fileURLToPath(new URL(".", import.meta.url));
-const rootDir = path.resolve(currentDir, "../..");
+const rootDir = path.resolve(import.meta.dirname, "../..");
 
 const entries = fs
-  .readdirSync(currentDir)
+  .readdirSync(import.meta.dirname)
   .filter((file) => file.endsWith(".js") && !file.endsWith(".config.js"));
 
 export default defineConfig(
