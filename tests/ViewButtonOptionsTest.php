@@ -37,7 +37,7 @@ final class ViewButtonOptionsTest extends TestCase
                         'template' => 'article',
                         'content' => [
                             'title' => 'Kirby Copilot',
-                            'customprompt' => 'Write a teaser'
+                            'customPrompt' => 'Write a teaser'
                         ]
                     ]
                 ]
@@ -53,7 +53,7 @@ final class ViewButtonOptionsTest extends TestCase
     public function resolves_the_user_prompt_query(): void
     {
         $page = $this->appWithButtons([
-            'copilot' => ['userPrompt' => '{{ page.customprompt }}']
+            'copilot' => ['userPrompt' => '{{ page.customPrompt }}']
         ])->page('test');
 
         $this->assertSame(
@@ -81,7 +81,7 @@ final class ViewButtonOptionsTest extends TestCase
         $page = $this->appWithButtons([
             'copilot' => [
                 'component' => 'k-copilot-view-button',
-                'props' => ['userPrompt' => '{{ page.customprompt }}']
+                'props' => ['userPrompt' => '{{ page.customPrompt }}']
             ]
         ])->page('test');
 
@@ -97,7 +97,7 @@ final class ViewButtonOptionsTest extends TestCase
         $page = $this->appWithButtons([
             'copilot' => [
                 'userPrompt' => 'Write a headline',
-                'props' => ['userPrompt' => '{{ page.customprompt }}']
+                'props' => ['userPrompt' => '{{ page.customPrompt }}']
             ]
         ])->page('test');
 
@@ -119,7 +119,7 @@ final class ViewButtonOptionsTest extends TestCase
     }
 
     #[Test]
-    public function returns_null_for_a_button_switched_off_by_name(): void
+    public function returns_null_for_a_button_set_to_false(): void
     {
         $page = $this->appWithButtons(['copilot' => false])->page('test');
 
@@ -141,7 +141,7 @@ final class ViewButtonOptionsTest extends TestCase
     }
 
     #[Test]
-    public function returns_null_when_the_buttons_are_switched_off(): void
+    public function returns_null_when_buttons_is_false(): void
     {
         $page = $this->appWithButtons(false)->page('test');
 

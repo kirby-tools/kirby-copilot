@@ -23,7 +23,7 @@ final class ButtonOptionsRouteTest extends ApiRouteTestCase
                 'pages/article' => [
                     'title' => 'Article',
                     'buttons' => [
-                        'copilot' => ['userPrompt' => '{{ page.customprompt }}']
+                        'copilot' => ['userPrompt' => '{{ page.customPrompt }}']
                     ]
                 ]
             ],
@@ -35,7 +35,7 @@ final class ButtonOptionsRouteTest extends ApiRouteTestCase
                         'template' => 'article',
                         'content' => [
                             'title' => 'Kirby Copilot',
-                            'customprompt' => 'Write a teaser'
+                            'customPrompt' => 'Write a teaser'
                         ]
                     ]
                 ]

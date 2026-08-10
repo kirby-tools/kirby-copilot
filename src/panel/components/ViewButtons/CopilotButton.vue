@@ -74,8 +74,8 @@ async function initPromptDialog() {
     return;
   }
 
-  // A view button's props reach the Panel unresolved, so the server hands back
-  // the ones that carry a Kirby query – and is spared the rest.
+  // A view button's props reach the Panel unresolved, so the server resolves
+  // the ones carrying a Kirby query.
   const buttonOptions: { userPrompt?: string; systemPrompt?: string } =
     hasKirbyQuery(props.userPrompt) || hasKirbyQuery(props.systemPrompt)
       ? await panel.api.get(
