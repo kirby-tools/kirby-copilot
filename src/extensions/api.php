@@ -3,6 +3,7 @@
 use JohannSchopplich\Copilot\AI\CurlProxyTransport;
 use JohannSchopplich\Copilot\AI\Proxy;
 use JohannSchopplich\Copilot\PanelContext;
+use JohannSchopplich\Copilot\ViewButtonOptions;
 use JohannSchopplich\KirbyTools\FieldNormalizer;
 use JohannSchopplich\KirbyTools\FieldResolver;
 use JohannSchopplich\KirbyTools\ModelResolver;
@@ -10,6 +11,7 @@ use JohannSchopplich\Licensing\LicensePanel;
 use JohannSchopplich\Licensing\Licenses;
 use Kirby\Cms\App;
 use Kirby\Cms\Blueprint;
+use Kirby\Cms\Find;
 use Kirby\Exception\InvalidArgumentException;
 use Kirby\Exception\NotFoundException;
 use Kirby\Toolkit\I18n;
@@ -39,6 +41,20 @@ return [
                     'assets' => $assets,
                     'licenseStatus' => $licenses->getStatus()
                 ];
+            }
+        ],
+        [
+            'pattern' => '__copilot__/button-options',
+            'method' => 'GET',
+            'action' => function () use ($kirby) {
+                $path = $kirby->request()->query()->get('path');
+
+                if (!is_string($path) || $path === '') {
+                    throw new InvalidArgumentException('Missing "path" query parameter');
+                }
+
+                // `Find::parent` enforces the model's own access permissions.
+                return ViewButtonOptions::resolve(Find::parent($path));
             }
         ],
         [

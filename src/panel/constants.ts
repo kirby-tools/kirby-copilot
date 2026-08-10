@@ -1,6 +1,7 @@
 import type { AISDKModule } from "./utils/ai";
 
 export const PLUGIN_CONTEXT_API_ROUTE = "__copilot__/context";
+export const PLUGIN_BUTTON_OPTIONS_API_ROUTE = "__copilot__/button-options";
 export const PLUGIN_MODEL_FIELDS_API_ROUTE = "__copilot__/model-fields";
 export const PLUGIN_FIELDSETS_API_ROUTE = "__copilot__/fieldsets";
 export const PLUGIN_PROXY_API_ROUTE = "__copilot__/proxy";

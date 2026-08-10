@@ -1,0 +1,53 @@
+<?php
+
+declare(strict_types = 1);
+
+namespace JohannSchopplich\Copilot;
+
+use JohannSchopplich\KirbyTools\QueryResolver;
+use Kirby\Cms\ModelWithContent;
+
+/**
+ * A section computes its props on the server, a view button does not:
+ * `Kirby\Panel\Ui\Component::props()` hands custom attributes to the Panel
+ * verbatim. The button therefore asks for its own props by model, and the
+ * query never travels through the request.
+ */
+final class ViewButtonOptions
+{
+    private const BUTTON_NAME = 'copilot';
+
+    /**
+     * @return array{userPrompt: mixed, systemPrompt: mixed}
+     */
+    public static function resolve(ModelWithContent $model): array
+    {
+        $props = self::props($model);
+
+        return [
+            'userPrompt' => QueryResolver::resolve($model, $props['userPrompt'] ?? null),
+            'systemPrompt' => QueryResolver::resolve($model, $props['systemPrompt'] ?? null)
+        ];
+    }
+
+    private static function props(ModelWithContent $model): array
+    {
+        $buttons = $model->blueprint()->buttons();
+
+        if (!is_array($buttons)) {
+            return [];
+        }
+
+        $button = $buttons[self::BUTTON_NAME] ?? null;
+
+        if (!is_array($button)) {
+            return [];
+        }
+
+        $nested = $button['props'] ?? null;
+
+        // Mirrors `ViewButton::normalize`, which accepts props nested under
+        // `props` as well as at the top level, and lets the top level win.
+        return is_array($nested) ? [...$nested, ...$button] : $button;
+    }
+}

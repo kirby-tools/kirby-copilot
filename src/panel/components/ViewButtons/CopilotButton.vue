@@ -22,6 +22,7 @@ import {
   DEFAULT_LOG_LEVEL,
   DEFAULT_SYSTEM_PROMPT,
   LOG_LEVELS,
+  PLUGIN_BUTTON_OPTIONS_API_ROUTE,
 } from "../../constants";
 import { fieldToZodSchema } from "../../schemas/fields";
 import { loadAISDK, openPromptDialog } from "../../utils";
@@ -50,6 +51,10 @@ const isHovering = ref(false);
 let activeRun: ReturnType<typeof runStructuredGeneration>;
 let isAbortRequested = false;
 
+function hasKirbyQuery(value: string | undefined) {
+  return typeof value === "string" && value.includes("{{");
+}
+
 async function initPromptDialog() {
   if (isGenerating.value) return;
 
@@ -69,9 +74,22 @@ async function initPromptDialog() {
     return;
   }
 
+  // A view button's props reach the Panel unresolved, so the server hands back
+  // the ones that carry a Kirby query – and is spared the rest.
+  const buttonOptions: { userPrompt?: string; systemPrompt?: string } =
+    hasKirbyQuery(props.userPrompt) || hasKirbyQuery(props.systemPrompt)
+      ? await panel.api.get(
+          PLUGIN_BUTTON_OPTIONS_API_ROUTE,
+          { path: panel.view.path },
+          undefined,
+          // Avoid showing Panel loading indicator.
+          true,
+        )
+      : props;
+
   const promptContext = await openPromptDialog<PromptContext>({
     fields,
-    userPrompt: props.userPrompt,
+    userPrompt: buttonOptions.userPrompt,
   });
   if (!promptContext) return;
 
@@ -106,7 +124,9 @@ async function initPromptDialog() {
     const { Output } = await loadAISDK();
 
     const systemPrompt =
-      props.systemPrompt || config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
+      buttonOptions.systemPrompt ||
+      config.systemPrompt ||
+      DEFAULT_SYSTEM_PROMPT;
 
     activeRun = runStructuredGeneration({
       streamOptions: {
