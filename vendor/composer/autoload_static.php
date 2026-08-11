@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitb019df19525881b0a091efd78781a210
+class ComposerStaticInit51edd518d07100b5d7d6394bbbe05fdb
 {
     public static $files = array (
         '4b3d45d99f6e4eb65ea80c00519736e4' => __DIR__ . '/..' . '/anthropic-ai/sdk/src/Version.php',
@@ -1302,9 +1302,11 @@ class ComposerStaticInitb019df19525881b0a091efd78781a210
         'JohannSchopplich\\Copilot\\AI\\ProxyTransportResult' => __DIR__ . '/../..' . '/src/classes/Copilot/AI/ProxyTransportResult.php',
         'JohannSchopplich\\Copilot\\AI\\Resolver' => __DIR__ . '/../..' . '/src/classes/Copilot/AI/Resolver.php',
         'JohannSchopplich\\Copilot\\PanelContext' => __DIR__ . '/../..' . '/src/classes/Copilot/PanelContext.php',
+        'JohannSchopplich\\Copilot\\ViewButtonOptions' => __DIR__ . '/../..' . '/src/classes/Copilot/ViewButtonOptions.php',
         'JohannSchopplich\\KirbyTools\\FieldNormalizer' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-utils/src/FieldNormalizer.php',
         'JohannSchopplich\\KirbyTools\\FieldResolver' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-utils/src/FieldResolver.php',
         'JohannSchopplich\\KirbyTools\\ModelResolver' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-utils/src/ModelResolver.php',
+        'JohannSchopplich\\KirbyTools\\QueryResolver' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-utils/src/QueryResolver.php',
         'JohannSchopplich\\Licensing\\Http\\HttpClientInterface' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-licensing/src/Http/HttpClientInterface.php',
         'JohannSchopplich\\Licensing\\Http\\KirbyHttpClient' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-licensing/src/Http/KirbyHttpClient.php',
         'JohannSchopplich\\Licensing\\LicenseActivator' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-licensing/src/LicenseActivator.php',
@@ -1836,9 +1838,9 @@ class ComposerStaticInitb019df19525881b0a091efd78781a210
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitb019df19525881b0a091efd78781a210::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitb019df19525881b0a091efd78781a210::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitb019df19525881b0a091efd78781a210::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit51edd518d07100b5d7d6394bbbe05fdb::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit51edd518d07100b5d7d6394bbbe05fdb::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit51edd518d07100b5d7d6394bbbe05fdb::$classMap;
 
         }, null, ClassLoader::class);
     }

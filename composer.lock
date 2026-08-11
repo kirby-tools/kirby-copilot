@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "458387ad2ba17e50b541b29e51719ccb",
+    "content-hash": "51edd518d07100b5d7d6394bbbe05fdb",
     "packages": [
         {
             "name": "anthropic-ai/sdk",

@@ -1,7 +1,7 @@
 {
   "name": "kirby-copilot",
   "type": "module",
-  "version": "3.9.1",
+  "version": "3.10.0",
   "private": true,
   "packageManager": "pnpm@11.21.0",
   "engines": {
