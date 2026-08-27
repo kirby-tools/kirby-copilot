@@ -93,7 +93,8 @@ export function runStructuredGeneration({
       abortSignal: signal,
     });
 
-    // Prevent unhandled rejection when aborting before `finalOutput` is awaited.
+    // A run that fails or is aborted rejects `finalOutput` before the loop
+    // below reaches it, which would surface as an unhandled rejection.
     finalOutput.catch(() => {});
 
     for await (const partialOutput of partialOutputStream) {

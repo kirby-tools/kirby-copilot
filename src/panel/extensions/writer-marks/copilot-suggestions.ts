@@ -354,12 +354,19 @@ function createCompletionPlugin(
         ? `<prefix>${prefix}</prefix>\n<suffix>${suffix}</suffix>`
         : prefix;
 
+      let firstStreamError: unknown;
+
       const { textStream } = streamText({
         model,
         reasoning,
         instructions: COMPLETION_SYSTEM_PROMPT,
         prompt,
         abortSignal: signal,
+        // Error parts never enter `textStream`, so this is the only place the
+        // provider's own error can be picked up.
+        onError({ error }) {
+          firstStreamError ??= error;
+        },
       });
 
       const shouldPrependSpace = prefix.length > 0 && !/\s$/.test(prefix);
@@ -386,6 +393,10 @@ function createCompletionPlugin(
 
       if (signal.aborted) return;
 
+      // Chunks also run out when the provider fails mid-stream, which would
+      // otherwise offer the truncated text as a finished suggestion.
+      if (firstStreamError) throw firstStreamError;
+
       const finalSuggestion =
         shouldPrependSpace && !streamedText.startsWith(" ")
           ? ` ${streamedText}`
@@ -404,7 +415,14 @@ function createCompletionPlugin(
 
       console.error("Failed to generate completion:", error);
 
-      view.dispatch(setCompletionMeta(view.state.tr, { type: "dismiss" }));
+      // A provider that is down stays down for the next keystroke, so the
+      // debounce must not fire straight into the same failure again.
+      view.dispatch(
+        setCompletionMeta(view.state.tr, {
+          type: "dismiss",
+          skipNextTrigger: true,
+        }),
+      );
     } finally {
       abortController = undefined;
     }

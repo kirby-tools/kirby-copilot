@@ -25,19 +25,31 @@ vi.mock("../../src/panel/composables/plugin", () => ({
   usePluginContext: () => Promise.resolve({ config: {} }),
 }));
 
-/** Streams a complete object, then fails without ever finishing the run. */
-function createModelFailingAfterOutput(error: unknown) {
+const upstreamError = new AISDKError({
+  name: "TestUpstreamError",
+  message: "Upstream exploded",
+});
+
+/** Streams a complete object, then fails instead of finishing the response. */
+function createModelFailingAfterOutput() {
   const chunks: LanguageModelV4StreamPart[] = [
     { type: "stream-start", warnings: [] },
     { type: "text-start", id: "1" },
     { type: "text-delta", id: "1", delta: '{"title":"Quiet garden"}' },
-    { type: "error", error },
+    { type: "error", error: upstreamError },
   ];
 
   return new MockLanguageModelV4({
     doStream: async () => ({
       stream: simulateReadableStream({ chunks }),
     }),
+  });
+}
+
+/** Fails before the response starts, the shape of a rejected API key. */
+function createModelFailingBeforeOutput() {
+  return new MockLanguageModelV4({
+    doStream: () => Promise.reject(upstreamError),
   });
 }
 
@@ -55,26 +67,29 @@ describe("third-party seam contract", () => {
   it("exposes every streamText result key the fixture pins", async () => {
     const result = await copilotThirdPartyApi.streamText({
       userPrompt: "Fill the fields",
-      model: createModelFailingAfterOutput(new Error("unused")),
+      model: createModelFailingAfterOutput(),
       outputSchema: z.object({ title: z.string() }),
     });
 
-    // `in` over a property read, so the assertion never starts a stream the
-    // test does not await.
-    for (const key of contract.streamTextResult) {
-      expect(key in result).toBe(true);
-    }
+    expect(Object.keys(result)).toEqual(
+      expect.arrayContaining(contract.streamTextResult),
+    );
   });
 
   it("rejects output with the provider error when the run fails after a complete object", async () => {
     const { output } = await copilotThirdPartyApi.streamText({
       userPrompt: "Fill the fields",
-      model: createModelFailingAfterOutput(
-        new AISDKError({
-          name: "TestUpstreamError",
-          message: "Upstream exploded",
-        }),
-      ),
+      model: createModelFailingAfterOutput(),
+      outputSchema: z.object({ title: z.string() }),
+    });
+
+    await expect(output).rejects.toThrow("Upstream exploded");
+  });
+
+  it("rejects output with the provider error when the run fails before any output", async () => {
+    const { output } = await copilotThirdPartyApi.streamText({
+      userPrompt: "Fill the fields",
+      model: createModelFailingBeforeOutput(),
       outputSchema: z.object({ title: z.string() }),
     });
 

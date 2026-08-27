@@ -173,15 +173,15 @@ export async function useStreamText({
     abortSignal,
     // The provider's own error reaches this callback and nowhere else: error
     // parts never enter `textStream`, and the result promises either reject
-    // with the SDK's generic `NoOutputGeneratedError` or settle with whatever
-    // arrived before the failure.
+    // with the SDK's own `NoOutputGeneratedError` or settle with what arrived
+    // before the failure.
     onError({ error }) {
       firstStreamError ??= error;
     },
   });
 
   // Surface silent SDK coercions, e.g. reasoning dropped for models that
-  // don't support it (stream errors are already reported via `onError`).
+  // don't support it (stream errors are already recorded via `onError`).
   Promise.resolve(result.warnings)
     .then((warnings) => {
       if (warnings?.length) {
@@ -190,15 +190,13 @@ export async function useStreamText({
     })
     .catch(() => {});
 
-  /** Yields every part, then throws when the run behind the stream failed. */
   async function* surfaceRunFailure<T>(stream: AsyncIterable<T>) {
     yield* stream;
-    // Parts also run out when the provider fails mid-stream, so the recorded
-    // error decides whether the consumer may treat the run as complete.
+    // Parts also run out when the provider fails mid-stream, so the stream
+    // ending is no proof that the run succeeded.
     if (firstStreamError) throw firstStreamError;
   }
 
-  /** Resolves with the output unless the run reported an error along the way. */
   async function resolveOutput() {
     let output: Awaited<typeof result.output>;
 
@@ -208,16 +206,12 @@ export async function useStreamText({
       throw firstStreamError ?? error;
     }
 
-    // The output can parse cleanly from the text that arrived before the
-    // failure, which would hand the consumer a result the provider disowned.
+    // The text that arrived before the failure can still parse into a complete
+    // output, which would hand the consumer a result the provider disowned.
     if (firstStreamError) throw firstStreamError;
 
     return output;
   }
-
-  // Reading `output` twice must not start a second chain, whose rejection
-  // nobody would be awaiting.
-  let outputPromise: ReturnType<typeof resolveOutput> | undefined;
 
   return {
     get textStream() {
@@ -227,7 +221,7 @@ export async function useStreamText({
       return surfaceRunFailure(result.partialOutputStream);
     },
     get output() {
-      return (outputPromise ??= resolveOutput());
+      return resolveOutput();
     },
   };
 }
