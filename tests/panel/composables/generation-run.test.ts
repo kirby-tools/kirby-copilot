@@ -7,7 +7,6 @@ import {
   runStructuredGeneration,
   runTextGeneration,
 } from "../../../src/panel/composables/generation-run";
-import { useSkills } from "../../../src/panel/composables/skills";
 
 const panel = {
   isLoading: false,
@@ -34,6 +33,12 @@ vi.mock("kirbyuse", async () => {
 // Load the real AI SDK so runs stream through the same code path as production.
 vi.mock("../../../src/panel/utils/ai", () => ({
   loadAISDK: () => import("ai"),
+}));
+
+// Tests inject their model directly, so the context fetch that
+// `resolvePromptContext` awaits never has to hit the Panel API.
+vi.mock("../../../src/panel/composables/plugin", () => ({
+  usePluginContext: () => Promise.resolve({ config: {} }),
 }));
 
 function createTextModel(deltas: string[]) {
@@ -74,7 +79,6 @@ beforeEach(() => {
   vi.clearAllMocks();
   vi.unstubAllGlobals();
   panel.isLoading = false;
-  useSkills().setConfigSkills([]);
 });
 
 describe("runTextGeneration", () => {

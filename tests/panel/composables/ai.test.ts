@@ -8,7 +8,6 @@ import {
   resolvePromptContext,
   useStreamText,
 } from "../../../src/panel/composables/ai";
-import { useSkills } from "../../../src/panel/composables/skills";
 import { CopilotError } from "../../../src/panel/utils/error";
 
 const mockPagesGet = vi.fn();
@@ -84,7 +83,7 @@ vi.mock("../../../src/panel/composables/plugin", () => ({
 
 type PluginConfigSubset = Pick<
   PluginConfig,
-  "provider" | "providers" | "reasoningEffort"
+  "provider" | "providers" | "reasoningEffort" | "skills"
 >;
 
 function createPluginConfig(
@@ -94,6 +93,7 @@ function createPluginConfig(
     config: {
       provider: overrides?.provider ?? "openai",
       reasoningEffort: overrides?.reasoningEffort,
+      skills: overrides?.skills,
       providers: {
         openai: { model: "gpt-5.4-nano", hasApiKey: true },
         ...overrides?.providers,
@@ -110,7 +110,6 @@ vi.mock("../../../src/panel/composables/logger", () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
-  useSkills().setConfigSkills([]);
   mockUsePluginContext.mockReturnValue(createPluginConfig());
 });
 
@@ -652,18 +651,22 @@ describe("resolvePromptContext", () => {
 
   describe("skills", () => {
     beforeEach(() => {
-      useSkills().setConfigSkills([
-        {
-          id: "brand-voice",
-          label: "Brand Voice",
-          instructions: "Write casually.",
-        },
-        {
-          id: "be-brief",
-          label: "Be Brief",
-          instructions: "Cut every unnecessary word.",
-        },
-      ]);
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({
+          skills: [
+            {
+              id: "brand-voice",
+              label: "Brand Voice",
+              instructions: "Write casually.",
+            },
+            {
+              id: "be-brief",
+              label: "Be Brief",
+              instructions: "Cut every unnecessary word.",
+            },
+          ],
+        }),
+      );
     });
 
     it("wraps tokens found in the prompt with the human label as attribute", async () => {
@@ -678,13 +681,17 @@ describe("resolvePromptContext", () => {
     });
 
     it("escapes quotes, ampersands, and angle brackets in the label attribute", async () => {
-      useSkills().setConfigSkills([
-        {
-          id: "tricky",
-          label: `Wörter & "Sätze" <case>`,
-          instructions: "Do things.",
-        },
-      ]);
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({
+          skills: [
+            {
+              id: "tricky",
+              label: `Wörter & "Sätze" <case>`,
+              instructions: "Do things.",
+            },
+          ],
+        }),
+      );
 
       const { systemPromptWithContext } = await resolvePromptContext({
         userPrompt: "Write @skill://tricky",
@@ -776,7 +783,7 @@ describe("resolvePromptContext", () => {
     });
 
     it("strips unknown token ids from the user prompt and drops them from the system prompt", async () => {
-      useSkills().setConfigSkills([]);
+      mockUsePluginContext.mockReturnValue(createPluginConfig());
 
       const { systemPromptWithContext, userPromptWithContext } =
         await resolvePromptContext({
@@ -785,6 +792,25 @@ describe("resolvePromptContext", () => {
 
       expect(systemPromptWithContext).toBeUndefined();
       expect(userPromptWithContext).toBe("Write something");
+    });
+
+    it("dedupes unknown token ids into a single warning", async () => {
+      await resolvePromptContext({
+        userPrompt: "Write @skill://typo @skill://typo @skill://gone",
+      });
+
+      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("typo, gone"),
+      );
+    });
+
+    it("does not warn when every token id is configured", async () => {
+      await resolvePromptContext({
+        userPrompt: "Write @skill://brand-voice something",
+      });
+
+      expect(mockLogger.warn).not.toHaveBeenCalled();
     });
 
     it("returns undefined systemPrompt when no tokens and no base prompt", async () => {

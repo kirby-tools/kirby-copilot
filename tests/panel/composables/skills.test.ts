@@ -4,6 +4,7 @@ import {
   createSkillRefTokenRegex,
   createSkillTriggerRegex,
   extractSkillRefIds,
+  resolveSkillRefs,
   stripSkillRefTokens,
   useSkills,
 } from "../../../src/panel/composables/skills";
@@ -54,7 +55,7 @@ describe("setConfigSkills", () => {
     setConfigSkills([skill({ id: "a" }), skill({ id: "b" })]);
     setConfigSkills([skill({ id: "c" })]);
 
-    expect(skills.value.map((s) => s.id)).toEqual(["c"]);
+    expect(skills.value.map((skill) => skill.id)).toEqual(["c"]);
   });
 });
 
@@ -73,35 +74,37 @@ describe("hasSkill", () => {
   });
 });
 
-describe("getActiveSkills", () => {
+describe("resolveSkillRefs", () => {
   it("resolves tokens in the order they were passed", () => {
-    const { setConfigSkills, getActiveSkills } = useSkills();
-    setConfigSkills([skill({ id: "a" }), skill({ id: "b" })]);
+    const { resolvedSkills } = resolveSkillRefs(
+      [skill({ id: "a" }), skill({ id: "b" })],
+      ["b", "a"],
+    );
 
-    expect(getActiveSkills(["b", "a"]).map((s) => s.id)).toEqual(["b", "a"]);
+    expect(resolvedSkills.map((entry) => entry.id)).toEqual(["b", "a"]);
   });
 
   it("dedupes repeated token ids", () => {
-    const { setConfigSkills, getActiveSkills } = useSkills();
-    setConfigSkills([skill({ id: "a" })]);
+    const { resolvedSkills } = resolveSkillRefs([skill({ id: "a" })], ["a", "a"]);
 
-    expect(getActiveSkills(["a", "a"]).map((s) => s.id)).toEqual(["a"]);
+    expect(resolvedSkills.map((entry) => entry.id)).toEqual(["a"]);
   });
 
-  it("drops unknown token ids without throwing", () => {
-    const { setConfigSkills, getActiveSkills } = useSkills();
-    setConfigSkills([skill({ id: "known" })]);
+  it("separates unknown token ids from the resolved skills", () => {
+    const { resolvedSkills, unknownSkillIds } = resolveSkillRefs(
+      [skill({ id: "known" })],
+      ["known", "typo", "typo"],
+    );
 
-    expect(getActiveSkills(["known", "typo"]).map((s) => s.id)).toEqual([
-      "known",
-    ]);
+    expect(resolvedSkills.map((entry) => entry.id)).toEqual(["known"]);
+    expect(unknownSkillIds).toEqual(["typo"]);
   });
 
-  it("returns an empty array for an empty token list", () => {
-    const { setConfigSkills, getActiveSkills } = useSkills();
-    setConfigSkills([skill({ id: "a" })]);
+  it("returns nothing for an empty token list", () => {
+    const { resolvedSkills, unknownSkillIds } = resolveSkillRefs([skill({ id: "a" })], []);
 
-    expect(getActiveSkills([])).toEqual([]);
+    expect(resolvedSkills).toEqual([]);
+    expect(unknownSkillIds).toEqual([]);
   });
 });
 
@@ -114,7 +117,7 @@ describe("createSkillRefTokenRegex", () => {
 
     const second = createSkillRefTokenRegex();
     expect(
-      Array.from("@skill://bar and @skill://baz".matchAll(second), (m) => m[1]),
+      Array.from("@skill://bar and @skill://baz".matchAll(second), (match) => match[1]),
     ).toEqual(["bar", "baz"]);
   });
 
@@ -124,7 +127,7 @@ describe("createSkillRefTokenRegex", () => {
       "@skill://brand_voice and @skill://be-brief-v2 and @skill://X9".matchAll(
         regex,
       ),
-      (m) => m[1],
+      (match) => match[1],
     );
 
     expect(matches).toEqual(["brand_voice", "be-brief-v2", "X9"]);
@@ -134,10 +137,19 @@ describe("createSkillRefTokenRegex", () => {
     expect(createSkillRefTokenRegex().test("skill://brand-voice")).toBe(false);
   });
 
+  it("stops matching tonalität at the first non-ASCII letter", () => {
+    const ids = Array.from(
+      "@skill://tonalität".matchAll(createSkillRefTokenRegex()),
+      (match) => match[1],
+    );
+
+    expect(ids).toEqual(["tonalit"]);
+  });
+
   it("does not match a skill id containing a slash", () => {
     const ids = Array.from(
       "@skill://foo/bar".matchAll(createSkillRefTokenRegex()),
-      (m) => m[1],
+      (match) => match[1],
     );
 
     // Only the first segment before the slash is captured (consistent with PHP validation).
@@ -164,8 +176,8 @@ describe("extractSkillRefIds", () => {
     ).toEqual(["brand-voice"]);
   });
 
-  it("extracts tokens embedded mid-word, which the typeahead trigger rejects", () => {
-    expect(extractSkillRefIds("foo@skill://bar")).toEqual(["bar"]);
+  it("leaves mid-word tokens unextracted, matching the typeahead trigger", () => {
+    expect(extractSkillRefIds("foo@skill://bar")).toEqual([]);
   });
 });
 
@@ -192,6 +204,11 @@ describe("createSkillTriggerRegex", () => {
       input: "{@skill://baz",
       expected: "baz",
     },
+    {
+      position: "after an opening quote",
+      input: 'schreibe "@skill://foo',
+      expected: "foo",
+    },
   ])("matches at $position", ({ input, expected }) => {
     expect(input.match(createSkillTriggerRegex())?.[1]).toBe(expected);
   });
@@ -215,7 +232,9 @@ describe("stripSkillRefTokens", () => {
     expect(stripSkillRefTokens("@skill://brand\nthe rest")).toBe("\nthe rest");
   });
 
-  it("strips mid-word tokens, collapsing the surrounding word", () => {
-    expect(stripSkillRefTokens("foo@skill://bar baz")).toBe("foobaz");
+  it("leaves mid-word tokens untouched, matching extraction", () => {
+    expect(stripSkillRefTokens("foo@skill://bar baz")).toBe(
+      "foo@skill://bar baz",
+    );
   });
 });

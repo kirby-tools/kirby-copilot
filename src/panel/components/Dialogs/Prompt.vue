@@ -22,6 +22,7 @@ import {
   normalizePlaceholders,
   openFilePicker,
 } from "../../utils";
+import { insertRefToken } from "../../utils/reference-tokens";
 import PromptEditor from "../PromptEditor/PromptEditor.vue";
 import ContentDropdown from "../Ui/ContentDropdown.vue";
 
@@ -222,15 +223,16 @@ function pickPages() {
     },
     on: {
       submit: (pages: Record<string, string>[]) => {
-        let insertPos = cursorOffset;
+        let insertIndex = cursorOffset;
         for (const page of pages) {
           if (!page.id) continue;
-          const token = `@page://${page.id} `;
-          prompt.value =
-            prompt.value.slice(0, insertPos) +
-            token +
-            prompt.value.slice(insertPos);
-          insertPos += token.length;
+          const { text: nextPrompt, nextIndex } = insertRefToken(
+            prompt.value,
+            insertIndex,
+            `@page://${page.id} `,
+          );
+          prompt.value = nextPrompt;
+          insertIndex = nextIndex;
         }
         panel.dialog.close();
       },

@@ -37,7 +37,11 @@ import { normalizePlaceholders } from "../utils/template";
 import { useLogger } from "./logger";
 import { extractPageRefIds } from "./pages";
 import { usePluginContext } from "./plugin";
-import { extractSkillRefIds, stripSkillRefTokens, useSkills } from "./skills";
+import {
+  extractSkillRefIds,
+  resolveSkillRefs,
+  stripSkillRefTokens,
+} from "./skills";
 
 const DEFAULT_PLAYGROUND_MODEL_PROVIDER = "google";
 
@@ -246,18 +250,29 @@ export async function resolvePromptContext({
   userPrompt: string;
   files?: File[];
 }) {
+  const { config } = await usePluginContext();
+
   const contentContext = createContentContext();
   let userPromptWithContext = template(
     normalizePlaceholders(userPrompt),
     contentContext,
   );
 
-  const skillBlocks = useSkills()
-    .getActiveSkills(extractSkillRefIds(userPromptWithContext))
-    .map(
-      (skill) =>
-        `<skill name="${escapeXmlAttr(skill.label)}">\n${skill.instructions}\n</skill>`,
+  const { resolvedSkills, unknownSkillIds } = resolveSkillRefs(
+    config.skills ?? [],
+    extractSkillRefIds(userPromptWithContext),
+  );
+
+  if (unknownSkillIds.length > 0) {
+    useLogger().warn(
+      `Unknown skill id(s) stripped without injecting instructions: ${unknownSkillIds.join(", ")}`,
     );
+  }
+
+  const skillBlocks = resolvedSkills.map(
+    (skill) =>
+      `<skill name="${escapeXmlAttr(skill.label)}">\n${skill.instructions}\n</skill>`,
+  );
 
   const systemPromptWithContext =
     [systemPrompt, ...skillBlocks].filter(Boolean).join("\n\n") || undefined;
