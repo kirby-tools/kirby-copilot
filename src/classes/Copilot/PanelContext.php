@@ -219,34 +219,52 @@ final class PanelContext
      */
     private static function normalizeSkills(array $skills, string $language): array
     {
-        return array_values(array_filter(array_map(
-            function ($skill) use ($language) {
-                $id = is_string($skill['id'] ?? null) ? trim($skill['id']) : null;
-                $label = self::resolveMultilang($skill['label'] ?? null, $language);
-                $instructions = self::resolveMultilang($skill['instructions'] ?? null, $language);
+        $normalizedSkills = [];
 
-                if (is_string($label)) {
-                    $label = trim($label);
-                }
+        foreach (array_values($skills) as $index => $skill) {
+            $id = is_string($skill['id'] ?? null) ? trim($skill['id']) : null;
+            $label = self::resolveMultilang($skill['label'] ?? null, $language);
+            $instructions = self::resolveMultilang($skill['instructions'] ?? null, $language);
 
-                if (is_string($instructions)) {
-                    $instructions = trim($instructions);
-                }
+            if (is_string($label)) {
+                $label = trim($label);
+            }
 
-                if (!$id || !$label || !$instructions) {
-                    return null;
-                }
+            if (is_string($instructions)) {
+                $instructions = trim($instructions);
+            }
 
-                // Editors type `@skill://<id>`, so restrict ids to slug-safe
-                // characters and reject anything that wouldn't round-trip.
-                if (!preg_match('/^[\w\-]+$/', $id)) {
-                    return null;
-                }
+            if (!$id || !$label || !$instructions) {
+                self::rejectSkill($index, 'id, label, and instructions must be non-empty');
+                continue;
+            }
 
-                return compact('id', 'label', 'instructions');
-            },
-            $skills
-        )));
+            // Editors type `@skill://<id>`, so restrict ids to slug-safe
+            // characters and reject anything that wouldn't round-trip.
+            // Keep in sync with the Panel token grammar's `SKILL_ID_CHARSET`.
+            if (!preg_match('/^[\w\-]+$/', $id)) {
+                self::rejectSkill($index, 'id "' . $id . '" must only contain letters, digits, underscores, or hyphens');
+                continue;
+            }
+
+            $normalizedSkills[] = compact('id', 'label', 'instructions');
+        }
+
+        return $normalizedSkills;
+    }
+
+    /**
+     * Reports an invalid skill entry the caller is about to drop – throwing
+     * in debug mode, staying silent otherwise.
+     */
+    private static function rejectSkill(int $index, string $reason): void
+    {
+        if (App::instance()->option('debug')) {
+            // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
+            throw new InvalidArgumentException(
+                'Invalid skills[' . $index . ']: ' . $reason
+            );
+        }
     }
 
     private static function resolveMultilang(mixed $value, string $language): string|null

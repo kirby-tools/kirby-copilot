@@ -221,6 +221,7 @@ final class ContextRouteTest extends ApiRouteTestCase
             'id with spaces'       => [['id' => 'foo bar', 'label' => 'x', 'instructions' => 'y']],
             'id with slash'        => [['id' => 'foo/bar', 'label' => 'x', 'instructions' => 'y']],
             'id with colon'        => [['id' => 'foo:bar', 'label' => 'x', 'instructions' => 'y']],
+            'non-ascii id'         => [['id' => 'tonalität', 'label' => 'x', 'instructions' => 'y']],
         ];
     }
 
@@ -236,6 +237,48 @@ final class ContextRouteTest extends ApiRouteTestCase
         ]);
 
         $this->assertSame([], $response['config']['skills']);
+    }
+
+    #[Test]
+    #[DataProvider('invalidSkillEntries')]
+    public function invalid_skill_entry_throws_in_debug_mode(array $entry): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/^Invalid skills\[0\]: /');
+
+        $this->callContextRoute([
+            'debug' => true,
+            'johannschopplich.copilot' => [
+                'providers' => ['openai' => ['apiKey' => 'test-key']],
+                'skills'    => [$entry],
+            ],
+        ]);
+    }
+
+    /**
+     * @return array<string, array{0: string}>
+     */
+    public static function slugSafeSkillIds(): array
+    {
+        return [
+            'letters and hyphens' => ['be-brief-v2'],
+            'underscore'          => ['brand_voice'],
+            'uppercase and digit' => ['X9'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('slugSafeSkillIds')]
+    public function slug_safe_skill_id_survives_normalization(string $id): void
+    {
+        $response = $this->callContextRoute([
+            'johannschopplich.copilot' => [
+                'providers' => ['openai' => ['apiKey' => 'test-key']],
+                'skills'    => [['id' => $id, 'label' => 'x', 'instructions' => 'y']],
+            ],
+        ]);
+
+        $this->assertSame([$id], array_column($response['config']['skills'], 'id'));
     }
 
     #[Test]
