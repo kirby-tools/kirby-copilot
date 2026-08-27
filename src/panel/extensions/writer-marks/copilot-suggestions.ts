@@ -21,20 +21,18 @@ interface CompletionPluginState {
   suggestion: string | null;
   position: number | null;
   isLoading: boolean;
-  skipNextTrigger: boolean;
 }
 
 export type CompletionMeta =
   | { type: "startLoading"; position: number }
   | { type: "streamChunk"; suggestion: string; position: number }
   | { type: "complete"; suggestion: string; position: number }
-  | { type: "dismiss"; skipNextTrigger?: boolean };
+  | { type: "dismiss" };
 
 const EMPTY_PLUGIN_STATE: CompletionPluginState = {
   suggestion: null,
   position: null,
   isLoading: false,
-  skipNextTrigger: false,
 };
 
 let completionConfig: false | CompletionConfig | undefined;
@@ -106,12 +104,7 @@ export const copilotSuggestions: CopilotSuggestionsMark = {
     const { view } = this.editor!;
     const pluginState = getCompletionState(view.state);
 
-    view.dispatch(
-      setCompletionMeta(view.state.tr, {
-        type: "dismiss",
-        skipNextTrigger: true,
-      }),
-    );
+    view.dispatch(setCompletionMeta(view.state.tr, { type: "dismiss" }));
 
     return Boolean(pluginState?.suggestion || pluginState?.isLoading);
   },
@@ -156,6 +149,7 @@ function createCompletionPlugin(
 ): PluginSpec<CompletionPluginState> {
   let debounceTimer: ReturnType<typeof setTimeout>;
   let abortController: AbortController | undefined;
+  let hasTypedText = false;
 
   const abortActiveRequest = () => {
     if (abortController) {
@@ -182,30 +176,22 @@ function createCompletionPlugin(
                 suggestion: null,
                 position: meta.position,
                 isLoading: true,
-                skipNextTrigger: false,
               };
             case "streamChunk":
               return {
                 suggestion: meta.suggestion,
                 position: meta.position,
                 isLoading: true,
-                skipNextTrigger: false,
               };
             case "complete":
               return {
                 suggestion: meta.suggestion,
                 position: meta.position,
                 isLoading: false,
-                skipNextTrigger: false,
               };
             case "dismiss":
               abortActiveRequest();
-              return {
-                suggestion: null,
-                position: null,
-                isLoading: false,
-                skipNextTrigger: meta.skipNextTrigger ?? false,
-              };
+              return { ...EMPTY_PLUGIN_STATE };
             default: {
               const _exhaustive: never = meta;
               void _exhaustive;
@@ -235,24 +221,16 @@ function createCompletionPlugin(
       }
 
       return {
-        update(view, prevState) {
-          const pluginState = getCompletionState(view.state);
-
-          if (pluginState?.skipNextTrigger) {
-            clearTimeout(debounceTimer);
-            return;
-          }
+        update(view) {
+          const wasTextTyped = hasTypedText;
+          hasTypedText = false;
 
           clearTimeout(debounceTimer);
 
-          // Skip during IME composition.
+          if (!wasTextTyped) return;
+
+          // A composition still assembles the text it will leave behind.
           if (view.composing) return;
-
-          if (view.state.doc.eq(prevState.doc)) return;
-
-          // Only trigger if editor is focused (prevents completion on external
-          // updates like content insertion from prompt dialog or undo/redo).
-          if (!view.hasFocus()) return;
 
           // Skip inline suggestions if disabled or config not loaded.
           if (!completionConfig) return;
@@ -312,6 +290,13 @@ function createCompletionPlugin(
         }
 
         return DecorationSet.empty;
+      },
+      // Typing is what asks for a suggestion, and a programmatic insertion
+      // reaches the same document change without passing here. The update
+      // this input dispatches consumes the flag.
+      handleTextInput() {
+        hasTypedText = true;
+        return false;
       },
       handleDOMEvents: {
         blur: () => {
@@ -416,14 +401,7 @@ function createCompletionPlugin(
 
       console.error("Failed to generate completion:", error);
 
-      // A provider that is down stays down for the next keystroke, so the
-      // debounce must not fire straight into the same failure again.
-      view.dispatch(
-        setCompletionMeta(view.state.tr, {
-          type: "dismiss",
-          skipNextTrigger: true,
-        }),
-      );
+      view.dispatch(setCompletionMeta(view.state.tr, { type: "dismiss" }));
     } finally {
       // A superseded run must not clear the controller of the run that
       // replaced it, which would leave the newer one impossible to abort.
