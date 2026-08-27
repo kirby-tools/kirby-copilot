@@ -303,8 +303,23 @@ export async function resolvePromptContext({
       }),
     );
 
-    const pageContextBlocks = referencedPages
-      .filter((reference) => reference !== undefined)
+    const resolvedPages = referencedPages.filter(
+      (reference) => reference !== undefined,
+    );
+    const resolvedPageIds = new Set(
+      resolvedPages.map((reference) => reference.requestedPageId),
+    );
+    const unreadablePageIds = uniquePageIds.filter(
+      (id) => !resolvedPageIds.has(id),
+    );
+
+    if (unreadablePageIds.length > 0) {
+      useLogger().warn(
+        `Unreadable page id(s) left out of the prompt context: ${unreadablePageIds.join(", ")}`,
+      );
+    }
+
+    const pageContextBlocks = resolvedPages
       .map(
         ({ requestedPageId, page }) =>
           `<reference_page id="${escapeXmlAttr(requestedPageId)}">\n${JSON.stringify(createReferencePageContent(page))}\n</reference_page>`,

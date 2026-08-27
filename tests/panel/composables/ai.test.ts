@@ -630,6 +630,27 @@ describe("resolvePromptContext", () => {
         </reference_page>"
       `);
     });
+
+    it("warns about an unreadable reference and leaves it out of the context", async () => {
+      mockPagesGet.mockRejectedValue(new Error("Not found"));
+
+      const { userPromptWithContext } = await resolvePromptContext({
+        userPrompt: "Summarize @page://gone",
+      });
+
+      expect(userPromptWithContext).toBe("Summarize @page://gone");
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("gone"),
+      );
+    });
+
+    it("does not warn when every reference resolves", async () => {
+      mockPagesGet.mockResolvedValue({ title: "About", content: {} });
+
+      await resolvePromptContext({ userPrompt: "Summarize @page://about" });
+
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
   });
 
   describe("mixed file handling", () => {
