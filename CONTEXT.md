@@ -25,7 +25,8 @@ _Avoid_: payload, request context
 ### Prompting
 
 **Skill**:
-A reusable instruction block the user references from the prompt editor via a trigger token.
+A reusable instruction block the user references from the prompt editor via a trigger token. User-invoked only – a plain-text preset layered onto the run's instructions.
+_Avoid_: agent skill (the model-invoked, executable SKILL.md concept from agent frameworks – Copilot skills are neither)
 
 **Prompt template**:
 A saved, reusable prompt, optionally multilingual.
