@@ -15,6 +15,7 @@ import {
 import { loadAISDK } from "../../utils";
 
 const LICENSE_TOAST_THRESHOLD = 3;
+const COMPLETION_ERROR_COOLDOWN = 30_000;
 const COMPLETION_COUNT_STORAGE_KEY = `${STORAGE_KEY_PREFIX}completionCount`;
 
 interface CompletionPluginState {
@@ -150,6 +151,7 @@ function createCompletionPlugin(
   let debounceTimer: ReturnType<typeof setTimeout>;
   let abortController: AbortController | undefined;
   let hasTypedText = false;
+  let cooldownDeadline = 0;
 
   const abortActiveRequest = () => {
     if (abortController) {
@@ -236,6 +238,11 @@ function createCompletionPlugin(
           if (!completionConfig) return;
 
           debounceTimer = setTimeout(() => {
+            // A provider that just failed is likely to fail again, and every
+            // pause in typing would otherwise cost another request. The manual
+            // trigger stays open for a deliberate retry.
+            if (Date.now() < cooldownDeadline) return;
+
             const { $head } = view.state.selection;
 
             const isAtEndOfBlock =
@@ -400,6 +407,7 @@ function createCompletionPlugin(
       if (signal.aborted) return;
 
       console.error("Failed to generate completion:", error);
+      cooldownDeadline = Date.now() + COMPLETION_ERROR_COOLDOWN;
 
       view.dispatch(setCompletionMeta(view.state.tr, { type: "dismiss" }));
     } finally {
