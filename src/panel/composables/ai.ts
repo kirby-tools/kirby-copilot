@@ -171,10 +171,9 @@ export async function useStreamText({
       }),
     }),
     abortSignal,
-    // `streamText` runs this inside `notify`, which swallows whatever the
-    // callback throws, and `textStream` drops error parts – so as of ai@7 a
-    // failed stream would end the loop as if it had succeeded. Sorting the
-    // error out is `handleStreamError`'s job, so every kind is kept here.
+    // `streamText` swallows whatever this callback throws, and `textStream`
+    // carries no error parts, so recording the error here is the only way it
+    // reaches the run. `handleStreamError` sorts out which kind it is.
     onError({ error }) {
       firstStreamError ??= error;
     },
