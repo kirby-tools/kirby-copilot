@@ -8,8 +8,8 @@
 const REF_TOKEN_WORD_CHARACTER_REGEX = /[\w-]/;
 
 /**
- * Zero-width boundary before a token, so a mid-word occurrence
- * (`foo@skill://x`) stays literal text at every stage of the lifecycle.
+ * Zero-width boundary before a token, so a mid-word occurrence like
+ * `foo@skill://x` stays literal text.
  */
 export const REF_TOKEN_BOUNDARY_SOURCE = String.raw`(?<!${REF_TOKEN_WORD_CHARACTER_REGEX.source})`;
 

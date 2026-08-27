@@ -245,8 +245,7 @@ final class PanelContext
                 continue;
             }
 
-            // Editors type `@skill://<id>`, so restrict ids to slug-safe
-            // characters and reject anything that wouldn't round-trip.
+            // Editors type `@skill://<id>`, so ids must be slug-safe.
             // Keep in sync with the Panel token grammar's `SKILL_ID_CHARSET`.
             if (!preg_match('/^[\w\-]+$/', $id)) {
                 self::reportRejectedEntry('skills', $key, 'id "' . $id . '" must only contain letters, digits, underscores, or hyphens');
