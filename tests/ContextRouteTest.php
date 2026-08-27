@@ -282,6 +282,43 @@ final class ContextRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
+    public function duplicate_skill_ids_throw_in_debug_mode(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Duplicate skill ids: brand-voice');
+
+        $this->callContextRoute([
+            'debug' => true,
+            'johannschopplich.copilot' => [
+                'providers' => ['openai' => ['apiKey' => 'test-key']],
+                'skills'    => [
+                    ['id' => 'brand-voice', 'label' => 'First', 'instructions' => 'x'],
+                    ['id' => 'brand-voice', 'label' => 'Second', 'instructions' => 'y'],
+                ],
+            ],
+        ]);
+    }
+
+    #[Test]
+    public function duplicate_skill_ids_reach_the_panel_without_debug(): void
+    {
+        $response = $this->callContextRoute([
+            'johannschopplich.copilot' => [
+                'providers' => ['openai' => ['apiKey' => 'test-key']],
+                'skills'    => [
+                    ['id' => 'brand-voice', 'label' => 'First', 'instructions' => 'x'],
+                    ['id' => 'brand-voice', 'label' => 'Second', 'instructions' => 'y'],
+                ],
+            ],
+        ]);
+
+        $this->assertSame(
+            ['First', 'Second'],
+            array_column($response['config']['skills'], 'label')
+        );
+    }
+
+    #[Test]
     public function skill_multilang_fields_fall_back_to_en_when_user_language_is_unresolvable(): void
     {
         $response = $this->callContextRoute([
@@ -345,6 +382,22 @@ final class ContextRouteTest extends ApiRouteTestCase
         ]);
 
         $this->assertSame([], $response['config']['promptTemplates']);
+    }
+
+    #[Test]
+    #[DataProvider('invalidPromptTemplateEntries')]
+    public function invalid_prompt_template_entry_throws_in_debug_mode(array $entry): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/^Invalid promptTemplates\[0\]: /');
+
+        $this->callContextRoute([
+            'debug' => true,
+            'johannschopplich.copilot' => [
+                'providers' => ['openai' => ['apiKey' => 'test-key']],
+                'promptTemplates' => [$entry],
+            ],
+        ]);
     }
 
     #[Test]

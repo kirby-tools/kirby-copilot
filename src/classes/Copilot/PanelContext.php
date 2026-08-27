@@ -202,15 +202,21 @@ final class PanelContext
      */
     private static function normalizePromptTemplates(array $templates, string $language): array
     {
-        return array_values(array_filter(array_map(
-            function ($template) use ($language) {
-                $label = self::resolveMultilang($template['label'] ?? null, $language);
-                $prompt = self::resolveMultilang($template['prompt'] ?? null, $language);
+        $normalizedTemplates = [];
 
-                return $label && $prompt ? compact('label', 'prompt') : null;
-            },
-            $templates
-        )));
+        foreach (array_values($templates) as $index => $template) {
+            $label = self::resolveMultilang($template['label'] ?? null, $language);
+            $prompt = self::resolveMultilang($template['prompt'] ?? null, $language);
+
+            if (!$label || !$prompt) {
+                self::rejectEntry('promptTemplates', $index, 'label and prompt must be non-empty');
+                continue;
+            }
+
+            $normalizedTemplates[] = compact('label', 'prompt');
+        }
+
+        return $normalizedTemplates;
     }
 
     /**
@@ -235,7 +241,7 @@ final class PanelContext
             }
 
             if (!$id || !$label || !$instructions) {
-                self::rejectSkill($index, 'id, label, and instructions must be non-empty');
+                self::rejectEntry('skills', $index, 'id, label, and instructions must be non-empty');
                 continue;
             }
 
@@ -243,26 +249,38 @@ final class PanelContext
             // characters and reject anything that wouldn't round-trip.
             // Keep in sync with the Panel token grammar's `SKILL_ID_CHARSET`.
             if (!preg_match('/^[\w\-]+$/', $id)) {
-                self::rejectSkill($index, 'id "' . $id . '" must only contain letters, digits, underscores, or hyphens');
+                self::rejectEntry('skills', $index, 'id "' . $id . '" must only contain letters, digits, underscores, or hyphens');
                 continue;
             }
 
             $normalizedSkills[] = compact('id', 'label', 'instructions');
         }
 
+        // A second entry with the same id never wins a `@skill://` token,
+        // so it would sit in the config doing nothing.
+        $idCounts = array_count_values(array_column($normalizedSkills, 'id'));
+        $duplicateIds = array_keys(array_filter($idCounts, fn (int $count) => $count > 1));
+
+        if ($duplicateIds !== [] && App::instance()->option('debug')) {
+            // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
+            throw new InvalidArgumentException(
+                'Duplicate skill ids: ' . implode(', ', $duplicateIds)
+            );
+        }
+
         return $normalizedSkills;
     }
 
     /**
-     * Reports an invalid skill entry the caller is about to drop – throwing
-     * in debug mode, staying silent otherwise.
+     * Reports a config entry the caller is about to drop – throwing in debug
+     * mode, staying silent otherwise.
      */
-    private static function rejectSkill(int $index, string $reason): void
+    private static function rejectEntry(string $option, int $index, string $reason): void
     {
         if (App::instance()->option('debug')) {
             // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
             throw new InvalidArgumentException(
-                'Invalid skills[' . $index . ']: ' . $reason
+                'Invalid ' . $option . '[' . $index . ']: ' . $reason
             );
         }
     }
