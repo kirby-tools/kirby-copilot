@@ -75,6 +75,27 @@ function createTextModel(deltas: string[]) {
   });
 }
 
+function createFailingModel(error: unknown, deltas: string[] = []) {
+  const chunks: LanguageModelV4StreamPart[] = [
+    { type: "stream-start", warnings: [] },
+    { type: "text-start", id: "1" },
+    ...deltas.map(
+      (delta): LanguageModelV4StreamPart => ({
+        type: "text-delta",
+        id: "1",
+        delta,
+      }),
+    ),
+    { type: "error", error },
+  ];
+
+  return new MockLanguageModelV4({
+    doStream: async () => ({
+      stream: simulateReadableStream({ chunks }),
+    }),
+  });
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   vi.unstubAllGlobals();
@@ -134,25 +155,16 @@ describe("runTextGeneration", () => {
   });
 
   it("surfaces stream failures as an error notification and clears the loading state", async () => {
-    const failingModel = new MockLanguageModelV4({
-      doStream: async () => ({
-        stream: simulateReadableStream({
-          chunks: [
-            { type: "stream-start" as const, warnings: [] },
-            {
-              type: "error" as const,
-              error: new AISDKError({
-                name: "TestUpstreamError",
-                message: "Upstream exploded",
-              }),
-            },
-          ],
-        }),
-      }),
-    });
-
     const run = runTextGeneration({
-      streamOptions: { userPrompt: "Write", model: failingModel },
+      streamOptions: {
+        userPrompt: "Write",
+        model: createFailingModel(
+          new AISDKError({
+            name: "TestUpstreamError",
+            message: "Upstream exploded",
+          }),
+        ),
+      },
       sink: { write: () => {} },
     });
 
@@ -161,6 +173,56 @@ describe("runTextGeneration", () => {
     expect(panel.notification.error).toHaveBeenCalledWith("Upstream exploded");
     expect(panel.notification.success).not.toHaveBeenCalled();
     expect(panel.isLoading).toBe(false);
+  });
+
+  it("falls back to the generic message when the stream fails with a plain Error", async () => {
+    const run = runTextGeneration({
+      streamOptions: {
+        userPrompt: "Write",
+        // A browser rejects a dead `fetch` with a `TypeError` carrying no
+        // `cause`, which the SDK passes through without wrapping.
+        model: createFailingModel(new TypeError("Failed to fetch")),
+      },
+      sink: { write: () => {} },
+    });
+
+    await run!.done;
+
+    expect(panel.notification.error).toHaveBeenCalledWith(
+      "johannschopplich.copilot.notification.error",
+    );
+    expect(panel.notification.success).not.toHaveBeenCalled();
+  });
+
+  it("surfaces a stream failure that arrives after the first deltas", async () => {
+    const writtenDeltas: string[] = [];
+    const persistFinal = vi.fn();
+
+    const run = runTextGeneration({
+      streamOptions: {
+        userPrompt: "Write",
+        model: createFailingModel(
+          new AISDKError({
+            name: "TestUpstreamError",
+            message: "Upstream exploded",
+          }),
+          ["First line\n"],
+        ),
+      },
+      sink: {
+        write: (delta) => {
+          writtenDeltas.push(delta);
+        },
+        persistFinal,
+      },
+    });
+
+    await run!.done;
+
+    expect(writtenDeltas).toEqual(["First line\n"]);
+    expect(persistFinal).not.toHaveBeenCalled();
+    expect(panel.notification.error).toHaveBeenCalledWith("Upstream exploded");
+    expect(panel.notification.success).not.toHaveBeenCalled();
   });
 
   it("persists the result once after streaming when the sink provides persistFinal", async () => {
@@ -347,27 +409,16 @@ describe("runStructuredGeneration", () => {
 
   it("surfaces stream failures without persisting the partial result", async () => {
     const persistFinal = vi.fn();
-    const failingModel = new MockLanguageModelV4({
-      doStream: async () => ({
-        stream: simulateReadableStream({
-          chunks: [
-            { type: "stream-start" as const, warnings: [] },
-            {
-              type: "error" as const,
-              error: new AISDKError({
-                name: "TestUpstreamError",
-                message: "Upstream exploded",
-              }),
-            },
-          ],
-        }),
-      }),
-    });
 
     const run = runStructuredGeneration({
       streamOptions: {
         userPrompt: "Fill the fields",
-        model: failingModel,
+        model: createFailingModel(
+          new AISDKError({
+            name: "TestUpstreamError",
+            message: "Upstream exploded",
+          }),
+        ),
         output: Output.object({ schema: z.object({ title: z.string() }) }),
       },
       sink: { writePartial: () => {}, persistFinal },

@@ -108,7 +108,7 @@ export async function useStreamText({
     logLevel = 3;
   }
 
-  const { AISDKError, Output, streamText, smoothStream } = await loadAISDK();
+  const { Output, streamText, smoothStream } = await loadAISDK();
   const resolvedOutput =
     output ??
     (outputSchema ? Output.object({ schema: outputSchema }) : undefined);
@@ -131,7 +131,7 @@ export async function useStreamText({
 
   const hasFiles = imageByteArrays.length > 0 || pdfByteArrays.length > 0;
 
-  let firstStreamError: Error | undefined;
+  let firstStreamError: unknown;
 
   const result = await streamText({
     model,
@@ -171,16 +171,12 @@ export async function useStreamText({
       }),
     }),
     abortSignal,
-    // The SDK runs this inside `notify`, which swallows whatever the callback
-    // throws, and drops error parts from `textStream` – so the error is kept
-    // here for `getStreamError` and rethrown by the caller after the stream.
+    // `streamText` runs this inside `notify`, which swallows whatever the
+    // callback throws, and `textStream` drops error parts – so as of ai@7 a
+    // failed stream would end the loop as if it had succeeded. Sorting the
+    // error out is `handleStreamError`'s job, so every kind is kept here.
     onError({ error }) {
-      if (AISDKError.isInstance(error)) {
-        firstStreamError ??= error;
-        return;
-      }
-
-      console.error("Unexpected error during text streaming:", error);
+      firstStreamError ??= error;
     },
   });
 
