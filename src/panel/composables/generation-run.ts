@@ -61,7 +61,7 @@ export function runTextGeneration({
   sink: TextGenerationSink;
 }): GenerationRun | undefined {
   return startGenerationRun(runOptions, async (signal) => {
-    const { textStream } = await useStreamText({
+    const { textStream, getStreamError } = await useStreamText({
       ...streamOptions,
       abortSignal: signal,
     });
@@ -72,6 +72,10 @@ export function runTextGeneration({
     }
 
     if (signal.aborted) return;
+
+    const streamError = getStreamError();
+    if (streamError) throw streamError;
+
     await sink.persistFinal?.();
   });
 }
@@ -87,7 +91,11 @@ export function runStructuredGeneration({
   sink: StructuredGenerationSink;
 }): GenerationRun | undefined {
   return startGenerationRun(runOptions, async (signal) => {
-    const { partialOutputStream, output: finalOutput } = await useStreamText({
+    const {
+      partialOutputStream,
+      output: finalOutput,
+      getStreamError,
+    } = await useStreamText({
       ...streamOptions,
       abortSignal: signal,
     });
@@ -101,6 +109,10 @@ export function runStructuredGeneration({
     }
 
     if (signal.aborted) return;
+
+    const streamError = getStreamError();
+    if (streamError) throw streamError;
+
     const structuredOutput = await finalOutput;
 
     // Abort must never reach the persisting write.

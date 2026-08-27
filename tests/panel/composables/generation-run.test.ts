@@ -344,4 +344,39 @@ describe("runStructuredGeneration", () => {
     expect(panel.notification.error).not.toHaveBeenCalled();
     expect(panel.isLoading).toBe(false);
   });
+
+  it("surfaces stream failures without persisting the partial result", async () => {
+    const persistFinal = vi.fn();
+    const failingModel = new MockLanguageModelV4({
+      doStream: async () => ({
+        stream: simulateReadableStream({
+          chunks: [
+            { type: "stream-start" as const, warnings: [] },
+            {
+              type: "error" as const,
+              error: new AISDKError({
+                name: "TestUpstreamError",
+                message: "Upstream exploded",
+              }),
+            },
+          ],
+        }),
+      }),
+    });
+
+    const run = runStructuredGeneration({
+      streamOptions: {
+        userPrompt: "Fill the fields",
+        model: failingModel,
+        output: Output.object({ schema: z.object({ title: z.string() }) }),
+      },
+      sink: { writePartial: () => {}, persistFinal },
+    });
+
+    await run!.done;
+
+    expect(persistFinal).not.toHaveBeenCalled();
+    expect(panel.notification.error).toHaveBeenCalledWith("Upstream exploded");
+    expect(panel.notification.success).not.toHaveBeenCalled();
+  });
 });

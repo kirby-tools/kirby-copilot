@@ -131,6 +131,8 @@ export async function useStreamText({
 
   const hasFiles = imageByteArrays.length > 0 || pdfByteArrays.length > 0;
 
+  let firstStreamError: Error | undefined;
+
   const result = await streamText({
     model,
     reasoning,
@@ -169,9 +171,13 @@ export async function useStreamText({
       }),
     }),
     abortSignal,
+    // The SDK runs this inside `notify`, which swallows whatever the callback
+    // throws, and drops error parts from `textStream` – so the error is kept
+    // here for `getStreamError` and rethrown by the caller after the stream.
     onError({ error }) {
       if (AISDKError.isInstance(error)) {
-        throw error;
+        firstStreamError ??= error;
+        return;
       }
 
       console.error("Unexpected error during text streaming:", error);
@@ -188,7 +194,10 @@ export async function useStreamText({
     })
     .catch(() => {});
 
-  return result;
+  return Object.assign(result, {
+    /** Returns the first error the stream reported, once the stream has ended. */
+    getStreamError: () => firstStreamError,
+  });
 }
 
 export async function resolveLanguageModel({
