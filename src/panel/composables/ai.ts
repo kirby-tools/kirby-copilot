@@ -171,9 +171,10 @@ export async function useStreamText({
       }),
     }),
     abortSignal,
-    // `streamText` swallows whatever this callback throws, and `textStream`
-    // carries no error parts, so recording the error here is the only way it
-    // reaches the run. `handleStreamError` sorts out which kind it is.
+    // The provider's own error reaches this callback and nowhere else: error
+    // parts never enter `textStream`, and the result promises either reject
+    // with the SDK's generic `NoOutputGeneratedError` or settle with whatever
+    // arrived before the failure.
     onError({ error }) {
       firstStreamError ??= error;
     },
@@ -189,10 +190,46 @@ export async function useStreamText({
     })
     .catch(() => {});
 
-  return Object.assign(result, {
-    /** Returns the first error the stream reported, once the stream has ended. */
-    getStreamError: () => firstStreamError,
-  });
+  /** Yields every part, then throws when the run behind the stream failed. */
+  async function* surfaceRunFailure<T>(stream: AsyncIterable<T>) {
+    yield* stream;
+    // Parts also run out when the provider fails mid-stream, so the recorded
+    // error decides whether the consumer may treat the run as complete.
+    if (firstStreamError) throw firstStreamError;
+  }
+
+  /** Resolves with the output unless the run reported an error along the way. */
+  async function resolveOutput() {
+    let output: Awaited<typeof result.output>;
+
+    try {
+      output = await result.output;
+    } catch (error) {
+      throw firstStreamError ?? error;
+    }
+
+    // The output can parse cleanly from the text that arrived before the
+    // failure, which would hand the consumer a result the provider disowned.
+    if (firstStreamError) throw firstStreamError;
+
+    return output;
+  }
+
+  // Reading `output` twice must not start a second chain, whose rejection
+  // nobody would be awaiting.
+  let outputPromise: ReturnType<typeof resolveOutput> | undefined;
+
+  return {
+    get textStream() {
+      return surfaceRunFailure(result.textStream);
+    },
+    get partialOutputStream() {
+      return surfaceRunFailure(result.partialOutputStream);
+    },
+    get output() {
+      return (outputPromise ??= resolveOutput());
+    },
+  };
 }
 
 export async function resolveLanguageModel({

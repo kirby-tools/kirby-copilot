@@ -61,7 +61,7 @@ export function runTextGeneration({
   sink: TextGenerationSink;
 }): GenerationRun | undefined {
   return startGenerationRun(runOptions, async (signal) => {
-    const { textStream, getStreamError } = await useStreamText({
+    const { textStream } = await useStreamText({
       ...streamOptions,
       abortSignal: signal,
     });
@@ -72,9 +72,6 @@ export function runTextGeneration({
     }
 
     if (signal.aborted) return;
-
-    const streamError = getStreamError();
-    if (streamError) throw streamError;
 
     await sink.persistFinal?.();
   });
@@ -91,17 +88,13 @@ export function runStructuredGeneration({
   sink: StructuredGenerationSink;
 }): GenerationRun | undefined {
   return startGenerationRun(runOptions, async (signal) => {
-    const {
-      partialOutputStream,
-      output: finalOutput,
-      getStreamError,
-    } = await useStreamText({
+    const { partialOutputStream, output: finalOutput } = await useStreamText({
       ...streamOptions,
       abortSignal: signal,
     });
 
     // Prevent unhandled rejection when aborting before `finalOutput` is awaited.
-    (finalOutput as Promise<unknown>).catch(() => {});
+    finalOutput.catch(() => {});
 
     for await (const partialOutput of partialOutputStream) {
       if (signal.aborted) return;
@@ -109,9 +102,6 @@ export function runStructuredGeneration({
     }
 
     if (signal.aborted) return;
-
-    const streamError = getStreamError();
-    if (streamError) throw streamError;
 
     const structuredOutput = await finalOutput;
 
