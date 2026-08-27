@@ -30,7 +30,6 @@ const upstreamError = new AISDKError({
   message: "Upstream exploded",
 });
 
-/** Streams a complete object, then fails instead of finishing the response. */
 function createModelFailingAfterOutput() {
   const chunks: LanguageModelV4StreamPart[] = [
     { type: "stream-start", warnings: [] },
@@ -46,7 +45,6 @@ function createModelFailingAfterOutput() {
   });
 }
 
-/** Fails before the response starts, the shape of a rejected API key. */
 function createModelFailingBeforeOutput() {
   return new MockLanguageModelV4({
     doStream: () => Promise.reject(upstreamError),
