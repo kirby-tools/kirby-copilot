@@ -255,6 +255,21 @@ final class ContextRouteTest extends ApiRouteTestCase
         ]);
     }
 
+    #[Test]
+    public function invalid_skill_entry_throws_with_its_config_key_in_debug_mode(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/^Invalid skills\[brand\]: /');
+
+        $this->callContextRoute([
+            'debug' => true,
+            'johannschopplich.copilot' => [
+                'providers' => ['openai' => ['apiKey' => 'test-key']],
+                'skills'    => ['brand' => ['label' => 'x', 'instructions' => 'y']],
+            ],
+        ]);
+    }
+
     /**
      * @return array<string, array{0: string}>
      */

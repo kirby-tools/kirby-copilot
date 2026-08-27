@@ -204,12 +204,12 @@ final class PanelContext
     {
         $normalizedTemplates = [];
 
-        foreach (array_values($templates) as $index => $template) {
+        foreach ($templates as $key => $template) {
             $label = self::resolveMultilang($template['label'] ?? null, $language);
             $prompt = self::resolveMultilang($template['prompt'] ?? null, $language);
 
             if (!$label || !$prompt) {
-                self::rejectEntry('promptTemplates', $index, 'label and prompt must be non-empty');
+                self::reportRejectedEntry('promptTemplates', $key, 'label and prompt must be non-empty');
                 continue;
             }
 
@@ -227,7 +227,7 @@ final class PanelContext
     {
         $normalizedSkills = [];
 
-        foreach (array_values($skills) as $index => $skill) {
+        foreach ($skills as $key => $skill) {
             $id = is_string($skill['id'] ?? null) ? trim($skill['id']) : null;
             $label = self::resolveMultilang($skill['label'] ?? null, $language);
             $instructions = self::resolveMultilang($skill['instructions'] ?? null, $language);
@@ -241,7 +241,7 @@ final class PanelContext
             }
 
             if (!$id || !$label || !$instructions) {
-                self::rejectEntry('skills', $index, 'id, label, and instructions must be non-empty');
+                self::reportRejectedEntry('skills', $key, 'id, label, and instructions must be non-empty');
                 continue;
             }
 
@@ -249,7 +249,7 @@ final class PanelContext
             // characters and reject anything that wouldn't round-trip.
             // Keep in sync with the Panel token grammar's `SKILL_ID_CHARSET`.
             if (!preg_match('/^[\w\-]+$/', $id)) {
-                self::rejectEntry('skills', $index, 'id "' . $id . '" must only contain letters, digits, underscores, or hyphens');
+                self::reportRejectedEntry('skills', $key, 'id "' . $id . '" must only contain letters, digits, underscores, or hyphens');
                 continue;
             }
 
@@ -275,12 +275,12 @@ final class PanelContext
      * Reports a config entry the caller is about to drop – throwing in debug
      * mode, staying silent otherwise.
      */
-    private static function rejectEntry(string $option, int $index, string $reason): void
+    private static function reportRejectedEntry(string $option, string|int $key, string $reason): void
     {
         if (App::instance()->option('debug')) {
             // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
             throw new InvalidArgumentException(
-                'Invalid ' . $option . '[' . $index . ']: ' . $reason
+                'Invalid ' . $option . '[' . $key . ']: ' . $reason
             );
         }
     }
