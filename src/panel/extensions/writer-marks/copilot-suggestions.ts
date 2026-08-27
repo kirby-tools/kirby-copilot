@@ -325,8 +325,7 @@ function createCompletionPlugin(
     view: EditorView,
     { includeSuffix = false } = {},
   ) {
-    abortController?.abort();
-    abortController = new AbortController();
+    abortActiveRequest();
 
     const { state } = view;
     const position = state.selection.head;
@@ -335,6 +334,8 @@ function createCompletionPlugin(
       suffixLength: includeSuffix ? COMPLETION_SUFFIX_LENGTH : 0,
     });
     if (!prefix.trim()) return;
+
+    abortController = new AbortController();
 
     view.dispatch(
       setCompletionMeta(state.tr, { type: "startLoading", position }),
@@ -424,7 +425,11 @@ function createCompletionPlugin(
         }),
       );
     } finally {
-      abortController = undefined;
+      // A superseded run must not clear the controller of the run that
+      // replaced it, which would leave the newer one impossible to abort.
+      if (abortController?.signal === signal) {
+        abortController = undefined;
+      }
     }
   }
 }
