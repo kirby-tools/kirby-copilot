@@ -226,12 +226,12 @@ function pickPages() {
         let insertIndex = cursorOffset;
         for (const page of pages) {
           if (!page.id) continue;
-          const { text: nextPrompt, nextIndex } = insertRefToken(
+          const { nextText, nextIndex } = insertRefToken(
             prompt.value,
             insertIndex,
             `@page://${page.id} `,
           );
-          prompt.value = nextPrompt;
+          prompt.value = nextText;
           insertIndex = nextIndex;
         }
         panel.dialog.close();

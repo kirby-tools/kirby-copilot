@@ -100,7 +100,7 @@ describe("resolveSkillRefs", () => {
     expect(unknownSkillIds).toEqual(["typo"]);
   });
 
-  it("returns nothing for an empty token list", () => {
+  it("returns empty resolvedSkills and unknownSkillIds for an empty token list", () => {
     const { resolvedSkills, unknownSkillIds } = resolveSkillRefs([skill({ id: "a" })], []);
 
     expect(resolvedSkills).toEqual([]);

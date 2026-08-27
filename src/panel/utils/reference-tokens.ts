@@ -4,14 +4,14 @@
  * resolution); only the token syntax itself lives here.
  */
 
-/** Word characters plus the hyphen, so a token cannot continue a slug either. */
-const REF_TOKEN_WORD_CHAR_REGEX = /[\w-]/;
+/** Characters a token may not directly follow, hyphen included so it cannot continue a slug. */
+const REF_TOKEN_WORD_CHARACTER_REGEX = /[\w-]/;
 
 /**
  * Zero-width boundary before a token, so a mid-word occurrence
  * (`foo@skill://x`) stays literal text at every stage of the lifecycle.
  */
-export const REF_TOKEN_BOUNDARY_SOURCE = String.raw`(?<!${REF_TOKEN_WORD_CHAR_REGEX.source})`;
+export const REF_TOKEN_BOUNDARY_SOURCE = String.raw`(?<!${REF_TOKEN_WORD_CHARACTER_REGEX.source})`;
 
 export function createRefTokenRegex(kind: string, idCharset: string) {
   return new RegExp(
@@ -35,12 +35,12 @@ export function extractRefIds(text: string, regex: RegExp) {
  * land mid-word.
  */
 export function insertRefToken(text: string, index: number, token: string) {
-  const separator = REF_TOKEN_WORD_CHAR_REGEX.test(text[index - 1] ?? "")
+  const separator = REF_TOKEN_WORD_CHARACTER_REGEX.test(text[index - 1] ?? "")
     ? " "
     : "";
 
   return {
-    text: text.slice(0, index) + separator + token + text.slice(index),
+    nextText: text.slice(0, index) + separator + token + text.slice(index),
     nextIndex: index + separator.length + token.length,
   };
 }

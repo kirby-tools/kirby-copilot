@@ -30,7 +30,15 @@ describe("reference token grammar", () => {
     ).toEqual(["start", "in-paren"]);
   });
 
-  it("matches a token wrapped in quotes", () => {
+  it("skips a token that directly follows a hyphen", () => {
+    const regex = createRefTokenRegex("skill", String.raw`[\w\-]`);
+
+    expect(
+      extractRefIds("brand-@skill://voice and @skill://voice", regex),
+    ).toEqual(["voice"]);
+  });
+
+  it("matches a token wrapped in straight or typographic quotes", () => {
     const regex = createRefTokenRegex("page", String.raw`[\w\-/]`);
 
     expect(
@@ -49,34 +57,34 @@ describe("reference token grammar", () => {
 
 describe("insertRefToken", () => {
   it("inserts without a prefix after an opening quote", () => {
-    expect(insertRefToken('Fasse "', 7, "@page://about ").text).toBe(
+    expect(insertRefToken('Fasse "', 7, "@page://about ").nextText).toBe(
       'Fasse "@page://about ',
     );
   });
 
   it("prefixes a space where the token would land mid-word", () => {
     expect(insertRefToken("Summarize", 9, "@page://about ")).toEqual({
-      text: "Summarize @page://about ",
+      nextText: "Summarize @page://about ",
       nextIndex: 24,
     });
   });
 
   it("inserts without a prefix after a space", () => {
-    expect(insertRefToken("Summarize ", 10, "@page://about ").text).toBe(
+    expect(insertRefToken("Summarize ", 10, "@page://about ").nextText).toBe(
       "Summarize @page://about ",
     );
   });
 
   it("inserts without a prefix at the start of the input", () => {
-    expect(insertRefToken("", 0, "@page://about ").text).toBe(
+    expect(insertRefToken("", 0, "@page://about ").nextText).toBe(
       "@page://about ",
     );
   });
 
   it("returns the index behind the inserted token so a second insert follows it", () => {
-    const { text, nextIndex } = insertRefToken("Compare", 7, "@page://a ");
+    const { nextText, nextIndex } = insertRefToken("Compare", 7, "@page://a ");
 
-    expect(insertRefToken(text, nextIndex, "@page://b ").text).toBe(
+    expect(insertRefToken(nextText, nextIndex, "@page://b ").nextText).toBe(
       "Compare @page://a @page://b ",
     );
   });
