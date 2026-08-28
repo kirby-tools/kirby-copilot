@@ -1,10 +1,10 @@
 diff --git a/dist/index.js b/dist/index.js
-index 7b5d4114140c6bf517c62484ff79cfc1b9435c84..167fe10a90b20c63fa04b96b75ebe169d9644698 100644
+index 0ce9f9cc28070fef2005b88aef7c02d1ad08b032..c78be15e2dd16d9fcc4c94a84231856c427425d5 100644
 --- a/dist/index.js
 +++ b/dist/index.js
-@@ -4220,6 +4220,8 @@ function openTelemetryChannelSpanContext({
+@@ -4257,6 +4257,8 @@ function openTelemetryChannelSpanContext({
  }) {
-   var _a23;
+   var _a24;
    if (!isNodeRuntime()) {
 +    Promise.resolve(completion).catch(() => {
 +    });
