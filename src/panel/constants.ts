@@ -81,6 +81,7 @@ When <reference_page> is provided, use it as reference material. Draw on its str
 
 export const COMPLETION_PREFIX_LENGTH = 4000;
 export const COMPLETION_SUFFIX_LENGTH = 500;
+export const COMPLETION_ERROR_COOLDOWN_MS = 30_000;
 
 export const COMPLETION_SYSTEM_PROMPT = `
 You are a writing assistant providing inline autocompletions.

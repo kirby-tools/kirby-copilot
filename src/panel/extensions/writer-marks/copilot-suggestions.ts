@@ -7,6 +7,7 @@ import { PluginKey } from "prosemirror-state";
 import { Decoration, DecorationSet } from "prosemirror-view";
 import { resolveLanguageModel, usePluginContext } from "../../composables";
 import {
+  COMPLETION_ERROR_COOLDOWN_MS,
   COMPLETION_PREFIX_LENGTH,
   COMPLETION_SUFFIX_LENGTH,
   COMPLETION_SYSTEM_PROMPT,
@@ -15,10 +16,9 @@ import {
 import { loadAISDK } from "../../utils";
 
 const LICENSE_TOAST_THRESHOLD = 3;
-const COMPLETION_ERROR_COOLDOWN = 30_000;
 const COMPLETION_COUNT_STORAGE_KEY = `${STORAGE_KEY_PREFIX}completionCount`;
 
-interface CompletionPluginState {
+export interface CompletionPluginState {
   suggestion: string | null;
   position: number | null;
   isLoading: boolean;
@@ -42,7 +42,7 @@ const completionPluginKey = new PluginKey<CompletionPluginState>(
   "copilot-suggestions",
 );
 
-const triggerHandles = new WeakMap<EditorView, () => void>();
+const triggerHandles = new WeakMap<EditorView, () => boolean>();
 
 export function setCompletionMeta(tr: Transaction, meta: CompletionMeta) {
   tr.setMeta(completionPluginKey, meta);
@@ -56,8 +56,7 @@ export function getCompletionState(state: EditorState) {
 export function triggerCompletion(view: EditorView): boolean {
   const trigger = triggerHandles.get(view);
   if (!trigger) return false;
-  trigger();
-  return true;
+  return trigger();
 }
 
 interface CopilotSuggestionsMark extends WriterMarkExtension {
@@ -80,8 +79,8 @@ export const copilotSuggestions: CopilotSuggestionsMark = {
     };
   },
 
-  plugins(this: CopilotSuggestionsMark, context: WriterMarkContext) {
-    return [createCompletionPlugin(context, this)];
+  plugins(this: CopilotSuggestionsMark, _context: WriterMarkContext) {
+    return [createCompletionPlugin(this)];
   },
 
   _acceptSuggestion(this: CopilotSuggestionsMark) {
@@ -144,7 +143,6 @@ export const copilotSuggestions: CopilotSuggestionsMark = {
 };
 
 function createCompletionPlugin(
-  context: WriterMarkContext,
   mark: CopilotSuggestionsMark,
 ): PluginSpec<CompletionPluginState> {
   let debounceTimer: ReturnType<typeof setTimeout>;
@@ -211,8 +209,11 @@ function createCompletionPlugin(
 
     view(editorView) {
       triggerHandles.set(editorView, () => {
+        if (!completionConfig) return false;
+
         clearTimeout(debounceTimer);
         generateCompletion(editorView, { includeSuffix: true });
+        return true;
       });
 
       if (completionConfig === undefined) {
@@ -223,12 +224,12 @@ function createCompletionPlugin(
 
       return {
         update(view) {
-          const wasTextTyped = hasTypedText;
+          const hasTypedTextBeforeUpdate = hasTypedText;
           hasTypedText = false;
 
           clearTimeout(debounceTimer);
 
-          if (!wasTextTyped) return;
+          if (!hasTypedTextBeforeUpdate) return;
 
           // A composition still assembles the text it will leave behind.
           if (view.composing) return;
@@ -293,7 +294,7 @@ function createCompletionPlugin(
 
         return DecorationSet.empty;
       },
-      // Typing is what asks for a suggestion, and a programmatic insertion
+      // Typing is what asks for a completion, and a programmatic insertion
       // reaches the same document change without passing here. The update
       // this input dispatches consumes the flag.
       handleTextInput() {
@@ -383,7 +384,7 @@ function createCompletionPlugin(
       if (signal.aborted) return;
 
       // Chunks also run out when the provider fails mid-stream, which would
-      // otherwise offer the truncated text as a finished suggestion.
+      // otherwise offer the truncated text as a finished completion.
       if (firstStreamError) throw firstStreamError;
 
       const finalSuggestion =
@@ -399,11 +400,12 @@ function createCompletionPlugin(
         }),
       );
     } catch (error) {
-      // If intentionally aborted, state was already cleared by the aborter.
+      // An intentional abort runs `abortActiveRequest`, which cleared the state
+      // already.
       if (signal.aborted) return;
 
       console.error("Failed to generate completion:", error);
-      cooldownDeadline = Date.now() + COMPLETION_ERROR_COOLDOWN;
+      cooldownDeadline = Date.now() + COMPLETION_ERROR_COOLDOWN_MS;
 
       view.dispatch(setCompletionMeta(view.state.tr, { type: "dismiss" }));
     } finally {
