@@ -171,6 +171,9 @@ export async function useStreamText({
       }),
     }),
     abortSignal,
+    // Telemetry has no sink in the Panel, and its tracing channel leaves a
+    // rejected promise behind that Kirby turns into an error dialog.
+    telemetry: { isEnabled: false },
     // The provider's own error reaches this callback and nowhere else: error
     // parts never enter `textStream`, and the result promises either reject
     // with the SDK's own `NoOutputGeneratedError` or settle with what arrived

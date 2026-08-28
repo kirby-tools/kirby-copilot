@@ -355,6 +355,9 @@ function createCompletionPlugin(
         instructions: COMPLETION_SYSTEM_PROMPT,
         prompt,
         abortSignal: signal,
+        // Telemetry has no sink in the Panel, and its tracing channel leaves a
+        // rejected promise behind that Kirby turns into an error dialog.
+        telemetry: { isEnabled: false },
         // Error parts never enter `textStream`, so this is the only place the
         // provider's own error can be picked up.
         onError({ error }) {
