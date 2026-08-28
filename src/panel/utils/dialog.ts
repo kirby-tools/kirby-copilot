@@ -8,7 +8,6 @@ export async function openPromptDialog<T = unknown>(
     const panel = usePanel();
     let result: T | undefined;
 
-    // Reset global state for a fresh dialog session.
     const { reset } = usePromptDialogState();
     reset((props.userPrompt as string) || "");
 

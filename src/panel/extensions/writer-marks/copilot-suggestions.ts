@@ -132,7 +132,6 @@ export const copilotSuggestions: CopilotSuggestionsMark = {
 
     const context = await usePluginContext();
 
-    // Only show toast for unlicensed users.
     if (["inactive", "invalid"].includes(context.licenseStatus!)) {
       window.panel.notification.info({
         icon: "key",
@@ -234,13 +233,9 @@ function createCompletionPlugin(
           // A composition still assembles the text it will leave behind.
           if (view.composing) return;
 
-          // Skip inline suggestions if disabled or config not loaded.
           if (!completionConfig) return;
 
           debounceTimer = setTimeout(() => {
-            // A provider that just failed is likely to fail again, and every
-            // pause in typing would otherwise cost another request. The manual
-            // trigger stays open for a deliberate retry.
             if (Date.now() < cooldownDeadline) return;
 
             const { $head } = view.state.selection;
@@ -333,7 +328,6 @@ function createCompletionPlugin(
       setCompletionMeta(state.tr, { type: "startLoading", position }),
     );
 
-    // Capture signal reference to detect if generation gets canceled.
     const { signal } = abortController;
 
     try {
@@ -342,7 +336,6 @@ function createCompletionPlugin(
       });
       const { streamText } = await loadAISDK();
 
-      // Use prefix/suffix format when there's text after cursor (manual trigger mid-text).
       const prompt = suffix
         ? `<prefix>${prefix}</prefix>\n<suffix>${suffix}</suffix>`
         : prefix;
@@ -424,10 +417,8 @@ function createCompletionPlugin(
 }
 
 /**
- * Gets text context around the cursor for completion (FIM pattern).
- *
- * @remarks
- * Includes text from previous blocks for better context on new lines.
+ * Collects the fill-in-the-middle context around the cursor: the prefix reaches
+ * back across earlier blocks, the suffix stays inside the current one.
  */
 function getCursorContext(
   state: EditorState,
@@ -442,12 +433,10 @@ function getCursorContext(
   const { $head } = state.selection;
   const cursorPos = $head.pos;
 
-  // Get text from document start to cursor, with double newlines between blocks.
   const prefix = state.doc
     .textBetween(0, cursorPos, "\n\n")
     .slice(-prefixLength);
 
-  // For suffix, only look within current block (don't cross block boundaries).
   const blockText = $head.parent.textContent;
   const offset = $head.parentOffset;
   const suffix =

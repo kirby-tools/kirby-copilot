@@ -42,7 +42,6 @@ export function useBlocks() {
     let currentFieldsets = await getFieldsets();
     const { config } = await usePluginContext();
 
-    // Filter out excluded blocks from global config.
     if (config.excludedBlocks && Array.isArray(config.excludedBlocks)) {
       currentFieldsets = currentFieldsets.filter(
         (fieldset) => !config.excludedBlocks!.includes(fieldset.type),
@@ -80,7 +79,6 @@ export function useLayouts() {
     let currentFieldsets = await getFieldsets();
     const { config } = await usePluginContext();
 
-    // Filter out excluded blocks from global config.
     if (config.excludedBlocks && Array.isArray(config.excludedBlocks)) {
       currentFieldsets = currentFieldsets.filter(
         (fieldset) => !config.excludedBlocks!.includes(fieldset.type),

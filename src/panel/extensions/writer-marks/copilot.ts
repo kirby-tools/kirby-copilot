@@ -52,7 +52,6 @@ export const copilot: CopilotMark = {
 
     if (/^\n+$/.test(text)) {
       if (text.length >= 2) {
-        // 2+ newlines → paragraph break.
         const node = this.editor!.options.inline
           ? [
               context.schema.nodes.hardBreak!.create(),
@@ -63,7 +62,6 @@ export const copilot: CopilotMark = {
         return { tr, newPosition: position + 2 };
       }
 
-      // Single newline → hard break.
       tr = tr.replaceWith(
         position,
         position,
@@ -92,7 +90,6 @@ export const copilot: CopilotMark = {
         return { tr, newPosition: position + (sizeAfter - sizeBefore) };
       } catch (error) {
         console.error("Failed to parse HTML:", error);
-        // Fall through to plain text insertion.
       }
     }
 
@@ -139,7 +136,6 @@ export const copilot: CopilotMark = {
       const { state, view } = this.editor!;
       let tr = state.tr;
 
-      // Only delete the selection on the first call.
       if (!hasDeletedSelection) {
         const isFullSelection = isEntireDocumentSelected(state);
         const { from, to } = state.selection;
@@ -172,7 +168,6 @@ function isEntireDocumentSelected(state: EditorState) {
   return from <= 1 && to >= state.doc.content.size - 1;
 }
 
-/** Converts HTML with `<p>` and `<br>` tags to rich-text format (newlines for breaks). */
 function normalizeHtmlToRichText(html: string) {
   return html
     .replace(/<br\s*\/?>/gi, "\n")

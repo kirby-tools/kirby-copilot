@@ -143,7 +143,6 @@ function startGenerationRun(
     try {
       await execute(signal);
 
-      // Handle cancellation before stream started or after it completed.
       if (signal.aborted) return;
 
       panel.notification.success({
