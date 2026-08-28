@@ -42,7 +42,7 @@ const completionPluginKey = new PluginKey<CompletionPluginState>(
   "copilot-suggestions",
 );
 
-const triggerHandles = new WeakMap<EditorView, () => boolean>();
+const triggerHandles = new WeakMap<EditorView, () => void>();
 
 export function setCompletionMeta(tr: Transaction, meta: CompletionMeta) {
   tr.setMeta(completionPluginKey, meta);
@@ -56,7 +56,8 @@ export function getCompletionState(state: EditorState) {
 export function triggerCompletion(view: EditorView): boolean {
   const trigger = triggerHandles.get(view);
   if (!trigger) return false;
-  return trigger();
+  trigger();
+  return true;
 }
 
 interface CopilotSuggestionsMark extends WriterMarkExtension {
@@ -208,12 +209,11 @@ function createCompletionPlugin(
     },
 
     view(editorView) {
+      // `completion: false` turns off the suggestions that interrupt typing,
+      // not the shortcut, which stays available on demand.
       triggerHandles.set(editorView, () => {
-        if (!completionConfig) return false;
-
         clearTimeout(debounceTimer);
         generateCompletion(editorView, { includeSuffix: true });
-        return true;
       });
 
       if (completionConfig === undefined) {

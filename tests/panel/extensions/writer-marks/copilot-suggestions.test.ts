@@ -190,14 +190,21 @@ describe("inline completion", () => {
     expect(editor.isCompletionPending()).toBe(false);
   });
 
-  it("leaves Mod-, unhandled when completion is false", async () => {
+  it("starts no request when typing pauses and completion is false", async () => {
+    const editor = await createEditor(false);
+
+    editor.type("Hello");
+    await vi.advanceTimersByTimeAsync(DEBOUNCE_MS);
+
+    expect(editor.isCompletionPending()).toBe(false);
+  });
+
+  it("answers Mod-, when completion is false", async () => {
     const editor = await createEditor(false);
     editor.type("Hello");
 
-    const isHandled = editor.triggerManually();
-
-    expect(isHandled).toBe(false);
-    expect(editor.isCompletionPending()).toBe(false);
+    expect(editor.triggerManually()).toBe(true);
+    expect(editor.isCompletionPending()).toBe(true);
   });
 
   it("starts no request at the next pause in typing after a failure", async () => {
