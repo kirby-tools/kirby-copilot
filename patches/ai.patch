@@ -1,0 +1,13 @@
+diff --git a/dist/index.js b/dist/index.js
+index 7b5d4114140c6bf517c62484ff79cfc1b9435c84..167fe10a90b20c63fa04b96b75ebe169d9644698 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -4220,6 +4220,8 @@ function openTelemetryChannelSpanContext({
+ }) {
+   var _a23;
+   if (!isNodeRuntime()) {
++    Promise.resolve(completion).catch(() => {
++    });
+     return void 0;
+   }
+   const diagnosticsChannel = loadBuiltinModule(

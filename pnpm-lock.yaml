@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  ai: 67058ed94882dde983bd51052f488dcb77bcf472d9cfd3f4cb63726e777de3e5
+
 importers:
 
   .:
@@ -40,7 +43,7 @@ importers:
         version: 66.8.1(eslint@10.8.1(jiti@2.7.0))(typescript@6.0.3)
       ai:
         specifier: ^7.0.73
-        version: 7.0.73(zod@4.4.3)
+        version: 7.0.73(patch_hash=67058ed94882dde983bd51052f488dcb77bcf472d9cfd3f4cb63726e777de3e5)(zod@4.4.3)
       bumpp:
         specifier: ^12.2.1
         version: 12.2.1
@@ -4701,7 +4704,7 @@ snapshots:
 
   acorn@8.18.0: {}
 
-  ai@7.0.73(zod@4.4.3):
+  ai@7.0.73(patch_hash=67058ed94882dde983bd51052f488dcb77bcf472d9cfd3f4cb63726e777de3e5)(zod@4.4.3):
     dependencies:
       '@ai-sdk/gateway': 4.0.59(zod@4.4.3)
       '@ai-sdk/provider': 4.0.7

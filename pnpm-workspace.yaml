@@ -8,3 +8,6 @@ trustPolicyExclude:
 allowBuilds:
   "@parcel/watcher": true
   esbuild: true
+
+patchedDependencies:
+  ai: patches/ai.patch
