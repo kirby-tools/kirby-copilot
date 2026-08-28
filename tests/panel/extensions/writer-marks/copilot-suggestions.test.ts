@@ -47,7 +47,6 @@ async function* neverEndingStream(): AsyncGenerator<string> {
   await new Promise(() => {});
 }
 
-/** Creates a stream that ends without text once the test releases it. */
 function createReleasableStream() {
   let release!: () => void;
   const released = new Promise<void>((resolve) => {
@@ -85,17 +84,20 @@ async function createEditor(completion: PluginConfig["completion"]) {
     plugins: [plugin],
   });
   let pluginView: ReturnType<NonNullable<typeof spec.view>>;
+  let isComposing = false;
 
   const view = {
     get state() {
       return state;
+    },
+    get composing() {
+      return isComposing;
     },
     dispatch(tr: Transaction) {
       const previousState = state;
       state = state.apply(tr);
       pluginView?.update?.(view, previousState);
     },
-    composing: false,
   } as unknown as EditorView;
 
   pluginView = spec.view!(view);
@@ -103,21 +105,28 @@ async function createEditor(completion: PluginConfig["completion"]) {
   // The plugin reads its config asynchronously when the view opens.
   await vi.advanceTimersByTimeAsync(0);
 
+  function type(text: string) {
+    const { from, to } = view.state.selection;
+    const insertText = () => view.state.tr.insertText(text, from, to);
+
+    const isHandled = spec.props!.handleTextInput!.call(
+      plugin,
+      view,
+      from,
+      to,
+      text,
+      insertText,
+    );
+
+    if (!isHandled) view.dispatch(insertText());
+  }
+
   return {
-    type(text: string) {
-      const { from, to } = view.state.selection;
-      const insertText = () => view.state.tr.insertText(text, from, to);
-
-      const isHandled = spec.props!.handleTextInput!.call(
-        plugin,
-        view,
-        from,
-        to,
-        text,
-        insertText,
-      );
-
-      if (!isHandled) view.dispatch(insertText());
+    type,
+    typeWhileComposing(text: string) {
+      isComposing = true;
+      type(text);
+      isComposing = false;
     },
     insertProgrammatically(text: string) {
       view.dispatch(view.state.tr.insertText(text));
@@ -133,7 +142,6 @@ async function createEditor(completion: PluginConfig["completion"]) {
   };
 }
 
-/** Starts an editor whose first request has already failed. */
 async function createEditorAfterFailedRequest() {
   const editor = await createEditor({ debounce: DEBOUNCE_MS });
   mockStreamText.mockImplementationOnce(() => {
@@ -173,6 +181,15 @@ describe("inline completion", () => {
     expect(editor.isCompletionPending()).toBe(false);
   });
 
+  it("starts no request during an IME composition", async () => {
+    const editor = await createEditor({ debounce: DEBOUNCE_MS });
+
+    editor.typeWhileComposing("にほんご");
+    await vi.advanceTimersByTimeAsync(DEBOUNCE_MS);
+
+    expect(editor.isCompletionPending()).toBe(false);
+  });
+
   it("leaves Mod-, unhandled when completion is false", async () => {
     const editor = await createEditor(false);
     editor.type("Hello");
@@ -183,7 +200,7 @@ describe("inline completion", () => {
     expect(editor.isCompletionPending()).toBe(false);
   });
 
-  it("skips the next pause in typing after a failed request", async () => {
+  it("starts no request at the next pause in typing after a failure", async () => {
     const editor = await createEditorAfterFailedRequest();
 
     editor.type(" world");
@@ -192,7 +209,7 @@ describe("inline completion", () => {
     expect(editor.isCompletionPending()).toBe(false);
   });
 
-  it("asks again once COMPLETION_ERROR_COOLDOWN_MS has passed", async () => {
+  it("starts a request again once COMPLETION_ERROR_COOLDOWN_MS has passed", async () => {
     const editor = await createEditorAfterFailedRequest();
     await vi.advanceTimersByTimeAsync(COMPLETION_ERROR_COOLDOWN_MS);
 
@@ -202,14 +219,14 @@ describe("inline completion", () => {
     expect(editor.isCompletionPending()).toBe(true);
   });
 
-  it("answers Mod-, after a failed request", async () => {
+  it("answers Mod-, during the cooldown after a failure", async () => {
     const editor = await createEditorAfterFailedRequest();
 
     expect(editor.triggerManually()).toBe(true);
     expect(editor.isCompletionPending()).toBe(true);
   });
 
-  it("still aborts on dismiss after a superseded request finished", async () => {
+  it("keeps the newer request cancelable after the superseded one finished", async () => {
     const editor = await createEditor({ debounce: DEBOUNCE_MS });
     const supersededStream = createReleasableStream();
     mockStreamText.mockImplementationOnce(() => ({
