@@ -199,7 +199,7 @@ describe("inline completion", () => {
     expect(editor.isCompletionPending()).toBe(false);
   });
 
-  it("answers Mod-, when completion is false", async () => {
+  it("starts a request on Mod-, when completion is false", async () => {
     const editor = await createEditor(false);
     editor.type("Hello");
 
@@ -226,7 +226,7 @@ describe("inline completion", () => {
     expect(editor.isCompletionPending()).toBe(true);
   });
 
-  it("answers Mod-, during the cooldown after a failure", async () => {
+  it("starts a request on Mod-, during the cooldown after a failure", async () => {
     const editor = await createEditorAfterFailedRequest();
 
     expect(editor.triggerManually()).toBe(true);
