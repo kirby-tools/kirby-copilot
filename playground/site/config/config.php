@@ -47,8 +47,8 @@ return [
                     TXT
             ],
             [
-                'id' => 'brevity',
-                'label' => 'Be Brief',
+                'id' => 'concise',
+                'label' => 'Concise',
                 'instructions' => <<<TXT
                     Be ruthless about length. Prefer one short sentence over
                     two long ones. Cut every adverb and hedge ("really", "very",
@@ -57,14 +57,14 @@ return [
                     TXT
             ],
             [
-                'id' => 'de-en-bilingual',
+                'id' => 'formal-address',
                 'label' => [
-                    'en' => 'Bilingual Output',
-                    'de' => 'Zweisprachige Ausgabe'
+                    'en' => 'Formal Address',
+                    'de' => 'Förmliche Anrede'
                 ],
                 'instructions' => [
-                    'en' => 'Return the result twice: first in German, then in English, separated by a horizontal rule. Match the tone across both languages.',
-                    'de' => 'Gib das Ergebnis zweimal aus: zuerst auf Deutsch, dann auf Englisch, getrennt durch eine horizontale Linie. Halte den Ton in beiden Sprachen gleich.'
+                    'en' => 'Address the reader formally. In German use "Sie" and "Ihr", never "du". Formal is not bureaucratic: keep the sentences short and the verbs active.',
+                    'de' => 'Sprich den Leser förmlich an. Verwende "Sie" und "Ihr", niemals "du". Förmlich heißt nicht behördlich: Halte die Sätze kurz und die Verben aktiv.'
                 ]
             ]
         ]
