@@ -454,7 +454,7 @@ function getFieldPreview(fieldName: string) {
                 :key="template.id"
                 @click="loadTemplate(template)"
               >
-                <span class="kai-truncate">{{ template.label }}</span>
+                {{ template.label }}
               </k-dropdown-item>
 
               <!-- Empty state -->
@@ -480,7 +480,7 @@ function getFieldPreview(fieldName: string) {
                   :key="index"
                   @click="loadPromptFromHistory(promptText)"
                 >
-                  <span class="kai-truncate">{{ promptText }}</span>
+                  {{ promptText }}
                 </k-dropdown-item>
               </div>
             </ContentDropdown>
