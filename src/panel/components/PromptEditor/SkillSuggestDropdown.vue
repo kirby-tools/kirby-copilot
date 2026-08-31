@@ -43,17 +43,11 @@ const panel = usePanel();
 </script>
 
 <template>
-  <!-- TODO: Add `k-dropdown` and swap `--font-size-tiny` for `--text-xs` when
-       migrating to Kirby 6. Kirby 6 moved the dropdown surface off
-       `k-dropdown-content`, which it keeps only as a component alias, onto
-       `k-dropdown`, and dropped the `--font-size-tiny` alias. Both survive
-       Kirby 5: it declares no `.k-dropdown` rule, and `--font-size-tiny`
-       already resolves to `var(--text-xs)` there. -->
   <ul
     :id="listboxId"
     role="listbox"
     :aria-label="panel.t('johannschopplich.copilot.skill.suggestions')"
-    class="k-dropdown-content kai-fixed kai-z-[var(--z-dropdown)] kai-max-h-[16rem] kai-max-w-[24rem] kai-min-w-[14rem] kai-overflow-y-auto"
+    class="k-dropdown k-dropdown-content kai-fixed kai-z-[var(--z-dropdown)] kai-max-h-[16rem] kai-max-w-[24rem] kai-min-w-[14rem] kai-overflow-y-auto"
     :class="[
       bottom !== null
         ? 'kai-mb-[var(--spacing-1)]'
@@ -85,7 +79,7 @@ const panel = usePanel();
         <span class="kai-w-full kai-inline-flex kai-items-center kai-gap-3">
           <span class="kai-truncate kai-leading-[1.5]">{{ skill.label }}</span>
           <span
-            class="kai-[font-size:var(--font-size-tiny)] kai-truncate kai-text-[var(--color-text-dimmed)] kai-leading-[1.5]"
+            class="kai-[font-size:var(--text-xs)] kai-truncate kai-text-[var(--color-text-dimmed)] kai-leading-[1.5]"
             v-text="skill.id"
           />
         </span>

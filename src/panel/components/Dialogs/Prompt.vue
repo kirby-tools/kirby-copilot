@@ -308,7 +308,7 @@ function getFieldPreview(fieldName: string) {
       <!-- Placeholder preview panel -->
       <details
         v-if="hasPlaceholders"
-        class="kai-group kai-mx-2 kai-mb-2 kai-rounded-[var(--rounded)] kai-bg-[var(--color-background)]"
+        class="kai-group kai-mx-2 kai-mb-2 kai-rounded-[var(--rounded)] kai-bg-[var(--panel-color-back)]"
       >
         <summary
           class="kai-flex kai-cursor-pointer kai-list-none kai-items-center kai-gap-0.5 kai-rounded-[var(--rounded)] kai-p-1.5 [&::-webkit-details-marker]:kai-hidden focus:kai-outline-[2px] focus:kai-outline-[var(--color-focus)] focus:kai-outline"
@@ -404,7 +404,7 @@ function getFieldPreview(fieldName: string) {
                   <span>{{ field.label || field.name }}</span>
                   <span
                     v-if="getFieldPreview(field.name)"
-                    class="kai-[font-size:var(--font-size-tiny)] kai-truncate kai-text-[var(--color-text-dimmed)] kai-leading-[1.5]"
+                    class="kai-[font-size:var(--text-xs)] kai-truncate kai-text-[var(--color-text-dimmed)] kai-leading-[1.5]"
                     v-text="getFieldPreview(field.name)"
                   />
                 </span>
