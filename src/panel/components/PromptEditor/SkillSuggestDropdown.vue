@@ -43,6 +43,12 @@ const panel = usePanel();
 </script>
 
 <template>
+  <!-- TODO: Add `k-dropdown` and swap `--font-size-tiny` for `--text-xs` when
+       migrating to Kirby 6. Kirby 6 moved the dropdown surface off
+       `k-dropdown-content`, which it keeps only as a component alias, onto
+       `k-dropdown`, and dropped the `--font-size-tiny` alias. Both survive
+       Kirby 5: it declares no `.k-dropdown` rule, and `--font-size-tiny`
+       already resolves to `var(--text-xs)` there. -->
   <ul
     :id="listboxId"
     role="listbox"
