@@ -449,11 +449,10 @@ function onModelSave() {
           }}
         </summary>
 
-        <div class="kai-mt-3">
-          <div
-            v-if="permissions.includes('edit')"
-            class="kai-mb-2 kai-text-right"
-          >
+        <div
+          class="kai-mt-[var(--spacing-3)] [&>*+*]:kai-mt-[var(--spacing-2)]"
+        >
+          <div v-if="permissions.includes('edit')" class="kai-text-right">
             <k-input
               :key="isDetailsOpen ? 1 : 0"
               :value="currentPrompt"
