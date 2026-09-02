@@ -11,14 +11,13 @@ Kirby Copilot is a plugin for [Kirby CMS](https://getkirby.com) that integrates 
 
 Whether you are building sites for clients or managing content yourself, Kirby Copilot brings AI-assisted creation and editing to the Panel.
 
+- 🧭 **View Button**: Fill several fields from one prompt, with files and other pages as context.
+- 🧱 **Blocks & Layouts**: Whole layouts from your own block blueprints, custom blocks included.
+- ⚡ **Inline Suggestions**: Ghost text after a pause – Tab keeps it.
+- 📇 **Toolbar Buttons**: Rewrite or extend the selection in writer and textarea fields.
+- 📚 **Skills**: Reusable instructions, pulled into any prompt with `@skill://`.
+- 🌞 **Prompt Templates**: Save and reuse frequently used prompts.
 - 🦙 **Multi-Provider**: OpenAI, Anthropic, Google, or Mistral – switch anytime.
-- 🧱 **Structure-Aware Generation**: Entire layouts from a single prompt, using your project's blocks.
-- ⚡ **Inline Suggestions**: Ghost text after a brief pause – Tab to accept.
-- 📇 **In-Context Editing**: Refine writer/textarea text, with selection awareness.
-- 🌞 **Prompt Templates**: Save and reuse frequently-used prompts.
-- 📚 **Skills**: Package reusable instructions and pull them into any prompt with `@skill://`.
-- 🎀 **Rich Context**: Other fields, images, and PDFs feed the AI.
-- 🔒 **Secure by Default**: API keys stay server-side, never exposed to Panel users.
 - 🛠 **PHP API**: Drive AI from CLI, hooks, and custom workflows – see [PHP classes](https://kirby.tools/docs/copilot/php-classes).
 
 ## Licensing
@@ -33,7 +32,7 @@ Here are some quick links:
 
 - [Installation](https://kirby.tools/docs/copilot/getting-started/installation)
 - [Panel View Button](https://kirby.tools/docs/copilot/usage/view-button)
-- [Blocks & Layouts Generation](https://kirby.tools/docs/copilot/usage/blocks-and-layouts)
+- [Blocks & Layouts Generation](https://kirby.tools/docs/copilot/advanced/blocks-and-layouts)
 - [Global Configuration](https://kirby.tools/docs/copilot/configuration/global)
 
 ## Support and Questions
