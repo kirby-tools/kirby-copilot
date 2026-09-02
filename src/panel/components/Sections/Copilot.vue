@@ -401,7 +401,7 @@ function onModelSave() {
         <code>userPrompt</code> has to be set in the section configuration.
       </k-text>
     </k-box>
-    <div v-else class="kai-space-y-4">
+    <div v-else class="[&>*+*]:kai-mt-[var(--spacing-4)]">
       <k-button-group layout="collapsed">
         <k-button
           :icon="isGenerating ? 'loader' : icon"
