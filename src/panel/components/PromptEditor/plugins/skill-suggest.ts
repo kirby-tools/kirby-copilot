@@ -11,9 +11,9 @@ export type DropdownPosition =
   | { top: null; bottom: number; left: number };
 
 export type SkillSuggestState =
-  | { open: false }
+  | { isOpen: false }
   | ({
-      open: true;
+      isOpen: true;
       query: string;
       from: number;
       selectedIndex: number;
@@ -28,7 +28,7 @@ export interface SkillSuggestHandlers {
 }
 
 interface SkillSuggestPluginState {
-  open: boolean;
+  isOpen: boolean;
   query: string;
   from: number;
   to: number;
@@ -41,7 +41,7 @@ type SkillSuggestMeta =
   | { type: "setSelectedIndex"; index: number };
 
 const EMPTY_PLUGIN_STATE: SkillSuggestPluginState = {
-  open: false,
+  isOpen: false,
   query: "",
   from: 0,
   to: 0,
@@ -66,7 +66,7 @@ function setSkillSuggestMeta(tr: Transaction, meta: SkillSuggestMeta) {
  */
 export function commitSkillSuggestion(view: EditorView, id: string) {
   const state = skillSuggestPluginKey.getState(view.state);
-  if (!state?.open) return;
+  if (!state?.isOpen) return;
 
   const tr = view.state.tr.insertText(`@skill://${id} `, state.from, state.to);
   setSkillSuggestMeta(tr, { type: "dismiss" });
@@ -76,7 +76,7 @@ export function commitSkillSuggestion(view: EditorView, id: string) {
 
 export function dismissSkillSuggestion(view: EditorView) {
   const state = skillSuggestPluginKey.getState(view.state);
-  if (!state?.open) return;
+  if (!state?.isOpen) return;
 
   view.dispatch(setSkillSuggestMeta(view.state.tr, { type: "dismiss" }));
 }
@@ -92,9 +92,9 @@ export function setSkillSuggestSelectedIndex(view: EditorView, index: number) {
 
 function detectSkillSuggestion(
   state: EditorState,
-): Pick<SkillSuggestPluginState, "open" | "query" | "from" | "to"> {
+): Pick<SkillSuggestPluginState, "isOpen" | "query" | "from" | "to"> {
   const { selection, doc } = state;
-  if (!selection.empty) return { open: false, query: "", from: 0, to: 0 };
+  if (!selection.empty) return { isOpen: false, query: "", from: 0, to: 0 };
 
   const cursor = selection.head;
   const $pos = doc.resolve(cursor);
@@ -102,10 +102,10 @@ function detectSkillSuggestion(
   const textBefore = doc.textBetween(blockStart, cursor, "\n");
 
   const match = textBefore.match(createSkillTriggerRegex());
-  if (!match) return { open: false, query: "", from: 0, to: 0 };
+  if (!match) return { isOpen: false, query: "", from: 0, to: 0 };
 
   return {
-    open: true,
+    isOpen: true,
     query: match[1] ?? "",
     from: cursor - match[0].length,
     to: cursor,
@@ -153,13 +153,14 @@ export function createSkillSuggestPlugin(options: SkillSuggestHandlers) {
 
         // Suppress when there's no trigger, or a pure cursor movement landed
         // on an existing trigger (so cursor-into-existing-token doesn't pop).
-        const shouldSuppress = !trigger.open || (!value.open && !tr.docChanged);
+        const shouldSuppress =
+          !trigger.isOpen || (!value.isOpen && !tr.docChanged);
 
         if (shouldSuppress) {
           return EMPTY_PLUGIN_STATE;
         }
 
-        const resetIndex = !value.open || trigger.query !== value.query;
+        const resetIndex = !value.isOpen || trigger.query !== value.query;
 
         return {
           ...trigger,
@@ -173,7 +174,7 @@ export function createSkillSuggestPlugin(options: SkillSuggestHandlers) {
         if (event.isComposing) return false;
 
         const state = skillSuggestPluginKey.getState(view.state);
-        if (!state?.open) return false;
+        if (!state?.isOpen) return false;
 
         if (event.key === "Escape") {
           dismissSkillSuggestion(view);
@@ -211,7 +212,8 @@ export function createSkillSuggestPlugin(options: SkillSuggestHandlers) {
 
         const pluginState = skillSuggestPluginKey.getState(state);
         const isOpen =
-          !!pluginState?.open && options.getOptionCount(pluginState.query) > 0;
+          !!pluginState?.isOpen &&
+          options.getOptionCount(pluginState.query) > 0;
         const attrs: Record<string, string> = {
           "aria-autocomplete": "list",
           "aria-expanded": isOpen ? "true" : "false",
@@ -238,7 +240,7 @@ export function createSkillSuggestPlugin(options: SkillSuggestHandlers) {
           const prevPluginState = skillSuggestPluginKey.getState(prevState);
           if (
             prevPluginState &&
-            prevPluginState.open === state.open &&
+            prevPluginState.isOpen === state.isOpen &&
             prevPluginState.from === state.from &&
             prevPluginState.query === state.query &&
             prevPluginState.selectedIndex === state.selectedIndex
@@ -246,13 +248,13 @@ export function createSkillSuggestPlugin(options: SkillSuggestHandlers) {
             return;
           }
 
-          if (!state.open) {
-            options.onStateChange({ open: false });
+          if (!state.isOpen) {
+            options.onStateChange({ isOpen: false });
             return;
           }
 
           options.onStateChange({
-            open: true,
+            isOpen: true,
             query: state.query,
             from: state.from,
             selectedIndex: state.selectedIndex,

@@ -48,11 +48,11 @@ const placeholder = createPlaceholderPlugin(props.placeholder);
 const listboxId = `k-copilot-skill-suggest-${generateRandomId(8)}`;
 
 const { skills, hasSkill } = useSkills();
-const suggestState = ref<SkillSuggestState>({ open: false });
+const suggestState = ref<SkillSuggestState>({ isOpen: false });
 const isFocused = ref(false);
 
 const filteredSkills = computed(() =>
-  suggestState.value.open
+  suggestState.value.isOpen
     ? filterSkills(skills.value, suggestState.value.query)
     : [],
 );
@@ -144,7 +144,7 @@ watch(
 watch(skills, () => view?.dispatch(view.state.tr));
 
 function onViewportChange() {
-  if (!view || !suggestState.value.open) return;
+  if (!view || !suggestState.value.isOpen) return;
   suggestState.value = {
     ...suggestState.value,
     ...computeDropdownPosition(view, suggestState.value.from),
@@ -214,7 +214,7 @@ defineExpose({
   <div class="k-copilot-prompt-editor-root">
     <div ref="editor" class="k-copilot-prompt-editor" />
     <SkillSuggestDropdown
-      v-if="suggestState.open && isFocused && filteredSkills.length > 0"
+      v-if="suggestState.isOpen && isFocused && filteredSkills.length > 0"
       :skills="filteredSkills"
       :selected-index="suggestState.selectedIndex"
       :top="suggestState.top"

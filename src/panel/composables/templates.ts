@@ -134,7 +134,7 @@ export function usePromptTemplates() {
       ...template,
       id: `config-${index}`,
       createdAt: 0,
-      readOnly: true,
+      isReadOnly: true,
     }));
 
     if (newTemplates.length > 0 && !hasStoredTemplates) {

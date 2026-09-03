@@ -309,7 +309,7 @@ describe("usePromptTemplates", () => {
   });
 
   describe("setConfigTemplates", () => {
-    it("marks config templates readOnly and assigns config-* ids", async () => {
+    it("marks config templates read-only and assigns config-* ids", async () => {
       const { setConfigTemplates, allTemplates } = await loadComposable();
 
       setConfigTemplates([
@@ -317,7 +317,7 @@ describe("usePromptTemplates", () => {
         { label: "Another", prompt: "q" },
       ]);
 
-      const configOnly = allTemplates.value.filter((t) => t.readOnly);
+      const configOnly = allTemplates.value.filter((t) => t.isReadOnly);
       expect(configOnly.map((t) => t.id)).toEqual(["config-0", "config-1"]);
     });
 

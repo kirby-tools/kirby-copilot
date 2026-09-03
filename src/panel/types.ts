@@ -38,7 +38,7 @@ export interface PromptTemplate {
   prompt: string;
   createdAt: number;
   /** Config-defined templates are read-only for editors. */
-  readOnly?: boolean;
+  isReadOnly?: boolean;
 }
 
 export type PromptTemplateInput = Pick<PromptTemplate, "label" | "prompt">;
