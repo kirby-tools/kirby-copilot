@@ -1,6 +1,6 @@
 {
   "name": "johannschopplich/kirby-copilot",
-  "description": "AI-powered content generation for Kirby CMS",
+  "description": "AI content generation in the Kirby Panel",
   "type": "kirby-plugin",
   "version": "3.11.0",
   "keywords": [
