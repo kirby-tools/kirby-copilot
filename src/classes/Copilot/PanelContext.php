@@ -67,14 +67,15 @@ final class PanelContext
 
         self::validateEnum($config, 'provider', array_column(ProviderName::cases(), 'value'), ProviderName::Google->value);
 
-        // The Panel only ever needs to know a key is present, never the key itself.
+        // The Panel only ever needs to know a key is present, never the key
+        // itself, and `timeout` bounds the PHP provider classes alone.
         $config['providers'] = array_map(
             function (array $provider) use ($kirby) {
                 $apiKey = ProviderName::resolveApiKey($provider['apiKey'] ?? null, $kirby);
 
                 return [
                     'hasApiKey' => ProviderName::isUsableApiKey($apiKey)
-                ] + array_diff_key($provider, ['apiKey' => true]);
+                ] + array_diff_key($provider, ['apiKey' => true, 'timeout' => true]);
             },
             $config['providers']
         );

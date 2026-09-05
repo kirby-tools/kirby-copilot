@@ -2,10 +2,12 @@
 
 declare(strict_types = 1);
 
+use JohannSchopplich\Copilot\AI\ProviderConfig;
 use JohannSchopplich\Copilot\AI\ProviderName;
 use JohannSchopplich\Copilot\AI\Resolver;
 use Kirby\Cms\App;
 use Kirby\Exception\InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
@@ -63,6 +65,43 @@ final class ResolverTest extends TestCase
         $this->assertNull($config->model);
         $this->assertNull($config->baseUrl);
         $this->assertSame([], $config->options);
+        $this->assertSame(ProviderConfig::DEFAULT_TIMEOUT, $config->timeout);
+    }
+
+    #[Test]
+    public function accepts_a_numeric_string_as_the_request_timeout(): void
+    {
+        $resolver = new Resolver(
+            defaultProvider: ProviderName::OpenAI,
+            providers: ['openai' => ['timeout' => '30']],
+        );
+
+        $config = $resolver->forProvider(ProviderName::OpenAI);
+
+        $this->assertSame(30, $config->timeout);
+    }
+
+    public static function unusableTimeouts(): array
+    {
+        return [
+            'not a number' => ['thirty'],
+            'zero' => [0],
+            'negative' => [-5],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('unusableTimeouts')]
+    public function falls_back_to_the_default_timeout_when_the_option_is_not_a_positive_number(mixed $timeout): void
+    {
+        $resolver = new Resolver(
+            defaultProvider: ProviderName::OpenAI,
+            providers: ['openai' => ['timeout' => $timeout]],
+        );
+
+        $config = $resolver->forProvider(ProviderName::OpenAI);
+
+        $this->assertSame(ProviderConfig::DEFAULT_TIMEOUT, $config->timeout);
     }
 
     #[Test]
@@ -124,9 +163,10 @@ final class ResolverTest extends TestCase
                 'apiKey' => 'sk-test',
                 'model' => 'gpt-5.4',
                 'baseUrl' => 'https://api.openai.com/v1',
-                // Panel-owned keys, never a vendor request parameter.
+                // Keys the plugin reads itself, never a vendor request parameter.
                 'completionModel' => 'gpt-5.4-nano',
                 'api' => 'responses',
+                'timeout' => 30,
                 'reasoning_effort' => 'low',
             ]],
         );

@@ -8,6 +8,7 @@ use Anthropic\Client as AnthropicClient;
 use Anthropic\Core\Exceptions\APIException;
 use Anthropic\Messages\TextBlock;
 use Anthropic\Messages\ToolUseBlock;
+use Anthropic\RequestOptions;
 use JohannSchopplich\Copilot\AI\Exception\ProviderException;
 use JohannSchopplich\Copilot\AI\ProviderConfig;
 use JohannSchopplich\Copilot\AI\ProviderName;
@@ -145,6 +146,7 @@ final class AnthropicProvider implements Provider
         return $this->client ?? new AnthropicClient(
             apiKey: $this->apiKey(),
             baseUrl: $this->baseUrl(),
+            requestOptions: RequestOptions::with(transporter: $this->config->httpClient()),
         );
     }
 

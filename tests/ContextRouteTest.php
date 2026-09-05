@@ -493,6 +493,18 @@ final class ContextRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
+    public function omits_the_provider_timeout(): void
+    {
+        $response = $this->callContextRoute([
+            'johannschopplich.copilot' => [
+                'providers' => ['openai' => ['apiKey' => 'test-key', 'timeout' => 30]],
+            ],
+        ]);
+
+        $this->assertArrayNotHasKey('timeout', $response['config']['providers']['openai']);
+    }
+
+    #[Test]
     public function forwards_the_options_no_normalization_step_names(): void
     {
         $response = $this->callContextRoute([

@@ -61,6 +61,16 @@ final class OpenAIProviderTest extends TestCase
         ]);
     }
 
+    /**
+     * @param list<int> $sleeps
+     */
+    private function recordingSleep(array &$sleeps): Closure
+    {
+        return static function (int $seconds) use (&$sleeps): void {
+            $sleeps[] = $seconds;
+        };
+    }
+
     private function errorException(int $statusCode, string $retryAfter = ''): ErrorException
     {
         $response = $this->createStub(ResponseInterface::class);
@@ -310,9 +320,6 @@ final class OpenAIProviderTest extends TestCase
     public function retries_with_increasing_delay(): void
     {
         $sleeps = [];
-        $sleep = static function (int $seconds) use (&$sleeps): void {
-            $sleeps[] = $seconds;
-        };
 
         [, $provider] = $this->fixture(
             responses: [
@@ -321,7 +328,7 @@ final class OpenAIProviderTest extends TestCase
                 $this->errorException(429),
                 $this->successResponse('{"ok": true}'),
             ],
-            sleep: $sleep,
+            sleep: $this->recordingSleep($sleeps),
         );
 
         $provider->generateObject(
@@ -329,26 +336,20 @@ final class OpenAIProviderTest extends TestCase
             schema: ['type' => 'object'],
         );
 
-        $this->assertCount(3, $sleeps);
-        $this->assertGreaterThan(0, $sleeps[0]);
-        $this->assertGreaterThanOrEqual($sleeps[0], $sleeps[1]);
-        $this->assertGreaterThanOrEqual($sleeps[1], $sleeps[2]);
+        $this->assertSame([1, 2, 4], $sleeps);
     }
 
     #[Test]
     public function respects_retry_after_header_for_delay(): void
     {
         $sleeps = [];
-        $sleep = static function (int $seconds) use (&$sleeps): void {
-            $sleeps[] = $seconds;
-        };
 
         [, $provider] = $this->fixture(
             responses: [
                 $this->errorException(429, retryAfter: '7'),
                 $this->successResponse('{"ok": true}'),
             ],
-            sleep: $sleep,
+            sleep: $this->recordingSleep($sleeps),
         );
 
         $provider->generateObject(
@@ -357,6 +358,98 @@ final class OpenAIProviderTest extends TestCase
         );
 
         $this->assertSame([7], $sleeps);
+    }
+
+    #[Test]
+    public function caps_the_retry_after_delay_at_60_seconds(): void
+    {
+        $sleeps = [];
+
+        [, $provider] = $this->fixture(
+            responses: [
+                $this->errorException(429, retryAfter: '3600'),
+                $this->successResponse('{"ok": true}'),
+            ],
+            sleep: $this->recordingSleep($sleeps),
+        );
+
+        $provider->generateObject(
+            messages: [['role' => 'user', 'content' => 'hi']],
+            schema: ['type' => 'object'],
+        );
+
+        $this->assertSame([60], $sleeps);
+    }
+
+    #[Test]
+    public function sleeps_until_the_retry_after_http_date(): void
+    {
+        $sleeps = [];
+
+        [, $provider] = $this->fixture(
+            responses: [
+                $this->errorException(429, retryAfter: gmdate('D, d M Y H:i:s', time() + 30) . ' GMT'),
+                $this->successResponse('{"ok": true}'),
+            ],
+            sleep: $this->recordingSleep($sleeps),
+        );
+
+        $provider->generateObject(
+            messages: [['role' => 'user', 'content' => 'hi']],
+            schema: ['type' => 'object'],
+        );
+
+        // A wide window on purpose: any fall-through to the exponential branch
+        // would be 1 second, so this still tells the two apart.
+        $this->assertCount(1, $sleeps);
+        $this->assertGreaterThanOrEqual(25, $sleeps[0]);
+        $this->assertLessThanOrEqual(30, $sleeps[0]);
+    }
+
+    #[Test]
+    public function waits_a_second_when_the_retry_after_date_has_passed(): void
+    {
+        $sleeps = [];
+
+        [, $provider] = $this->fixture(
+            responses: [
+                $this->errorException(429),
+                $this->errorException(429, retryAfter: gmdate('D, d M Y H:i:s', time() - 30) . ' GMT'),
+                $this->successResponse('{"ok": true}'),
+            ],
+            sleep: $this->recordingSleep($sleeps),
+        );
+
+        $provider->generateObject(
+            messages: [['role' => 'user', 'content' => 'hi']],
+            schema: ['type' => 'object'],
+        );
+
+        // The expired date lands on the second attempt, where the exponential
+        // branch would say 2 – so the 1 can only come from the floor.
+        $this->assertSame([1, 1], $sleeps);
+    }
+
+    #[Test]
+    public function falls_back_to_exponential_delay_when_retry_after_is_unparsable(): void
+    {
+        $sleeps = [];
+
+        [, $provider] = $this->fixture(
+            responses: [
+                $this->errorException(429, retryAfter: 'soon'),
+                $this->errorException(429, retryAfter: 'soon'),
+                $this->successResponse('{"ok": true}'),
+            ],
+            sleep: $this->recordingSleep($sleeps),
+        );
+
+        $provider->generateObject(
+            messages: [['role' => 'user', 'content' => 'hi']],
+            schema: ['type' => 'object'],
+        );
+
+        $this->assertSame([1, 2], $sleeps);
     }
 
     #[Test]

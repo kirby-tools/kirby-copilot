@@ -62,20 +62,26 @@ final readonly class Resolver
             $apiKey = $apiKey(App::instance());
         }
 
+        $timeout = (int)($config['timeout'] ?? 0);
+
         return new ProviderConfig(
             apiKey: ProviderName::isUsableApiKey($apiKey) ? $apiKey : null,
             model: isset($config['model']) ? (string)$config['model'] : null,
             baseUrl: isset($config['baseUrl']) ? (string)$config['baseUrl'] : null,
-            // `completionModel` and `api` steer the Panel's AI SDK client and
-            // have no server-side reader, so they are dropped rather than
-            // forwarded to the vendor as request parameters.
+            // `completionModel` and `api` steer the Panel's AI SDK client,
+            // `timeout` steers the HTTP client here. None of them is a vendor
+            // request parameter, so all three are dropped rather than forwarded.
             options: array_diff_key($config, [
                 'apiKey' => true,
                 'model' => true,
                 'baseUrl' => true,
                 'completionModel' => true,
                 'api' => true,
+                'timeout' => true,
             ]),
+            // Zero, which a mistyped value casts to, would reach Guzzle as no
+            // timeout at all.
+            timeout: $timeout > 0 ? $timeout : ProviderConfig::DEFAULT_TIMEOUT,
         );
     }
 }

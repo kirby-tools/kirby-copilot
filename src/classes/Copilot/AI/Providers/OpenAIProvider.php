@@ -32,6 +32,7 @@ class OpenAIProvider implements Provider
 {
     public const DEFAULT_BASE_URL = 'https://api.openai.com/v1';
     private const MAX_RETRIES = 3;
+    private const MAX_RETRY_DELAY = 60;
 
     public function __construct(
         protected readonly ProviderConfig $config,
@@ -132,6 +133,7 @@ class OpenAIProvider implements Provider
         return $this->client ?? OpenAI::factory()
             ->withApiKey($this->apiKey())
             ->withBaseUri($this->baseUrl())
+            ->withHttpClient($this->config->httpClient())
             ->make();
     }
 
@@ -208,11 +210,28 @@ class OpenAIProvider implements Provider
 
         $header = $response?->getHeaderLine('Retry-After') ?? '';
 
-        if ($header !== '' && is_numeric($header)) {
-            return max(0, (int)$header);
+        if ($header !== '') {
+            // RFC 9110 allows both a delay in seconds and an HTTP date.
+            $seconds = is_numeric($header)
+                ? (int)$header
+                : $this->secondsUntilHttpDate($header);
+
+            if ($seconds !== null) {
+                // Capped because `sleep()` does not count against
+                // `max_execution_time`, floored because a `0` or an expired
+                // date would otherwise retry straight back into the limit.
+                return max(1, min(self::MAX_RETRY_DELAY, $seconds));
+            }
         }
 
         return 2 ** $attempt;
+    }
+
+    private function secondsUntilHttpDate(string $httpDate): int|null
+    {
+        $timestamp = strtotime($httpDate);
+
+        return $timestamp === false ? null : $timestamp - time();
     }
 
     protected function baseUrl(): string
