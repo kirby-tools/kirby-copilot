@@ -33,6 +33,7 @@ import { createHtmlChunking } from "../utils/html-chunking";
 import { toReducedBlob } from "../utils/image";
 import { parseGatewayPrefix } from "../utils/models";
 import { extractTextFromPdf } from "../utils/pdf";
+import { watchForProxyError } from "../utils/proxy";
 import { normalizePlaceholders } from "../utils/template";
 import { useLogger } from "./logger";
 import { extractPageRefIds } from "./pages";
@@ -490,8 +491,8 @@ async function createProviderClient({
     );
   }
 
-  const proxyFetch: typeof globalThis.fetch = (url, options) =>
-    fetch(
+  const proxyFetch: typeof globalThis.fetch = async (url, options) => {
+    const response = await fetch(
       `${panel.api.endpoint}/${PLUGIN_PROXY_API_ROUTE}?provider=${provider}`,
       {
         ...options,
@@ -502,6 +503,11 @@ async function createProviderClient({
         }),
       },
     );
+
+    return response.body
+      ? new Response(response.body.pipeThrough(watchForProxyError()), response)
+      : response;
+  };
 
   return createProvider({
     baseURL: providerConfig.baseUrl || undefined,

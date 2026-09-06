@@ -16,6 +16,12 @@ use Kirby\Exception\InvalidArgumentException;
  */
 final class Proxy
 {
+    /**
+     * Opens the SSE comment line that carries an upstream failure to the Panel
+     * once the response has started streaming.
+     */
+    public const ERROR_MARKER = '__KIRBY_COPILOT_PROXY_ERROR__';
+
     public function __construct(
         private readonly App $kirby,
         private readonly ProxyTransport $transport,
@@ -26,8 +32,9 @@ final class Proxy
      * Validates and forwards the current request to the upstream provider.
      *
      * Returns a 502 JSON response when the transport fails before any output
-     * reached the client, `null` otherwise (the transport has already
-     * streamed the response).
+     * reached the client, `null` otherwise – either because the response
+     * streamed cleanly or because the failure was appended to it as a marker
+     * line.
      *
      * @throws InvalidArgumentException When the provider, its API key or the requested proxy target is invalid
      */
@@ -138,6 +145,8 @@ final class Proxy
         $contentTypeSet = false;
         $lastStatus = 0;
 
+        $streamStarted = false;
+
         $curlOptions = [
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $body,
@@ -177,7 +186,8 @@ final class Proxy
             },
             // Stream to stdout chunk by chunk instead of buffering the body,
             // so the Panel renders tokens as they arrive.
-            CURLOPT_WRITEFUNCTION => function ($ch, $chunk) {
+            CURLOPT_WRITEFUNCTION => function ($ch, $chunk) use (&$streamStarted) {
+                $streamStarted = true;
                 echo $chunk;
                 flush();
                 return strlen($chunk);
@@ -204,18 +214,28 @@ final class Proxy
         $result = $this->transport->stream($targetUrl, $curlOptions);
 
         if ($result->errorCode !== 0) {
-            // Surface transport failures as 502 JSON so the Panel shows
-            // an error instead of a silent empty stream.
             error_log("Kirby Copilot proxy cURL error ({$result->errorCode}): " . $result->errorMessage);
 
-            if (!headers_sent()) {
-                return Response::json([
-                    'error' => [
-                        'message' => 'Upstream request failed: ' . $result->errorMessage,
-                        'code'    => $result->errorCode,
-                    ],
-                ], 502);
+            $message = 'Upstream request failed: ' . $result->errorMessage;
+
+            // Once a byte has gone out the status line is spent, so the failure
+            // has to travel in the stream itself, as a comment line that every
+            // SSE parser drops before any provider schema sees it. Without it
+            // the truncated stream reads as a finished generation.
+            if ($streamStarted) {
+                echo ': ' . self::ERROR_MARKER . ' ' . preg_replace('/\s+/', ' ', $message) . "\n\n";
+                flush();
+
+                return null;
             }
+
+            // Nothing streamed yet, so the Panel can still be told outright.
+            return Response::json([
+                'error' => [
+                    'message' => $message,
+                    'code'    => $result->errorCode,
+                ],
+            ], 502);
         }
 
         return null;

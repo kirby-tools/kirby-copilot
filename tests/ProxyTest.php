@@ -216,6 +216,27 @@ final class ProxyTest extends TestCase
     }
 
     #[Test]
+    public function appends_the_error_marker_when_the_transport_fails_mid_stream(): void
+    {
+        $chunk = "data: {\"delta\":\"Hi\"}\n\n";
+        $transport = new FakeProxyTransport(
+            new ProxyTransportResult(28, 'Operation timed out'),
+            streamedChunk: $chunk,
+        );
+
+        ob_start();
+        $response = $this->createProxy($transport)->handle();
+        $output = ob_get_clean();
+
+        $this->assertNull($response);
+        $this->assertStringStartsWith($chunk, $output);
+        $this->assertStringContainsString(
+            ': ' . Proxy::ERROR_MARKER . ' Upstream request failed: Operation timed out' . "\n\n",
+            $output,
+        );
+    }
+
+    #[Test]
     public function header_callback_skips_1xx_and_forwards_the_final_status(): void
     {
         $transport = new FakeProxyTransport();
@@ -261,6 +282,7 @@ final class FakeProxyTransport implements ProxyTransport
 
     public function __construct(
         private readonly ProxyTransportResult $result = new ProxyTransportResult(0, ''),
+        private readonly string $streamedChunk = '',
     ) {
     }
 
@@ -268,6 +290,11 @@ final class FakeProxyTransport implements ProxyTransport
     {
         $this->targetUrl = $targetUrl;
         $this->curlOptions = $curlOptions;
+
+        if ($this->streamedChunk !== '') {
+            $curlOptions[CURLOPT_WRITEFUNCTION](null, $this->streamedChunk);
+        }
+
         return $this->result;
     }
 }
