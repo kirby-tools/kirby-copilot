@@ -167,6 +167,7 @@ final class ResolverTest extends TestCase
                 'completionModel' => 'gpt-5.4-nano',
                 'api' => 'responses',
                 'timeout' => 30,
+                'options' => ['reasoningEffort' => 'high'],
                 'reasoning_effort' => 'low',
             ]],
         );

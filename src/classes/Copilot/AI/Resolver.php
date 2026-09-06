@@ -68,15 +68,17 @@ final readonly class Resolver
             apiKey: ProviderName::isUsableApiKey($apiKey) ? $apiKey : null,
             model: isset($config['model']) ? (string)$config['model'] : null,
             baseUrl: isset($config['baseUrl']) ? (string)$config['baseUrl'] : null,
-            // `completionModel` and `api` steer the Panel's AI SDK client,
-            // `timeout` steers the HTTP client here. None of them is a vendor
-            // request parameter, so all three are dropped rather than forwarded.
+            // `completionModel`, `api` and `options` steer the Panel's AI SDK
+            // client, `timeout` steers the HTTP client here. None of them is a
+            // vendor request parameter, so all four are dropped rather than
+            // forwarded.
             options: array_diff_key($config, [
                 'apiKey' => true,
                 'model' => true,
                 'baseUrl' => true,
                 'completionModel' => true,
                 'api' => true,
+                'options' => true,
                 'timeout' => true,
             ]),
             // Zero, which a mistyped value casts to, would reach Guzzle as no
