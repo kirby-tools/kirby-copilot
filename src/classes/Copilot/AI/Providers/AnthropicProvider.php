@@ -59,7 +59,7 @@ final class AnthropicProvider implements Provider
             $message = $this->client()->messages->create(...$request);
         } catch (APIException $e) {
             $this->fail(
-                reason: 'request failed: ' . $e->getMessage(),
+                reason: 'request failed: ' . $this->reasonOf($e),
                 httpCode: $e->status,
                 previous: $e,
             );
@@ -94,7 +94,7 @@ final class AnthropicProvider implements Provider
             $message = $this->client()->messages->create(...$request);
         } catch (APIException $e) {
             $this->fail(
-                reason: 'request failed: ' . $e->getMessage(),
+                reason: 'request failed: ' . $this->reasonOf($e),
                 httpCode: $e->status,
                 previous: $e,
             );
@@ -174,6 +174,23 @@ final class AnthropicProvider implements Provider
             httpCode: $httpCode,
             previous: $previous,
         );
+    }
+
+    /**
+     * Collapses the SDK's message to one line and appends the cause, which a
+     * connection failure carries only in `previous` – its own message is the
+     * bare class banner.
+     */
+    private function reasonOf(APIException $e): string
+    {
+        $reason = $e->getMessage();
+        $cause = $e->getPrevious()?->getMessage();
+
+        if ($cause !== null && $cause !== '') {
+            $reason = rtrim($reason) . ': ' . $cause;
+        }
+
+        return trim((string)preg_replace('/\s+/', ' ', $reason));
     }
 
     /**

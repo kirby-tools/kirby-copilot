@@ -5,9 +5,11 @@ declare(strict_types = 1);
 use Anthropic\Client as AnthropicClient;
 use Anthropic\RequestOptions as AnthropicRequestOptions;
 use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use JohannSchopplich\Copilot\AI\Exception\ProviderException;
 use JohannSchopplich\Copilot\AI\ProviderConfig;
@@ -264,6 +266,28 @@ final class AnthropicProviderTest extends TestCase
             messages: [['role' => 'user', 'content' => 'hi']],
             schema: ['type' => 'object'],
         );
+    }
+
+    #[Test]
+    public function names_the_cause_of_a_connection_failure(): void
+    {
+        [, $provider] = $this->fixture(
+            responses: [new ConnectException(
+                'cURL error 28: Operation timed out after 120000 milliseconds',
+                new Request('POST', 'https://api.anthropic.com/v1/messages'),
+            )],
+        );
+
+        try {
+            $provider->generateObject(
+                messages: [['role' => 'user', 'content' => 'hi']],
+                schema: ['type' => 'object'],
+            );
+            $this->fail('Expected ProviderException');
+        } catch (ProviderException $e) {
+            $this->assertStringContainsString('cURL error 28: Operation timed out', $e->getMessage());
+            $this->assertStringNotContainsString("\n", $e->getMessage());
+        }
     }
 
     #[Test]
