@@ -16,6 +16,7 @@ use OpenAI\Exceptions\RateLimitException;
 use OpenAI\Exceptions\ServerException;
 use OpenAI\Exceptions\TransporterException;
 use OpenAI\Exceptions\UnserializableResponse;
+use OpenAI\Responses\Chat\CreateResponse;
 use Throwable;
 
 /**
@@ -59,7 +60,7 @@ class OpenAIProvider implements Provider
 
         $response = $this->withRetry(fn () => $this->client()->chat()->create($request));
 
-        $content = $response->choices[0]->message->content;
+        $content = $this->textContent($response);
         $decoded = json_decode($content, associative: true);
 
         if (!is_array($decoded) || ($decoded !== [] && array_is_list($decoded))) {
@@ -83,6 +84,14 @@ class OpenAIProvider implements Provider
 
         $response = $this->withRetry(fn () => $this->client()->chat()->create($request));
 
+        return $this->textContent($response);
+    }
+
+    /**
+     * @throws ProviderException When the response carries no text content
+     */
+    private function textContent(CreateResponse $response): string
+    {
         $content = $response->choices[0]->message->content;
 
         if (!is_string($content)) {

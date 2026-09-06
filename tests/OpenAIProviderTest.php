@@ -119,6 +119,28 @@ final class OpenAIProviderTest extends TestCase
         );
     }
 
+    #[Test]
+    public function generate_object_throws_provider_exception_for_null_content(): void
+    {
+        $response = CreateResponse::fake([
+            'choices' => [
+                [
+                    'index' => 0,
+                    'message' => ['role' => 'assistant', 'content' => null],
+                    'finish_reason' => 'stop',
+                ],
+            ],
+        ]);
+
+        [, $provider] = $this->fixture(responses: [$response]);
+
+        $this->expectException(ProviderException::class);
+        $provider->generateObject(
+            messages: [['role' => 'user', 'content' => 'hi']],
+            schema: ['type' => 'object'],
+        );
+    }
+
     public static function openAIFamilyVendors(): array
     {
         return [
