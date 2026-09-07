@@ -12,7 +12,6 @@ return [
             'assets/panel.css',
             env('PLAYGROUND') !== false ? 'assets/panel-demo.css' : null
         ]),
-        'js' => 'assets/panel.js',
         'favicon' => 'favicon.ico',
         'vue' => [
             'compiler' => false
