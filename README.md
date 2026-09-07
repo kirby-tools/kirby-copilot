@@ -24,16 +24,25 @@ Whether you are building sites for clients or managing content yourself, Kirby C
 
 Kirby Copilot is a commercial plugin that requires a license. You can install and test the plugin locally without a license. However, production environments require a valid license. You can purchase a license from the [Kirby Copilot Website](https://kirby.tools/copilot/buy).
 
-## Getting Started
+## Requirements
 
-To get started, please refer to the [documentation](https://kirby.tools/docs/copilot/getting-started) for guidance on installation, configuration, and usage.
+- Kirby 4 or Kirby 5
 
-Here are some quick links:
+## Installation
 
-- [Installation](https://kirby.tools/docs/copilot/getting-started/installation)
-- [Panel View Button](https://kirby.tools/docs/copilot/usage/view-button)
-- [Blocks & Layouts Generation](https://kirby.tools/docs/copilot/advanced/blocks-and-layouts)
-- [Global Configuration](https://kirby.tools/docs/copilot/configuration/global)
+### Composer (Recommended)
+
+```bash
+composer require johannschopplich/kirby-copilot
+```
+
+### Manual Installation
+
+Download and copy this repository to `/site/plugins/kirby-copilot`.
+
+## Documentation
+
+For installation, configuration, and usage, see the [Kirby Copilot documentation](https://kirby.tools/docs/copilot).
 
 ## Support and Questions
 
@@ -62,4 +71,4 @@ We value your feedback and ideas for improving Kirby Copilot. If you have any su
 
 ## License
 
-[Kirby Tools License](./LICENSE.md) License © 2024-PRESENT [Johann Schopplich](https://github.com/johannschopplich)
+[Kirby Tools License](./LICENSE.md) © 2024-PRESENT [Johann Schopplich](https://github.com/johannschopplich)
