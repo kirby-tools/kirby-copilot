@@ -1,4 +1,4 @@
-[![Kirby Copilot](./.github/social-card.png)](https://kirby.tools/copilot)
+[![Kirby Copilot](https://kirby.tools/social-card/copilot.png)](https://kirby.tools/copilot)
 
 # Kirby Copilot
 
