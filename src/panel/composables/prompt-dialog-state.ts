@@ -10,6 +10,10 @@ export const usePromptDialogState = createGlobalState(() => {
   function reset(initialPrompt = "") {
     prompt.value = initialPrompt;
     files.value = [];
+    resetSelection();
+  }
+
+  function resetSelection() {
     selectedFieldNames.value = [];
     insertOption.value = "replace";
   }
@@ -20,5 +24,6 @@ export const usePromptDialogState = createGlobalState(() => {
     selectedFieldNames,
     insertOption,
     reset,
+    resetSelection,
   };
 });
