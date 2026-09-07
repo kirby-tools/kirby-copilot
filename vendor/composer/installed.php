@@ -1,8 +1,8 @@
 <?php return array(
     'root' => array(
         'name' => 'johannschopplich/kirby-copilot',
-        'pretty_version' => '3.11.0',
-        'version' => '3.11.0.0',
+        'pretty_version' => '3.12.0',
+        'version' => '3.12.0.0',
         'reference' => null,
         'type' => 'kirby-plugin',
         'install_path' => __DIR__ . '/../../',
@@ -56,8 +56,8 @@
             'dev_requirement' => false,
         ),
         'johannschopplich/kirby-copilot' => array(
-            'pretty_version' => '3.11.0',
-            'version' => '3.11.0.0',
+            'pretty_version' => '3.12.0',
+            'version' => '3.12.0.0',
             'reference' => null,
             'type' => 'kirby-plugin',
             'install_path' => __DIR__ . '/../../',
