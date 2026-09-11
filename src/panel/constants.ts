@@ -83,11 +83,11 @@ When <selection> is provided, use it as context for your response. Preserve any 
 When <reference_page> is provided, use it as reference material. Draw on its structure, style, or content as instructed by the user.
 `;
 
-export const COMPLETION_PREFIX_LENGTH = 4000;
-export const COMPLETION_SUFFIX_LENGTH = 500;
-export const COMPLETION_ERROR_COOLDOWN_MS = 30_000;
+export const SUGGESTION_PREFIX_LENGTH = 4000;
+export const SUGGESTION_SUFFIX_LENGTH = 500;
+export const SUGGESTION_ERROR_COOLDOWN_MS = 30_000;
 
-export const COMPLETION_SYSTEM_PROMPT = `
+export const SUGGESTION_SYSTEM_PROMPT = `
 You are a writing assistant providing inline autocompletions.
 
 RULES:

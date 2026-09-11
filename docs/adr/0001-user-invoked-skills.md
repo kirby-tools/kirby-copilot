@@ -1,4 +1,4 @@
-# Skills Are User-Invoked Prompt Presets, Not Agent Skills
+# Skills Are User-Invoked Instruction Blocks, Not Agent Skills
 
 The AI ecosystem (Anthropic Agent Skills, agentskills.io) has standardized "skills" as model-invoked capabilities: SKILL.md files whose descriptions the model reads to decide autonomously what to load, with progressive disclosure and optional code execution. Copilot skills deliberately diverge: a skill is three config strings (`id`, `label`, `instructions`) that an editor references explicitly via `@skill://<id>`, concatenated verbatim into the system prompt of a single generation run.
 

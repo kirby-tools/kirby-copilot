@@ -353,7 +353,7 @@ describe("useStreamText", () => {
 });
 
 describe("resolveLanguageModel", () => {
-  describe("completion model selection", () => {
+  describe("model selection", () => {
     it("returns a model instance for valid config", async () => {
       const result = await resolveLanguageModel();
 
@@ -372,7 +372,7 @@ describe("resolveLanguageModel", () => {
         expected: "gpt-5.4-mini",
       },
       {
-        name: "falls back to default completion model when not configured",
+        name: "falls back to the default completionModel when none is configured",
         openai: undefined,
         expected: "gpt-5.4-nano",
       },
@@ -390,7 +390,7 @@ describe("resolveLanguageModel", () => {
         },
         expected: "google-ai-studio/gemini-3.5-flash",
       },
-    ])("completion model resolution: $name", async ({ openai, expected }) => {
+    ])("resolves the completionModel: $name", async ({ openai, expected }) => {
       let resolvedModelId: string | undefined;
       mockCreateOpenAI.mockReturnValue({
         languageModel: (...args: unknown[]) => {
@@ -406,12 +406,12 @@ describe("resolveLanguageModel", () => {
         );
       }
 
-      await resolveLanguageModel({ forCompletion: true });
+      await resolveLanguageModel({ isInlineSuggestion: true });
 
       expect(resolvedModelId).toBe(expected);
     });
 
-    it("throws when default completion model would cross gateway provider boundaries", async () => {
+    it("throws when the default completionModel would cross gateway provider boundaries", async () => {
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({
           providers: {
@@ -424,9 +424,9 @@ describe("resolveLanguageModel", () => {
         }),
       );
 
-      const error = await resolveLanguageModel({ forCompletion: true }).catch(
-        (e) => e,
-      );
+      const error = await resolveLanguageModel({
+        isInlineSuggestion: true,
+      }).catch((e) => e);
 
       expect(error).toBeInstanceOf(CopilotError);
       expect(error.message).toMatch(/completionModel/);
@@ -477,14 +477,15 @@ describe("resolveLanguageModel", () => {
       expect(providerOptions).toBeUndefined();
     });
 
-    it("applies the default effort and disables reasoning for completions", async () => {
+    it("applies the default effort and disables reasoning for inline suggestions", async () => {
       const { reasoning } = await resolveLanguageModel();
-      const { reasoning: completionReasoning } = await resolveLanguageModel({
-        forCompletion: true,
-      });
+      const { reasoning: inlineSuggestionReasoning } =
+        await resolveLanguageModel({
+          isInlineSuggestion: true,
+        });
 
       expect(reasoning).toBe("low");
-      expect(completionReasoning).toBe("none");
+      expect(inlineSuggestionReasoning).toBe("none");
     });
 
     it("keeps providerConfig.options as the providerOptions escape hatch", async () => {
@@ -627,7 +628,7 @@ describe("resolveEditorPrompt", () => {
   });
 
   describe("placeholders", () => {
-    it("returns the user prompt unchanged when no template variables", async () => {
+    it("returns an editor prompt without placeholders unchanged", async () => {
       const { userPrompt } = await resolveEditorPrompt({
         userPrompt: "Simple prompt without variables",
       });
@@ -635,7 +636,7 @@ describe("resolveEditorPrompt", () => {
       expect(userPrompt).toBe("Simple prompt without variables");
     });
 
-    it("renders template variables in user prompt", async () => {
+    it("resolves {title} to the page title", async () => {
       const { userPrompt } = await resolveEditorPrompt({
         userPrompt: "Page title: {title}",
       });

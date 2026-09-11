@@ -7,53 +7,53 @@ import { PluginKey } from "prosemirror-state";
 import { Decoration, DecorationSet } from "prosemirror-view";
 import { resolveLanguageModel, usePluginContext } from "../../composables";
 import {
-  COMPLETION_ERROR_COOLDOWN_MS,
-  COMPLETION_PREFIX_LENGTH,
-  COMPLETION_SUFFIX_LENGTH,
-  COMPLETION_SYSTEM_PROMPT,
   STORAGE_KEY_PREFIX,
+  SUGGESTION_ERROR_COOLDOWN_MS,
+  SUGGESTION_PREFIX_LENGTH,
+  SUGGESTION_SUFFIX_LENGTH,
+  SUGGESTION_SYSTEM_PROMPT,
 } from "../../constants";
 import { loadAISDK } from "../../utils";
 
 const LICENSE_TOAST_THRESHOLD = 3;
-const COMPLETION_COUNT_STORAGE_KEY = `${STORAGE_KEY_PREFIX}completionCount`;
+const ACCEPTED_SUGGESTION_COUNT_STORAGE_KEY = `${STORAGE_KEY_PREFIX}acceptedSuggestionCount`;
 
-export interface CompletionPluginState {
+export interface SuggestionPluginState {
   suggestion: string | null;
   position: number | null;
   isLoading: boolean;
 }
 
-export type CompletionMeta =
+export type SuggestionMeta =
   | { type: "startLoading"; position: number }
   | { type: "streamChunk"; suggestion: string; position: number }
   | { type: "complete"; suggestion: string; position: number }
   | { type: "dismiss" };
 
-const EMPTY_PLUGIN_STATE: CompletionPluginState = {
+const EMPTY_PLUGIN_STATE: SuggestionPluginState = {
   suggestion: null,
   position: null,
   isLoading: false,
 };
 
-let completionConfig: false | CompletionConfig | undefined;
+let suggestionConfig: false | CompletionConfig | undefined;
 
-const completionPluginKey = new PluginKey<CompletionPluginState>(
+const suggestionPluginKey = new PluginKey<SuggestionPluginState>(
   "copilot-suggestions",
 );
 
 const triggerHandles = new WeakMap<EditorView, () => void>();
 
-export function setCompletionMeta(tr: Transaction, meta: CompletionMeta) {
-  tr.setMeta(completionPluginKey, meta);
+export function setSuggestionMeta(tr: Transaction, meta: SuggestionMeta) {
+  tr.setMeta(suggestionPluginKey, meta);
   return tr;
 }
 
-export function getCompletionState(state: EditorState) {
-  return completionPluginKey.getState(state);
+export function getSuggestionState(state: EditorState) {
+  return suggestionPluginKey.getState(state);
 }
 
-export function triggerCompletion(view: EditorView): boolean {
+export function triggerSuggestion(view: EditorView): boolean {
   const trigger = triggerHandles.get(view);
   if (!trigger) return false;
   trigger();
@@ -63,7 +63,7 @@ export function triggerCompletion(view: EditorView): boolean {
 interface CopilotSuggestionsMark extends WriterMarkExtension {
   _acceptSuggestion: () => boolean;
   _dismissSuggestion: () => boolean;
-  _triggerCompletion: () => boolean;
+  _triggerSuggestion: () => boolean;
   _showLicenseToastOnce: () => Promise<void>;
 }
 
@@ -76,24 +76,24 @@ export const copilotSuggestions: CopilotSuggestionsMark = {
     return {
       Tab: () => this._acceptSuggestion(),
       Escape: () => this._dismissSuggestion(),
-      "Mod-,": () => this._triggerCompletion(),
+      "Mod-,": () => this._triggerSuggestion(),
     };
   },
 
   plugins(this: CopilotSuggestionsMark, _context: WriterMarkContext) {
-    return [createCompletionPlugin(this)];
+    return [createSuggestionPlugin(this)];
   },
 
   _acceptSuggestion(this: CopilotSuggestionsMark) {
     const { view } = this.editor!;
-    const pluginState = getCompletionState(view.state);
+    const pluginState = getSuggestionState(view.state);
     if (!pluginState?.suggestion) return false;
 
     const tr = view.state.tr.insertText(
       pluginState.suggestion,
       pluginState.position!,
     );
-    setCompletionMeta(tr, { type: "dismiss" });
+    setSuggestionMeta(tr, { type: "dismiss" });
     view.dispatch(tr);
 
     this._showLicenseToastOnce();
@@ -103,32 +103,34 @@ export const copilotSuggestions: CopilotSuggestionsMark = {
 
   _dismissSuggestion(this: CopilotSuggestionsMark) {
     const { view } = this.editor!;
-    const pluginState = getCompletionState(view.state);
+    const pluginState = getSuggestionState(view.state);
 
-    view.dispatch(setCompletionMeta(view.state.tr, { type: "dismiss" }));
+    view.dispatch(setSuggestionMeta(view.state.tr, { type: "dismiss" }));
 
     return Boolean(pluginState?.suggestion || pluginState?.isLoading);
   },
 
-  _triggerCompletion(this: CopilotSuggestionsMark) {
-    return triggerCompletion(this.editor!.view);
+  _triggerSuggestion(this: CopilotSuggestionsMark) {
+    return triggerSuggestion(this.editor!.view);
   },
 
   async _showLicenseToastOnce() {
     if (__PLAYGROUND__) return;
     if (isLocalDev()) return;
 
-    const storedValue = sessionStorage.getItem(COMPLETION_COUNT_STORAGE_KEY);
+    const storedValue = sessionStorage.getItem(
+      ACCEPTED_SUGGESTION_COUNT_STORAGE_KEY,
+    );
     if (storedValue === "done") return;
 
-    let completionCount = Number(storedValue) || 0;
-    completionCount++;
+    let acceptedSuggestionCount = Number(storedValue) || 0;
+    acceptedSuggestionCount++;
     sessionStorage.setItem(
-      COMPLETION_COUNT_STORAGE_KEY,
-      String(completionCount),
+      ACCEPTED_SUGGESTION_COUNT_STORAGE_KEY,
+      String(acceptedSuggestionCount),
     );
 
-    if (completionCount < LICENSE_TOAST_THRESHOLD) return;
+    if (acceptedSuggestionCount < LICENSE_TOAST_THRESHOLD) return;
 
     const context = await usePluginContext();
 
@@ -139,13 +141,13 @@ export const copilotSuggestions: CopilotSuggestionsMark = {
       });
     }
 
-    sessionStorage.setItem(COMPLETION_COUNT_STORAGE_KEY, "done");
+    sessionStorage.setItem(ACCEPTED_SUGGESTION_COUNT_STORAGE_KEY, "done");
   },
 };
 
-function createCompletionPlugin(
+function createSuggestionPlugin(
   mark: CopilotSuggestionsMark,
-): PluginSpec<CompletionPluginState> {
+): PluginSpec<SuggestionPluginState> {
   let debounceTimer: ReturnType<typeof setTimeout>;
   let abortController: AbortController | undefined;
   let hasTypedText = false;
@@ -159,15 +161,15 @@ function createCompletionPlugin(
   };
 
   return {
-    key: completionPluginKey,
+    key: suggestionPluginKey,
 
     state: {
       init() {
         return { ...EMPTY_PLUGIN_STATE };
       },
       apply(tr, value) {
-        const meta = tr.getMeta(completionPluginKey) as
-          CompletionMeta | undefined;
+        const meta = tr.getMeta(suggestionPluginKey) as
+          SuggestionMeta | undefined;
 
         if (meta) {
           switch (meta.type) {
@@ -213,12 +215,12 @@ function createCompletionPlugin(
       // not the shortcut, which stays available on demand.
       triggerHandles.set(editorView, () => {
         clearTimeout(debounceTimer);
-        generateCompletion(editorView, { includeSuffix: true });
+        generateSuggestion(editorView, { includeSuffix: true });
       });
 
-      if (completionConfig === undefined) {
+      if (suggestionConfig === undefined) {
         usePluginContext().then(({ config }) => {
-          completionConfig = config.completion;
+          suggestionConfig = config.completion;
         });
       }
 
@@ -234,7 +236,7 @@ function createCompletionPlugin(
           // A composition still assembles the text it will leave behind.
           if (view.composing) return;
 
-          if (!completionConfig) return;
+          if (!suggestionConfig) return;
 
           debounceTimer = setTimeout(() => {
             if (Date.now() < cooldownDeadline) return;
@@ -246,8 +248,8 @@ function createCompletionPlugin(
             const isEmptyBlock = $head.parent.textContent.length === 0;
             if (!isAtEndOfBlock || isEmptyBlock) return;
 
-            generateCompletion(view);
-          }, completionConfig.debounce);
+            generateSuggestion(view);
+          }, suggestionConfig.debounce);
         },
         destroy() {
           clearTimeout(debounceTimer);
@@ -259,7 +261,7 @@ function createCompletionPlugin(
 
     props: {
       decorations(state) {
-        const pluginState = getCompletionState(state);
+        const pluginState = getSuggestionState(state);
 
         if (
           pluginState?.isLoading &&
@@ -294,7 +296,7 @@ function createCompletionPlugin(
 
         return DecorationSet.empty;
       },
-      // Typing is what asks for a completion, and a programmatic insertion
+      // Typing is what asks for a suggestion, and a programmatic insertion
       // reaches the same document change without passing here. The update
       // this input dispatches consumes the flag.
       handleTextInput() {
@@ -309,7 +311,7 @@ function createCompletionPlugin(
     },
   };
 
-  async function generateCompletion(
+  async function generateSuggestion(
     view: EditorView,
     { includeSuffix = false } = {},
   ) {
@@ -319,21 +321,21 @@ function createCompletionPlugin(
     const position = state.selection.head;
 
     const { prefix, suffix } = getCursorContext(state, {
-      suffixLength: includeSuffix ? COMPLETION_SUFFIX_LENGTH : 0,
+      suffixLength: includeSuffix ? SUGGESTION_SUFFIX_LENGTH : 0,
     });
     if (!prefix.trim()) return;
 
     abortController = new AbortController();
 
     view.dispatch(
-      setCompletionMeta(state.tr, { type: "startLoading", position }),
+      setSuggestionMeta(state.tr, { type: "startLoading", position }),
     );
 
     const { signal } = abortController;
 
     try {
       const { model, reasoning } = await resolveLanguageModel({
-        forCompletion: true,
+        isInlineSuggestion: true,
       });
       const { streamText } = await loadAISDK();
 
@@ -346,7 +348,7 @@ function createCompletionPlugin(
       const { textStream } = streamText({
         model,
         reasoning,
-        instructions: COMPLETION_SYSTEM_PROMPT,
+        instructions: SUGGESTION_SYSTEM_PROMPT,
         prompt,
         abortSignal: signal,
         // Error parts never enter `textStream`, so this is the only place the
@@ -370,7 +372,7 @@ function createCompletionPlugin(
             : streamedText;
 
         view.dispatch(
-          setCompletionMeta(view.state.tr, {
+          setSuggestionMeta(view.state.tr, {
             type: "streamChunk",
             suggestion,
             position,
@@ -381,7 +383,7 @@ function createCompletionPlugin(
       if (signal.aborted) return;
 
       // Chunks also run out when the provider fails mid-stream, which would
-      // otherwise offer the truncated text as a finished completion.
+      // otherwise offer the truncated text as a finished suggestion.
       if (firstStreamError) throw firstStreamError;
 
       const finalSuggestion =
@@ -390,7 +392,7 @@ function createCompletionPlugin(
           : streamedText;
 
       view.dispatch(
-        setCompletionMeta(view.state.tr, {
+        setSuggestionMeta(view.state.tr, {
           type: "complete",
           suggestion: finalSuggestion,
           position,
@@ -401,10 +403,10 @@ function createCompletionPlugin(
       // already.
       if (signal.aborted) return;
 
-      console.error("Failed to generate completion:", error);
-      cooldownDeadline = Date.now() + COMPLETION_ERROR_COOLDOWN_MS;
+      console.error("Failed to generate an inline suggestion:", error);
+      cooldownDeadline = Date.now() + SUGGESTION_ERROR_COOLDOWN_MS;
 
-      view.dispatch(setCompletionMeta(view.state.tr, { type: "dismiss" }));
+      view.dispatch(setSuggestionMeta(view.state.tr, { type: "dismiss" }));
     } finally {
       // A superseded run must not clear the controller of the run that
       // replaced it, which would leave the newer one impossible to abort.
@@ -422,7 +424,7 @@ function createCompletionPlugin(
 function getCursorContext(
   state: EditorState,
   {
-    prefixLength = COMPLETION_PREFIX_LENGTH,
+    prefixLength = SUGGESTION_PREFIX_LENGTH,
     suffixLength = 0,
   }: {
     prefixLength?: number;

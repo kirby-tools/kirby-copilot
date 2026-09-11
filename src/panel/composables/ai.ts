@@ -201,22 +201,26 @@ export async function useStreamText({
 }
 
 export async function resolveLanguageModel({
-  forCompletion = false,
+  isInlineSuggestion = false,
 }: {
-  forCompletion?: boolean;
+  isInlineSuggestion?: boolean;
 } = {}) {
   const panel = usePanel();
   const { config } = await usePluginContext();
 
   const { provider, providerConfig, isPlayground, reasoningEffortOverride } =
-    resolveProviderSelection(config, forCompletion);
+    resolveProviderSelection(config, isInlineSuggestion);
   const api = await createProviderClient({
     provider,
     providerConfig,
     isPlayground,
     panel,
   });
-  const modelId = resolveModelId({ provider, providerConfig, forCompletion });
+  const modelId = resolveModelId({
+    provider,
+    providerConfig,
+    isInlineSuggestion,
+  });
 
   // Support for OpenAI-compatible gateways that don't support `/v1/responses`,
   // e.g. Cloudflare AI Gateway.
@@ -224,7 +228,7 @@ export async function resolveLanguageModel({
     provider === "openai" && providerConfig.api === "chat"
       ? (api as OpenAIProvider).chat(modelId)
       : api.languageModel(modelId);
-  const reasoning: ReasoningEffort = forCompletion
+  const reasoning: ReasoningEffort = isInlineSuggestion
     ? "none"
     : (reasoningEffortOverride ??
       config.reasoningEffort ??
@@ -427,7 +431,7 @@ function buildUserPrompt(
  */
 function resolveProviderSelection(
   config: PluginConfig,
-  forCompletion: boolean,
+  isInlineSuggestion: boolean,
 ) {
   // Direct browser transport (session-stored key) is only for the deployed
   // playground, where no server-side keys exist – on localhost, requests keep
@@ -436,7 +440,7 @@ function resolveProviderSelection(
     __PLAYGROUND__ && !window.location.hostname.includes("localhost");
   let reasoningEffortOverride: ReasoningEffort | undefined;
 
-  if (!forCompletion && __PLAYGROUND__) {
+  if (!isInlineSuggestion && __PLAYGROUND__) {
     config = JSON.parse(JSON.stringify(config));
     const { currentContent } = useContent();
 
@@ -534,23 +538,23 @@ async function createProviderClient({
 }
 
 /**
- * Resolves the effective model id, honoring gateway prefixes and completion fallbacks.
+ * Resolves the effective model id, honoring AI gateway prefixes and the `completionModel` fallback.
  */
 function resolveModelId({
   provider,
   providerConfig,
-  forCompletion,
+  isInlineSuggestion,
 }: {
   provider: ModelProvider;
   providerConfig: ProviderConfig;
-  forCompletion: boolean;
+  isInlineSuggestion: boolean;
 }): string {
   const { prefix } = parseGatewayPrefix(providerConfig.model ?? "");
 
   // Cross-provider gateway prefix: require explicit `completionModel` rather
   // than derive a 404 (e.g. `google-ai-studio/gpt-5.4-nano`).
   if (
-    forCompletion &&
+    isInlineSuggestion &&
     !providerConfig.completionModel &&
     prefix &&
     prefix !== provider
@@ -560,16 +564,16 @@ function resolveModelId({
     );
   }
 
-  // Keep the default-completion fallback on the same gateway as the primary model.
+  // The default `completionModel` stays on the same AI gateway as the primary model.
   const defaultCompletion = PROVIDER_REGISTRY[provider].defaultCompletionModel;
   const gatewayPrefix = prefix ? `${prefix}/` : "";
-  const modelId = forCompletion
+  const modelId = isInlineSuggestion
     ? providerConfig.completionModel || gatewayPrefix + defaultCompletion
     : providerConfig.model;
 
   if (!modelId) {
     throw new CopilotError(
-      `Missing ${forCompletion ? "completionModel" : "model"} for the "${provider}" provider. Add it to "johannschopplich.copilot.providers.${provider}" in your Kirby config.`,
+      `Missing ${isInlineSuggestion ? "completionModel" : "model"} for the "${provider}" provider. Add it to "johannschopplich.copilot.providers.${provider}" in your Kirby config.`,
     );
   }
 

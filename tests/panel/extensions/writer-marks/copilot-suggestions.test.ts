@@ -1,11 +1,11 @@
 import type { PluginSpec, Transaction } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
-import type { CompletionPluginState } from "../../../../src/panel/extensions/writer-marks/copilot-suggestions";
+import type { SuggestionPluginState } from "../../../../src/panel/extensions/writer-marks/copilot-suggestions";
 import type { PluginConfig } from "../../../../src/panel/types";
 import { Schema } from "prosemirror-model";
 import { EditorState, Plugin } from "prosemirror-state";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { COMPLETION_ERROR_COOLDOWN_MS } from "../../../../src/panel/constants";
+import { SUGGESTION_ERROR_COOLDOWN_MS } from "../../../../src/panel/constants";
 
 const DEBOUNCE_MS = 300;
 
@@ -42,7 +42,7 @@ const schema = new Schema({
   },
 });
 
-/** Emits nothing and never ends, so a started completion stays observable. */
+/** Emits nothing and never ends, so a started suggestion stays observable. */
 async function* neverEndingStream(): AsyncGenerator<string> {
   await new Promise(() => {});
 }
@@ -69,14 +69,17 @@ function createReleasableStream() {
 async function createEditor(completion: PluginConfig["completion"]) {
   mockUsePluginContext.mockResolvedValue({ config: { completion } });
 
-  const { copilotSuggestions, getCompletionState, setCompletionMeta, triggerCompletion } =
-    await import(
-      "../../../../src/panel/extensions/writer-marks/copilot-suggestions"
-    );
+  const {
+    copilotSuggestions,
+    getSuggestionState,
+    setSuggestionMeta,
+    triggerSuggestion,
+  } =
+    await import("../../../../src/panel/extensions/writer-marks/copilot-suggestions");
 
   const spec = copilotSuggestions.plugins!({
     schema,
-  } as never)[0] as PluginSpec<CompletionPluginState>;
+  } as never)[0] as PluginSpec<SuggestionPluginState>;
 
   const plugin = new Plugin(spec);
   let state = EditorState.create({
@@ -131,12 +134,12 @@ async function createEditor(completion: PluginConfig["completion"]) {
     insertProgrammatically(text: string) {
       view.dispatch(view.state.tr.insertText(text));
     },
-    triggerManually: () => triggerCompletion(view),
+    triggerManually: () => triggerSuggestion(view),
     dismiss() {
-      view.dispatch(setCompletionMeta(view.state.tr, { type: "dismiss" }));
+      view.dispatch(setSuggestionMeta(view.state.tr, { type: "dismiss" }));
     },
-    isCompletionPending: () =>
-      Boolean(getCompletionState(view.state)?.isLoading),
+    isSuggestionPending: () =>
+      Boolean(getSuggestionState(view.state)?.isLoading),
     abortSignalOfRequest: (index: number): AbortSignal =>
       mockStreamText.mock.calls[index]![0].abortSignal,
   };
@@ -162,14 +165,14 @@ beforeEach(() => {
   mockStreamText.mockImplementation(() => ({ textStream: neverEndingStream() }));
 });
 
-describe("inline completion", () => {
+describe("inline suggestion", () => {
   it("starts a request when typing pauses", async () => {
     const editor = await createEditor({ debounce: DEBOUNCE_MS });
 
     editor.type("Hello");
     await vi.advanceTimersByTimeAsync(DEBOUNCE_MS);
 
-    expect(editor.isCompletionPending()).toBe(true);
+    expect(editor.isSuggestionPending()).toBe(true);
   });
 
   it("ignores text a generation run writes into the field", async () => {
@@ -178,7 +181,7 @@ describe("inline completion", () => {
     editor.insertProgrammatically("Text from a generation run");
     await vi.advanceTimersByTimeAsync(DEBOUNCE_MS);
 
-    expect(editor.isCompletionPending()).toBe(false);
+    expect(editor.isSuggestionPending()).toBe(false);
   });
 
   it("starts no request during an IME composition", async () => {
@@ -187,24 +190,24 @@ describe("inline completion", () => {
     editor.typeWhileComposing("にほんご");
     await vi.advanceTimersByTimeAsync(DEBOUNCE_MS);
 
-    expect(editor.isCompletionPending()).toBe(false);
+    expect(editor.isSuggestionPending()).toBe(false);
   });
 
-  it("starts no request when typing pauses and completion is false", async () => {
+  it("starts no request when typing pauses and `completion` is false", async () => {
     const editor = await createEditor(false);
 
     editor.type("Hello");
     await vi.advanceTimersByTimeAsync(DEBOUNCE_MS);
 
-    expect(editor.isCompletionPending()).toBe(false);
+    expect(editor.isSuggestionPending()).toBe(false);
   });
 
-  it("starts a request on Mod-, when completion is false", async () => {
+  it("starts a request on Mod-, when `completion` is false", async () => {
     const editor = await createEditor(false);
     editor.type("Hello");
 
     expect(editor.triggerManually()).toBe(true);
-    expect(editor.isCompletionPending()).toBe(true);
+    expect(editor.isSuggestionPending()).toBe(true);
   });
 
   it("starts no request at the next pause in typing after a failure", async () => {
@@ -213,24 +216,24 @@ describe("inline completion", () => {
     editor.type(" world");
     await vi.advanceTimersByTimeAsync(DEBOUNCE_MS);
 
-    expect(editor.isCompletionPending()).toBe(false);
+    expect(editor.isSuggestionPending()).toBe(false);
   });
 
-  it("starts a request again once COMPLETION_ERROR_COOLDOWN_MS has passed", async () => {
+  it("starts a request again once SUGGESTION_ERROR_COOLDOWN_MS has passed", async () => {
     const editor = await createEditorAfterFailedRequest();
-    await vi.advanceTimersByTimeAsync(COMPLETION_ERROR_COOLDOWN_MS);
+    await vi.advanceTimersByTimeAsync(SUGGESTION_ERROR_COOLDOWN_MS);
 
     editor.type(" world");
     await vi.advanceTimersByTimeAsync(DEBOUNCE_MS);
 
-    expect(editor.isCompletionPending()).toBe(true);
+    expect(editor.isSuggestionPending()).toBe(true);
   });
 
   it("starts a request on Mod-, during the cooldown after a failure", async () => {
     const editor = await createEditorAfterFailedRequest();
 
     expect(editor.triggerManually()).toBe(true);
-    expect(editor.isCompletionPending()).toBe(true);
+    expect(editor.isSuggestionPending()).toBe(true);
   });
 
   it("keeps the newer request cancelable after the superseded one finished", async () => {
