@@ -12,7 +12,7 @@ import type {
 } from "../constants";
 import type { OutputFormat, PluginConfig, ProviderConfig } from "../types";
 import { useContent, usePanel } from "kirbyuse";
-import { isObject, template } from "utilful";
+import { isObject } from "utilful";
 import {
   DEFAULT_REASONING_EFFORT,
   PDF_SIZE_LIMIT,
@@ -34,7 +34,7 @@ import { toReducedBlob } from "../utils/image";
 import { parseGatewayPrefix } from "../utils/models";
 import { extractTextFromPdf } from "../utils/pdf";
 import { watchForProxyError } from "../utils/proxy";
-import { normalizePlaceholders } from "../utils/template";
+import { resolvePlaceholders } from "../utils/template";
 import { useLogger } from "./logger";
 import { extractPageRefIds } from "./pages";
 import { usePluginContext } from "./plugin";
@@ -338,10 +338,10 @@ export async function resolveEditorPrompt({
     [systemPrompt, ...skillBlocks].filter(Boolean).join("\n\n") || undefined;
 
   let userPromptWithContext = buildUserPrompt(
-    template(
-      normalizePlaceholders(stripSkillRefTokens(userPrompt)),
+    resolvePlaceholders(
+      stripSkillRefTokens(userPrompt),
       createContentContext(),
-    ).trim(),
+    ),
     { responseFormat, selection },
   );
 

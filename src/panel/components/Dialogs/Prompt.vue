@@ -5,7 +5,7 @@ import type { PropType } from "vue";
 import type { ActiveField, PromptTemplate } from "../../types";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import { computed, isKirby5, ref, usePanel } from "kirbyuse";
-import { template as renderTemplate, TEMPLATE_PLACEHOLDER_RE } from "utilful";
+import { TEMPLATE_PLACEHOLDER_RE } from "utilful";
 import {
   useGenerationHistory,
   useModelFields,
@@ -19,8 +19,8 @@ import { SUPPORTED_FILE_MIME_TYPES } from "../../constants";
 import {
   createContentContext,
   findFieldDefinition,
-  normalizePlaceholders,
   openFilePicker,
+  resolvePlaceholders,
 } from "../../utils";
 import { insertRefToken } from "../../utils/reference-tokens";
 import PromptEditor from "../PromptEditor/PromptEditor.vue";
@@ -106,11 +106,7 @@ const hasPlaceholders = computed(() => {
   return keys.some((key) => key in contentContext);
 });
 const resolvedPrompt = computed(() =>
-  renderTemplate(
-    normalizePlaceholders(prompt.value),
-    contentContext,
-    (key) => `{${key}}`,
-  ).trim(),
+  resolvePlaceholders(prompt.value, contentContext),
 );
 
 const placeholderFields = computed(() => [

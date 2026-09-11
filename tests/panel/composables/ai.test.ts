@@ -650,6 +650,22 @@ describe("resolveEditorPrompt", () => {
 
       expect(userPrompt).toBe("Page title: Test Page");
     });
+
+    it("lowercases an unmatched {Name} to {name}", async () => {
+      const { userPrompt } = await resolveEditorPrompt({
+        userPrompt: "Greet {Name}",
+      });
+
+      expect(userPrompt).toBe("Greet {name}");
+    });
+
+    it("keeps a placeholder without a matching field in braces", async () => {
+      const { userPrompt } = await resolveEditorPrompt({
+        userPrompt: "Use {0}, {count} and {{x}} for {title}",
+      });
+
+      expect(userPrompt).toBe("Use {0}, {count} and {{x}} for Test Page");
+    });
   });
 
   describe("selection and response format", () => {
