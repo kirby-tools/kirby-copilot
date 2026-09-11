@@ -10,7 +10,20 @@ vi.mock("kirbyuse", async () => {
   const { baseKirbyuseMock } = await import("./helpers/mock-kirbyuse");
   return {
     ...baseKirbyuseMock(),
-    usePanel: () => ({ view: { title: "Test Page" } }),
+    // A readable page, so a resolved page reference would change the prompt.
+    usePanel: () => ({
+      view: { title: "Test Page" },
+      api: {
+        pages: {
+          id: (id: string) => id,
+          get: async () => ({
+            id: "about",
+            title: "About",
+            content: { text: "Internal note" },
+          }),
+        },
+      },
+    }),
     useContent: () => ({ currentContent: { value: {} } }),
   };
 });
@@ -21,8 +34,20 @@ vi.mock("../../src/panel/utils/ai", () => ({
   loadAISDK: () => import("ai"),
 }));
 
+// A configured skill, so a resolved skill reference would change the system prompt.
 vi.mock("../../src/panel/composables/plugin", () => ({
-  usePluginContext: () => Promise.resolve({ config: {} }),
+  usePluginContext: () =>
+    Promise.resolve({
+      config: {
+        skills: [
+          {
+            id: "brand-voice",
+            label: "Brand Voice",
+            instructions: "Write casually.",
+          },
+        ],
+      },
+    }),
 }));
 
 const upstreamError = new AISDKError({
@@ -72,6 +97,29 @@ describe("third-party seam contract", () => {
     expect(Object.keys(result)).toEqual(
       expect.arrayContaining(contract.streamTextResult),
     );
+  });
+
+  it("sends userPrompt to the model byte for byte", async () => {
+    const userPrompt = `Translate each string.\n\n${JSON.stringify({
+      texts: ["{0}", "{count}", "{{x}}", "{Name}", "{title}"],
+      notes: "@page://about @skill://brand-voice",
+    })}`;
+    const model = createModelFailingAfterOutput();
+
+    const { output } = await copilotThirdPartyApi.streamText({
+      userPrompt,
+      model,
+      outputSchema: z.object({ title: z.string() }),
+    });
+    await output.catch(() => {});
+
+    expect(model.doStreamCalls[0]?.prompt).toEqual([
+      {
+        role: "user",
+        content: [{ type: "text", text: userPrompt }],
+        providerOptions: undefined,
+      },
+    ]);
   });
 
   it("rejects output with the provider error when the run fails after a complete object", async () => {
