@@ -6,6 +6,6 @@ We chose user-invoked over model-invoked because a Panel generation run is one-s
 
 ## Consequences
 
-- Skills resolve in every generation run (`resolvePromptContext`), regardless of which surface started it; the typeahead and highlighting exist only in the prompt dialog.
+- Skills resolve in every editor prompt (`resolveEditorPrompt`), whichever surface sent it; the typeahead and highlighting exist only in the prompt dialog.
 - The model never sees a skill list or the `@skill://` token – only the injected `<skill>` blocks. There is no metadata tier, so nothing needs progressive disclosure.
 - A future model-invoked mode (description field plus on-demand loading) stays possible on top of the same config shape, but is out of scope until users show up with skill libraries large enough to justify the round-trip.

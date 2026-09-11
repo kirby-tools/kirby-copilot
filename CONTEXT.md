@@ -4,65 +4,68 @@ AI-assisted content generation inside the Kirby Panel: users prompt an AI provid
 
 ## Language
 
-### Generation
-
-**Generation run**:
-One AI generation from "prompt context known" to final insertion or persistence. Owns the lifecycle: abort, loading state, error surfacing, success notification.
-_Avoid_: generation job, stream, request
-
-**Sink**:
-The place a generation run's output lands. Delta sinks consume incremental text; snapshot sinks consume cumulative partial objects and persist once at the end.
-_Avoid_: target, callback, handler
-
-**Inline completion**:
-The ghost-text autocomplete inside the writer field. Deliberately not a generation run – it fails silently, aborts on document changes, and shows no Panel loading state.
-_Avoid_: suggestion (overloaded with skill-suggest), autocomplete
-
-**Prompt context**:
-Everything assembled around the user's prompt before a run: system prompt, skills, referenced pages, attached files, response format.
-_Avoid_: payload, request context
-
 ### Prompting
-
-**Skill**:
-A reusable instruction block the user references from the prompt editor via a trigger token. User-invoked only – a plain-text preset layered onto the run's instructions.
-_Avoid_: agent skill (the model-invoked, executable SKILL.md concept from agent frameworks – Copilot skills are neither)
 
 **Prompt template**:
 A saved, reusable prompt, optionally multilingual.
 _Avoid_: preset
 
-**Reference token**:
-An inline token in the prompt that stands for something to resolve later – a skill or a page.
-_Avoid_: mention, tag
+**Editor prompt**:
+A prompt an editor sends from the Panel – typed, predefined in a blueprint, or from a prompt template.
+_Avoid_: editor's own prompt, user prompt (the message role)
 
-### Proxy
+**Placeholder**:
+A marker in an editor prompt that stands for a field's current value.
+_Avoid_: template variable
+
+**Reference token**:
+A token in an editor prompt that stands for a skill or a page.
+_Avoid_: mention, tag, trigger token
+
+**Skill**:
+A reusable instruction block an editor pulls into a run through a reference token in an editor prompt; the model never invokes it on its own.
+_Avoid_: agent skill (model-invoked in agent frameworks)
+
+**Selection**:
+The text an editor has selected in a field, sent as is next to an editor prompt.
+
+**Prompt context**:
+Everything assembled around a prompt before a run: system prompt, skills, referenced pages, selection, attached files, response format.
+_Avoid_: payload, request context
+
+### Generation
+
+**Generation run**:
+One AI generation, from the submitted prompt to its output landing in the Panel. It can be aborted.
+_Avoid_: generation job, stream, request
+
+**Sink**:
+The place a generation run's output lands: streamed text in a field, or field values saved at the end.
+_Avoid_: target, callback, handler
+
+**Inline suggestion**:
+Ghost text the writer field proposes while an editor types. Unlike a generation run, it fails silently and shows no loading state.
+_Avoid_: inline completion, autocomplete
+
+### Providers
+
+**Provider**:
+An AI vendor whose models the plugin can run.
+_Avoid_: model vendor, backend
 
 **Proxy**:
 The server-side pass-through that forwards Panel AI requests to the configured provider, guarding the API key and the allowed upstream hosts.
-_Avoid_: gateway (reserved for cross-provider model prefixes), relay
+_Avoid_: gateway (see AI gateway), relay
 
-**Proxy transport**:
-The streaming HTTP leg of the proxy: carries a fully shaped request upstream and emits the response to the client as it arrives.
-_Avoid_: HTTP client, cURL wrapper
-
-**Provider**:
-An AI vendor the plugin can talk to (OpenAI, Anthropic, Google, Mistral).
-_Avoid_: model vendor, backend
-
-**Provider registry**:
-The single owner of provider knowledge, one per language. PHP: the provider name set, per-provider default models, default upstream hosts, and API key resolution. Panel: the SDK factory, default completion model, and playground exposure per provider.
-_Avoid_: provider config, provider map
-
-**Gateway prefix**:
-A provider-qualifying prefix on a model name (e.g. `anthropic/…`) used when a request crosses provider boundaries through an AI gateway.
+**AI gateway**:
+A service that routes requests to several providers' models; a model name then carries its provider as a prefix, like `anthropic/…`.
 
 **Reasoning effort**:
-The universal effort vocabulary users configure once (`provider-default` to `xhigh`); mapping it onto provider-specific knobs is the AI SDK's job, not the plugin's.
+How much the model reasons before it answers, set in one vocabulary for every provider.
 _Avoid_: thinking budget, thinking level
 
 ### Interop
 
 **Third-party seam**:
-The versioned API Copilot exposes to other plugins. Only plain data crosses it – never raw AI SDK values – so both plugins can move to a new SDK independently.
+The versioned API Copilot exposes to other plugins. Only plain data crosses it, never AI SDK values, and a prompt sent through it reaches the model as is.
 _Avoid_: public API, bridge, integration
