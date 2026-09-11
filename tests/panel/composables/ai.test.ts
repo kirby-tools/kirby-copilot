@@ -3,7 +3,7 @@ import { simulateReadableStream } from "ai";
 import { MockLanguageModelV4 } from "ai/test";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  buildUserPrompt,
+  resolveEditorPrompt,
   resolveLanguageModel,
   resolvePromptContext,
   useStreamText,
@@ -11,6 +11,8 @@ import {
 import { CopilotError } from "../../../src/panel/utils/error";
 
 const mockPagesGet = vi.fn();
+const defaultContent = { title: "Test", body: "Content" };
+let mockCurrentContent: Record<string, unknown> = defaultContent;
 
 vi.mock("kirbyuse", async () => {
   const { baseKirbyuseMock } = await import("../helpers/mock-kirbyuse");
@@ -28,7 +30,7 @@ vi.mock("kirbyuse", async () => {
       view: { title: "Test Page" },
     }),
     useContent: () => ({
-      currentContent: { value: { title: "Test", body: "Content" } },
+      currentContent: { value: mockCurrentContent },
     }),
   };
 });
@@ -110,11 +112,12 @@ vi.mock("../../../src/panel/composables/logger", () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockCurrentContent = defaultContent;
   mockUsePluginContext.mockReturnValue(createPluginConfig());
 });
 
 describe("useStreamText", () => {
-  describe("prompt handling", () => {
+  describe("prompt", () => {
     it("passes system and user prompts to streamText", async () => {
       mockStreamText.mockResolvedValue({ textStream: null });
 
@@ -138,6 +141,21 @@ describe("useStreamText", () => {
 
       const call = mockStreamText.mock.calls[0]?.[0];
       expect(call?.instructions).toBeUndefined();
+    });
+
+    it("sends userPrompt as is, even with a responseFormat", async () => {
+      mockStreamText.mockResolvedValue({ textStream: null });
+
+      await useStreamText({
+        userPrompt: "Summarize {title} @page://about @skill://brand-voice",
+        responseFormat: "markdown",
+      });
+
+      expect(mockStreamText).toHaveBeenCalledWith(
+        expect.objectContaining({
+          prompt: "Summarize {title} @page://about @skill://brand-voice",
+        }),
+      );
     });
   });
 
@@ -559,70 +577,171 @@ describe("resolveLanguageModel", () => {
 });
 
 describe("resolvePromptContext", () => {
+  it("converts images to byte arrays", async () => {
+    const imageFile = new File(["image-data"], "test.png", {
+      type: "image/png",
+    });
+
+    const { imageByteArrays } = await resolvePromptContext({
+      userPrompt: "Test",
+      files: [imageFile],
+    });
+
+    expect(imageByteArrays).toHaveLength(1);
+    expect(imageByteArrays[0]).toBeInstanceOf(Uint8Array);
+  });
+
+  it("filters out non-image files from imageByteArrays", async () => {
+    const files = [
+      new File(["img"], "test.png", { type: "image/png" }),
+      new File(["text"], "doc.txt", { type: "text/plain" }),
+    ];
+
+    const { imageByteArrays } = await resolvePromptContext({
+      userPrompt: "Test",
+      files,
+    });
+
+    expect(imageByteArrays).toHaveLength(1);
+  });
+
+  it("sorts images into imageByteArrays and PDFs into pdfByteArrays", async () => {
+    const files = [
+      new File(["img"], "test.png", { type: "image/png" }),
+      new File(["pdf"], "doc.pdf", { type: "application/pdf" }),
+    ];
+
+    const { imageByteArrays, pdfByteArrays } = await resolvePromptContext({
+      userPrompt: "Test",
+      files,
+    });
+
+    expect(imageByteArrays).toHaveLength(1);
+    expect(pdfByteArrays).toHaveLength(1);
+  });
+});
+
+describe("resolveEditorPrompt", () => {
   beforeEach(() => {
     mockPagesGet.mockReset();
   });
 
-  describe("prompt processing", () => {
+  describe("placeholders", () => {
     it("returns the user prompt unchanged when no template variables", async () => {
-      const { userPromptWithContext } = await resolvePromptContext({
+      const { userPrompt } = await resolveEditorPrompt({
         userPrompt: "Simple prompt without variables",
       });
 
-      expect(userPromptWithContext).toBe("Simple prompt without variables");
+      expect(userPrompt).toBe("Simple prompt without variables");
     });
 
     it("renders template variables in user prompt", async () => {
-      const { userPromptWithContext } = await resolvePromptContext({
+      const { userPrompt } = await resolveEditorPrompt({
         userPrompt: "Page title: {title}",
       });
 
-      expect(userPromptWithContext).toContain("Test");
+      expect(userPrompt).toBe("Page title: Test Page");
+    });
+
+    it("resolves {Title} like {title}", async () => {
+      const { userPrompt } = await resolveEditorPrompt({
+        userPrompt: "Page title: {Title}",
+      });
+
+      expect(userPrompt).toBe("Page title: Test Page");
     });
   });
 
-  describe("image input handling", () => {
-    it("converts images to byte arrays", async () => {
-      const imageFile = new File(["image-data"], "test.png", {
-        type: "image/png",
+  describe("selection and response format", () => {
+    it("prepends responseFormat as a <response_format> block", async () => {
+      const { userPrompt } = await resolveEditorPrompt({
+        userPrompt: "Write something",
+        responseFormat: "markdown",
       });
 
-      const { imageByteArrays } = await resolvePromptContext({
-        userPrompt: "Test",
-        files: [imageFile],
-      });
-
-      expect(imageByteArrays).toHaveLength(1);
-      expect(imageByteArrays[0]).toBeInstanceOf(Uint8Array);
+      expect(userPrompt).toBe(
+        "<response_format>markdown</response_format>\n\nWrite something",
+      );
     });
 
-    it("filters out non-image files from imageByteArrays", async () => {
-      const files = [
-        new File(["img"], "test.png", { type: "image/png" }),
-        new File(["text"], "doc.txt", { type: "text/plain" }),
-      ];
-
-      const { imageByteArrays } = await resolvePromptContext({
-        userPrompt: "Test",
-        files,
+    it("prepends the selection as a <selection> block", async () => {
+      const { userPrompt } = await resolveEditorPrompt({
+        userPrompt: "Edit this",
+        selection: "selected text",
       });
 
-      expect(imageByteArrays).toHaveLength(1);
+      expect(userPrompt).toBe(
+        "<selection>\nselected text\n</selection>\n\nEdit this",
+      );
+    });
+
+    it("leaves out an empty selection", async () => {
+      const { userPrompt } = await resolveEditorPrompt({
+        userPrompt: "Edit this",
+        selection: "",
+      });
+
+      expect(userPrompt).toBe("Edit this");
     });
   });
 
-  describe("page IDs", () => {
+  describe("resolution scope", () => {
+    const literalText =
+      "Use {0} and {count} for {{x}}, {Name}, @page://about and @skill://brand-voice.";
+
+    beforeEach(() => {
+      mockUsePluginContext.mockReturnValue(
+        createPluginConfig({
+          skills: [
+            {
+              id: "brand-voice",
+              label: "Brand Voice",
+              instructions: "Write casually.",
+            },
+          ],
+        }),
+      );
+    });
+
+    it("keeps the selection as is next to the resolved prompt", async () => {
+      const { systemPrompt, userPrompt } = await resolveEditorPrompt({
+        userPrompt: "Improve the text for {title}",
+        selection: literalText,
+        responseFormat: "text",
+      });
+
+      expect(userPrompt).toBe(
+        `<response_format>text</response_format>\n\n<selection>\n${literalText}\n</selection>\n\nImprove the text for Test Page`,
+      );
+      expect(systemPrompt).toBeUndefined();
+      expect(mockPagesGet).not.toHaveBeenCalled();
+    });
+
+    it("resolves no reference token or placeholder inside a placeholder's value", async () => {
+      mockCurrentContent = { body: literalText };
+
+      const { systemPrompt, userPrompt } = await resolveEditorPrompt({
+        userPrompt: "Summarize {body}",
+      });
+
+      expect(userPrompt).toBe(`Summarize ${literalText}`);
+      expect(systemPrompt).toBeUndefined();
+      expect(mockPagesGet).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("page references", () => {
     it("appends reference_page blocks with fetched page content", async () => {
       mockPagesGet.mockResolvedValue({
         title: "About",
         content: { headline: "About Us", body: "We are great" },
       });
 
-      const { userPromptWithContext } = await resolvePromptContext({
+      const { userPrompt } = await resolveEditorPrompt({
         userPrompt: "Summarize @page://about",
       });
 
-      expect(userPromptWithContext).toMatchInlineSnapshot(`
+      expect(userPrompt).toMatchInlineSnapshot(`
         "Summarize @page://about
 
         <reference_page id="about">
@@ -634,11 +753,11 @@ describe("resolvePromptContext", () => {
     it("warns about an unreadable reference and leaves it out of the context", async () => {
       mockPagesGet.mockRejectedValue(new Error("Not found"));
 
-      const { userPromptWithContext } = await resolvePromptContext({
+      const { userPrompt } = await resolveEditorPrompt({
         userPrompt: "Summarize @page://gone",
       });
 
-      expect(userPromptWithContext).toBe("Summarize @page://gone");
+      expect(userPrompt).toBe("Summarize @page://gone");
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining("gone"),
       );
@@ -647,26 +766,9 @@ describe("resolvePromptContext", () => {
     it("does not warn when every reference resolves", async () => {
       mockPagesGet.mockResolvedValue({ title: "About", content: {} });
 
-      await resolvePromptContext({ userPrompt: "Summarize @page://about" });
+      await resolveEditorPrompt({ userPrompt: "Summarize @page://about" });
 
       expect(mockLogger.warn).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("mixed file handling", () => {
-    it("separates images and PDFs correctly", async () => {
-      const files = [
-        new File(["img"], "test.png", { type: "image/png" }),
-        new File(["pdf"], "doc.pdf", { type: "application/pdf" }),
-      ];
-
-      const { imageByteArrays, pdfByteArrays } = await resolvePromptContext({
-        userPrompt: "Test",
-        files,
-      });
-
-      expect(imageByteArrays).toHaveLength(1);
-      expect(pdfByteArrays).toHaveLength(1);
     });
   });
 
@@ -691,12 +793,12 @@ describe("resolvePromptContext", () => {
     });
 
     it("wraps tokens found in the prompt with the human label as attribute", async () => {
-      const { systemPromptWithContext } = await resolvePromptContext({
+      const { systemPrompt } = await resolveEditorPrompt({
         userPrompt: "Write a headline @skill://brand-voice",
         systemPrompt: "You are a writer.",
       });
 
-      expect(systemPromptWithContext).toContain(
+      expect(systemPrompt).toContain(
         `<skill name="Brand Voice">\nWrite casually.\n</skill>`,
       );
     });
@@ -714,21 +816,21 @@ describe("resolvePromptContext", () => {
         }),
       );
 
-      const { systemPromptWithContext } = await resolvePromptContext({
+      const { systemPrompt } = await resolveEditorPrompt({
         userPrompt: "Write @skill://tricky",
       });
 
-      expect(systemPromptWithContext).toContain(
+      expect(systemPrompt).toContain(
         `<skill name="Wörter &amp; &quot;Sätze&quot; &lt;case&gt;">\nDo things.\n</skill>`,
       );
     });
 
-    it("strips `@skill://id` tokens from the user prompt", async () => {
-      const { userPromptWithContext } = await resolvePromptContext({
+    it("strips @skill://id tokens from the user prompt", async () => {
+      const { userPrompt } = await resolveEditorPrompt({
         userPrompt: "Write a headline @skill://brand-voice about Kirby.",
       });
 
-      expect(userPromptWithContext).toBe("Write a headline about Kirby.");
+      expect(userPrompt).toBe("Write a headline about Kirby.");
     });
 
     it.each([
@@ -741,31 +843,31 @@ describe("resolvePromptContext", () => {
         userPrompt: "@skill://brand-voice Foo bar @skill://be-brief",
       },
     ])(
-      "collapses stripped tokens $position to `Foo bar`",
-      async ({ userPrompt }) => {
-        const { userPromptWithContext } = await resolvePromptContext({
-          userPrompt,
+      "collapses stripped tokens $position to Foo bar",
+      async ({ userPrompt: prompt }) => {
+        const { userPrompt } = await resolveEditorPrompt({
+          userPrompt: prompt,
         });
 
-        expect(userPromptWithContext).toBe("Foo bar");
+        expect(userPrompt).toBe("Foo bar");
       },
     );
 
     it("strips only horizontal whitespace after the token, leaving newlines", async () => {
-      const { userPromptWithContext } = await resolvePromptContext({
+      const { userPrompt } = await resolveEditorPrompt({
         userPrompt: "First line\n@skill://brand-voice\nSecond line",
       });
 
-      expect(userPromptWithContext).toBe("First line\n\nSecond line");
+      expect(userPrompt).toBe("First line\n\nSecond line");
     });
 
     it("joins multiple skill blocks with the system prompt using blank lines", async () => {
-      const { systemPromptWithContext } = await resolvePromptContext({
+      const { systemPrompt } = await resolveEditorPrompt({
         userPrompt: "@skill://brand-voice @skill://be-brief write a headline",
         systemPrompt: "You are a writer.",
       });
 
-      expect(systemPromptWithContext).toBe(
+      expect(systemPrompt).toBe(
         [
           "You are a writer.",
           `<skill name="Brand Voice">\nWrite casually.\n</skill>`,
@@ -775,11 +877,11 @@ describe("resolvePromptContext", () => {
     });
 
     it("returns skill blocks as system prompt when no base prompt is set", async () => {
-      const { systemPromptWithContext } = await resolvePromptContext({
+      const { systemPrompt } = await resolveEditorPrompt({
         userPrompt: "Write @skill://brand-voice",
       });
 
-      expect(systemPromptWithContext).toBe(
+      expect(systemPrompt).toBe(
         `<skill name="Brand Voice">\nWrite casually.\n</skill>`,
       );
     });
@@ -790,15 +892,14 @@ describe("resolvePromptContext", () => {
         content: { body: "We are great" },
       });
 
-      const { systemPromptWithContext, userPromptWithContext } =
-        await resolvePromptContext({
-          userPrompt: "@skill://brand-voice Summarize @page://about",
-        });
+      const { systemPrompt, userPrompt } = await resolveEditorPrompt({
+        userPrompt: "@skill://brand-voice Summarize @page://about",
+      });
 
-      expect(systemPromptWithContext).toBe(
+      expect(systemPrompt).toBe(
         `<skill name="Brand Voice">\nWrite casually.\n</skill>`,
       );
-      expect(userPromptWithContext).toBe(
+      expect(userPrompt).toBe(
         `Summarize @page://about\n\n<reference_page id="about">\n{"title":"About","body":"We are great"}\n</reference_page>`,
       );
     });
@@ -806,17 +907,16 @@ describe("resolvePromptContext", () => {
     it("strips unknown token ids from the user prompt and drops them from the system prompt", async () => {
       mockUsePluginContext.mockReturnValue(createPluginConfig());
 
-      const { systemPromptWithContext, userPromptWithContext } =
-        await resolvePromptContext({
-          userPrompt: "Write @skill://typo something",
-        });
+      const { systemPrompt, userPrompt } = await resolveEditorPrompt({
+        userPrompt: "Write @skill://typo something",
+      });
 
-      expect(systemPromptWithContext).toBeUndefined();
-      expect(userPromptWithContext).toBe("Write something");
+      expect(systemPrompt).toBeUndefined();
+      expect(userPrompt).toBe("Write something");
     });
 
     it("dedupes unknown token ids into a single warning", async () => {
-      await resolvePromptContext({
+      await resolveEditorPrompt({
         userPrompt: "Write @skill://typo @skill://typo @skill://gone",
       });
 
@@ -827,7 +927,7 @@ describe("resolvePromptContext", () => {
     });
 
     it("does not warn when every token id is configured", async () => {
-      await resolvePromptContext({
+      await resolveEditorPrompt({
         userPrompt: "Write @skill://brand-voice something",
       });
 
@@ -835,67 +935,21 @@ describe("resolvePromptContext", () => {
     });
 
     it("returns undefined systemPrompt when no tokens and no base prompt", async () => {
-      const { systemPromptWithContext } = await resolvePromptContext({
+      const { systemPrompt } = await resolveEditorPrompt({
         userPrompt: "Write a headline",
       });
 
-      expect(systemPromptWithContext).toBeUndefined();
+      expect(systemPrompt).toBeUndefined();
     });
 
     it("passes the base system prompt through unchanged when no tokens match", async () => {
-      const { systemPromptWithContext } = await resolvePromptContext({
+      const { systemPrompt } = await resolveEditorPrompt({
         userPrompt: "Write a headline",
         systemPrompt: "You are a writer.",
       });
 
-      expect(systemPromptWithContext).toBe("You are a writer.");
+      expect(systemPrompt).toBe("You are a writer.");
     });
-  });
-});
-
-describe("buildUserPrompt", () => {
-  it("returns prompt only when no options provided", () => {
-    expect(buildUserPrompt("Hello world")).toBe("Hello world");
-  });
-
-  it("returns prompt only when options are empty", () => {
-    expect(buildUserPrompt("Hello world", {})).toBe("Hello world");
-  });
-
-  it("prepends response format when provided", () => {
-    const result = buildUserPrompt("Write something", {
-      responseFormat: "markdown",
-    });
-    expect(result).toBe(
-      "<response_format>markdown</response_format>\n\nWrite something",
-    );
-  });
-
-  it("prepends selection when provided", () => {
-    const result = buildUserPrompt("Edit this", {
-      selection: "selected text",
-    });
-    expect(result).toBe(
-      "<selection>\nselected text\n</selection>\n\nEdit this",
-    );
-  });
-
-  it("includes both response format and selection in correct order", () => {
-    const result = buildUserPrompt("Process this", {
-      responseFormat: "rich-text",
-      selection: "some content",
-    });
-    expect(result).toBe(
-      "<response_format>rich-text</response_format>\n\n<selection>\nsome content\n</selection>\n\nProcess this",
-    );
-  });
-
-  it("filters out falsy values", () => {
-    const result = buildUserPrompt("Prompt", {
-      responseFormat: undefined,
-      selection: "",
-    });
-    expect(result).toBe("Prompt");
   });
 });
 

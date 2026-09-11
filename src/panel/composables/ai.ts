@@ -46,25 +46,6 @@ import {
 
 const DEFAULT_PLAYGROUND_MODEL_PROVIDER = "google";
 
-export function buildUserPrompt(
-  prompt: string,
-  {
-    responseFormat,
-    selection,
-  }: {
-    responseFormat?: OutputFormat;
-    selection?: string;
-  } = {},
-) {
-  return [
-    responseFormat && `<response_format>${responseFormat}</response_format>`,
-    selection && `<selection>\n${selection}\n</selection>`,
-    prompt,
-  ]
-    .filter(Boolean)
-    .join("\n\n");
-}
-
 export async function useStreamText({
   userPrompt,
   systemPrompt,
@@ -114,19 +95,11 @@ export async function useStreamText({
     output ??
     (outputSchema ? Output.object({ schema: outputSchema }) : undefined);
 
-  const {
-    userPromptWithContext,
-    systemPromptWithContext,
-    imageByteArrays,
-    pdfByteArrays,
-  } = await resolvePromptContext({
-    userPrompt,
-    systemPrompt,
-    files,
-  });
+  const { userPromptWithContext, imageByteArrays, pdfByteArrays } =
+    await resolvePromptContext({ userPrompt, files });
 
   if (logLevel > 1) {
-    logger.info("System prompt:", systemPromptWithContext);
+    logger.info("System prompt:", systemPrompt);
     logger.info("User prompt:", userPromptWithContext);
   }
 
@@ -139,7 +112,7 @@ export async function useStreamText({
     reasoning,
     providerOptions,
     output: resolvedOutput,
-    instructions: systemPromptWithContext || undefined,
+    instructions: systemPrompt || undefined,
     ...(hasFiles
       ? {
           messages: [
@@ -268,35 +241,86 @@ export async function resolveLanguageModel({
 }
 
 /**
- * Assembles the final system and user prompts plus any file attachments
- * that the AI SDK call needs.
+ * Assembles the final user prompt plus any file attachments that the AI SDK
+ * call needs.
  *
  * @remarks
- * `@skill://id` tokens are stripped once resolved, so they never reach the
- * model, while `@page://id` tokens stay in place so the model can correlate
- * them with the appended `<reference_page>` blocks. PDFs beyond the native
- * attachment cap are inlined as extracted text instead of attached.
+ * PDFs beyond the native attachment cap are inlined as extracted text instead
+ * of attached.
  */
 export async function resolvePromptContext({
-  systemPrompt,
   userPrompt,
   files = [],
 }: {
-  systemPrompt?: string;
   userPrompt: string;
   files?: File[];
 }) {
-  const { config } = await usePluginContext();
+  let userPromptWithContext = userPrompt;
 
-  const contentContext = createContentContext();
-  let userPromptWithContext = template(
-    normalizePlaceholders(userPrompt),
-    contentContext,
+  const images = files.filter((file) => file.type.startsWith("image/"));
+  const pdfs = files.filter((file) => file.type === "application/pdf");
+
+  const totalPdfSize = pdfs.reduce((sum, pdf) => sum + pdf.size, 0);
+  const hasNativePdfSupport = totalPdfSize <= PDF_SIZE_LIMIT;
+
+  // Providers reject PDFs above the native attachment cap; extract text
+  // client-side so the content still reaches the model.
+  if (!hasNativePdfSupport && pdfs.length > 0) {
+    const pdfTexts = await Promise.all(pdfs.map(extractTextFromPdf));
+    userPromptWithContext += `\n\n${pdfTexts
+      .map(
+        (value, index) =>
+          `<pdf_document_${index + 1}>\n${value}\n</pdf_document_${index + 1}>`,
+      )
+      .join("\n\n")}`;
+  }
+
+  const imageByteArrays = await Promise.all(
+    images.map(async (file) => {
+      const reducedBlob = await toReducedBlob(file, { maxDimension: 2048 });
+      const arrayBuffer = await reducedBlob.arrayBuffer();
+      return new Uint8Array(arrayBuffer);
+    }),
   );
+
+  const pdfByteArrays = hasNativePdfSupport
+    ? await Promise.all(
+        pdfs.map(async (file) => {
+          const arrayBuffer = await file.arrayBuffer();
+          return new Uint8Array(arrayBuffer);
+        }),
+      )
+    : [];
+
+  return { userPromptWithContext, imageByteArrays, pdfByteArrays };
+}
+
+/**
+ * Resolves placeholders and reference tokens in an editor prompt and wraps
+ * it with the selection and the response format, ready for `useStreamText`.
+ *
+ * @remarks
+ * Resolution never reaches into the selection or a placeholder's value.
+ * Skill references are stripped whether their skill is configured or not, so
+ * they never reach the model, while page references stay in place so the
+ * model can correlate them with the appended `<reference_page>` blocks.
+ */
+export async function resolveEditorPrompt({
+  systemPrompt,
+  userPrompt,
+  selection,
+  responseFormat,
+}: {
+  systemPrompt?: string;
+  userPrompt: string;
+  selection?: string;
+  responseFormat?: OutputFormat;
+}) {
+  const { config } = await usePluginContext();
 
   const { resolvedSkills, unknownSkillIds } = resolveSkillRefs(
     config.skills ?? [],
-    extractSkillRefIds(userPromptWithContext),
+    extractSkillRefIds(userPrompt),
   );
 
   if (unknownSkillIds.length > 0) {
@@ -313,9 +337,15 @@ export async function resolvePromptContext({
   const systemPromptWithContext =
     [systemPrompt, ...skillBlocks].filter(Boolean).join("\n\n") || undefined;
 
-  userPromptWithContext = stripSkillRefTokens(userPromptWithContext).trim();
+  let userPromptWithContext = buildUserPrompt(
+    template(
+      normalizePlaceholders(stripSkillRefTokens(userPrompt)),
+      createContentContext(),
+    ).trim(),
+    { responseFormat, selection },
+  );
 
-  const uniquePageIds = [...new Set(extractPageRefIds(userPromptWithContext))];
+  const uniquePageIds = [...new Set(extractPageRefIds(userPrompt))];
   if (uniquePageIds.length > 0) {
     const panel = usePanel();
 
@@ -367,47 +397,29 @@ export async function resolvePromptContext({
     }
   }
 
-  const images = files.filter((file) => file.type.startsWith("image/"));
-  const pdfs = files.filter((file) => file.type === "application/pdf");
-
-  const totalPdfSize = pdfs.reduce((sum, pdf) => sum + pdf.size, 0);
-  const hasNativePdfSupport = totalPdfSize <= PDF_SIZE_LIMIT;
-
-  // Providers reject PDFs above the native-attachment cap; extract text
-  // client-side so the content still reaches the model.
-  if (!hasNativePdfSupport && pdfs.length > 0) {
-    const pdfTexts = await Promise.all(pdfs.map(extractTextFromPdf));
-    userPromptWithContext += `\n\n${pdfTexts
-      .map(
-        (value, index) =>
-          `<pdf_document_${index + 1}>\n${value}\n</pdf_document_${index + 1}>`,
-      )
-      .join("\n\n")}`;
-  }
-
-  const imageByteArrays = await Promise.all(
-    images.map(async (file) => {
-      const reducedBlob = await toReducedBlob(file, { maxDimension: 2048 });
-      const arrayBuffer = await reducedBlob.arrayBuffer();
-      return new Uint8Array(arrayBuffer);
-    }),
-  );
-
-  const pdfByteArrays = hasNativePdfSupport
-    ? await Promise.all(
-        pdfs.map(async (file) => {
-          const arrayBuffer = await file.arrayBuffer();
-          return new Uint8Array(arrayBuffer);
-        }),
-      )
-    : [];
-
   return {
-    systemPromptWithContext,
-    userPromptWithContext,
-    imageByteArrays,
-    pdfByteArrays,
+    systemPrompt: systemPromptWithContext,
+    userPrompt: userPromptWithContext,
   };
+}
+
+function buildUserPrompt(
+  prompt: string,
+  {
+    responseFormat,
+    selection,
+  }: {
+    responseFormat?: OutputFormat;
+    selection?: string;
+  },
+) {
+  return [
+    responseFormat && `<response_format>${responseFormat}</response_format>`,
+    selection && `<selection>\n${selection}\n</selection>`,
+    prompt,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 }
 
 /**

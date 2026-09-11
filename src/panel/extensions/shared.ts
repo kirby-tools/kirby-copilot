@@ -1,6 +1,5 @@
 import type { ActiveField, OutputFormat, PromptContext } from "../types";
 import {
-  buildUserPrompt,
   ensurePlaygroundApiKey,
   runTextGeneration,
   usePluginContext,
@@ -50,7 +49,8 @@ export async function streamTextToField(
 
   const run = runTextGeneration({
     streamOptions: {
-      userPrompt: buildUserPrompt(prompt, { responseFormat, selection }),
+      userPrompt: prompt,
+      selection,
       systemPrompt: config.systemPrompt || DEFAULT_SYSTEM_PROMPT,
       responseFormat,
       files,

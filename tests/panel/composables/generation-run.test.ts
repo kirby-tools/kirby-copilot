@@ -36,7 +36,7 @@ vi.mock("../../../src/panel/utils/ai", () => ({
 }));
 
 // Tests inject their model directly, so the context fetch that
-// `resolvePromptContext` awaits never has to hit the Panel API.
+// `resolveEditorPrompt` awaits never has to hit the Panel API.
 vi.mock("../../../src/panel/composables/plugin", () => ({
   usePluginContext: () => Promise.resolve({ config: {} }),
 }));
@@ -128,6 +128,34 @@ describe("runTextGeneration", () => {
     expect(panel.isLoading).toBe(false);
     expect(panel.notification.success).toHaveBeenCalledOnce();
     expect(panel.notification.error).not.toHaveBeenCalled();
+  });
+
+  it("resolves the editor prompt and sends the selection as is", async () => {
+    const model = createTextModel(["Done"]);
+
+    const run = runTextGeneration({
+      streamOptions: {
+        userPrompt: "Improve {title}",
+        selection: "Keep {title}",
+        responseFormat: "text",
+        model,
+      },
+      sink: { write: () => {} },
+    });
+    await run!.done;
+
+    expect(model.doStreamCalls[0]?.prompt).toEqual([
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: "<response_format>text</response_format>\n\n<selection>\nKeep {title}\n</selection>\n\nImprove Test Page",
+          },
+        ],
+        providerOptions: undefined,
+      },
+    ]);
   });
 
   it("stops writing and suppresses all notifications when aborted mid-stream", async () => {

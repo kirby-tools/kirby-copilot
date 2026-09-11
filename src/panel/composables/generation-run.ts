@@ -1,12 +1,15 @@
 import { usePanel } from "kirbyuse";
 import { STORAGE_KEY_PREFIX } from "../constants";
 import { handleStreamError } from "../utils/error";
-import { useStreamText } from "./ai";
+import { resolveEditorPrompt, useStreamText } from "./ai";
 
 type StreamTextOptions = Omit<
   Parameters<typeof useStreamText>[0],
   "abortSignal"
->;
+> & {
+  /** Text selected in a field, sent as is next to the editor prompt. */
+  selection?: string;
+};
 
 export interface GenerationRun {
   /** Settles when the run has finished, was aborted, or failed. */
@@ -63,6 +66,7 @@ export function runTextGeneration({
   return startGenerationRun(runOptions, async (signal) => {
     const { textStream } = await useStreamText({
       ...streamOptions,
+      ...(await resolveEditorPrompt(streamOptions)),
       abortSignal: signal,
     });
 
@@ -90,6 +94,7 @@ export function runStructuredGeneration({
   return startGenerationRun(runOptions, async (signal) => {
     const { partialOutputStream, output: finalOutput } = await useStreamText({
       ...streamOptions,
+      ...(await resolveEditorPrompt(streamOptions)),
       abortSignal: signal,
     });
 

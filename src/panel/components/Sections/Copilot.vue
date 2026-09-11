@@ -24,7 +24,6 @@ import {
 import { section } from "kirbyuse/props";
 import { isObject } from "utilful";
 import {
-  buildUserPrompt,
   ensurePlaygroundApiKey,
   runStructuredGeneration,
   runTextGeneration,
@@ -273,7 +272,7 @@ async function generate() {
 
       activeRun = runTextGeneration({
         streamOptions: {
-          userPrompt: buildUserPrompt(currentPrompt.value, { responseFormat }),
+          userPrompt: currentPrompt.value,
           systemPrompt: systemPrompt.value,
           responseFormat,
           files: files.value,
