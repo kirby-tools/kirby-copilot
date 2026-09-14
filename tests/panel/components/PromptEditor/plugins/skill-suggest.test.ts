@@ -48,7 +48,7 @@ function createHeadlessEditor() {
 }
 
 describe("commitSkillSuggestion", () => {
-  it("replaces the typed trigger with the skill token plus a trailing space, matching the page picker's insertion", () => {
+  it("replaces the typed trigger with the reference token and a trailing space", () => {
     const editor = createHeadlessEditor();
     editor.type("Write a headline @skill://br");
 

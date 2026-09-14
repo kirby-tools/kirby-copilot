@@ -37,7 +37,7 @@ describe("generateKirbyLayoutsSchema", () => {
     ).not.toThrow();
   });
 
-  it("parses a multi-column layout declared via `layouts` config", () => {
+  it("parses a multi-column layout declared in `layouts`", () => {
     const schema = generateKirbyLayoutsSchema([textBlock], {
       layouts: [["1/1"], ["1/2", "1/2"]],
     });

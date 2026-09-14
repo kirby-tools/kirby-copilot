@@ -203,7 +203,7 @@ describe("runTextGeneration", () => {
     expect(panel.isLoading).toBe(false);
   });
 
-  it("falls back to the generic message when the stream fails with a plain Error", async () => {
+  it("falls back to the generic error notification when the stream fails with a TypeError", async () => {
     const run = runTextGeneration({
       streamOptions: {
         userPrompt: "Write",
@@ -277,7 +277,7 @@ describe("runTextGeneration", () => {
     expect(panel.notification.success).toHaveBeenCalledOnce();
   });
 
-  it("skips the final persist when aborted after the stream completed", async () => {
+  it("skips persistFinal when aborted during the last write", async () => {
     const persistFinal = vi.fn();
 
     const run = runTextGeneration({
@@ -299,7 +299,7 @@ describe("runTextGeneration", () => {
     expect(panel.notification.success).not.toHaveBeenCalled();
   });
 
-  it("aborts on Escape while running and detaches the listener afterwards", async () => {
+  it("aborts on Escape with escapeToAbort and detaches the keydown listener afterwards", async () => {
     const keydownListeners = new Set<(event: { key: string }) => void>();
     vi.stubGlobal("document", {
       addEventListener: (type: string, handler: never) => {
@@ -334,7 +334,7 @@ describe("runTextGeneration", () => {
   });
 });
 
-describe("generation run single-flight", () => {
+describe("concurrent generation runs", () => {
   it("declines a second run with a notification while one is active and accepts runs again afterwards", async () => {
     const rejectedSinkWrite = vi.fn();
     let rejectedRun: unknown = "unset";
@@ -410,7 +410,7 @@ describe("runStructuredGeneration", () => {
     expect(panel.notification.error).not.toHaveBeenCalled();
   });
 
-  it("skips the persisting write and stays silent when aborted during streaming", async () => {
+  it("skips persistFinal and stays silent when aborted mid-stream", async () => {
     const persistFinal = vi.fn();
 
     const run = runStructuredGeneration({

@@ -77,7 +77,7 @@ final class ContextRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function invalid_providers_openai_api_is_unset_without_debug(): void
+    public function drops_an_invalid_providers_openai_api_without_debug(): void
     {
         $response = $this->callContextRoute([
             'johannschopplich.copilot' => [
@@ -94,7 +94,7 @@ final class ContextRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function valid_enum_values_are_preserved(): void
+    public function keeps_valid_enum_values(): void
     {
         $response = $this->callContextRoute([
             'johannschopplich.copilot' => [
@@ -227,7 +227,7 @@ final class ContextRouteTest extends ApiRouteTestCase
 
     #[Test]
     #[DataProvider('invalidSkillEntries')]
-    public function invalid_skill_entries_are_dropped(array $entry): void
+    public function drops_invalid_skill_entries_without_debug(array $entry): void
     {
         $response = $this->callContextRoute([
             'johannschopplich.copilot' => [
@@ -355,7 +355,7 @@ final class ContextRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function prompt_templates_are_normalized_and_kept_when_both_fields_are_set(): void
+    public function keeps_prompt_templates_with_label_and_prompt(): void
     {
         $response = $this->callContextRoute([
             'johannschopplich.copilot' => [
@@ -387,7 +387,7 @@ final class ContextRouteTest extends ApiRouteTestCase
 
     #[Test]
     #[DataProvider('invalidPromptTemplateEntries')]
-    public function invalid_prompt_templates_are_dropped(array $entry): void
+    public function drops_invalid_prompt_template_entries_without_debug(array $entry): void
     {
         $response = $this->callContextRoute([
             'johannschopplich.copilot' => [
@@ -441,15 +441,15 @@ final class ContextRouteTest extends ApiRouteTestCase
         return [
             'false stays false'                    => [false, false],
             'true expands to default debounce'     => [true, ['debounce' => 1000]],
-            'empty array disables feature'         => [[], false],
-            'debounce honors minimum of 500ms'     => [['debounce' => 100], ['debounce' => 500]],
-            'debounce passes values above minimum' => [['debounce' => 2500], ['debounce' => 2500]],
+            'empty array becomes false'            => [[], false],
+            'debounce raises 100 to 500'           => [['debounce' => 100], ['debounce' => 500]],
+            'debounce keeps 2500'                  => [['debounce' => 2500], ['debounce' => 2500]],
         ];
     }
 
     #[Test]
     #[DataProvider('completionValues')]
-    public function completion_value_is_normalized(mixed $input, mixed $expected): void
+    public function normalizes_the_completion_option(mixed $input, mixed $expected): void
     {
         $response = $this->callContextRoute([
             'johannschopplich.copilot' => [
@@ -462,7 +462,7 @@ final class ContextRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function api_key_closures_are_resolved_to_boolean_flags(): void
+    public function resolves_api_key_closures_to_has_api_key_flags(): void
     {
         $response = $this->callContextRoute([
             'johannschopplich.copilot' => [
@@ -505,7 +505,7 @@ final class ContextRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function forwards_the_options_no_normalization_step_names(): void
+    public function forwards_system_prompt_and_excluded_blocks_unchanged(): void
     {
         $response = $this->callContextRoute([
             'johannschopplich.copilot' => [

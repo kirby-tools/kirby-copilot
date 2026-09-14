@@ -77,7 +77,7 @@ function createModelFailingBeforeOutput() {
 }
 
 describe("third-party seam contract", () => {
-  it("matches the contract fixture mirrored in Kirby Content Translator", () => {
+  it("exposes the apiVersion and every method the fixture pins", () => {
     expect(copilotThirdPartyApi.apiVersion).toBe(contract.apiVersion);
 
     for (const method of contract.methods) {

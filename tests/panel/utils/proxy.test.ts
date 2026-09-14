@@ -36,7 +36,7 @@ describe("watchForProxyError", () => {
     expect(output).toEqual(chunks);
   });
 
-  it("fails the stream with the message after the marker", async () => {
+  it("fails the stream with a CopilotError carrying the message after PROXY_ERROR_MARKER", async () => {
     const chunks = [
       'data: {"delta":"Hi"}\n\n',
       `: ${PROXY_ERROR_MARKER} Upstream request failed: Operation timed out\n\n`,
@@ -50,7 +50,7 @@ describe("watchForProxyError", () => {
     );
   });
 
-  it("fails the stream on a marker split across two chunks", async () => {
+  it("fails the stream on a PROXY_ERROR_MARKER split across two chunks", async () => {
     const line = `: ${PROXY_ERROR_MARKER} Upstream request failed: Operation timed out\n\n`;
     const chunks = [line.slice(0, 12), line.slice(12)];
 
@@ -59,7 +59,7 @@ describe("watchForProxyError", () => {
     );
   });
 
-  it("fails the stream on a marker line left open at close", async () => {
+  it("fails the stream on a PROXY_ERROR_MARKER line left open at close", async () => {
     const chunks = [`: ${PROXY_ERROR_MARKER} Upstream request failed`];
 
     await expect(pipe(chunks)).rejects.toThrow("Upstream request failed");

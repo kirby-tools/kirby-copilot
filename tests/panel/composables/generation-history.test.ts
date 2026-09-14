@@ -74,7 +74,7 @@ describe("useGenerationHistory", () => {
       expect(history.value.at(-1)).toBe("entry-5");
     });
 
-    it("resets currentIndex so ArrowUp re-starts at the freshest entry", async () => {
+    it("resets currentIndex to -1 (ArrowUp starts again at the newest entry)", async () => {
       const { addToHistory, navigateHistory, currentIndex } =
         await loadComposable();
       addToHistory("a");
@@ -140,7 +140,7 @@ describe("useGenerationHistory", () => {
   });
 
   describe("deleteEntry", () => {
-    it("removes by value and persists", async () => {
+    it("removes an entry by value", async () => {
       await seedStorage(["a", "b", "c"]);
       const { deleteEntry, history } = await loadComposable();
 
@@ -156,7 +156,7 @@ describe("useGenerationHistory", () => {
   });
 
   describe("clearHistory", () => {
-    it("empties the list and resets currentIndex", async () => {
+    it("empties history and resets currentIndex to -1", async () => {
       await seedStorage(["a", "b"]);
       const { clearHistory, history, currentIndex, navigateHistory } =
         await loadComposable();

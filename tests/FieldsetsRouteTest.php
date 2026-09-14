@@ -34,7 +34,7 @@ final class FieldsetsRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function block_fields_are_extracted(): void
+    public function returns_the_name_and_fields_of_a_block_blueprint(): void
     {
         $result = $this->callFieldsetsRoute([
             'blocks/test-basic' => [
@@ -54,7 +54,7 @@ final class FieldsetsRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function i18n_labels_are_translated(): void
+    public function translates_i18n_labels(): void
     {
         $result = $this->callFieldsetsRoute([
             'blocks/test-i18n' => [
@@ -103,7 +103,7 @@ final class FieldsetsRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function tabbed_block_fields_are_merged(): void
+    public function merges_the_fields_of_all_tabs(): void
     {
         $result = $this->callFieldsetsRoute([
             'blocks/test-tabs' => [
@@ -130,7 +130,7 @@ final class FieldsetsRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function broken_extends_is_skipped_without_failing_other_blocks(): void
+    public function skips_a_block_with_a_broken_extends_and_keeps_the_others(): void
     {
         $result = $this->callFieldsetsRoute([
             'blocks/valid-block' => [

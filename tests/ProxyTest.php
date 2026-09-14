@@ -175,7 +175,6 @@ final class ProxyTest extends TestCase
     public function builds_the_streaming_curl_options(): void
     {
         $transport = new FakeProxyTransport();
-
         $this->createProxy($transport)->handle();
 
         $curlOptions = $transport->curlOptions;
@@ -262,7 +261,7 @@ final class ProxyTest extends TestCase
     }
 
     #[Test]
-    public function write_callback_echoes_the_chunk_and_reports_its_length(): void
+    public function write_callback_echoes_the_chunk_and_returns_its_length(): void
     {
         $transport = new FakeProxyTransport();
         $this->createProxy($transport)->handle();

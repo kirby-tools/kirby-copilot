@@ -6,7 +6,7 @@ import {
 } from "../../../src/panel/utils/reference-tokens";
 
 describe("reference token grammar", () => {
-  it("builds a matcher for any token kind, scoped to the given id charset", () => {
+  it("matches only tokens of the given kind", () => {
     const regex = createRefTokenRegex("file", String.raw`[\w\-]`);
 
     expect(
@@ -14,7 +14,7 @@ describe("reference token grammar", () => {
     ).toEqual(["report-v2"]);
   });
 
-  it("extracts ids in document order, preserving duplicates for caller dedup", () => {
+  it("extracts ids in document order, including duplicates (the caller dedupes)", () => {
     const regex = createRefTokenRegex("page", String.raw`[\w\-/]`);
 
     expect(extractRefIds("@page://a then @page://b/c then @page://a", regex)).toEqual(
@@ -56,7 +56,7 @@ describe("reference token grammar", () => {
 });
 
 describe("insertRefToken", () => {
-  it("inserts without a prefix after an opening quote", () => {
+  it("inserts without a leading space after an opening quote", () => {
     expect(insertRefToken('Fasse "', 7, "@page://about ").nextText).toBe(
       'Fasse "@page://about ',
     );
@@ -69,19 +69,19 @@ describe("insertRefToken", () => {
     });
   });
 
-  it("inserts without a prefix after a space", () => {
+  it("inserts without a leading space after a space", () => {
     expect(insertRefToken("Summarize ", 10, "@page://about ").nextText).toBe(
       "Summarize @page://about ",
     );
   });
 
-  it("inserts without a prefix at the start of the input", () => {
+  it("inserts without a leading space at the start of the input", () => {
     expect(insertRefToken("", 0, "@page://about ").nextText).toBe(
       "@page://about ",
     );
   });
 
-  it("returns the index behind the inserted token so a second insert follows it", () => {
+  it("returns nextIndex behind the inserted token", () => {
     const { nextText, nextIndex } = insertRefToken("Compare", 7, "@page://a ");
 
     expect(insertRefToken(nextText, nextIndex, "@page://b ").nextText).toBe(

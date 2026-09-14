@@ -86,7 +86,7 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    public function returns_decoded_json_object_from_chat_completion_content(): void
+    public function generate_object_decodes_the_message_content_as_a_json_object(): void
     {
         [, $provider] = $this->fixture(content: '{"greeting": "hello"}');
 
@@ -108,7 +108,7 @@ final class OpenAIProviderTest extends TestCase
 
     #[Test]
     #[DataProvider('invalidJsonObjectPayloads')]
-    public function throws_provider_exception_when_response_is_not_a_json_object(string $content): void
+    public function generate_object_throws_provider_exception_when_the_content_is_not_a_json_object(string $content): void
     {
         [, $provider] = $this->fixture(content: $content);
 
@@ -141,7 +141,7 @@ final class OpenAIProviderTest extends TestCase
         );
     }
 
-    public static function openAIFamilyVendors(): array
+    public static function openAIFamilyProviders(): array
     {
         return [
             'OpenAI' => [
@@ -169,8 +169,8 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    #[DataProvider('openAIFamilyVendors')]
-    public function throws_naming_the_vendor_config_path_when_the_api_key_is_missing(
+    #[DataProvider('openAIFamilyProviders')]
+    public function throws_auth_exception_naming_the_provider_config_path_without_an_api_key(
         string $providerClass,
         string $expectedConfigKey,
         string $expectedModel,
@@ -191,8 +191,8 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    #[DataProvider('openAIFamilyVendors')]
-    public function uses_vendor_default_model_when_config_model_is_null(
+    #[DataProvider('openAIFamilyProviders')]
+    public function sends_the_default_model_when_config_model_is_null(
         string $providerClass,
         string $expectedConfigKey,
         string $expectedModel,
@@ -212,8 +212,8 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    #[DataProvider('openAIFamilyVendors')]
-    public function exposes_vendor_default_base_url(
+    #[DataProvider('openAIFamilyProviders')]
+    public function exposes_the_provider_default_base_url(
         string $providerClass,
         string $expectedConfigKey,
         string $expectedModel,
@@ -224,7 +224,7 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    #[DataProvider('openAIFamilyVendors')]
+    #[DataProvider('openAIFamilyProviders')]
     public function provider_exception_includes_diagnostic_details(
         string $providerClass,
         string $expectedConfigKey,
@@ -296,7 +296,7 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    public function treats_non_429_4xx_as_terminal_failure(): void
+    public function throws_without_retrying_a_non_429_4xx(): void
     {
         [$client, $provider] = $this->fixture(
             responses: [$this->errorException(401)],
@@ -339,7 +339,7 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    public function retries_with_increasing_delay(): void
+    public function retries_with_exponential_delay(): void
     {
         $sleeps = [];
 
@@ -362,7 +362,7 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    public function respects_retry_after_header_for_delay(): void
+    public function sleeps_for_the_retry_after_seconds(): void
     {
         $sleeps = [];
 
@@ -475,7 +475,7 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    public function constrains_response_to_supplied_json_schema(): void
+    public function generate_object_sends_the_schema_as_response_format(): void
     {
         [$client, $provider] = $this->fixture();
 
@@ -519,7 +519,7 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    public function treats_unserializable_response_as_terminal_failure(): void
+    public function throws_without_retrying_an_unserializable_response(): void
     {
         $response = $this->createStub(ResponseInterface::class);
         $response->method('getStatusCode')->willReturn(500);
@@ -541,7 +541,7 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    public function returns_text_from_chat_completion_content(): void
+    public function generate_text_returns_the_message_content(): void
     {
         [, $provider] = $this->fixture(content: 'hello world');
 
@@ -553,7 +553,7 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    public function omits_response_format_for_text_generation(): void
+    public function generate_text_omits_response_format(): void
     {
         [$client, $provider] = $this->fixture(content: 'hi');
 
@@ -567,7 +567,7 @@ final class OpenAIProviderTest extends TestCase
     }
 
     #[Test]
-    public function throws_provider_exception_when_text_content_is_null(): void
+    public function generate_text_throws_provider_exception_for_null_content(): void
     {
         $response = CreateResponse::fake([
             'choices' => [

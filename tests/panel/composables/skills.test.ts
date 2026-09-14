@@ -109,7 +109,7 @@ describe("resolveSkillRefs", () => {
 });
 
 describe("createSkillRefTokenRegex", () => {
-  it("returns a fresh regex per call so interleaved matchAll runs stay independent", () => {
+  it("returns a fresh regex per call", () => {
     // Protects against regressing to a shared-instance regex whose mutable
     // `lastIndex` would make a second matchAll skip or start mid-string.
     const first = createSkillRefTokenRegex();
@@ -133,7 +133,7 @@ describe("createSkillRefTokenRegex", () => {
     expect(matches).toEqual(["brand_voice", "be-brief-v2", "X9"]);
   });
 
-  it("does not match when prefix is missing", () => {
+  it("does not match a token without the leading @", () => {
     expect(createSkillRefTokenRegex().test("skill://brand-voice")).toBe(false);
   });
 
@@ -146,7 +146,7 @@ describe("createSkillRefTokenRegex", () => {
     expect(ids).toEqual(["tonalit"]);
   });
 
-  it("does not match a skill id containing a slash", () => {
+  it("stops matching foo/bar at the slash", () => {
     const ids = Array.from(
       "@skill://foo/bar".matchAll(createSkillRefTokenRegex()),
       (match) => match[1],
@@ -162,7 +162,7 @@ describe("extractSkillRefIds", () => {
     expect(extractSkillRefIds("Nothing to see here")).toEqual([]);
   });
 
-  it("returns ids in document order, preserving duplicates for caller dedup", () => {
+  it("returns ids in document order, including duplicates (the caller dedupes)", () => {
     expect(
       extractSkillRefIds(
         "@skill://brand-voice then @skill://be-brief and @skill://brand-voice again",
@@ -176,7 +176,7 @@ describe("extractSkillRefIds", () => {
     ).toEqual(["brand-voice"]);
   });
 
-  it("leaves mid-word tokens unextracted, matching the typeahead trigger", () => {
+  it("skips a token that directly follows a word character", () => {
     expect(extractSkillRefIds("foo@skill://bar")).toEqual([]);
   });
 });
@@ -232,7 +232,7 @@ describe("stripSkillRefTokens", () => {
     expect(stripSkillRefTokens("@skill://brand\nthe rest")).toBe("\nthe rest");
   });
 
-  it("leaves mid-word tokens untouched, matching extraction", () => {
+  it("leaves a token that directly follows a word character untouched", () => {
     expect(stripSkillRefTokens("foo@skill://bar baz")).toBe(
       "foo@skill://bar baz",
     );

@@ -115,7 +115,7 @@ describe("usePromptTemplates", () => {
       { field: "label", label: "   ", prompt: "prompt" },
       { field: "prompt", label: "label", prompt: "   " },
     ])(
-      "returns undefined and does not persist when $field is blank",
+      "returns undefined and adds nothing when $field is blank",
       async ({ label, prompt }) => {
         const { addTemplate, templates } = await loadComposable();
 
@@ -155,7 +155,7 @@ describe("usePromptTemplates", () => {
       });
     });
 
-    it("returns false and does not mutate when id is unknown", async () => {
+    it("returns false and leaves templates unchanged for an unknown id", async () => {
       await seedStorage([{ id: "t-1", label: "A", prompt: "P", createdAt: 1 }]);
 
       const { updateTemplate, templates } = await loadComposable();
@@ -167,7 +167,7 @@ describe("usePromptTemplates", () => {
   });
 
   describe("deleteTemplate", () => {
-    it("removes by id and persists", async () => {
+    it("removes a template by id", async () => {
       await seedStorage([
         { id: "t-1", label: "A", prompt: "P", createdAt: 1 },
         { id: "t-2", label: "B", prompt: "Q", createdAt: 2 },
@@ -321,7 +321,7 @@ describe("usePromptTemplates", () => {
       expect(configOnly.map((t) => t.id)).toEqual(["config-0", "config-1"]);
     });
 
-    it("clears default templates on first run when config templates are provided", async () => {
+    it("clears default templates when storage is empty", async () => {
       // Storage is empty → initial state = defaults.
       const { templates, setConfigTemplates } = await loadComposable();
       expect(templates.value.length).toBeGreaterThan(0);

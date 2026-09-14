@@ -72,7 +72,7 @@ describe("generateKirbyBlocksSchema", () => {
       );
     });
 
-    it("filters out blocks with no fields and rejects invalid types", () => {
+    it("rejects a block type without fields and an unknown block type", () => {
       const configWithEmptyBlock = [
         ...basicBlocksConfig,
         fieldset({ type: "empty", name: "Empty", fields: {} }),
@@ -96,7 +96,7 @@ describe("generateKirbyBlocksSchema", () => {
   });
 
   describe("block validation", () => {
-    it("validates required fields", () => {
+    it("rejects a block missing a required field", () => {
       const schema = generateKirbyBlocksSchema(basicBlocksConfig);
 
       expect(() =>
@@ -114,7 +114,7 @@ describe("generateKirbyBlocksSchema", () => {
       ).not.toThrow();
     });
 
-    it("validates field types", () => {
+    it("rejects a select value outside the options", () => {
       const schema = generateKirbyBlocksSchema(basicBlocksConfig);
 
       expect(() =>
@@ -161,7 +161,7 @@ describe("generateKirbyBlocksSchema", () => {
       }),
     ];
 
-    it("excludes utility field types from schema", () => {
+    it("omits line, info, gap, headline, and files fields from block content", () => {
       const schema = generateKirbyBlocksSchema(excludedFieldsConfig);
 
       expect(() =>
@@ -180,8 +180,8 @@ describe("generateKirbyBlocksSchema", () => {
     });
   });
 
-  describe("unknown field types in blocks", () => {
-    it("skips unknown field types and keeps known fields", () => {
+  describe("unknown field types", () => {
+    it("accepts the known fields and rejects a value for an unknown one", () => {
       const config = [
         fieldset({
           type: "custom",
@@ -220,7 +220,7 @@ describe("generateKirbyBlocksSchema", () => {
       ).toThrow();
     });
 
-    it("excludes blocks where all fields are unknown types", () => {
+    it("rejects a block type whose fields are all unknown", () => {
       const config = [
         fieldset({
           type: "text",
@@ -265,7 +265,7 @@ describe("generateKirbyBlocksSchema", () => {
     });
   });
 
-  describe("complex field integration", () => {
+  describe("complex fields", () => {
     const complexBlocksConfig = [
       fieldset({
         type: "testimonials",
@@ -335,7 +335,7 @@ describe("generateKirbyBlocksSchema", () => {
       }),
     ];
 
-    it("accepts structure, object, and entries content inside blocks", () => {
+    it("accepts structure, object, and entries content", () => {
       const schema = generateKirbyBlocksSchema(complexBlocksConfig);
 
       expect(() =>
@@ -356,7 +356,7 @@ describe("generateKirbyBlocksSchema", () => {
       ).not.toThrow();
     });
 
-    it("validates complex field constraints", () => {
+    it("rejects structure, object, and entries content that breaks a constraint", () => {
       const schema = generateKirbyBlocksSchema(complexBlocksConfig);
 
       // Structure item missing a required field.
@@ -432,7 +432,7 @@ describe("generateKirbyBlocksSchema", () => {
       }),
     ];
 
-    it("generates schemas for blocks containing nested blocks fields", () => {
+    it("accepts nested blocks from the declared fieldsets", () => {
       const schema = generateKirbyBlocksSchema(nestedBlocksConfig);
 
       expect(() =>
@@ -455,7 +455,7 @@ describe("generateKirbyBlocksSchema", () => {
       ).not.toThrow();
     });
 
-    it("rejects invalid nested block types", () => {
+    it("rejects a nested block type outside the declared fieldsets", () => {
       const schema = generateKirbyBlocksSchema(nestedBlocksConfig);
 
       // `rich-text` is not allowed in the nested blocks fieldsets.
@@ -475,7 +475,7 @@ describe("generateKirbyBlocksSchema", () => {
       ).toThrow();
     });
 
-    it("validates nested block content fields", () => {
+    it("rejects a nested block missing a required field", () => {
       const schema = generateKirbyBlocksSchema(nestedBlocksConfig);
 
       // Nested heading block missing the required `text` field.

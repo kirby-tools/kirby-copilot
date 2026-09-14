@@ -140,7 +140,7 @@ final class AnthropicProviderTest extends TestCase
     }
 
     #[Test]
-    public function returns_decoded_object_from_response_tool_use_input(): void
+    public function generate_object_returns_the_tool_use_input(): void
     {
         [, $provider] = $this->fixture(
             responses: [$this->toolUseResponse(input: ['greeting' => 'hello'])],
@@ -176,7 +176,7 @@ final class AnthropicProviderTest extends TestCase
     }
 
     #[Test]
-    public function constrains_response_to_supplied_input_schema(): void
+    public function generate_object_forces_the_structured_response_tool_with_the_schema(): void
     {
         [, $provider] = $this->fixture(
             responses: [$this->toolUseResponse(input: ['ok' => true])],
@@ -308,7 +308,7 @@ final class AnthropicProviderTest extends TestCase
     }
 
     #[Test]
-    public function returns_concatenated_text_from_response_content_blocks(): void
+    public function generate_text_concatenates_the_text_blocks(): void
     {
         [, $provider] = $this->fixture(
             responses: [$this->textBlocksResponse(['hello', ' ', 'world'])],
@@ -322,7 +322,7 @@ final class AnthropicProviderTest extends TestCase
     }
 
     #[Test]
-    public function omits_tools_and_tool_choice_for_text_generation(): void
+    public function generate_text_omits_tools_and_tool_choice(): void
     {
         [, $provider] = $this->fixture(
             responses: [$this->textBlocksResponse(['ok'])],
@@ -338,7 +338,7 @@ final class AnthropicProviderTest extends TestCase
     }
 
     #[Test]
-    public function throws_provider_exception_when_response_has_no_text_block(): void
+    public function generate_text_throws_provider_exception_without_a_text_block(): void
     {
         [, $provider] = $this->fixture(
             responses: [$this->toolUseResponse(input: ['ok' => true])],

@@ -23,7 +23,7 @@ final class ResolverTest extends TestCase
     }
 
     #[Test]
-    public function throws_when_provider_option_is_missing(): void
+    public function from_kirby_options_throws_without_a_provider_option(): void
     {
         new App(['options' => ['johannschopplich.copilot' => []]]);
 
@@ -34,7 +34,7 @@ final class ResolverTest extends TestCase
     }
 
     #[Test]
-    public function throws_when_provider_option_is_unknown(): void
+    public function from_kirby_options_throws_for_an_unknown_provider(): void
     {
         new App(['options' => ['johannschopplich.copilot' => ['provider' => 'bogus']]]);
 
@@ -45,7 +45,7 @@ final class ResolverTest extends TestCase
     }
 
     #[Test]
-    public function accepts_provider_name_case_insensitively(): void
+    public function from_kirby_options_matches_the_provider_case_insensitively(): void
     {
         new App(['options' => ['johannschopplich.copilot' => ['provider' => 'OpenAI']]]);
 
@@ -55,7 +55,7 @@ final class ResolverTest extends TestCase
     }
 
     #[Test]
-    public function returns_empty_config_when_provider_is_unconfigured(): void
+    public function for_provider_returns_the_defaults_for_an_unconfigured_provider(): void
     {
         $resolver = new Resolver(defaultProvider: ProviderName::OpenAI, providers: []);
 
@@ -69,7 +69,7 @@ final class ResolverTest extends TestCase
     }
 
     #[Test]
-    public function accepts_a_numeric_string_as_the_request_timeout(): void
+    public function for_provider_casts_a_numeric_string_timeout_to_an_integer(): void
     {
         $resolver = new Resolver(
             defaultProvider: ProviderName::OpenAI,
@@ -92,7 +92,7 @@ final class ResolverTest extends TestCase
 
     #[Test]
     #[DataProvider('unusableTimeouts')]
-    public function falls_back_to_the_default_timeout_when_the_option_is_not_a_positive_number(mixed $timeout): void
+    public function for_provider_falls_back_to_the_default_timeout_when_timeout_is_not_a_positive_number(mixed $timeout): void
     {
         $resolver = new Resolver(
             defaultProvider: ProviderName::OpenAI,
@@ -105,7 +105,7 @@ final class ResolverTest extends TestCase
     }
 
     #[Test]
-    public function api_key_closure_receives_kirby_app(): void
+    public function for_provider_calls_an_api_key_closure_with_the_app(): void
     {
         $kirby = new App();
         $received = null;
@@ -125,7 +125,7 @@ final class ResolverTest extends TestCase
     }
 
     #[Test]
-    public function treats_empty_api_key_as_unset(): void
+    public function for_provider_resolves_an_empty_api_key_to_null(): void
     {
         $resolver = new Resolver(
             defaultProvider: ProviderName::OpenAI,
@@ -138,7 +138,7 @@ final class ResolverTest extends TestCase
     }
 
     #[Test]
-    public function exposes_typed_model_and_base_url_from_provider_options(): void
+    public function for_provider_reads_model_and_base_url(): void
     {
         $resolver = new Resolver(
             defaultProvider: ProviderName::OpenAI,
@@ -155,7 +155,7 @@ final class ResolverTest extends TestCase
     }
 
     #[Test]
-    public function collects_only_unknown_keys_as_pass_through_options(): void
+    public function for_provider_passes_only_unknown_keys_through_as_options(): void
     {
         $resolver = new Resolver(
             defaultProvider: ProviderName::OpenAI,
@@ -181,7 +181,7 @@ final class ResolverTest extends TestCase
     }
 
     #[Test]
-    public function returns_isolated_config_per_provider(): void
+    public function for_provider_returns_each_provider_its_own_config(): void
     {
         $resolver = new Resolver(
             defaultProvider: ProviderName::OpenAI,

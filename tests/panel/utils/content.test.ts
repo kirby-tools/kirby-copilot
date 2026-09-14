@@ -51,7 +51,7 @@ describe("createReferencePageContent", () => {
     expect(result).toEqual({ title: "T", count: 3, flag: false, body: "hi" });
   });
 
-  it("strips `id` and `isHidden` from KirbyBlock arrays", () => {
+  it("strips id and isHidden from KirbyBlock arrays", () => {
     const result = createReferencePageContent({
       title: "T",
       content: {
@@ -77,7 +77,7 @@ describe("createReferencePageContent", () => {
 });
 
 describe("createContentContext", () => {
-  it("merges currentContent with the panel view title", () => {
+  it("merges currentContent with panel.view.title", () => {
     mockCurrentContent.value = { body: "hello" };
     mockView.title = "My Page";
 
@@ -106,7 +106,7 @@ describe("createContentContext", () => {
     expect(result.tags).toBe(JSON.stringify(["a", "b"], undefined, 2));
   });
 
-  it("normalizes KirbyBlock arrays before JSON-stringifying", () => {
+  it("strips id and isHidden from KirbyBlock arrays in the JSON", () => {
     mockCurrentContent.value = {
       blocks: [
         block({ type: "text", content: { text: "A" } }),

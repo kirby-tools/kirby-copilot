@@ -37,7 +37,7 @@ describe("findFieldDefinition", () => {
   });
 
   describe("array of fields", () => {
-    it("finds a field in an array", () => {
+    it("finds the field matching the name", () => {
       const fields = [
         field({ type: "text", name: "title", label: "Title" }),
         field({ type: "textarea", name: "description", label: "Description" }),
@@ -46,7 +46,7 @@ describe("findFieldDefinition", () => {
       expect(result).toBe(fields[1]);
     });
 
-    it("returns undefined when field not found in array", () => {
+    it("returns undefined when no field matches the name", () => {
       const fields = [
         field({ type: "text", name: "title", label: "Title" }),
         field({ type: "textarea", name: "description", label: "Description" }),
@@ -56,8 +56,8 @@ describe("findFieldDefinition", () => {
     });
   });
 
-  describe("nested fields (structure/object)", () => {
-    it("finds deeply nested fields", () => {
+  describe("structure fields", () => {
+    it("finds a field two levels deep", () => {
       const outer = structureField("outer", {
         inner: structureField("inner", {
           deep: field({ type: "text", name: "deep", label: "Deep" }),
@@ -68,8 +68,8 @@ describe("findFieldDefinition", () => {
     });
   });
 
-  describe("fieldsets with tabs (blocks/layouts)", () => {
-    it("finds a field inside fieldsets > tabs > fields", () => {
+  describe("blocks fields", () => {
+    it("finds a field in a fieldset tab", () => {
       const blocks = blocksField("blocks", {
         text: {
           content: field({ type: "writer", name: "content", label: "Content" }),
@@ -156,8 +156,8 @@ describe("findFieldDefinition", () => {
     });
   });
 
-  describe("type filtering", () => {
-    it("filters by type in nested structures", () => {
+  describe("fieldType", () => {
+    it("returns undefined when the name matches but the type does not", () => {
       const items = structureField("items", {
         title: field({ type: "text", name: "title", label: "Title" }),
         description: field({

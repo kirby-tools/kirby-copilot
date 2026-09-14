@@ -9,7 +9,7 @@ describe("parseGatewayPrefix", () => {
     });
   });
 
-  it("splits on the first slash", () => {
+  it("splits a prefixed id into prefix and nativeModelId", () => {
     expect(parseGatewayPrefix("openai/gpt-5.4")).toEqual({
       prefix: "openai",
       nativeModelId: "gpt-5.4",

@@ -141,7 +141,7 @@ async function createEditor(completion: PluginConfig["completion"]) {
     isSuggestionPending: () =>
       Boolean(getSuggestionState(view.state)?.isLoading),
     abortSignalOfRequest: (index: number): AbortSignal =>
-      mockStreamText.mock.calls[index]![0].abortSignal,
+      mockStreamText.mock.calls[index]?.[0]?.abortSignal,
   };
 }
 
@@ -202,7 +202,7 @@ describe("inline suggestion", () => {
     expect(editor.isSuggestionPending()).toBe(false);
   });
 
-  it("starts a request on Mod-, when `completion` is false", async () => {
+  it("triggerSuggestion starts a request when `completion` is false", async () => {
     const editor = await createEditor(false);
     editor.type("Hello");
 
@@ -229,7 +229,7 @@ describe("inline suggestion", () => {
     expect(editor.isSuggestionPending()).toBe(true);
   });
 
-  it("starts a request on Mod-, during the cooldown after a failure", async () => {
+  it("triggerSuggestion starts a request during the cooldown after a failure", async () => {
     const editor = await createEditorAfterFailedRequest();
 
     expect(editor.triggerManually()).toBe(true);

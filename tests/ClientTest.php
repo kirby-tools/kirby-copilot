@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 final class ClientTest extends TestCase
 {
     #[Test]
-    public function forwards_messages_and_schema_and_returns_the_provider_object_unchanged(): void
+    public function generate_object_forwards_messages_and_schema_and_returns_the_provider_object_unchanged(): void
     {
         $messages = [['role' => 'user', 'content' => 'hi']];
         $schema = ['type' => 'object', 'properties' => ['x' => ['type' => 'string']]];
@@ -37,7 +37,7 @@ final class ClientTest extends TestCase
     }
 
     #[Test]
-    public function throws_the_provider_exception_with_its_reason_unchanged(): void
+    public function generate_object_throws_the_provider_exception_with_its_reason_unchanged(): void
     {
         $stub = $this->createStub(Provider::class);
         $stub->method('generateObject')->willThrowException(new ProviderException(
@@ -59,7 +59,7 @@ final class ClientTest extends TestCase
     }
 
     #[Test]
-    public function returns_provider_text_unchanged(): void
+    public function generate_text_returns_the_provider_text_unchanged(): void
     {
         $stub = $this->createStub(Provider::class);
         $stub->method('generateText')->willReturn('hello world');
@@ -104,7 +104,7 @@ final class ClientTest extends TestCase
     }
 
     #[Test]
-    public function require_api_key_skips_validation_when_provider_override_is_set(): void
+    public function require_api_key_never_throws_with_a_provider_override(): void
     {
         $client = new Client(
             resolver: new Resolver(defaultProvider: ProviderName::OpenAI, providers: []),

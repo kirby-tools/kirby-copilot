@@ -7,16 +7,16 @@ describe("createHtmlChunking", () => {
       expect(createHtmlChunking()("")).toBeNull();
     });
 
-    it("releases text before special characters", () => {
+    it("releases text up to the next < or newline", () => {
       expect(extractChunks("Hello <strong>world</strong>")[0]).toBe("Hello ");
       expect(extractChunks("Hello\nworld")[0]).toBe("Hello");
     });
 
-    it("releases entire buffer when no tags or newlines", () => {
+    it("releases the entire buffer when it contains no < or newline", () => {
       expect(extractChunks("Hello, world!")).toEqual(["Hello, world!"]);
     });
 
-    it("treats invalid tag-like text as plain text", () => {
+    it("releases a < that opens no valid tag as its own chunk", () => {
       expect(extractChunks("<123>text")).toEqual(["<", "123>text"]);
       expect(extractChunks("a < b")).toEqual(["a ", "<", " b"]);
       expect(extractChunks("</123>x")).toEqual(["<", "/123>x"]);
@@ -78,7 +78,7 @@ describe("createHtmlChunking", () => {
   });
 
   describe("nested elements", () => {
-    it("tracks depth for same-name elements", () => {
+    it("releases nested same-name elements as one chunk", () => {
       expect(extractChunks("<div><div><div>x</div></div></div>y")[0]).toBe(
         "<div><div><div>x</div></div></div>",
       );
@@ -95,7 +95,7 @@ describe("createHtmlChunking", () => {
     });
   });
 
-  describe("streaming behavior", () => {
+  describe("partial and mixed input", () => {
     it("buffers incomplete tags", () => {
       const detectChunk = createHtmlChunking();
       expect(detectChunk("<stron")).toBeNull();

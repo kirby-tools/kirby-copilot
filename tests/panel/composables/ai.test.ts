@@ -117,7 +117,7 @@ beforeEach(() => {
 
 describe("useStreamText", () => {
   describe("prompt", () => {
-    it("passes system and user prompts to streamText", async () => {
+    it("passes systemPrompt as instructions and userPrompt as prompt", async () => {
       mockStreamText.mockResolvedValue({ textStream: null });
 
       await useStreamText({
@@ -133,7 +133,7 @@ describe("useStreamText", () => {
       );
     });
 
-    it("omits system prompt when not provided", async () => {
+    it("omits instructions without a systemPrompt", async () => {
       mockStreamText.mockResolvedValue({ textStream: null });
 
       await useStreamText({ userPrompt: "Hello" });
@@ -159,7 +159,7 @@ describe("useStreamText", () => {
   });
 
   describe("reasoning", () => {
-    it("passes the resolved reasoning effort through to streamText", async () => {
+    it("passes the configured reasoningEffort as reasoning", async () => {
       mockStreamText.mockResolvedValue({ textStream: null });
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({ reasoningEffort: "medium" }),
@@ -206,7 +206,7 @@ describe("useStreamText", () => {
   });
 
   describe("response format chunking", () => {
-    it("uses HTML chunking transform for rich-text format", async () => {
+    it("chunks a rich-text responseFormat by HTML", async () => {
       mockStreamText.mockResolvedValue({ textStream: null });
 
       await useStreamText({
@@ -218,7 +218,7 @@ describe("useStreamText", () => {
       expect(typeof call?.chunking).toBe("function");
     });
 
-    it("uses line chunking for text format", async () => {
+    it("chunks a text responseFormat by line", async () => {
       mockStreamText.mockResolvedValue({ textStream: null });
 
       await useStreamText({
@@ -231,7 +231,7 @@ describe("useStreamText", () => {
       );
     });
 
-    it("uses line chunking when no responseFormat is specified", async () => {
+    it("chunks by line without a responseFormat", async () => {
       mockStreamText.mockResolvedValue({ textStream: null });
 
       await useStreamText({ userPrompt: "Test" });
@@ -258,7 +258,7 @@ describe("useStreamText", () => {
       );
     });
 
-    it("builds structured output from a plain outputSchema for third-party callers", async () => {
+    it("builds output from a plain outputSchema", async () => {
       mockStreamText.mockResolvedValue({ textStream: null });
       const schema = { type: "object" };
       const builtOutput = { responseFormat: "json" };
@@ -277,8 +277,8 @@ describe("useStreamText", () => {
     });
   });
 
-  describe("provider warnings", () => {
-    it("logs warnings the SDK emits when settings are coerced or unsupported", async () => {
+  describe("logging", () => {
+    it("logs the warnings the SDK reports", async () => {
       const warnings = [{ type: "unsupported", feature: "reasoning" }];
       mockStreamText.mockResolvedValue({
         textStream: null,
@@ -362,8 +362,8 @@ describe("useStreamText", () => {
     });
   });
 
-  describe("abort signal", () => {
-    it("passes abort signal through to streamText", async () => {
+  describe("abort", () => {
+    it("forwards abortSignal", async () => {
       mockStreamText.mockResolvedValue({ textStream: null });
       const controller = new AbortController();
 
@@ -390,7 +390,7 @@ describe("resolveLanguageModel", () => {
 
     it.each([
       {
-        name: "uses explicit completionModel",
+        name: "uses the configured completionModel",
         openai: {
           model: "gpt-5.4-nano",
           completionModel: "gpt-5.4-mini",
@@ -399,17 +399,17 @@ describe("resolveLanguageModel", () => {
         expected: "gpt-5.4-mini",
       },
       {
-        name: "falls back to the default completionModel when none is configured",
+        name: "falls back to the defaultCompletionModel without a completionModel",
         openai: undefined,
         expected: "gpt-5.6-luna",
       },
       {
-        name: "applies gateway prefix from model to default fallback",
+        name: "prefixes the defaultCompletionModel with the AI gateway prefix of model",
         openai: { model: "openai/gpt-5.4", hasApiKey: true },
         expected: "openai/gpt-5.6-luna",
       },
       {
-        name: "explicit completionModel wins over gateway-prefix derivation",
+        name: "prefers completionModel over the AI gateway prefix of model",
         openai: {
           model: "openai/gpt-5.4",
           completionModel: "google-ai-studio/gemini-3.5-flash",
@@ -417,7 +417,7 @@ describe("resolveLanguageModel", () => {
         },
         expected: "google-ai-studio/gemini-3.5-flash",
       },
-    ])("resolves the completionModel: $name", async ({ openai, expected }) => {
+    ])("$name", async ({ openai, expected }) => {
       let resolvedModelId: string | undefined;
       mockCreateOpenAI.mockReturnValue({
         languageModel: (...args: unknown[]) => {
@@ -438,7 +438,7 @@ describe("resolveLanguageModel", () => {
       expect(resolvedModelId).toBe(expected);
     });
 
-    it("throws when the default completionModel would cross gateway provider boundaries", async () => {
+    it("throws CopilotError for a model with another provider's prefix and no completionModel", async () => {
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({
           providers: {
@@ -467,7 +467,7 @@ describe("resolveLanguageModel", () => {
       ["google", mockCreateGoogle, "gemini-3.5-flash-lite"],
       ["mistral", mockCreateMistral, "mistral-small-latest"],
     ] as const)(
-      "creates %s provider when configured",
+      "creates the configured %s provider",
       async (provider, mockFn, model) => {
         mockUsePluginContext.mockReturnValue(
           createPluginConfig({
@@ -484,7 +484,7 @@ describe("resolveLanguageModel", () => {
   });
 
   describe("reasoning and provider options", () => {
-    it("passes the configured effort as top-level reasoning without provider-specific shapes", async () => {
+    it("returns the configured reasoningEffort as reasoning without providerOptions", async () => {
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({
           provider: "anthropic",
@@ -504,7 +504,7 @@ describe("resolveLanguageModel", () => {
       expect(providerOptions).toBeUndefined();
     });
 
-    it("applies the default effort and disables reasoning for inline suggestions", async () => {
+    it("defaults reasoning to low, and to none for an inline suggestion", async () => {
       const { reasoning } = await resolveLanguageModel();
       const { reasoning: inlineSuggestionReasoning } =
         await resolveLanguageModel({
@@ -515,7 +515,7 @@ describe("resolveLanguageModel", () => {
       expect(inlineSuggestionReasoning).toBe("none");
     });
 
-    it("keeps providerConfig.options as the providerOptions escape hatch", async () => {
+    it("returns providers.openai.options as providerOptions.openai", async () => {
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({
           providers: {
@@ -563,7 +563,7 @@ describe("resolveLanguageModel", () => {
     });
   });
 
-  describe("upstream failure handling", () => {
+  describe("errors", () => {
     it("throws CopilotError for unsupported provider", async () => {
       mockUsePluginContext.mockReturnValue(
         createPluginConfig({ provider: "invalid-provider" }),
@@ -730,7 +730,7 @@ describe("resolveEditorPrompt", () => {
   });
 
   describe("page references", () => {
-    it("appends reference_page blocks with fetched page content", async () => {
+    it("appends a <reference_page> block with the fetched page content", async () => {
       mockPagesGet.mockResolvedValue({
         title: "About",
         content: { headline: "About Us", body: "We are great" },
@@ -791,7 +791,7 @@ describe("resolveEditorPrompt", () => {
       );
     });
 
-    it("wraps tokens found in the prompt with the human label as attribute", async () => {
+    it("wraps a referenced skill's instructions in a <skill> block named by its label", async () => {
       const { systemPrompt } = await resolveEditorPrompt({
         userPrompt: "Write a headline @skill://brand-voice",
         systemPrompt: "You are a writer.",
@@ -824,7 +824,7 @@ describe("resolveEditorPrompt", () => {
       );
     });
 
-    it("strips @skill://id tokens from the user prompt", async () => {
+    it("strips @skill://id tokens from userPrompt", async () => {
       const { userPrompt } = await resolveEditorPrompt({
         userPrompt: "Write a headline @skill://brand-voice about Kirby.",
       });
@@ -834,11 +834,11 @@ describe("resolveEditorPrompt", () => {
 
     it.each([
       {
-        position: "inline (trailing whitespace)",
+        position: "between words",
         userPrompt: "Foo @skill://brand-voice @skill://be-brief bar",
       },
       {
-        position: "start and end of prompt",
+        position: "at the start and end",
         userPrompt: "@skill://brand-voice Foo bar @skill://be-brief",
       },
     ])(
@@ -860,7 +860,7 @@ describe("resolveEditorPrompt", () => {
       expect(userPrompt).toBe("First line\n\nSecond line");
     });
 
-    it("joins multiple skill blocks with the system prompt using blank lines", async () => {
+    it("joins systemPrompt and <skill> blocks with blank lines", async () => {
       const { systemPrompt } = await resolveEditorPrompt({
         userPrompt: "@skill://brand-voice @skill://be-brief write a headline",
         systemPrompt: "You are a writer.",
@@ -875,7 +875,7 @@ describe("resolveEditorPrompt", () => {
       );
     });
 
-    it("returns skill blocks as system prompt when no base prompt is set", async () => {
+    it("returns the <skill> block as systemPrompt without an input systemPrompt", async () => {
       const { systemPrompt } = await resolveEditorPrompt({
         userPrompt: "Write @skill://brand-voice",
       });
@@ -885,7 +885,7 @@ describe("resolveEditorPrompt", () => {
       );
     });
 
-    it("strips skill tokens while retaining page tokens when both share a prompt", async () => {
+    it("keeps @page:// tokens while stripping @skill:// tokens", async () => {
       mockPagesGet.mockResolvedValue({
         title: "About",
         content: { body: "We are great" },
@@ -903,7 +903,7 @@ describe("resolveEditorPrompt", () => {
       );
     });
 
-    it("strips unknown token ids from the user prompt and drops them from the system prompt", async () => {
+    it("strips an unknown skill id without adding a <skill> block", async () => {
       mockUsePluginContext.mockReturnValue(createPluginConfig());
 
       const { systemPrompt, userPrompt } = await resolveEditorPrompt({
@@ -933,7 +933,7 @@ describe("resolveEditorPrompt", () => {
       expect(mockLogger.warn).not.toHaveBeenCalled();
     });
 
-    it("returns undefined systemPrompt when no tokens and no base prompt", async () => {
+    it("returns an undefined systemPrompt without tokens or an input systemPrompt", async () => {
       const { systemPrompt } = await resolveEditorPrompt({
         userPrompt: "Write a headline",
       });
@@ -941,7 +941,7 @@ describe("resolveEditorPrompt", () => {
       expect(systemPrompt).toBeUndefined();
     });
 
-    it("passes the base system prompt through unchanged when no tokens match", async () => {
+    it("returns systemPrompt unchanged without tokens", async () => {
       const { systemPrompt } = await resolveEditorPrompt({
         userPrompt: "Write a headline",
         systemPrompt: "You are a writer.",
