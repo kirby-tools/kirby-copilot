@@ -33,7 +33,7 @@ export interface ProviderDefinition {
 export const PROVIDER_REGISTRY = {
   anthropic: {
     factory: "createAnthropic",
-    defaultCompletionModel: "claude-haiku-4-5",
+    defaultCompletionModel: "claude-sonnet-5",
     playgroundModelField: "anthropicmodel",
   },
   google: {

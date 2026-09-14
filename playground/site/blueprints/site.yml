@@ -88,10 +88,9 @@ tabs:
             when:
               modelProvider: anthropic
             options:
-              claude-haiku-4-5: Claude 4.5 Haiku
               claude-sonnet-5: Claude 5 Sonnet (recommended)
               claude-opus-5: Claude 5 Opus
-            help: Sonnet 5 balances speed and quality. Opus 5 shines at complex reasoning, Haiku 4.5 is fastest for quick drafts.
+            help: Sonnet 5 balances speed and quality. Opus 5 shines at complex reasoning.
 
           reasoningEffort:
             label: Reasoning Effort

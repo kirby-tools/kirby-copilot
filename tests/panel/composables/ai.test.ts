@@ -463,7 +463,7 @@ describe("resolveLanguageModel", () => {
   describe("provider resolution", () => {
     it.each([
       ["openai", mockCreateOpenAI, "gpt-5.6-luna"],
-      ["anthropic", mockCreateAnthropic, "claude-haiku-4-5"],
+      ["anthropic", mockCreateAnthropic, "claude-sonnet-5"],
       ["google", mockCreateGoogle, "gemini-3.5-flash-lite"],
       ["mistral", mockCreateMistral, "mistral-small-latest"],
     ] as const)(
@@ -491,7 +491,7 @@ describe("resolveLanguageModel", () => {
           reasoningEffort: "high",
           providers: {
             anthropic: {
-              model: "claude-haiku-4-5",
+              model: "claude-sonnet-5",
               hasApiKey: true,
             },
           },
