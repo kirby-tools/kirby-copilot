@@ -10,9 +10,8 @@ export type AISDKModule = typeof import("@ai-sdk/anthropic") &
 let sdk: AISDKModule | undefined;
 
 export async function loadAISDK(): Promise<AISDKModule> {
-  // Ensure plugin assets are registered before loading modules.
-  // This is necessary when `loadAISDK` is called (e.g. by Content Translator)
-  // before any Copilot UI has rendered.
+  // A third-party consumer can reach the SDK before any Copilot UI has
+  // rendered, so the plugin assets are registered here first.
   await usePluginContext();
   sdk ??= withTelemetryDisabled(await loadPluginModule<AISDKModule>("ai"));
   return sdk;
