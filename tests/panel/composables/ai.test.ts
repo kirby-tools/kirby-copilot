@@ -5,7 +5,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   resolveEditorPrompt,
   resolveLanguageModel,
-  resolvePromptContext,
   useStreamText,
 } from "../../../src/panel/composables/ai";
 import { CopilotError } from "../../../src/panel/utils/error";
@@ -333,6 +332,34 @@ describe("useStreamText", () => {
         }),
       );
     });
+
+    it("sends a PDF as application/pdf", async () => {
+      mockStreamText.mockResolvedValue({ textStream: null });
+      const pdfFile = new File(["pdf"], "doc.pdf", { type: "application/pdf" });
+
+      await useStreamText({ userPrompt: "Summarize this", files: [pdfFile] });
+
+      const call = mockStreamText.mock.calls[0]?.[0];
+      expect(call?.messages[0].content).toEqual([
+        { type: "text", text: "Summarize this" },
+        {
+          type: "file",
+          mediaType: "application/pdf",
+          data: new Uint8Array([0x70, 0x64, 0x66]),
+        },
+      ]);
+    });
+
+    it("leaves a text/plain file out of the request", async () => {
+      mockStreamText.mockResolvedValue({ textStream: null });
+      const textFile = new File(["text"], "notes.txt", { type: "text/plain" });
+
+      await useStreamText({ userPrompt: "Summarize this", files: [textFile] });
+
+      const call = mockStreamText.mock.calls[0]?.[0];
+      expect(call?.prompt).toBe("Summarize this");
+      expect(call?.messages).toBeUndefined();
+    });
   });
 
   describe("abort signal", () => {
@@ -574,51 +601,6 @@ describe("resolveLanguageModel", () => {
       expect(error.message).toMatch(/Missing.*model/);
       expect(error.message).toMatch(/openai/);
     });
-  });
-});
-
-describe("resolvePromptContext", () => {
-  it("converts images to byte arrays", async () => {
-    const imageFile = new File(["image-data"], "test.png", {
-      type: "image/png",
-    });
-
-    const { imageByteArrays } = await resolvePromptContext({
-      userPrompt: "Test",
-      files: [imageFile],
-    });
-
-    expect(imageByteArrays).toHaveLength(1);
-    expect(imageByteArrays[0]).toBeInstanceOf(Uint8Array);
-  });
-
-  it("filters out non-image files from imageByteArrays", async () => {
-    const files = [
-      new File(["img"], "test.png", { type: "image/png" }),
-      new File(["text"], "doc.txt", { type: "text/plain" }),
-    ];
-
-    const { imageByteArrays } = await resolvePromptContext({
-      userPrompt: "Test",
-      files,
-    });
-
-    expect(imageByteArrays).toHaveLength(1);
-  });
-
-  it("sorts images into imageByteArrays and PDFs into pdfByteArrays", async () => {
-    const files = [
-      new File(["img"], "test.png", { type: "image/png" }),
-      new File(["pdf"], "doc.pdf", { type: "application/pdf" }),
-    ];
-
-    const { imageByteArrays, pdfByteArrays } = await resolvePromptContext({
-      userPrompt: "Test",
-      files,
-    });
-
-    expect(imageByteArrays).toHaveLength(1);
-    expect(pdfByteArrays).toHaveLength(1);
   });
 });
 

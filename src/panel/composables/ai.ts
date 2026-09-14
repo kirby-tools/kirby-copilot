@@ -15,7 +15,6 @@ import { useContent, usePanel } from "kirbyuse";
 import { isObject } from "utilful";
 import {
   DEFAULT_REASONING_EFFORT,
-  PDF_SIZE_LIMIT,
   PLUGIN_PROXY_API_ROUTE,
   PROVIDER_REGISTRY,
   PROXY_API_KEY_MARKER,
@@ -32,7 +31,6 @@ import { CopilotError } from "../utils/error";
 import { createHtmlChunking } from "../utils/html-chunking";
 import { toReducedBlob } from "../utils/image";
 import { parseGatewayPrefix } from "../utils/models";
-import { extractTextFromPdf } from "../utils/pdf";
 import { watchForProxyError } from "../utils/proxy";
 import { resolvePlaceholders } from "../utils/template";
 import { useLogger } from "./logger";
@@ -95,15 +93,35 @@ export async function useStreamText({
     output ??
     (outputSchema ? Output.object({ schema: outputSchema }) : undefined);
 
-  const { userPromptWithContext, imageByteArrays, pdfByteArrays } =
-    await resolvePromptContext({ userPrompt, files });
+  const fileParts = await Promise.all(
+    files
+      .filter(
+        (file) =>
+          file.type.startsWith("image/") || file.type === "application/pdf",
+      )
+      .map(async (file) => {
+        if (file.type === "application/pdf") {
+          return {
+            type: "file" as const,
+            mediaType: "application/pdf" as const,
+            data: new Uint8Array(await file.arrayBuffer()),
+          };
+        }
+
+        const reducedBlob = await toReducedBlob(file, { maxDimension: 2048 });
+        return {
+          type: "file" as const,
+          // Subtype is auto-detected from the binary data.
+          mediaType: "image" as const,
+          data: new Uint8Array(await reducedBlob.arrayBuffer()),
+        };
+      }),
+  );
 
   if (logLevel > 1) {
     logger.info("System prompt:", systemPrompt);
-    logger.info("User prompt:", userPromptWithContext);
+    logger.info("User prompt:", userPrompt);
   }
-
-  const hasFiles = imageByteArrays.length > 0 || pdfByteArrays.length > 0;
 
   let firstStreamError: unknown;
 
@@ -113,30 +131,20 @@ export async function useStreamText({
     providerOptions,
     output: resolvedOutput,
     instructions: systemPrompt || undefined,
-    ...(hasFiles
+    ...(fileParts.length > 0
       ? {
           messages: [
             {
               role: "user" as const,
               content: [
-                { type: "text" as const, text: userPromptWithContext },
-                ...imageByteArrays.map((image) => ({
-                  type: "file" as const,
-                  // Subtype is auto-detected from the binary data.
-                  mediaType: "image" as const,
-                  data: image,
-                })),
-                ...pdfByteArrays.map((data) => ({
-                  type: "file" as const,
-                  data,
-                  mediaType: "application/pdf" as const,
-                })),
+                { type: "text" as const, text: userPrompt },
+                ...fileParts,
               ],
             },
           ],
         }
       : {
-          prompt: userPromptWithContext,
+          prompt: userPrompt,
         }),
     ...(!resolvedOutput && {
       experimental_transform: smoothStream({
@@ -242,61 +250,6 @@ export async function resolveLanguageModel({
     reasoning,
     providerOptions,
   };
-}
-
-/**
- * Assembles the final user prompt plus any file attachments that the AI SDK
- * call needs.
- *
- * @remarks
- * PDFs beyond the native attachment cap are inlined as extracted text instead
- * of attached.
- */
-export async function resolvePromptContext({
-  userPrompt,
-  files = [],
-}: {
-  userPrompt: string;
-  files?: File[];
-}) {
-  let userPromptWithContext = userPrompt;
-
-  const images = files.filter((file) => file.type.startsWith("image/"));
-  const pdfs = files.filter((file) => file.type === "application/pdf");
-
-  const totalPdfSize = pdfs.reduce((sum, pdf) => sum + pdf.size, 0);
-  const hasNativePdfSupport = totalPdfSize <= PDF_SIZE_LIMIT;
-
-  // Providers reject PDFs above the native attachment cap; extract text
-  // client-side so the content still reaches the model.
-  if (!hasNativePdfSupport && pdfs.length > 0) {
-    const pdfTexts = await Promise.all(pdfs.map(extractTextFromPdf));
-    userPromptWithContext += `\n\n${pdfTexts
-      .map(
-        (value, index) =>
-          `<pdf_document_${index + 1}>\n${value}\n</pdf_document_${index + 1}>`,
-      )
-      .join("\n\n")}`;
-  }
-
-  const imageByteArrays = await Promise.all(
-    images.map(async (file) => {
-      const reducedBlob = await toReducedBlob(file, { maxDimension: 2048 });
-      const arrayBuffer = await reducedBlob.arrayBuffer();
-      return new Uint8Array(arrayBuffer);
-    }),
-  );
-
-  const pdfByteArrays = hasNativePdfSupport
-    ? await Promise.all(
-        pdfs.map(async (file) => {
-          const arrayBuffer = await file.arrayBuffer();
-          return new Uint8Array(arrayBuffer);
-        }),
-      )
-    : [];
-
-  return { userPromptWithContext, imageByteArrays, pdfByteArrays };
 }
 
 /**

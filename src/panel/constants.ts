@@ -119,12 +119,6 @@ export const SUPPORTED_FILE_MIME_TYPES = [
   "application/pdf",
 ];
 
-/**
- * Beyond this total size, PDFs are inlined as extracted text instead of being
- * attached as binaries, since providers reject large attachments.
- */
-export const PDF_SIZE_LIMIT = 50 * 1024 * 1024;
-
 export const PROMPT_FORMATTING_INSTRUCTIONS: Record<string, string> = {
   en: "IMPORTANT: Preserve all formatting (bold, italic, links, code, headings, lists, etc.) exactly as in the original.",
   de: "WICHTIG: Bewahre alle Formatierungen (fett, kursiv, Links, Code, Überschriften, Listen usw.) exakt wie im Original.",
