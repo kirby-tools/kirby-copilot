@@ -8,7 +8,7 @@ import type { LogLevel as LogLevelIndex } from "kirbyuse";
 import type { PropType } from "vue";
 import type { LogLevel } from "../../constants";
 import type { PromptContext } from "../../types";
-import { ref, useContent, usePanel } from "kirbyuse";
+import { computed, ref, useContent, usePanel } from "kirbyuse";
 import { z } from "zod";
 import {
   ensurePlaygroundApiKey,
@@ -43,8 +43,11 @@ const props = defineProps({
 });
 
 const panel = usePanel();
-const { currentContent, update: updateContent } = useContent();
+const { content, currentContent, update: updateContent } = useContent();
 const { getModelFields } = useModelFields();
+const isContentEditable = computed(
+  () => panel.view.props.permissions?.update !== false && !content.isLocked(),
+);
 
 const isGenerating = ref(false);
 const isHovering = ref(false);
@@ -57,13 +60,6 @@ function hasKirbyQuery(value: string | undefined) {
 
 async function initPromptDialog() {
   if (isGenerating.value) return;
-
-  if (panel.content.isLocked()) {
-    panel.notification.error(
-      panel.t("lock.isLocked", { email: panel.content.lock().user.email }),
-    );
-    return;
-  }
 
   if (!ensurePlaygroundApiKey()) return;
 
@@ -238,6 +234,7 @@ function processFieldValues({
     variant="filled"
     size="sm"
     responsive
+    :disabled="!isGenerating && !isContentEditable"
     @mouseenter.native="isHovering = true"
     @mouseleave.native="isHovering = false"
     @click="isHovering && isGenerating ? abort() : initPromptDialog()"

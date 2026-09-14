@@ -61,7 +61,10 @@ const props = defineProps(propsDefinition);
 const _isKirby5 = isKirby5();
 const panel = usePanel();
 const { t } = useI18n();
-const { currentContent, update: updateContent } = useContent();
+const { content, currentContent, update: updateContent } = useContent();
+const isContentEditable = computed(
+  () => panel.view.props.permissions?.update !== false && !content.isLocked(),
+);
 
 // #region Section props
 const label = ref<string>();
@@ -408,7 +411,7 @@ function onModelSave() {
           :theme="theme"
           variant="filled"
           :size="size"
-          :disabled="isGenerating"
+          :disabled="isGenerating || !isContentEditable"
           @click="generate()"
         />
         <k-button
