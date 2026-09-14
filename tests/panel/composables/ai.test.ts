@@ -374,12 +374,12 @@ describe("resolveLanguageModel", () => {
       {
         name: "falls back to the default completionModel when none is configured",
         openai: undefined,
-        expected: "gpt-5.4-nano",
+        expected: "gpt-5.6-luna",
       },
       {
         name: "applies gateway prefix from model to default fallback",
         openai: { model: "openai/gpt-5.4", hasApiKey: true },
-        expected: "openai/gpt-5.4-nano",
+        expected: "openai/gpt-5.6-luna",
       },
       {
         name: "explicit completionModel wins over gateway-prefix derivation",
@@ -435,9 +435,9 @@ describe("resolveLanguageModel", () => {
 
   describe("provider resolution", () => {
     it.each([
-      ["openai", mockCreateOpenAI, "gpt-5.4-nano"],
+      ["openai", mockCreateOpenAI, "gpt-5.6-luna"],
       ["anthropic", mockCreateAnthropic, "claude-haiku-4-5"],
-      ["google", mockCreateGoogle, "gemini-3.5-flash"],
+      ["google", mockCreateGoogle, "gemini-3.5-flash-lite"],
       ["mistral", mockCreateMistral, "mistral-small-latest"],
     ] as const)(
       "creates %s provider when configured",

@@ -72,13 +72,13 @@ tabs:
             label: Model
             type: select
             required: true
-            default: gemini-3.1-pro-preview
+            default: gemini-3.8-flash
             when:
               modelProvider: google
             options:
-              gemini-3.5-flash: Gemini 3.5 Flash
-              gemini-3.1-pro-preview: Gemini 3.1 Pro (recommended)
-            help: Gemini 3.1 Pro excels at structured content generation – our overall recommendation! Gemini 3.5 Flash is the faster choice.
+              gemini-3.8-flash: Gemini 3.8 Flash (recommended)
+              gemini-3.1-pro-preview: Gemini 3.1 Pro
+            help: Gemini 3.8 Flash excels at structured content generation – our overall recommendation! Gemini 3.1 Pro takes on the most complex tasks.
 
           anthropicModel:
             label: Model
@@ -90,8 +90,8 @@ tabs:
             options:
               claude-haiku-4-5: Claude 4.5 Haiku
               claude-sonnet-5: Claude 5 Sonnet (recommended)
-              claude-opus-4-8: Claude 4.8 Opus
-            help: Sonnet 5 balances speed and quality. Opus 4.8 shines at complex reasoning, Haiku 4.5 is fastest for quick drafts.
+              claude-opus-5: Claude 5 Opus
+            help: Sonnet 5 balances speed and quality. Opus 5 shines at complex reasoning, Haiku 4.5 is fastest for quick drafts.
 
           reasoningEffort:
             label: Reasoning Effort

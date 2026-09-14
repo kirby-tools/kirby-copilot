@@ -38,7 +38,7 @@ export const PROVIDER_REGISTRY = {
   },
   google: {
     factory: "createGoogle",
-    defaultCompletionModel: "gemini-3.5-flash",
+    defaultCompletionModel: "gemini-3.5-flash-lite",
     playgroundModelField: "googlemodel",
   },
   mistral: {
@@ -47,7 +47,7 @@ export const PROVIDER_REGISTRY = {
   },
   openai: {
     factory: "createOpenAI",
-    defaultCompletionModel: "gpt-5.4-nano",
+    defaultCompletionModel: "gpt-5.6-luna",
     playgroundModelField: "openaimodel",
   },
 } as const satisfies Record<string, ProviderDefinition>;

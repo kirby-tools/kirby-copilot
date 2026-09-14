@@ -26,7 +26,7 @@ return [
                 'apiKey' => env('OPENAI_API_KEY', 'YOUR_API_KEY')
             ],
             'google' => [
-                'model' => 'gemini-3.1-pro-preview',
+                'model' => 'gemini-3.8-flash',
                 'apiKey' => env('GOOGLE_API_KEY', 'YOUR_API_KEY')
             ],
             'anthropic' => [

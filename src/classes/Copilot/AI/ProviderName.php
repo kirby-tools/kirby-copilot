@@ -25,7 +25,7 @@ enum ProviderName: string
         return match ($this) {
             self::OpenAI => 'gpt-5.6-terra',
             self::Anthropic => 'claude-sonnet-5',
-            self::Google => 'gemini-3.1-pro-preview',
+            self::Google => 'gemini-3.8-flash',
             self::Mistral => 'mistral-medium-latest',
         };
     }

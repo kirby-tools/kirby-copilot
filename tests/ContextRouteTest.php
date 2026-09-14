@@ -130,7 +130,7 @@ final class ContextRouteTest extends ApiRouteTestCase
         // so it can keep the fallback on the same AI gateway as the primary model.
         $this->assertSame([
             'openai'    => ['hasApiKey' => false, 'model' => 'gpt-5.6-terra'],
-            'google'    => ['hasApiKey' => false, 'model' => 'gemini-3.1-pro-preview'],
+            'google'    => ['hasApiKey' => false, 'model' => 'gemini-3.8-flash'],
             'anthropic' => ['hasApiKey' => false, 'model' => 'claude-sonnet-5'],
             'mistral'   => ['hasApiKey' => false, 'model' => 'mistral-medium-latest'],
         ], $response['config']['providers']);

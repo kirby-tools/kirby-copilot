@@ -14,7 +14,7 @@ Openaimodel: gpt-5.6-terra
 
 ----
 
-Googlemodel: gemini-3.1-pro-preview
+Googlemodel: gemini-3.8-flash
 
 ----
 

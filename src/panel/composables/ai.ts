@@ -552,7 +552,7 @@ function resolveModelId({
   const { prefix } = parseGatewayPrefix(providerConfig.model ?? "");
 
   // Cross-provider gateway prefix: require explicit `completionModel` rather
-  // than derive a 404 (e.g. `google-ai-studio/gpt-5.4-nano`).
+  // than derive a 404 (e.g. `google-ai-studio/gpt-5.6-luna`).
   if (
     isInlineSuggestion &&
     !providerConfig.completionModel &&
