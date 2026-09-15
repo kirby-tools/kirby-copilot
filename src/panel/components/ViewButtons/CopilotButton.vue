@@ -8,7 +8,7 @@ import type { LogLevel as LogLevelIndex } from "kirbyuse";
 import type { PropType } from "vue";
 import type { LogLevel } from "../../constants";
 import type { PromptContext } from "../../types";
-import { computed, ref, useContent, usePanel } from "kirbyuse";
+import { ref, useContent, usePanel } from "kirbyuse";
 import { z } from "zod";
 import {
   ensurePlaygroundApiKey,
@@ -43,11 +43,12 @@ const props = defineProps({
 });
 
 const panel = usePanel();
-const { content, currentContent, update: updateContent } = useContent();
+const {
+  currentContent,
+  isEditable: isContentEditable,
+  update: updateContent,
+} = useContent();
 const { getModelFields } = useModelFields();
-const isContentEditable = computed(
-  () => panel.view.props.permissions?.update !== false && !content.isLocked(),
-);
 
 const isGenerating = ref(false);
 const isHovering = ref(false);

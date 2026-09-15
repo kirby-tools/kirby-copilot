@@ -61,10 +61,11 @@ const props = defineProps(propsDefinition);
 const _isKirby5 = isKirby5();
 const panel = usePanel();
 const { t } = useI18n();
-const { content, currentContent, update: updateContent } = useContent();
-const isContentEditable = computed(
-  () => panel.view.props.permissions?.update !== false && !content.isLocked(),
-);
+const {
+  currentContent,
+  isEditable: isContentEditable,
+  update: updateContent,
+} = useContent();
 
 // #region Section props
 const label = ref<string>();
