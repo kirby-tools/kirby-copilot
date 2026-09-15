@@ -42,9 +42,10 @@ export function useBlocks() {
     let currentFieldsets = await getFieldsets();
     const { config } = await usePluginContext();
 
-    if (config.excludedBlocks && Array.isArray(config.excludedBlocks)) {
+    const { excludedBlocks } = config;
+    if (Array.isArray(excludedBlocks)) {
       currentFieldsets = currentFieldsets.filter(
-        (fieldset) => !config.excludedBlocks!.includes(fieldset.type),
+        (fieldset) => !excludedBlocks.includes(fieldset.type),
       );
     }
 
@@ -61,12 +62,6 @@ export function useBlocks() {
     return generateKirbyBlocksSchema(currentFieldsets);
   }
 
-  function normalizeBlock(block: Partial<KirbyBlock>) {
-    block.isHidden ??= false;
-    block.id ??= crypto.randomUUID();
-    return block as KirbyBlock;
-  }
-
   return {
     getFieldsets,
     getZodSchema,
@@ -79,9 +74,10 @@ export function useLayouts() {
     let currentFieldsets = await getFieldsets();
     const { config } = await usePluginContext();
 
-    if (config.excludedBlocks && Array.isArray(config.excludedBlocks)) {
+    const { excludedBlocks } = config;
+    if (Array.isArray(excludedBlocks)) {
       currentFieldsets = currentFieldsets.filter(
-        (fieldset) => !config.excludedBlocks!.includes(fieldset.type),
+        (fieldset) => !excludedBlocks.includes(fieldset.type),
       );
     }
 
@@ -104,12 +100,7 @@ export function useLayouts() {
     layout.columns = (layout.columns ?? []).map((column) => {
       column.id ??= crypto.randomUUID();
       column.width ??= "1/1";
-      column.blocks = (column.blocks ?? []).map((block) => {
-        block.isHidden ??= false;
-        block.id ??= crypto.randomUUID();
-        return block;
-      });
-
+      column.blocks = (column.blocks ?? []).map(normalizeBlock);
       return column;
     });
 
@@ -120,4 +111,10 @@ export function useLayouts() {
     getZodSchema,
     normalizeLayout,
   };
+}
+
+function normalizeBlock(block: Partial<KirbyBlock>) {
+  block.isHidden ??= false;
+  block.id ??= crypto.randomUUID();
+  return block as KirbyBlock;
 }
