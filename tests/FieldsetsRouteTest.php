@@ -2,7 +2,6 @@
 
 declare(strict_types = 1);
 
-use Kirby\Cms\App;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
@@ -19,7 +18,7 @@ final class FieldsetsRouteTest extends ApiRouteTestCase
             $appConfig['fields'] = $fields;
         }
 
-        return $this->callRoute(new App($appConfig), '__copilot__/fieldsets');
+        return $this->callRoute(self::bootApp($appConfig), '__copilot__/fieldsets');
     }
 
     private function findBlock(array $result, string $type): array|null

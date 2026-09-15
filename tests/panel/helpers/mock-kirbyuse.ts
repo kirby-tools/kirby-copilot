@@ -1,15 +1,13 @@
 import { vi } from "vitest";
+import { computed, effectScope, reactive, ref, watch } from "vue";
 
 export function baseKirbyuseMock() {
   return {
-    effectScope: () => ({ run: <T>(fn: () => T): T => fn() }),
-    ref: <T>(value: T) => ({ value }),
-    reactive: <T extends object>(value: T): T => value,
-    computed: <T>(fn: () => T) => ({
-      get value() {
-        return fn();
-      },
-    }),
+    ref,
+    computed,
+    reactive,
+    watch,
+    effectScope,
     createLogger: () => ({
       info: vi.fn(),
       warn: vi.fn(),

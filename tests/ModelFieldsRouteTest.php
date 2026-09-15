@@ -2,7 +2,6 @@
 
 declare(strict_types = 1);
 
-use Kirby\Cms\App;
 use Kirby\Exception\InvalidArgumentException;
 use Kirby\Exception\NotFoundException;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
@@ -16,7 +15,7 @@ final class ModelFieldsRouteTest extends ApiRouteTestCase
     private function callModelFieldsRoute(array $query = []): mixed
     {
         return $this->callRoute(
-            new App(['request' => ['query' => $query]]),
+            self::bootApp(['request' => ['query' => $query]]),
             '__copilot__/model-fields'
         );
     }

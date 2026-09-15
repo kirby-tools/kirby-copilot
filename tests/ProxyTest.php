@@ -5,29 +5,22 @@ declare(strict_types = 1);
 use JohannSchopplich\Copilot\AI\Proxy;
 use JohannSchopplich\Copilot\AI\ProxyTransport;
 use JohannSchopplich\Copilot\AI\ProxyTransportResult;
-use Kirby\Cms\App;
 use Kirby\Cms\Response;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 
 #[RunTestsInSeparateProcesses]
 #[PreserveGlobalState(false)]
-final class ProxyTest extends TestCase
+final class ProxyTest extends ApiRouteTestCase
 {
-    protected function tearDown(): void
-    {
-        App::destroy();
-    }
-
     private function createProxy(
         FakeProxyTransport $transport,
         array $server = [],
         array $providerConfig = ['apiKey' => 'test-key'],
         string $providerConfigKey = 'openai',
     ): Proxy {
-        $kirby = new App([
+        $kirby = self::bootApp([
             'options' => [
                 'johannschopplich.copilot' => [
                     'providers' => [$providerConfigKey => $providerConfig],

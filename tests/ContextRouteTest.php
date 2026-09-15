@@ -2,7 +2,6 @@
 
 declare(strict_types = 1);
 
-use Kirby\Cms\App;
 use Kirby\Exception\InvalidArgumentException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
@@ -15,7 +14,7 @@ final class ContextRouteTest extends ApiRouteTestCase
 {
     private function callContextRoute(array $options): mixed
     {
-        return $this->callRoute(new App(['options' => $options]), '__copilot__/context');
+        return $this->callRoute(self::bootApp(['options' => $options]), '__copilot__/context');
     }
 
     private static function buildConfigWithOverride(string $path, mixed $value): array

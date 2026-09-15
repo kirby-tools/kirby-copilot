@@ -2,7 +2,6 @@
 
 declare(strict_types = 1);
 
-use Kirby\Cms\App;
 use Kirby\Exception\InvalidArgumentException;
 use Kirby\Exception\NotFoundException;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
@@ -13,48 +12,47 @@ use PHPUnit\Framework\Attributes\Test;
 #[PreserveGlobalState(false)]
 final class ButtonOptionsRouteTest extends ApiRouteTestCase
 {
+    private const APP_PROPS = [
+        'blueprints' => [
+            'pages/article' => [
+                'title' => 'Article',
+                'buttons' => [
+                    'copilot' => ['userPrompt' => '{{ page.customPrompt }}']
+                ]
+            ]
+        ],
+        'site' => [
+            'children' => [
+                [
+                    'slug' => 'test',
+                    'num' => 1,
+                    'template' => 'article',
+                    'content' => [
+                        'title' => 'Kirby Copilot',
+                        'customPrompt' => 'Write a teaser'
+                    ]
+                ]
+            ]
+        ],
+        'users' => [
+            ['id' => 'admin', 'email' => 'admin@example.com', 'role' => 'admin'],
+            ['id' => 'editor', 'email' => 'editor@example.com', 'role' => 'editor']
+        ],
+        'roles' => [
+            ['name' => 'admin', 'title' => 'Admin'],
+            [
+                'name' => 'editor',
+                'title' => 'Editor',
+                'permissions' => ['pages' => ['access' => false]]
+            ]
+        ]
+    ];
+
     private function callButtonOptionsRoute(
         array $query,
         string $user = 'admin@example.com'
     ): mixed {
-        $app = new App([
-            'roots' => ['index' => __DIR__ . '/tmp'],
-            'blueprints' => [
-                'pages/article' => [
-                    'title' => 'Article',
-                    'buttons' => [
-                        'copilot' => ['userPrompt' => '{{ page.customPrompt }}']
-                    ]
-                ]
-            ],
-            'site' => [
-                'children' => [
-                    [
-                        'slug' => 'test',
-                        'num' => 1,
-                        'template' => 'article',
-                        'content' => [
-                            'title' => 'Kirby Copilot',
-                            'customPrompt' => 'Write a teaser'
-                        ]
-                    ]
-                ]
-            ],
-            'users' => [
-                ['id' => 'admin', 'email' => 'admin@example.com', 'role' => 'admin'],
-                ['id' => 'editor', 'email' => 'editor@example.com', 'role' => 'editor']
-            ],
-            'roles' => [
-                ['name' => 'admin', 'title' => 'Admin'],
-                [
-                    'name' => 'editor',
-                    'title' => 'Editor',
-                    'permissions' => ['pages' => ['access' => false]]
-                ]
-            ],
-            'request' => ['query' => $query]
-        ]);
-
+        $app = self::bootApp([...self::APP_PROPS, 'request' => ['query' => $query]]);
         $app->impersonate($user);
 
         return $this->callRoute($app, '__copilot__/button-options');

@@ -11,21 +11,15 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 
 #[RunTestsInSeparateProcesses]
 #[PreserveGlobalState(false)]
-final class ResolverTest extends TestCase
+final class ResolverTest extends ApiRouteTestCase
 {
-    protected function tearDown(): void
-    {
-        App::destroy();
-    }
-
     #[Test]
     public function from_kirby_options_throws_without_a_provider_option(): void
     {
-        new App(['options' => ['johannschopplich.copilot' => []]]);
+        self::bootApp(['options' => ['johannschopplich.copilot' => []]]);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Missing required option "johannschopplich.copilot.provider"');
@@ -36,7 +30,7 @@ final class ResolverTest extends TestCase
     #[Test]
     public function from_kirby_options_throws_for_an_unknown_provider(): void
     {
-        new App(['options' => ['johannschopplich.copilot' => ['provider' => 'bogus']]]);
+        self::bootApp(['options' => ['johannschopplich.copilot' => ['provider' => 'bogus']]]);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Unknown provider "bogus"');
@@ -47,7 +41,7 @@ final class ResolverTest extends TestCase
     #[Test]
     public function from_kirby_options_matches_the_provider_case_insensitively(): void
     {
-        new App(['options' => ['johannschopplich.copilot' => ['provider' => 'OpenAI']]]);
+        self::bootApp(['options' => ['johannschopplich.copilot' => ['provider' => 'OpenAI']]]);
 
         $resolver = Resolver::fromKirbyOptions();
 
@@ -107,7 +101,7 @@ final class ResolverTest extends TestCase
     #[Test]
     public function for_provider_calls_an_api_key_closure_with_the_app(): void
     {
-        $kirby = new App();
+        $kirby = self::bootApp();
         $received = null;
 
         $resolver = new Resolver(

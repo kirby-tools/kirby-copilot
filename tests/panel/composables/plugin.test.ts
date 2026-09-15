@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const get = vi.fn();
 
@@ -9,15 +9,18 @@ vi.mock("kirbyuse", () => ({
 beforeEach(() => {
   vi.resetModules();
   get.mockReset();
-  (globalThis as any).window = { panel: { api: { get } } };
+  vi.stubGlobal("window", { panel: { api: { get } } });
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
 });
 
 describe("usePluginContext", () => {
   it("requests the context once and serves the cached response afterwards", async () => {
     get.mockResolvedValue({ config: {}, assets: [] });
-    const { usePluginContext } = await import(
-      "../../../src/panel/composables/plugin"
-    );
+    const { usePluginContext } =
+      await import("../../../src/panel/composables/plugin");
 
     const [first, second] = await Promise.all([
       usePluginContext(),
@@ -32,9 +35,8 @@ describe("usePluginContext", () => {
   it("retries after a failed request instead of caching the rejection", async () => {
     get.mockRejectedValueOnce(new Error('Unknown provider "banana"'));
     get.mockResolvedValueOnce({ config: {}, assets: [] });
-    const { usePluginContext } = await import(
-      "../../../src/panel/composables/plugin"
-    );
+    const { usePluginContext } =
+      await import("../../../src/panel/composables/plugin");
 
     await expect(usePluginContext()).rejects.toThrow("banana");
 

@@ -5,4 +5,7 @@ export default defineConfig({
     // Mirrors kirbyup at build-time.
     __PLAYGROUND__: JSON.stringify(false),
   },
+  test: {
+    include: ["tests/panel/**/*.test.ts"],
+  },
 });

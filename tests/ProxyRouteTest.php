@@ -2,7 +2,6 @@
 
 declare(strict_types = 1);
 
-use Kirby\Cms\App;
 use Kirby\Exception\InvalidArgumentException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
@@ -16,12 +15,13 @@ final class ProxyRouteTest extends ApiRouteTestCase
     private function callProxy(array $options = [], array $query = [], array $server = []): mixed
     {
         return $this->callRoute(
-            new App([
+            self::bootApp([
                 'options' => $options,
                 'request' => ['query' => $query],
                 'server'  => $server,
             ]),
-            '__copilot__/proxy'
+            '__copilot__/proxy',
+            'POST'
         );
     }
 

@@ -15,7 +15,11 @@ export function installStorageMocks(hostname = "test-host") {
       storage = {};
     },
   });
-  vi.stubGlobal("window", { location: { hostname } });
+  // Vue sniffs `window.navigator.userAgent` when it loads.
+  vi.stubGlobal("window", {
+    location: { hostname },
+    navigator: { userAgent: "" },
+  });
 
   return {
     reset() {
