@@ -61,7 +61,6 @@ export interface PluginConfig {
   logLevel?: LogLevel;
 }
 
-/** Response from `__copilot__/context` API endpoint. */
 export interface PluginContextResponse {
   config: PluginConfig;
   assets: PluginAsset[];
