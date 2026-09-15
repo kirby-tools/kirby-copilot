@@ -74,13 +74,6 @@ export function commitSkillSuggestion(view: EditorView, id: string) {
   view.focus();
 }
 
-export function dismissSkillSuggestion(view: EditorView) {
-  const state = skillSuggestPluginKey.getState(view.state);
-  if (!state?.isOpen) return;
-
-  view.dispatch(setSkillSuggestMeta(view.state.tr, { type: "dismiss" }));
-}
-
 export function setSkillSuggestSelectedIndex(view: EditorView, index: number) {
   const state = skillSuggestPluginKey.getState(view.state);
   if (!state || state.selectedIndex === index) return;
@@ -222,7 +215,7 @@ export function createSkillSuggestPlugin(options: SkillSuggestHandlers) {
         if (isOpen) {
           attrs["aria-controls"] = options.listboxId;
           attrs["aria-activedescendant"] =
-            `${options.listboxId}-opt-${pluginState!.selectedIndex}`;
+            `${options.listboxId}-opt-${pluginState.selectedIndex}`;
         }
 
         return attrs;
@@ -281,4 +274,11 @@ export function computeDropdownPosition(
   return flipUp
     ? { top: null, bottom: window.innerHeight - coords.top, left: coords.left }
     : { top: coords.bottom, bottom: null, left: coords.left };
+}
+
+function dismissSkillSuggestion(view: EditorView) {
+  const state = skillSuggestPluginKey.getState(view.state);
+  if (!state?.isOpen) return;
+
+  view.dispatch(setSkillSuggestMeta(view.state.tr, { type: "dismiss" }));
 }

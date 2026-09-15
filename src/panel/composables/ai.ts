@@ -412,7 +412,7 @@ function resolveProviderSelection(
 
     if (selectedModel) {
       config.providers[selectedProvider] ??= {};
-      config.providers[selectedProvider]!.model = selectedModel;
+      config.providers[selectedProvider].model = selectedModel;
     }
 
     const selectedReasoningEffort = currentContent.value.reasoningeffort;

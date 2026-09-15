@@ -67,8 +67,8 @@ function buildDecorations(
 
         decorations.push(
           Decoration.inline(
-            pos + match.index!,
-            pos + match.index! + match[0].length,
+            pos + match.index,
+            pos + match.index + match[0].length,
             { class: className },
           ),
         );

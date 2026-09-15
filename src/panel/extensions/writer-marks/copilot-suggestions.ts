@@ -24,7 +24,7 @@ export interface SuggestionPluginState {
   isLoading: boolean;
 }
 
-export type SuggestionMeta =
+type SuggestionMeta =
   | { type: "startLoading"; position: number }
   | { type: "streamChunk"; suggestion: string; position: number }
   | { type: "complete"; suggestion: string; position: number }

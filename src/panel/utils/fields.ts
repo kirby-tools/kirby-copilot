@@ -46,11 +46,7 @@ export function findFieldDefinition(
         if (!tab.fields) continue;
 
         for (const field of Object.values(tab.fields)) {
-          const result = findFieldDefinition(
-            field as KirbyAnyFieldProps,
-            fieldName,
-            fieldType,
-          );
+          const result = findFieldDefinition(field, fieldName, fieldType);
           if (result) return result;
         }
       }
@@ -59,11 +55,7 @@ export function findFieldDefinition(
 
   if ("fields" in fieldDefinition && fieldDefinition.fields) {
     for (const field of Object.values(fieldDefinition.fields)) {
-      const result = findFieldDefinition(
-        field as KirbyAnyFieldProps,
-        fieldName,
-        fieldType,
-      );
+      const result = findFieldDefinition(field, fieldName, fieldType);
       if (result) return result;
     }
   }

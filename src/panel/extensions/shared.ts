@@ -78,7 +78,7 @@ export async function streamTextToField(
   if (activeField) delete activeField.element.dataset.copilot;
 }
 
-export function getActiveField(): ActiveField | undefined {
+function getActiveField(): ActiveField | undefined {
   const element = document.activeElement?.closest<HTMLElement>(".k-field");
   if (!element) return;
 

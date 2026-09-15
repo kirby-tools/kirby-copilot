@@ -25,7 +25,7 @@ export const EXCLUDED_FIELD_TYPES = new Set(
   ["files", "gap", "headline", "hidden", "info", "line", "pages", "users"],
 );
 
-export const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
+const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
   text: (field) =>
     createTextSchema(
       field as KirbyTextFieldProps,
