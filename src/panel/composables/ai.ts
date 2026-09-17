@@ -13,6 +13,7 @@ import type {
 import type { OutputFormat, PluginConfig, ProviderConfig } from "../types";
 import { useContent, usePanel } from "kirbyuse";
 import { isObject } from "utilful";
+import { toReducedBlob } from "utilful/image";
 import {
   DEFAULT_REASONING_EFFORT,
   PLUGIN_PROXY_API_ROUTE,
@@ -29,7 +30,6 @@ import {
 } from "../utils/content";
 import { CopilotError } from "../utils/error";
 import { createHtmlChunking } from "../utils/html-chunking";
-import { toReducedBlob } from "../utils/image";
 import { parseGatewayPrefix } from "../utils/models";
 import { watchForProxyError } from "../utils/proxy";
 import { resolvePlaceholders } from "../utils/template";

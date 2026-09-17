@@ -3,7 +3,7 @@ export * from "./content";
 export * from "./dialog";
 export * from "./error";
 export * from "./fields";
-export * from "./image";
+export * from "./file-picker";
 export * from "./models";
 export * from "./shared";
 export * from "./template";

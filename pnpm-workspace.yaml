@@ -1,6 +1,7 @@
 minimumReleaseAgeExcludePrune: true
 minimumReleaseAgeExclude:
   - kirbyuse@1.4.0
+  - utilful@3.4.0
 
 trustPolicy: no-downgrade
 trustPolicyExclude:

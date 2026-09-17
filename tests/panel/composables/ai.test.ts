@@ -34,7 +34,7 @@ vi.mock("kirbyuse", async () => {
   };
 });
 
-vi.mock("../../../src/panel/utils/image", () => ({
+vi.mock("utilful/image", () => ({
   toReducedBlob: (file: File) => Promise.resolve(file),
 }));
 
