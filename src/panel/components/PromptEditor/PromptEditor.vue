@@ -234,7 +234,7 @@ defineExpose({
 }
 
 .k-copilot-prompt-editor .ProseMirror {
-  padding: 0.5rem;
+  padding: var(--spacing-2);
   line-height: 1.5;
   outline: none;
   min-height: calc(1.5em * 3 + 1rem);
