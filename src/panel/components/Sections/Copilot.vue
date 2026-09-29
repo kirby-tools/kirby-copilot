@@ -459,7 +459,7 @@ function onModelSave() {
             <k-input
               :key="isDetailsOpen ? 1 : 0"
               :value="currentPrompt"
-              class="kai-mb-1"
+              class="kai-mb-[var(--spacing-1)]"
               :placeholder="
                 panel.t('johannschopplich.copilot.prompt.placeholder')
               "

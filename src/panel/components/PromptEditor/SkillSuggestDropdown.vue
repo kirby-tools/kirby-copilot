@@ -76,7 +76,9 @@ const panel = usePanel();
             'kai-[--button-color-back:var(--dropdown-color-hr)]',
         ]"
       >
-        <span class="kai-w-full kai-inline-flex kai-items-center kai-gap-3">
+        <span
+          class="kai-w-full kai-inline-flex kai-items-center kai-gap-[var(--spacing-3)]"
+        >
           <span class="kai-truncate kai-leading-[1.5]">{{ skill.label }}</span>
           <span
             class="kai-[font-size:var(--text-xs)] kai-truncate kai-text-[var(--color-text-dimmed)] kai-leading-[1.5]"

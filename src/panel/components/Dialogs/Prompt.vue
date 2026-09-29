@@ -304,7 +304,7 @@ function getFieldPreview(fieldName: string) {
       <!-- Placeholder preview panel -->
       <details
         v-if="hasPlaceholders"
-        class="kai-group kai-mx-2 kai-mb-2 kai-rounded-[var(--rounded)] kai-bg-[var(--panel-color-back)]"
+        class="kai-group kai-mx-[var(--spacing-2)] kai-mb-[var(--spacing-2)] kai-rounded-[var(--rounded)] kai-bg-[var(--panel-color-back)]"
       >
         <summary
           class="kai-flex kai-cursor-pointer kai-list-none kai-items-center kai-gap-0.5 kai-rounded-[var(--rounded)] kai-p-1.5 [&::-webkit-details-marker]:kai-hidden focus:kai-outline-[2px] focus:kai-outline-[var(--color-focus)] focus:kai-outline"
@@ -315,7 +315,7 @@ function getFieldPreview(fieldName: string) {
           />
           <span>{{ panel.t("johannschopplich.copilot.preview") }}</span>
         </summary>
-        <div class="kai-px-1.5 kai-py-2">
+        <div class="kai-px-1.5 kai-py-[var(--spacing-2)]">
           <p
             class="kai-whitespace-pre-wrap kai-leading-[1.375]"
             v-text="resolvedPrompt"
@@ -324,9 +324,11 @@ function getFieldPreview(fieldName: string) {
       </details>
 
       <div
-        class="kai-flex kai-items-center kai-justify-between kai-px-2 kai-pb-2"
+        class="kai-flex kai-items-center kai-justify-between kai-px-[var(--spacing-2)] kai-pb-[var(--spacing-2)]"
       >
-        <div class="kai-flex kai-flex-wrap kai-items-center kai-gap-1">
+        <div
+          class="kai-flex kai-flex-wrap kai-items-center kai-gap-[var(--spacing-1)]"
+        >
           <!-- File picker button -->
           <k-button
             icon="attachment"
@@ -395,7 +397,7 @@ function getFieldPreview(fieldName: string) {
                 @click="insertFieldPlaceholder(field.name)"
               >
                 <span
-                  class="kai-w-full kai-inline-flex kai-items-center kai-gap-3"
+                  class="kai-w-full kai-inline-flex kai-items-center kai-gap-[var(--spacing-3)]"
                 >
                   <span>{{ field.label || field.name }}</span>
                   <span
@@ -484,7 +486,7 @@ function getFieldPreview(fieldName: string) {
         </div>
 
         <!-- Action buttons -->
-        <div class="kai-flex kai-gap-2">
+        <div class="kai-flex kai-gap-[var(--spacing-2)]">
           <template v-if="isFieldGenerationMode">
             <k-button
               :text="panel.t('johannschopplich.copilot.fields')"
