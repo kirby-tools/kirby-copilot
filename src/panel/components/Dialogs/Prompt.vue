@@ -402,7 +402,7 @@ function getFieldPreview(fieldName: string) {
                   <span>{{ field.label || field.name }}</span>
                   <span
                     v-if="getFieldPreview(field.name)"
-                    class="kai-[font-size:var(--text-xs)] kai-truncate kai-text-[var(--color-text-dimmed)] kai-leading-[1.5]"
+                    class="kai-truncate kai-text-[length:var(--text-xs)]/[1.5] kai-text-[color:var(--color-text-dimmed)]"
                     v-text="getFieldPreview(field.name)"
                   />
                 </span>
