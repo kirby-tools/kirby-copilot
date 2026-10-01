@@ -1,6 +1,6 @@
 # Kirby Copilot
 
-AI-assisted content generation inside the Kirby Panel: users prompt an AI provider and the result lands in Panel fields, either as streamed text or as structured field values.
+AI-assisted content generation inside the Kirby Panel: users prompt an AI provider and the result lands in Panel fields, either as streamed text or as structured field values; agents outside the Panel work on the same content through MCP.
 
 ## Language
 
@@ -69,3 +69,42 @@ _Avoid_: thinking budget, thinking level
 **Third-party seam**:
 The versioned API Copilot exposes to other plugins. Only plain data crosses it, never AI SDK values, and a prompt sent through it reaches the model as is.
 _Avoid_: public API, bridge, integration
+
+### Agents
+
+**Agent**:
+An AI application outside the Panel, such as Claude, ChatGPT, or Cursor, that works on site content through the MCP URL as the Kirby user who connected it.
+_Avoid_: MCP client, bot, assistant
+
+**Client**:
+The identity an agent presents when it connects: verified when its id is the HTTPS URL of a metadata document, whose host the Panel shows; unverified when the agent named itself.
+_Avoid_: registration
+
+**Connection request**:
+An agent's request to connect to the site, which a user approves or declines on the consent view.
+_Avoid_: authorization request (OAuth's word for it)
+
+**Consent view**:
+The Panel view where a user approves an agent's connection request and picks its connection permissions.
+
+**Connection**:
+One agent's standing authorization to act as one Kirby user with a chosen set of connection permissions, until it is revoked or ends.
+_Avoid_: grant, app, integration, token
+
+**Connection permission**:
+What a connection may do – Read content, Prepare changes, Publish changes, or Delete content – picked when connecting and capped by the user's Kirby role.
+_Avoid_: scope (OAuth's word for it), access
+
+**MCP URL**:
+The one address of a site that a user enters in their agent to connect it.
+_Avoid_: endpoint, server URL
+
+**Agent write**:
+A change an agent makes to one model's content in one language – preparing, discarding, or publishing changes – that starts from what it last read.
+
+**Unsaved changes**:
+A model's edited content in one language that is not published yet.
+_Avoid_: changes version
+
+**Published content**:
+What visitors see.
