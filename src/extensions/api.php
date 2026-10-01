@@ -1,5 +1,7 @@
 <?php
 
+use JohannSchopplich\Copilot\Agents\Agents;
+use JohannSchopplich\Copilot\Agents\Consent;
 use JohannSchopplich\Copilot\AI\CurlProxyTransport;
 use JohannSchopplich\Copilot\AI\Proxy;
 use JohannSchopplich\Copilot\PanelContext;
@@ -195,6 +197,43 @@ return [
 
                 return FieldNormalizer::normalizeFields(FieldResolver::resolveModelFields($model));
             }
-        ]
+        ],
+        ...(Agents::isEnabled() ? [
+            [
+                'pattern' => 'copilot/oauth/authorize',
+                'method' => 'GET',
+                'auth' => false,
+                'action' => fn () => Agents::authorizationServer()->authorize($kirby->request())
+            ],
+            [
+                'pattern' => 'copilot/oauth/token',
+                'method' => 'POST',
+                'auth' => false,
+                'action' => fn () => Agents::authorizationServer()->token($kirby->request())
+            ],
+            [
+                'pattern' => 'copilot/oauth/register',
+                'method' => 'POST',
+                'auth' => false,
+                'action' => fn () => Agents::authorizationServer()->register($kirby->request())
+            ],
+            [
+                'pattern' => '__copilot__/agents/consent/(:any)',
+                'method' => 'POST',
+                'action' => function (string $id) use ($kirby) {
+                    $body = $kirby->request()->body();
+                    $permissions = $body->get('permissions');
+
+                    return [
+                        'redirect' => Consent::decide(
+                            $kirby,
+                            $id,
+                            $body->get('isApproved') === true,
+                            is_array($permissions) ? array_values(array_filter($permissions, 'is_string')) : []
+                        )
+                    ];
+                }
+            ]
+        ] : [])
     ]
 ];

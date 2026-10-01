@@ -32,14 +32,14 @@ abstract class ApiRouteTestCase extends TestCase
         return $app;
     }
 
-    protected function callRoute(App $kirby, string $pattern, string $method = 'GET'): mixed
+    protected function callRoute(App $kirby, string $pattern, string $method = 'GET', string ...$arguments): mixed
     {
         $api = require dirname(__DIR__) . '/src/extensions/api.php';
         $routes = $api['routes']($kirby);
 
         foreach ($routes as $route) {
             if (($route['pattern'] ?? '') === $pattern && ($route['method'] ?? 'GET') === $method) {
-                return $route['action']();
+                return $route['action'](...$arguments);
             }
         }
 

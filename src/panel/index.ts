@@ -7,6 +7,8 @@ import PlaygroundApiKeyField from "./components/Playground/ApiKey.vue";
 import CopilotSection from "./components/Sections/Copilot.vue";
 // @ts-ignore - Vue component
 import CopilotButton from "./components/ViewButtons/CopilotButton.vue";
+// @ts-ignore - Vue component
+import AgentsAuthorizeView from "./components/Views/AgentsAuthorize.vue";
 import { icons } from "./config/icons";
 import { copilot as copilotButton } from "./extensions/textarea-buttons/copilot";
 import { copilot as copilotMark } from "./extensions/writer-marks/copilot";
@@ -23,6 +25,7 @@ window.panel.plugin("johannschopplich/copilot", {
   },
   components: {
     "k-copilot-prompt-dialog": PromptDialog,
+    "k-copilot-agents-authorize-view": AgentsAuthorizeView,
   },
   sections: {
     copilot: CopilotSection,

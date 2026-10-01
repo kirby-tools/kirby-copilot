@@ -12,6 +12,7 @@ claude.ai and ChatGPT connect to an MCP server only through OAuth or without any
 ## Consequences
 
 - The endpoints are Kirby API routes with `auth: false`, the one seam that returns a raw response without Kirby's session in Kirby 5 and 6. The MCP URL therefore lives under the API slug, and `api: false` turns Agents off.
-- The discovery documents sit under `/.well-known/` at the site root. A host that blocks that path, or a site installed in a subfolder, can't connect agents.
+- The discovery documents sit under `/.well-known/` at the domain root. A host that answers that path itself, or a site installed in a subfolder, needs a server rule that passes them to Kirby.
+- The protected resource metadata is also served at the bare `/.well-known/oauth-protected-resource`, since agents that miss the `WWW-Authenticate` hint probe the root. Another plugin on the same site can't serve its own metadata there while Agents are on.
 - A dynamically registered client can't be blocked as a whole, since there is no registration to delete; its connections are revoked one by one.
 - Copilot follows changes to the MCP authorization profile itself.
