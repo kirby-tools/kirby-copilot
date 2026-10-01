@@ -16,6 +16,7 @@
 /playground/storage/accounts/*
 !/playground/storage/accounts/admin
 !/playground/storage/accounts/playground
+/playground/storage/accounts/*/.copilot-agents.json
 /playground/storage/cache/*
 /playground/storage/sessions/*
 
