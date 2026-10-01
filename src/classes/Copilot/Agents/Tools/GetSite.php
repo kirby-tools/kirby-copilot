@@ -56,14 +56,7 @@ final class GetSite
                 'role' => $user->role()->title()
             ],
             'permissions' => ConnectionPermission::values($connection->permissions),
-            'pages' => $pages->limit(self::PAGE_LIMIT)->values(fn (Page $page) => [
-                'id' => $page->id(),
-                'uuid' => $page->uuid()?->toString(),
-                'title' => $page->title()->value(),
-                'template' => $page->intendedTemplate()->name(),
-                'status' => $page->status(),
-                'panelUrl' => $page->panel()->url()
-            ]),
+            'pages' => $pages->limit(self::PAGE_LIMIT)->values(ModelSummary::page(...)),
             'hasMorePages' => $pages->count() > self::PAGE_LIMIT
         ];
     }

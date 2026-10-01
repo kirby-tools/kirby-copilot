@@ -78,7 +78,8 @@ return array_replace_recursive(
             'johannschopplich.copilot.agents.more' => '+{count} more',
             'johannschopplich.copilot.agents.empty' => 'No agents connected yet.',
             'johannschopplich.copilot.agents.revoke' => 'Revoke',
-            'johannschopplich.copilot.agents.revoke.confirm' => 'Revoke access for <strong>{agent}</strong>? It ends at once, and the agent has to connect again.'
+            'johannschopplich.copilot.agents.revoke.confirm' => 'Revoke access for <strong>{agent}</strong>? It ends at once, and the agent has to connect again.',
+            'johannschopplich.copilot.agents.reloaded' => 'An agent changed this content, so the view was reloaded.'
         ],
         'de' => [
             'johannschopplich.copilot.label' => 'Copilot',
@@ -153,7 +154,8 @@ return array_replace_recursive(
             'johannschopplich.copilot.agents.more' => '+{count} weitere',
             'johannschopplich.copilot.agents.empty' => 'Noch keine Agenten verbunden.',
             'johannschopplich.copilot.agents.revoke' => 'Widerrufen',
-            'johannschopplich.copilot.agents.revoke.confirm' => 'Zugriff von <strong>{agent}</strong> widerrufen? Der Agent verliert ihn sofort und muss sich neu verbinden.'
+            'johannschopplich.copilot.agents.revoke.confirm' => 'Zugriff von <strong>{agent}</strong> widerrufen? Der Agent verliert ihn sofort und muss sich neu verbinden.',
+            'johannschopplich.copilot.agents.reloaded' => 'Ein Agent hat diesen Inhalt geändert, daher wurde die Ansicht neu geladen.'
         ],
         'fr' => [
             'johannschopplich.copilot.label' => 'Copilot',

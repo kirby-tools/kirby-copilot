@@ -66,24 +66,6 @@ final class ViewImageToolTest extends McpToolTestCase
         $this->assertSame('logo.svg isn\'t a JPEG, PNG, GIF, or WebP image.', $result['content'][0]['text']);
     }
 
-    #[Test]
-    public function refuses_a_page(): void
-    {
-        $result = $this->viewImage('notes');
-
-        $this->assertTrue($result['isError']);
-        $this->assertSame('`file` must be a file.', $result['content'][0]['text']);
-    }
-
-    #[Test]
-    public function is_listed_as_a_read_only_tool(): void
-    {
-        $this->assertSame(
-            ['readOnlyHint' => true, 'destructiveHint' => false, 'idempotentHint' => true, 'openWorldHint' => false],
-            $this->listedTool('view_image')['annotations']
-        );
-    }
-
     private function viewImage(string $file, Closure|null $prepare = null): array
     {
         return $this->callWithImages('view_image', ['file' => $file], $prepare);

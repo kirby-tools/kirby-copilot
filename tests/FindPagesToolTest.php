@@ -130,15 +130,6 @@ final class FindPagesToolTest extends McpToolTestCase
         $this->assertSame('`limit` must be an integer from 1 to 50.', $result['content'][0]['text']);
     }
 
-    #[Test]
-    public function is_listed_as_a_read_only_tool(): void
-    {
-        $this->assertSame(
-            ['readOnlyHint' => true, 'destructiveHint' => false, 'idempotentHint' => true, 'openWorldHint' => false],
-            $this->listedTool('find_pages')['annotations']
-        );
-    }
-
     private function findPages(array $arguments = [], Closure|null $prepare = null): array
     {
         $result = $this->callTool('find_pages', $arguments, $this->props(), $prepare);

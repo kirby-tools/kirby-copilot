@@ -59,6 +59,7 @@ export interface PluginConfig {
   excludedBlocks?: string[];
   completion?: false | CompletionConfig;
   logLevel?: LogLevel;
+  agents: boolean;
 }
 
 export interface PluginContextResponse {

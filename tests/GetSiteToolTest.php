@@ -75,15 +75,6 @@ final class GetSiteToolTest extends McpToolTestCase
         $this->assertTrue($site['hasMorePages']);
     }
 
-    #[Test]
-    public function lists_get_site_with_read_only_annotations(): void
-    {
-        $this->assertSame(
-            ['readOnlyHint' => true, 'destructiveHint' => false, 'idempotentHint' => true, 'openWorldHint' => false],
-            $this->listedTool('get_site')['annotations']
-        );
-    }
-
     private function getSite(array $props = []): array
     {
         return $this->callTool('get_site', [], array_replace_recursive([

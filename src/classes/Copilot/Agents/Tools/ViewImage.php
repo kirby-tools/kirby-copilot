@@ -9,14 +9,13 @@ use JohannSchopplich\Copilot\Agents\ContentVersion;
 use JohannSchopplich\Copilot\Agents\Tool;
 use JohannSchopplich\Copilot\Agents\ToolError;
 use JohannSchopplich\Copilot\Agents\ToolResult;
-use Kirby\Cms\File;
 use Kirby\Cms\FileVersion;
 use Kirby\Filesystem\F;
 use Kirby\Toolkit\Str;
 
 final class ViewImage
 {
-    /** The formats that MCP clients pass on to their models */
+    /** The formats that agents pass on to their models. */
     private const FORMATS = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
     private const WIDTH = 1024;
@@ -30,32 +29,28 @@ final class ViewImage
             inputSchema: [
                 'type' => 'object',
                 'properties' => [
-                    'file' => ['type' => 'string', 'description' => 'A `file://` UUID, or `<page ID>/<filename>`.'],
-                    'language' => ['type' => 'string', 'description' => 'The language code of the alt text. Defaults to the default language.']
+                    'file' => ['type' => 'string', 'description' => Arguments::FILE_DESCRIPTION],
+                    'language' => ['type' => 'string', 'description' => Arguments::LANGUAGE_DESCRIPTION]
                 ],
                 'required' => ['file'],
                 'additionalProperties' => false
             ],
-            annotations: ['readOnlyHint' => true, 'destructiveHint' => false, 'idempotentHint' => true, 'openWorldHint' => false],
+            annotations: Tool::READ_ONLY,
             permission: ConnectionPermission::Read,
-            handler: fn (array $arguments) => self::run(new Arguments($arguments))
+            handler: self::run(...)
         );
     }
 
     private static function run(Arguments $arguments): ToolResult
     {
-        $arguments->language();
-        $file = $arguments->model('file');
-
-        if (!$file instanceof File) {
-            throw new ToolError('`file` must be a file.');
-        }
+        $language = $arguments->language();
+        $file = $arguments->file('file');
 
         if ($file->type() !== 'image' || !in_array(Str::lower($file->extension()), self::FORMATS, true)) {
             throw new ToolError("{$file->filename()} isn't a JPEG, PNG, GIF, or WebP image.");
         }
 
-        // A thumb is generated lazily, on its first request (critique L5)
+        // Kirby generates a thumb on its first request, so `save()` creates it before it is read.
         $thumb = $file->thumb(['width' => self::WIDTH]);
 
         if ($thumb instanceof FileVersion) {
@@ -64,13 +59,10 @@ final class ViewImage
 
         return new ToolResult(
             data: [
-                'id' => $file->id(),
-                'uuid' => $file->uuid()?->toString(),
-                'filename' => $file->filename(),
-                'alt' => $file->content()->get('alt')->or(null)->value(),
+                ...ModelSummary::file($file, $language),
                 'width' => $file->width(),
                 'height' => $file->height(),
-                'panelUrl' => $file->panel()->url()
+                'etag' => ContentVersion::etag($file, $language)
             ],
             content: [[
                 'type' => 'image',

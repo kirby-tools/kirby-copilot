@@ -6,13 +6,17 @@ use JohannSchopplich\Copilot\Agents\Client;
 use JohannSchopplich\Copilot\Agents\ConnectionPermission;
 use JohannSchopplich\Copilot\Agents\ConnectionStore;
 use Kirby\Cms\App;
+use Kirby\Data\Data;
 
 /**
  * Calls the MCP URL as Ada, an editor, over a connection with the
- * permissions to read and prepare changes.
+ * permissions to read and prepare changes, unless a test grants others.
  */
 abstract class McpToolTestCase extends ApiRouteTestCase
 {
+    /** @var list<ConnectionPermission> */
+    protected array $permissions = [ConnectionPermission::Read, ConnectionPermission::Prepare];
+
     /**
      * @param Closure(App): void|null $prepare Changes the content, which lives in memory, before the call
      */
@@ -21,15 +25,31 @@ abstract class McpToolTestCase extends ApiRouteTestCase
         return $this->rpc('tools/call', ['name' => $name, 'arguments' => (object)$arguments], $props, $prepare)['result'];
     }
 
-    protected function listedTool(string $name): array
+    /**
+     * Writes a content file below the content folder, for tools whose
+     * writes outlive the app of one call.
+     */
+    protected static function writeContent(string $path, array $content, int|null $modified = null): void
     {
-        foreach ($this->rpc('tools/list')['result']['tools'] as $tool) {
-            if ($tool['name'] === $name) {
-                return $tool;
-            }
-        }
+        $file = static::indexRoot() . '/content/' . $path;
+        Data::write($file, $content);
 
-        $this->fail("Tool not listed: {$name}");
+        if ($modified !== null) {
+            touch($file, $modified);
+        }
+    }
+
+    /**
+     * Asks the route that an open Panel view polls when an agent last wrote
+     * the model's changes.
+     */
+    protected function lastWrite(string $model, string|null $language = null, array $props = []): int|null
+    {
+        $kirby = self::bootApp(array_replace_recursive(['options' => ['johannschopplich.copilot' => ['agents' => true]]], $props, [
+            'request' => ['query' => array_filter(['model' => $model, 'language' => $language])]
+        ]));
+
+        return $this->callRoute($kirby, '__copilot__/agents/last-write')['writtenAt'];
     }
 
     protected function rpc(string $method, array $params = [], array $props = [], Closure|null $prepare = null): array
@@ -47,7 +67,7 @@ abstract class McpToolTestCase extends ApiRouteTestCase
             new Client('https://claude.ai/oauth/claude-code-client-metadata', 'Claude Code', 'claude.ai', true),
             'http://localhost/callback',
             'https://example.com/api/copilot/mcp',
-            [ConnectionPermission::Read, ConnectionPermission::Write],
+            $this->permissions,
             'challenge'
         );
         $token = $store->redeemCode($code, fn () => true)['accessToken']->value;

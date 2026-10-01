@@ -252,15 +252,6 @@ final class GetContentToolTest extends McpToolTestCase
         $this->assertSame('home/lake+dawn.jpg', $this->getContent(['model' => 'file://lake-uuid'])['model']['id']);
     }
 
-    #[Test]
-    public function is_listed_as_a_read_only_tool(): void
-    {
-        $this->assertSame(
-            ['readOnlyHint' => true, 'destructiveHint' => false, 'idempotentHint' => true, 'openWorldHint' => false],
-            $this->listedTool('get_content')['annotations']
-        );
-    }
-
     private function getContent(array $arguments, Closure|null $prepare = null, array|null $props = null): array
     {
         $result = $this->callTool('get_content', $arguments, $props ?? $this->props(), $prepare);

@@ -116,6 +116,13 @@ final class ContextRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
+    public function tells_the_panel_whether_agents_are_on(): void
+    {
+        $this->assertTrue($this->callContextRoute(['johannschopplich.copilot' => ['agents' => true]])['config']['agents']);
+        $this->assertFalse($this->callContextRoute(['johannschopplich.copilot' => []])['config']['agents']);
+    }
+
+    #[Test]
     public function defaults_fill_in_missing_config(): void
     {
         $response = $this->callContextRoute([

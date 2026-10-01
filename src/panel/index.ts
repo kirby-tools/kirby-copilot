@@ -1,4 +1,5 @@
 /* eslint-disable ts/ban-ts-comment */
+import { reloadAfterAgentWrites } from "./agents";
 // @ts-ignore - Vue component
 import PromptDialog from "./components/Dialogs/Prompt.vue";
 // @ts-ignore - Vue component
@@ -54,5 +55,6 @@ window.panel.plugin("johannschopplich/copilot", {
   icons,
   use: {
     legacyViewButtonSupport: legacyViewButtonMixin,
+    reloadAfterAgentWrites,
   },
 });

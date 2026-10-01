@@ -79,7 +79,15 @@ final class Agents
             Tools\GetSite::tool(),
             Tools\FindPages::tool(),
             Tools\GetContent::tool(),
-            Tools\ViewImage::tool()
+            Tools\ViewImage::tool(),
+            Tools\PrepareChanges::tool(),
+            Tools\DiscardChanges::tool(),
+            Tools\CreateDraft::tool(),
+            Tools\UploadFile::tool(),
+            Tools\PublishChanges::tool(),
+            Tools\ChangeStatus::tool(),
+            Tools\DeletePage::tool(),
+            Tools\DeleteFile::tool()
         ];
     }
 }

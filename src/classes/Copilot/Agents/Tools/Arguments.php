@@ -20,6 +20,14 @@ use Kirby\Uuid\Uuid;
  */
 final class Arguments
 {
+    public const MODEL_DESCRIPTION = '`site`, or the `id` or `uuid` of a page or file as other tools return them, like `blog/my-post` or `blog/my-post/photo.jpg`.';
+    public const PARENT_DESCRIPTION = '`site`, or the `id` or `uuid` of a page as other tools return them, like `blog/my-post`.';
+    public const PAGE_DESCRIPTION = 'The `id` or `uuid` of a page as other tools return them, like `blog/my-post`.';
+    public const FILE_DESCRIPTION = 'The `id` or `uuid` of a file as other tools return them, like `blog/my-post/photo.jpg`.';
+    public const LANGUAGE_DESCRIPTION = 'A language code from get_site, on multilingual sites only. Defaults to the default language.';
+    public const ETAG_DESCRIPTION = 'The latest etag of this content in this language, from get_content or from the last tool that returned one for it.';
+    public const PAGE_STATUSES = ['listed', 'unlisted', 'draft'];
+
     public function __construct(private readonly array $arguments)
     {
     }
@@ -33,6 +41,16 @@ final class Arguments
         }
 
         return $value;
+    }
+
+    public function requiredString(string $name, string $hint = ''): string
+    {
+        return $this->string($name) ?? throw new ToolError(trim("`{$name}` is required. {$hint}"));
+    }
+
+    public function etag(): string
+    {
+        return $this->requiredString('etag', 'Read the content with get_content first.');
     }
 
     /**
@@ -63,9 +81,27 @@ final class Arguments
         return $value;
     }
 
-    public function integer(string $name, int $default, int $min, int $max = PHP_INT_MAX): int
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function object(string $name): array|null
+    {
+        $value = $this->arguments[$name] ?? null;
+
+        if ($value !== null && (!is_array($value) || ($value !== [] && array_is_list($value)))) {
+            throw new ToolError("`{$name}` must be an object.");
+        }
+
+        return $value;
+    }
+
+    public function integer(string $name, int|null $default, int $min, int $max = PHP_INT_MAX): int|null
     {
         $value = $this->arguments[$name] ?? $default;
+
+        if ($value === null) {
+            return null;
+        }
 
         if (!is_int($value) || $value < $min || $value > $max) {
             throw new ToolError($max === PHP_INT_MAX
@@ -83,7 +119,7 @@ final class Arguments
      */
     public function model(string $name): Site|Page|File
     {
-        $address = $this->string($name) ?? throw new ToolError("`{$name}` is required.");
+        $address = $this->requiredString($name);
 
         if ($address === 'site') {
             return Find::site();
@@ -109,6 +145,39 @@ final class Arguments
         } catch (NotFoundException) {
             throw new ToolError("Found no page or file \"{$address}\" the account may access. find_pages finds a page's ID; get_content lists a page's files.");
         }
+    }
+
+    public function parent(string $name): Site|Page
+    {
+        $parent = $this->model($name);
+
+        if ($parent instanceof File) {
+            throw new ToolError("`{$name}` must be the site or a page.");
+        }
+
+        return $parent;
+    }
+
+    public function page(string $name): Page
+    {
+        $page = $this->model($name);
+
+        if (!$page instanceof Page) {
+            throw new ToolError("`{$name}` must be a page.");
+        }
+
+        return $page;
+    }
+
+    public function file(string $name): File
+    {
+        $file = $this->model($name);
+
+        if (!$file instanceof File) {
+            throw new ToolError("`{$name}` must be a file.");
+        }
+
+        return $file;
     }
 
     /**
