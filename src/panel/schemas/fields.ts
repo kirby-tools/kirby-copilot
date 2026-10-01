@@ -13,6 +13,7 @@ import type {
 } from "kirby-types";
 import type { SchemaBuilder, SchemaContext } from "./types";
 import { z } from "zod";
+import fieldHints from "../../field-hints.json";
 
 /**
  * Field types excluded from AI generation:
@@ -29,42 +30,42 @@ const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
   text: (field) =>
     createTextSchema(
       field as KirbyTextFieldProps,
-      `"${field.label}", single-line plain text without line breaks or formatting`,
+      `"${field.label}", ${fieldHints.text}`,
     ),
   textarea: (field) =>
     createTextSchema(
       field as KirbyTextFieldProps,
-      `"${field.label}", multi-line text with line breaks for paragraphs. Markdown formatting is allowed if content requires it.`,
+      `"${field.label}", ${fieldHints.textarea}`,
     ),
   markdown: (field) =>
     createTextSchema(
       field as KirbyTextFieldProps,
-      `"${field.label}", multi-line text with Markdown formatting`,
+      `"${field.label}", ${fieldHints.markdown}`,
     ),
   slug: (field) =>
     createTextSchema(
       field as KirbyTextFieldProps,
-      `"${field.label}", a URL-friendly slug (lowercase, hyphens, no spaces or special characters)`,
+      `"${field.label}", ${fieldHints.slug}`,
     ),
   url: (field) =>
     createTextSchema(
       field as KirbyTextFieldProps,
-      `"${field.label}", a valid URL starting with http:// or https://`,
+      `"${field.label}", ${fieldHints.url}`,
     ),
   email: (field) =>
     createTextSchema(
       field as KirbyTextFieldProps,
-      `"${field.label}", a valid email address`,
+      `"${field.label}", ${fieldHints.email}`,
     ),
   password: (field) =>
     createTextSchema(
       field as KirbyTextFieldProps,
-      `"${field.label}", a secure password (not for actual use)`,
+      `"${field.label}", ${fieldHints.password}`,
     ),
   tel: (field) =>
     createTextSchema(
       field as KirbyTextFieldProps,
-      `"${field.label}", a telephone number in appropriate format for the context`,
+      `"${field.label}", ${fieldHints.tel}`,
     ),
 
   writer: (field) =>
@@ -72,21 +73,18 @@ const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
       field as KirbyWriterFieldProps,
       `"${field.label}" (WYSIWYG), ${
         (field as KirbyWriterFieldProps).inline === true
-          ? "text with inline formatting only (bold, italic, underline, code, links, email, sub, sup). NO wrapping paragraph <p> tags allowed."
-          : "text wrapped in paragraph <p> tags (can contain one or multiple paragraphs). Inline formatting (bold, italic, underline, code, links, email, sub, sup) is allowed."
+          ? fieldHints.inlineWriter
+          : fieldHints.writer
       }`,
     ),
   list: (field) =>
-    z
-      .string()
-      .describe(
-        `"${field.label}" (WYSIWYG), HTML list wrapped in <ul> or <ol>. Use <li> for items with inline formatting (bold, italic, underline, code, links, email, sub, sup).`,
-      ),
+    z.string().describe(`"${field.label}" (WYSIWYG), ${fieldHints.list}`),
 
   number: (field) => createNumericSchema(field as KirbyNumberFieldProps),
   range: (field) => createNumericSchema(field as KirbyRangeFieldProps),
 
-  toggle: (field) => z.boolean().describe(`"${field.label}", a boolean`),
+  toggle: (field) =>
+    z.boolean().describe(`"${field.label}", ${fieldHints.toggle}`),
 
   // Single selection fields (all store a single string value).
   select: (field) =>
@@ -108,30 +106,18 @@ const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
     z
       .string()
       .describe(
-        `"${field.label}", a date ${
+        `"${field.label}", ${
           (field as KirbyDateFieldProps).time
-            ? "with time in YYYY-MM-DD HH:MM:SS format (ISO 8601)"
-            : "in YYYY-MM-DD format (ISO 8601)"
+            ? fieldHints.dateWithTime
+            : fieldHints.date
         }`,
       ),
-  time: (field) =>
-    z
-      .string()
-      .describe(
-        `"${field.label}", a time in HH:MM:SS format (24-hour, ISO 8601)`,
-      ),
+  time: (field) => z.string().describe(`"${field.label}", ${fieldHints.time}`),
 
   color: (field) =>
-    z
-      .string()
-      .describe(`"${field.label}", a color value in hex, rgb or hsl format`),
+    z.string().describe(`"${field.label}", ${fieldHints.color}`),
 
-  link: (field) =>
-    z
-      .string()
-      .describe(
-        `"${field.label}", a link: internal page UUIDs (page://...), external URLs (https://...), email links (mailto:...), or anchors (#section)`,
-      ),
+  link: (field) => z.string().describe(`"${field.label}", ${fieldHints.link}`),
 
   structure: (field, context) => {
     const objectSchema = createNestedFieldsSchema(
@@ -142,16 +128,12 @@ const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
     if (objectSchema) {
       return z
         .array(objectSchema)
-        .describe(
-          `"${field.label}", repeatable structured data, each containing the defined sub-fields with appropriate content`,
-        );
+        .describe(`"${field.label}", ${fieldHints.structureWithFields}`);
     }
 
     return z
       .array(z.record(z.string(), z.string()))
-      .describe(
-        `"${field.label}", repeatable structured data based on expected content structure`,
-      );
+      .describe(`"${field.label}", ${fieldHints.structure}`);
   },
 
   object: (field, context) => {
@@ -162,15 +144,13 @@ const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
 
     if (objectSchema) {
       return objectSchema.describe(
-        `"${field.label}", structured data containing the defined sub-fields with appropriate content`,
+        `"${field.label}", ${fieldHints.objectWithFields}`,
       );
     }
 
     return z
       .record(z.string(), z.string())
-      .describe(
-        `"${field.label}", object data based on expected content structure`,
-      );
+      .describe(`"${field.label}", ${fieldHints.object}`);
   },
 
   blocks: (field, context) => {
@@ -181,7 +161,7 @@ const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
     if (!availableFieldsets?.length || !generateBlockSchema) {
       return z
         .array(z.record(z.string(), z.unknown()))
-        .describe(`"${field.label}", nested content blocks`);
+        .describe(`"${field.label}", ${fieldHints.blocks}`);
     }
 
     let nestedFieldsets = availableFieldsets;
@@ -202,7 +182,7 @@ const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
     if (blockSchemas.length === 0) {
       return z
         .array(z.record(z.string(), z.unknown()))
-        .describe(`"${field.label}", nested content blocks`);
+        .describe(`"${field.label}", ${fieldHints.blocks}`);
     }
 
     const blockUnion =
@@ -210,7 +190,7 @@ const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
 
     return z
       .array(blockUnion)
-      .describe(`"${field.label}", nested content blocks`);
+      .describe(`"${field.label}", ${fieldHints.blocks}`);
   },
 
   entries: (field) => {
@@ -230,12 +210,13 @@ const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
     if (_field.min != null) arraySchema = arraySchema.min(_field.min);
     if (_field.max != null) arraySchema = arraySchema.max(_field.max);
 
+    const entriesHint =
+      _field.min != null || _field.max != null
+        ? fieldHints.boundedEntries
+        : fieldHints.entries;
+
     return arraySchema.describe(
-      `"${field.label}", multiple entries of ${innerField.type} values${
-        _field.min != null || _field.max != null
-          ? " within the defined count range"
-          : ""
-      }`,
+      `"${field.label}", ${entriesHint.replace("{type}", innerField.type)}`,
     );
   },
 };
@@ -329,8 +310,10 @@ function createNumericSchema(
   if (field.max != null) schema = schema.max(field.max);
 
   return schema.describe(
-    `"${field.label}", a numeric value${
-      field.min != null || field.max != null ? " within the defined range" : ""
+    `"${field.label}", ${
+      field.min != null || field.max != null
+        ? fieldHints.boundedNumber
+        : fieldHints.number
     }`,
   );
 }
@@ -346,12 +329,10 @@ function createSingleSelectionSchema(field: KirbyOptionsFieldProps) {
   if (values.length > 0) {
     return z
       .enum(values)
-      .describe(
-        `"${field.label}", single selection value based on the predefined options`,
-      );
+      .describe(`"${field.label}", ${fieldHints.predefinedSingleSelection}`);
   }
 
-  return z.string().describe(`"${field.label}", single selection value`);
+  return z.string().describe(`"${field.label}", ${fieldHints.singleSelection}`);
 }
 
 /** Creates a Zod schema for multiple selection fields (checkboxes, multiselect, tags). */
@@ -365,12 +346,10 @@ function createMultipleSelectionSchema(field: KirbyOptionsFieldProps) {
   if (values.length > 0) {
     return z
       .array(z.enum(values))
-      .describe(
-        `"${field.label}", one ore many values based on the predefined options`,
-      );
+      .describe(`"${field.label}", ${fieldHints.predefinedMultipleSelection}`);
   }
 
   return z
     .array(z.string())
-    .describe(`"${field.label}", multiple selection values`);
+    .describe(`"${field.label}", ${fieldHints.multipleSelection}`);
 }

@@ -2,6 +2,7 @@ import type { KirbyLayoutFieldProps } from "kirby-types";
 import type { KirbyFieldset } from "../types";
 import type { SchemaContext } from "./types";
 import { z } from "zod";
+import fieldHints from "../../field-hints.json";
 import { generateBlockSchema } from "./blocks";
 
 export function generateKirbyLayoutsSchema(
@@ -27,7 +28,7 @@ export function generateKirbyLayoutsSchema(
   const layoutCombinations = layouts.map((layout) => `"${layout}"`).join(", ");
 
   return layoutSchema.describe(
-    `Kirby layout with columns and blocks. Available layout combinations: ${layoutCombinations}. Use these exact column width combinations when creating layouts.`,
+    `${fieldHints.layout}. Available layout combinations: ${layoutCombinations}. Use these exact column width combinations when creating layouts.`,
   );
 }
 
