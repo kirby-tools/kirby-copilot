@@ -9,8 +9,8 @@ use Kirby\Cms\App;
 use Kirby\Cms\User;
 
 /**
- * Entry point of the Agents feature: whether it is on, its URLs, and who
- * may connect.
+ * Entry point of the Agents feature: whether it is on, its URLs, who may
+ * connect, and the tools.
  */
 final class Agents
 {
@@ -68,5 +68,13 @@ final class Agents
             App::instance(),
             new ClientResolver(new PublicUrlFetcher(), self::cache())
         );
+    }
+
+    /**
+     * @return list<Tool>
+     */
+    public static function tools(): array
+    {
+        return [];
     }
 }

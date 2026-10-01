@@ -2,6 +2,7 @@
 
 use JohannSchopplich\Copilot\Agents\Agents;
 use JohannSchopplich\Copilot\Agents\Consent;
+use JohannSchopplich\Copilot\Agents\McpGuard;
 use JohannSchopplich\Copilot\AI\CurlProxyTransport;
 use JohannSchopplich\Copilot\AI\Proxy;
 use JohannSchopplich\Copilot\PanelContext;
@@ -199,6 +200,12 @@ return [
             }
         ],
         ...(Agents::isEnabled() ? [
+            [
+                'pattern' => 'copilot/mcp',
+                'method' => 'GET|POST|DELETE',
+                'auth' => false,
+                'action' => fn () => (new McpGuard($kirby))->handle($kirby->request())
+            ],
             [
                 'pattern' => 'copilot/oauth/authorize',
                 'method' => 'GET',
