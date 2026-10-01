@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PropType } from "vue";
+import type { ConnectedAgent } from "../../types";
 import { ref, usePanel } from "kirbyuse";
 import { PLUGIN_AGENTS_CONSENT_API_ROUTE } from "../../constants";
 
@@ -7,11 +8,7 @@ const props = defineProps({
   id: String,
   site: String,
   account: String,
-  client: Object as PropType<{
-    name: string;
-    host: string | null;
-    isVerified: boolean;
-  } | null>,
+  client: Object as PropType<Omit<ConnectedAgent, "isLocal"> | null>,
   redirect: Object as PropType<{
     type: "web" | "local" | "app";
     label: string;
@@ -53,14 +50,23 @@ async function decide(isApproved: boolean) {
         <header class="[&>*+*]:kai-mt-[var(--spacing-2)]">
           <k-headline tag="h1">
             {{
-              panel.t("johannschopplich.copilot.agents.authorize.headline", {
-                client: client.host ?? client.name,
-                site,
-              })
+              panel.t(
+                client.isVerified
+                  ? "johannschopplich.copilot.agents.authorize.headline"
+                  : "johannschopplich.copilot.agents.authorize.headline.unverified",
+                { client: client.host ?? client.name, site },
+              )
             }}
           </k-headline>
           <k-text v-if="client.host && client.name !== client.host">
             <p>{{ client.name }}</p>
+          </k-text>
+          <k-text v-else-if="!client.isVerified">
+            <p>
+              {{
+                panel.t("johannschopplich.copilot.agents.authorize.unverified")
+              }}
+            </p>
           </k-text>
         </header>
 

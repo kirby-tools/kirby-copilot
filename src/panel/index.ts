@@ -8,6 +8,10 @@ import CopilotSection from "./components/Sections/Copilot.vue";
 // @ts-ignore - Vue component
 import CopilotButton from "./components/ViewButtons/CopilotButton.vue";
 // @ts-ignore - Vue component
+import AgentCell from "./components/Views/AgentCell.vue";
+// @ts-ignore - Vue component
+import AgentsView from "./components/Views/Agents.vue";
+// @ts-ignore - Vue component
 import AgentsAuthorizeView from "./components/Views/AgentsAuthorize.vue";
 import { icons } from "./config/icons";
 import { copilot as copilotButton } from "./extensions/textarea-buttons/copilot";
@@ -25,7 +29,9 @@ window.panel.plugin("johannschopplich/copilot", {
   },
   components: {
     "k-copilot-prompt-dialog": PromptDialog,
+    "k-copilot-agents-view": AgentsView,
     "k-copilot-agents-authorize-view": AgentsAuthorizeView,
+    "k-table-copilot-agent-cell": AgentCell,
   },
   sections: {
     copilot: CopilotSection,

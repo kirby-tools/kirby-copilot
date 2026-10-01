@@ -83,3 +83,21 @@ export interface KirbyFieldset {
   description?: string | null;
   fields?: Record<string, KirbyFieldProps>;
 }
+
+export interface ConnectedAgent {
+  id: string;
+  name: string;
+  host: string | null;
+  isVerified: boolean;
+  isLocal: boolean;
+}
+
+/** A row of the Agents table. */
+export interface AgentConnection {
+  id: string;
+  agent: ConnectedAgent;
+  account?: string;
+  permissions: string[];
+  lastUsedAt: number | null;
+  revokeDialog: string;
+}
