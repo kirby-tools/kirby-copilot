@@ -10,3 +10,4 @@ require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../index.php';
 require_once __DIR__ . '/ApiRouteTestCase.php';
 require_once __DIR__ . '/FakeClientMetadataFetcher.php';
+require_once __DIR__ . '/McpToolTestCase.php';

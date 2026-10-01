@@ -75,6 +75,11 @@ final class Agents
      */
     public static function tools(): array
     {
-        return [];
+        return [
+            Tools\GetSite::tool(),
+            Tools\FindPages::tool(),
+            Tools\GetContent::tool(),
+            Tools\ViewImage::tool()
+        ];
     }
 }

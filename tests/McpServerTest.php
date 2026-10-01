@@ -8,6 +8,7 @@ use JohannSchopplich\Copilot\Agents\ConnectionPermission;
 use JohannSchopplich\Copilot\Agents\McpServer;
 use JohannSchopplich\Copilot\Agents\Tool;
 use JohannSchopplich\Copilot\Agents\ToolError;
+use JohannSchopplich\Copilot\Agents\Tools\Arguments;
 use Kirby\Exception\NotFoundException;
 use Kirby\Http\Response;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
@@ -397,13 +398,9 @@ final class McpServerTest extends ApiRouteTestCase
                 inputSchema: ['type' => 'object', 'properties' => (object)[]],
                 annotations: ['readOnlyHint' => true, 'openWorldHint' => false],
                 permission: ConnectionPermission::Read,
-                handler: function (array $arguments) {
-                    if (!isset($arguments['text'])) {
-                        throw new ToolError('Pass a text.');
-                    }
-
-                    return ['text' => $arguments['text']];
-                }
+                handler: fn (Arguments $arguments) => [
+                    'text' => $arguments->string('text') ?? throw new ToolError('Pass a text.')
+                ]
             ),
             new Tool(
                 name: 'crash',
@@ -412,8 +409,8 @@ final class McpServerTest extends ApiRouteTestCase
                 inputSchema: ['type' => 'object', 'properties' => ['kind' => ['type' => 'string']], 'additionalProperties' => false],
                 annotations: ['readOnlyHint' => true],
                 permission: ConnectionPermission::Read,
-                handler: function (array $arguments) {
-                    if (($arguments['kind'] ?? null) === 'kirby') {
+                handler: function (Arguments $arguments) {
+                    if ($arguments->string('kind') === 'kirby') {
                         throw new NotFoundException(key: 'page.notFound', data: ['slug' => 'notes']);
                     }
 

@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace JohannSchopplich\Copilot\Agents;
 
+use JohannSchopplich\Copilot\Agents\Tools\Arguments;
 use Kirby\Cms\App;
 use Kirby\Data\Json;
 use Kirby\Exception\Exception as KirbyException;
@@ -231,7 +232,7 @@ final class McpServer
         }
 
         try {
-            $result = ($tool->handler)($arguments, $connection);
+            $result = ($tool->handler)(new Arguments($arguments), $connection);
         } catch (ToolError | KirbyException $exception) {
             return self::toolError($exception->getMessage());
         } catch (Throwable $exception) {
@@ -239,11 +240,18 @@ final class McpServer
             return self::toolError("The tool {$tool->name} failed unexpectedly. Don't retry it; tell the user.");
         }
 
-        // Legacy clients require an object
+        $content = [];
+
+        if ($result instanceof ToolResult) {
+            $content = $result->content;
+            $result = $result->data;
+        }
+
+        // Legacy clients require an object.
         $structuredContent = (object)$result;
 
         return [
-            'content' => [[
+            'content' => [...$content, [
                 'type' => 'text',
                 'text' => json_encode($structuredContent, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
             ]],
