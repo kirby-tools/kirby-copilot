@@ -5,8 +5,8 @@ import type {
   KirbyFieldProps,
   KirbyLayoutFieldProps,
 } from "kirby-types";
-import type { LogLevel as LogLevelIndex } from "kirbyuse";
 import type z from "zod";
+import type { LogLevel } from "../../constants";
 import type { PluginConfig } from "../../types";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import {
@@ -32,9 +32,6 @@ import {
   usePluginContext,
 } from "../../composables";
 import {
-  DEFAULT_LOG_LEVEL,
-  DEFAULT_SYSTEM_PROMPT,
-  LOG_LEVELS,
   SUPPORTED_FILE_MIME_TYPES,
   SUPPORTED_IMAGE_MIME_TYPES,
   SUPPORTED_PROVIDERS,
@@ -75,7 +72,7 @@ const systemPrompt = ref<string>();
 const icon = ref<string>();
 const theme = ref<string>();
 const size = ref<string>();
-const logLevel = ref<LogLevelIndex>();
+const logLevel = ref<LogLevel>();
 
 const modelFile = ref<{ mime: string; url: string }>();
 const help = ref<string>();
@@ -138,20 +135,13 @@ watch(isDetailsOpen, (value) => {
   label.value = t(response.label) || panel.t("johannschopplich.copilot.label");
   field.value = response.field ?? undefined;
   userPrompt.value = response.userPrompt ?? undefined;
-  systemPrompt.value =
-    response.systemPrompt ||
-    context.config.systemPrompt ||
-    DEFAULT_SYSTEM_PROMPT;
+  systemPrompt.value = response.systemPrompt ?? undefined;
   if (response.editable === true) permissions.value.push("edit");
   if (response.files === true) permissions.value.push("files");
   icon.value = response.icon || "sparkling";
   theme.value = response.theme || "notice-icon";
   size.value = response.size || "md";
-  logLevel.value = LOG_LEVELS.indexOf(
-    response.logLevel && LOG_LEVELS.includes(response.logLevel)
-      ? response.logLevel
-      : (context.config.logLevel ?? DEFAULT_LOG_LEVEL),
-  ) as LogLevelIndex;
+  logLevel.value = response.logLevel ?? undefined;
   help.value = response.help ? t(response.help) : undefined;
   config.value = context.config;
   licenseStatus.value = __PLAYGROUND__ ? "active" : context.licenseStatus;

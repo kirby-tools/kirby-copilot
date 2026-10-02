@@ -4,7 +4,6 @@ import type {
   KirbyFieldProps,
   KirbyLayoutFieldProps,
 } from "kirby-types";
-import type { LogLevel as LogLevelIndex } from "kirbyuse";
 import type { PropType } from "vue";
 import type { LogLevel } from "../../constants";
 import type { PromptContext } from "../../types";
@@ -16,14 +15,8 @@ import {
   useBlocks,
   useLayouts,
   useModelFields,
-  usePluginContext,
 } from "../../composables";
-import {
-  DEFAULT_LOG_LEVEL,
-  DEFAULT_SYSTEM_PROMPT,
-  LOG_LEVELS,
-  PLUGIN_BUTTON_OPTIONS_API_ROUTE,
-} from "../../constants";
+import { PLUGIN_BUTTON_OPTIONS_API_ROUTE } from "../../constants";
 import { fieldToZodSchema } from "../../schemas/fields";
 import { loadAISDK, openPromptDialog } from "../../utils";
 
@@ -117,25 +110,15 @@ async function initPromptDialog() {
 
     const _currentContent = { ...currentContent.value };
 
-    const { config } = await usePluginContext();
     const { Output } = await loadAISDK();
-
-    const systemPrompt =
-      buttonOptions.systemPrompt ||
-      config.systemPrompt ||
-      DEFAULT_SYSTEM_PROMPT;
 
     activeRun = runStructuredGeneration({
       streamOptions: {
         userPrompt: prompt,
-        systemPrompt,
+        systemPrompt: buttonOptions.systemPrompt,
         output: Output.object({ schema: z.object(fieldsSchema) }),
         files,
-        logLevel: LOG_LEVELS.indexOf(
-          props.logLevel && LOG_LEVELS.includes(props.logLevel)
-            ? props.logLevel
-            : (config.logLevel ?? DEFAULT_LOG_LEVEL),
-        ) as LogLevelIndex,
+        logLevel: props.logLevel,
       },
       escapeToAbort: true,
       sink: {
@@ -171,7 +154,7 @@ async function initPromptDialog() {
     });
 
     // The Stop button goes live with `isGenerating`, but the run only exists
-    // once the schemas, the plugin context and the SDK chunk have loaded.
+    // once the schemas and the SDK chunk have loaded.
     if (isAbortRequested) activeRun?.abort();
 
     await activeRun?.done;

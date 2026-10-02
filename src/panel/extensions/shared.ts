@@ -1,10 +1,5 @@
 import type { ActiveField, OutputFormat, PromptContext } from "../types";
-import {
-  ensurePlaygroundApiKey,
-  runTextGeneration,
-  usePluginContext,
-} from "../composables";
-import { DEFAULT_SYSTEM_PROMPT } from "../constants";
+import { ensurePlaygroundApiKey, runTextGeneration } from "../composables";
 import { openPromptDialog } from "../utils";
 
 export async function streamTextToField(
@@ -41,8 +36,6 @@ export async function streamTextToField(
   const { prompt, files } = promptContext;
   if (!prompt) return;
 
-  const { config } = await usePluginContext();
-
   let isFirstInsertion = true;
 
   if (activeField) activeField.element.dataset.copilot = "generating";
@@ -51,7 +44,6 @@ export async function streamTextToField(
     streamOptions: {
       userPrompt: prompt,
       selection,
-      systemPrompt: config.systemPrompt || DEFAULT_SYSTEM_PROMPT,
       responseFormat,
       files,
     },

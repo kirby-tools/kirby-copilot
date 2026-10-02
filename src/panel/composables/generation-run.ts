@@ -1,14 +1,24 @@
+import type { LogLevel as LogLevelIndex } from "kirbyuse";
+import type { LogLevel } from "../constants";
 import { usePanel } from "kirbyuse";
-import { STORAGE_KEY_PREFIX } from "../constants";
+import {
+  DEFAULT_LOG_LEVEL,
+  DEFAULT_SYSTEM_PROMPT,
+  LOG_LEVELS,
+  STORAGE_KEY_PREFIX,
+} from "../constants";
 import { handleStreamError } from "../utils/error";
 import { resolveEditorPrompt, useStreamText } from "./ai";
+import { usePluginContext } from "./plugin";
 
 type StreamTextOptions = Omit<
   Parameters<typeof useStreamText>[0],
-  "abortSignal"
+  "abortSignal" | "logLevel"
 > & {
   /** Text selected in a field, sent as is next to the editor prompt. */
   selection?: string;
+  /** Per-run override of the global `logLevel` option. */
+  logLevel?: LogLevel;
 };
 
 export interface GenerationRun {
@@ -65,8 +75,7 @@ export function runTextGeneration({
 }): GenerationRun | undefined {
   return startGenerationRun(runOptions, async (signal) => {
     const { textStream } = await useStreamText({
-      ...streamOptions,
-      ...(await resolveEditorPrompt(streamOptions)),
+      ...(await resolveStreamOptions(streamOptions)),
       abortSignal: signal,
     });
 
@@ -93,8 +102,7 @@ export function runStructuredGeneration({
 }): GenerationRun | undefined {
   return startGenerationRun(runOptions, async (signal) => {
     const { partialOutputStream, output: finalOutput } = await useStreamText({
-      ...streamOptions,
-      ...(await resolveEditorPrompt(streamOptions)),
+      ...(await resolveStreamOptions(streamOptions)),
       abortSignal: signal,
     });
 
@@ -167,5 +175,27 @@ function startGenerationRun(
   return {
     done,
     abort: () => abortController.abort(),
+  };
+}
+
+async function resolveStreamOptions({
+  systemPrompt,
+  logLevel,
+  ...streamOptions
+}: StreamTextOptions) {
+  const { config } = await usePluginContext();
+
+  return {
+    ...streamOptions,
+    ...(await resolveEditorPrompt({
+      ...streamOptions,
+      systemPrompt:
+        systemPrompt || config.systemPrompt || DEFAULT_SYSTEM_PROMPT,
+    })),
+    logLevel: LOG_LEVELS.indexOf(
+      logLevel && LOG_LEVELS.includes(logLevel)
+        ? logLevel
+        : (config.logLevel ?? DEFAULT_LOG_LEVEL),
+    ) as LogLevelIndex,
   };
 }

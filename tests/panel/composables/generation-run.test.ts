@@ -7,6 +7,11 @@ import {
   runStructuredGeneration,
   runTextGeneration,
 } from "../../../src/panel/composables/generation-run";
+import { useLogger } from "../../../src/panel/composables/logger";
+
+const pluginContext = vi.hoisted(() => ({
+  config: {} as Record<string, unknown>,
+}));
 
 const panel = {
   isLoading: false,
@@ -35,10 +40,10 @@ vi.mock("../../../src/panel/utils/ai", () => ({
   loadAISDK: () => import("ai"),
 }));
 
-// Tests inject their model directly, so the context fetch that
-// `resolveEditorPrompt` awaits never has to hit the Panel API.
+// Tests inject their model directly, so the generation run's context fetch
+// never has to hit the Panel API.
 vi.mock("../../../src/panel/composables/plugin", () => ({
-  usePluginContext: () => Promise.resolve({ config: {} }),
+  usePluginContext: () => Promise.resolve(pluginContext),
 }));
 
 function createTextModel(deltas: string[]) {
@@ -99,7 +104,9 @@ function createFailingModel(error: unknown, deltas: string[] = []) {
 beforeEach(() => {
   vi.clearAllMocks();
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
   panel.isLoading = false;
+  pluginContext.config = {};
 });
 
 describe("runTextGeneration", () => {
@@ -144,18 +151,33 @@ describe("runTextGeneration", () => {
     });
     await run!.done;
 
-    expect(model.doStreamCalls[0]?.prompt).toEqual([
-      {
-        role: "user",
-        content: [
-          {
-            type: "text",
-            text: "<response_format>text</response_format>\n\n<selection>\nKeep {title}\n</selection>\n\nImprove Test Page",
-          },
-        ],
-        providerOptions: undefined,
-      },
-    ]);
+    expect(model.doStreamCalls[0]?.prompt.at(-1)).toEqual({
+      role: "user",
+      content: [
+        {
+          type: "text",
+          text: "<response_format>text</response_format>\n\n<selection>\nKeep {title}\n</selection>\n\nImprove Test Page",
+        },
+      ],
+      providerOptions: undefined,
+    });
+  });
+
+  it("falls back to the global system prompt and log level", async () => {
+    vi.stubEnv("DEV", false);
+    pluginContext.config = { systemPrompt: "Be brief.", logLevel: "debug" };
+    const model = createTextModel(["Done"]);
+
+    const run = runTextGeneration({
+      streamOptions: { userPrompt: "Write", model },
+      sink: { write: () => {} },
+    });
+    await run!.done;
+
+    expect(useLogger().info).toHaveBeenCalledWith(
+      "System prompt:",
+      "Be brief.",
+    );
   });
 
   it("stops writing and suppresses all notifications when aborted mid-stream", async () => {
