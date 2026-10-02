@@ -2,7 +2,7 @@
 import type { LicenseStatus } from "@kirby-tools/licensing";
 import type { KirbyFieldProps } from "kirby-types";
 import type { PropType } from "vue";
-import type { ActiveField, PromptTemplate } from "../../types";
+import type { ActiveField, PromptContext, PromptTemplate } from "../../types";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import { computed, isKirby5, ref, usePanel } from "kirbyuse";
 import { TEMPLATE_PLACEHOLDER_RE } from "utilful";
@@ -37,15 +37,7 @@ const emit = defineEmits<{
   (event: "cancel"): void;
   (event: "close"): void;
   (event: "input", value: unknown): void;
-  (
-    event: "submit",
-    value: {
-      prompt: string;
-      files: File[];
-      selectedFieldNames: string[];
-      insertMode: string;
-    },
-  ): void;
+  (event: "submit", value: PromptContext): void;
   (event: "success"): void;
 }>();
 
