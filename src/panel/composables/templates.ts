@@ -63,31 +63,6 @@ export function usePromptTemplates() {
     return template;
   }
 
-  function updateTemplate(id: string, updates: Partial<PromptTemplate>) {
-    const index = state.templates.findIndex((template) => template.id === id);
-    if (index === -1) return false;
-
-    // `Object.assign` preserves Vue 2 reactivity on the mutated object.
-    Object.assign(state.templates[index]!, updates);
-
-    saveTemplates();
-    return true;
-  }
-
-  function deleteTemplate(id: string) {
-    const index = state.templates.findIndex((template) => template.id === id);
-    if (index === -1) return false;
-
-    state.templates.splice(index, 1);
-    saveTemplates();
-    return true;
-  }
-
-  function clearTemplates() {
-    state.templates = [];
-    saveTemplates();
-  }
-
   function setTemplates(newTemplates: PromptTemplateInput[]) {
     const existingTemplates = [...state.templates];
     const result: PromptTemplate[] = [];
@@ -142,20 +117,12 @@ export function usePromptTemplates() {
     }
   }
 
-  function getTemplate(id: string) {
-    return allTemplates.value.find((template) => template.id === id);
-  }
-
   return {
     templates: computed(() => state.templates),
     allTemplates,
     addTemplate,
-    updateTemplate,
-    deleteTemplate,
-    clearTemplates,
     setTemplates,
     setConfigTemplates,
-    getTemplate,
   };
 }
 

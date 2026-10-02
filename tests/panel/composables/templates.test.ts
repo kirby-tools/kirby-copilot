@@ -139,70 +139,6 @@ describe("usePromptTemplates", () => {
     });
   });
 
-  describe("updateTemplate", () => {
-    it("merges updates into the existing template", async () => {
-      await seedStorage([
-        { id: "t-1", label: "Before", prompt: "Before prompt", createdAt: 1 },
-      ]);
-
-      const { updateTemplate, templates } = await loadComposable();
-
-      expect(updateTemplate("t-1", { label: "After" })).toBe(true);
-      expect(templates.value[0]).toMatchObject({
-        id: "t-1",
-        label: "After",
-        prompt: "Before prompt",
-      });
-    });
-
-    it("returns false and leaves templates unchanged for an unknown id", async () => {
-      await seedStorage([{ id: "t-1", label: "A", prompt: "P", createdAt: 1 }]);
-
-      const { updateTemplate, templates } = await loadComposable();
-      const snapshot = JSON.parse(JSON.stringify(templates.value));
-
-      expect(updateTemplate("missing", { label: "X" })).toBe(false);
-      expect(templates.value).toEqual(snapshot);
-    });
-  });
-
-  describe("deleteTemplate", () => {
-    it("removes a template by id", async () => {
-      await seedStorage([
-        { id: "t-1", label: "A", prompt: "P", createdAt: 1 },
-        { id: "t-2", label: "B", prompt: "Q", createdAt: 2 },
-      ]);
-
-      const { deleteTemplate, templates } = await loadComposable();
-
-      expect(deleteTemplate("t-1")).toBe(true);
-      expect(templates.value.map((t) => t.id)).toEqual(["t-2"]);
-    });
-
-    it("returns false for an unknown id", async () => {
-      await seedStorage([{ id: "t-1", label: "A", prompt: "P", createdAt: 1 }]);
-
-      const { deleteTemplate } = await loadComposable();
-
-      expect(deleteTemplate("missing")).toBe(false);
-    });
-  });
-
-  describe("clearTemplates", () => {
-    it("empties the user templates list", async () => {
-      await seedStorage([
-        { id: "t-1", label: "A", prompt: "P", createdAt: 1 },
-        { id: "t-2", label: "B", prompt: "Q", createdAt: 2 },
-      ]);
-
-      const { clearTemplates, templates } = await loadComposable();
-
-      clearTemplates();
-
-      expect(templates.value).toEqual([]);
-    });
-  });
-
   describe("setTemplates", () => {
     beforeEach(async () => {
       await seedStorage([]);
@@ -358,31 +294,6 @@ describe("usePromptTemplates", () => {
         "Config",
         "User",
       ]);
-    });
-  });
-
-  describe("getTemplate", () => {
-    it("finds a user template by id", async () => {
-      await seedStorage([
-        { id: "user-1", label: "Mine", prompt: "P", createdAt: 1 },
-      ]);
-
-      const { getTemplate } = await loadComposable();
-
-      expect(getTemplate("user-1")?.label).toBe("Mine");
-    });
-
-    it("finds a config template by id", async () => {
-      const { setConfigTemplates, getTemplate } = await loadComposable();
-      setConfigTemplates([{ label: "Config", prompt: "p" }]);
-
-      expect(getTemplate("config-0")?.label).toBe("Config");
-    });
-
-    it("returns undefined for an unknown id", async () => {
-      const { getTemplate } = await loadComposable();
-
-      expect(getTemplate("nope")).toBeUndefined();
     });
   });
 });

@@ -63,7 +63,6 @@ export function useBlocks() {
   }
 
   return {
-    getFieldsets,
     getZodSchema,
     normalizeBlock,
   };

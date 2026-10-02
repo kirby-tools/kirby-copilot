@@ -34,12 +34,7 @@ export function useModelFields() {
     return filteredFields;
   }
 
-  function clearModelFields() {
-    modelFieldsCache.delete(panel.view.path);
-  }
-
   return {
     getModelFields,
-    clearModelFields,
   };
 }

@@ -34,7 +34,6 @@ import {
 import {
   SUPPORTED_FILE_MIME_TYPES,
   SUPPORTED_IMAGE_MIME_TYPES,
-  SUPPORTED_PROVIDERS,
 } from "../../constants";
 import {
   getHashedStorageKey,
@@ -138,7 +137,7 @@ watch(isDetailsOpen, (value) => {
   systemPrompt.value = response.systemPrompt ?? undefined;
   if (response.editable === true) permissions.value.push("edit");
   if (response.files === true) permissions.value.push("files");
-  icon.value = response.icon || "sparkling";
+  icon.value = response.icon;
   theme.value = response.theme || "notice-icon";
   size.value = response.size || "md";
   logLevel.value = response.logLevel ?? undefined;
@@ -342,26 +341,7 @@ function onModelSave() {
       />
     </template>
 
-    <k-box v-if="!config" theme="empty">
-      <k-text>
-        Missing <code>johannschopplich.copilot</code> global configuration.
-      </k-text>
-    </k-box>
-    <k-box
-      v-else-if="
-        !config.provider || !SUPPORTED_PROVIDERS.includes(config.provider)
-      "
-      theme="empty"
-    >
-      <k-text>
-        Unsupported provider <code>{{ config.provider }}</code> in the
-        <code>johannschopplich.copilot.provider</code> global configuration.
-      </k-text>
-    </k-box>
-    <k-box
-      v-else-if="!config.providers?.[config.provider]?.model"
-      theme="empty"
-    >
+    <k-box v-if="!config.providers?.[config.provider]?.model" theme="empty">
       <k-text>
         Missing
         <code>model</code>
