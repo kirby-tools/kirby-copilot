@@ -97,14 +97,11 @@ const isFieldGenerationMode = computed(
 );
 
 const recentPrompts = computed(() => getRecentEntries(10));
-const hasPlaceholders = computed(() => {
-  const matches = prompt.value.match(TEMPLATE_PLACEHOLDER_RE);
-  if (!matches) return false;
-
-  // Only show preview if at least one placeholder is present in the content context.
-  const keys = matches.map((match) => match.slice(1, -1).toLowerCase());
-  return keys.some((key) => key in contentContext);
-});
+const hasPlaceholders = computed(() =>
+  Array.from(prompt.value.matchAll(TEMPLATE_PLACEHOLDER_RE), ([, key]) =>
+    key!.toLowerCase(),
+  ).some((key) => key in contentContext),
+);
 const resolvedPrompt = computed(() =>
   resolvePlaceholders(prompt.value, contentContext),
 );

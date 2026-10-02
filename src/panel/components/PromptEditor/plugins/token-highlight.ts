@@ -1,10 +1,9 @@
 import type { EditorState } from "prosemirror-state";
 import { Plugin } from "prosemirror-state";
 import { Decoration, DecorationSet } from "prosemirror-view";
+import { TEMPLATE_PLACEHOLDER_RE } from "utilful";
 import { createPageRefTokenRegex } from "../../../composables/pages";
 import { createSkillRefTokenRegex } from "../../../composables/skills";
-
-const PLACEHOLDER_TOKEN_REGEX_SOURCE = String.raw`\{[^}]+\}`;
 
 interface TokenHighlightPattern {
   className: string | ((match: RegExpMatchArray) => string);
@@ -14,7 +13,7 @@ interface TokenHighlightPattern {
 const STATIC_TOKEN_HIGHLIGHT_PATTERNS: readonly TokenHighlightPattern[] = [
   {
     className: "k-copilot-token-placeholder",
-    createRegex: () => new RegExp(PLACEHOLDER_TOKEN_REGEX_SOURCE, "g"),
+    createRegex: () => new RegExp(TEMPLATE_PLACEHOLDER_RE.source, "g"),
   },
   {
     className: "k-copilot-token-page-ref",
