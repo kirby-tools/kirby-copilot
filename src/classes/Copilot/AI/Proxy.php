@@ -22,6 +22,8 @@ final class Proxy
      */
     public const ERROR_MARKER = '__KIRBY_COPILOT_PROXY_ERROR__';
 
+    public const API_KEY_MARKER = '__KIRBY_COPILOT_PROXY__';
+
     public function __construct(
         private readonly App $kirby,
         private readonly ProxyTransport $transport,
@@ -113,7 +115,7 @@ final class Proxy
                 continue;
             }
 
-            $hasMarker = str_contains($value, '__KIRBY_COPILOT_PROXY__');
+            $hasMarker = str_contains($value, self::API_KEY_MARKER);
 
             if (in_array($nameLower, $markerAuthHeaders, true)) {
                 // The proxy owns the API key, so an auth header only travels
@@ -123,7 +125,7 @@ final class Proxy
                     continue;
                 }
 
-                $value = str_replace('__KIRBY_COPILOT_PROXY__', $apiKey, $value);
+                $value = str_replace(self::API_KEY_MARKER, $apiKey, $value);
             } elseif ($hasMarker) {
                 // Only the auth arm substitutes the marker, so this one would
                 // travel upstream unsubstituted; drop the header instead.

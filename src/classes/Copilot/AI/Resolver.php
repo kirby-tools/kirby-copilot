@@ -43,7 +43,8 @@ final readonly class Resolver
         if ($defaultProvider === null) {
             // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
             throw new InvalidArgumentException(
-                'Unknown provider "' . $providerName . '" – set "johannschopplich.copilot.provider" to one of: openai, anthropic, google, mistral'
+                'Unknown provider "' . $providerName . '" – set "johannschopplich.copilot.provider" to one of: ' .
+                implode(', ', array_column(ProviderName::cases(), 'value'))
             );
         }
 
