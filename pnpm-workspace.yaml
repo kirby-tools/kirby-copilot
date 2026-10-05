@@ -1,5 +1,7 @@
 minimumReleaseAgeExcludePrune: true
 
+minimumReleaseAgeExclude:
+  - utilful@3.5.1
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - chokidar@4.0.3
