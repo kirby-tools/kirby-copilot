@@ -109,6 +109,13 @@ export const copilot: CopilotMark = {
       );
     }
 
+    // Clear the DOM selection before the dialog opens, like Kirby's link
+    // dialog (getkirby/kirby#8288): Chromium crashes when a scrollable modal
+    // dialog opens over a live editor selection. Insertion reads the editor
+    // state selection, which stays intact.
+    // TODO: Remove once Chromium fixes the underlying crash
+    window.getSelection()?.removeAllRanges();
+
     let cursorPosition: number;
     let hasDeletedSelection = false;
     let isFirstInsertion = true;
