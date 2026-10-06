@@ -545,6 +545,13 @@ function getFieldPreview(fieldName: string) {
   overflow: visible;
 }
 
+/* Kirby 5.6 scrolls and masks the dialog body, which clips the licensing
+   buttons above it and the fixed skill suggestions below it */
+.k-copilot-prompt-dialog .k-dialog-body.k-scrollable[data-fade][data-axis] {
+  overflow: visible;
+  mask-image: none;
+}
+
 .k-copilot-prompt-dialog-licensing-buttons[data-layout="collapsed"]
   > .k-button {
   --theme-color-border: var(--color-pink-900);
