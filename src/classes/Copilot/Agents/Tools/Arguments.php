@@ -53,6 +53,17 @@ final class Arguments
         return $this->requiredString('etag', 'Read the content with get_content first.');
     }
 
+    public function boolean(string $name): bool|null
+    {
+        $value = $this->arguments[$name] ?? null;
+
+        if ($value !== null && !is_bool($value)) {
+            throw new ToolError("`{$name}` must be a boolean.");
+        }
+
+        return $value;
+    }
+
     /**
      * @param list<string> $values
      */

@@ -85,12 +85,15 @@ final class FindPagesToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function returns_titles_and_urls_in_the_requested_language(): void
+    public function returns_titles_urls_and_has_changes_in_the_requested_language(): void
     {
-        $page = $this->callTool('find_pages', ['language' => 'de'], $this->multilangProps())['structuredContent']['pages'][0];
+        $page = $this->callTool('find_pages', ['language' => 'de'], $this->multilangProps(), function (App $kirby) {
+            $kirby->page('about')->version('changes')->save(['title' => 'About us'], 'en');
+        })['structuredContent']['pages'][0];
 
         $this->assertSame('Über uns', $page['title']);
         $this->assertSame('https://example.com/de/about', $page['url']);
+        $this->assertFalse($page['hasChanges']);
     }
 
     #[Test]
@@ -110,6 +113,37 @@ final class FindPagesToolTest extends McpToolTestCase
         });
 
         $this->assertSame([true, false, false], array_column($result['pages'], 'hasChanges'));
+    }
+
+    #[Test]
+    public function finds_only_pages_with_unsaved_changes_for_has_changes_true(): void
+    {
+        $result = $this->findPages(['hasChanges' => true], function (App $kirby) {
+            $kirby->page('notes/first')->version('changes')->save(['title' => 'First note, revised']);
+        });
+
+        $this->assertSame(['notes/first'], array_column($result['pages'], 'id'));
+    }
+
+    #[Test]
+    public function returns_the_values_of_the_requested_fields_cut_to_300_characters(): void
+    {
+        $result = $this->findPages(['parent' => 'notes', 'fields' => ['text']]);
+
+        $this->assertSame(
+            [['text' => ''], ['text' => 'Kirby loves agents'], ['text' => str_repeat('Long ', 60) . '…']],
+            array_column($result['pages'], 'values')
+        );
+    }
+
+    #[Test]
+    public function sorts_by_the_title_of_the_unsaved_changes_with_direction_desc(): void
+    {
+        $result = $this->findPages(['parent' => 'notes', 'sortBy' => 'title', 'direction' => 'desc'], function (App $kirby) {
+            $kirby->page('notes/first')->version('changes')->save(['title' => 'Zebra note']);
+        });
+
+        $this->assertSame(['notes/first', 'notes/third', 'notes/second'], array_column($result['pages'], 'id'));
     }
 
     #[Test]
@@ -153,13 +187,14 @@ final class FindPagesToolTest extends McpToolTestCase
                             ['slug' => 'third', 'num' => 2, 'template' => 'note', 'content' => ['title' => 'Third note', 'text' => 'Kirby loves agents', 'uuid' => 'third-uuid']]
                         ],
                         'drafts' => [
-                            ['slug' => 'second', 'template' => 'note', 'content' => ['title' => 'Second note', 'uuid' => 'second-uuid']]
+                            ['slug' => 'second', 'template' => 'note', 'content' => ['title' => 'Second note', 'text' => str_repeat('Long ', 100), 'uuid' => 'second-uuid']]
                         ]
                     ],
                     ['slug' => 'secret', 'num' => 2, 'template' => 'secret', 'content' => ['title' => 'Secret', 'uuid' => 'secret-uuid']]
                 ]
             ],
             'blueprints' => [
+                'pages/note' => ['fields' => ['text' => ['type' => 'textarea']]],
                 'pages/secret' => ['options' => ['access' => false]]
             ]
         ];
