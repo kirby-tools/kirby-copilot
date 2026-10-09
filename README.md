@@ -18,7 +18,7 @@ Whether you are building sites for clients or managing content yourself, Kirby C
 - 📚 **Skills**: Reusable instructions, pulled into any prompt with `@skill://`.
 - 🌞 **Prompt Templates**: Save and reuse frequently used prompts.
 - 🦙 **Multi-Provider**: OpenAI, Anthropic, Google, or Mistral – switch anytime.
-- 🤖 **Agents**: Connect Claude, ChatGPT, or Cursor through the Panel's login – by default, their edits wait for you to publish.
+- 🤖 **Agents**: Connect Claude, ChatGPT, or Cursor through the Panel's login, and by default their edits wait for you to publish – see [Agents](https://kirby.tools/docs/copilot/agents).
 - 🛠 **PHP API**: Drive AI from CLI, hooks, and custom workflows – see [PHP classes](https://kirby.tools/docs/copilot/php-classes).
 
 ## Licensing
