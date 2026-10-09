@@ -26,7 +26,7 @@ final class UploadFileToolTest extends McpToolTestCase
     #[Test]
     public function uploads_a_file_to_a_page(): void
     {
-        $result = $this->upload(['parent' => 'notes', 'filename' => 'Lake View.png', 'data' => self::PNG]);
+        $result = $this->upload(['parent' => 'notes', 'filename' => 'Lake View.png', 'data' => self::PNG, 'template' => 'image']);
 
         $this->assertSame('notes/lake-view.png', $result['file']['id']);
         $this->assertSame('image', $result['file']['template']);
@@ -46,23 +46,12 @@ final class UploadFileToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function takes_the_template_of_the_first_accepting_files_section(): void
+    public function asks_for_the_template_when_the_parent_accepts_several(): void
     {
-        self::writeContent('twin/twin.txt', ['Title' => 'Twin']);
+        $result = $this->uploadResult(['parent' => 'notes', 'filename' => 'a.png', 'data' => self::PNG]);
 
-        $result = $this->upload(['parent' => 'twin', 'filename' => 'a.png', 'data' => self::PNG]);
-
-        $this->assertSame('cover', $result['file']['template']);
-    }
-
-    #[Test]
-    public function skips_a_template_whose_image_dimensions_the_file_misses(): void
-    {
-        self::writeContent('poster/poster.txt', ['Title' => 'Poster']);
-
-        $result = $this->upload(['parent' => 'poster', 'filename' => 'a.png', 'data' => self::PNG]);
-
-        $this->assertSame('image', $result['file']['template']);
+        $this->assertTrue($result['isError']);
+        $this->assertSame('Notes accepts files with several templates, so pass one as `template`: image, vector.', $result['content'][0]['text']);
     }
 
     #[Test]
@@ -99,10 +88,10 @@ final class UploadFileToolTest extends McpToolTestCase
     #[Test]
     public function refuses_a_file_the_template_does_not_accept(): void
     {
-        $result = $this->uploadResult(['parent' => 'notes', 'filename' => 'readme.txt', 'data' => base64_encode('Hello')]);
+        $result = $this->uploadResult(['parent' => 'notes', 'filename' => 'readme.txt', 'data' => base64_encode('Hello'), 'template' => 'image']);
 
         $this->assertTrue($result['isError']);
-        $this->assertSame('None of the file templates Notes accepts takes readme.txt: image, vector.', $result['content'][0]['text']);
+        $this->assertSame('The extension "txt" is not allowed', $result['content'][0]['text']);
         $this->assertFileDoesNotExist(self::indexRoot() . '/content/notes/readme.txt');
     }
 
@@ -135,7 +124,7 @@ final class UploadFileToolTest extends McpToolTestCase
     #[Test]
     public function refuses_data_that_is_not_base64(): void
     {
-        $result = $this->uploadResult(['parent' => 'notes', 'filename' => 'a.png', 'data' => 'not base64!']);
+        $result = $this->uploadResult(['parent' => 'notes', 'filename' => 'a.png', 'data' => 'not base64!', 'template' => 'image']);
 
         $this->assertTrue($result['isError']);
         $this->assertSame('`data` must be the file\'s content in base64.', $result['content'][0]['text']);
@@ -144,7 +133,7 @@ final class UploadFileToolTest extends McpToolTestCase
     #[Test]
     public function refuses_base64_data_over_100_kb(): void
     {
-        $result = $this->uploadResult(['parent' => 'notes', 'filename' => 'a.png', 'data' => base64_encode(str_repeat('a', 100 * 1024 + 1))]);
+        $result = $this->uploadResult(['parent' => 'notes', 'filename' => 'a.png', 'data' => base64_encode(str_repeat('a', 100 * 1024 + 1)), 'template' => 'image']);
 
         $this->assertTrue($result['isError']);
         $this->assertSame('The file is larger than 100 KB. Pass a `url` instead.', $result['content'][0]['text']);
@@ -156,22 +145,33 @@ final class UploadFileToolTest extends McpToolTestCase
         $result = $this->uploadResult(['parent' => 'notes', 'filename' => 'a.png']);
 
         $this->assertTrue($result['isError']);
-        $this->assertSame('Pass either `url` or `data`.', $result['content'][0]['text']);
+        $this->assertSame('Pass exactly one of `url` and `data`.', $result['content'][0]['text']);
     }
 
     #[Test]
     public function refuses_a_url_inside_the_server_network(): void
     {
-        $result = $this->uploadResult(['parent' => 'notes', 'filename' => 'a.png', 'url' => 'https://127.0.0.1/a.png']);
+        $result = $this->uploadResult(['parent' => 'notes', 'filename' => 'a.png', 'url' => 'https://127.0.0.1/a.png', 'template' => 'image']);
 
         $this->assertTrue($result['isError']);
         $this->assertStringStartsWith("Couldn't fetch https://127.0.0.1/a.png.", $result['content'][0]['text']);
     }
 
     #[Test]
+    public function names_the_template_maxsize_when_a_url_upload_fails(): void
+    {
+        self::writeContent('thumbs/thumbs.txt', ['Title' => 'Thumbs']);
+
+        $result = $this->uploadResult(['parent' => 'thumbs', 'filename' => 'a.png', 'url' => 'https://127.0.0.1/a.png']);
+
+        $this->assertTrue($result['isError']);
+        $this->assertStringEndsWith("for a file of at most 2\u{a0}MB.", $result['content'][0]['text']);
+    }
+
+    #[Test]
     public function refuses_a_role_without_the_create_permission(): void
     {
-        $result = $this->uploadResult(['parent' => 'notes', 'filename' => 'a.png', 'data' => self::PNG], role: 'reviewer');
+        $result = $this->uploadResult(['parent' => 'notes', 'filename' => 'a.png', 'data' => self::PNG, 'template' => 'image'], role: 'reviewer');
 
         $this->assertTrue($result['isError']);
         $this->assertSame('The file cannot be created', $result['content'][0]['text']);
@@ -181,7 +181,7 @@ final class UploadFileToolTest extends McpToolTestCase
     #[Test]
     public function refuses_a_file_as_the_parent(): void
     {
-        $this->upload(['parent' => 'notes', 'filename' => 'a.png', 'data' => self::PNG]);
+        $this->upload(['parent' => 'notes', 'filename' => 'a.png', 'data' => self::PNG, 'template' => 'image']);
 
         $result = $this->uploadResult(['parent' => 'notes/a.png', 'filename' => 'b.png', 'data' => self::PNG]);
 
@@ -209,18 +209,7 @@ final class UploadFileToolTest extends McpToolTestCase
                 ],
                 'pages/gallery' => ['sections' => ['files' => ['type' => 'files']]],
                 'pages/plain' => ['fields' => ['subtitle' => ['type' => 'text']]],
-                'pages/twin' => [
-                    'sections' => [
-                        'covers' => ['type' => 'files', 'template' => 'cover'],
-                        'images' => ['type' => 'files', 'template' => 'image']
-                    ]
-                ],
-                'pages/poster' => [
-                    'sections' => [
-                        'banners' => ['type' => 'files', 'template' => 'banner'],
-                        'images' => ['type' => 'files', 'template' => 'image']
-                    ]
-                ],
+                'pages/thumbs' => ['sections' => ['thumbs' => ['type' => 'files', 'template' => 'thumb']]],
                 'pages/article' => ['fields' => ['cover' => ['type' => 'files', 'uploads' => ['template' => 'cover']]]],
                 'pages/album' => [
                     'sections' => [
@@ -230,9 +219,9 @@ final class UploadFileToolTest extends McpToolTestCase
                     ]
                 ],
                 'files/cover' => ['accept' => ['mime' => 'image/png']],
-                'files/banner' => ['accept' => ['mime' => 'image/png', 'minwidth' => 100]],
                 'files/image' => ['accept' => ['mime' => 'image/png, image/jpeg']],
                 'files/vector' => ['accept' => ['extension' => 'svg']],
+                'files/thumb' => ['accept' => ['mime' => 'image/png', 'maxsize' => 2 * 1024 * 1024]],
                 'files/document' => ['accept' => ['extension' => 'pdf']],
                 'users/reviewer' => ['name' => 'reviewer', 'permissions' => ['files' => ['create' => false]]]
             ],

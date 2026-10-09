@@ -9,14 +9,17 @@ use Kirby\Cms\App;
 
 /**
  * Fetches an HTTPS URL outside the server's own network: the host must
- * resolve to public addresses only, the connection is pinned to the checked
- * address, and redirects aren't followed.
+ * resolve to public addresses only, and the connection is pinned to the
+ * checked address. A redirect passes the same checks, and none is followed
+ * by default, since a client metadata document must not be fetched through
+ * one (OAuth Client ID Metadata Document).
  *
  * @internal
  */
 final class PublicUrlFetcher implements ClientMetadataFetcher
 {
-    private const TIMEOUT = 5;
+    private const CONNECT_TIMEOUT = 5;
+    private const REDIRECT_STATUSES = [301, 302, 303, 307, 308];
 
     /** IPv4 ranges that `FILTER_FLAG_NO_PRIV_RANGE` and `FILTER_FLAG_NO_RES_RANGE` let through. */
     private const NON_PUBLIC_IPV4_RANGES = [
@@ -28,20 +31,98 @@ final class PublicUrlFetcher implements ClientMetadataFetcher
     /**
      * @param (Closure(string): list<string>)|null $resolve Returns the addresses of a host name; DNS by default
      * @param int $maxBytes Fails the fetch of a larger response body
+     * @param int $timeout Seconds for the transfers, redirects included
      */
     public function __construct(
         private readonly Closure|null $resolve = null,
         private readonly int $maxBytes = 10 * 1024,
-        private readonly string $accept = 'application/json'
+        private readonly string $accept = 'application/json',
+        private readonly int $timeout = 5,
+        private readonly int $maxRedirects = 0
     ) {
     }
 
     public function fetch(string $url): array|null
     {
+        $stream = fopen('php://temp', 'w+');
+
+        try {
+            $headers = $this->transfer($url, $stream);
+
+            if ($headers === null) {
+                return null;
+            }
+
+            $maxAge = preg_match('/max-age=(\d+)/', $headers['cache-control'] ?? '', $matches) === 1
+                ? (int)$matches[1]
+                : null;
+
+            return ['body' => stream_get_contents($stream, offset: 0), 'maxAge' => $maxAge];
+        } finally {
+            fclose($stream);
+        }
+    }
+
+    /**
+     * Streams the response body into a file. Returns `false` when the fetch
+     * fails, which may leave a partial or an error body in the file.
+     */
+    public function download(string $url, string $path): bool
+    {
+        $stream = fopen($path, 'w+');
+
+        try {
+            return $this->transfer($url, $stream) !== null;
+        } finally {
+            fclose($stream);
+        }
+    }
+
+    /**
+     * Writes the body of the final response into the stream and returns its
+     * headers, or `null` when a hop fails a check or the response after at
+     * most `$maxRedirects` redirects isn't a 200.
+     *
+     * @param resource $stream
+     * @return array<string, string>|null
+     */
+    private function transfer(string $url, $stream): array|null
+    {
+        $deadline = microtime(true) + $this->timeout;
+
+        for ($redirects = 0; ; $redirects++) {
+            ftruncate($stream, 0);
+            rewind($stream);
+            $response = $this->request($url, $stream, $deadline);
+
+            if ($response === null) {
+                return null;
+            }
+
+            if ($response['status'] === 200) {
+                return $response['headers'];
+            }
+
+            // `CURLOPT_PROTOCOLS` refuses a redirect to anything but HTTPS.
+            if (!in_array($response['status'], self::REDIRECT_STATUSES, true) || $response['location'] === null || $redirects >= $this->maxRedirects) {
+                return null;
+            }
+
+            $url = $response['location'];
+        }
+    }
+
+    /**
+     * @param resource $stream
+     * @return array{status: int, headers: array<string, string>, location: string|null}|null
+     */
+    private function request(string $url, $stream, float $deadline): array|null
+    {
         $host = parse_url($url, PHP_URL_HOST);
         $port = parse_url($url, PHP_URL_PORT) ?? 443;
+        $timeoutMs = (int)(($deadline - microtime(true)) * 1000);
 
-        if (!is_string($host)) {
+        if (!is_string($host) || $timeoutMs <= 0) {
             return null;
         }
 
@@ -51,8 +132,8 @@ final class PublicUrlFetcher implements ClientMetadataFetcher
             return null;
         }
 
-        $body = '';
         $headers = [];
+        $bytes = 0;
         $handle = curl_init($url);
 
         curl_setopt_array($handle, [
@@ -61,8 +142,8 @@ final class PublicUrlFetcher implements ClientMetadataFetcher
             CURLOPT_PROXY => '',
             CURLOPT_PROTOCOLS => CURLPROTO_HTTPS,
             CURLOPT_FOLLOWLOCATION => false,
-            CURLOPT_CONNECTTIMEOUT => self::TIMEOUT,
-            CURLOPT_TIMEOUT => self::TIMEOUT,
+            CURLOPT_CONNECTTIMEOUT => self::CONNECT_TIMEOUT,
+            CURLOPT_TIMEOUT_MS => $timeoutMs,
             CURLOPT_HTTPHEADER => ["Accept: {$this->accept}"],
             CURLOPT_HEADERFUNCTION => function ($handle, string $header) use (&$headers) {
                 $parts = explode(':', $header, 2);
@@ -74,10 +155,10 @@ final class PublicUrlFetcher implements ClientMetadataFetcher
                 return strlen($header);
             },
             // Returning less than the chunk length aborts the transfer.
-            CURLOPT_WRITEFUNCTION => function ($handle, string $chunk) use (&$body) {
-                $body .= $chunk;
+            CURLOPT_WRITEFUNCTION => function ($handle, string $chunk) use ($stream, &$bytes) {
+                $bytes += strlen($chunk);
 
-                return strlen($body) > $this->maxBytes ? 0 : strlen($chunk);
+                return $bytes > $this->maxBytes ? 0 : (int)fwrite($stream, $chunk);
             }
         ]);
 
@@ -88,17 +169,18 @@ final class PublicUrlFetcher implements ClientMetadataFetcher
             curl_setopt($handle, CURLOPT_CAINFO, App::instance()->root('kirby') . '/cacert.pem');
         }
 
-        $isSuccess = curl_exec($handle) !== false && curl_getinfo($handle, CURLINFO_RESPONSE_CODE) === 200;
-
-        if (!$isSuccess) {
+        if (curl_exec($handle) === false) {
             return null;
         }
 
-        $maxAge = preg_match('/max-age=(\d+)/', $headers['cache-control'] ?? '', $matches) === 1
-            ? (int)$matches[1]
-            : null;
+        // The `Location` header, resolved against the URL as a client following it would.
+        $location = curl_getinfo($handle, CURLINFO_REDIRECT_URL);
 
-        return ['body' => $body, 'maxAge' => $maxAge];
+        return [
+            'status' => curl_getinfo($handle, CURLINFO_RESPONSE_CODE),
+            'headers' => $headers,
+            'location' => is_string($location) && $location !== '' ? $location : null
+        ];
     }
 
     /**

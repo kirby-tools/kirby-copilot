@@ -13,7 +13,6 @@ use Kirby\Cms\File;
 use Kirby\Cms\Language;
 use Kirby\Cms\Page;
 use Kirby\Cms\Site;
-use Kirby\Exception\Exception as KirbyException;
 use Kirby\Filesystem\Dir;
 use Kirby\Filesystem\F;
 
@@ -23,8 +22,11 @@ use Kirby\Filesystem\F;
  */
 final class UploadFile
 {
-    private const MAX_SIZE = 5 * 1024 * 1024;
+    /** The largest file a URL upload takes for a file template without its own `accept.maxsize`. */
+    private const MAX_SIZE = 20 * 1024 * 1024;
     private const MAX_SIZE_TEXT = self::MAX_SIZE / 1024 / 1024 . ' MB';
+    private const MAX_REDIRECTS = 5;
+    private const DOWNLOAD_TIMEOUT = 60;
 
     /** A model writes base64 out token by token, so only a small file fits in a call. */
     private const MAX_DATA_SIZE = 100 * 1024;
@@ -35,15 +37,15 @@ final class UploadFile
         return new Tool(
             name: 'upload_file',
             title: 'Upload file',
-            description: 'Uploads a file to the site or a page: from a public URL, up to ' . self::MAX_SIZE_TEXT . ', or as base64 for a small file, up to ' . self::MAX_DATA_SIZE_TEXT . '. The file is live at once; only its fields, like the alt text, wait for review – write them with prepare_changes afterwards. Returns the file and its etag.',
+            description: 'Uploads a file to the site or a page: from a public HTTPS URL, up to ' . self::MAX_SIZE_TEXT . ' unless the file template sets its own maximum, or as base64 for a small file, up to ' . self::MAX_DATA_SIZE_TEXT . '. The file is live at once; only its fields, like the alt text, wait for review – view_image shows an image to describe, prepare_changes writes the fields. Returns the file and its etag.',
             inputSchema: [
                 'type' => 'object',
                 'properties' => [
                     'parent' => ['type' => 'string', 'description' => Arguments::PARENT_DESCRIPTION],
                     'filename' => ['type' => 'string', 'description' => 'The filename with its extension.'],
-                    'url' => ['type' => 'string', 'description' => 'An HTTPS URL that answers with the file itself, without a redirect.'],
+                    'url' => ['type' => 'string', 'description' => 'A public HTTPS URL that answers with the file itself, directly or after up to ' . self::MAX_REDIRECTS . ' redirects.'],
                     'data' => ['type' => 'string', 'description' => 'The file\'s content in base64, instead of `url`.'],
-                    'template' => ['type' => 'string', 'description' => 'A file template the parent accepts. Defaults to the first one that accepts the file.']
+                    'template' => ['type' => 'string', 'description' => 'A file template the parent accepts. Required when it accepts several.']
                 ],
                 'required' => ['parent', 'filename'],
                 'additionalProperties' => false
@@ -64,23 +66,32 @@ final class UploadFile
         $templates = self::templates($parent);
 
         if (($url === null) === ($data === null)) {
-            throw new ToolError('Pass either `url` or `data`.');
+            throw new ToolError('Pass exactly one of `url` and `data`.');
         }
 
         if ($templates === []) {
             throw new ToolError("{$parent->title()->value()} takes no new files.");
         }
 
-        $content = $url !== null ? self::download($url) : self::decode($data);
+        if ($template === null && count($templates) > 1) {
+            throw new ToolError("{$parent->title()->value()} accepts files with several templates, so pass one as `template`: " . implode(', ', $templates) . '.');
+        }
+
+        $template ??= $templates[0];
+
+        if (!in_array($template, $templates, true)) {
+            throw new ToolError("{$parent->title()->value()} accepts files with the templates: " . implode(', ', $templates) . '.');
+        }
+
         $root = sys_get_temp_dir() . '/copilot-upload-' . bin2hex(random_bytes(8));
         $source = $root . '/' . $filename;
-        F::write($source, $content);
 
         try {
-            $template ??= self::firstAcceptingTemplate($parent, $templates, $source, $filename);
-
-            if (!in_array($template, $templates, true)) {
-                throw new ToolError("{$parent->title()->value()} accepts files with the templates: " . implode(', ', $templates) . '.');
+            if ($url !== null) {
+                Dir::make($root);
+                self::download($url, $source, self::maxSize($parent, $filename, $template));
+            } else {
+                F::write($source, self::decode($data));
             }
 
             $file = $parent->createFile([
@@ -103,11 +114,23 @@ final class UploadFile
         ];
     }
 
-    private static function download(string $url): string
+    private static function download(string $url, string $path, int $maxSize): void
     {
-        $response = (new PublicUrlFetcher(maxBytes: self::MAX_SIZE, accept: '*/*'))->fetch($url);
+        $fetcher = new PublicUrlFetcher(
+            maxBytes: $maxSize,
+            accept: '*/*',
+            timeout: self::DOWNLOAD_TIMEOUT,
+            maxRedirects: self::MAX_REDIRECTS
+        );
 
-        return $response['body'] ?? throw new ToolError("Couldn't fetch {$url}. Pass a public HTTPS URL that answers with the file itself, without a redirect, for a file of at most " . self::MAX_SIZE_TEXT . '.');
+        if (!$fetcher->download($url, $path)) {
+            throw new ToolError("Couldn't fetch {$url}. Pass a public HTTPS URL that answers with the file itself, directly or after up to " . self::MAX_REDIRECTS . ' redirects, for a file of at most ' . F::niceSize($maxSize, false) . '.');
+        }
+    }
+
+    private static function maxSize(Site|Page $parent, string $filename, string $template): int
+    {
+        return (int)((new File(['filename' => $filename, 'parent' => $parent, 'template' => $template]))->blueprint()->accept()['maxsize'] ?? self::MAX_SIZE);
     }
 
     private static function decode(string $data): string
@@ -155,25 +178,5 @@ final class UploadFile
         }
 
         return array_values(array_unique($templates));
-    }
-
-    /**
-     * @param list<string> $templates
-     */
-    private static function firstAcceptingTemplate(Site|Page $parent, array $templates, string $source, string $filename): string
-    {
-        foreach ($templates as $template) {
-            $file = new File(['filename' => $filename, 'parent' => $parent, 'template' => $template]);
-
-            try {
-                // `asset()` is an `Image` for an image, whose `match()` also checks the `accept` dimensions.
-                $file->asset($source)->match($file->blueprint()->accept());
-                return $template;
-            } catch (KirbyException) {
-                continue;
-            }
-        }
-
-        throw new ToolError("None of the file templates {$parent->title()->value()} accepts takes {$filename}: " . implode(', ', $templates) . '.');
     }
 }
