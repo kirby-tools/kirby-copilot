@@ -174,6 +174,22 @@ final class PrepareChangesToolTest extends McpToolTestCase
     }
 
     #[Test]
+    public function counts_the_blocks_of_a_layout_field(): void
+    {
+        $result = $this->prepare(['layout' => [
+            ['id' => 'r1', 'attrs' => [], 'columns' => [
+                ['id' => 'c1', 'width' => '1/2', 'blocks' => [['id' => 'l1', 'type' => 'text', 'content' => ['text' => '<p>One</p>']]]],
+                ['id' => 'c2', 'width' => '1/2', 'blocks' => [
+                    ['id' => 'l2', 'type' => 'text', 'content' => ['text' => '<p>Two</p>']],
+                    ['id' => 'l3', 'type' => 'text', 'content' => ['text' => '<p>Three</p>']]
+                ]]
+            ]]
+        ]]);
+
+        $this->assertSame([0, 3], [$result['changed'][0]['itemsBefore'], $result['changed'][0]['itemsAfter']]);
+    }
+
+    #[Test]
     public function adds_ids_to_new_blocks(): void
     {
         $this->prepare(['body' => [['type' => 'text', 'content' => ['text' => '<p>New</p>']]]]);
@@ -370,6 +386,7 @@ final class PrepareChangesToolTest extends McpToolTestCase
                         'locked' => ['type' => 'text', 'disabled' => true],
                         'text' => ['type' => 'textarea'],
                         'body' => ['type' => 'blocks', 'fieldsets' => ['text']],
+                        'layout' => ['type' => 'layout', 'fieldsets' => ['text']],
                         'price' => ['type' => 'text', 'translate' => false],
                         'map' => ['type' => 'locator']
                     ]

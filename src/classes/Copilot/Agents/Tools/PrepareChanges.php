@@ -112,8 +112,9 @@ final class PrepareChanges
     }
 
     /**
-     * Counts the items of a list, such as blocks or structure rows, which
-     * the shortened preview hides when one goes missing.
+     * Counts the items of a list, such as blocks or structure rows, and a
+     * layout's blocks, since the shortened preview can't show that one went
+     * missing.
      */
     private static function itemCounts(mixed $before, mixed $after): array
     {
@@ -121,7 +122,19 @@ final class PrepareChanges
             return [];
         }
 
-        return ['itemsBefore' => is_array($before) ? count($before) : 0, 'itemsAfter' => count($after)];
+        return ['itemsBefore' => self::countItems($before), 'itemsAfter' => self::countItems($after)];
+    }
+
+    private static function countItems(mixed $value): int
+    {
+        if (!is_array($value)) {
+            return 0;
+        }
+
+        return array_sum(array_map(
+            fn (mixed $item) => is_array($item['columns'] ?? null) ? array_sum(array_map(fn (array $column) => count($column['blocks'] ?? []), $item['columns'])) : 1,
+            $value
+        ));
     }
 
     private static function preview(mixed $value): mixed
