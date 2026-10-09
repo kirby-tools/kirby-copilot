@@ -2,10 +2,13 @@ import type { PluginFunction } from "vue";
 import { usePluginContext } from "./composables/plugin";
 import { PLUGIN_AGENTS_LAST_WRITE_API_ROUTE } from "./constants";
 
+const CHECK_INTERVAL_MS = 10_000;
+
 /**
- * Reloads an open content view once an agent changed its model, when the
- * editor returns to the tab. A stale view would save its whole form again
- * with the next keystroke and overwrite the agent's changes.
+ * Reloads an open content view once an agent changed its model, checked
+ * while the tab is visible and when the editor returns to it. A stale view
+ * would save its whole form again with the next keystroke and overwrite the
+ * agent's changes.
  */
 export const reloadAfterAgentWrites: PluginFunction<any> = () => {
   // Returning to a tab fires both events.
@@ -19,6 +22,7 @@ export const reloadAfterAgentWrites: PluginFunction<any> = () => {
 
   window.addEventListener("focus", check);
   document.addEventListener("visibilitychange", check);
+  setInterval(check, CHECK_INTERVAL_MS);
 };
 
 async function reloadIfWritten() {
@@ -53,6 +57,6 @@ async function reloadIfWritten() {
       );
     }
   } catch {
-    // The next focus checks again.
+    // The next check tries again.
   }
 }
