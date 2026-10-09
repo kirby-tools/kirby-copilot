@@ -73,6 +73,8 @@ final class ToolDefinitionsTest extends McpToolTestCase
         yield ['upload_file', ConnectionPermission::Publish, 'Publish changes'];
         yield ['publish_changes', ConnectionPermission::Publish, 'Publish changes'];
         yield ['change_status', ConnectionPermission::Publish, 'Publish changes'];
+        yield ['change_slug', ConnectionPermission::Publish, 'Publish changes'];
+        yield ['move_page', ConnectionPermission::Publish, 'Publish changes'];
         yield ['delete_page', ConnectionPermission::Delete, 'Delete content'];
         yield ['delete_file', ConnectionPermission::Delete, 'Delete content'];
     }

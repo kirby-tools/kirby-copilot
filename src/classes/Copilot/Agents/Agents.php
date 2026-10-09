@@ -86,6 +86,8 @@ final class Agents
             Tools\UploadFile::tool(),
             Tools\PublishChanges::tool(),
             Tools\ChangeStatus::tool(),
+            Tools\ChangeSlug::tool(),
+            Tools\MovePage::tool(),
             Tools\DeletePage::tool(),
             Tools\DeleteFile::tool()
         ];

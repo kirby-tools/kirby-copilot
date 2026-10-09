@@ -149,7 +149,7 @@ final class PrepareChangesToolTest extends McpToolTestCase
         $this->assertSame(['intro'], array_column($result['changed'], 'name'));
         $this->assertSame(['unknown', 'locked', 'slug', 'map'], array_column($result['ignored'], 'name'));
         $this->assertSame('The field is disabled.', $result['ignored'][1]['reason']);
-        $this->assertSame("Agents can't write this field of the type locator.", $result['ignored'][3]['reason']);
+        $this->assertSame("Agents can't write fields of the type locator; tell the user to edit it in the Panel.", $result['ignored'][3]['reason']);
         $this->assertNull($this->app()->page('notes/first')->version('changes')->content()->get('unknown')->value());
     }
 

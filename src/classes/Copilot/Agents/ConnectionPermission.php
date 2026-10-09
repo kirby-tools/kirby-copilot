@@ -43,7 +43,7 @@ enum ConnectionPermission: string
         $required = match ($this) {
             self::Read => [],
             self::Prepare => [['pages', 'update'], ['site', 'update'], ['files', 'update'], ['pages', 'create']],
-            self::Publish => [['pages', 'update'], ['site', 'update'], ['files', 'update'], ['pages', 'changeStatus'], ['files', 'create']],
+            self::Publish => [['pages', 'update'], ['site', 'update'], ['files', 'update'], ['pages', 'changeStatus'], ['pages', 'changeSlug'], ['pages', 'move'], ['files', 'create']],
             self::Delete => [['pages', 'delete'], ['files', 'delete']]
         };
 

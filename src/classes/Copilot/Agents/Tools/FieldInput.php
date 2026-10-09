@@ -36,8 +36,8 @@ final class FieldInput
 
             $reason = match (true) {
                 $name === 'title' => self::titleIgnoreReason($model, $value),
-                $name === 'slug' => 'Agents don\'t change slugs, since a new slug changes the page\'s URL right away.',
-                $field === null && isset($blueprintFields[$name]) => "Agents can't write this field of the type {$blueprintFields[$name]['type']}.",
+                $name === 'slug' => 'The slug isn\'t a field. change_slug changes it.',
+                $field === null && isset($blueprintFields[$name]) => "Agents can't write fields of the type {$blueprintFields[$name]['type']}; tell the user to edit it in the Panel.",
                 $field === null => 'There is no such field. get_content lists the fields.',
                 $field['disabled'] => 'The field is disabled.',
                 !$field['translate'] && !$language->isDefault() => 'The field has one value for all languages. Write it in the default language.',
