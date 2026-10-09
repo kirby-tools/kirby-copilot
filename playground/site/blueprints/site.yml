@@ -331,3 +331,10 @@ tabs:
             files: false
             open: true
             help: This prompt uses context from the **Site Title** and **Current Year** fields.
+
+  pages:
+    label: Pages
+    sections:
+      pages:
+        type: pages
+        create: article

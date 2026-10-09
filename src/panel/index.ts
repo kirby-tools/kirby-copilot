@@ -1,4 +1,5 @@
 /* eslint-disable ts/ban-ts-comment */
+import { reloadAfterAgentWrites } from "./agents";
 // @ts-ignore - Vue component
 import PromptDialog from "./components/Dialogs/Prompt.vue";
 // @ts-ignore - Vue component
@@ -7,6 +8,12 @@ import PlaygroundApiKeyField from "./components/Playground/ApiKey.vue";
 import CopilotSection from "./components/Sections/Copilot.vue";
 // @ts-ignore - Vue component
 import CopilotButton from "./components/ViewButtons/CopilotButton.vue";
+// @ts-ignore - Vue component
+import AgentCell from "./components/Views/AgentCell.vue";
+// @ts-ignore - Vue component
+import AgentsView from "./components/Views/Agents.vue";
+// @ts-ignore - Vue component
+import AgentsAuthorizeView from "./components/Views/AgentsAuthorize.vue";
 import { icons } from "./config/icons";
 import { copilot as copilotButton } from "./extensions/textarea-buttons/copilot";
 import { copilot as copilotMark } from "./extensions/writer-marks/copilot";
@@ -23,6 +30,9 @@ window.panel.plugin("johannschopplich/copilot", {
   },
   components: {
     "k-copilot-prompt-dialog": PromptDialog,
+    "k-copilot-agents-view": AgentsView,
+    "k-copilot-agents-authorize-view": AgentsAuthorizeView,
+    "k-table-copilot-agent-cell": AgentCell,
   },
   sections: {
     copilot: CopilotSection,
@@ -45,5 +55,6 @@ window.panel.plugin("johannschopplich/copilot", {
   icons,
   use: {
     legacyViewButtonSupport: legacyViewButtonMixin,
+    reloadAfterAgentWrites,
   },
 });

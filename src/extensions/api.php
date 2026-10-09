@@ -1,5 +1,9 @@
 <?php
 
+use JohannSchopplich\Copilot\Agents\Agents;
+use JohannSchopplich\Copilot\Agents\AgentWrites;
+use JohannSchopplich\Copilot\Agents\Consent;
+use JohannSchopplich\Copilot\Agents\McpGuard;
 use JohannSchopplich\Copilot\AI\CurlProxyTransport;
 use JohannSchopplich\Copilot\AI\Proxy;
 use JohannSchopplich\Copilot\PanelContext;
@@ -12,6 +16,7 @@ use JohannSchopplich\Licensing\Licenses;
 use Kirby\Cms\App;
 use Kirby\Cms\Blueprint;
 use Kirby\Cms\Find;
+use Kirby\Cms\Language;
 use Kirby\Exception\InvalidArgumentException;
 use Kirby\Exception\NotFoundException;
 use Kirby\Toolkit\I18n;
@@ -195,6 +200,64 @@ return [
 
                 return FieldNormalizer::normalizeFields(FieldResolver::resolveModelFields($model));
             }
-        ]
+        ],
+        ...(Agents::isEnabled() ? [
+            [
+                'pattern' => 'copilot/mcp',
+                'method' => 'GET|POST|DELETE',
+                'auth' => false,
+                'action' => fn () => (new McpGuard($kirby))->handle($kirby->request())
+            ],
+            [
+                'pattern' => 'copilot/oauth/authorize',
+                'method' => 'GET',
+                'auth' => false,
+                'action' => fn () => Agents::authorizationServer()->authorize($kirby->request())
+            ],
+            [
+                'pattern' => 'copilot/oauth/token',
+                'method' => 'POST',
+                'auth' => false,
+                'action' => fn () => Agents::authorizationServer()->token($kirby->request())
+            ],
+            [
+                'pattern' => 'copilot/oauth/register',
+                'method' => 'POST',
+                'auth' => false,
+                'action' => fn () => Agents::authorizationServer()->register($kirby->request())
+            ],
+            [
+                'pattern' => '__copilot__/agents/consent/(:any)',
+                'method' => 'POST',
+                'action' => function (string $id) use ($kirby) {
+                    $body = $kirby->request()->body();
+                    $permissions = $body->get('permissions');
+
+                    return [
+                        'redirect' => Consent::decide(
+                            $kirby,
+                            $id,
+                            $body->get('isApproved') === true,
+                            is_array($permissions) ? array_values(array_filter($permissions, 'is_string')) : []
+                        )
+                    ];
+                }
+            ],
+            [
+                // Lets an open Panel view reload once an agent changed its model.
+                'pattern' => '__copilot__/agents/last-write',
+                'method' => 'GET',
+                'action' => function () use ($kirby) {
+                    $query = $kirby->request()->query();
+                    $path = $query->get('model') ?? '';
+                    $model = ModelResolver::resolveFromPath($path) ?? throw new NotFoundException(message: 'No model found for path: ' . $path);
+                    $code = $query->get('language');
+
+                    return [
+                        'writtenAt' => AgentWrites::lastWrittenAt($model, ($code !== null ? $kirby->language($code) : null) ?? Language::ensure('default'))
+                    ];
+                }
+            ]
+        ] : [])
     ]
 ];

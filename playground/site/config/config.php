@@ -19,6 +19,7 @@ return [
     ],
 
     'johannschopplich.copilot' => [
+        'agents' => env('KIRBY_DEBUG', false),
         'provider' => 'google',
         'providers' => [
             'openai' => [

@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace JohannSchopplich\Copilot;
 
+use JohannSchopplich\Copilot\Agents\Agents;
 use JohannSchopplich\Copilot\AI\ProviderName;
 use Kirby\Cms\App;
 use Kirby\Exception\InvalidArgumentException;
@@ -105,7 +106,8 @@ final class PanelContext
             'skills' => $config['skills'],
             'excludedBlocks' => $config['excludedBlocks'] ?? null,
             'completion' => $config['completion'],
-            'logLevel' => $config['logLevel']
+            'logLevel' => $config['logLevel'],
+            'agents' => Agents::isEnabled()
         ];
     }
 

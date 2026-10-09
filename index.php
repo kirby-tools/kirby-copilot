@@ -8,6 +8,11 @@ $packageName = 'johannschopplich/kirby-copilot';
 $pluginConfig = [
     'name' => 'johannschopplich/copilot',
     'extends' => [
+        'options' => [
+            'agents' => false,
+            // On, unlike Kirby's plugin caches, since `RateLimit` and `AgentWrites` don't work without it.
+            'cache.agents' => true
+        ],
         'api' => require __DIR__ . '/src/extensions/api.php',
         'sections' => require __DIR__ . '/src/extensions/sections.php',
         'translations' => require __DIR__ . '/src/extensions/translations.php'
@@ -18,8 +23,10 @@ if (class_exists('Kirby\Plugin\License')) {
     $pluginConfig['extends']['areas'] = [
         'system' => fn () => [
             'dialogs' => \JohannSchopplich\Licensing\LicensePanel::dialogs($packageName, 'Kirby Copilot')
-        ]
+        ],
+        'copilot-agents' => require __DIR__ . '/src/extensions/areas/agents.php'
     ];
+    $pluginConfig['extends']['routes'] = require __DIR__ . '/src/extensions/routes.php';
 
     Kirby::plugin(
         ...$pluginConfig,
