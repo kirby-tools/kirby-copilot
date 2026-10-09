@@ -20,8 +20,7 @@ final class PublishChangesToolTest extends McpToolTestCase
 
         self::writeContent('notes/notes.txt', ['Title' => 'Notes']);
         self::writeContent('notes/1_first/note.txt', ['Title' => 'First note', 'Intro' => 'Hello', 'Uuid' => 'first']);
-        // An agent's changes, or the user's from more than ten minutes ago.
-        self::writeContent('notes/1_first/_changes/note.txt', ['Title' => 'First note', 'Intro' => 'Hello, agent', 'Uuid' => 'first', 'Lock' => 'ada'], time() - 601);
+        self::writeContent('notes/1_first/_changes/note.txt', ['Title' => 'First note', 'Intro' => 'Hello, editor', 'Uuid' => 'first', 'Lock' => 'ada']);
         self::writeContent('notes/1_first/photo.jpg.txt', ['Alt' => 'A lake', 'Template' => 'image']);
         touch(self::indexRoot() . '/content/notes/1_first/photo.jpg');
     }
@@ -29,10 +28,11 @@ final class PublishChangesToolTest extends McpToolTestCase
     #[Test]
     public function publishes_the_changes_and_returns_the_published_content_etag(): void
     {
+        $this->prepare();
         $result = $this->publish();
 
         $this->assertFalse($result['isError'], $result['content'][0]['text']);
-        $this->assertSame('latest', $result['structuredContent']['version']);
+        $this->assertFalse($result['structuredContent']['hasChanges']);
         $this->assertSame($this->read()['etag'], $result['structuredContent']['etag']);
         $this->assertSame('https://example.com/panel/pages/notes+first', $result['structuredContent']['panelUrl']);
         $this->assertArrayNotHasKey('notices', $result['structuredContent']);
@@ -64,6 +64,7 @@ final class PublishChangesToolTest extends McpToolTestCase
     #[Test]
     public function tells_an_open_panel_view_when_an_agent_published(): void
     {
+        $this->prepare();
         $this->publish();
 
         $this->assertNotNull($this->lastWrite('pages/notes+first'));
@@ -76,8 +77,7 @@ final class PublishChangesToolTest extends McpToolTestCase
         Dir::remove(self::indexRoot() . '/content/notes/1_first');
         self::writeContent('notes/1_first/note.en.txt', ['Title' => 'First note', 'Intro' => 'Hello']);
         self::writeContent('notes/1_first/note.de.txt', ['Title' => 'Erste Notiz', 'Intro' => 'Hallo']);
-        self::writeContent('notes/1_first/_changes/note.en.txt', ['Title' => 'First note', 'Intro' => 'Hello, agent', 'Lock' => 'ada'], time() - 601);
-        self::writeContent('notes/1_first/_changes/note.de.txt', ['Title' => 'Erste Notiz', 'Intro' => 'Hallo, Agent', 'Lock' => 'ada'], time() - 601);
+        self::writeContent('notes/1_first/_changes/note.en.txt', ['Title' => 'First note', 'Intro' => 'Hello, agent', 'Lock' => 'ada']);
         $props = $this->props([
             'options' => ['languages' => true],
             'languages' => [
@@ -85,6 +85,13 @@ final class PublishChangesToolTest extends McpToolTestCase
                 ['code' => 'de', 'name' => 'Deutsch']
             ]
         ]);
+
+        $this->callTool('prepare_changes', [
+            'model' => 'notes/first',
+            'language' => 'de',
+            'etag' => $this->callTool('get_content', ['model' => 'notes/first', 'language' => 'de'], $props)['structuredContent']['etag'],
+            'fields' => ['intro' => 'Hallo, Agent']
+        ], $props);
 
         $etag = $this->callTool('get_content', ['model' => 'notes/first', 'language' => 'de'], $props)['structuredContent']['etag'];
         $result = $this->callTool('publish_changes', ['model' => 'notes/first', 'language' => 'de', 'etag' => $etag], $props);
@@ -102,8 +109,8 @@ final class PublishChangesToolTest extends McpToolTestCase
     #[Test]
     public function refuses_changes_with_validation_errors_and_names_them(): void
     {
-        self::writeContent('notes/1_first/_changes/note.txt', ['Title' => 'First note', 'Intro' => '', 'Lock' => 'ada'], time() - 601);
         $props = $this->props(['blueprints' => ['pages/note' => ['fields' => ['intro' => ['type' => 'text', 'required' => true]]]]]);
+        $this->prepare('notes/first', ['intro' => ''], $props);
 
         $result = $this->callTool('publish_changes', [
             'model' => 'notes/first',
@@ -119,8 +126,8 @@ final class PublishChangesToolTest extends McpToolTestCase
     public function publishes_the_changes_of_a_draft_with_validation_errors(): void
     {
         self::writeContent('notes/_drafts/idea/note.txt', ['Title' => 'Idea', 'Intro' => 'Hello', 'Uuid' => 'idea']);
-        self::writeContent('notes/_drafts/idea/_changes/note.txt', ['Title' => 'Idea', 'Intro' => '', 'Uuid' => 'idea', 'Lock' => 'ada'], time() - 601);
         $props = $this->props(['blueprints' => ['pages/note' => ['fields' => ['intro' => ['type' => 'text', 'required' => true]]]]]);
+        $this->prepare('notes/idea', ['intro' => ''], $props);
 
         $result = $this->callTool('publish_changes', [
             'model' => 'notes/idea',
@@ -143,15 +150,25 @@ final class PublishChangesToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function refuses_to_publish_while_the_user_edits_in_the_panel(): void
+    public function publishes_changes_the_user_is_making_in_the_panel(): void
     {
-        self::writeContent('notes/1_first/_changes/note.txt', ['Title' => 'First note', 'Intro' => 'Typing', 'Lock' => 'ada']);
+        $this->assertFalse($this->publish()['isError']);
+        $this->assertSame('Hello, editor', self::bootApp($this->props())->page('notes/first')->content()->get('intro')->value());
+    }
 
-        $result = $this->publish();
+    #[Test]
+    public function names_the_user_whose_panel_edit_locks_the_changes(): void
+    {
+        self::writeContent('notes/1_first/_changes/note.txt', ['Title' => 'First note', 'Intro' => 'Typing', 'Uuid' => 'first', 'Lock' => 'grace']);
+        $props = $this->props(['users' => [1 => ['id' => 'grace', 'email' => 'grace@example.com', 'role' => 'editor']]]);
+
+        $result = $this->callTool('publish_changes', [
+            'model' => 'notes/first',
+            'etag' => $this->callTool('get_content', ['model' => 'notes/first'], $props)['structuredContent']['etag']
+        ], $props);
 
         $this->assertTrue($result['isError']);
-        $this->assertStringStartsWith('Ada edited this content in the Panel', $result['content'][0]['text']);
-        $this->assertSame('Hello', self::bootApp($this->props())->page('notes/first')->content()->get('intro')->value());
+        $this->assertSame('grace@example.com is editing this content in the Panel. Try again once they leave its view, or 10 minutes after their last edit.', $result['content'][0]['text']);
     }
 
     #[Test]
@@ -168,6 +185,7 @@ final class PublishChangesToolTest extends McpToolTestCase
     #[Test]
     public function refuses_an_account_that_may_not_update_the_page(): void
     {
+        $this->prepare();
         $result = $this->publish(role: 'reviewer');
 
         $this->assertTrue($result['isError']);
@@ -181,6 +199,17 @@ final class PublishChangesToolTest extends McpToolTestCase
             'model' => 'notes/first',
             'etag' => $this->read()['etag']
         ], $this->props(['users' => [['role' => $role]]]));
+    }
+
+    private function prepare(string $model = 'notes/first', array $fields = ['intro' => 'Hello, agent'], array|null $props = null): void
+    {
+        $props ??= $this->props();
+
+        $this->callTool('prepare_changes', [
+            'model' => $model,
+            'etag' => $this->callTool('get_content', ['model' => $model], $props)['structuredContent']['etag'],
+            'fields' => $fields
+        ], $props);
     }
 
     private function read(string $model = 'notes/first'): array

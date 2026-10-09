@@ -4,7 +4,9 @@ declare(strict_types = 1);
 
 namespace JohannSchopplich\Copilot\Agents\Tools;
 
+use JohannSchopplich\Copilot\Agents\AgentWrites;
 use JohannSchopplich\Copilot\Agents\ConnectionPermission;
+use JohannSchopplich\Copilot\Agents\ContentVersion;
 use JohannSchopplich\Copilot\Agents\Tool;
 use JohannSchopplich\Copilot\Agents\ToolError;
 
@@ -15,7 +17,7 @@ final class ChangeStatus
         return new Tool(
             name: 'change_status',
             title: 'Change status',
-            description: 'Changes a page\'s status: `listed` makes it public and lists it in its parent\'s navigation, `unlisted` makes it public without, `draft` hides it from visitors; `position` also reorders a listed page. Call it only when the user asks. A draft with validation errors or unsaved changes stays a draft, and the error says why. A published page\'s unsaved changes stay unsaved. Returns the page\'s status, its position among the listed pages, and its URL unless it is a draft.',
+            description: 'Changes a page\'s status: `listed` makes it public and lists it in its parent\'s navigation, `unlisted` makes it public without, `draft` hides it from visitors; `position` also reorders a listed page. Call it only when the user asks. A draft with validation errors or unsaved changes stays a draft. A published page\'s unsaved changes stay unsaved. Returns the page\'s status, its position among the listed pages, and its URL unless it is a draft.',
             inputSchema: [
                 'type' => 'object',
                 'properties' => [
@@ -42,23 +44,25 @@ final class ChangeStatus
             throw new ToolError('`position` applies only to `listed`.');
         }
 
-        // Kirby's own error names the fields only in its details, which a tool
-        // error leaves out.
-        if ($page->isDraft() && $status !== 'draft' && $page->errors() !== []) {
-            throw new ToolError('The page has validation errors, so it stays a draft. Fix them with prepare_changes and publish_changes: ' . FieldInput::describeErrors($page->errors()));
-        }
+        $page = AgentWrites::lock($page, function () use ($page, $status, $position) {
+            // Kirby's own error names the fields only in its details, which a tool
+            // error leaves out.
+            if ($page->isDraft() && $status !== 'draft' && $page->errors() !== []) {
+                throw new ToolError('The page has validation errors, so it stays a draft. Fix them with prepare_changes and publish_changes: ' . FieldInput::describeErrors($page->errors()));
+            }
 
-        // A draft would go live without its unsaved changes, since only published content is public.
-        if ($page->isDraft() && $status !== 'draft' && $page->version('changes')->exists('*')) {
-            throw new ToolError('The draft has unsaved changes, so it stays a draft. Publish them with publish_changes first.');
-        }
+            // A draft would go live without its unsaved changes, since only published content is public.
+            if ($page->isDraft() && $status !== 'draft' && $page->version('changes')->exists('*')) {
+                throw new ToolError('The draft has unsaved changes' . ContentVersion::changedLanguages($page) . ', so it stays a draft. Publish them with publish_changes first.');
+            }
 
-        // Kirby moves a listed page without a position to the end.
-        if ($status === 'listed' && $position === null && $page->isListed()) {
-            $position = $page->siblings()->listed()->indexOf($page) + 1;
-        }
+            // Kirby moves a listed page without a position to the end.
+            if ($status === 'listed' && $position === null && $page->isListed()) {
+                $position = $page->siblings()->listed()->indexOf($page) + 1;
+            }
 
-        $page = $page->changeStatus($status, $position);
+            return $page->changeStatus($status, $position);
+        });
 
         $result = [
             'page' => [
@@ -69,7 +73,7 @@ final class ChangeStatus
         ];
 
         if ($page->version('changes')->exists('*')) {
-            $result['notices'] = ['The page has unsaved changes, which stay unsaved. publish_changes publishes them.'];
+            $result['notices'] = ['The page has unsaved changes' . ContentVersion::changedLanguages($page) . ', which stay unsaved. publish_changes publishes them.'];
         }
 
         return $result;

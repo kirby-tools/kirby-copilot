@@ -6,6 +6,7 @@ namespace JohannSchopplich\Copilot\Agents\Tools;
 
 use JohannSchopplich\Copilot\Agents\AgentWrites;
 use JohannSchopplich\Copilot\Agents\ConnectionPermission;
+use JohannSchopplich\Copilot\Agents\ContentVersion;
 use JohannSchopplich\Copilot\Agents\Tool;
 use JohannSchopplich\Copilot\Agents\ToolError;
 
@@ -37,7 +38,7 @@ final class DeleteFile
 
         return AgentWrites::lock($file, function () use ($file) {
             if ($file->version('changes')->exists('*')) {
-                throw new ToolError('The file has unsaved changes, which someone may still be working on. Ask the user whether to discard them, then try again.');
+                throw new ToolError('The file has unsaved changes' . ContentVersion::changedLanguages($file) . ', which someone may still be working on. Ask the user whether to discard them, then try again.');
             }
 
             $file->delete();

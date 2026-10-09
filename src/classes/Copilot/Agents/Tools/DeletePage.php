@@ -6,6 +6,7 @@ namespace JohannSchopplich\Copilot\Agents\Tools;
 
 use JohannSchopplich\Copilot\Agents\AgentWrites;
 use JohannSchopplich\Copilot\Agents\ConnectionPermission;
+use JohannSchopplich\Copilot\Agents\ContentVersion;
 use JohannSchopplich\Copilot\Agents\Tool;
 use JohannSchopplich\Copilot\Agents\ToolError;
 use Kirby\Cms\File;
@@ -38,7 +39,7 @@ final class DeletePage
 
         return AgentWrites::lock($page, function () use ($page) {
             if ($page->version('changes')->exists('*')) {
-                throw new ToolError('The page has unsaved changes, which someone may still be working on. Ask the user whether to discard them, then try again.');
+                throw new ToolError('The page has unsaved changes' . ContentVersion::changedLanguages($page) . ', which someone may still be working on. Ask the user whether to discard them, then try again.');
             }
 
             $changedFiles = $page->files()->filter(fn (File $file) => $file->version('changes')->exists('*'));

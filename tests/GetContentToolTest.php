@@ -29,7 +29,7 @@ final class GetContentToolTest extends McpToolTestCase
             ],
             $content['model']
         );
-        $this->assertSame('latest', $content['version']);
+        $this->assertFalse($content['hasChanges']);
         $this->assertNull($content['changesBy']);
         $this->assertSame('https://example.com/panel/pages/notes+first', $content['panelUrl']);
         $this->assertSame(['intro', 'cover', 'related', 'body', 'author', 'sections'], array_column($content['fields'], 'name'));
@@ -43,7 +43,8 @@ final class GetContentToolTest extends McpToolTestCase
             $kirby->page('notes/first')->version('changes')->save(['title' => 'First note', 'intro' => 'Hello, agent']);
         });
 
-        $this->assertSame('changes', $content['version']);
+        $this->assertTrue($content['hasChanges']);
+        $this->assertSame(['intro'], $content['changedFields']);
         $this->assertSame('Hello, agent', $content['fields'][0]['value']);
         $this->assertSame('https://example.com/panel/pages/notes+first/preview/compare', $content['panelUrl']);
     }

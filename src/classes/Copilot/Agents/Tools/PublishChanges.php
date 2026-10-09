@@ -18,7 +18,7 @@ final class PublishChanges
         return new Tool(
             name: 'publish_changes',
             title: 'Publish changes',
-            description: 'Publishes the unsaved changes of a page, a file, or the site in one language, whoever made them, so they replace the published content. Changes with validation errors stay unpublished, except on a draft, which stays hidden from visitors until change_status makes it public. Call it only when the user asks. Returns the new etag.',
+            description: 'Publishes the unsaved changes of a page, a file, or the site in one language, so they replace the published content. They include changes made in the Panel, whoever made them. A draft stays hidden after publishing; change_status makes it public. Call it only when the user asks. Returns the new etag.',
             inputSchema: [
                 'type' => 'object',
                 'properties' => [

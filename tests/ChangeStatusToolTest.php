@@ -86,7 +86,7 @@ final class ChangeStatusToolTest extends McpToolTestCase
     #[Test]
     public function says_that_unsaved_changes_stay_unsaved(): void
     {
-        self::writeContent('notes/1_first/_changes/note.txt', ['Title' => 'First note', 'Intro' => 'Hello, agent', 'Lock' => 'ada'], time() - 601);
+        self::writeContent('notes/1_first/_changes/note.txt', ['Title' => 'First note', 'Intro' => 'Hello, agent', 'Lock' => 'ada']);
 
         $result = $this->callTool('change_status', ['page' => 'notes/first', 'status' => 'unlisted'], $this->props());
 
@@ -96,13 +96,30 @@ final class ChangeStatusToolTest extends McpToolTestCase
     #[Test]
     public function refuses_to_publish_a_draft_with_unsaved_changes(): void
     {
-        self::writeContent('notes/_drafts/idea/_changes/note.txt', ['Title' => 'Idea', 'Intro' => 'Hello, agent', 'Lock' => 'ada'], time() - 601);
+        self::writeContent('notes/_drafts/idea/_changes/note.txt', ['Title' => 'Idea', 'Intro' => 'Hello, agent', 'Lock' => 'ada']);
 
         $result = $this->callTool('change_status', ['page' => 'notes/idea', 'status' => 'unlisted'], $this->props());
 
         $this->assertTrue($result['isError']);
         $this->assertSame('The draft has unsaved changes, so it stays a draft. Publish them with publish_changes first.', $result['content'][0]['text']);
         $this->assertSame('draft', self::bootApp($this->props())->page('notes/idea')->status());
+    }
+
+    #[Test]
+    public function names_the_languages_of_a_drafts_unsaved_changes(): void
+    {
+        self::writeContent('notes/_drafts/idea/_changes/note.de.txt', ['Title' => 'Idee', 'Intro' => 'Hallo, Agent', 'Lock' => 'ada']);
+        $props = $this->props([
+            'options' => ['languages' => true],
+            'languages' => [
+                ['code' => 'en', 'name' => 'English', 'default' => true],
+                ['code' => 'de', 'name' => 'Deutsch']
+            ]
+        ]);
+
+        $result = $this->callTool('change_status', ['page' => 'notes/idea', 'status' => 'unlisted'], $props);
+
+        $this->assertSame('The draft has unsaved changes in de, so it stays a draft. Publish them with publish_changes first.', $result['content'][0]['text']);
     }
 
     #[Test]

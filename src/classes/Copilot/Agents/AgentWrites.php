@@ -9,14 +9,11 @@ use Kirby\Cms\App;
 use Kirby\Cms\File;
 use Kirby\Cms\Language;
 use Kirby\Cms\ModelWithContent;
-use Kirby\Content\Lock;
 use Kirby\Filesystem\Dir;
 
 /**
- * The agents' last writes to a model's unsaved changes, per language. They
- * tell an agent's write apart from a Panel edit: a Panel tab holds the
- * content it loaded and saves all of it again with the next keystroke, so
- * an agent must not write while an editor edits.
+ * The agents' last writes to a model's unsaved changes, per language, which
+ * tell an open Panel view to reload.
  */
 final class AgentWrites
 {
@@ -25,10 +22,7 @@ final class AgentWrites
 
     /**
      * Runs an agent's write to the changes of a model in a language and
-     * records it, unless the content changed since the agent's etag or
-     * holds a recent Panel edit the agent didn't make. Kirby's lock can't
-     * tell an agent's write from the user's own Panel edit, since the agent
-     * writes as the same user.
+     * records it, unless the content changed since the agent's etag.
      *
      * @template T
      * @param Closure(): T $write
@@ -39,12 +33,6 @@ final class AgentWrites
         return self::lock($model, function () use ($model, $language, $etag, $write) {
             if ($etag !== ContentVersion::etag($model, $language)) {
                 throw new ToolError('The content changed since your etag. Read it again with get_content and base the call on what it holds now.');
-            }
-
-            $refusal = self::panelEditRefusal($model, $language);
-
-            if ($refusal !== null) {
-                throw new ToolError($refusal);
             }
 
             $result = $write();
@@ -96,42 +84,12 @@ final class AgentWrites
      */
     public static function lastWrittenAt(ModelWithContent $model, Language $language): int|null
     {
-        return Agents::cache()->get(self::key($model, $language))['at'] ?? null;
-    }
-
-    /**
-     * Describes a Panel edit of the changes within Kirby's lock window that
-     * an agent didn't make, or returns `null`. The Panel releases its
-     * user's lock when they leave the model's view; without content
-     * locking, only time tells.
-     */
-    private static function panelEditRefusal(ModelWithContent $model, Language $language): string|null
-    {
-        $lock = Lock::for($model->version('changes'), $language);
-
-        if (!$lock->isActive() || $lock->modified() === (Agents::cache()->get(self::key($model, $language))['modified'] ?? null)) {
-            return null;
-        }
-
-        if (!Lock::isEnabled()) {
-            return 'Someone edited this content in the Panel in the last 10 minutes and may still be editing it. Try again once 10 minutes have passed since the last edit.';
-        }
-
-        $editor = $lock->user();
-
-        if ($editor === null) {
-            return null;
-        }
-
-        return "{$editor->username()} edited this content in the Panel in the last 10 minutes and may still be editing it. Ask them to leave its view in the Panel, then try again.";
+        return Agents::cache()->get(self::key($model, $language));
     }
 
     private static function record(ModelWithContent $model, Language $language): void
     {
-        Agents::cache()->set(self::key($model, $language), [
-            'modified' => Lock::for($model->version('changes'), $language)->modified(),
-            'at' => (int)(microtime(true) * 1000)
-        ], self::TTL);
+        Agents::cache()->set(self::key($model, $language), (int)(microtime(true) * 1000), self::TTL);
     }
 
     private static function key(ModelWithContent $model, Language $language): string

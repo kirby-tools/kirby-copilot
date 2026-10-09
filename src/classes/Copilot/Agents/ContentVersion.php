@@ -26,15 +26,30 @@ final class ContentVersion
     }
 
     /**
-     * @return array{version: string, etag: string, panelUrl: string}
+     * @return array{hasChanges: bool, etag: string, panelUrl: string}
      */
     public static function describe(Site|Page|File $model, Language $language): array
     {
         return [
-            'version' => self::source($model, $language)->id()->value(),
+            'hasChanges' => $model->version('changes')->exists($language),
             'etag' => self::etag($model, $language),
             'panelUrl' => self::panelUrl($model, $language)
         ];
+    }
+
+    /**
+     * Names the languages with unsaved changes on a multilingual site, as
+     * ` in de, en`, since publishing and discarding take one at a time.
+     */
+    public static function changedLanguages(ModelWithContent $model): string
+    {
+        $kirby = App::instance();
+
+        if (!$kirby->multilang()) {
+            return '';
+        }
+
+        return ' in ' . implode(', ', $kirby->languages()->filter(fn (Language $language) => $model->version('changes')->exists($language))->codes());
     }
 
     /**

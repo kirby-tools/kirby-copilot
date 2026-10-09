@@ -28,7 +28,7 @@ final class PrepareChanges
         return new Tool(
             name: 'prepare_changes',
             title: 'Prepare changes',
-            description: 'Writes field values to the unsaved changes of a page, a file, or the site in one language; an editor reviews and publishes them in the Panel. Send values in the shape get_content returns them, the title included. Each value replaces the whole field – send every block or row of a blocks or structure field – and fields you leave out keep their values. Returns what changed, ignored fields with the reason, validation errors, the new etag, and the Panel URL to review the changes.',
+            description: 'Writes field values to the unsaved changes of a page, a file, or the site in one language; they go live once published – by an editor in the Panel, or with publish_changes when the user asks. Send values in the shape get_content returns them, the title included. Each value replaces the whole field – send every block or row of a blocks or structure field – and fields you leave out keep their values. Returns what changed, ignored fields with the reason, validation errors, the new etag, and the Panel URL to review the changes. For a list field such as blocks or a structure, what changed also counts the items before and after; tell the user when items went missing.',
             inputSchema: [
                 'type' => 'object',
                 'properties' => [
@@ -72,13 +72,7 @@ final class PrepareChanges
 
             $after = self::formValues($model, $language);
             $changes = $model->version('changes');
-            $notices = ['Written to the unsaved changes, which go live once published. A Panel tab already showing this content picks them up when it regains focus and can overwrite them until then.'];
-
-            if ($model instanceof Site) {
-                $notices[] = 'The Panel\'s list of changes leaves out the site, so tell the editor to open the site in the Panel.';
-            }
-
-            return [
+            $result = [
                 'changed' => array_values(array_filter(array_map(
                     fn (string $name) => ($before[$name] ?? null) === ($after[$name] ?? null) ? null : [
                         'name' => $name,
@@ -90,9 +84,14 @@ final class PrepareChanges
                 ))),
                 'ignored' => $ignored,
                 'warnings' => $changes->exists($language) ? FieldInput::warnings($model, $language, $changes->content($language)->toArray()) : [],
-                ...ContentVersion::describe($model, $language),
-                'notices' => $notices
+                ...ContentVersion::describe($model, $language)
             ];
+
+            if ($model instanceof Site) {
+                $result['notices'] = ['The Panel\'s list of changes leaves out the site, so tell the editor to open the site in the Panel.'];
+            }
+
+            return $result;
         });
     }
 

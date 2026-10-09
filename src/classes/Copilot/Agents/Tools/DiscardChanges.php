@@ -18,7 +18,7 @@ final class DiscardChanges
         return new Tool(
             name: 'discard_changes',
             title: 'Discard changes',
-            description: 'Discards the unsaved changes of a page, a file, or the site in one language, whoever made them, so that the published content applies again. Call it only when the user asks. Returns the new etag.',
+            description: 'Discards the unsaved changes of a page, a file, or the site in one language, so that the published content applies again. They include changes made in the Panel, whoever made them. Call it only when the user asks. Returns the new etag.',
             inputSchema: [
                 'type' => 'object',
                 'properties' => [

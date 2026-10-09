@@ -19,17 +19,17 @@ final class DiscardChangesToolTest extends McpToolTestCase
 
         self::writeContent('notes/notes.txt', ['Title' => 'Notes']);
         self::writeContent('notes/first/note.txt', ['Title' => 'First note', 'Intro' => 'Hello']);
-        // An agent's changes, or the user's from more than ten minutes ago.
-        self::writeContent('notes/first/_changes/note.txt', ['Title' => 'First note', 'Intro' => 'Hello, agent', 'Lock' => 'ada'], time() - 601);
+        self::writeContent('notes/first/_changes/note.txt', ['Title' => 'First note', 'Intro' => 'Hello, editor', 'Lock' => 'ada']);
     }
 
     #[Test]
     public function discards_the_changes_and_returns_the_published_content_etag(): void
     {
+        $this->prepare();
         $result = $this->discard();
 
         $this->assertFalse($result['isError'], $result['content'][0]['text']);
-        $this->assertSame('latest', $result['structuredContent']['version']);
+        $this->assertFalse($result['structuredContent']['hasChanges']);
         $this->assertSame($this->read()['etag'], $result['structuredContent']['etag']);
         $this->assertFalse(self::bootApp($this->props())->page('notes/first')->version('changes')->exists());
     }
@@ -45,14 +45,10 @@ final class DiscardChangesToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function refuses_to_discard_while_the_user_edits_in_the_panel(): void
+    public function discards_changes_the_user_is_making_in_the_panel(): void
     {
-        self::writeContent('notes/first/_changes/note.txt', ['Title' => 'First note', 'Intro' => 'Typing', 'Lock' => 'ada']);
-
-        $result = $this->discard();
-
-        $this->assertTrue($result['isError']);
-        $this->assertStringStartsWith('Ada edited this content in the Panel', $result['content'][0]['text']);
+        $this->assertFalse($this->discard()['isError']);
+        $this->assertFalse(self::bootApp($this->props())->page('notes/first')->version('changes')->exists());
     }
 
     #[Test]
@@ -69,6 +65,7 @@ final class DiscardChangesToolTest extends McpToolTestCase
     #[Test]
     public function refuses_an_account_that_may_not_update_the_page(): void
     {
+        $this->prepare();
         $result = $this->discard(role: 'reviewer');
 
         $this->assertTrue($result['isError']);
@@ -82,6 +79,15 @@ final class DiscardChangesToolTest extends McpToolTestCase
             'model' => 'notes/first',
             'etag' => $this->read()['etag']
         ], $this->props(['users' => [['role' => $role]]]));
+    }
+
+    private function prepare(): void
+    {
+        $this->callTool('prepare_changes', [
+            'model' => 'notes/first',
+            'etag' => $this->read()['etag'],
+            'fields' => ['intro' => 'Hello, agent']
+        ], $this->props());
     }
 
     private function read(): array

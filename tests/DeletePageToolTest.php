@@ -54,7 +54,7 @@ final class DeletePageToolTest extends McpToolTestCase
     #[Test]
     public function refuses_a_page_with_unsaved_changes(): void
     {
-        self::writeContent('notes/1_first/_changes/note.txt', ['Title' => 'First note, edited', 'Lock' => 'ada'], time() - 601);
+        self::writeContent('notes/1_first/_changes/note.txt', ['Title' => 'First note, edited', 'Lock' => 'ada']);
 
         $result = $this->callTool('delete_page', ['page' => 'notes/first'], $this->props());
 
@@ -69,8 +69,8 @@ final class DeletePageToolTest extends McpToolTestCase
         F::write(self::indexRoot() . '/content/notes/1_first/a.md', 'A');
         F::write(self::indexRoot() . '/content/notes/1_first/b.md', 'B');
         F::write(self::indexRoot() . '/content/notes/1_first/c.md', 'C');
-        self::writeContent('notes/1_first/_changes/a.md.txt', ['Alt' => 'A, edited', 'Lock' => 'ada'], time() - 601);
-        self::writeContent('notes/1_first/_changes/c.md.txt', ['Alt' => 'C, edited', 'Lock' => 'ada'], time() - 601);
+        self::writeContent('notes/1_first/_changes/a.md.txt', ['Alt' => 'A, edited', 'Lock' => 'ada']);
+        self::writeContent('notes/1_first/_changes/c.md.txt', ['Alt' => 'C, edited', 'Lock' => 'ada']);
 
         $result = $this->callTool('delete_page', ['page' => 'notes/first'], $this->props());
 

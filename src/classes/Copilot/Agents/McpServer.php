@@ -6,6 +6,7 @@ namespace JohannSchopplich\Copilot\Agents;
 
 use JohannSchopplich\Copilot\Agents\Tools\Arguments;
 use Kirby\Cms\App;
+use Kirby\Content\LockedContentException;
 use Kirby\Data\Json;
 use Kirby\Exception\Exception as KirbyException;
 use Kirby\Http\Request;
@@ -233,6 +234,10 @@ final class McpServer
 
         try {
             $result = ($tool->handler)(new Arguments($arguments), $connection);
+        } catch (LockedContentException $exception) {
+            // Kirby's lock messages don't name the editor, and the one for publishing reads "This version is already published"
+            $editor = $exception->getDetails()['user']['email'] ?? 'Another user';
+            return self::toolError("{$editor} is editing this content in the Panel. Try again once they leave its view, or 10 minutes after their last edit.");
         } catch (ToolError | KirbyException $exception) {
             return self::toolError($exception->getMessage());
         } catch (Throwable $exception) {

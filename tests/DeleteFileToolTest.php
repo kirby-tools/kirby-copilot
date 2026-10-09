@@ -37,7 +37,7 @@ final class DeleteFileToolTest extends McpToolTestCase
     #[Test]
     public function refuses_a_file_with_unsaved_changes(): void
     {
-        self::writeContent('notes/_changes/notes.md.txt', ['Alt' => 'Edited notes', 'Lock' => 'ada'], time() - 601);
+        self::writeContent('notes/_changes/notes.md.txt', ['Alt' => 'Edited notes', 'Lock' => 'ada']);
 
         $result = $this->callTool('delete_file', ['file' => 'notes/notes.md'], $this->props());
 

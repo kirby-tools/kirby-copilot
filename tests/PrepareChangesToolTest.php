@@ -42,7 +42,7 @@ final class PrepareChangesToolTest extends McpToolTestCase
         $result = $this->prepare(['intro' => 'Hello, agent']);
 
         $this->assertSame([['name' => 'intro', 'before' => 'Hello', 'after' => 'Hello, agent']], $result['changed']);
-        $this->assertSame('changes', $result['version']);
+        $this->assertTrue($result['hasChanges']);
         $this->assertSame($this->read()['etag'], $result['etag']);
         $this->assertSame('https://example.com/panel/pages/notes+first/preview/compare', $result['panelUrl']);
 
@@ -65,24 +65,12 @@ final class PrepareChangesToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function refuses_to_write_after_a_panel_edit_onto_its_own_changes(): void
-    {
-        $this->prepare(['intro' => 'Hello, agent']);
-        self::writeContent(self::CHANGES, ['Title' => 'First note', 'Intro' => 'Typing', 'Lock' => 'ada'], time() - 60);
-
-        $result = $this->prepareResult(['summary' => 'Two fields']);
-
-        $this->assertTrue($result['isError']);
-        $this->assertStringStartsWith('Ada edited this content in the Panel', $result['content'][0]['text']);
-    }
-
-    #[Test]
     public function drops_changes_that_equal_the_published_content(): void
     {
         $result = $this->prepare(['intro' => 'Hello']);
 
         $this->assertSame([], $result['changed']);
-        $this->assertSame('latest', $result['version']);
+        $this->assertFalse($result['hasChanges']);
         $this->assertFalse($this->app()->page('notes/first')->version('changes')->exists());
     }
 
@@ -96,49 +84,16 @@ final class PrepareChangesToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function refuses_to_write_while_the_user_edits_in_the_panel(): void
+    public function writes_onto_the_changes_the_user_is_making_in_the_panel(): void
     {
         self::writeContent(self::CHANGES, ['Intro' => 'Typing', 'Lock' => 'ada']);
 
-        $result = $this->prepareResult(['intro' => 'Hello, agent']);
+        $this->prepare(['summary' => 'Written']);
 
-        $this->assertTrue($result['isError']);
-        $this->assertSame('Ada edited this content in the Panel in the last 10 minutes and may still be editing it. Ask them to leave its view in the Panel, then try again.', $result['content'][0]['text']);
-    }
+        $changes = $this->app()->page('notes/first')->version('changes')->content();
 
-    #[Test]
-    public function writes_once_the_user_left_the_page_in_the_panel(): void
-    {
-        // Leaving the view releases the lock.
-        self::writeContent(self::CHANGES, ['Intro' => 'Typed']);
-
-        $result = $this->prepare(['summary' => 'Written']);
-
-        $this->assertSame('Typed', $this->app()->page('notes/first')->version('changes')->content()->get('intro')->value());
-        $this->assertSame('changes', $result['version']);
-    }
-
-    #[Test]
-    public function refuses_to_write_after_a_recent_panel_edit_without_content_locking(): void
-    {
-        self::writeContent(self::CHANGES, ['Intro' => 'Typed']);
-
-        $result = $this->callTool('prepare_changes', [
-            'model' => 'notes/first',
-            'etag' => $this->read()['etag'],
-            'fields' => ['summary' => 'Written']
-        ], $this->props(['options' => ['content' => ['locking' => false]]]));
-
-        $this->assertTrue($result['isError']);
-        $this->assertSame('Someone edited this content in the Panel in the last 10 minutes and may still be editing it. Try again once 10 minutes have passed since the last edit.', $result['content'][0]['text']);
-    }
-
-    #[Test]
-    public function writes_ten_minutes_after_the_last_panel_edit(): void
-    {
-        self::writeContent(self::CHANGES, ['Intro' => 'Typed', 'Lock' => 'ada'], time() - 601);
-
-        $this->assertFalse($this->prepareResult(['summary' => 'Written'])['isError']);
+        $this->assertSame('Typing', $changes->get('intro')->value());
+        $this->assertSame('Written', $changes->get('summary')->value());
     }
 
     #[Test]
@@ -251,7 +206,7 @@ final class PrepareChangesToolTest extends McpToolTestCase
     {
         $result = $this->prepare(['tagline' => 'Hello, agent'], model: 'site');
 
-        $this->assertStringContainsString('leaves out the site', $result['notices'][1]);
+        $this->assertStringContainsString('leaves out the site', $result['notices'][0]);
     }
 
     #[Test]
@@ -290,9 +245,9 @@ final class PrepareChangesToolTest extends McpToolTestCase
     #[Test]
     public function keeps_the_etag_when_only_the_lock_of_the_changes_changes(): void
     {
-        self::writeContent(self::CHANGES, ['Title' => 'First note', 'Intro' => 'Hello, agent', 'Lock' => 'ada'], time() - 601);
+        self::writeContent(self::CHANGES, ['Title' => 'First note', 'Intro' => 'Hello, agent', 'Lock' => 'ada']);
         $etag = $this->read()['etag'];
-        self::writeContent(self::CHANGES, ['Title' => 'First note', 'Intro' => 'Hello, agent', 'Lock' => 'grace'], time() - 601);
+        self::writeContent(self::CHANGES, ['Title' => 'First note', 'Intro' => 'Hello, agent', 'Lock' => 'grace']);
 
         $this->assertSame($etag, $this->read()['etag']);
     }
@@ -301,7 +256,7 @@ final class PrepareChangesToolTest extends McpToolTestCase
     public function keeps_the_etag_of_a_translation_when_the_default_language_changes(): void
     {
         $props = $this->multilang();
-        self::writeContent('notes/first/_changes/note.de.txt', ['Title' => 'Erste Notiz', 'Intro' => 'Hallo, Agent'], time() - 601);
+        self::writeContent('notes/first/_changes/note.de.txt', ['Title' => 'Erste Notiz', 'Intro' => 'Hallo, Agent']);
         $etag = $this->read(language: 'de', props: $props)['etag'];
 
         $this->callTool('prepare_changes', [

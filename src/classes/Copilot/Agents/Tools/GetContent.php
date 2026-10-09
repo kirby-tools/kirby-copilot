@@ -11,6 +11,9 @@ use JohannSchopplich\Copilot\Agents\ToolError;
 use JohannSchopplich\Copilot\FieldDigest;
 use Kirby\Cms\App;
 use Kirby\Cms\File;
+use Kirby\Cms\Language;
+use Kirby\Cms\Page;
+use Kirby\Cms\Site;
 use Kirby\Content\Lock;
 use Kirby\Data\Json;
 use Kirby\Form\Fields;
@@ -31,7 +34,7 @@ final class GetContent
         return new Tool(
             name: 'get_content',
             title: 'Get content',
-            description: 'Returns the content of a page, a file, or the site in one language: each field with its type, label, a hint for the value format, its options and sub-fields, and its value. Values are the unsaved changes where they exist, else the published content. Also returns an etag for writing, who else made the unsaved changes, the files of a page or the site, and the Panel URL to review the content in. find_pages lists subpages.',
+            description: 'Returns the content of a page, a file, or the site in one language: each field with its type, label, a hint for the value format, its options and sub-fields, and its value. Values are the unsaved changes where they exist, else the published content. Also returns an etag for writing, who else made the unsaved changes and the fields they change, all of which go live with a publish, the files of a page or the site, and the Panel URL to review the content in. find_pages lists subpages.',
             inputSchema: [
                 'type' => 'object',
                 'properties' => [
@@ -48,6 +51,24 @@ final class GetContent
         );
     }
 
+    /**
+     * @param list<array> $fields Fields of `FieldDigest::for()`
+     * @param array<string, array> $fieldsets Fieldsets by type, at least those the fields name
+     * @return array<string, mixed>
+     */
+    public static function values(Site|Page|File $model, Language $language, array $fields, array $fieldsets): array
+    {
+        $content = ContentVersion::source($model, $language)->content($language)->toArray();
+        $formValues = Fields::for($model, $language)->fill($content)->toFormValues();
+        $values = [];
+
+        foreach ($fields as $field) {
+            $values[$field['name']] = self::compactValue($field, $formValues[$field['name']] ?? null, $fieldsets);
+        }
+
+        return $values;
+    }
+
     private static function run(Arguments $arguments): array
     {
         $language = $arguments->language();
@@ -62,13 +83,10 @@ final class GetContent
             $fields = self::pickFields($fields, $names);
         }
 
-        $values = Fields::for($model, $language)->fill($version->content($language)->toArray())->toFormValues();
         $fieldsets = self::usedFieldsets($fields, $digest['fieldsets']);
+        $values = self::values($model, $language, $fields, $fieldsets);
 
-        $fields = array_map(fn (array $field) => [
-            ...$field,
-            'value' => self::compactValue($field, $values[$field['name']] ?? null, $fieldsets)
-        ], $fields);
+        $fields = array_map(fn (array $field) => [...$field, 'value' => $values[$field['name']]], $fields);
 
         $owner = $version->id()->is('changes') ? Lock::for($version, $language)->user() : null;
         $result = [
@@ -78,6 +96,10 @@ final class GetContent
             'changesBy' => $owner !== null && $owner->id() !== App::instance()->user()?->id() ? $owner->username() : null,
             'fields' => $fields
         ];
+
+        if ($version->id()->is('changes')) {
+            $result['changedFields'] = self::changedFields($model, $language);
+        }
 
         if ($fieldsets !== []) {
             $result['fieldsets'] = $fieldsets;
@@ -220,6 +242,21 @@ final class GetContent
      *
      * @return list<string> The names of the fields whose values were removed
      */
+    /**
+     * Names the fields whose unsaved changes differ from the published
+     * content.
+     *
+     * @return list<string>
+     */
+    private static function changedFields(Site|Page|File $model, Language $language): array
+    {
+        $changes = $model->version('changes')->read($language) ?? [];
+        $latest = $model->version('latest')->read($language) ?? [];
+        unset($changes['lock'], $changes['uuid']);
+
+        return array_keys(array_filter($changes, fn (mixed $value, string $name) => ($latest[$name] ?? null) !== $value, ARRAY_FILTER_USE_BOTH));
+    }
+
     private static function omitLargestValues(array &$result): array
     {
         $omitted = [];
