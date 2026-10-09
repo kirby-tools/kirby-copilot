@@ -13,6 +13,11 @@ $pluginConfig = [
             // On, unlike Kirby's plugin caches, since `RateLimit` and `AgentWrites` don't work without it.
             'cache.agents' => true
         ],
+        // Role blueprints set these to `false` to withhold a connection permission from agents.
+        'permissions' => [
+            'agentsPublish' => true,
+            'agentsDelete' => true
+        ],
         'api' => require __DIR__ . '/src/extensions/api.php',
         'sections' => require __DIR__ . '/src/extensions/sections.php',
         'translations' => require __DIR__ . '/src/extensions/translations.php'

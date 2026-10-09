@@ -20,12 +20,6 @@ final class Consent
     {
         $user = $kirby->user();
         $pending = PendingAuthorization::find($kirby->session(), $id);
-        $permissions = array_map(fn (ConnectionPermission $permission) => [
-            'value' => $permission->value,
-            'text' => $permission->label(),
-            'info' => $permission->info(),
-            'disabled' => $permission === ConnectionPermission::Read || !$permission->isAvailableTo($user)
-        ], ConnectionPermission::cases());
 
         return [
             'component' => 'k-copilot-agents-authorize-view',
@@ -36,7 +30,7 @@ final class Consent
                 'account' => $user->email(),
                 'client' => $pending?->client->toArray(),
                 'redirect' => $pending !== null ? self::describeRedirect($pending->redirectUri) : null,
-                'permissions' => $permissions,
+                'permissions' => ConnectionPermission::options($user),
                 'defaultPermissions' => ConnectionPermission::values(self::defaultPermissions($user))
             ]
         ];
@@ -69,16 +63,11 @@ final class Consent
             return self::authorizationResponse($pending, ['error' => 'access_denied']);
         }
 
-        $permissions = array_values(array_filter(
-            ConnectionPermission::cases(),
-            fn (ConnectionPermission $permission) => $permission === ConnectionPermission::Read || (in_array($permission->value, $permissionValues, true) && $permission->isAvailableTo($user))
-        ));
-
         $code = ConnectionStore::for($user)->create(
             $pending->client,
             $pending->redirectUri,
             Agents::mcpUrl(),
-            $permissions,
+            ConnectionPermission::chosenBy($user, $permissionValues),
             $pending->codeChallenge
         );
 

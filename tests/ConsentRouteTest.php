@@ -39,6 +39,16 @@ final class ConsentRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
+    public function shows_the_permissions_the_role_withholds_from_agents_as_unavailable(): void
+    {
+        [$kirby, $id] = $this->pending(role: 'curator');
+
+        $props = $this->view($kirby, $id)['props'];
+
+        $this->assertSame(['content:prepare', 'content:delete'], array_column(array_filter($props['permissions'], fn ($permission) => !$permission['disabled']), 'value'));
+    }
+
+    #[Test]
     public function preselects_reading_and_preparing_changes(): void
     {
         [$kirby, $id] = $this->pending();
@@ -170,9 +180,12 @@ final class ConsentRouteTest extends ApiRouteTestCase
             'blueprints' => [
                 'users/writer' => ['name' => 'writer', 'permissions' => ['access' => ['copilot-agents' => false]]],
                 'users/reviewer' => ['name' => 'reviewer', 'permissions' => [
-                    'pages' => ['create' => false, 'update' => false, 'delete' => false],
+                    'pages' => ['create' => false, 'update' => false, 'changeStatus' => false, 'delete' => false],
                     'site' => ['update' => false],
                     'files' => ['create' => false, 'update' => false, 'delete' => false]
+                ]],
+                'users/curator' => ['name' => 'curator', 'permissions' => [
+                    'johannschopplich.copilot' => ['agentsPublish' => false]
                 ]]
             ],
             'users' => [['id' => 'editor', 'email' => 'editor@example.com', 'role' => $role]]

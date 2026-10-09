@@ -21,7 +21,7 @@ final class GetSite
         return new Tool(
             name: 'get_site',
             title: 'Get site',
-            description: 'Returns the site\'s title, URL, and languages, the account the agent acts as, this connection\'s permissions, and the top-level pages. Call it first. get_content with `site` reads the site\'s fields.',
+            description: 'Returns the site\'s title, URL, and languages, the account the agent acts as, this connection\'s permissions, and the top-level pages. Every tool you can call is within these permissions; tools beyond them are hidden, and the user can allow more in the Panel\'s Agents view, if their role permits it. Call it first. get_content with `site` reads the site\'s fields.',
             inputSchema: ['type' => 'object', 'properties' => new stdClass(), 'additionalProperties' => false],
             annotations: Tool::READ_ONLY,
             permission: ConnectionPermission::Read,

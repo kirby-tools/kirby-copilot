@@ -27,6 +27,10 @@ return fn (App $kirby) => Agents::isEnabled() ? [
         'copilot-agents/(:any)/(:any)/revoke' => [
             'load' => fn (string $userId, string $id) => AgentsView::revokeDialog($kirby, $userId, $id),
             'submit' => fn (string $userId, string $id) => AgentsView::revoke($kirby, $userId, $id)
+        ],
+        'copilot-agents/(:any)/(:any)/permissions' => [
+            'load' => fn (string $userId, string $id) => AgentsView::permissionsDialog($kirby, $userId, $id),
+            'submit' => fn (string $userId, string $id) => AgentsView::changePermissions($kirby, $userId, $id)
         ]
     ]
 ] : [];

@@ -9,8 +9,9 @@ use Kirby\Cms\App;
 use Kirby\Data\Data;
 
 /**
- * Calls the MCP URL as Ada, an editor, over a connection with the
- * permissions to read and prepare changes, unless a test grants others.
+ * Calls the MCP URL as the first user – Ada, an editor, unless a test
+ * replaces her – over a connection that may read and prepare changes,
+ * unless a test sets others.
  */
 abstract class McpToolTestCase extends ApiRouteTestCase
 {
@@ -62,7 +63,7 @@ abstract class McpToolTestCase extends ApiRouteTestCase
             'users' => [['id' => 'ada', 'email' => 'ada@example.com', 'name' => 'Ada', 'role' => 'editor']]
         ], $props);
 
-        $store = ConnectionStore::for(self::bootApp($props)->user('ada'));
+        $store = ConnectionStore::for(self::bootApp($props)->users()->first());
         $code = $store->create(
             new Client('https://claude.ai/oauth/claude-code-client-metadata', 'Claude Code', 'claude.ai', true),
             'http://localhost/callback',

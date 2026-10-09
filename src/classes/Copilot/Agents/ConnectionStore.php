@@ -68,7 +68,7 @@ final class ConnectionStore
 
         foreach ($this->readRecords() as $id => $record) {
             if ($this->isActive($record)) {
-                $connections[] = Connection::fromRecord($id, $this->user->id(), $record);
+                $connections[] = Connection::fromRecord($id, $this->user, $record);
             }
         }
 
@@ -80,7 +80,7 @@ final class ConnectionStore
         $record = $this->readRecords()[$id] ?? null;
 
         return $record !== null && $this->isActive($record)
-            ? Connection::fromRecord($id, $this->user->id(), $record)
+            ? Connection::fromRecord($id, $this->user, $record)
             : null;
     }
 
@@ -146,7 +146,7 @@ final class ConnectionStore
                 return null;
             }
 
-            $connection = Connection::fromRecord($id, $this->user->id(), $record);
+            $connection = Connection::fromRecord($id, $this->user, $record);
 
             if ($record['code']['expiresAt'] < self::now() || !$verify($connection, $record['code']['challenge'])) {
                 return null;
@@ -194,7 +194,7 @@ final class ConnectionStore
                 $records[$id]['lastUsedAt'] = $now;
 
                 return [
-                    'connection' => Connection::fromRecord($id, $this->user->id(), $records[$id]),
+                    'connection' => Connection::fromRecord($id, $this->user, $records[$id]),
                     ...$this->issueTokenPair($records, $id)
                 ];
             }
@@ -239,7 +239,22 @@ final class ConnectionStore
             $record['lastUsedAt'] = $now;
         }
 
-        return Connection::fromRecord($id, $this->user->id(), $record);
+        return Connection::fromRecord($id, $this->user, $record);
+    }
+
+    /**
+     * @param list<ConnectionPermission> $permissions
+     */
+    public function changePermissions(string $id, array $permissions): bool
+    {
+        return $this->transaction(function (array &$records) use ($id, $permissions) {
+            if (!isset($records[$id])) {
+                return false;
+            }
+
+            $records[$id]['permissions'] = ConnectionPermission::values($permissions);
+            return true;
+        });
     }
 
     public function revoke(string $id): bool

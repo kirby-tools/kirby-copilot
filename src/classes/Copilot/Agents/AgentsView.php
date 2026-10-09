@@ -14,7 +14,8 @@ use Kirby\Toolkit\I18n;
 
 /**
  * The Agents view: the MCP URL and the connections the user may see.
- * Admins see and revoke every user's connections.
+ * Admins see and revoke every user's connections, but only a connection's
+ * own user changes its permissions.
  */
 final class AgentsView
 {
@@ -26,7 +27,7 @@ final class AgentsView
 
         foreach ($isAdmin ? $kirby->users() : [$user] as $owner) {
             foreach (ConnectionStore::for($owner)->all() as $connection) {
-                $rows[] = self::row($connection, $owner, $isAdmin);
+                $rows[] = self::row($connection, $owner, $user);
             }
         }
 
@@ -70,7 +71,44 @@ final class AgentsView
         return ConnectionStore::for($kirby->user($userId))->revoke($id);
     }
 
-    private static function row(Connection $connection, User $owner, bool $isAdmin): array
+    public static function permissionsDialog(App $kirby, string $userId, string $id): array
+    {
+        $connection = self::findOwnConnection($kirby, $userId, $id);
+
+        return [
+            'component' => 'k-form-dialog',
+            'props' => [
+                'fields' => [
+                    'permissions' => [
+                        'label' => I18n::translate('johannschopplich.copilot.agents.permissions'),
+                        'type' => 'checkboxes',
+                        'options' => ConnectionPermission::options($kirby->user())
+                    ]
+                ],
+                'value' => ['permissions' => ConnectionPermission::values($connection->permissions)],
+                'submitButton' => [
+                    'icon' => 'check',
+                    'text' => I18n::translate('johannschopplich.copilot.agents.permissions.change'),
+                    'theme' => 'positive'
+                ]
+            ]
+        ];
+    }
+
+    public static function changePermissions(App $kirby, string $userId, string $id): bool
+    {
+        self::findOwnConnection($kirby, $userId, $id);
+
+        $user = $kirby->user();
+        $values = $kirby->request()->get('permissions');
+
+        return ConnectionStore::for($user)->changePermissions($id, ConnectionPermission::chosenBy(
+            $user,
+            is_array($values) ? array_values(array_filter($values, 'is_string')) : []
+        ));
+    }
+
+    private static function row(Connection $connection, User $owner, User $user): array
     {
         $row = [
             'id' => $connection->id,
@@ -84,11 +122,24 @@ final class AgentsView
             'revokeDialog' => 'copilot-agents/' . $owner->id() . '/' . $connection->id . '/revoke'
         ];
 
-        if ($isAdmin) {
+        if ($owner->is($user)) {
+            $row['permissionsDialog'] = 'copilot-agents/' . $owner->id() . '/' . $connection->id . '/permissions';
+        }
+
+        if ($user->isAdmin()) {
             $row['account'] = $owner->email();
         }
 
         return $row;
+    }
+
+    private static function findOwnConnection(App $kirby, string $userId, string $id): Connection
+    {
+        if ($kirby->user()->id() !== $userId) {
+            throw new PermissionException(message: 'You may only change your own connections.');
+        }
+
+        return self::findConnection($kirby, $userId, $id);
     }
 
     private static function findConnection(App $kirby, string $userId, string $id): Connection

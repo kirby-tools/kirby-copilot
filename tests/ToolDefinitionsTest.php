@@ -21,7 +21,7 @@ final class ToolDefinitionsTest extends McpToolTestCase
         $result = $this->callTool($name);
 
         $this->assertTrue($result['isError']);
-        $this->assertSame("This connection lacks the permission \"{$label}\" ({$permission->value}) that {$name} needs. The user can reconnect the agent and allow it.", $result['content'][0]['text']);
+        $this->assertSame("This connection lacks the permission \"{$label}\" ({$permission->value}) that {$name} needs. The user can allow it for this connection in the Panel's Agents view, if their role permits it.", $result['content'][0]['text']);
     }
 
     #[Test]
@@ -36,6 +36,18 @@ final class ToolDefinitionsTest extends McpToolTestCase
         ]);
 
         $this->assertStringContainsString('lacks the permission "Publish changes"', $result['content'][0]['text']);
+    }
+
+    #[Test]
+    public function drops_the_tools_of_a_permission_the_role_withholds_from_agents(): void
+    {
+        $this->permissions = ConnectionPermission::cases();
+
+        $tools = $this->rpc('tools/list', [], [
+            'blueprints' => ['users/editor' => ['permissions' => ['johannschopplich.copilot' => ['agentsDelete' => false]]]]
+        ])['result']['tools'];
+
+        $this->assertNotContains('delete_page', array_column($tools, 'name'));
     }
 
     #[Test]

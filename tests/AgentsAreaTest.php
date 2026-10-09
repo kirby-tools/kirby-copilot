@@ -110,6 +110,57 @@ final class AgentsAreaTest extends ApiRouteTestCase
     }
 
     #[Test]
+    public function offers_only_the_owner_to_change_a_connection(): void
+    {
+        $kirby = $this->app();
+        $this->connect($kirby, 'editor', [ConnectionPermission::Read]);
+        $this->connect($kirby, 'admin', [ConnectionPermission::Read]);
+        $kirby->impersonate('admin');
+
+        $connections = $this->area($kirby)['views'][0]['action']()['props']['connections'];
+
+        $this->assertSame(['admin@example.com'], array_column(array_filter($connections, fn (array $connection) => isset($connection['permissionsDialog'])), 'account'));
+    }
+
+    #[Test]
+    public function prefills_the_change_dialog_with_the_connection_permissions(): void
+    {
+        $kirby = $this->app();
+        $id = $this->connect($kirby, 'editor', [ConnectionPermission::Read, ConnectionPermission::Publish]);
+        $kirby->impersonate('editor');
+
+        $props = $this->permissionsDialog($kirby)['load']('editor', $id)['props'];
+
+        $this->assertSame(['content:read', 'content:publish'], $props['value']['permissions']);
+    }
+
+    #[Test]
+    public function lets_the_owner_change_a_connection_within_what_the_role_allows(): void
+    {
+        $kirby = $this->app(['permissions' => ['pages' => ['delete' => false], 'files' => ['delete' => false]]]);
+        $id = $this->connect($kirby, 'editor', [ConnectionPermission::Read, ConnectionPermission::Publish]);
+        $kirby = $kirby->clone(['request' => ['method' => 'POST', 'body' => ['permissions' => ['content:prepare', 'content:delete']]]]);
+        $kirby->impersonate('editor');
+
+        $this->permissionsDialog($kirby)['submit']('editor', $id);
+
+        $this->assertSame([ConnectionPermission::Read, ConnectionPermission::Prepare], ConnectionStore::for($kirby->user('editor'))->find($id)->permissions);
+    }
+
+    #[Test]
+    public function keeps_an_admin_from_changing_another_users_connection(): void
+    {
+        $kirby = $this->app();
+        $id = $this->connect($kirby, 'editor', [ConnectionPermission::Read]);
+        $kirby = $kirby->clone(['request' => ['method' => 'POST', 'body' => ['permissions' => ['content:delete']]]]);
+        $kirby->impersonate('admin');
+
+        $this->expectException(PermissionException::class);
+
+        $this->permissionsDialog($kirby)['submit']('editor', $id);
+    }
+
+    #[Test]
     public function hides_the_area_while_agents_are_off(): void
     {
         $kirby = self::bootApp();
@@ -117,11 +168,11 @@ final class AgentsAreaTest extends ApiRouteTestCase
         $this->assertSame([], $this->area($kirby));
     }
 
-    private function app(): App
+    private function app(array $editorBlueprint = []): App
     {
         return self::bootApp([
             'options' => ['johannschopplich.copilot' => ['agents' => true]],
-            'blueprints' => ['users/editor' => ['name' => 'editor']],
+            'blueprints' => ['users/editor' => ['name' => 'editor', ...$editorBlueprint]],
             'users' => [
                 ['id' => 'admin', 'email' => 'admin@example.com', 'role' => 'admin'],
                 ['id' => 'editor', 'email' => 'editor@example.com', 'role' => 'editor'],
@@ -155,5 +206,10 @@ final class AgentsAreaTest extends ApiRouteTestCase
     private function revokeDialog(App $kirby): array
     {
         return $this->area($kirby)['dialogs']['copilot-agents/(:any)/(:any)/revoke'];
+    }
+
+    private function permissionsDialog(App $kirby): array
+    {
+        return $this->area($kirby)['dialogs']['copilot-agents/(:any)/(:any)/permissions'];
     }
 }

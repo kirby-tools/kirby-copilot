@@ -101,4 +101,6 @@ export interface AgentConnection {
   permissions: string[];
   lastUsedAt: number | null;
   revokeDialog: string;
+  /** Only on the current user's own connections. */
+  permissionsDialog?: string;
 }

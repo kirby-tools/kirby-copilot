@@ -92,7 +92,7 @@ One agent's standing authorization to act as one Kirby user with a chosen set of
 _Avoid_: grant, app, integration, token
 
 **Connection permission**:
-What a connection may do – Read content, Prepare changes, Publish changes, or Delete content – picked when connecting and capped by the user's Kirby role.
+What a connection may do – Read content, Prepare changes, Publish changes, or Delete content – picked when connecting, changeable by its user, and capped by the user's Kirby role.
 _Avoid_: scope (OAuth's word for it), access
 
 **MCP URL**:

@@ -68,6 +68,17 @@ const rows = computed(() => {
       : panel.t("johannschopplich.copilot.agents.lastActive.never"),
     // A single table option renders as a button, which ignores `dialog`.
     options: [
+      ...(connection.permissionsDialog
+        ? [
+            {
+              icon: "edit",
+              text: panel.t(
+                "johannschopplich.copilot.agents.permissions.change",
+              ),
+              click: () => panel.dialog.open(connection.permissionsDialog),
+            },
+          ]
+        : []),
       {
         icon: "trash",
         text: panel.t("johannschopplich.copilot.agents.revoke"),
