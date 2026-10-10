@@ -454,17 +454,17 @@
         },
         {
             "name": "johannschopplich/kirby-tools-licensing",
-            "version": "0.9.4",
-            "version_normalized": "0.9.4.0",
+            "version": "0.9.5",
+            "version_normalized": "0.9.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/kirby-tools/licensing-backend.git",
-                "reference": "f54a1fe34b72b5c1843eac41e5c7ba93a640f03b"
+                "reference": "18ce762ee7f296a0c7ed37eeb9fa09159c50a73d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kirby-tools/licensing-backend/zipball/f54a1fe34b72b5c1843eac41e5c7ba93a640f03b",
-                "reference": "f54a1fe34b72b5c1843eac41e5c7ba93a640f03b",
+                "url": "https://api.github.com/repos/kirby-tools/licensing-backend/zipball/18ce762ee7f296a0c7ed37eeb9fa09159c50a73d",
+                "reference": "18ce762ee7f296a0c7ed37eeb9fa09159c50a73d",
                 "shasum": ""
             },
             "require": {
@@ -474,7 +474,7 @@
                 "getkirby/cms": "^5",
                 "phpunit/phpunit": "^12"
             },
-            "time": "2026-08-21T19:25:48+00:00",
+            "time": "2026-09-20T19:09:02+00:00",
             "type": "library",
             "extra": {
                 "kirby-cms-path": false
@@ -500,7 +500,7 @@
             "homepage": "https://github.com/kirby-tools/licensing-backend#readme",
             "support": {
                 "issues": "https://github.com/kirby-tools/licensing-backend/issues",
-                "source": "https://github.com/kirby-tools/licensing-backend/tree/v0.9.4"
+                "source": "https://github.com/kirby-tools/licensing-backend/tree/v0.9.5"
             },
             "install-path": "../johannschopplich/kirby-tools-licensing"
         },
@@ -1083,23 +1083,23 @@
         },
         {
             "name": "symfony/polyfill-php80",
-            "version": "v1.37.0",
-            "version_normalized": "1.37.0.0",
+            "version": "v1.43.0",
+            "version_normalized": "1.43.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php80.git",
-                "reference": "dfb55726c3a76ea3b6459fcfda1ec2d80a682411"
+                "reference": "9c6a5d6b01ca51d486c813e9a9c0ed55f208bb74"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-php80/zipball/dfb55726c3a76ea3b6459fcfda1ec2d80a682411",
-                "reference": "dfb55726c3a76ea3b6459fcfda1ec2d80a682411",
+                "url": "https://api.github.com/repos/symfony/polyfill-php80/zipball/9c6a5d6b01ca51d486c813e9a9c0ed55f208bb74",
+                "reference": "9c6a5d6b01ca51d486c813e9a9c0ed55f208bb74",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.2"
             },
-            "time": "2026-04-10T16:19:22+00:00",
+            "time": "2026-09-25T15:50:05+00:00",
             "type": "library",
             "extra": {
                 "thanks": {
@@ -1146,7 +1146,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-php80/tree/v1.37.0"
+                "source": "https://github.com/symfony/polyfill-php80/tree/v1.43.0"
             },
             "funding": [
                 {

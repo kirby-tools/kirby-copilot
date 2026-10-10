@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitb0c31db8b927d2b0de58944c6892ede1
+class ComposerStaticInitfad8c15c36e9bd118e0bebf2724290f4
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -1427,6 +1427,47 @@ class ComposerStaticInitb0c31db8b927d2b0de58944c6892ede1
         'JohannSchopplich\\Copilot\\AI\\ProxyTransport' => __DIR__ . '/../..' . '/src/classes/Copilot/AI/ProxyTransport.php',
         'JohannSchopplich\\Copilot\\AI\\ProxyTransportResult' => __DIR__ . '/../..' . '/src/classes/Copilot/AI/ProxyTransportResult.php',
         'JohannSchopplich\\Copilot\\AI\\Resolver' => __DIR__ . '/../..' . '/src/classes/Copilot/AI/Resolver.php',
+        'JohannSchopplich\\Copilot\\Agents\\ActiveContent' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/ActiveContent.php',
+        'JohannSchopplich\\Copilot\\Agents\\AgentWrites' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/AgentWrites.php',
+        'JohannSchopplich\\Copilot\\Agents\\Agents' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Agents.php',
+        'JohannSchopplich\\Copilot\\Agents\\AgentsView' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/AgentsView.php',
+        'JohannSchopplich\\Copilot\\Agents\\AuthorizationServer' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/AuthorizationServer.php',
+        'JohannSchopplich\\Copilot\\Agents\\Client' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Client.php',
+        'JohannSchopplich\\Copilot\\Agents\\ClientMetadataFetcher' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/ClientMetadataFetcher.php',
+        'JohannSchopplich\\Copilot\\Agents\\ClientResolver' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/ClientResolver.php',
+        'JohannSchopplich\\Copilot\\Agents\\Connection' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Connection.php',
+        'JohannSchopplich\\Copilot\\Agents\\ConnectionPermission' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/ConnectionPermission.php',
+        'JohannSchopplich\\Copilot\\Agents\\ConnectionStore' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/ConnectionStore.php',
+        'JohannSchopplich\\Copilot\\Agents\\Consent' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Consent.php',
+        'JohannSchopplich\\Copilot\\Agents\\ContentVersion' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/ContentVersion.php',
+        'JohannSchopplich\\Copilot\\Agents\\McpGuard' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/McpGuard.php',
+        'JohannSchopplich\\Copilot\\Agents\\McpServer' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/McpServer.php',
+        'JohannSchopplich\\Copilot\\Agents\\PendingAuthorization' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/PendingAuthorization.php',
+        'JohannSchopplich\\Copilot\\Agents\\PublicUrlFetcher' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/PublicUrlFetcher.php',
+        'JohannSchopplich\\Copilot\\Agents\\RateLimit' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/RateLimit.php',
+        'JohannSchopplich\\Copilot\\Agents\\RedirectUri' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/RedirectUri.php',
+        'JohannSchopplich\\Copilot\\Agents\\Token' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Token.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tool' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tool.php',
+        'JohannSchopplich\\Copilot\\Agents\\ToolError' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/ToolError.php',
+        'JohannSchopplich\\Copilot\\Agents\\ToolResult' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/ToolResult.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tools\\Arguments' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/Arguments.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tools\\ChangeSlug' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/ChangeSlug.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tools\\ChangeStatus' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/ChangeStatus.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tools\\CreateDraft' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/CreateDraft.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tools\\DeleteFile' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/DeleteFile.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tools\\DeletePage' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/DeletePage.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tools\\DiscardChanges' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/DiscardChanges.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tools\\FieldInput' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/FieldInput.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tools\\FindPages' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/FindPages.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tools\\GetContent' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/GetContent.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tools\\GetSite' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/GetSite.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tools\\ModelSummary' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/ModelSummary.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tools\\MovePage' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/MovePage.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tools\\PrepareChanges' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/PrepareChanges.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tools\\PublishChanges' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/PublishChanges.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tools\\UploadFile' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/UploadFile.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tools\\ViewImage' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/ViewImage.php',
+        'JohannSchopplich\\Copilot\\FieldDigest' => __DIR__ . '/../..' . '/src/classes/Copilot/FieldDigest.php',
         'JohannSchopplich\\Copilot\\PanelContext' => __DIR__ . '/../..' . '/src/classes/Copilot/PanelContext.php',
         'JohannSchopplich\\Copilot\\ViewButtonOptions' => __DIR__ . '/../..' . '/src/classes/Copilot/ViewButtonOptions.php',
         'JohannSchopplich\\KirbyTools\\FieldNormalizer' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-utils/src/FieldNormalizer.php',
@@ -1976,9 +2017,9 @@ class ComposerStaticInitb0c31db8b927d2b0de58944c6892ede1
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitb0c31db8b927d2b0de58944c6892ede1::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitb0c31db8b927d2b0de58944c6892ede1::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitb0c31db8b927d2b0de58944c6892ede1::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitfad8c15c36e9bd118e0bebf2724290f4::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitfad8c15c36e9bd118e0bebf2724290f4::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitfad8c15c36e9bd118e0bebf2724290f4::$classMap;
 
         }, null, ClassLoader::class);
     }
