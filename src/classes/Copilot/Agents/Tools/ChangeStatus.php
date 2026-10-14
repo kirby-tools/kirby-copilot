@@ -9,6 +9,7 @@ use JohannSchopplich\Copilot\Agents\ConnectionPermission;
 use JohannSchopplich\Copilot\Agents\ContentVersion;
 use JohannSchopplich\Copilot\Agents\Tool;
 use JohannSchopplich\Copilot\Agents\ToolError;
+use Kirby\Content\LockedContentException;
 
 final class ChangeStatus
 {
@@ -44,7 +45,11 @@ final class ChangeStatus
             throw new ToolError('`position` applies only to `listed`.');
         }
 
-        $page = AgentWrites::lock($page, function () use ($page, $status, $position) {
+        $page = AgentWrites::lock(function () use ($page, $status, $position) {
+            if ($page->lock()->isLocked()) {
+                throw new LockedContentException($page->lock());
+            }
+
             // Kirby's own error names the fields only in its details, which a tool
             // error leaves out.
             if ($page->isDraft() && $status !== 'draft' && $page->errors() !== []) {
@@ -53,7 +58,7 @@ final class ChangeStatus
 
             // A draft would go live without its unsaved changes, since only published content is public.
             if ($page->isDraft() && $status !== 'draft' && $page->version('changes')->exists('*')) {
-                throw new ToolError('The draft has unsaved changes' . ContentVersion::changedLanguages($page) . ', so it stays a draft. Publish them with publish_changes first.');
+                throw new ToolError('The draft has unsaved changes' . ContentVersion::inChangedLanguages($page) . ', so it stays a draft. Publish them with publish_changes first.');
             }
 
             // Kirby moves a listed page without a position to the end.
@@ -67,13 +72,12 @@ final class ChangeStatus
         $result = [
             'page' => [
                 ...ModelSummary::page($page),
-                'url' => ModelSummary::model($page)['url'],
                 'position' => $page->isListed() ? $page->siblings()->listed()->indexOf($page) + 1 : null
             ]
         ];
 
         if ($page->version('changes')->exists('*')) {
-            $result['notices'] = ['The page has unsaved changes' . ContentVersion::changedLanguages($page) . ', which stay unsaved. publish_changes publishes them.'];
+            $result['notices'] = ['The page has unsaved changes' . ContentVersion::inChangedLanguages($page) . ', which stay unsaved. publish_changes publishes them.'];
         }
 
         return $result;

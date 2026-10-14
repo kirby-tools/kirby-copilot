@@ -61,7 +61,7 @@ final class DeleteFileToolTest extends McpToolTestCase
         $result = $this->callTool('delete_file', ['file' => 'notes/notes.md'], $this->props(['users' => [['role' => 'reviewer']]]));
 
         $this->assertTrue($result['isError']);
-        $this->assertSame('The file cannot be deleted', $result['content'][0]['text']);
+        $this->assertSame('Kirby refused this for the user\'s account – its role or the blueprint\'s options: The file cannot be deleted', $result['content'][0]['text']);
         $this->assertFileExists(self::indexRoot() . '/content/notes/notes.md');
     }
 

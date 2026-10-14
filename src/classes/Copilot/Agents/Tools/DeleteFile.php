@@ -36,9 +36,9 @@ final class DeleteFile
     {
         $file = $arguments->file('file');
 
-        return AgentWrites::lock($file, function () use ($file) {
+        return AgentWrites::lock(function () use ($file) {
             if ($file->version('changes')->exists('*')) {
-                throw new ToolError('The file has unsaved changes' . ContentVersion::changedLanguages($file) . ', which someone may still be working on. Ask the user whether to discard them, then try again.');
+                throw new ToolError('The file has unsaved changes' . ContentVersion::inChangedLanguages($file) . ', which someone may still be working on. Ask the user whether to discard them, then try again.');
             }
 
             $file->delete();

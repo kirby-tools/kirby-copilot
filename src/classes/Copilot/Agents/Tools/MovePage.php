@@ -7,6 +7,7 @@ namespace JohannSchopplich\Copilot\Agents\Tools;
 use JohannSchopplich\Copilot\Agents\AgentWrites;
 use JohannSchopplich\Copilot\Agents\ConnectionPermission;
 use JohannSchopplich\Copilot\Agents\Tool;
+use Kirby\Content\LockedContentException;
 
 final class MovePage
 {
@@ -35,13 +36,14 @@ final class MovePage
     {
         $page = $arguments->page('page');
         $parent = $arguments->parent('parent');
-        $page = AgentWrites::lock($page, fn () => $page->move($parent));
+        $page = AgentWrites::lock(function () use ($page, $parent) {
+            if ($page->lock()->isLocked()) {
+                throw new LockedContentException($page->lock());
+            }
 
-        return [
-            'page' => [
-                ...ModelSummary::page($page),
-                'url' => ModelSummary::model($page)['url']
-            ]
-        ];
+            return $page->move($parent);
+        });
+
+        return ['page' => ModelSummary::page($page)];
     }
 }

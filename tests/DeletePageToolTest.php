@@ -69,14 +69,44 @@ final class DeletePageToolTest extends McpToolTestCase
         F::write(self::indexRoot() . '/content/notes/1_first/a.md', 'A');
         F::write(self::indexRoot() . '/content/notes/1_first/b.md', 'B');
         F::write(self::indexRoot() . '/content/notes/1_first/c.md', 'C');
+        F::write(self::indexRoot() . '/content/notes/1_first/c.md.txt', 'Template: secret');
         self::writeContent('notes/1_first/_changes/a.md.txt', ['Alt' => 'A, edited', 'Lock' => 'ada']);
-        self::writeContent('notes/1_first/_changes/c.md.txt', ['Alt' => 'C, edited', 'Lock' => 'ada']);
+        self::writeContent('notes/1_first/_changes/c.md.txt', ['Alt' => 'C, edited', 'Template' => 'secret', 'Lock' => 'ada']);
 
-        $result = $this->callTool('delete_page', ['page' => 'notes/first'], $this->props());
+        $result = $this->callTool('delete_page', ['page' => 'notes/first'], $this->props(['blueprints' => ['files/secret' => ['options' => ['access' => false]]]]));
 
         $this->assertTrue($result['isError']);
-        $this->assertSame('Files of the page have unsaved changes, which someone may still be working on: a.md, c.md. Ask the user whether to discard them, then try again.', $result['content'][0]['text']);
+        $this->assertSame('Files of the page have unsaved changes, which someone may still be working on: a.md, a file the account may not access. Ask the user whether to discard them, then try again.', $result['content'][0]['text']);
         $this->assertFileExists(self::indexRoot() . '/content/notes/1_first/a.md');
+    }
+
+    #[Test]
+    public function refuses_a_page_with_files_the_account_may_not_delete(): void
+    {
+        F::write(self::indexRoot() . '/content/notes/1_first/a.md', 'A');
+        F::write(self::indexRoot() . '/content/notes/1_first/b.md', 'B');
+        F::write(self::indexRoot() . '/content/notes/1_first/b.md.txt', 'Template: secret');
+        self::writeContent('notes/1_first/_changes/note.txt', ['Title' => 'First, edited', 'Lock' => 'ada']);
+
+        $result = $this->callTool('delete_page', ['page' => 'notes/first'], $this->props([
+            'blueprints' => ['files/secret' => ['options' => ['access' => false]]],
+            'users' => [['role' => 'archivist']]
+        ]));
+
+        $this->assertTrue($result['isError']);
+        $this->assertSame('The account may not delete these files of the page, which deleting it would delete too: a.md, a file the account may not access.', $result['content'][0]['text']);
+        $this->assertFileExists(self::indexRoot() . '/content/notes/1_first/note.txt');
+    }
+
+    #[Test]
+    public function refuses_a_page_with_subpages_before_its_unsaved_changes_or_files_the_account_may_not_delete(): void
+    {
+        F::write(self::indexRoot() . '/content/notes/a.md', 'A');
+        self::writeContent('notes/_changes/notes.txt', ['Title' => 'Notes, edited', 'Lock' => 'ada']);
+
+        $result = $this->callTool('delete_page', ['page' => 'notes'], $this->props(['users' => [['role' => 'archivist']]]));
+
+        $this->assertSame('The page has subpages and cannot be deleted', $result['content'][0]['text']);
     }
 
     #[Test]
@@ -94,7 +124,7 @@ final class DeletePageToolTest extends McpToolTestCase
         $result = $this->callTool('delete_page', ['page' => 'notes/first'], $this->props(['users' => [['role' => 'reviewer']]]));
 
         $this->assertTrue($result['isError']);
-        $this->assertSame('You are not allowed to delete "first"', $result['content'][0]['text']);
+        $this->assertSame('Kirby refused this for the user\'s account – its role or the blueprint\'s options: You are not allowed to delete "first"', $result['content'][0]['text']);
         $this->assertDirectoryExists(self::indexRoot() . '/content/notes/1_first');
     }
 
@@ -102,7 +132,8 @@ final class DeletePageToolTest extends McpToolTestCase
     {
         return array_replace_recursive([
             'blueprints' => [
-                'users/reviewer' => ['name' => 'reviewer', 'permissions' => ['pages' => ['delete' => false]]]
+                'users/reviewer' => ['name' => 'reviewer', 'permissions' => ['pages' => ['delete' => false]]],
+                'users/archivist' => ['name' => 'archivist', 'permissions' => ['files' => ['delete' => false]]]
             ]
         ], $props);
     }

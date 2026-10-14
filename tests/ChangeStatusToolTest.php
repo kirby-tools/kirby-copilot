@@ -128,7 +128,7 @@ final class ChangeStatusToolTest extends McpToolTestCase
         $result = $this->callTool('change_status', ['page' => 'notes/idea', 'status' => 'listed'], $this->props(['users' => [['role' => 'reviewer']]]));
 
         $this->assertTrue($result['isError']);
-        $this->assertSame('The status for this page cannot be changed', $result['content'][0]['text']);
+        $this->assertSame("Kirby refused this for the user's account – its role or the blueprint's options: The status for this page cannot be changed", $result['content'][0]['text']);
         $this->assertSame('draft', self::bootApp($this->props())->page('notes/idea')->status());
     }
 

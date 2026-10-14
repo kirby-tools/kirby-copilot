@@ -8,6 +8,7 @@ use JohannSchopplich\Copilot\Agents\AgentWrites;
 use JohannSchopplich\Copilot\Agents\ConnectionPermission;
 use JohannSchopplich\Copilot\Agents\Tool;
 use Kirby\Cms\App;
+use Kirby\Content\LockedContentException;
 
 final class ChangeSlug
 {
@@ -16,7 +17,7 @@ final class ChangeSlug
         return new Tool(
             name: 'change_slug',
             title: 'Change slug',
-            description: 'Changes the URL slug of a page in one language. The default language\'s slug renames the page; another language\'s slug changes only that language\'s URL. The new URL is live at once, and links to the old one break. Call it only when the user asks. Returns the page with its new URL.',
+            description: 'Changes the URL slug of a page in one language. The new URL is live at once. The default language\'s slug renames the page, and links to the old URL break. Another language\'s slug changes only that language\'s URL: links with the old translated slug break, while the default language\'s slug keeps working in that language too. Call it only when the user asks. Returns the page with its new URL.',
             inputSchema: [
                 'type' => 'object',
                 'properties' => [
@@ -39,13 +40,14 @@ final class ChangeSlug
         $page = $arguments->page('page');
         $slug = $arguments->requiredString('slug');
 
-        $page = AgentWrites::lock($page, fn () => $page->changeSlug($slug, App::instance()->multilang() ? $language->code() : null));
+        $page = AgentWrites::lock(function () use ($page, $slug, $language) {
+            if ($page->lock()->isLocked()) {
+                throw new LockedContentException($page->lock());
+            }
 
-        return [
-            'page' => [
-                ...ModelSummary::page($page),
-                'url' => $page->isDraft() ? null : $page->url($language->code())
-            ]
-        ];
+            return $page->changeSlug($slug, App::instance()->multilang() ? $language->code() : null);
+        });
+
+        return ['page' => ModelSummary::page($page)];
     }
 }

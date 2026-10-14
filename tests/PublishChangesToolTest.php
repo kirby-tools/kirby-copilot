@@ -189,7 +189,7 @@ final class PublishChangesToolTest extends McpToolTestCase
         $result = $this->publish(role: 'reviewer');
 
         $this->assertTrue($result['isError']);
-        $this->assertSame('You are not allowed to update "first"', $result['content'][0]['text']);
+        $this->assertSame('Kirby refused this for the user\'s account – its role or the blueprint\'s options: You are not allowed to update "first"', $result['content'][0]['text']);
         $this->assertSame('Hello', self::bootApp($this->props())->page('notes/first')->content()->get('intro')->value());
     }
 
