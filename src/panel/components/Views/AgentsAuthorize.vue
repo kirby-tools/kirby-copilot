@@ -58,10 +58,7 @@ async function decide(isApproved: boolean) {
               )
             }}
           </k-headline>
-          <k-text v-if="client.host && client.name !== client.host">
-            <p>{{ client.name }}</p>
-          </k-text>
-          <k-text v-else-if="!client.isVerified">
+          <k-text v-if="!client.isVerified">
             <p>
               {{
                 panel.t("johannschopplich.copilot.agents.authorize.unverified")

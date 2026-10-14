@@ -24,8 +24,10 @@ final readonly class Connection
     }
 
     /**
-     * Builds the connection without the permissions the user's role
-     * withholds from agents, which caps existing connections too.
+     * Builds the connection without the permissions the user's role doesn't
+     * make available, which caps existing connections too. The record keeps
+     * them for when the role makes them available again, until the user
+     * changes the connection's permissions.
      */
     public static function fromRecord(string $id, User $user, array $record): self
     {
@@ -37,7 +39,7 @@ final readonly class Connection
             resource: $record['resource'],
             permissions: array_values(array_filter(
                 array_map(ConnectionPermission::tryFrom(...), $record['permissions']),
-                fn (ConnectionPermission|null $permission) => $permission !== null && !$permission->isWithheldFrom($user)
+                fn (ConnectionPermission|null $permission) => $permission?->isAvailableTo($user) === true
             )),
             createdAt: $record['createdAt'],
             lastUsedAt: $record['lastUsedAt'] ?? null

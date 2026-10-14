@@ -8,8 +8,10 @@ use JohannSchopplich\Copilot\Agents\ConnectionStore;
 use JohannSchopplich\Copilot\Agents\PendingAuthorization;
 use JohannSchopplich\Copilot\Agents\Token;
 use Kirby\Cms\App;
+use Kirby\Exception\Exception;
 use Kirby\Exception\NotFoundException;
 use Kirby\Exception\PermissionException;
+use Kirby\Filesystem\Dir;
 use Kirby\Http\Response;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -46,10 +48,11 @@ final class ConsentRouteTest extends ApiRouteTestCase
         $props = $this->view($kirby, $id)['props'];
 
         $this->assertSame(['content:prepare', 'content:delete'], array_column(array_filter($props['permissions'], fn ($permission) => !$permission['disabled']), 'value'));
+        $this->assertSame('Your role doesn’t allow this', $props['permissions'][2]['info']);
     }
 
     #[Test]
-    public function preselects_reading_and_preparing_changes(): void
+    public function preselects_reading_and_preparing_changes_without_a_requested_scope(): void
     {
         [$kirby, $id] = $this->pending();
 
@@ -57,11 +60,22 @@ final class ConsentRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function shows_an_unknown_request_as_missing(): void
+    public function preselects_only_reading_when_the_agent_requests_content_read(): void
     {
-        [$kirby] = $this->pending();
+        [$kirby, $id] = $this->pending(requestedPermissions: [ConnectionPermission::Read]);
 
-        $this->assertNull($this->view($kirby, str_repeat('0', 32))['props']['client']);
+        $this->assertSame(['content:read'], $this->view($kirby, $id)['props']['defaultPermissions']);
+    }
+
+    #[Test]
+    public function marks_a_requested_content_publish_without_preselecting_it(): void
+    {
+        [$kirby, $id] = $this->pending(requestedPermissions: [ConnectionPermission::Prepare, ConnectionPermission::Publish]);
+
+        $props = $this->view($kirby, $id)['props'];
+
+        $this->assertSame(['content:read', 'content:prepare'], $props['defaultPermissions']);
+        $this->assertSame(['Read content', 'Prepare changes', 'Publish changes (requested by the agent)', 'Delete content'], array_column($props['permissions'], 'text'));
     }
 
     #[Test]
@@ -74,6 +88,7 @@ final class ConsentRouteTest extends ApiRouteTestCase
             'http://localhost:4242/callback',
             'xyz',
             self::CHALLENGE,
+            null,
             time() - 1
         );
         $expired->store($kirby->session());
@@ -149,6 +164,25 @@ final class ConsentRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
+    public function keeps_the_request_when_its_connection_can_t_be_saved(): void
+    {
+        [$kirby, $id] = $this->pending(body: ['isApproved' => true]);
+        $root = $kirby->user('editor')->root();
+        Dir::make($root);
+        file_put_contents($root . '/.copilot-agents.json', '{');
+
+        $exception = null;
+
+        try {
+            $this->decide($kirby, $id);
+        } catch (Exception $exception) {
+        }
+
+        $this->assertSame('The agent connections of this user can\'t be read, so they aren\'t changed.', $exception?->getMessage());
+        $this->assertNotNull(PendingAuthorization::find($kirby->session(), $id));
+    }
+
+    #[Test]
     public function refuses_a_decision_without_the_csrf_token(): void
     {
         [$kirby, $id] = $this->pending(body: ['isApproved' => true]);
@@ -169,9 +203,10 @@ final class ConsentRouteTest extends ApiRouteTestCase
     }
 
     /**
+     * @param list<ConnectionPermission>|null $requestedPermissions
      * @return array{0: App, 1: string}
      */
-    private function pending(string $role = 'admin', string $redirectUri = 'http://localhost:4242/callback', string $state = 'xyz', array $body = []): array
+    private function pending(string $role = 'admin', string $redirectUri = 'http://localhost:4242/callback', string $state = 'xyz', array $body = [], array|null $requestedPermissions = null): array
     {
         $kirby = self::bootApp([
             'options' => ['johannschopplich.copilot' => ['agents' => true]],
@@ -196,7 +231,8 @@ final class ConsentRouteTest extends ApiRouteTestCase
             new Client(self::CLAUDE_CODE, 'Claude Code', 'claude.ai', true, ['http://localhost/callback']),
             $redirectUri,
             $state,
-            self::CHALLENGE
+            self::CHALLENGE,
+            $requestedPermissions
         );
         $pending->store($kirby->session());
 

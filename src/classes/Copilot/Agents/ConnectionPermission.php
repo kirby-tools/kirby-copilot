@@ -60,32 +60,25 @@ enum ConnectionPermission: string
         return false;
     }
 
-    public function isWithheldFrom(User $user): bool
-    {
-        $action = match ($this) {
-            self::Publish => 'agentsPublish',
-            self::Delete => 'agentsDelete',
-            default => null
-        };
-
-        return $action !== null && !$user->role()->permissions()->for('johannschopplich.copilot', $action);
-    }
-
     /**
      * Returns the checkbox options of the permissions, disabling Read, which
      * every connection has, and those the user's role doesn't make
-     * available.
+     * available, which say so instead of what they allow.
      *
      * @return list<array{value: string, text: string, info: string, disabled: bool}>
      */
     public static function options(User $user): array
     {
-        return array_map(fn (self $permission) => [
-            'value' => $permission->value,
-            'text' => $permission->label(),
-            'info' => $permission->info(),
-            'disabled' => $permission === self::Read || !$permission->isAvailableTo($user)
-        ], self::cases());
+        return array_map(function (self $permission) use ($user) {
+            $isAvailable = $permission->isAvailableTo($user);
+
+            return [
+                'value' => $permission->value,
+                'text' => $permission->label(),
+                'info' => $isAvailable ? $permission->info() : I18n::translate('johannschopplich.copilot.agents.permission.unavailable'),
+                'disabled' => $permission === self::Read || !$isAvailable
+            ];
+        }, self::cases());
     }
 
     /**
@@ -149,5 +142,16 @@ enum ConnectionPermission: string
     public static function join(array $permissions): string
     {
         return implode(' ', self::values($permissions));
+    }
+
+    private function isWithheldFrom(User $user): bool
+    {
+        $action = match ($this) {
+            self::Publish => 'agentsPublish',
+            self::Delete => 'agentsDelete',
+            default => null
+        };
+
+        return $action !== null && !$user->role()->permissions()->for('johannschopplich.copilot', $action);
     }
 }

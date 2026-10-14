@@ -20,6 +20,13 @@ final class Consent
     {
         $user = $kirby->user();
         $pending = PendingAuthorization::find($kirby->session(), $id);
+        $requestedValues = ConnectionPermission::values(self::requestedBeyondDefaults($pending?->requestedPermissions ?? []));
+        $options = array_map(
+            fn (array $option) => in_array($option['value'], $requestedValues, true)
+                ? [...$option, 'text' => I18n::template('johannschopplich.copilot.agents.authorize.requested', ['permission' => $option['text']])]
+                : $option,
+            ConnectionPermission::options($user)
+        );
 
         return [
             'component' => 'k-copilot-agents-authorize-view',
@@ -30,8 +37,8 @@ final class Consent
                 'account' => $user->email(),
                 'client' => $pending?->client->toArray(),
                 'redirect' => $pending !== null ? self::describeRedirect($pending->redirectUri) : null,
-                'permissions' => ConnectionPermission::options($user),
-                'defaultPermissions' => ConnectionPermission::values(self::defaultPermissions($user))
+                'permissions' => $options,
+                'defaultPermissions' => ConnectionPermission::values(self::defaultPermissions($user, $pending?->requestedPermissions))
             ]
         ];
     }
@@ -57,9 +64,8 @@ final class Consent
             throw new NotFoundException(message: I18n::translate('johannschopplich.copilot.agents.authorize.expired'));
         }
 
-        $pending->remove($session);
-
         if (!$isApproved) {
+            $pending->remove($session);
             return self::authorizationResponse($pending, ['error' => 'access_denied']);
         }
 
@@ -70,6 +76,7 @@ final class Consent
             ConnectionPermission::chosenBy($user, $permissionValues),
             $pending->codeChallenge
         );
+        $pending->remove($session);
 
         return self::authorizationResponse($pending, ['code' => $code->value]);
     }
@@ -87,13 +94,31 @@ final class Consent
     }
 
     /**
+     * Returns Read and each default the agent requested – each default when
+     * it sent no scope – that the user's role makes available.
+     *
+     * @param list<ConnectionPermission>|null $requestedPermissions
      * @return list<ConnectionPermission>
      */
-    private static function defaultPermissions(User $user): array
+    private static function defaultPermissions(User $user, array|null $requestedPermissions): array
     {
         return array_values(array_filter(
             ConnectionPermission::defaults(),
-            fn (ConnectionPermission $permission) => $permission->isAvailableTo($user)
+            fn (ConnectionPermission $permission) =>
+                $permission === ConnectionPermission::Read ||
+                (in_array($permission, $requestedPermissions ?? ConnectionPermission::defaults(), true) && $permission->isAvailableTo($user))
+        ));
+    }
+
+    /**
+     * @param list<ConnectionPermission> $requestedPermissions
+     * @return list<ConnectionPermission>
+     */
+    private static function requestedBeyondDefaults(array $requestedPermissions): array
+    {
+        return array_values(array_filter(
+            $requestedPermissions,
+            fn (ConnectionPermission $permission) => !in_array($permission, ConnectionPermission::defaults(), true)
         ));
     }
 
