@@ -31,7 +31,7 @@ final class AgentsAreaTest extends ApiRouteTestCase
     public function shows_an_editor_only_their_own_connections_and_their_agents(): void
     {
         $kirby = $this->app();
-        $this->connect($kirby, 'editor', [ConnectionPermission::Read, ConnectionPermission::Prepare]);
+        $id = $this->connect($kirby, 'editor', [ConnectionPermission::Read, ConnectionPermission::Prepare]);
         $this->connect($kirby, 'admin', [ConnectionPermission::Read]);
         $kirby->impersonate('editor');
 
@@ -39,6 +39,7 @@ final class AgentsAreaTest extends ApiRouteTestCase
 
         $this->assertFalse($props['isAdmin']);
         $this->assertCount(1, $props['connections']);
+        $this->assertSame("copilot-agents/editor/{$id}", $props['connections'][0]['options']);
         $this->assertSame(['id' => 'https://claude.ai/oauth/claude-code-client-metadata', 'name' => 'Claude Code', 'host' => 'claude.ai', 'isVerified' => true, 'isLocal' => true], $props['connections'][0]['agent']);
         $this->assertSame(['Read content', 'Prepare changes'], $props['connections'][0]['permissions']);
         $this->assertArrayNotHasKey('account', $props['connections'][0]);
@@ -71,6 +72,19 @@ final class AgentsAreaTest extends ApiRouteTestCase
     }
 
     #[Test]
+    public function hides_from_an_admin_the_connections_of_a_role_that_may_not_connect(): void
+    {
+        $kirby = $this->app(['permissions' => ['access' => ['copilot-agents' => false]]]);
+        $this->connect($kirby, 'editor', [ConnectionPermission::Read]);
+        $this->connect($kirby, 'admin', [ConnectionPermission::Read]);
+        $kirby->impersonate('admin');
+
+        $props = $this->area($kirby)['views'][0]['action']()['props'];
+
+        $this->assertSame(['admin@example.com'], array_column($props['connections'], 'account'));
+    }
+
+    #[Test]
     public function lets_the_owner_revoke_a_connection(): void
     {
         $kirby = $this->app();
@@ -94,6 +108,19 @@ final class AgentsAreaTest extends ApiRouteTestCase
     }
 
     #[Test]
+    public function names_the_agent_and_its_account_in_the_revoke_dialog(): void
+    {
+        $kirby = $this->app();
+        $id = $this->connect($kirby, 'editor', [ConnectionPermission::Read]);
+        $kirby->impersonate('admin');
+
+        $this->assertStringStartsWith(
+            'Revoke access for <strong>Claude Code</strong> connected as <strong>editor@example.com</strong>?',
+            $this->revokeDialog($kirby)['load']('editor', $id)['props']['text']
+        );
+    }
+
+    #[Test]
     public function keeps_editors_from_revoking_each_other(): void
     {
         $kirby = $this->app();
@@ -113,13 +140,14 @@ final class AgentsAreaTest extends ApiRouteTestCase
     public function offers_only_the_owner_to_change_a_connection(): void
     {
         $kirby = $this->app();
-        $this->connect($kirby, 'editor', [ConnectionPermission::Read]);
-        $this->connect($kirby, 'admin', [ConnectionPermission::Read]);
+        $editorId = $this->connect($kirby, 'editor', [ConnectionPermission::Read]);
+        $adminId = $this->connect($kirby, 'admin', [ConnectionPermission::Read]);
         $kirby->impersonate('admin');
 
-        $connections = $this->area($kirby)['views'][0]['action']()['props']['connections'];
+        $dropdown = $this->area($kirby)['dropdowns']['copilot-agents/(:any)/(:any)'];
 
-        $this->assertSame(['admin@example.com'], array_column(array_filter($connections, fn (array $connection) => isset($connection['permissionsDialog'])), 'account'));
+        $this->assertSame(["copilot-agents/admin/{$adminId}/permissions", "copilot-agents/admin/{$adminId}/revoke"], array_column($dropdown('admin', $adminId), 'dialog'));
+        $this->assertSame(["copilot-agents/editor/{$editorId}/revoke"], array_column($dropdown('editor', $editorId), 'dialog'));
     }
 
     #[Test]

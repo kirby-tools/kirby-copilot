@@ -14,9 +14,16 @@ use Kirby\Cms\User;
  */
 final class Agents
 {
+    /**
+     * Agents need Kirby's API, which serves the MCP URL and the OAuth
+     * endpoints, and the Panel, where users approve connection requests and
+     * manage connections.
+     */
     public static function isEnabled(): bool
     {
-        return App::instance()->option('johannschopplich.copilot.agents') === true;
+        $kirby = App::instance();
+
+        return $kirby->option('johannschopplich.copilot.agents') === true && $kirby->option('api') !== false && $kirby->option('panel') !== false;
     }
 
     /**

@@ -100,7 +100,6 @@ export interface AgentConnection {
   account?: string;
   permissions: string[];
   lastUsedAt: number | null;
-  revokeDialog: string;
-  /** Only on the current user's own connections. */
-  permissionsDialog?: string;
+  /** Path of the row's dropdown route. */
+  options: string;
 }

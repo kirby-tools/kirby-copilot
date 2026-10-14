@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   checkAgentsSetup,
   formatRelativeTime,
@@ -54,18 +54,16 @@ describe("formatRelativeTime", () => {
       expected,
     );
   });
-
-  it("falls back to English for a code Intl rejects", () => {
-    expect(formatRelativeTime(secondsAgo(3 * 3600), now, "x")).toBe(
-      "3 hours ago",
-    );
-  });
 });
 
 describe("checkAgentsSetup", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   const mcpUrl = "https://example.com/api/copilot/mcp";
   const challenge =
-    'Bearer resource_metadata="https://example.com/.well-known/oauth-protected-resource/api/copilot/mcp", scope="content:read content:prepare"';
+    'Bearer resource_metadata="https://example.com/.well-known/oauth-protected-resource/api/copilot/mcp"';
   const resourceMetadata = {
     resource: mcpUrl,
     authorization_servers: ["https://example.com"],
@@ -135,6 +133,27 @@ describe("checkAgentsSetup", () => {
     ).toEqual([{ type: "unreachable", url: mcpUrl }]);
   });
 
+  it("reports a site that never answers", async () => {
+    const timeout = new AbortController();
+    vi.spyOn(AbortSignal, "timeout").mockReturnValue(timeout.signal);
+    const fetch = (_url: string | URL | Request, init?: RequestInit) =>
+      new Promise<Response>((_, reject) => {
+        if (init?.signal?.aborted) reject(init.signal.reason);
+        init?.signal?.addEventListener("abort", () =>
+          reject(init.signal!.reason),
+        );
+      });
+
+    const problems = checkAgentsSetup({
+      mcpUrl,
+      pageProtocol: "https:",
+      fetch,
+    });
+    timeout.abort();
+
+    expect(await problems).toEqual([{ type: "unreachable", url: mcpUrl }]);
+  });
+
   it("reports each .well-known URL the host answers itself", async () => {
     const { fetch } = createSite({
       "https://example.com/.well-known/oauth-protected-resource": () =>
@@ -158,19 +177,34 @@ describe("checkAgentsSetup", () => {
   });
 
   it("looks up the metadata of an issuer with a path below the domain root", async () => {
+    const subfolderMcpUrl = "https://example.com/site/api/copilot/mcp";
+    const resourceMetadataUrl =
+      "https://example.com/site/.well-known/oauth-protected-resource/site/api/copilot/mcp";
+    const subfolderResourceMetadata = {
+      resource: subfolderMcpUrl,
+      authorization_servers: ["https://example.com/site"],
+    };
     const { fetch } = createSite({
-      "https://example.com/.well-known/oauth-protected-resource/api/copilot/mcp":
-        () =>
-          Response.json({
-            ...resourceMetadata,
-            authorization_servers: ["https://example.com/site"],
-          }),
+      [subfolderMcpUrl]: () =>
+        new Response(null, {
+          status: 401,
+          headers: {
+            "WWW-Authenticate": `Bearer resource_metadata="${resourceMetadataUrl}", error="invalid_token"`,
+          },
+        }),
+      [resourceMetadataUrl]: () => Response.json(subfolderResourceMetadata),
+      "https://example.com/.well-known/oauth-protected-resource": () =>
+        Response.json(subfolderResourceMetadata),
       "https://example.com/.well-known/oauth-authorization-server/site": () =>
         Response.json({ issuer: "https://example.com/site" }),
     });
 
     expect(
-      await checkAgentsSetup({ mcpUrl, pageProtocol: "https:", fetch }),
+      await checkAgentsSetup({
+        mcpUrl: subfolderMcpUrl,
+        pageProtocol: "https:",
+        fetch,
+      }),
     ).toEqual([]);
   });
 

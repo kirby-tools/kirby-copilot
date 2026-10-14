@@ -3,6 +3,10 @@ const VISIBLE_LABEL_COUNT = 2;
 // The server answers a token it doesn't know with `invalid_token`, which proves that the header arrived.
 const PROBE_TOKEN = "kca_probe";
 
+// Chrome leaves a request pending on a basic-auth challenge, and the tab's
+// later requests to the site too.
+const REQUEST_TIMEOUT_MS = 10_000;
+
 const RELATIVE_TIME_UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
   ["year", 365 * 86400],
   ["month", 30 * 86400],
@@ -38,7 +42,7 @@ export function formatRelativeTime(
   translationCode: string,
 ) {
   const format = createRelativeTimeFormat(translationCode);
-  const elapsed = Math.max(0, now / 1000 - timestamp);
+  const elapsed = now / 1000 - timestamp;
 
   for (const [unit, seconds] of RELATIVE_TIME_UNITS) {
     if (elapsed >= seconds) {
@@ -68,16 +72,24 @@ export async function checkAgentsSetup({
   pageProtocol: string;
   fetch?: typeof globalThis.fetch;
 }): Promise<AgentsSetupProblem[]> {
-  // Behind a proxy that doesn't forward the scheme, Kirby builds http URLs.
-  // The browser then blocks every probe as mixed content.
+  // Behind a proxy that terminates HTTPS, Kirby builds http URLs unless its `url` option says otherwise, and the browser then blocks every probe as mixed content.
   if (pageProtocol === "https:" && mcpUrl.startsWith("http:")) {
     return [{ type: "insecure" }];
   }
 
+  const probeResponse = await probe(mcpUrl, fetch);
+
+  // A site that doesn't answer the probe leaves the `.well-known` requests waiting too.
+  if (!probeResponse) {
+    return [{ type: "unreachable", url: mcpUrl }];
+  }
+
   const problems: AgentsSetupProblem[] = [];
   const { origin, pathname } = new URL(mcpUrl);
-
-  const challenge = await probeChallenge(mcpUrl, fetch);
+  const challenge =
+    probeResponse.status === 401
+      ? probeResponse.headers.get("WWW-Authenticate")
+      : null;
 
   if (!challenge?.includes("resource_metadata=")) {
     problems.push({ type: "unreachable", url: mcpUrl });
@@ -124,16 +136,12 @@ function createRelativeTimeFormat(translationCode: string) {
       ? "sr-Latn"
       : translationCode.replace("_", "-");
 
-  try {
-    return new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
-  } catch {
-    return new Intl.RelativeTimeFormat("en", { numeric: "auto" });
-  }
+  return new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
 }
 
-async function probeChallenge(mcpUrl: string, fetch: typeof globalThis.fetch) {
+async function probe(mcpUrl: string, fetch: typeof globalThis.fetch) {
   try {
-    const response = await fetch(mcpUrl, {
+    return await fetch(mcpUrl, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${PROBE_TOKEN}`,
@@ -141,19 +149,18 @@ async function probeChallenge(mcpUrl: string, fetch: typeof globalThis.fetch) {
         Accept: "application/json, text/event-stream",
       },
       body: "{}",
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
-
-    return response.status === 401
-      ? response.headers.get("WWW-Authenticate")
-      : null;
   } catch {
-    return null;
+    return undefined;
   }
 }
 
 async function fetchJson(url: string, fetch: typeof globalThis.fetch) {
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
     return response.ok ? await response.json() : undefined;
   } catch {
     return undefined;

@@ -23,6 +23,9 @@ return fn (App $kirby) => Agents::isEnabled() ? [
             'action' => fn (string $id) => Consent::view($kirby, $id)
         ]
     ],
+    'dropdowns' => [
+        'copilot-agents/(:any)/(:any)' => fn (string $userId, string $id) => AgentsView::dropdown($kirby, $userId, $id)
+    ],
     'dialogs' => [
         'copilot-agents/(:any)/(:any)/revoke' => [
             'load' => fn (string $userId, string $id) => AgentsView::revokeDialog($kirby, $userId, $id),

@@ -14,8 +14,8 @@ use Kirby\Toolkit\I18n;
 
 /**
  * The Agents view: the MCP URL and the connections the user may see.
- * Admins see and revoke every user's connections, but only a connection's
- * own user changes its permissions.
+ * Admins see and revoke the connections of every user who may connect, but
+ * only a connection's own user changes its permissions.
  */
 final class AgentsView
 {
@@ -25,7 +25,8 @@ final class AgentsView
         $isAdmin = $user->isAdmin();
         $rows = [];
 
-        foreach ($isAdmin ? $kirby->users() : [$user] as $owner) {
+        // A user whose role loses access keeps their connections, which work again if the role regains it before their refresh token expires.
+        foreach ($isAdmin ? $kirby->users()->filter(Agents::canConnect(...)) : [$user] as $owner) {
             foreach (ConnectionStore::for($owner)->all() as $connection) {
                 $rows[] = self::row($connection, $owner, $user);
             }
@@ -45,6 +46,30 @@ final class AgentsView
         ];
     }
 
+    public static function dropdown(App $kirby, string $userId, string $id): array
+    {
+        self::findConnection($kirby, $userId, $id);
+
+        $path = 'copilot-agents/' . $userId . '/' . $id;
+        $options = [];
+
+        if ($kirby->user()->id() === $userId) {
+            $options[] = [
+                'dialog' => $path . '/permissions',
+                'icon' => 'edit',
+                'text' => I18n::translate('johannschopplich.copilot.agents.permissions.change')
+            ];
+        }
+
+        $options[] = [
+            'dialog' => $path . '/revoke',
+            'icon' => 'trash',
+            'text' => I18n::translate('johannschopplich.copilot.agents.revoke')
+        ];
+
+        return $options;
+    }
+
     public static function revokeDialog(App $kirby, string $userId, string $id): array
     {
         $connection = self::findConnection($kirby, $userId, $id);
@@ -53,7 +78,8 @@ final class AgentsView
             'component' => 'k-remove-dialog',
             'props' => [
                 'text' => I18n::template('johannschopplich.copilot.agents.revoke.confirm', [
-                    'agent' => Escape::html($connection->client->name)
+                    'agent' => Escape::html($connection->client->name),
+                    'account' => Escape::html($kirby->user($userId)->email())
                 ]),
                 'submitButton' => [
                     'icon' => 'trash',
@@ -119,12 +145,8 @@ final class AgentsView
             ],
             'permissions' => array_map(fn (ConnectionPermission $permission) => $permission->label(), $connection->permissions),
             'lastUsedAt' => $connection->lastUsedAt,
-            'revokeDialog' => 'copilot-agents/' . $owner->id() . '/' . $connection->id . '/revoke'
+            'options' => 'copilot-agents/' . $owner->id() . '/' . $connection->id
         ];
-
-        if ($owner->is($user)) {
-            $row['permissionsDialog'] = 'copilot-agents/' . $owner->id() . '/' . $connection->id . '/permissions';
-        }
 
         if ($user->isAdmin()) {
             $row['account'] = $owner->email();

@@ -66,25 +66,6 @@ const rows = computed(() => {
     lastUsedAt: connection.lastUsedAt
       ? formatRelativeTime(connection.lastUsedAt, now, panel.translation.code)
       : panel.t("johannschopplich.copilot.agents.lastActive.never"),
-    // A single table option renders as a button, which ignores `dialog`.
-    options: [
-      ...(connection.permissionsDialog
-        ? [
-            {
-              icon: "edit",
-              text: panel.t(
-                "johannschopplich.copilot.agents.permissions.change",
-              ),
-              click: () => panel.dialog.open(connection.permissionsDialog),
-            },
-          ]
-        : []),
-      {
-        icon: "trash",
-        text: panel.t("johannschopplich.copilot.agents.revoke"),
-        click: () => panel.dialog.open(connection.revokeDialog),
-      },
-    ],
   }));
 });
 
@@ -100,7 +81,7 @@ function copyMcpUrl() {
     <k-header>
       {{ panel.t("johannschopplich.copilot.agents") }}
 
-      <template v-if="licenseStatus !== undefined" #buttons>
+      <template #buttons>
         <LicensingButtonGroup
           label="Kirby Copilot"
           api-namespace="__copilot__"
