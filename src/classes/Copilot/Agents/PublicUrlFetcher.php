@@ -21,11 +21,22 @@ final class PublicUrlFetcher implements ClientMetadataFetcher
     private const CONNECT_TIMEOUT = 5;
     private const REDIRECT_STATUSES = [301, 302, 303, 307, 308];
 
-    /** IPv4 ranges that `FILTER_FLAG_NO_PRIV_RANGE` and `FILTER_FLAG_NO_RES_RANGE` let through. */
-    private const NON_PUBLIC_IPV4_RANGES = [
-        '100.64.0.0/10', // Shared address space, used inside cloud networks.
-        '192.0.0.0/24', // IETF protocol assignments.
-        '198.18.0.0/15' // Benchmarking.
+    /**
+     * ASCII labels, the last starting with a letter: curl reads `2130706433`,
+     * `0x7f000001`, or `127.1` as an IPv4 address and decodes percent-encoded
+     * and international names before it looks up the pinned address, so any
+     * other host would miss the pin.
+     */
+    private const HOST_NAME_PATTERN = '/^(?:[a-z0-9_-]+\.)*[a-z][a-z0-9_-]*\.?$/i';
+
+    /** Special-use ranges that `FILTER_FLAG_GLOBAL_RANGE` lets through. */
+    private const NON_PUBLIC_RANGES = [
+        '::/96', // Deprecated IPv4-compatible addresses, which some systems route to IPv4.
+        '::ffff:0:0:0/96', // IPv4-translated addresses.
+        '64:ff9b:1::/48', // NAT64 for local use, which reaches private networks.
+        '3fff::/20', // Documentation.
+        '5f00::/16', // Segment routing.
+        'fec0::/10' // Site-local addresses, which reach private networks.
     ];
 
     /**
@@ -49,7 +60,7 @@ final class PublicUrlFetcher implements ClientMetadataFetcher
         try {
             $headers = $this->transfer($url, $stream);
 
-            if ($headers === null) {
+            if (is_string($headers)) {
                 return null;
             }
 
@@ -64,29 +75,58 @@ final class PublicUrlFetcher implements ClientMetadataFetcher
     }
 
     /**
-     * Streams the response body into a file. Returns `false` when the fetch
-     * fails, which may leave a partial or an error body in the file.
+     * Streams the response body into a file. Returns why the fetch failed,
+     * or `null` once it succeeded; a failed fetch may leave a partial or an
+     * error body in the file.
      */
-    public function download(string $url, string $path): bool
+    public function download(string $url, string $path): string|null
     {
         $stream = fopen($path, 'w+');
 
         try {
-            return $this->transfer($url, $stream) !== null;
+            $headers = $this->transfer($url, $stream);
+
+            return is_string($headers) ? $headers : null;
         } finally {
             fclose($stream);
         }
     }
 
     /**
+     * Returns the first address of the host when all of them are public.
+     */
+    public function resolvePublicIp(string $host): string|null
+    {
+        if (filter_var($host, FILTER_VALIDATE_IP) !== false) {
+            $ips = [$host];
+        } elseif (preg_match(self::HOST_NAME_PATTERN, $host) === 1) {
+            $ips = ($this->resolve ?? self::lookUp(...))($host);
+        } else {
+            return null;
+        }
+
+        if ($ips === []) {
+            return null;
+        }
+
+        foreach ($ips as $ip) {
+            if (!is_string($ip) || !self::isPublicIp($ip)) {
+                return null;
+            }
+        }
+
+        return $ips[0];
+    }
+
+    /**
      * Writes the body of the final response into the stream and returns its
-     * headers, or `null` when a hop fails a check or the response after at
-     * most `$maxRedirects` redirects isn't a 200.
+     * headers, or why the fetch failed when a hop fails a check or the
+     * response after at most `$maxRedirects` redirects isn't a 200.
      *
      * @param resource $stream
-     * @return array<string, string>|null
+     * @return array<string, string>|string
      */
-    private function transfer(string $url, $stream): array|null
+    private function transfer(string $url, $stream): array|string
     {
         $deadline = microtime(true) + $this->timeout;
 
@@ -95,8 +135,8 @@ final class PublicUrlFetcher implements ClientMetadataFetcher
             rewind($stream);
             $response = $this->request($url, $stream, $deadline);
 
-            if ($response === null) {
-                return null;
+            if (is_string($response)) {
+                return $response;
             }
 
             if ($response['status'] === 200) {
@@ -105,7 +145,7 @@ final class PublicUrlFetcher implements ClientMetadataFetcher
 
             // `CURLOPT_PROTOCOLS` refuses a redirect to anything but HTTPS.
             if (!in_array($response['status'], self::REDIRECT_STATUSES, true) || $response['location'] === null || $redirects >= $this->maxRedirects) {
-                return null;
+                return "it answered with HTTP {$response['status']}";
             }
 
             $url = $response['location'];
@@ -114,22 +154,22 @@ final class PublicUrlFetcher implements ClientMetadataFetcher
 
     /**
      * @param resource $stream
-     * @return array{status: int, headers: array<string, string>, location: string|null}|null
+     * @return array{status: int, headers: array<string, string>, location: string|null}|string
      */
-    private function request(string $url, $stream, float $deadline): array|null
+    private function request(string $url, $stream, float $deadline): array|string
     {
         $host = parse_url($url, PHP_URL_HOST);
         $port = parse_url($url, PHP_URL_PORT) ?? 443;
         $timeoutMs = (int)(($deadline - microtime(true)) * 1000);
 
-        if (!is_string($host) || $timeoutMs <= 0) {
-            return null;
+        if ($timeoutMs <= 0) {
+            return 'the connection failed';
         }
 
-        $ip = $this->resolvePublicIp(trim($host, '[]'));
+        $ip = is_string($host) ? $this->resolvePublicIp(trim($host, '[]')) : null;
 
         if ($ip === null) {
-            return null;
+            return 'the host has no public address';
         }
 
         $headers = [];
@@ -145,6 +185,8 @@ final class PublicUrlFetcher implements ClientMetadataFetcher
             CURLOPT_CONNECTTIMEOUT => self::CONNECT_TIMEOUT,
             CURLOPT_TIMEOUT_MS => $timeoutMs,
             CURLOPT_HTTPHEADER => ["Accept: {$this->accept}"],
+            // Some hosts, like Wikimedia's, refuse a request without one.
+            CURLOPT_USERAGENT => 'Kirby Copilot (+' . App::instance()->site()->url() . ')',
             CURLOPT_HEADERFUNCTION => function ($handle, string $header) use (&$headers) {
                 $parts = explode(':', $header, 2);
 
@@ -170,7 +212,7 @@ final class PublicUrlFetcher implements ClientMetadataFetcher
         }
 
         if (curl_exec($handle) === false) {
-            return null;
+            return $bytes > $this->maxBytes ? 'the file is larger than the limit' : 'the connection failed';
         }
 
         // The `Location` header, resolved against the URL as a client following it would.
@@ -181,28 +223,6 @@ final class PublicUrlFetcher implements ClientMetadataFetcher
             'headers' => $headers,
             'location' => is_string($location) && $location !== '' ? $location : null
         ];
-    }
-
-    /**
-     * Returns the first address of the host when all of them are public.
-     */
-    public function resolvePublicIp(string $host): string|null
-    {
-        $ips = filter_var($host, FILTER_VALIDATE_IP) !== false
-            ? [$host]
-            : ($this->resolve ?? self::lookUp(...))($host);
-
-        if ($ips === []) {
-            return null;
-        }
-
-        foreach ($ips as $ip) {
-            if (!is_string($ip) || !self::isPublicIp($ip)) {
-                return null;
-            }
-        }
-
-        return $ips[0];
     }
 
     /**
@@ -227,32 +247,19 @@ final class PublicUrlFetcher implements ClientMetadataFetcher
             return false;
         }
 
-        if (strlen($packed) === 16) {
-            $ipv4 = self::embeddedIpv4($packed);
+        $ipv4 = strlen($packed) === 16 ? self::embeddedIpv4($packed) : null;
 
-            if ($ipv4 !== null) {
-                return self::isPublicIp(inet_ntop($ipv4));
-            }
+        if ($ipv4 !== null) {
+            return self::isPublicIp(inet_ntop($ipv4));
+        }
 
-            // NAT64 for local use (64:ff9b:1::/48) and site-local addresses (fec0::/10) reach private networks.
-            if (str_starts_with($packed, "\x00\x64\xff\x9b\x00\x01") || (ord($packed[0]) === 0xfe && (ord($packed[1]) & 0xc0) === 0xc0)) {
+        foreach (self::NON_PUBLIC_RANGES as $range) {
+            if (self::isInRange($packed, $range)) {
                 return false;
             }
         }
 
-        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
-            return false;
-        }
-
-        if (strlen($packed) === 4) {
-            foreach (self::NON_PUBLIC_IPV4_RANGES as $range) {
-                if (self::isInIpv4Range($packed, $range)) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
+        return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_GLOBAL_RANGE) !== false;
     }
 
     /**
@@ -269,11 +276,19 @@ final class PublicUrlFetcher implements ClientMetadataFetcher
         };
     }
 
-    private static function isInIpv4Range(string $packed, string $range): bool
+    private static function isInRange(string $packed, string $range): bool
     {
         [$network, $bits] = explode('/', $range);
-        $mask = -1 << (32 - (int)$bits);
+        $packedNetwork = inet_pton($network);
 
-        return (unpack('N', $packed)[1] & $mask) === (ip2long($network) & $mask);
+        if (strlen($packedNetwork) !== strlen($packed)) {
+            return false;
+        }
+
+        $prefixBytes = intdiv((int)$bits, 8);
+        $mask = (0xff << (8 - (int)$bits % 8)) & 0xff;
+
+        return strncmp($packed, $packedNetwork, $prefixBytes) === 0 &&
+            ($mask === 0 || (ord($packed[$prefixBytes]) & $mask) === (ord($packedNetwork[$prefixBytes]) & $mask));
     }
 }

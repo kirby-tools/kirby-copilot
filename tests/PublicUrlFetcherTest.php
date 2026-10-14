@@ -28,11 +28,14 @@ final class PublicUrlFetcherTest extends TestCase
         yield 'shared address space' => ['100.100.100.200', false];
         yield 'IETF protocol assignments' => ['192.0.0.1', false];
         yield 'benchmarking' => ['198.18.0.1', false];
+        yield 'documentation' => ['203.0.113.1', false];
         yield 'IPv6 loopback' => ['::1', false];
         yield 'unique local IPv6' => ['fd00::1', false];
         yield 'site-local IPv6' => ['fec0::1', false];
         yield 'IPv4-mapped loopback' => ['::ffff:127.0.0.1', false];
         yield 'IPv4-mapped public' => ['::ffff:93.184.215.14', true];
+        yield 'IPv4-compatible loopback' => ['::7f00:1', false];
+        yield 'IPv4-translated loopback' => ['::ffff:0:7f00:1', false];
         yield 'NAT64 private' => ['64:ff9b::a00:1', false];
         yield 'NAT64 public' => ['64:ff9b::5db8:d70e', true];
         yield 'NAT64 local use' => ['64:ff9b:1::5db8:d70e', false];
@@ -75,5 +78,21 @@ final class PublicUrlFetcherTest extends TestCase
         $fetcher = new PublicUrlFetcher(fn () => ['93.184.215.14']);
 
         $this->assertNull($fetcher->resolvePublicIp('10.0.0.1'));
+    }
+
+    #[Test]
+    #[DataProvider('hostsCurlRewrites')]
+    public function refuses_a_host_curl_rewrites(string $host): void
+    {
+        $fetcher = new PublicUrlFetcher(fn () => ['93.184.215.14']);
+
+        $this->assertNull($fetcher->resolvePublicIp($host));
+    }
+
+    public static function hostsCurlRewrites(): iterable
+    {
+        yield 'shorthand IPv4' => ['127.1'];
+        yield 'percent-encoded' => ['client%2Eexample'];
+        yield 'non-ASCII' => ['bücher.example'];
     }
 }

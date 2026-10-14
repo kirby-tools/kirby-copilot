@@ -4,8 +4,10 @@ declare(strict_types = 1);
 
 namespace JohannSchopplich\Copilot\Agents\Tools;
 
+use JohannSchopplich\Copilot\Agents\Connection;
 use JohannSchopplich\Copilot\Agents\ConnectionPermission;
 use JohannSchopplich\Copilot\Agents\ContentVersion;
+use JohannSchopplich\Copilot\Agents\MissingPermission;
 use JohannSchopplich\Copilot\Agents\PublicUrlFetcher;
 use JohannSchopplich\Copilot\Agents\Tool;
 use JohannSchopplich\Copilot\Agents\ToolError;
@@ -13,6 +15,7 @@ use Kirby\Cms\File;
 use Kirby\Cms\Language;
 use Kirby\Cms\Page;
 use Kirby\Cms\Site;
+use Kirby\Exception\PermissionException;
 use Kirby\Filesystem\Dir;
 use Kirby\Filesystem\F;
 
@@ -37,7 +40,7 @@ final class UploadFile
         return new Tool(
             name: 'upload_file',
             title: 'Upload file',
-            description: 'Uploads a file to the site or a page: from a public HTTPS URL, up to ' . self::MAX_SIZE_TEXT . ' unless the file template sets its own maximum, or as base64 for a small file, up to ' . self::MAX_DATA_SIZE_TEXT . '. The file is live at once; only its fields, like the alt text, wait for review – view_image shows an image to describe, prepare_changes writes the fields. Returns the file and its etag.',
+            description: 'Uploads a file to the site or a page: from a public HTTPS URL, up to ' . self::MAX_SIZE_TEXT . ' unless the file template sets its own maximum, or as base64 for a small file, up to ' . self::MAX_DATA_SIZE_TEXT . '. An upload to a draft, or a page inside one, needs the Prepare changes permission; one to a published page or the site is live at once and needs Publish changes. The file\'s fields, like the alt text, wait for review – view_image shows an image to describe, prepare_changes writes the fields. Call it only when the user asks. Returns the file and its etag.',
             inputSchema: [
                 'type' => 'object',
                 'properties' => [
@@ -51,14 +54,19 @@ final class UploadFile
                 'additionalProperties' => false
             ],
             annotations: [...Tool::DESTRUCTIVE, 'idempotentHint' => false, 'openWorldHint' => true],
-            permission: ConnectionPermission::Publish,
+            permission: ConnectionPermission::Prepare,
             handler: self::run(...)
         );
     }
 
-    private static function run(Arguments $arguments): array
+    private static function run(Arguments $arguments, Connection $connection): array
     {
         $parent = $arguments->parent('parent');
+
+        if (!self::isInDraft($parent) && !$connection->hasPermission(ConnectionPermission::Publish)) {
+            throw new MissingPermission(ConnectionPermission::Publish);
+        }
+
         $filename = F::safeName($arguments->requiredString('filename'));
         $url = $arguments->string('url');
         $data = $arguments->string('data');
@@ -83,13 +91,20 @@ final class UploadFile
             throw new ToolError("{$parent->title()->value()} accepts files with the templates: " . implode(', ', $templates) . '.');
         }
 
+        $file = new File(['filename' => $filename, 'parent' => $parent, 'template' => $template]);
+
+        // Kirby checks this only once the file is downloaded.
+        if ($file->permissions()->can('create') !== true) {
+            throw new PermissionException(message: 'The file cannot be created');
+        }
+
         $root = sys_get_temp_dir() . '/copilot-upload-' . bin2hex(random_bytes(8));
         $source = $root . '/' . $filename;
 
         try {
             if ($url !== null) {
                 Dir::make($root);
-                self::download($url, $source, self::maxSize($parent, $filename, $template));
+                self::download($url, $source, (int)($file->blueprint()->accept()['maxsize'] ?? self::MAX_SIZE));
             } else {
                 F::write($source, self::decode($data));
             }
@@ -106,10 +121,7 @@ final class UploadFile
         $language = Language::ensure('default');
 
         return [
-            'file' => [
-                ...ModelSummary::file($file, $language),
-                'url' => $file->url()
-            ],
+            'file' => ModelSummary::file($file, $language),
             'etag' => ContentVersion::etag($file, $language)
         ];
     }
@@ -123,23 +135,15 @@ final class UploadFile
             maxRedirects: self::MAX_REDIRECTS
         );
 
-        if (!$fetcher->download($url, $path)) {
-            throw new ToolError("Couldn't fetch {$url}. Pass a public HTTPS URL that answers with the file itself, directly or after up to " . self::MAX_REDIRECTS . ' redirects, for a file of at most ' . F::niceSize($maxSize, false) . '.');
-        }
-    }
+        $failure = $fetcher->download($url, $path);
 
-    private static function maxSize(Site|Page $parent, string $filename, string $template): int
-    {
-        return (int)((new File(['filename' => $filename, 'parent' => $parent, 'template' => $template]))->blueprint()->accept()['maxsize'] ?? self::MAX_SIZE);
+        if ($failure !== null) {
+            throw new ToolError("Couldn't fetch {$url}: {$failure}. Pass a public HTTPS URL that answers with the file itself, directly or after up to " . self::MAX_REDIRECTS . ' redirects, for a file of at most ' . F::niceSize($maxSize, false) . '.');
+        }
     }
 
     private static function decode(string $data): string
     {
-        // Rejects base64 longer than `MAX_DATA_SIZE` encodes to, before decoding it.
-        if (strlen($data) > (int)ceil(self::MAX_DATA_SIZE / 3) * 4 + 4) {
-            throw new ToolError('The file is larger than ' . self::MAX_DATA_SIZE_TEXT . '. Pass a `url` instead.');
-        }
-
         $content = base64_decode($data, true);
 
         if ($content === false) {
@@ -157,7 +161,7 @@ final class UploadFile
      * Lists the templates a Panel upload to the parent takes, in section
      * order: a files section's own template, or `default` without one, and
      * the upload templates of the fields. A files section that lists
-     * another parent's files or is full doesn't count.
+     * another parent's files or takes no uploads doesn't count.
      *
      * @return list<string>
      */
@@ -167,7 +171,7 @@ final class UploadFile
         $templates = [];
 
         foreach ($blueprint->sections() as $section) {
-            if ($section->type() === 'files' && ($section->isFull() || !$section->parent()->is($parent))) {
+            if ($section->type() === 'files' && ($section->upload() === false || !$section->parent()->is($parent))) {
                 continue;
             }
 
@@ -178,5 +182,16 @@ final class UploadFile
         }
 
         return array_values(array_unique($templates));
+    }
+
+    private static function isInDraft(Site|Page $parent): bool
+    {
+        for ($page = $parent; $page instanceof Page; $page = $page->parent()) {
+            if ($page->isDraft()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

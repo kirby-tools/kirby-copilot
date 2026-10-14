@@ -7,6 +7,7 @@ use Kirby\Filesystem\F;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\TestWith;
 
 #[RunTestsInSeparateProcesses]
 #[PreserveGlobalState(false)]
@@ -33,6 +34,32 @@ final class UploadFileToolTest extends McpToolTestCase
         $this->assertSame('https://example.com/panel/pages/notes/files/lake-view.png', $result['file']['panelUrl']);
         $this->assertSame(base64_decode(self::PNG), file_get_contents(self::indexRoot() . '/content/notes/lake-view.png'));
         $this->assertSame($this->callTool('get_content', ['model' => 'notes/lake-view.png'])['structuredContent']['etag'], $result['etag']);
+    }
+
+    #[Test]
+    #[TestWith(['notes/idea'], 'draft')]
+    #[TestWith(['notes/idea/sketch'], 'page inside a draft')]
+    public function uploads_into_a_draft_with_the_prepare_permission(string $parent): void
+    {
+        $this->permissions = [ConnectionPermission::Read, ConnectionPermission::Prepare];
+        self::writeContent('notes/_drafts/idea/idea.txt', ['Title' => 'Idea']);
+        self::writeContent('notes/_drafts/idea/sketch/sketch.txt', ['Title' => 'Sketch']);
+
+        $result = $this->upload(['parent' => $parent, 'filename' => 'a.png', 'data' => self::PNG, 'template' => 'image']);
+
+        $this->assertSame("{$parent}/a.png", $result['file']['id']);
+    }
+
+    #[Test]
+    public function asks_for_the_publish_permission_to_upload_to_a_published_page(): void
+    {
+        $this->permissions = [ConnectionPermission::Read, ConnectionPermission::Prepare];
+
+        $response = $this->post('tools/call', ['name' => 'upload_file', 'arguments' => ['parent' => 'notes', 'filename' => 'a.png', 'data' => self::PNG, 'template' => 'image']]);
+
+        $this->assertSame(403, $response->code());
+        $this->assertStringContainsString('error="insufficient_scope", scope="content:read content:prepare content:publish"', $response->headers()['WWW-Authenticate']);
+        $this->assertFileDoesNotExist(self::indexRoot() . '/content/notes/a.png');
     }
 
     #[Test]
@@ -65,7 +92,7 @@ final class UploadFileToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function skips_files_sections_of_another_parent_and_full_ones(): void
+    public function skips_files_sections_that_take_no_upload_to_the_parent(): void
     {
         self::writeContent('album/album.txt', ['Title' => 'Album']);
         F::write(self::indexRoot() . '/content/album/existing.png', base64_decode(self::PNG));
@@ -154,7 +181,7 @@ final class UploadFileToolTest extends McpToolTestCase
         $result = $this->uploadResult(['parent' => 'notes', 'filename' => 'a.png', 'url' => 'https://127.0.0.1/a.png', 'template' => 'image']);
 
         $this->assertTrue($result['isError']);
-        $this->assertStringStartsWith("Couldn't fetch https://127.0.0.1/a.png.", $result['content'][0]['text']);
+        $this->assertStringStartsWith("Couldn't fetch https://127.0.0.1/a.png: the host has no public address.", $result['content'][0]['text']);
     }
 
     #[Test]
@@ -169,12 +196,12 @@ final class UploadFileToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function refuses_a_role_without_the_create_permission(): void
+    public function refuses_a_role_without_the_create_permission_before_fetching_the_url(): void
     {
-        $result = $this->uploadResult(['parent' => 'notes', 'filename' => 'a.png', 'data' => self::PNG, 'template' => 'image'], role: 'reviewer');
+        $result = $this->uploadResult(['parent' => 'notes', 'filename' => 'a.png', 'url' => 'https://127.0.0.1/a.png', 'template' => 'image'], role: 'reviewer');
 
         $this->assertTrue($result['isError']);
-        $this->assertSame('The file cannot be created', $result['content'][0]['text']);
+        $this->assertSame('Kirby refused this for the user\'s account – its role or the blueprint\'s options: The file cannot be created', $result['content'][0]['text']);
         $this->assertFileDoesNotExist(self::indexRoot() . '/content/notes/a.png');
     }
 
@@ -214,6 +241,7 @@ final class UploadFileToolTest extends McpToolTestCase
                 'pages/album' => [
                     'sections' => [
                         'siteCovers' => ['type' => 'files', 'parent' => 'site', 'template' => 'cover'],
+                        'documents' => ['type' => 'files', 'template' => 'document', 'create' => false],
                         'covers' => ['type' => 'files', 'template' => 'cover', 'max' => 1],
                         'images' => ['type' => 'files', 'template' => 'image']
                     ]
