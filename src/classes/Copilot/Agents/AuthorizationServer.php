@@ -6,6 +6,7 @@ namespace JohannSchopplich\Copilot\Agents;
 
 use Kirby\Cms\App;
 use Kirby\Data\Json;
+use Kirby\Exception\Exception;
 use Kirby\Http\Request;
 use Kirby\Http\Response;
 use Kirby\Toolkit\Escape;
@@ -17,8 +18,6 @@ use Kirby\Toolkit\Escape;
  */
 final class AuthorizationServer
 {
-    private const RATE_LIMIT = 30;
-
     public function __construct(
         private readonly App $kirby,
         private readonly ClientResolver $clientResolver
@@ -67,13 +66,14 @@ final class AuthorizationServer
      */
     public function authorize(Request $request): Response
     {
-        if (RateLimit::hit('authorize.' . $this->kirby->visitor()->ip(), self::RATE_LIMIT)) {
-            return self::errorPage('Too many connection attempts. Try again in a minute.', 429);
-        }
-
         $query = $request->query()->toArray();
         $clientId = self::stringParameter($query, 'client_id');
-        $client = $clientId !== null ? $this->clientResolver->resolve($clientId) : null;
+
+        try {
+            $client = $clientId !== null ? $this->clientResolver->resolve($clientId) : null;
+        } catch (Exception $exception) {
+            return self::errorPage($exception->getMessage(), $exception->getHttpCode());
+        }
 
         if ($client === null) {
             return self::errorPage('The agent didn’t identify itself with a client metadata document Kirby could load or with a valid registration.');
@@ -89,12 +89,13 @@ final class AuthorizationServer
         $codeChallenge = self::stringParameter($query, 'code_challenge');
         $resource = self::stringParameter($query, 'resource');
         $scope = self::stringParameter($query, 'scope');
+        $requestedPermissions = $scope !== null ? ConnectionPermission::parse($scope) : null;
 
         $error = match (true) {
             ($query['response_type'] ?? null) !== 'code' => 'The agent asked for a flow other than the authorization code flow.',
             ($query['code_challenge_method'] ?? null) !== 'S256' || $codeChallenge === null || preg_match('/^[A-Za-z0-9_-]{43}$/', $codeChallenge) !== 1 => 'The agent didn’t send a PKCE challenge with S256.',
-            $resource !== null && $resource !== Agents::mcpUrl() => 'The agent asked for access to ' . $resource . ' instead of ' . Agents::mcpUrl() . '.',
-            $scope !== null && ConnectionPermission::parse($scope) === null => 'The agent asked for unknown permissions. Supported scopes: ' . ConnectionPermission::join(ConnectionPermission::cases()) . '.',
+            $resource !== null && !self::isMcpUrl($resource) => 'The agent asked for access to ' . $resource . ' instead of ' . Agents::mcpUrl() . '.',
+            $scope !== null && $requestedPermissions === null => 'The agent asked for unknown permissions. Supported scopes: ' . ConnectionPermission::join(ConnectionPermission::cases()) . '.',
             default => null
         };
 
@@ -102,7 +103,7 @@ final class AuthorizationServer
             return self::errorPage($error);
         }
 
-        $pending = PendingAuthorization::create($client, $redirectUri, $state, $codeChallenge);
+        $pending = PendingAuthorization::create($client, $redirectUri, $state, $codeChallenge, $requestedPermissions);
         $pending->store($this->kirby->session());
 
         // The id goes in the path: the Panel drops the query string after login.
@@ -111,10 +112,6 @@ final class AuthorizationServer
 
     public function token(Request $request): Response
     {
-        if (RateLimit::hit('token.' . $this->kirby->visitor()->ip(), self::RATE_LIMIT)) {
-            return self::oauthError('invalid_request', 'Too many token requests. Try again in a minute.', 429);
-        }
-
         $body = $request->body()->toArray();
 
         return match ($body['grant_type'] ?? null) {
@@ -130,10 +127,6 @@ final class AuthorizationServer
      */
     public function register(Request $request): Response
     {
-        if (RateLimit::hit('register.' . $this->kirby->visitor()->ip(), self::RATE_LIMIT)) {
-            return self::oauthError('invalid_request', 'Too many registrations. Try again in a minute.', 429);
-        }
-
         $body = $request->body()->toArray();
         $redirectUris = $body['redirect_uris'] ?? null;
 
@@ -180,11 +173,11 @@ final class AuthorizationServer
         $verifier = self::stringParameter($body, 'code_verifier');
         $resource = self::stringParameter($body, 'resource');
 
-        if ($code === null || $clientId === null || $redirectUri === null || $verifier === null) {
-            return self::oauthError('invalid_request', 'Send code, client_id, redirect_uri, and code_verifier.');
+        if ($code === null || $clientId === null || $verifier === null) {
+            return self::oauthError('invalid_request', 'Send code, client_id, and code_verifier.');
         }
 
-        if ($resource !== null && $resource !== Agents::mcpUrl()) {
+        if ($resource !== null && !self::isMcpUrl($resource)) {
             return self::oauthError('invalid_target', 'The resource must be ' . Agents::mcpUrl() . '.');
         }
 
@@ -195,7 +188,7 @@ final class AuthorizationServer
             $token,
             fn (Connection $connection, string $challenge) =>
                 $connection->client->id === $clientId &&
-                $connection->redirectUri === $redirectUri &&
+                ($redirectUri === null || $connection->redirectUri === $redirectUri) &&
                 self::isPkceVerified($verifier, $challenge)
         );
 
@@ -212,18 +205,22 @@ final class AuthorizationServer
         $clientId = self::stringParameter($body, 'client_id');
         $resource = self::stringParameter($body, 'resource');
 
-        if ($resource !== null && $resource !== Agents::mcpUrl()) {
+        if ($resource !== null && !self::isMcpUrl($resource)) {
             return self::oauthError('invalid_target', 'The resource must be ' . Agents::mcpUrl() . '.');
         }
 
         $token = $value !== null ? Token::parse($value, Token::REFRESH) : null;
         $store = $token !== null ? ConnectionStore::forToken($token) : null;
 
-        if ($store === null || $clientId === null) {
+        if ($store === null) {
             return self::oauthError('invalid_grant', 'The refresh token is invalid.');
         }
 
-        $tokens = $store->find($token->connectionId)?->client->id === $clientId ? $store->refresh($token) : null;
+        $connection = $store->find($token->connectionId);
+
+        // Refreshing a connection made before the site's URL changed would only issue tokens `McpGuard` refuses.
+        $isMatching = $connection?->resource === Agents::mcpUrl() && ($clientId === null || $connection->client->id === $clientId);
+        $tokens = $isMatching ? $store->refresh($token) : null;
 
         if ($tokens === null) {
             return self::oauthError('invalid_grant', 'The refresh token is invalid, expired, or revoked.');
@@ -241,6 +238,18 @@ final class AuthorizationServer
         }
 
         return false;
+    }
+
+    /**
+     * Compares the scheme and host case-insensitively and the path byte for byte.
+     */
+    private static function isMcpUrl(string $resource): bool
+    {
+        $mcpUrl = Agents::mcpUrl();
+        $pathStart = strpos($mcpUrl, '/', strpos($mcpUrl, '://') + 3);
+
+        return strcasecmp(substr($resource, 0, $pathStart), substr($mcpUrl, 0, $pathStart)) === 0 &&
+            substr($resource, $pathStart) === substr($mcpUrl, $pathStart);
     }
 
     private static function isSubset(mixed $values, array $supported): bool

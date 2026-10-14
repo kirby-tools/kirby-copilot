@@ -5,12 +5,12 @@ declare(strict_types = 1);
 use JohannSchopplich\Copilot\Agents\Client;
 use JohannSchopplich\Copilot\Agents\ConnectionPermission;
 use JohannSchopplich\Copilot\Agents\ConnectionStore;
-use JohannSchopplich\Copilot\Agents\RateLimit;
 use Kirby\Cms\App;
 use Kirby\Http\Response;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\TestWith;
 
 #[RunTestsInSeparateProcesses]
 #[PreserveGlobalState(false)]
@@ -37,7 +37,7 @@ final class McpRouteTest extends ApiRouteTestCase
 
         $this->assertSame(401, $response->code());
         $this->assertSame(
-            'Bearer resource_metadata="https://example.com/.well-known/oauth-protected-resource/api/copilot/mcp", scope="content:read content:prepare"',
+            'Bearer resource_metadata="https://example.com/.well-known/oauth-protected-resource/api/copilot/mcp"',
             $response->headers()['WWW-Authenticate']
         );
     }
@@ -74,39 +74,22 @@ final class McpRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function refuses_a_user_whose_role_lost_the_agents_area(): void
+    #[TestWith(['copilot-agents'])]
+    #[TestWith(['panel'])]
+    public function refuses_a_user_whose_role_lost_the_panel_or_the_agents_area(string $area): void
     {
-        $this->assertSame(401, $this->call(token: $this->accessToken(role: 'writer'))->code());
+        $this->assertSame(401, $this->call(token: $this->accessToken(withheldArea: $area))->code());
     }
 
-    #[Test]
-    public function limits_the_requests_of_a_connection_per_minute(): void
-    {
-        // Holds time still, so the requests can't straddle two windows.
-        RateLimit::$clock = fn () => 1_800_000_000;
-        $token = $this->accessToken();
-
-        for ($i = 0; $i < 120; $i++) {
-            $response = $this->call(token: $token);
-        }
-
-        $this->assertSame(200, $response->code());
-
-        $response = $this->call(token: $token);
-
-        $this->assertSame(429, $response->code());
-        $this->assertSame('60', $response->headers()['Retry-After']);
-    }
-
-    private function accessToken(string $role = 'admin', string $resource = self::MCP_URL): string
+    private function accessToken(string|null $withheldArea = null, string $resource = self::MCP_URL): string
     {
         $this->kirby = self::bootApp([
             'options' => ['johannschopplich.copilot' => ['agents' => true]],
             // Blueprints load after the plugin registered its area, so a role can set `access.copilot-agents`.
-            'blueprints' => [
-                'users/writer' => ['name' => 'writer', 'permissions' => ['access' => ['copilot-agents' => false]]]
+            'blueprints' => $withheldArea === null ? [] : [
+                'users/writer' => ['name' => 'writer', 'permissions' => ['access' => [$withheldArea => false]]]
             ],
-            'users' => [['id' => 'editor', 'email' => 'editor@example.com', 'role' => $role]]
+            'users' => [['id' => 'editor', 'email' => 'editor@example.com', 'role' => $withheldArea === null ? 'admin' : 'writer']]
         ]);
 
         $store = ConnectionStore::for($this->kirby->user('editor'));

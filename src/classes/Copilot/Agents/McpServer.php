@@ -7,8 +7,8 @@ namespace JohannSchopplich\Copilot\Agents;
 use JohannSchopplich\Copilot\Agents\Tools\Arguments;
 use Kirby\Cms\App;
 use Kirby\Content\LockedContentException;
-use Kirby\Data\Json;
 use Kirby\Exception\Exception as KirbyException;
+use Kirby\Exception\PermissionException;
 use Kirby\Http\Request;
 use Kirby\Http\Response;
 use stdClass;
@@ -18,7 +18,7 @@ use Throwable;
  * A stateless MCP server that answers both protocol eras on the MCP URL:
  * modern requests carry their version in `_meta`, legacy ones start with
  * `initialize` and name their version in the `MCP-Protocol-Version` header.
- * It never issues a session id and always answers with JSON.
+ * It never issues a session id and never streams.
  */
 final class McpServer
 {
@@ -29,7 +29,7 @@ final class McpServer
     private const META_CLIENT_CAPABILITIES = 'io.modelcontextprotocol/clientCapabilities';
     private const META_SERVER_INFO = 'io.modelcontextprotocol/serverInfo';
 
-    /** Discovery and the tool list change only with a plugin update or a renamed site, so clients may cache them. */
+    /** Discovery changes only with a plugin update or a renamed site; the tool list also with the connection's permissions, which each call checks again. */
     private const CACHE_TTL_MS = 3_600_000;
 
     private const PARSE_ERROR = -32700;
@@ -56,10 +56,6 @@ final class McpServer
             return self::error(null, self::PARSE_ERROR, 'Send one JSON-RPC message as a JSON object.', 400);
         }
 
-        if ($message !== [] && array_is_list($message)) {
-            return self::error(null, self::INVALID_REQUEST, 'Batches are not supported. Send one message per request.', 400);
-        }
-
         $method = $message['method'] ?? null;
 
         if (($message['jsonrpc'] ?? null) !== '2.0' || !is_string($method)) {
@@ -79,7 +75,8 @@ final class McpServer
         $params = is_array($message['params'] ?? null) ? $message['params'] : [];
         $version = $params['_meta'][self::META_PROTOCOL_VERSION] ?? null;
 
-        $isModern = $method !== 'initialize' && $version !== null;
+        $isModern = $method !== 'initialize' &&
+            ($version !== null || in_array($request->header('MCP-Protocol-Version'), self::MODERN_VERSIONS, true));
 
         // A legacy request needn't send the routing headers, but one that does
         // is held to them, since a gateway may route on them.
@@ -105,6 +102,10 @@ final class McpServer
         array $params,
         mixed $version
     ): Response {
+        if ($version === null) {
+            return self::error($id, self::INVALID_PARAMS, 'Missing _meta["' . self::META_PROTOCOL_VERSION . '"].', 400);
+        }
+
         if (!in_array($version, self::MODERN_VERSIONS, true)) {
             return self::error($id, self::UNSUPPORTED_PROTOCOL_VERSION, 'Unsupported protocol version.', 400, [
                 'supported' => [...self::MODERN_VERSIONS, ...self::LEGACY_VERSIONS],
@@ -220,7 +221,7 @@ final class McpServer
         }
 
         if (!$connection->hasPermission($tool->permission)) {
-            return self::toolError("This connection lacks the permission \"{$tool->permission->label('en')}\" ({$tool->permission->value}) that {$tool->name} needs. The user can allow it for this connection in the Panel's Agents view, if their role permits it.");
+            return self::refuseMissing($connection, $tool, $tool->permission);
         }
 
         if (($tool->inputSchema['additionalProperties'] ?? true) === false) {
@@ -234,10 +235,15 @@ final class McpServer
 
         try {
             $result = ($tool->handler)(new Arguments($arguments), $connection);
+        } catch (MissingPermission $exception) {
+            return self::refuseMissing($connection, $tool, $exception->permission);
         } catch (LockedContentException $exception) {
-            // Kirby's lock messages don't name the editor, and the one for publishing reads "This version is already published"
+            // Kirby's lock messages don't name the editor, and the one for publishing reads "This version is already published".
             $editor = $exception->getDetails()['user']['email'] ?? 'Another user';
             return self::toolError("{$editor} is editing this content in the Panel. Try again once they leave its view, or 10 minutes after their last edit.");
+        } catch (PermissionException $exception) {
+            // Kirby's own text, like "The status for this page cannot be changed", doesn't say it is a refusal by permission.
+            return self::toolError("Kirby refused this for the user's account – its role or the blueprint's options: {$exception->getMessage()}");
         } catch (ToolError | KirbyException $exception) {
             return self::toolError($exception->getMessage());
         } catch (Throwable $exception) {
@@ -258,7 +264,7 @@ final class McpServer
         return [
             'content' => [...$content, [
                 'type' => 'text',
-                'text' => Json::encode($structuredContent)
+                'text' => self::encode($structuredContent)
             ]],
             'structuredContent' => $structuredContent,
             'isError' => false
@@ -285,7 +291,8 @@ final class McpServer
                 return "{$name} header is missing";
             }
 
-            if (preg_match('/^=\?base64\?(.*)\?=$/', $value, $matches) === 1) {
+            // The MCP spec allows the base64 sentinel only for `Mcp-Name` among these headers.
+            if ($name === 'Mcp-Name' && preg_match('/^=\?base64\?(.*)\?=$/', $value, $matches) === 1) {
                 $value = base64_decode($matches[1], true);
             }
 
@@ -323,6 +330,39 @@ final class McpServer
         return self::json(['jsonrpc' => '2.0', 'id' => $id, 'result' => $result]);
     }
 
+    private static function refuseMissing(Connection $connection, Tool $tool, ConnectionPermission $permission): array|Response
+    {
+        if ($permission->isAvailableTo(App::instance()->user($connection->userId))) {
+            return self::insufficientScope($connection, $tool, $permission);
+        }
+
+        return self::toolError("This connection lacks the {$permission->label('en')} permission ({$permission->value}) that {$tool->name} needs, and the user's role doesn't make it available to agents.");
+    }
+
+    /**
+     * Asks the client to authorize again with the connection's permissions
+     * and the one the call needs (RFC 6750), which step-up capable clients
+     * do on their own.
+     */
+    private static function insufficientScope(Connection $connection, Tool $tool, ConnectionPermission $permission): Response
+    {
+        $message = "This connection lacks the {$permission->label('en')} permission ({$permission->value}) that {$tool->name} needs. The user can allow it for this connection in the Panel's Agents view.";
+        $scope = ConnectionPermission::join([...$connection->permissions, $permission]);
+
+        return new class ($message, 'text/plain', 403, [
+            'WWW-Authenticate' => 'Bearer error="insufficient_scope", scope="' . $scope . '", resource_metadata="' . Agents::resourceMetadataUrl() . '", error_description="' . $message . '"'
+        ]) extends Response {
+            public function send(): string
+            {
+                $body = parent::send();
+                // PHP turns the status into 401 once a `WWW-Authenticate` header is sent.
+                http_response_code($this->code());
+
+                return $body;
+            }
+        };
+    }
+
     private static function toolError(string $message): array
     {
         return [
@@ -344,6 +384,15 @@ final class McpServer
 
     private static function json(array $payload, int $status = 200): Response
     {
-        return Response::json(Json::encode($payload), $status);
+        return Response::json(self::encode($payload), $status);
+    }
+
+    /**
+     * Encodes like `Kirby\Data\Json::encode`, but replaces invalid UTF-8
+     * instead of returning an empty string.
+     */
+    private static function encode(mixed $data): string
+    {
+        return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
     }
 }

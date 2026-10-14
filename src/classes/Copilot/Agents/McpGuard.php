@@ -16,8 +16,6 @@ use Kirby\Http\Uri;
  */
 final class McpGuard
 {
-    private const RATE_LIMIT = 120;
-
     public function __construct(
         private readonly App $kirby
     ) {
@@ -39,7 +37,8 @@ final class McpGuard
         $connection = $auth instanceof BearerAuth ? $this->authenticate($auth->token()) : null;
 
         if ($connection === null) {
-            $challenge = 'Bearer resource_metadata="' . Agents::resourceMetadataUrl() . '", scope="' . ConnectionPermission::join(ConnectionPermission::defaults()) . '"';
+            // No `scope`: ChatGPT keeps the scopes hinted here as the connector's only ones and refuses every step-up beyond them.
+            $challenge = 'Bearer resource_metadata="' . Agents::resourceMetadataUrl() . '"';
 
             // RFC 6750 adds `invalid_token` only when a token arrived, so a setup check can tell that the `Authorization` header reaches PHP.
             if ($auth instanceof BearerAuth) {
@@ -47,10 +46,6 @@ final class McpGuard
             }
 
             return new Response('', 'text/plain', 401, ['WWW-Authenticate' => $challenge]);
-        }
-
-        if (RateLimit::hit('mcp.' . $connection->id, self::RATE_LIMIT)) {
-            return new Response('', 'text/plain', 429, ['Retry-After' => '60']);
         }
 
         return $this->kirby->impersonate(

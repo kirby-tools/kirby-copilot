@@ -16,19 +16,26 @@ final readonly class PendingAuthorization
     private const SESSION_PREFIX = 'johannschopplich.copilot.agents.pending.';
     private const TTL = 600;
 
+    /**
+     * @param list<ConnectionPermission>|null $requestedPermissions The OAuth `scope`, or `null` when the agent sent none
+     */
     public function __construct(
         public string $id,
         public Client $client,
         public string $redirectUri,
         public string|null $state,
         public string $codeChallenge,
+        public array|null $requestedPermissions,
         public int $expiresAt
     ) {
     }
 
-    public static function create(Client $client, string $redirectUri, string|null $state, string $codeChallenge): self
+    /**
+     * @param list<ConnectionPermission>|null $requestedPermissions
+     */
+    public static function create(Client $client, string $redirectUri, string|null $state, string $codeChallenge, array|null $requestedPermissions): self
     {
-        return new self(bin2hex(random_bytes(16)), $client, $redirectUri, $state, $codeChallenge, time() + self::TTL);
+        return new self(bin2hex(random_bytes(16)), $client, $redirectUri, $state, $codeChallenge, $requestedPermissions, time() + self::TTL);
     }
 
     public static function find(Session $session, string $id): self|null
@@ -50,6 +57,7 @@ final readonly class PendingAuthorization
             redirectUri: $data['redirectUri'],
             state: $data['state'],
             codeChallenge: $data['codeChallenge'],
+            requestedPermissions: is_array($data['requestedPermissions'] ?? null) ? array_map(ConnectionPermission::from(...), $data['requestedPermissions']) : null,
             expiresAt: $data['expiresAt']
         );
     }
@@ -61,6 +69,7 @@ final readonly class PendingAuthorization
             'redirectUri' => $this->redirectUri,
             'state' => $this->state,
             'codeChallenge' => $this->codeChallenge,
+            'requestedPermissions' => $this->requestedPermissions !== null ? ConnectionPermission::values($this->requestedPermissions) : null,
             'expiresAt' => $this->expiresAt
         ]);
     }

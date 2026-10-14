@@ -13,6 +13,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\TestWith;
 
 #[RunTestsInSeparateProcesses]
 #[PreserveGlobalState(false)]
@@ -81,6 +82,16 @@ final class OAuthRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
+    #[TestWith(['api'])]
+    #[TestWith(['panel'])]
+    public function advertises_no_endpoint_while_the_api_or_the_panel_is_off(string $option): void
+    {
+        $kirby = self::bootApp(['options' => [$option => false, 'johannschopplich.copilot' => ['agents' => true]]]);
+
+        $this->assertNull($kirby->call('.well-known/oauth-authorization-server'));
+    }
+
+    #[Test]
     #[DataProvider('invalidConnectionRequests')]
     public function refuses_an_invalid_connection_request_with_a_page_instead_of_redirecting(array $query): void
     {
@@ -96,8 +107,10 @@ final class OAuthRouteTest extends ApiRouteTestCase
         yield 'unknown client' => [['client_id' => 'https://unknown.example/client.json']];
         yield 'unregistered redirect uri' => [['redirect_uri' => 'http://evil.example/callback']];
         yield 'plain PKCE' => [['code_challenge_method' => 'plain']];
+        yield 'malformed PKCE challenge' => [['code_challenge' => 'short']];
         yield 'implicit flow' => [['response_type' => 'token']];
         yield 'foreign resource' => [['resource' => 'https://example.com/api/other']];
+        yield 'resource with an uppercase path' => [['resource' => 'https://example.com/API/copilot/mcp']];
         yield 'unknown scope' => [['scope' => 'content:read admin']];
     }
 
@@ -117,6 +130,25 @@ final class OAuthRouteTest extends ApiRouteTestCase
         $this->assertSame('http://localhost:4242/callback', $pending->redirectUri);
         $this->assertSame('xyz', $pending->state);
         $this->assertSame(self::CHALLENGE, $pending->codeChallenge);
+    }
+
+    #[Test]
+    public function accepts_a_connection_request_for_the_mcp_url_with_an_uppercase_scheme_and_host(): void
+    {
+        $response = $this->authorize(['resource' => 'HTTPS://EXAMPLE.COM/api/copilot/mcp']);
+
+        $this->assertSame(302, $response->code());
+    }
+
+    #[Test]
+    public function keeps_the_requested_scope_with_the_pending_request(): void
+    {
+        $kirby = null;
+        $response = $this->authorize(['scope' => 'content:read content:publish'], $kirby);
+
+        $pending = PendingAuthorization::find($kirby->session(), basename((string)$response->headers()['Location']));
+
+        $this->assertSame([ConnectionPermission::Read, ConnectionPermission::Publish], $pending->requestedPermissions);
     }
 
     #[Test]
@@ -141,6 +173,21 @@ final class OAuthRouteTest extends ApiRouteTestCase
         $this->assertSame('content:read content:prepare', $body['scope']);
         $this->assertStringStartsWith('kca_editor.', $body['access_token']);
         $this->assertStringStartsWith('kcr_editor.', $body['refresh_token']);
+    }
+
+    #[Test]
+    public function exchanges_a_code_without_a_redirect_uri(): void
+    {
+        [$kirby, $code] = $this->createCode();
+
+        $response = $this->token($kirby, [
+            'grant_type' => 'authorization_code',
+            'code' => $code,
+            'client_id' => self::CLIENT_ID,
+            'code_verifier' => self::VERIFIER
+        ]);
+
+        $this->assertSame(200, $response->code());
     }
 
     #[Test]
@@ -188,6 +235,20 @@ final class OAuthRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
+    public function rotates_the_refresh_token_without_a_client_id(): void
+    {
+        [$kirby, $code] = $this->createCode();
+        $tokens = $this->exchange($kirby, $code);
+
+        $response = $this->token($kirby, [
+            'grant_type' => 'refresh_token',
+            'refresh_token' => $tokens['refresh_token']
+        ]);
+
+        $this->assertSame(200, $response->code());
+    }
+
+    #[Test]
     public function refuses_a_refresh_for_another_client(): void
     {
         [$kirby, $code] = $this->createCode();
@@ -216,6 +277,27 @@ final class OAuthRouteTest extends ApiRouteTestCase
         ]);
 
         $this->assertSame('invalid_target', $this->decode($response)['error']);
+    }
+
+    #[Test]
+    public function refuses_a_refresh_after_the_site_url_changed(): void
+    {
+        [$kirby, $code] = $this->createCode();
+        $tokens = $this->exchange($kirby, $code);
+
+        $kirby = self::bootApp([
+            ...self::enabled(),
+            'urls' => ['index' => 'https://example.org'],
+            'users' => [['id' => 'editor', 'email' => 'editor@example.com', 'role' => 'admin']]
+        ]);
+
+        $response = $this->token($kirby, [
+            'grant_type' => 'refresh_token',
+            'refresh_token' => $tokens['refresh_token'],
+            'client_id' => self::CLIENT_ID
+        ]);
+
+        $this->assertSame('invalid_grant', $this->decode($response)['error']);
     }
 
     #[Test]

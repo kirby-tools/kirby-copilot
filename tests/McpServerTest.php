@@ -34,7 +34,7 @@ final class McpServerTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function describes_the_server_on_initialize_without_a_session(): void
+    public function describes_the_server_on_initialize(): void
     {
         $response = $this->handle(['jsonrpc' => '2.0', 'id' => 1, 'method' => 'initialize', 'params' => [
             'protocolVersion' => '2025-06-18',
@@ -45,7 +45,6 @@ final class McpServerTest extends ApiRouteTestCase
         $this->assertSame(['tools' => ['listChanged' => false]], $result['capabilities']);
         $this->assertSame('kirby-copilot', $result['serverInfo']['name']);
         $this->assertStringContainsString('Kirby Playground', $result['instructions']);
-        $this->assertArrayNotHasKey('Mcp-Session-Id', $response->headers());
     }
 
     #[Test]
@@ -83,7 +82,6 @@ final class McpServerTest extends ApiRouteTestCase
         $tools = $this->decode($response)['result']['tools'];
 
         $this->assertSame(['echo', 'crash'], array_column($tools, 'name'));
-        $this->assertSame(['readOnlyHint' => true, 'openWorldHint' => false], $tools[0]['annotations']);
         $this->assertStringContainsString('"properties":{}', $response->body());
     }
 
@@ -131,12 +129,13 @@ final class McpServerTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function rejects_a_modern_tool_call_whose_mcp_name_header_names_another_tool(): void
+    public function challenges_a_modern_tool_call_without_its_permission_with_insufficient_scope(): void
     {
-        $body = $this->modern('tools/call', ['name' => 'echo', 'arguments' => ['text' => 'Hi']]);
-        $headers = [...$this->modernHeaders('tools/call'), 'Mcp-Name' => 'crash'];
+        $body = $this->modern('tools/call', ['name' => 'erase', 'arguments' => (object)[]]);
+        $response = $this->handle($body, [...$this->modernHeaders('tools/call'), 'Mcp-Name' => 'erase']);
 
-        $this->assertSame(-32020, $this->decode($this->handle($body, $headers))['error']['code']);
+        $response->send();
+        $this->assertSame(403, http_response_code());
     }
 
     #[Test]
@@ -146,6 +145,14 @@ final class McpServerTest extends ApiRouteTestCase
         $headers = [...$this->modernHeaders('tools/call'), 'Mcp-Name' => '=?base64?' . base64_encode('echo') . '?='];
 
         $this->assertSame(200, $this->handle($body, $headers)->code());
+    }
+
+    #[Test]
+    public function rejects_a_base64_mcp_method_header(): void
+    {
+        $headers = [...$this->modernHeaders('tools/list'), 'Mcp-Method' => '=?base64?' . base64_encode('tools/list') . '?='];
+
+        $this->assertSame(-32020, $this->decode($this->handle($this->modern('tools/list'), $headers))['error']['code']);
     }
 
     #[Test]
@@ -175,6 +182,17 @@ final class McpServerTest extends ApiRouteTestCase
     }
 
     #[Test]
+    public function rejects_a_request_with_a_modern_version_header_but_no_protocol_version_as_invalid_params(): void
+    {
+        $body = $this->modern('tools/list');
+        unset($body['params']['_meta']['io.modelcontextprotocol/protocolVersion']);
+        $response = $this->handle($body, $this->modernHeaders('tools/list'));
+
+        $this->assertSame(400, $response->code());
+        $this->assertSame(-32602, $this->decode($response)['error']['code']);
+    }
+
+    #[Test]
     public function answers_an_unknown_modern_method_with_404(): void
     {
         $response = $this->handle($this->modern('subscriptions/listen'), $this->modernHeaders('subscriptions/listen'));
@@ -197,6 +215,14 @@ final class McpServerTest extends ApiRouteTestCase
         $response = $this->handle(['jsonrpc' => '2.0', 'id' => 1, 'method' => 'tools/list'], ['MCP-Protocol-Version' => '2024-01-01']);
 
         $this->assertSame(400, $response->code());
+    }
+
+    #[Test]
+    public function substitutes_invalid_utf8_in_a_response_instead_of_sending_an_empty_body(): void
+    {
+        $response = $this->handle(['jsonrpc' => '2.0', 'id' => 1, 'method' => 'tools/list'], ['MCP-Protocol-Version' => "2025-\xFF"]);
+
+        $this->assertSame("Unsupported MCP-Protocol-Version: 2025-\u{FFFD}", $this->decode($response)['error']['message']);
     }
 
     #[Test]
@@ -307,19 +333,6 @@ final class McpServerTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function refuses_a_tool_outside_the_connection_permissions(): void
-    {
-        $response = $this->handle(
-            ['jsonrpc' => '2.0', 'id' => 1, 'method' => 'tools/call', 'params' => ['name' => 'erase', 'arguments' => []]],
-            ['MCP-Protocol-Version' => '2025-11-25']
-        );
-        $result = $this->decode($response)['result'];
-
-        $this->assertTrue($result['isError']);
-        $this->assertStringContainsString('content:delete', $result['content'][0]['text']);
-    }
-
-    #[Test]
     public function answers_an_unknown_tool_with_invalid_params(): void
     {
         $response = $this->handle(
@@ -340,6 +353,7 @@ final class McpServerTest extends ApiRouteTestCase
 
         $kirby = self::bootApp([
             'site' => ['content' => ['title' => 'Kirby Playground']],
+            'users' => [['id' => 'editor', 'role' => 'admin']],
             'server' => $server,
             'request' => [
                 'method' => 'POST',

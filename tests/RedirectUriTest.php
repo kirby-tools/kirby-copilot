@@ -43,6 +43,7 @@ final class RedirectUriTest extends TestCase
         yield ['blob:https://example.com/1'];
         yield ['about:blank'];
         yield ['wss://example.com/callback'];
+        yield ['intent://callback'];
         yield ['http://example.com/callback'];
         yield ['http://localhost.example.com/callback'];
         yield ['https:///callback'];
@@ -60,6 +61,12 @@ final class RedirectUriTest extends TestCase
         $this->assertSame('web', RedirectUri::kind('https://claude.ai/api/mcp/auth_callback'));
         $this->assertSame('local', RedirectUri::kind('http://127.0.0.1:53412/callback'));
         $this->assertSame('app', RedirectUri::kind('cursor://anysphere.cursor-mcp/oauth/callback'));
+    }
+
+    #[Test]
+    public function label_names_the_scheme_of_an_app_redirect(): void
+    {
+        $this->assertSame('cursor', RedirectUri::label('cursor://anysphere.cursor-mcp/oauth/callback'));
     }
 
     #[Test]

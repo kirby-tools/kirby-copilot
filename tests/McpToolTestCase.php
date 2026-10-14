@@ -7,6 +7,7 @@ use JohannSchopplich\Copilot\Agents\ConnectionPermission;
 use JohannSchopplich\Copilot\Agents\ConnectionStore;
 use Kirby\Cms\App;
 use Kirby\Data\Data;
+use Kirby\Http\Response;
 
 /**
  * Calls the MCP URL as the first user – Ada, an editor, unless a test
@@ -55,6 +56,11 @@ abstract class McpToolTestCase extends ApiRouteTestCase
 
     protected function rpc(string $method, array $params = [], array $props = [], Closure|null $prepare = null): array
     {
+        return json_decode($this->post($method, $params, $props, $prepare)->body(), true);
+    }
+
+    protected function post(string $method, array $params = [], array $props = [], Closure|null $prepare = null): Response
+    {
         $props = array_replace_recursive([
             'options' => ['johannschopplich.copilot' => ['agents' => true]],
             'blueprints' => [
@@ -88,6 +94,6 @@ abstract class McpToolTestCase extends ApiRouteTestCase
             $prepare($kirby);
         }
 
-        return json_decode($this->callRoute($kirby, 'copilot/mcp', 'GET|POST|DELETE')->body(), true);
+        return $this->callRoute($kirby, 'copilot/mcp', 'GET|POST|DELETE');
     }
 }

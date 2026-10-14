@@ -93,7 +93,9 @@ final class ClientResolver
             ($parts['scheme'] ?? null) === 'https' &&
             ($parts['host'] ?? '') !== '' &&
             trim($parts['path'] ?? '', '/') !== '' &&
+            array_intersect(explode('/', rawurldecode($parts['path'])), ['.', '..']) === [] &&
             !isset($parts['user']) &&
+            !isset($parts['query']) &&
             !isset($parts['fragment']);
     }
 

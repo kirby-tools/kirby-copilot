@@ -12,7 +12,11 @@ final class RedirectUri
 {
     private const LOOPBACK_HOSTS = ['localhost', '127.0.0.1', '[::1]'];
 
-    private const REFUSED_SCHEMES = ['javascript', 'data', 'file', 'vbscript', 'blob', 'about', 'ws', 'wss'];
+    /** Schemes the browser or the operating system routes to its own handlers instead of an agent's app. */
+    private const REFUSED_SCHEMES = [
+        'about', 'blob', 'data', 'file', 'filesystem', 'ftp', 'intent', 'javascript',
+        'mailto', 'sms', 'tel', 'vbscript', 'view-source', 'ws', 'wss'
+    ];
 
     public static function isAllowed(string $uri): bool
     {
@@ -53,14 +57,17 @@ final class RedirectUri
     }
 
     /**
-     * Names where an allowed redirect URI leads: its host, or its app
-     * scheme.
+     * Names where an allowed redirect URI leads: its host, or the scheme of
+     * an app redirect, since the scheme picks the app and the host is free
+     * text.
      */
     public static function label(string $uri): string
     {
         $parts = parse_url($uri);
 
-        return trim($parts['host'] ?? '', '[]') ?: $parts['scheme'];
+        return self::kind($uri) === 'app'
+            ? strtolower($parts['scheme'])
+            : trim($parts['host'], '[]');
     }
 
     /**

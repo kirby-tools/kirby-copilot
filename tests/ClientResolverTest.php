@@ -95,6 +95,9 @@ final class ClientResolverTest extends ApiRouteTestCase
         yield ['https://claude.ai/'];
         yield ['https://user@claude.ai/client.json'];
         yield ['https://claude.ai/client.json#a'];
+        yield ['https://claude.ai/x/../client.json'];
+        yield ['https://claude.ai/%2e/client.json'];
+        yield ['https://claude.ai/client.json?a'];
         yield ['claude-code'];
     }
 

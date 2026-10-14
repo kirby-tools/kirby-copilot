@@ -7,6 +7,8 @@ use JohannSchopplich\Copilot\Agents\ConnectionPermission;
 use JohannSchopplich\Copilot\Agents\ConnectionStore;
 use JohannSchopplich\Copilot\Agents\Token;
 use Kirby\Cms\User;
+use Kirby\Exception\Exception;
+use Kirby\Filesystem\Dir;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
@@ -50,6 +52,17 @@ final class ConnectionStoreTest extends ApiRouteTestCase
     }
 
     #[Test]
+    public function redeem_code_keeps_the_connection_when_its_code_comes_back_and_fails_verification(): void
+    {
+        $store = ConnectionStore::for($this->user());
+        $code = $this->createConnection($store);
+        $tokens = $store->redeemCode($code, fn () => true);
+
+        $this->assertNull($store->redeemCode($code, fn () => false));
+        $this->assertNotNull($store->authenticate($tokens['accessToken']));
+    }
+
+    #[Test]
     public function redeem_code_rejects_an_expired_code(): void
     {
         $store = ConnectionStore::for($this->user());
@@ -68,6 +81,19 @@ final class ConnectionStoreTest extends ApiRouteTestCase
 
         $this->assertNull($store->redeemCode($code, fn () => false));
         $this->assertNotNull($store->redeemCode($code, fn () => true));
+    }
+
+    #[Test]
+    public function rejects_tokens_with_the_right_ids_and_a_wrong_secret(): void
+    {
+        $store = ConnectionStore::for($this->user());
+        $code = $this->createConnection($store);
+
+        $this->assertNull($store->redeemCode(Token::issue(Token::CODE, $code->userId, $code->connectionId), fn () => true));
+        $this->assertNotNull($store->redeemCode($code, fn () => true));
+        $this->assertNull($store->authenticate(Token::issue(Token::ACCESS, $code->userId, $code->connectionId)));
+        $this->assertNull($store->refresh(Token::issue(Token::REFRESH, $code->userId, $code->connectionId)));
+        $this->assertNotNull($store->find($code->connectionId));
     }
 
     #[Test]
@@ -210,6 +236,26 @@ final class ConnectionStoreTest extends ApiRouteTestCase
         $store->authenticate($tokens['accessToken']);
 
         $this->assertSame($this->now, $store->find($tokens['connection']->id)->lastUsedAt);
+    }
+
+    #[Test]
+    public function refuses_to_write_over_a_store_it_cant_decode(): void
+    {
+        $user = $this->user();
+        $file = $user->root() . '/.copilot-agents.json';
+        $partialStore = '{"c0123456789abcdef": {"client": {';
+        Dir::make($user->root());
+        file_put_contents($file, $partialStore);
+
+        $exception = null;
+
+        try {
+            $this->createConnection(ConnectionStore::for($user));
+        } catch (Exception $exception) {
+        }
+
+        $this->assertSame('The agent connections of this user can\'t be read, so they aren\'t changed.', $exception?->getMessage());
+        $this->assertSame($partialStore, file_get_contents($file));
     }
 
     private function user(): User

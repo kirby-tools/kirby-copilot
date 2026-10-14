@@ -7,11 +7,13 @@ namespace JohannSchopplich\Copilot\Agents;
 use Closure;
 use Kirby\Cms\App;
 use Kirby\Cms\User;
+use Kirby\Exception\Exception;
 use Kirby\Filesystem\Dir;
 
 /**
- * Keeps a user's connections in a dotfile in their account folder, so Kirby
- * deletes them together with the user. Tokens are stored as hashes only.
+ * Keeps a user's connections in a dotfile in their account folder, next to
+ * its lock file, so Kirby deletes both together with the user. Tokens are
+ * stored as hashes only.
  */
 final class ConnectionStore
 {
@@ -20,9 +22,10 @@ final class ConnectionStore
     private const CODE_TTL = 60;
 
     /**
-     * How long a replaced refresh token keeps working. Claude Code shares one
-     * refresh token across its sessions, which refresh independently, and a
-     * client retries with the old token when a token response gets lost.
+     * How long a replaced refresh token keeps working, for Claude Code sessions
+     * that share one refresh token and refresh at the same moment, and for a
+     * client that retries with the old token when a token response gets lost.
+     * A later replay revokes the connection, as RFC 9700 asks.
      */
     public const REFRESH_GRACE_PERIOD = 60;
 
@@ -33,6 +36,7 @@ final class ConnectionStore
     private const REPLACED_REFRESH_TOKEN_LIMIT = 20;
 
     private const FILENAME = '.copilot-agents.json';
+    private const LOCK_FILENAME = '.copilot-agents.lock';
 
     /** Replaced in tests to move time forward. */
     public static Closure|null $clock = null;
@@ -67,7 +71,7 @@ final class ConnectionStore
         $connections = [];
 
         foreach ($this->readRecords() as $id => $record) {
-            if ($this->isActive($record)) {
+            if ($record['code']['isExchanged'] === true) {
                 $connections[] = Connection::fromRecord($id, $this->user, $record);
             }
         }
@@ -79,7 +83,7 @@ final class ConnectionStore
     {
         $record = $this->readRecords()[$id] ?? null;
 
-        return $record !== null && $this->isActive($record)
+        return $record !== null && $record['code']['isExchanged'] === true
             ? Connection::fromRecord($id, $this->user, $record)
             : null;
     }
@@ -126,7 +130,8 @@ final class ConnectionStore
     /**
      * Exchanges an authorization code for a token pair once. `$verify`
      * checks the request against the connection and the PKCE challenge. A
-     * code that comes back after its exchange revokes the connection.
+     * code that comes back after its exchange in a request that passes
+     * `$verify` revokes the connection.
      *
      * @param Closure(Connection, string): bool $verify
      * @return array{connection: Connection, accessToken: Token, refreshToken: Token}|null
@@ -141,14 +146,14 @@ final class ConnectionStore
                 return null;
             }
 
-            if ($record['code']['isExchanged'] === true) {
-                unset($records[$id]);
+            $connection = Connection::fromRecord($id, $this->user, $record);
+
+            if (!$verify($connection, $record['code']['challenge'])) {
                 return null;
             }
 
-            $connection = Connection::fromRecord($id, $this->user, $record);
-
-            if ($record['code']['expiresAt'] < self::now() || !$verify($connection, $record['code']['challenge'])) {
+            if ($record['code']['isExchanged'] === true) {
+                unset($records[$id]);
                 return null;
             }
 
@@ -170,7 +175,7 @@ final class ConnectionStore
             $id = $refreshToken->connectionId;
             $record = $records[$id] ?? null;
 
-            if ($record === null || !$this->isActive($record)) {
+            if ($record === null || $record['code']['isExchanged'] !== true) {
                 return null;
             }
 
@@ -179,10 +184,6 @@ final class ConnectionStore
             foreach ($record['refreshTokens'] as $index => $entry) {
                 if (!$refreshToken->matches($entry['hash'])) {
                     continue;
-                }
-
-                if ($entry['expiresAt'] < $now) {
-                    return null;
                 }
 
                 if ($entry['replacedAt'] !== null && $now - $entry['replacedAt'] > self::REFRESH_GRACE_PERIOD) {
@@ -212,7 +213,7 @@ final class ConnectionStore
         $id = $accessToken->connectionId;
         $record = $this->readRecords()[$id] ?? null;
 
-        if ($record === null || !$this->isActive($record)) {
+        if ($record === null || $record['code']['isExchanged'] !== true) {
             return null;
         }
 
@@ -220,7 +221,7 @@ final class ConnectionStore
         $isValid = false;
 
         foreach ($record['accessTokens'] as $entry) {
-            if ($accessToken->matches($entry['hash']) && $entry['expiresAt'] >= $now) {
+            if ($accessToken->matches($entry['hash'])) {
                 $isValid = true;
                 break;
             }
@@ -291,28 +292,6 @@ final class ConnectionStore
         return ['accessToken' => $accessToken, 'refreshToken' => $refreshToken];
     }
 
-    /**
-     * Tells whether the code was exchanged, a refresh token is still live,
-     * and the user's password hasn't changed since, mirroring how Kirby ends
-     * older sessions on a password change.
-     */
-    private function isActive(array $record): bool
-    {
-        if ($record['code']['isExchanged'] !== true) {
-            return false;
-        }
-
-        $now = self::now();
-
-        if (array_filter($record['refreshTokens'], fn (array $entry) => $entry['expiresAt'] >= $now) === []) {
-            return false;
-        }
-
-        $passwordTimestamp = $this->user->passwordTimestamp();
-
-        return $passwordTimestamp === null || $passwordTimestamp <= $record['createdAt'];
-    }
-
     private function readRecords(): array
     {
         $file = $this->file();
@@ -321,15 +300,8 @@ final class ConnectionStore
             return [];
         }
 
-        $handle = fopen($file, 'r');
-        flock($handle, LOCK_SH);
-
-        try {
-            return json_decode(stream_get_contents($handle) ?: '[]', true) ?? [];
-        } finally {
-            flock($handle, LOCK_UN);
-            fclose($handle);
-        }
+        // Writes replace the file in one rename, so a read sees the old or the new store whole.
+        return $this->prune(self::decode(file_get_contents($file)) ?? []);
     }
 
     /**
@@ -343,24 +315,28 @@ final class ConnectionStore
         $file = $this->file();
         Dir::make(dirname($file));
 
-        $handle = fopen($file, 'c+');
+        // The lock has a file of its own, since the rename below replaces the store's.
+        $handle = fopen($this->user->root() . '/' . self::LOCK_FILENAME, 'c');
         flock($handle, LOCK_EX);
 
         try {
-            $stored = json_decode(stream_get_contents($handle) ?: '[]', true) ?? [];
+            $stored = $this->prune(
+                self::decode(is_file($file) ? @file_get_contents($file) : '')
+                    ?? throw new Exception(message: 'The agent connections of this user can\'t be read, so they aren\'t changed.')
+            );
             $records = $stored;
             $result = $callback($records);
             $records = $this->prune($records);
 
             // A request that changes nothing, like one with a forged code, writes nothing.
             if ($records !== $stored) {
-                // Encoded before truncating, so a failure leaves the file intact.
                 $payload = $records === [] ? '{}' : json_encode($records, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+                $temporaryFile = $file . '.' . bin2hex(random_bytes(4));
 
-                ftruncate($handle, 0);
-                rewind($handle);
-                fwrite($handle, $payload);
-                fflush($handle);
+                if (@file_put_contents($temporaryFile, $payload) !== strlen($payload) || !@rename($temporaryFile, $file)) {
+                    @unlink($temporaryFile);
+                    throw new Exception(message: 'The agent connections of this user couldn\'t be saved.');
+                }
             }
 
             return $result;
@@ -371,10 +347,26 @@ final class ConnectionStore
     }
 
     /**
+     * Returns the records of a store file, or `null` when it can't be read or
+     * doesn't decode to an array, like a file broken by hand.
+     */
+    private static function decode(string|false $contents): array|null
+    {
+        if ($contents === '') {
+            return [];
+        }
+
+        $records = $contents !== false ? json_decode($contents, true) : null;
+
+        return is_array($records) ? $records : null;
+    }
+
+    /**
      * Drops what can never authenticate again – unexchanged connections past
-     * their code, connections from before a password change or without a
-     * live refresh token, and expired tokens – and the oldest replaced
-     * refresh tokens past the replay limit.
+     * their code, connections without a live refresh token or from before a
+     * password change, as Kirby ends older sessions on one, and expired
+     * tokens – and the oldest replaced refresh tokens past the replay limit.
+     * A record that remains is active once its code was exchanged.
      */
     private function prune(array $records): array
     {

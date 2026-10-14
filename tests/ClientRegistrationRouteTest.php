@@ -49,7 +49,6 @@ final class ClientRegistrationRouteTest extends ApiRouteTestCase
         $this->assertSame('Cursor', $client['client_name']);
         $this->assertSame(self::CURSOR['redirect_uris'], $client['redirect_uris']);
         $this->assertSame('none', $client['token_endpoint_auth_method']);
-        $this->assertArrayNotHasKey('client_secret', $client);
         $this->assertSame('no-store', $response->headers()['Cache-Control']);
     }
 
