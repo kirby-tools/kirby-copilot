@@ -38,10 +38,10 @@ final class ContentVersion
     }
 
     /**
-     * Names the languages with unsaved changes on a multilingual site, as
+     * Names the languages with unsaved changes as a phrase for a message,
      * ` in de, en`, since publishing and discarding take one at a time.
      */
-    public static function changedLanguages(ModelWithContent $model): string
+    public static function inChangedLanguages(ModelWithContent $model): string
     {
         $kirby = App::instance();
 

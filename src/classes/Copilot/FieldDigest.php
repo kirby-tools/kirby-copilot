@@ -25,6 +25,9 @@ final class FieldDigest
     /** Kirby saves the title and slug through their own actions, and a UUID never changes. */
     private const EXCLUDED_FIELD_NAMES = ['title', 'slug', 'uuid'];
 
+    /** Types whose `options` are values to choose from, unlike the link types a `link` field offers. */
+    private const CHOICE_TYPES = ['select', 'radio', 'toggles', 'checkboxes', 'multiselect', 'tags', 'color'];
+
     private const CONSTRAINT_PROPS = ['min', 'max', 'minlength', 'maxlength'];
 
     private const USER_OPTION_LIMIT = 50;
@@ -47,16 +50,29 @@ final class FieldDigest
      * Nested fields follow Kirby's current language, as in `Fields::for()`,
      * so a caller digesting another language sets it as current first.
      *
-     * @return array{fields: list<array>, fieldsets: array<string, array>}
+     * `unhinted` names the fields that hold a value but whose type, such as
+     * a plugin's, has no hint, so an AI can't write them.
+     *
+     * @return array{fields: list<array>, fieldsets: array<string, array>, unhinted: list<array{name: string, type: string, label: string|null}>}
      */
     public static function for(ModelWithContent $model, Language|string|null $language = null): array
     {
-        $fields = Fields::for($model, $language)->toProps();
+        $props = array_diff_key(Fields::for($model, $language)->toProps(), array_flip(self::EXCLUDED_FIELD_NAMES));
         $digest = new self($model);
+        $fields = $digest->digestFields($props);
+        $digestedNames = array_column($fields, 'name');
+        $unhinted = [];
+
+        foreach ($props as $name => $fieldProps) {
+            if (self::isVisibleValueField($fieldProps) && !in_array($name, $digestedNames, true)) {
+                $unhinted[] = ['name' => $name, 'type' => FieldNormalizer::resolveBaseType($fieldProps['type']), 'label' => $fieldProps['label'] ?? null];
+            }
+        }
 
         return [
-            'fields' => $digest->digestFields(array_diff_key($fields, array_flip(self::EXCLUDED_FIELD_NAMES))),
-            'fieldsets' => $digest->fieldsets
+            'fields' => $fields,
+            'fieldsets' => $digest->fieldsets,
+            'unhinted' => $unhinted
         ];
     }
 
@@ -81,7 +97,7 @@ final class FieldDigest
      */
     private function digestField(string $name, array $props): array|null
     {
-        if (($props['saveable'] ?? false) !== true || ($props['hidden'] ?? false) === true) {
+        if (!self::isVisibleValueField($props)) {
             return null;
         }
 
@@ -103,7 +119,7 @@ final class FieldDigest
             'hint' => $hint
         ];
 
-        if (!empty($props['options']) && is_array($props['options'])) {
+        if (in_array($type, self::CHOICE_TYPES, true) && !empty($props['options'])) {
             $field['options'] = array_map(
                 fn (array $option) => ['value' => $option['value'], 'text' => $option['text']],
                 $props['options']
@@ -205,6 +221,11 @@ final class FieldDigest
             fn (array $tab) => $tab['fields'] ?? [],
             $tabs
         )));
+    }
+
+    private static function isVisibleValueField(array $props): bool
+    {
+        return ($props['saveable'] ?? false) === true && ($props['hidden'] ?? false) !== true;
     }
 
     private static function hint(string $type, array $props): string|null

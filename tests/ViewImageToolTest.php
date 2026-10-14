@@ -28,6 +28,7 @@ final class ViewImageToolTest extends McpToolTestCase
                 'filename' => 'photo.jpg',
                 'template' => null,
                 'alt' => 'A lake at dawn',
+                'url' => App::instance()->file('notes/photo.jpg')->url(),
                 'panelUrl' => 'https://example.com/panel/pages/notes/files/photo.jpg',
                 'width' => 2048,
                 'height' => 1024,
@@ -46,6 +47,21 @@ final class ViewImageToolTest extends McpToolTestCase
         });
 
         $this->assertSame('A lake at dusk', $result['structuredContent']['alt']);
+    }
+
+    #[Test]
+    public function links_the_panel_in_the_language_and_says_the_file_isnt_translated_yet(): void
+    {
+        $result = $this->callWithImages('view_image', ['file' => 'file://photo-uuid', 'language' => 'de'], props: [
+            'options' => ['languages' => true],
+            'languages' => [
+                ['code' => 'en', 'name' => 'English', 'default' => true],
+                ['code' => 'de', 'name' => 'Deutsch']
+            ]
+        ])['structuredContent'];
+
+        $this->assertSame('https://example.com/panel/pages/notes/files/photo.jpg?language=de', $result['panelUrl']);
+        $this->assertSame(["The content isn't translated into Deutsch yet: the values are the default language's."], $result['notices']);
     }
 
     #[Test]
@@ -71,9 +87,9 @@ final class ViewImageToolTest extends McpToolTestCase
         return $this->callWithImages('view_image', ['file' => $file], $prepare);
     }
 
-    private function callWithImages(string $name, array $arguments, Closure|null $prepare = null): array
+    private function callWithImages(string $name, array $arguments, Closure|null $prepare = null, array $props = []): array
     {
-        return $this->callTool($name, $arguments, [
+        return $this->callTool($name, $arguments, array_replace_recursive([
             'site' => [
                 'children' => [
                     [
@@ -86,7 +102,7 @@ final class ViewImageToolTest extends McpToolTestCase
                     ]
                 ]
             ]
-        ], function (App $kirby) use ($prepare) {
+        ], $props), function (App $kirby) use ($prepare) {
             $files = $kirby->page('notes')->files();
 
             self::writeImage($files->find('photo.jpg')->root(), 2048, 1024, 'imagejpeg');

@@ -45,6 +45,25 @@ final class FieldDigestTest extends ApiRouteTestCase
     }
 
     #[Test]
+    public function describes_a_link_field_without_its_link_types_as_options(): void
+    {
+        $page = self::bootApp([
+            'blueprints' => ['pages/default' => ['fields' => ['cta' => ['type' => 'link', 'options' => ['url', 'page']]]]],
+            'site' => ['children' => [['slug' => 'test']]]
+        ])->page('test');
+
+        $this->assertSame([
+            'name' => 'cta',
+            'type' => 'link',
+            'label' => 'Cta',
+            'required' => false,
+            'translate' => true,
+            'disabled' => false,
+            'hint' => 'a link: internal page UUIDs (page://...), external URLs (https://...), email links (mailto:...), or anchors (#section)'
+        ], FieldDigest::for($page)['fields'][0]);
+    }
+
+    #[Test]
     public function describes_the_sub_fields_of_a_structure_field(): void
     {
         $digest = FieldDigest::for($this->playgroundApp()->page('product'))['fields'];
@@ -57,7 +76,7 @@ final class FieldDigestTest extends ApiRouteTestCase
         );
         $this->assertSame(['title', 'description', 'icon'], array_column($features['fields'], 'name'));
         $this->assertSame(
-            'text wrapped in paragraph <p> tags (can contain one or multiple paragraphs). Inline formatting (bold, italic, underline, code, links, email, sub, sup) is allowed.',
+            'text wrapped in paragraph <p> tags (can contain one or multiple paragraphs), headings (<h1> to <h6>), and bulleted <ul> or numbered <ol> lists. Inline formatting (bold, italic, underline, strike, code, links, email, sub, sup) is allowed.',
             self::findField($features['fields'], 'description')['hint']
         );
     }
@@ -305,7 +324,7 @@ final class FieldDigestTest extends ApiRouteTestCase
         ])->page('test');
 
         $this->assertSame([
-            'text with inline formatting only (bold, italic, underline, code, links, email, sub, sup). NO wrapping paragraph <p> tags allowed.',
+            'text with inline formatting only (bold, italic, underline, strike, code, links, email, sub, sup). NO wrapping paragraph <p> tags allowed.',
             'a date with time in YYYY-MM-DD HH:MM:SS format (ISO 8601)',
             'a numeric value within the defined range',
             'multiple selection values',

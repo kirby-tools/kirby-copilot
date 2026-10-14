@@ -53,6 +53,7 @@ final class ModelSummary
             'title' => $page->title()->value(),
             'template' => $page->intendedTemplate()->name(),
             'status' => $page->status(),
+            'url' => $page->isDraft() ? null : $page->url(),
             'panelUrl' => $page->panel()->url()
         ];
     }
@@ -69,7 +70,8 @@ final class ModelSummary
             'filename' => $file->filename(),
             'template' => $file->template(),
             'alt' => ContentVersion::source($file, $language)->content($language)->get('alt')->or(null)->value(),
-            'panelUrl' => $file->panel()->url()
+            'url' => $file->url(),
+            'panelUrl' => ContentVersion::panelUrl($file, $language)
         ];
     }
 }

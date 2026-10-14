@@ -11,8 +11,6 @@ use JohannSchopplich\Copilot\FieldDigest;
 use Kirby\Cms\App;
 use Kirby\Cms\Language;
 use Kirby\Cms\Page;
-use Kirby\Data\Json;
-use Kirby\Toolkit\Str;
 
 /**
  * Pages the account may not list stay out of the results, as in the Panel's search.
@@ -21,7 +19,6 @@ final class FindPages
 {
     private const DEFAULT_LIMIT = 20;
     private const MAX_LIMIT = 50;
-    private const MAX_VALUE_LENGTH = 300;
 
     public static function tool(): Tool
     {
@@ -37,7 +34,7 @@ final class FindPages
                     'template' => ['type' => 'string', 'description' => 'Only pages with this template.'],
                     'status' => ['type' => 'string', 'enum' => Arguments::PAGE_STATUSES],
                     'hasChanges' => ['type' => 'boolean', 'description' => 'Only pages with unsaved changes in `language`, or with `false` only pages without.'],
-                    'fields' => ['type' => 'array', 'items' => ['type' => 'string'], 'description' => 'Field names whose values to return per page, compact as in get_content. Values beyond ' . self::MAX_VALUE_LENGTH . ' characters are cut, lists and objects as JSON text; get_content returns them whole. Fields a page doesn\'t have are left out.'],
+                    'fields' => ['type' => 'array', 'items' => ['type' => 'string'], 'description' => 'Field names whose values to return per page, compact as in get_content. Values beyond ' . GetContent::SHORT_VALUE_LENGTH . ' characters are cut, lists and objects as JSON text; get_content returns them whole. Fields a page doesn\'t have are left out.'],
                     'sortBy' => ['type' => 'string', 'description' => '`modified` for the time the content was last saved, or a field name. Without it, results are sorted by relevance for a query, else in the site\'s order.'],
                     'direction' => ['type' => 'string', 'enum' => ['asc', 'desc'], 'default' => 'asc'],
                     'language' => ['type' => 'string', 'description' => Arguments::LANGUAGE_DESCRIPTION],
@@ -59,7 +56,7 @@ final class FindPages
         $template = $arguments->string('template');
         $status = $arguments->oneOf('status', Arguments::PAGE_STATUSES);
         $hasChanges = $arguments->boolean('hasChanges');
-        $names = $arguments->strings('fields');
+        $names = $arguments->fieldNames('fields');
         $sortBy = $arguments->string('sortBy');
         $direction = $arguments->oneOf('direction', ['asc', 'desc']) ?? 'asc';
         $query = $arguments->string('query');
@@ -95,8 +92,7 @@ final class FindPages
             'pages' => $pages->offset($offset)->limit($limit)->values(function (Page $page) use ($language, $names) {
                 $row = [
                     ...ModelSummary::page($page),
-                    'hasChanges' => $page->version('changes')->exists($language),
-                    'url' => ModelSummary::model($page)['url']
+                    'hasChanges' => $page->version('changes')->exists($language)
                 ];
 
                 if ($names !== null) {
@@ -118,13 +114,6 @@ final class FindPages
         $digest = FieldDigest::for($page, $language);
         $fields = array_values(array_filter($digest['fields'], fn (array $field) => in_array($field['name'], $names, true)));
 
-        return array_map(self::shortValue(...), GetContent::values($page, $language, $fields, $digest['fieldsets']));
-    }
-
-    private static function shortValue(mixed $value): mixed
-    {
-        $text = is_string($value) ? $value : Json::encode($value);
-
-        return Str::length($text) > self::MAX_VALUE_LENGTH ? Str::short($text, self::MAX_VALUE_LENGTH) : $value;
+        return array_map(GetContent::shortValue(...), GetContent::values($page, $language, $fields, $digest['fieldsets']));
     }
 }

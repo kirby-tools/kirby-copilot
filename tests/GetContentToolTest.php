@@ -40,7 +40,8 @@ final class GetContentToolTest extends McpToolTestCase
     public function reads_unsaved_changes_and_links_the_compare_preview(): void
     {
         $content = $this->getContent(['model' => 'page://first-uuid'], function (App $kirby) {
-            $kirby->page('notes/first')->version('changes')->save(['title' => 'First note', 'intro' => 'Hello, agent']);
+            $page = $kirby->page('notes/first');
+            $page->version('changes')->save([...$page->content()->toArray(), 'intro' => 'Hello, agent', 'legacy' => 'Not in the blueprint']);
         });
 
         $this->assertTrue($content['hasChanges']);
@@ -102,7 +103,7 @@ final class GetContentToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function lists_the_files_of_a_page(): void
+    public function lists_the_listable_files_of_a_page(): void
     {
         $content = $this->getContent(['model' => 'notes/first']);
 
@@ -113,6 +114,7 @@ final class GetContentToolTest extends McpToolTestCase
                 'filename' => 'photo.jpg',
                 'template' => 'image',
                 'alt' => 'A lake at dawn',
+                'url' => App::instance()->file('notes/first/photo.jpg')->url(),
                 'panelUrl' => 'https://example.com/panel/pages/notes+first/files/photo.jpg'
             ]],
             $content['files']
@@ -137,6 +139,40 @@ final class GetContentToolTest extends McpToolTestCase
         $this->assertSame(['related'], array_column($content['fields'], 'name'));
         $this->assertArrayNotHasKey('fieldsets', $content);
         $this->assertArrayNotHasKey('files', $content);
+    }
+
+    #[Test]
+    public function returns_metaDescription_requested_by_its_camelcase_blueprint_key(): void
+    {
+        $props = array_replace_recursive($this->props(), ['blueprints' => ['pages/note' => ['fields' => ['metaDescription' => ['type' => 'text']]]]]);
+
+        $content = $this->getContent(['model' => 'notes/first', 'fields' => ['metaDescription']], props: $props);
+
+        $this->assertSame(['metadescription'], array_column($content['fields'], 'name'));
+    }
+
+    #[Test]
+    public function returns_a_field_of_a_type_without_a_hint_as_not_writable(): void
+    {
+        $props = array_replace_recursive($this->props(), [
+            'fields' => ['map' => []],
+            'blueprints' => ['pages/note' => ['fields' => ['location' => ['type' => 'map', 'label' => 'Location']]]],
+            'site' => ['children' => [1 => ['children' => [['content' => ['location' => 'Berlin']]]]]]
+        ]);
+
+        $content = $this->getContent(['model' => 'notes/first', 'fields' => ['location']], props: $props);
+
+        $this->assertSame([['name' => 'location', 'type' => 'map', 'label' => 'Location', 'writable' => false, 'value' => 'Berlin']], $content['fields']);
+    }
+
+    #[Test]
+    public function notes_that_the_blueprint_options_keep_the_account_from_changing_the_content(): void
+    {
+        $props = array_replace_recursive($this->props(), ['blueprints' => ['pages/note' => ['options' => ['update' => false]]]]);
+
+        $content = $this->getContent(['model' => 'notes/first'], props: $props);
+
+        $this->assertSame(["The account may not change this content – its role or the blueprint's options don't allow it."], $content['notices']);
     }
 
     #[Test]
@@ -222,6 +258,19 @@ final class GetContentToolTest extends McpToolTestCase
     }
 
     #[Test]
+    public function names_no_changed_field_for_a_default_language_value_a_translation_copies(): void
+    {
+        $content = $this->getContent(['model' => 'about', 'language' => 'de'], function (App $kirby) {
+            $page = $kirby->page('about');
+            $page->version('latest')->save(['title' => 'Über uns'], 'de');
+            // The Panel saves a translation with the default-language values it falls back on too.
+            $page->version('changes')->save(['title' => 'Über uns, neu', 'tagline' => 'Hello'], 'de');
+        }, self::languageProps());
+
+        $this->assertSame(['title'], $content['changedFields']);
+    }
+
+    #[Test]
     public function notes_that_a_language_without_its_own_content_shows_the_default_language(): void
     {
         $content = $this->getContent(['model' => 'about', 'language' => 'de'], null, self::languageProps());
@@ -245,6 +294,13 @@ final class GetContentToolTest extends McpToolTestCase
         yield 'inaccessible page' => ['secret'];
         yield 'unknown address' => ['abot'];
         yield 'file UUID on an inaccessible page' => ['file://plan-uuid'];
+        yield 'encoded slash to a file of an inaccessible page' => ['home/secret%2Fplan.jpg'];
+    }
+
+    #[Test]
+    public function reads_a_file_by_a_path_with_capitalized_page_segments(): void
+    {
+        $this->assertSame('notes/first/photo.jpg', $this->getContent(['model' => 'Notes/First/photo.jpg'])['model']['id']);
     }
 
     #[Test]
@@ -304,7 +360,8 @@ final class GetContentToolTest extends McpToolTestCase
                                     ]])
                                 ],
                                 'files' => [
-                                    ['filename' => 'photo.jpg', 'template' => 'image', 'content' => ['uuid' => 'photo-uuid', 'alt' => 'A lake at dawn']]
+                                    ['filename' => 'photo.jpg', 'template' => 'image', 'content' => ['uuid' => 'photo-uuid', 'alt' => 'A lake at dawn']],
+                                    ['filename' => 'invoice.pdf', 'template' => 'hidden']
                                 ]
                             ]
                         ]
@@ -335,6 +392,7 @@ final class GetContentToolTest extends McpToolTestCase
                         'alt' => ['type' => 'text']
                     ]
                 ],
+                'files/hidden' => ['options' => ['list' => false]],
                 'users/editor' => ['name' => 'editor', 'title' => 'Editor']
             ],
             'users' => [

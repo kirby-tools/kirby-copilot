@@ -13,11 +13,12 @@ final class GetSiteToolTest extends McpToolTestCase
     #[Test]
     public function describes_the_site_the_account_and_the_listable_top_level_pages(): void
     {
-        $site = $this->getSite();
+        $site = $this->getSite(['blueprints' => ['users/editor' => ['permissions' => ['johannschopplich.copilot' => ['agentsDelete' => false]]]]]);
 
         $this->assertSame(['title' => 'Kirby Playground', 'url' => 'https://example.com', 'panelUrl' => 'https://example.com/panel/site'], $site['site']);
-        $this->assertSame(['id' => 'ada', 'uuid' => 'user://ada', 'name' => 'Ada', 'role' => 'Editor'], $site['account']);
+        $this->assertSame(['id' => 'ada', 'uuid' => 'user://ada', 'email' => 'ada@example.com', 'name' => 'Ada', 'role' => 'Editor'], $site['account']);
         $this->assertSame(['content:read', 'content:prepare'], $site['permissions']);
+        $this->assertSame(['content:delete'], $site['unavailablePermissions']);
         $this->assertSame([], $site['languages']);
         $this->assertSame(['home', 'notes', 'drafts-only'], array_column($site['pages'], 'id'));
         $this->assertSame(
@@ -27,6 +28,7 @@ final class GetSiteToolTest extends McpToolTestCase
                 'title' => 'Notes',
                 'template' => 'notes',
                 'status' => 'unlisted',
+                'url' => 'https://example.com/notes',
                 'panelUrl' => 'https://example.com/panel/pages/notes'
             ],
             $site['pages'][1]

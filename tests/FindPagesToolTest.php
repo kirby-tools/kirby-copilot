@@ -35,9 +35,9 @@ final class FindPagesToolTest extends McpToolTestCase
                 'title' => 'First note',
                 'template' => 'note',
                 'status' => 'listed',
+                'url' => 'https://example.com/notes/first',
                 'panelUrl' => 'https://example.com/panel/pages/notes+first',
-                'hasChanges' => false,
-                'url' => 'https://example.com/notes/first'
+                'hasChanges' => false
             ],
             $result['pages'][0]
         );
