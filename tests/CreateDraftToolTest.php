@@ -5,6 +5,7 @@ declare(strict_types = 1);
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\TestWith;
 
 #[RunTestsInSeparateProcesses]
 #[PreserveGlobalState(false)]
@@ -24,7 +25,7 @@ final class CreateDraftToolTest extends McpToolTestCase
         $result = $this->create(['parent' => 'notes', 'template' => 'note', 'title' => 'Hello, agents', 'fields' => ['intro' => 'Written by an agent']]);
 
         $this->assertSame('notes/hello-agents', $result['page']['id']);
-        $this->assertSame('draft', $result['page']['status']);
+        $this->assertSame(['status' => 'draft', 'url' => null], array_intersect_key($result['page'], ['status' => 0, 'url' => 0]));
         $this->assertSame('https://example.com/panel/pages/notes+hello-agents', $result['page']['panelUrl']);
 
         $draft = self::bootApp($this->props())->page('notes/hello-agents');
@@ -71,10 +72,13 @@ final class CreateDraftToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function refuses_a_parent_whose_pages_section_is_full(): void
+    #[TestWith([['max' => 1]], 'full')]
+    #[TestWith([['status' => 'listed', 'templates' => ['listed-note']]], 'adding listed pages')]
+    #[TestWith([['parent' => 'site', 'templates' => ['note']]], 'listing the site\'s pages')]
+    public function refuses_a_parent_whose_pages_section_takes_no_new_pages(array $section): void
     {
         self::writeContent('notes/1_first/note.txt', ['Title' => 'First']);
-        $props = $this->props(['blueprints' => ['pages/default' => ['sections' => ['pages' => ['max' => 1]]]]]);
+        $props = $this->props(['blueprints' => ['pages/default' => ['sections' => ['pages' => $section]]]]);
 
         $result = $this->callTool('create_draft', ['parent' => 'notes', 'template' => 'note', 'title' => 'Hello'], $props);
 
@@ -88,14 +92,17 @@ final class CreateDraftToolTest extends McpToolTestCase
         $result = $this->createResult(['parent' => 'notes', 'template' => 'note', 'title' => 'Hello'], role: 'reviewer');
 
         $this->assertTrue($result['isError']);
-        $this->assertSame('You are not allowed to create "hello"', $result['content'][0]['text']);
+        $this->assertSame('Kirby refused this for the user\'s account – its role or the blueprint\'s options: You are not allowed to create "hello"', $result['content'][0]['text']);
         $this->assertNull(self::bootApp($this->props())->page('notes/hello'));
     }
 
     #[Test]
-    public function refuses_active_markup(): void
+    #[TestWith([['intro' => '<script>alert(1)</script>']], 'script')]
+    #[TestWith([['body' => '[{"type":"markdown","content":{"text":"\\u003Cscript>alert(1)\\u003C/script>"}}]']], 'blocks as a JSON string')]
+    #[TestWith([['website' => 'javascript:alert(1)']], 'script URL in a url field')]
+    public function refuses_active_markup_or_a_script_url(array $fields): void
     {
-        $result = $this->createResult(['parent' => 'notes', 'template' => 'note', 'title' => 'Hello', 'fields' => ['intro' => '<script>alert(1)</script>']]);
+        $result = $this->createResult(['parent' => 'notes', 'template' => 'note', 'title' => 'Hello', 'fields' => $fields]);
 
         $this->assertTrue($result['isError']);
         $this->assertNull(self::bootApp($this->props())->page('notes/hello'));
@@ -107,17 +114,31 @@ final class CreateDraftToolTest extends McpToolTestCase
         $result = $this->createResult(['parent' => 'notes', 'template' => 'note', 'title' => 'Hi <script>alert(1)</script>', 'slug' => 'hello']);
 
         $this->assertTrue($result['isError']);
-        $this->assertStringStartsWith('`title` contains the element `<script>`', $result['content'][0]['text']);
+        $this->assertSame("`title` contains the element `<script>`, which the site doesn't accept from agents. Write it without.", $result['content'][0]['text']);
         $this->assertNull(self::bootApp($this->props())->page('notes/hello'));
     }
 
     #[Test]
     public function ignores_fields_it_may_not_write(): void
     {
-        $result = $this->create(['parent' => 'notes', 'template' => 'note', 'title' => 'Hello', 'fields' => ['unknown' => 'x', 'title' => 'Other', 'slug' => 'other']]);
+        $result = $this->create(['parent' => 'notes', 'template' => 'note', 'title' => 'Hello', 'fields' => ['unknown' => 'x', 'Title' => 'Other', 'slug' => 'other']]);
 
         $this->assertSame(['unknown', 'title', 'slug'], array_column($result['ignored'], 'name'));
         $this->assertSame('Send the slug as `slug`.', $result['ignored'][2]['reason']);
+    }
+
+    #[Test]
+    #[TestWith([['rating' => 'vier'], [['field' => 'rating', 'message' => 'The field doesn\'t take "vier", so Kirby stored 0.']]], 'word for a number')]
+    #[TestWith([['rating' => '0'], []], 'zero as a string')]
+    #[TestWith([['featured' => 'false'], []], 'false as a string')]
+    #[TestWith([['featured' => 'yes'], [['field' => 'featured', 'message' => 'The field doesn\'t take "yes", so Kirby stored false.']]], 'word for a toggle')]
+    #[TestWith([['topics' => ['nonsense']], [['field' => 'topics', 'message' => 'The field doesn\'t take ["nonsense"], so Kirby stored [].']]], 'unknown options only')]
+    #[TestWith([['topics' => 'nonsense'], [['field' => 'topics', 'message' => 'The field doesn\'t take "nonsense", so Kirby stored [].']]], 'unknown option as a string')]
+    public function warns_of_a_value_the_field_does_not_take(array $fields, array $warnings): void
+    {
+        $result = $this->create(['parent' => 'notes', 'template' => 'note', 'title' => 'Hello', 'fields' => $fields]);
+
+        $this->assertSame($warnings, $result['warnings']);
     }
 
     #[Test]
@@ -151,7 +172,12 @@ final class CreateDraftToolTest extends McpToolTestCase
                     'title' => 'Note',
                     'fields' => [
                         'intro' => ['type' => 'text'],
-                        'summary' => ['type' => 'text', 'default' => 'Default text']
+                        'summary' => ['type' => 'text', 'default' => 'Default text'],
+                        'rating' => ['type' => 'number'],
+                        'featured' => ['type' => 'toggle'],
+                        'topics' => ['type' => 'checkboxes', 'options' => ['news', 'events']],
+                        'website' => ['type' => 'url'],
+                        'body' => ['type' => 'blocks', 'fieldsets' => ['markdown']]
                     ]
                 ],
                 'pages/listed-note' => ['title' => 'Listed note', 'create' => ['status' => 'listed']],

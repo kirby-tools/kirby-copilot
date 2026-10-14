@@ -6,7 +6,6 @@ namespace JohannSchopplich\Copilot\Agents;
 
 use Closure;
 use Kirby\Cms\App;
-use Kirby\Cms\File;
 use Kirby\Cms\Language;
 use Kirby\Cms\ModelWithContent;
 use Kirby\Filesystem\Dir;
@@ -30,10 +29,14 @@ final class AgentWrites
      */
     public static function write(ModelWithContent $model, Language $language, string $etag, Closure $write): mixed
     {
-        return self::lock($model, function () use ($model, $language, $etag, $write) {
+        return self::lock(function () use ($model, $language, $etag, $write) {
             if ($etag !== ContentVersion::etag($model, $language)) {
-                throw new ToolError('The content changed since your etag. Read it again with get_content and base the call on what it holds now.');
+                $read = App::instance()->multilang() ? "get_content with `language` \"{$language->code()}\"" : 'get_content';
+                throw new ToolError("The content changed since your etag. Read it again with {$read} and base the call on what it holds now.");
             }
+
+            // `Changes::save()` and `discard()` take no language and write the current one.
+            App::instance()->setCurrentLanguage($language->code());
 
             $result = $write();
             self::record($model, $language);
@@ -43,36 +46,24 @@ final class AgentWrites
     }
 
     /**
-     * Runs a closure while no other agent request writes to or deletes the
-     * model, so two requests can't both pass their checks. A file shares
-     * the lock of its parent, since deleting a page deletes its files.
+     * Runs a closure while no other agent request writes, moves, or deletes
+     * content, so two requests can't both pass their checks.
      *
      * @template T
      * @param Closure(): T $run
      * @return T
      */
-    public static function lock(ModelWithContent $model, Closure $run): mixed
+    public static function lock(Closure $run): mixed
     {
         $root = App::instance()->root('cache') . '/johannschopplich/copilot-agents';
-        $file = $root . '/' . hash('xxh128', self::id($model instanceof File ? $model->parent() : $model)) . '.lock';
         Dir::make($root);
 
-        // A request that waited for the lock retries when the one before it removed the file.
-        do {
-            $handle = fopen($file, 'c');
-            flock($handle, LOCK_EX);
-            $isCurrent = fstat($handle)['ino'] === (@stat($file)['ino'] ?? null);
-
-            if (!$isCurrent) {
-                fclose($handle);
-            }
-        } while (!$isCurrent);
+        $handle = fopen($root . '/writes.lock', 'c');
+        flock($handle, LOCK_EX);
 
         try {
             return $run();
         } finally {
-            // Windows can't remove an open file, so the file stays for the next request.
-            @unlink($file);
             flock($handle, LOCK_UN);
             fclose($handle);
         }

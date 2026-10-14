@@ -93,6 +93,19 @@ final class Arguments
     }
 
     /**
+     * Reads a list of field names in lowercase, as Kirby matches field names
+     * in any case.
+     *
+     * @return list<string>|null
+     */
+    public function fieldNames(string $name): array|null
+    {
+        $names = $this->strings($name);
+
+        return $names === null ? null : array_map(strtolower(...), $names);
+    }
+
+    /**
      * @return array<string, mixed>|null
      */
     public function object(string $name): array|null
@@ -151,8 +164,15 @@ final class Arguments
             }
 
             $parent = dirname($address);
+            $parentPath = $parent === '.' ? 'site' : 'pages/' . str_replace('/', '+', $parent);
+            $file = Find::file($parentPath, basename($address));
 
-            return Find::file($parent === '.' ? 'site' : 'pages/' . str_replace('/', '+', $parent), basename($address));
+            // `Find` decodes the filename and falls back to other parents, whose access it doesn't check.
+            if (!$file->parent()->is(Find::parent($parentPath))) {
+                throw new NotFoundException();
+            }
+
+            return $file;
         } catch (NotFoundException) {
             throw new ToolError("Found no page or file \"{$address}\" the account may access. find_pages finds a page's ID; get_content lists a page's files.");
         }

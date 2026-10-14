@@ -10,25 +10,19 @@ use JohannSchopplich\Copilot\Agents\ConnectionPermission;
 use JohannSchopplich\Copilot\Agents\ContentVersion;
 use JohannSchopplich\Copilot\Agents\Tool;
 use JohannSchopplich\Copilot\Agents\ToolError;
+use JohannSchopplich\Copilot\FieldDigest;
 use Kirby\Api\Controller\Changes;
-use Kirby\Cms\File;
-use Kirby\Cms\Language;
-use Kirby\Cms\Page;
 use Kirby\Cms\Site;
-use Kirby\Data\Json;
 use Kirby\Form\Fields;
-use Kirby\Toolkit\Str;
 
 final class PrepareChanges
 {
-    private const PREVIEW_LENGTH = 300;
-
     public static function tool(): Tool
     {
         return new Tool(
             name: 'prepare_changes',
             title: 'Prepare changes',
-            description: 'Writes field values to the unsaved changes of a page, a file, or the site in one language; they go live once published – by an editor in the Panel, or with publish_changes when the user asks. Send values in the shape get_content returns them, the title included. Each value replaces the whole field – send every block or row of a blocks or structure field – and fields you leave out keep their values. Returns what changed, ignored fields with the reason, validation errors, the new etag, and the Panel URL to review the changes. For a list field such as blocks or a structure, what changed also counts the items before and after; tell the user when items went missing.',
+            description: 'Writes field values to the unsaved changes of a page, a file, or the site in one language; they go live once published – by an editor in the Panel, or with publish_changes when the user asks. Send values in the shape get_content returns them, the title included. Each value replaces the whole field – send every block or row of a blocks or structure field – and fields you leave out keep their values. Returns what changed, ignored fields with the reason, validation errors and values their fields don\'t take, the new etag, and the Panel URL to review the changes. For a list field such as blocks or a structure, what changed also counts the items before and after; tell the user when items went missing.',
             inputSchema: [
                 'type' => 'object',
                 'properties' => [
@@ -57,6 +51,11 @@ final class PrepareChanges
             throw new ToolError('`fields` must name at least one field.');
         }
 
+        // Kirby disables every field of a model the account can't update, so one refusal replaces a "disabled" per field.
+        if ($model->permissions()->can('update') !== true) {
+            throw new ToolError(FieldInput::UPDATE_REFUSAL);
+        }
+
         [$values, $ignored] = FieldInput::split($model, $language, $input);
 
         if ($values === []) {
@@ -64,26 +63,31 @@ final class PrepareChanges
         }
 
         return AgentWrites::write($model, $language, $etag, function () use ($model, $language, $values, $ignored) {
-            $before = self::formValues($model, $language);
+            $read = fn () => ContentVersion::source($model, $language)->content($language)->toArray();
+            $fields = Fields::for($model, $language);
+            $current = $fields->fill($read())->toFormValues();
 
-            ActiveContent::refuseIntroduced($values, $before);
+            $fields->submit($values);
+            ActiveContent::refuseIntroduced($fields, array_keys($values), $current);
 
             Changes::save($model, $values);
 
-            $after = self::formValues($model, $language);
-            $changes = $model->version('changes');
+            $fields->reset()->fill($read());
+            $digest = FieldDigest::for($model, $language);
+            $before = GetContent::compactValues($digest['fields'], $current, $digest['fieldsets']);
+            $after = GetContent::compactValues($digest['fields'], $fields->toFormValues(), $digest['fieldsets']);
             $result = [
                 'changed' => array_values(array_filter(array_map(
                     fn (string $name) => ($before[$name] ?? null) === ($after[$name] ?? null) ? null : [
                         'name' => $name,
-                        'before' => self::preview($before[$name] ?? null),
-                        'after' => self::preview($after[$name] ?? null),
+                        'before' => GetContent::shortValue($before[$name] ?? null),
+                        'after' => GetContent::shortValue($after[$name] ?? null),
                         ...self::itemCounts($before[$name] ?? null, $after[$name] ?? null)
                     ],
                     array_keys($values)
                 ))),
                 'ignored' => $ignored,
-                'warnings' => $changes->exists($language) ? FieldInput::warnings($model, $language, $changes->content($language)->toArray()) : [],
+                'warnings' => FieldInput::warnings($fields, $values),
                 ...ContentVersion::describe($model, $language)
             ];
 
@@ -93,22 +97,6 @@ final class PrepareChanges
 
             return $result;
         });
-    }
-
-    /**
-     * Reads the Panel's form values of the version an agent writes onto,
-     * the title included.
-     */
-    private static function formValues(Site|Page|File $model, Language $language): array
-    {
-        $content = ContentVersion::source($model, $language)->content($language)->toArray();
-        $values = Fields::for($model, $language)->fill($content)->toFormValues();
-
-        if (!$model instanceof File) {
-            $values['title'] = $content['title'] ?? null;
-        }
-
-        return $values;
     }
 
     /**
@@ -135,16 +123,5 @@ final class PrepareChanges
             fn (mixed $item) => is_array($item['columns'] ?? null) ? array_sum(array_map(fn (array $column) => count($column['blocks'] ?? []), $item['columns'])) : 1,
             $value
         ));
-    }
-
-    private static function preview(mixed $value): mixed
-    {
-        $text = is_string($value) ? $value : Json::encode($value);
-
-        if (mb_strlen($text) <= self::PREVIEW_LENGTH) {
-            return $value;
-        }
-
-        return Str::short($text, self::PREVIEW_LENGTH);
     }
 }

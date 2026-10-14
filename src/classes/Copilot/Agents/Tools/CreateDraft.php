@@ -23,7 +23,7 @@ final class CreateDraft
         return new Tool(
             name: 'create_draft',
             title: 'Create draft',
-            description: 'Creates a page as a draft below the site or a page, in the default language; it stays hidden from visitors until change_status makes it public. Read a page with the same template with get_content to see its fields, or create the draft with just a title and read it; send values in the shape get_content returns; fields you leave out get their defaults. Write other languages with prepare_changes afterwards. Returns the draft, ignored fields with the reason, validation errors, and its etag.',
+            description: 'Creates a page as a draft below the site or a page, in the default language; it stays hidden from visitors until change_status makes it public. Read a page with the same template with get_content to see its fields, or create the draft with just a title and read it; send values in the shape get_content returns; fields you leave out get their defaults. Write other languages with prepare_changes afterwards. Returns the draft, ignored fields with the reason, validation errors and values their fields don\'t take, and its etag.',
             inputSchema: [
                 'type' => 'object',
                 'properties' => [
@@ -73,7 +73,7 @@ final class CreateDraft
         ]);
         $draft->changeStorage(MemoryStorage::class);
 
-        $input = $arguments->object('fields') ?? [];
+        $input = array_change_key_case($arguments->object('fields') ?? []);
         $ignored = [];
 
         foreach (['title', 'slug'] as $name) {
@@ -84,30 +84,29 @@ final class CreateDraft
         }
 
         [$values, $fieldIgnored] = FieldInput::split($draft, $language, $input);
-        ActiveContent::refuseIntroduced([...$values, 'title' => $title]);
 
         $fields = Fields::for($draft, $language);
+        $fields->fill([...$fields->defaults(), ...$values, 'title' => $title]);
+        ActiveContent::refuseIntroduced($fields, [...array_keys($values), 'title']);
+
         $page = $parent->createChild([
             'slug' => $slug,
             'template' => $template,
             'draft' => true,
-            'content' => [
-                ...$fields->fill([...$fields->defaults(), ...$values])->toStoredValues(),
-                'title' => $title
-            ]
+            'content' => $fields->toStoredValues()
         ]);
 
         return [
             'page' => ModelSummary::page($page),
             'ignored' => [...$fieldIgnored, ...$ignored],
-            'warnings' => FieldInput::warnings($page, $language, $page->version()->content($language)->toArray()),
+            'warnings' => FieldInput::warnings($fields, $values),
             'etag' => ContentVersion::etag($page, $language)
         ];
     }
 
     /**
      * Collects the templates of the parent's pages sections that list the
-     * parent's own children and let the Panel add pages.
+     * parent's own drafts and let the Panel add pages.
      *
      * @return list<string>
      */
@@ -116,7 +115,7 @@ final class CreateDraft
         $templates = [];
 
         foreach ($parent->blueprint()->sections() as $section) {
-            if ($section->type() !== 'pages' || $section->create() === false || $section->isFull() || !$section->parent()->is($parent)) {
+            if ($section->type() !== 'pages' || $section->add() === false || !in_array($section->status(), ['draft', 'all'], true) || !$section->parent()->is($parent)) {
                 continue;
             }
 

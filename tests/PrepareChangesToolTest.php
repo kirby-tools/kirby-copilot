@@ -4,10 +4,12 @@ declare(strict_types = 1);
 
 use Kirby\Cms\App;
 use Kirby\Data\Json;
+use Kirby\Data\Yaml;
 use Kirby\Filesystem\Dir;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\TestWith;
 
 #[RunTestsInSeparateProcesses]
 #[PreserveGlobalState(false)]
@@ -43,13 +45,30 @@ final class PrepareChangesToolTest extends McpToolTestCase
 
         $this->assertSame([['name' => 'intro', 'before' => 'Hello', 'after' => 'Hello, agent']], $result['changed']);
         $this->assertTrue($result['hasChanges']);
-        $this->assertSame($this->read()['etag'], $result['etag']);
+        $content = $this->read();
+        $this->assertSame($content['etag'], $result['etag']);
+        $this->assertNull($content['changesBy']);
         $this->assertSame('https://example.com/panel/pages/notes+first/preview/compare', $result['panelUrl']);
 
         $page = $this->app()->page('notes/first');
         $this->assertSame('Hello, agent', $page->version('changes')->content()->get('intro')->value());
         $this->assertSame('A first note', $page->version('changes')->content()->get('summary')->value());
         $this->assertSame('Hello', $page->version('latest')->content()->get('intro')->value());
+    }
+
+    #[Test]
+    public function reports_a_pages_field_as_a_uuid_list(): void
+    {
+        self::writeContent('notes/second/note.txt', ['Title' => 'Second note', 'Uuid' => 'second-uuid']);
+        $props = $this->props(['blueprints' => ['pages/note' => ['fields' => ['related' => ['type' => 'pages']]]]]);
+
+        $result = $this->callTool('prepare_changes', [
+            'model' => 'notes/first',
+            'etag' => $this->read(props: $props)['etag'],
+            'fields' => ['related' => ['page://second-uuid']]
+        ], $props)['structuredContent'];
+
+        $this->assertSame([['name' => 'related', 'before' => [], 'after' => ['page://second-uuid'], 'itemsBefore' => 0, 'itemsAfter' => 1]], $result['changed']);
     }
 
     #[Test]
@@ -67,7 +86,10 @@ final class PrepareChangesToolTest extends McpToolTestCase
     #[Test]
     public function drops_changes_that_equal_the_published_content(): void
     {
-        $result = $this->prepare(['intro' => 'Hello']);
+        // A stored URL Kirby rejects.
+        self::writeContent('notes/first/note.txt', ['Title' => 'First note', 'Intro' => 'Hello', 'Website' => 'www.example.com', 'Uuid' => 'first-uuid']);
+
+        $result = $this->prepare(['intro' => 'Hello', 'website' => 'www.example.com']);
 
         $this->assertSame([], $result['changed']);
         $this->assertFalse($result['hasChanges']);
@@ -81,6 +103,21 @@ final class PrepareChangesToolTest extends McpToolTestCase
 
         $this->assertTrue($result['isError']);
         $this->assertStringStartsWith('The content changed since your etag.', $result['content'][0]['text']);
+    }
+
+    #[Test]
+    public function names_the_language_to_read_again_in_when_refusing_an_etag_of_another_language(): void
+    {
+        $props = $this->multilang();
+
+        $result = $this->callTool('prepare_changes', [
+            'model' => 'notes/first',
+            'language' => 'de',
+            'etag' => $this->read(props: $props)['etag'],
+            'fields' => ['intro' => 'Hallo, Agent']
+        ], $props);
+
+        $this->assertStringContainsString('get_content with `language` "de"', $result['content'][0]['text']);
     }
 
     #[Test]
@@ -106,6 +143,20 @@ final class PrepareChangesToolTest extends McpToolTestCase
         $this->assertSame('The field is disabled.', $result['ignored'][1]['reason']);
         $this->assertSame("Agents can't write fields of the type locator; tell the user to edit it in the Panel.", $result['ignored'][3]['reason']);
         $this->assertNull($this->app()->page('notes/first')->version('changes')->content()->get('unknown')->value());
+    }
+
+    #[Test]
+    public function writes_metaDescription_by_its_camelcase_blueprint_key(): void
+    {
+        $props = $this->props(['blueprints' => ['pages/note' => ['fields' => ['metaDescription' => ['type' => 'text']]]]]);
+
+        $result = $this->callTool('prepare_changes', [
+            'model' => 'notes/first',
+            'etag' => $this->read(props: $props)['etag'],
+            'fields' => ['metaDescription' => 'About the first note']
+        ], $props)['structuredContent'];
+
+        $this->assertSame(['metadescription'], array_column($result['changed'], 'name'));
     }
 
     #[Test]
@@ -137,30 +188,57 @@ final class PrepareChangesToolTest extends McpToolTestCase
     #[Test]
     public function refuses_an_account_that_may_not_update_the_page(): void
     {
-        // The role may change the title, so the write reaches Kirby's own permission check.
-        $result = $this->prepareResult(['title' => 'A better title'], role: 'reviewer');
+        $result = $this->prepareResult(['intro' => 'Hi'], role: 'reviewer');
 
         $this->assertTrue($result['isError']);
-        $this->assertSame('You are not allowed to change this version', $result['content'][0]['text']);
+        $this->assertSame("The account may not change this content – its role or the blueprint's options don't allow it.", $result['content'][0]['text']);
         $this->assertFalse($this->app()->page('notes/first')->version('changes')->exists());
     }
 
     #[Test]
-    public function refuses_new_active_markup(): void
+    #[TestWith(['intro', 'Hi <script>alert(1)</script>', 'the element `<script>`'], 'script')]
+    #[TestWith(['body', '[{"type":"markdown","content":{"text":"\\u003Cscript>alert(1)\\u003C/script>"}}]', 'the element `<script>`'], 'blocks as a JSON string')]
+    #[TestWith(['body', [['type' => 'text', 'content' => ['text' => '<p>Shoe&quot;&#32;onmouseover=&#39;alert(1)</p>']]], 'the event attribute `onmouseover`'], 'encoded quote and space in a writer')]
+    public function refuses_new_active_markup(string $name, mixed $value, string $markup): void
     {
-        $result = $this->prepareResult(['intro' => 'Hi <script>alert(1)</script>']);
+        $result = $this->prepareResult([$name => $value]);
 
         $this->assertTrue($result['isError']);
-        $this->assertSame("`intro` contains the element `<script>`, which the site doesn't accept from agents. Write it without.", $result['content'][0]['text']);
+        $this->assertSame("`{$name}` contains {$markup}, which the site doesn't accept from agents. Write it without. What the field already holds passes when you send it unchanged.", $result['content'][0]['text']);
         $this->assertFalse($this->app()->page('notes/first')->version('changes')->exists());
     }
 
     #[Test]
-    public function keeps_active_markup_an_editor_placed(): void
+    #[TestWith(['website', 'javascript&colon;alert(1)', '`website`'], 'script URL with an encoded colon')]
+    #[TestWith(['cta', 'javascript:alert(1)', '`cta`'], 'script URL in a link field with custom links')]
+    #[TestWith(['body', [['type' => 'button', 'content' => ['link' => 'javascript:alert(1)']]], '`link` in `body`'], 'script URL in a block')]
+    #[TestWith(['links', [['url' => 'javascript:alert(1)']], '`url` in `links`'], 'script URL in a structure row')]
+    public function refuses_a_script_url(string $name, mixed $value, string $place): void
     {
-        $result = $this->prepare([
-            'text' => 'Watch it: <iframe src="https://www.youtube.com/embed/x"></iframe>'
-        ]);
+        $result = $this->prepareResult([$name => $value]);
+
+        $this->assertTrue($result['isError']);
+        $this->assertSame("{$place} contains a `javascript:` URL, which the site doesn't accept from agents. Write it without. What the field already holds passes when you send it unchanged.", $result['content'][0]['text']);
+        $this->assertFalse($this->app()->page('notes/first')->version('changes')->exists());
+    }
+
+    #[Test]
+    public function keeps_a_script_url_that_a_structure_row_already_holds(): void
+    {
+        self::writeContent('notes/first/note.txt', ['Title' => 'First note', 'Links' => Yaml::encode([['url' => 'javascript:alert(1)']]), 'Uuid' => 'first-uuid']);
+
+        $result = $this->prepare(['links' => [['url' => 'javascript:alert(1)'], ['url' => 'https://example.com']]]);
+
+        $this->assertSame(['links'], array_column($result['changed'], 'name'));
+    }
+
+    #[Test]
+    #[TestWith(['Watch it: <iframe src="https://www.youtube.com/embed/x"></iframe>'], 'iframe the field holds')]
+    #[TestWith(['a &quot; onmouseover=alert(1) x=&quot;'], 'encoded quotes')]
+    #[TestWith(['JavaScript: The Good Parts'], 'script scheme outside a URL field')]
+    public function writes_a_textarea_without_new_active_markup(string $text): void
+    {
+        $result = $this->prepare(['text' => $text]);
 
         $this->assertSame(['text'], array_column($result['changed'], 'name'));
     }
@@ -201,11 +279,12 @@ final class PrepareChangesToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function returns_validation_warnings(): void
+    public function warns_of_validation_errors_and_of_a_value_kirby_stores_empty(): void
     {
-        $result = $this->prepare(['summary' => '']);
+        $result = $this->prepare(['summary' => '', 'website' => 'www.example.com', 'category' => 'unknown']);
 
-        $this->assertSame('summary', $result['warnings'][0]['field']);
+        $this->assertSame(['summary', 'website', 'category'], array_column($result['warnings'], 'field'));
+        $this->assertSame('The field doesn\'t take "unknown", so Kirby stored "".', $result['warnings'][2]['message']);
     }
 
     #[Test]
@@ -244,7 +323,7 @@ final class PrepareChangesToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function ignores_a_field_with_translate_false_in_a_secondary_language(): void
+    public function ignores_a_field_with_translate_false_in_a_secondary_language_and_points_to_the_default_language(): void
     {
         $props = $this->multilang();
 
@@ -255,7 +334,10 @@ final class PrepareChangesToolTest extends McpToolTestCase
             'fields' => ['intro' => 'Hallo, Agent', 'price' => '12']
         ], $props)['structuredContent'];
 
-        $this->assertSame(['price'], array_column($result['ignored'], 'name'));
+        $this->assertSame(
+            [['name' => 'price', 'reason' => 'The field has one value for all languages. Write it in the default language.']],
+            $result['ignored']
+        );
     }
 
     #[Test]
@@ -385,9 +467,13 @@ final class PrepareChangesToolTest extends McpToolTestCase
                         'summary' => ['type' => 'text', 'required' => true],
                         'locked' => ['type' => 'text', 'disabled' => true],
                         'text' => ['type' => 'textarea'],
-                        'body' => ['type' => 'blocks', 'fieldsets' => ['text']],
+                        'body' => ['type' => 'blocks', 'fieldsets' => ['text', 'markdown', 'button' => ['fields' => ['link' => ['type' => 'link']]]]],
                         'layout' => ['type' => 'layout', 'fieldsets' => ['text']],
                         'price' => ['type' => 'text', 'translate' => false],
+                        'website' => ['type' => 'url'],
+                        'cta' => ['type' => 'link', 'options' => ['url', 'custom']],
+                        'links' => ['type' => 'structure', 'fields' => ['url' => ['type' => 'url']]],
+                        'category' => ['type' => 'select', 'options' => ['news', 'essay']],
                         'map' => ['type' => 'locator']
                     ]
                 ],
@@ -395,7 +481,7 @@ final class PrepareChangesToolTest extends McpToolTestCase
                 'site' => ['fields' => ['tagline' => ['type' => 'text']]],
                 'users/editor' => ['name' => 'editor', 'title' => 'Editor'],
                 'users/writer' => ['name' => 'writer', 'permissions' => ['pages' => ['changeTitle' => false]]],
-                'users/reviewer' => ['name' => 'reviewer', 'permissions' => ['pages' => ['update' => false, 'changeTitle' => true]]]
+                'users/reviewer' => ['name' => 'reviewer', 'permissions' => ['pages' => ['update' => false]]]
             ],
             'users' => [
                 ['id' => 'ada', 'email' => 'ada@example.com', 'name' => 'Ada', 'role' => 'editor'],

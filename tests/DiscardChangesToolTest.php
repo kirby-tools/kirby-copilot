@@ -3,6 +3,7 @@
 declare(strict_types = 1);
 
 use JohannSchopplich\Copilot\Agents\ConnectionPermission;
+use Kirby\Filesystem\Dir;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
@@ -69,8 +70,34 @@ final class DiscardChangesToolTest extends McpToolTestCase
         $result = $this->discard(role: 'reviewer');
 
         $this->assertTrue($result['isError']);
-        $this->assertSame('You are not allowed to discard this version', $result['content'][0]['text']);
+        $this->assertSame('Kirby refused this for the user\'s account – its role or the blueprint\'s options: You are not allowed to discard this version', $result['content'][0]['text']);
         $this->assertTrue(self::bootApp($this->props())->page('notes/first')->version('changes')->exists());
+    }
+
+    #[Test]
+    public function discards_the_changes_of_one_language(): void
+    {
+        // A multi-language site reads `note.en.txt` and `note.de.txt`, so the single-language files go.
+        Dir::remove(self::indexRoot() . '/content/notes/first');
+        self::writeContent('notes/first/note.en.txt', ['Title' => 'First note', 'Intro' => 'Hello']);
+        self::writeContent('notes/first/note.de.txt', ['Title' => 'Erste Notiz', 'Intro' => 'Hallo']);
+        self::writeContent('notes/first/_changes/note.en.txt', ['Title' => 'First note', 'Intro' => 'Hello, editor']);
+        self::writeContent('notes/first/_changes/note.de.txt', ['Title' => 'Erste Notiz', 'Intro' => 'Hallo, Redaktion']);
+
+        $props = $this->props([
+            'options' => ['languages' => true],
+            'languages' => [
+                ['code' => 'en', 'name' => 'English', 'default' => true],
+                ['code' => 'de', 'name' => 'Deutsch']
+            ]
+        ]);
+        $etag = $this->callTool('get_content', ['model' => 'notes/first', 'language' => 'de'], $props)['structuredContent']['etag'];
+        $result = $this->callTool('discard_changes', ['model' => 'notes/first', 'language' => 'de', 'etag' => $etag], $props);
+
+        $this->assertFalse($result['isError'], $result['content'][0]['text']);
+        $page = self::bootApp($props)->page('notes/first');
+        $this->assertFalse($page->version('changes')->exists('de'));
+        $this->assertTrue($page->version('changes')->exists('en'));
     }
 
     private function discard(string $role = 'editor'): array
