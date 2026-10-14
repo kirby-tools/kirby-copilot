@@ -1,16 +1,15 @@
 {
   "name": "johannschopplich/kirby-copilot",
-  "description": "AI content generation in the Kirby Panel",
+  "description": "Generate with AI in the Panel, or connect your agents",
   "type": "kirby-plugin",
   "version": "3.14.0",
   "keywords": [
-    "ai",
-    "content",
-    "generation",
-    "gpt",
     "kirby",
-    "mistral",
-    "openai"
+    "kirby-cms",
+    "kirby-plugin",
+    "ai",
+    "llm",
+    "mcp"
   ],
   "license": "proprietary",
   "homepage": "https://kirby.tools/copilot",
