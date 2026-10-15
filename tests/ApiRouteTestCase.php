@@ -23,7 +23,8 @@ abstract class ApiRouteTestCase extends TestCase
     protected static function bootApp(array $props = []): App
     {
         $app = new App(array_replace_recursive([
-            'roots' => ['index' => static::indexRoot()],
+            // Outside the site's root, since Kirby writes the session on shutdown, after `tearDown()` removed it.
+            'roots' => ['index' => static::indexRoot(), 'sessions' => __DIR__ . '/tmp/sessions'],
             'urls' => ['index' => 'https://example.com']
         ], $props));
 
