@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitfad8c15c36e9bd118e0bebf2724290f4
+class ComposerStaticInitefd34be6308b1694dc6026ef3f04eb03
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -1442,9 +1442,9 @@ class ComposerStaticInitfad8c15c36e9bd118e0bebf2724290f4
         'JohannSchopplich\\Copilot\\Agents\\ContentVersion' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/ContentVersion.php',
         'JohannSchopplich\\Copilot\\Agents\\McpGuard' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/McpGuard.php',
         'JohannSchopplich\\Copilot\\Agents\\McpServer' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/McpServer.php',
+        'JohannSchopplich\\Copilot\\Agents\\MissingPermission' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/MissingPermission.php',
         'JohannSchopplich\\Copilot\\Agents\\PendingAuthorization' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/PendingAuthorization.php',
         'JohannSchopplich\\Copilot\\Agents\\PublicUrlFetcher' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/PublicUrlFetcher.php',
-        'JohannSchopplich\\Copilot\\Agents\\RateLimit' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/RateLimit.php',
         'JohannSchopplich\\Copilot\\Agents\\RedirectUri' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/RedirectUri.php',
         'JohannSchopplich\\Copilot\\Agents\\Token' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Token.php',
         'JohannSchopplich\\Copilot\\Agents\\Tool' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tool.php',
@@ -2017,9 +2017,9 @@ class ComposerStaticInitfad8c15c36e9bd118e0bebf2724290f4
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitfad8c15c36e9bd118e0bebf2724290f4::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitfad8c15c36e9bd118e0bebf2724290f4::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitfad8c15c36e9bd118e0bebf2724290f4::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitefd34be6308b1694dc6026ef3f04eb03::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitefd34be6308b1694dc6026ef3f04eb03::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitefd34be6308b1694dc6026ef3f04eb03::$classMap;
 
         }, null, ClassLoader::class);
     }

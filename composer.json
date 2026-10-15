@@ -2,7 +2,7 @@
   "name": "johannschopplich/kirby-copilot",
   "description": "Generate with AI in the Panel, or connect your agents",
   "type": "kirby-plugin",
-  "version": "3.14.0",
+  "version": "3.14.1",
   "keywords": [
     "kirby",
     "kirby-cms",
