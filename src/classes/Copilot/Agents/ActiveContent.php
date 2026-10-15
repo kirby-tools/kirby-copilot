@@ -80,14 +80,6 @@ final class ActiveContent
     private const UNCHECKABLE = "contains %s, which the site can't check on this server. Tell the user to edit the field in the Panel.";
 
     /**
-     * What libxml before 2.14, an HTML4 parser, reads differently from a
-     * browser: comments, elements whose content is text, and numeric
-     * references to no character XML allows, which it drops along with the
-     * rest of the attribute.
-     */
-    private const HTML4_MARKUP = '/<!--|<(?:textarea|title|xmp|noembed|noframes|plaintext)\b|&#(?:x([0-9a-f]*)|(\d*))/i';
-
-    /**
      * Refuses submitted values that bring in active markup their current
      * values don't contain, or a script URL as the whole value of a `url` or
      * `link` field, which templates print into `href` – also one in blocks,
@@ -126,9 +118,7 @@ final class ActiveContent
     /**
      * Says why the site refuses a value, or returns `null`: for the first
      * active construct the current value doesn't contain as often, or for
-     * markup it can't check – a value that can't be rendered or parsed, and
-     * markup anywhere in it that libxml before 2.14 reads differently, when
-     * PHP parses with that libxml.
+     * markup it can't check – a value that can't be rendered or parsed.
      */
     public static function refusal(mixed $value, mixed $current): string|null
     {
@@ -147,12 +137,6 @@ final class ActiveContent
                 fn (array $leaves) => [['', implode("\n", array_column($leaves, 1))]]
             ] as $form) {
                 $html = $form($leaves);
-                $markup = self::html4Markup(implode("\n", array_column($html, 1)));
-
-                if ($markup !== null) {
-                    return sprintf(self::UNCHECKABLE, $markup);
-                }
-
                 $currentCounts = self::constructCounts($form($currentLeaves));
 
                 foreach (self::constructCounts($html) as $construct => $count) {
@@ -287,42 +271,6 @@ final class ActiveContent
         return array_count_values($constructs);
     }
 
-    /**
-     * Returns the first markup that libxml before 2.14 reads differently from
-     * a browser, or `null`.
-     */
-    private static function html4Markup(string $html): string|null
-    {
-        if (!self::isHtml4()) {
-            return null;
-        }
-
-        preg_match_all(self::HTML4_MARKUP, $html, $matches, PREG_SET_ORDER | PREG_UNMATCHED_AS_NULL);
-
-        foreach ($matches as [$markup, $hex, $decimal]) {
-            $codePoint = $hex !== null ? hexdec($hex) : ($decimal !== null ? (int)$decimal : null);
-
-            if ($codePoint === null || !self::isXmlCharacter($codePoint)) {
-                return 'the markup `' . strtolower($markup) . '`';
-            }
-        }
-
-        return null;
-    }
-
-    private static function isHtml4(): bool
-    {
-        return !class_exists(HTMLDocument::class) && LIBXML_VERSION < 21400;
-    }
-
-    private static function isXmlCharacter(int|float $codePoint): bool
-    {
-        return in_array($codePoint, [0x9, 0xA, 0xD], true) ||
-            ($codePoint >= 0x20 && $codePoint <= 0xD7FF) ||
-            ($codePoint >= 0xE000 && $codePoint <= 0xFFFD) ||
-            ($codePoint >= 0x10000 && $codePoint <= 0x10FFFF);
-    }
-
     /** @return list<string> The active constructs of the HTML, each as its description and its content, joined by a NUL byte */
     private static function constructs(string $html): array
     {
@@ -350,8 +298,7 @@ final class ActiveContent
                     $constructs[] = "the event attribute `{$name}`\0{$attribute->value}";
                 } elseif (in_array($name, self::URL_ATTRIBUTES, true)) {
                     foreach ($name === 'srcset' ? explode(',', $attribute->value) : [$attribute->value] as $url) {
-                        // libxml before 2.14 leaves HTML5 references like `&colon;` as they are.
-                        $scheme = self::scriptScheme(self::isHtml4() ? html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8') : $url);
+                        $scheme = self::scriptScheme($url);
 
                         if ($scheme !== null) {
                             $constructs[] = "a `{$scheme}` URL\0{$name}={$url}";

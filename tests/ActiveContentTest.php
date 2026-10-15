@@ -127,7 +127,6 @@ final class ActiveContentTest extends ApiRouteTestCase
         yield 'prose in parentheses like a KirbyTag' => ['(Tip: JavaScript: closures)'];
         yield 'inline code' => ['Never write `javascript:` links.'];
         yield 'prose with a quote before a word starting with on' => ['It\'s "the best" one = two'];
-        yield 'references to a tab and a line break' => ['<p title="a&#9;b&#10;c">Text</p>'];
         // Browsers read an unquoted value up to whitespace, so the backticks and `onerror` are part of `src`.
         yield 'event attribute after a backtick' => ['<img src=`x`onerror=alert(1)>'];
         // Kirby's link and image tags empty a script URL.
