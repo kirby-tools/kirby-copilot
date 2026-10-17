@@ -3,6 +3,7 @@
 declare(strict_types = 1);
 
 use Kirby\Cms\App;
+use Kirby\Cms\Blocks;
 use Kirby\Data\Json;
 use Kirby\Data\Yaml;
 use Kirby\Filesystem\Dir;
@@ -252,6 +253,142 @@ final class PrepareChangesToolTest extends McpToolTestCase
     }
 
     #[Test]
+    public function replaces_passages_of_a_field_in_order_and_keeps_the_rest(): void
+    {
+        $this->editResult([
+            ['operation' => 'replace', 'field' => 'text', 'old' => 'Watch', 'new' => 'See'],
+            ['operation' => 'replace', 'field' => 'text', 'old' => 'See this', 'new' => 'See that']
+        ]);
+
+        $this->assertSame('See that: <iframe src="https://www.youtube.com/embed/x"></iframe>', $this->app()->page('notes/first')->version('changes')->content()->get('text')->value());
+    }
+
+    #[Test]
+    public function replaces_a_passage_inside_an_entry(): void
+    {
+        self::writeContent('notes/first/note.txt', ['Title' => 'First note', 'Summary' => 'A first note', 'Entries' => "- First entry\n- Second entry\n", 'Uuid' => 'first-uuid']);
+
+        $this->editResult([['operation' => 'replace', 'field' => 'entries', 'old' => 'Second', 'new' => 'Last']]);
+
+        $this->assertSame(['First entry', 'Last entry'], $this->app()->page('notes/first')->version('changes')->content()->get('entries')->toData('yaml'));
+    }
+
+    #[Test]
+    public function replaces_the_text_of_the_block_with_the_given_id(): void
+    {
+        self::writeBlocks([self::block('b1', '<p>Welcome</p>'), self::block('b2', '<p>Welcome back</p>')]);
+
+        $this->editResult([['operation' => 'replace', 'field' => 'body', 'id' => 'b2', 'old' => 'Welcome', 'new' => 'Good to see you']]);
+
+        $this->assertSame(['<p>Welcome</p>', '<p>Good to see you back</p>'], $this->storedBlocks()->values(fn ($block) => $block->text()->value()));
+    }
+
+    #[Test]
+    public function sets_a_field_of_a_block_and_hides_another(): void
+    {
+        self::writeBlocks([['id' => 'h1', 'type' => 'heading', 'isHidden' => false, 'content' => ['level' => 'h2', 'text' => 'Intro']], self::block('b1', '<p>Old</p>')]);
+
+        $this->editResult([
+            ['operation' => 'set', 'field' => 'body', 'id' => 'h1', 'name' => 'level', 'value' => 'h3'],
+            ['operation' => 'set', 'field' => 'body', 'id' => 'b1', 'name' => 'isHidden', 'value' => true]
+        ]);
+
+        $blocks = $this->storedBlocks();
+        $this->assertSame('h3', $blocks->first()->level()->value());
+        $this->assertTrue($blocks->last()->isHidden());
+    }
+
+    #[Test]
+    public function inserts_a_block_with_its_defaults_after_another_and_returns_its_id(): void
+    {
+        self::writeBlocks([self::block('b1', '<p>First</p>'), self::block('b2', '<p>Last</p>')]);
+
+        $result = $this->editResult([['operation' => 'insert', 'field' => 'body', 'after' => 'b1', 'type' => 'heading', 'content' => ['text' => 'Between']]])['structuredContent'];
+
+        $blocks = $this->storedBlocks();
+        $this->assertSame(['b1', $result['inserted'][0]['id'], 'b2'], $blocks->keys());
+        $this->assertSame(['Between', 'h2'], [$blocks->nth(1)->text()->value(), $blocks->nth(1)->level()->value()]);
+    }
+
+    #[Test]
+    public function inserts_blocks_after_the_same_block_in_reading_order(): void
+    {
+        self::writeBlocks([self::block('b1', '<p>First</p>'), self::block('b2', '<p>Last</p>')]);
+
+        $this->editResult([
+            ['operation' => 'insert', 'field' => 'body', 'after' => 'b1', 'type' => 'text', 'content' => ['text' => '<p>One</p>']],
+            ['operation' => 'insert', 'field' => 'body', 'after' => 'b1', 'type' => 'text', 'content' => ['text' => '<p>Two</p>']]
+        ]);
+
+        $this->assertSame(['<p>First</p>', '<p>One</p>', '<p>Two</p>', '<p>Last</p>'], $this->storedBlocks()->values(fn ($block) => $block->text()->value()));
+    }
+
+    #[Test]
+    public function moves_a_block_before_another_and_removes_one(): void
+    {
+        self::writeBlocks([self::block('b1', '<p>One</p>'), self::block('b2', '<p>Two</p>'), self::block('b3', '<p>Three</p>')]);
+
+        $this->editResult([
+            ['operation' => 'move', 'field' => 'body', 'id' => 'b3', 'before' => 'b1'],
+            ['operation' => 'remove', 'field' => 'body', 'id' => 'b2']
+        ]);
+
+        $this->assertSame(['b3', 'b1'], $this->storedBlocks()->keys());
+    }
+
+    #[Test]
+    public function moves_a_block_into_a_layout_column_and_appends_a_row(): void
+    {
+        self::writeContent('notes/first/note.txt', ['Title' => 'First note', 'Layout' => Json::encode([[
+            'id' => 'r1',
+            'attrs' => [],
+            'columns' => [
+                ['id' => 'c1', 'width' => '1/2', 'blocks' => [self::block('l1', '<p>Left</p>')]],
+                ['id' => 'c2', 'width' => '1/2', 'blocks' => []]
+            ]
+        ]]), 'Uuid' => 'first-uuid']);
+
+        $result = $this->editResult([
+            ['operation' => 'move', 'field' => 'layout', 'id' => 'l1', 'into' => 'c2'],
+            ['operation' => 'insert', 'field' => 'layout', 'columns' => [['width' => '1/1', 'blocks' => [['type' => 'text', 'content' => ['text' => '<p>Below</p>']]]]]]
+        ])['structuredContent'];
+
+        $layouts = $this->app()->page('notes/first')->version('changes')->content()->get('layout')->toLayouts();
+        $this->assertSame([[], ['l1']], $layouts->first()->columns()->values(fn ($column) => $column->blocks()->keys()));
+        $this->assertSame($result['inserted'][0]['id'], $layouts->last()->id());
+        $this->assertSame($result['inserted'][0]['columns'][0]['blocks'][0], $layouts->last()->columns()->first()->blocks()->first()->id());
+        $this->assertSame('<p>Below</p>', $layouts->last()->columns()->first()->blocks()->first()->text()->value());
+    }
+
+    #[Test]
+    #[TestWith([[['operation' => 'replace', 'field' => 'text', 'old' => 'Goodbye', 'new' => 'x']], 'edit 1: `old` doesn\'t occur in text. get_content returns its current value.'])]
+    #[TestWith([[['operation' => 'replace', 'field' => 'text', 'old' => 'iframe', 'new' => 'x']], 'edit 1: `old` occurs 2 times in text. Make it longer so it occurs once.'])]
+    #[TestWith([[['operation' => 'replace', 'field' => 'body', 'old' => 'b1', 'new' => 'x']], 'edit 1: `old` doesn\'t occur in body. get_content returns its current value.'])]
+    #[TestWith([[['operation' => 'remove', 'field' => 'body', 'id' => 'b9']], 'edit 1: body has no block, layout row, or layout column with the id b9. get_content returns the ids.'])]
+    #[TestWith([[['operation' => 'insert', 'field' => 'body', 'type' => 'gallery']], 'edit 1: body takes no block of the type gallery. Its types: text, markdown, button, heading.'])]
+    #[TestWith([[['operation' => 'set', 'field' => 'body', 'id' => 'b1', 'name' => 'color', 'value' => 'red']], 'edit 1: The block b1 has no field color. Its fields: text.'])]
+    #[TestWith([[['operation' => 'replace', 'field' => 'category', 'old' => 'news', 'new' => 'essay']], 'edit 1: category holds no text to edit. Send it whole in `fields`.'])]
+    #[TestWith([[['operation' => 'insert', 'field' => 'text', 'type' => 'text']], 'edit 1: text holds no blocks or layout rows. Send it whole in `fields`.'])]
+    #[TestWith([[['operation' => 'replace', 'field' => 'nope', 'old' => 'x', 'new' => 'y']], 'edit 1: nope: There is no such field. get_content lists the fields.'])]
+    public function refuses_an_edit_it_cant_apply(array $edits, string $message): void
+    {
+        $result = $this->editResult($edits);
+
+        $this->assertTrue($result['isError']);
+        $this->assertSame($message, $result['content'][0]['text']);
+        $this->assertFalse($this->app()->page('notes/first')->version('changes')->exists());
+    }
+
+    #[Test]
+    public function refuses_a_field_in_both_fields_and_edits(): void
+    {
+        $result = $this->editResult([['operation' => 'replace', 'field' => 'intro', 'old' => 'Hello', 'new' => 'Hi']], ['intro' => 'Hey']);
+
+        $this->assertTrue($result['isError']);
+        $this->assertSame('edit 1: intro is both in `fields` and in `edits`. Send it once.', $result['content'][0]['text']);
+    }
+
+    #[Test]
     public function counts_the_blocks_of_a_layout_field(): void
     {
         $result = $this->prepare(['layout' => [
@@ -313,12 +450,14 @@ final class PrepareChangesToolTest extends McpToolTestCase
             'model' => 'notes/first',
             'language' => 'de',
             'etag' => $this->read(language: 'de', props: $props)['etag'],
-            'fields' => ['intro' => 'Hallo, Agent']
+            'fields' => ['intro' => 'Hallo, Agent'],
+            'edits' => [['operation' => 'replace', 'field' => 'summary', 'old' => 'Notiz', 'new' => 'Note']]
         ], $props)['structuredContent'];
 
         $page = self::bootApp($props)->page('notes/first');
         $this->assertSame('https://example.com/panel/pages/notes+first/preview/compare?language=de', $result['panelUrl']);
         $this->assertSame('Hallo, Agent', $page->version('changes')->content('de')->get('intro')->value());
+        $this->assertSame('Eine erste Note', $page->version('changes')->content('de')->get('summary')->value());
         $this->assertFalse($page->version('changes')->exists('en'));
     }
 
@@ -428,6 +567,34 @@ final class PrepareChangesToolTest extends McpToolTestCase
         ], $props);
     }
 
+    private static function block(string $id, string $text): array
+    {
+        return ['id' => $id, 'type' => 'text', 'isHidden' => false, 'content' => ['text' => $text]];
+    }
+
+    private static function writeBlocks(array $blocks): void
+    {
+        self::writeContent('notes/first/note.txt', ['Title' => 'First note', 'Summary' => 'A first note', 'Body' => Json::encode($blocks), 'Uuid' => 'first-uuid']);
+    }
+
+    /**
+     * Reads the stored blocks, the hidden ones included.
+     */
+    private function storedBlocks(): Blocks
+    {
+        return Blocks::factory(Blocks::parse($this->app()->page('notes/first')->version('changes')->content()->get('body')->value()));
+    }
+
+    private function editResult(array $edits, array $fields = []): array
+    {
+        return $this->callTool('prepare_changes', array_filter([
+            'model' => 'notes/first',
+            'etag' => $this->read()['etag'],
+            'fields' => $fields,
+            'edits' => $edits
+        ]), $this->props());
+    }
+
     private function read(string $model = 'notes/first', string|null $language = null, array|null $props = null): array
     {
         return $this->callTool('get_content', array_filter(['model' => $model, 'language' => $language]), $props ?? $this->props())['structuredContent'];
@@ -467,14 +634,15 @@ final class PrepareChangesToolTest extends McpToolTestCase
                         'summary' => ['type' => 'text', 'required' => true],
                         'locked' => ['type' => 'text', 'disabled' => true],
                         'text' => ['type' => 'textarea'],
-                        'body' => ['type' => 'blocks', 'fieldsets' => ['text', 'markdown', 'button' => ['fields' => ['link' => ['type' => 'link']]]]],
+                        'body' => ['type' => 'blocks', 'fieldsets' => ['text', 'markdown', 'button' => ['fields' => ['link' => ['type' => 'link']]], 'heading']],
                         'layout' => ['type' => 'layout', 'fieldsets' => ['text']],
                         'price' => ['type' => 'text', 'translate' => false],
                         'website' => ['type' => 'url'],
                         'cta' => ['type' => 'link', 'options' => ['url', 'custom']],
                         'links' => ['type' => 'structure', 'fields' => ['url' => ['type' => 'url']]],
                         'category' => ['type' => 'select', 'options' => ['news', 'essay']],
-                        'map' => ['type' => 'locator']
+                        'map' => ['type' => 'locator'],
+                        'entries' => ['type' => 'entries']
                     ]
                 ],
                 'files/image' => ['fields' => ['alt' => ['type' => 'text']]],

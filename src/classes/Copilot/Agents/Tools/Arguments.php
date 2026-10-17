@@ -93,6 +93,20 @@ final class Arguments
     }
 
     /**
+     * @return list<array<string, mixed>>|null
+     */
+    public function objects(string $name): array|null
+    {
+        $value = $this->arguments[$name] ?? null;
+
+        if ($value !== null && (!is_array($value) || !array_is_list($value) || array_filter($value, fn (mixed $item) => !is_array($item) || ($item !== [] && array_is_list($item))) !== [])) {
+            throw new ToolError("`{$name}` must be a list of objects.");
+        }
+
+        return $value;
+    }
+
+    /**
      * Reads a list of field names in lowercase, as Kirby matches field names
      * in any case.
      *

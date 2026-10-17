@@ -26,7 +26,7 @@ final class FieldDigest
     private const EXCLUDED_FIELD_NAMES = ['title', 'slug', 'uuid'];
 
     /** Types whose `options` are values to choose from, unlike the link types a `link` field offers. */
-    private const CHOICE_TYPES = ['select', 'radio', 'toggles', 'checkboxes', 'multiselect', 'tags', 'color'];
+    public const CHOICE_TYPES = ['select', 'radio', 'toggles', 'checkboxes', 'multiselect', 'tags', 'color'];
 
     private const CONSTRAINT_PROPS = ['min', 'max', 'minlength', 'maxlength'];
 
