@@ -64,7 +64,7 @@ final class ViewImage
             'etag' => ContentVersion::etag($file, $language)
         ];
 
-        $untranslatedNotice = GetContent::untranslatedNotice($file, $language);
+        $untranslatedNotice = GetContent::untranslatedNotice(ContentVersion::source($file, $language), $language);
 
         if ($untranslatedNotice !== null) {
             $data['notices'] = [$untranslatedNotice];

@@ -144,6 +144,7 @@ final class FindPagesToolTest extends McpToolTestCase
         });
 
         $this->assertSame(['notes/first', 'notes/third', 'notes/second'], array_column($result['pages'], 'id'));
+        $this->assertSame('Zebra note', $result['pages'][0]['title']);
     }
 
     #[Test]

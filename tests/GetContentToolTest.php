@@ -41,13 +41,26 @@ final class GetContentToolTest extends McpToolTestCase
     {
         $content = $this->getContent(['model' => 'page://first-uuid'], function (App $kirby) {
             $page = $kirby->page('notes/first');
-            $page->version('changes')->save([...$page->content()->toArray(), 'intro' => 'Hello, agent', 'legacy' => 'Not in the blueprint']);
+            $page->version('changes')->save([...$page->content()->toArray(), 'title' => 'Renamed', 'intro' => 'Hello, agent', 'legacy' => 'Not in the blueprint']);
         });
 
         $this->assertTrue($content['hasChanges']);
-        $this->assertSame(['intro'], $content['changedFields']);
+        $this->assertSame('Renamed', $content['model']['title']);
+        $this->assertSame(['intro', 'title'], $content['changedFields']);
         $this->assertSame('Hello, agent', $content['fields'][0]['value']);
         $this->assertSame('https://example.com/panel/pages/notes+first/preview/compare', $content['panelUrl']);
+    }
+
+    #[Test]
+    public function reads_the_published_values_beside_unsaved_changes(): void
+    {
+        $content = $this->getContent(['model' => 'notes/first', 'published' => true, 'fields' => ['intro']], function (App $kirby) {
+            $kirby->page('notes/first')->version('changes')->save([...$kirby->page('notes/first')->content()->toArray(), 'title' => 'Renamed', 'intro' => 'Hello, agent']);
+        });
+
+        $this->assertTrue($content['hasChanges']);
+        $this->assertSame('First note', $content['model']['title']);
+        $this->assertSame('Hello', $content['fields'][0]['value']);
     }
 
     #[Test]
