@@ -1,6 +1,6 @@
 {
   "name": "johannschopplich/kirby-copilot",
-  "description": "Generate with AI in the Panel, or connect your agents",
+  "description": "Generate with AI in the Panel, or connect your agents over MCP",
   "type": "kirby-plugin",
   "version": "3.14.1",
   "keywords": [
