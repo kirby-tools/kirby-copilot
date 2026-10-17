@@ -166,7 +166,7 @@ final class FindPagesToolTest extends McpToolTestCase
         $result = $this->callTool('find_pages', ['parent' => 'secret'], $this->props());
 
         $this->assertTrue($result['isError']);
-        $this->assertSame('Found no page or file "secret" the account may access. find_pages finds a page\'s ID; get_content lists a page\'s files.', $result['content'][0]['text']);
+        $this->assertSame('Found no page or file "secret" the account may access. find_pages finds a page\'s ID, find_files a file\'s.', $result['content'][0]['text']);
     }
 
     #[Test]

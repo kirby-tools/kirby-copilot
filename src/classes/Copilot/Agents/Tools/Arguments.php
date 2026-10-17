@@ -188,7 +188,7 @@ final class Arguments
 
             return $file;
         } catch (NotFoundException) {
-            throw new ToolError("Found no page or file \"{$address}\" the account may access. find_pages finds a page's ID; get_content lists a page's files.");
+            throw new ToolError("Found no page or file \"{$address}\" the account may access. find_pages finds a page's ID, find_files a file's.");
         }
     }
 

@@ -309,7 +309,7 @@ final class GetContentToolTest extends McpToolTestCase
         $result = $this->callTool('get_content', ['model' => $model], $this->props());
 
         $this->assertTrue($result['isError']);
-        $this->assertSame("Found no page or file \"{$model}\" the account may access. find_pages finds a page's ID; get_content lists a page's files.", $result['content'][0]['text']);
+        $this->assertSame("Found no page or file \"{$model}\" the account may access. find_pages finds a page's ID, find_files a file's.", $result['content'][0]['text']);
     }
 
     public static function unreachableModels(): iterable

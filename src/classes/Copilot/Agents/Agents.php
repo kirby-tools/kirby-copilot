@@ -85,6 +85,7 @@ final class Agents
         return [
             Tools\GetSite::tool(),
             Tools\FindPages::tool(),
+            Tools\FindFiles::tool(),
             Tools\GetContent::tool(),
             Tools\ViewImage::tool(),
             Tools\PrepareChanges::tool(),
