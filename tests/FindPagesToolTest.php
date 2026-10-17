@@ -97,6 +97,19 @@ final class FindPagesToolTest extends McpToolTestCase
     }
 
     #[Test]
+    public function finds_the_pages_not_yet_translated_into_a_language(): void
+    {
+        $props = $this->multilangProps();
+        $props['site']['children'][] = ['slug' => 'contact', 'translations' => [['code' => 'en', 'content' => ['title' => 'Contact']]]];
+
+        $find = fn (array $arguments) => array_column($this->callTool('find_pages', $arguments, $props)['structuredContent']['pages'], 'id');
+
+        $this->assertSame(['contact'], $find(['language' => 'de', 'hasTranslation' => false]));
+        $this->assertSame(['about'], $find(['language' => 'de', 'hasTranslation' => true]));
+        $this->assertSame('`hasTranslation` needs a language other than the default.', $this->callTool('find_pages', ['hasTranslation' => false], $props)['content'][0]['text']);
+    }
+
+    #[Test]
     public function rejects_an_unknown_language(): void
     {
         $result = $this->callTool('find_pages', ['language' => 'fr'], $this->multilangProps());

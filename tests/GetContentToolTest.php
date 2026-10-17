@@ -293,6 +293,16 @@ final class GetContentToolTest extends McpToolTestCase
     }
 
     #[Test]
+    public function notes_that_a_translation_with_only_unsaved_changes_isnt_published(): void
+    {
+        $content = $this->getContent(['model' => 'about', 'language' => 'de', 'published' => true], function (App $kirby) {
+            $kirby->page('about')->version('changes')->save(['title' => 'Über uns'], 'de');
+        }, self::languageProps());
+
+        $this->assertSame(["The content isn't translated into Deutsch yet: the values are the default language's."], $content['notices']);
+    }
+
+    #[Test]
     #[DataProvider('unreachableModels')]
     public function reports_a_missing_or_inaccessible_model_as_no_page_or_file(string $model): void
     {

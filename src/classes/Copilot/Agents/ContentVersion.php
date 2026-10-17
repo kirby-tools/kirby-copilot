@@ -26,6 +26,15 @@ final class ContentVersion
     }
 
     /**
+     * Tells whether the version has content of its own in the language
+     * rather than showing the default language's.
+     */
+    public static function hasTranslation(Version $version, Language $language): bool
+    {
+        return $language->isDefault() || $version->exists($language);
+    }
+
+    /**
      * @return array{hasChanges: bool, etag: string, panelUrl: string}
      */
     public static function describe(Site|Page|File $model, Language $language): array

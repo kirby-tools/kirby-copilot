@@ -103,7 +103,7 @@ final class GetContent
 
     public static function untranslatedNotice(Version $version, Language $language): string|null
     {
-        return !$language->isDefault() && !$version->exists($language)
+        return !ContentVersion::hasTranslation($version, $language)
             ? "The content isn't translated into {$language->name()} yet: the values are the default language's."
             : null;
     }
@@ -114,8 +114,8 @@ final class GetContent
         $model = $arguments->model('model');
         $names = $arguments->fieldNames('fields');
 
-        $version = ContentVersion::source($model, $language);
-        $readVersion = $arguments->boolean('published') === true ? $model->version('latest') : $version;
+        $sourceVersion = ContentVersion::source($model, $language);
+        $readVersion = $arguments->boolean('published') === true ? $model->version('latest') : $sourceVersion;
         $digest = FieldDigest::for($model, $language);
         $fields = [
             ...$digest['fields'],
@@ -131,7 +131,7 @@ final class GetContent
 
         $fields = array_map(fn (array $field) => [...$field, 'value' => $values[$field['name']]], $fields);
 
-        $owner = $version->id()->is('changes') ? Lock::for($version, $language)->user() : null;
+        $owner = $sourceVersion->id()->is('changes') ? Lock::for($sourceVersion, $language)->user() : null;
         $result = [
             'model' => ModelSummary::model($model, $readVersion, $language),
             'language' => App::instance()->multilang() ? $language->code() : null,
@@ -140,7 +140,7 @@ final class GetContent
             'fields' => $fields
         ];
 
-        if ($version->id()->is('changes')) {
+        if ($sourceVersion->id()->is('changes')) {
             $result['changedFields'] = self::changedFields($model, $language);
         }
 
