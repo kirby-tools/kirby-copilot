@@ -7,6 +7,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\TestWith;
 
 #[RunTestsInSeparateProcesses]
 #[PreserveGlobalState(false)]
@@ -75,15 +76,20 @@ final class GetContentToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function names_who_made_the_unsaved_changes_after_their_lock_ends(): void
+    #[TestWith([true, 'Grace'], 'a user the account may list')]
+    #[TestWith([false, null], 'a user the account may not list')]
+    public function names_who_made_the_unsaved_changes_after_their_lock_ends(bool $mayList, string|null $name): void
     {
         self::writeContent('memo/default.txt', ['Title' => 'Memo']);
         // Kirby's lock ends ten minutes after the last edit.
         self::writeContent('memo/_changes/default.txt', ['Title' => 'Memo, edited', 'Lock' => 'grace'], time() - 601);
 
-        $content = $this->getContent(['model' => 'memo'], null, ['users' => $this->props()['users']]);
+        $content = $this->getContent(['model' => 'memo'], null, [
+            'blueprints' => ['users/editor' => ['permissions' => ['users' => ['list' => $mayList]]]],
+            'users' => $this->props()['users']
+        ]);
 
-        $this->assertSame('Grace', $content['changesBy']);
+        $this->assertSame($name, $content['changesBy']);
     }
 
     #[Test]

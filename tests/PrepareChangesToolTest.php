@@ -449,13 +449,14 @@ final class PrepareChangesToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function refuses_changes_another_user_holds_open(): void
+    public function refuses_changes_another_user_holds_open_without_naming_a_user_the_account_may_not_list(): void
     {
         self::writeContent(self::CHANGES, ['Title' => 'First note', 'Intro' => 'Hello from Grace', 'Lock' => 'grace']);
+        $props = $this->props(['blueprints' => ['users/editor' => ['permissions' => ['users' => ['list' => false]]]]]);
 
-        $result = $this->prepareResult(['intro' => 'Changed']);
+        $result = $this->callTool('prepare_changes', ['model' => 'notes/first', 'etag' => $this->read(props: $props)['etag'], 'fields' => ['intro' => 'Changed']], $props);
 
-        $this->assertSame('Grace is editing this content in the Panel. Try again once they leave its view, or 10 minutes after their last edit.', $result['content'][0]['text']);
+        $this->assertSame('Another user is editing this content in the Panel. Try again once they leave its view, or 10 minutes after their last edit.', $result['content'][0]['text']);
         $this->assertSame('Hello from Grace', $this->app()->page('notes/first')->version('changes')->content()->get('intro')->value());
     }
 

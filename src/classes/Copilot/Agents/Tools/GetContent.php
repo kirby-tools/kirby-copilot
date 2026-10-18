@@ -126,12 +126,12 @@ final class GetContent
 
         $fields = array_map(fn (array $field) => [...$field, 'value' => $values[$field['name']]], $fields);
 
-        $owner = $sourceVersion->id()->is('changes') ? Lock::for($sourceVersion, $language)->user() : null;
+        $lock = $sourceVersion->id()->is('changes') ? Lock::for($sourceVersion, $language)->toArray() : null;
         $result = [
             'model' => ModelSummary::model($model, $readVersion, $language),
             'language' => App::instance()->multilang() ? $language->code() : null,
             ...ContentVersion::describe($model, $language),
-            'changesBy' => $owner?->username()
+            'changesBy' => $lock !== null ? ContentVersion::lockHolder($lock) : null
         ];
 
         $notices = [];

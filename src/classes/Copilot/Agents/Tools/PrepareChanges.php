@@ -124,10 +124,12 @@ final class PrepareChanges
             FieldInput::refuseDropped($fields, $values, $digest->fields);
 
             // Kirby refuses changes another user holds open, but hands over the ones they left –
-            // without a name once the Panel unlocked them on leaving the view. Without locking, changes are no one's.
-            $owner = Lock::for($model->version('changes'), $language)->user();
-            $notices = !Lock::isEnabled() || $owner?->is(App::instance()->user()) === true ? [] : [
-                'The unsaved changes held ' . ($owner === null ? 'earlier edits' : "edits by {$owner->username()}") . ', which now count as yours in the Panel. Tell the user, so they review them before publishing.'
+            // without a name once the Panel unlocked them on leaving the view, or when the account may not list the user.
+            // Without locking, changes are no one's.
+            $lock = Lock::for($model->version('changes'), $language);
+            $holder = ContentVersion::lockHolder($lock->toArray());
+            $notices = !Lock::isEnabled() || $lock->user()?->is(App::instance()->user()) === true ? [] : [
+                'The unsaved changes held ' . ($holder === null ? 'earlier edits' : "edits by {$holder}") . ', which now count as yours in the Panel. Tell the user, so they review them before publishing.'
             ];
 
             Changes::save($model, $values);

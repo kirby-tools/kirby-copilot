@@ -35,6 +35,17 @@ final class ContentVersion
     }
 
     /**
+     * Names the user who holds a lock from its `Lock::toArray()` form, which
+     * leaves out a user the account may not list.
+     */
+    public static function lockHolder(array $lock): string|null
+    {
+        $id = $lock['user']['id'] ?? null;
+
+        return $id !== null ? App::instance()->user($id)?->username() : null;
+    }
+
+    /**
      * @return array{hasChanges: bool, etag: string, panelUrl: string}
      */
     public static function describe(Site|Page|File $model, Language $language): array
