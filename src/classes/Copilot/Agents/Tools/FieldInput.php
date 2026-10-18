@@ -6,10 +6,12 @@ namespace JohannSchopplich\Copilot\Agents\Tools;
 
 use JohannSchopplich\Copilot\Agents\ToolError;
 use JohannSchopplich\Copilot\FieldDigest;
+use Kirby\Cms\Blocks;
 use Kirby\Cms\File;
 use Kirby\Cms\Language;
 use Kirby\Cms\Page;
 use Kirby\Cms\Site;
+use Kirby\Data\Data;
 use Kirby\Data\Json;
 use Kirby\Form\Fields;
 use Kirby\Form\Form;
@@ -26,13 +28,15 @@ final class FieldInput
     /**
      * Keeps the values of fields an agent may write and names the others
      * with the reason. Kirby itself would store unknown keys, a disabled
-     * field's value, and a title the role may not change.
+     * field's value, and a title the role may not change. Refuses new
+     * blocks of a type their field doesn't take.
      *
      * @return array{0: array<string, mixed>, 1: list<array{name: string, reason: string}>}
      */
     public static function split(Site|Page|File $model, Language $language, array $input): array
     {
-        $fields = array_column(FieldDigest::for($model, $language)['fields'], null, 'name');
+        $digest = FieldDigest::for($model, $language);
+        $fields = array_column($digest['fields'], null, 'name');
         $values = [];
         $ignored = [];
 
@@ -52,6 +56,10 @@ final class FieldInput
             };
 
             if ($reason === null) {
+                if (in_array($field['type'] ?? null, ['blocks', 'layout'], true)) {
+                    self::refuseUnknownBlocks($model, $language, $field, $value, $digest['fieldsets']);
+                }
+
                 $values[$name] = $value;
             } else {
                 $ignored[] = ['name' => $name, 'reason' => $reason];
@@ -59,6 +67,16 @@ final class FieldInput
         }
 
         return [$values, $ignored];
+    }
+
+    /**
+     * @param array<string, array> $fieldsets
+     */
+    public static function unknownBlockTypeReason(array $field, string $type, array $fieldsets): string
+    {
+        $types = array_map(fn (string $key) => $fieldsets[$key]['type'], $field['fieldsets'] ?? []);
+
+        return "{$field['name']} takes no block of the type {$type}. Its types: " . implode(', ', $types) . '.';
     }
 
     /**
@@ -134,6 +152,56 @@ final class FieldInput
         }
 
         return implode('; ', $messages);
+    }
+
+    /**
+     * Kirby stores a block of a type its field doesn't take, and the site
+     * renders it as nothing. A stored block of a type the blueprint has since
+     * dropped stays, as in the Panel.
+     *
+     * @param array<string, array> $fieldsets
+     */
+    private static function refuseUnknownBlocks(Site|Page|File $model, Language $language, array $field, mixed $value, array $fieldsets): void
+    {
+        $items = match (true) {
+            !is_string($value) => $value,
+            $field['type'] === 'blocks' => Blocks::parse($value),
+            default => Data::decode($value, type: 'json', fail: false)
+        };
+        $types = array_map(fn (string $key) => $fieldsets[$key]['type'], $field['fieldsets'] ?? []);
+        $storedValue = GetContent::values($model, $language, [$field], $fieldsets)[$field['name']];
+        $storedTypes = [];
+
+        foreach (self::blocks($field, $storedValue) as $block) {
+            if (is_array($block) && is_string($block['id'] ?? null)) {
+                $storedTypes[$block['id']] = $block['type'] ?? null;
+            }
+        }
+
+        foreach (self::blocks($field, $items) as $block) {
+            $type = $block['type'] ?? null;
+
+            if (!is_string($type)) {
+                throw new ToolError("Each block in {$field['name']} needs a `type` and its `content`, as get_content returns them.");
+            }
+
+            if (!in_array($type, $types, true) && (!is_string($block['id'] ?? null) || ($storedTypes[$block['id']] ?? null) !== $type)) {
+                throw new ToolError(self::unknownBlockTypeReason($field, $type, $fieldsets));
+            }
+        }
+    }
+
+    /**
+     * Lists the blocks of a blocks value, or of the columns of a layout value.
+     */
+    private static function blocks(array $field, mixed $items): array
+    {
+        $blocks = $field['type'] === 'blocks' ? $items : array_merge([], ...array_map(
+            fn (mixed $row) => array_merge([], ...array_map(fn (mixed $column) => $column['blocks'] ?? [], $row['columns'] ?? [])),
+            is_array($items) ? $items : []
+        ));
+
+        return is_array($blocks) ? $blocks : [];
     }
 
     /**

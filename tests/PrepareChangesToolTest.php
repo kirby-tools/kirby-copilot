@@ -473,6 +473,43 @@ final class PrepareChangesToolTest extends McpToolTestCase
     }
 
     #[Test]
+    #[TestWith([[['type' => 'paragraph', 'content' => ['text' => '<p>Hi</p>']]], 'body takes no block of the type paragraph. Its types: text, markdown, button, heading.'], 'unknown type')]
+    #[TestWith([['Hi'], 'Each block in body needs a `type` and its `content`, as get_content returns them.'], 'no block')]
+    public function refuses_blocks_the_field_does_not_take(array $blocks, string $message): void
+    {
+        $result = $this->prepareResult(['body' => $blocks]);
+
+        $this->assertSame($message, $result['content'][0]['text']);
+        $this->assertFalse($this->app()->page('notes/first')->version('changes')->exists());
+    }
+
+    #[Test]
+    public function keeps_a_stored_block_of_a_type_the_field_no_longer_takes(): void
+    {
+        self::writeContent(self::CHANGES, ['Title' => 'First note', 'Body' => json_encode([
+            ['id' => 'b1', 'type' => 'text', 'isHidden' => false, 'content' => ['text' => '<p>Hello</p>']],
+            ['id' => 'b2', 'type' => 'legacy', 'isHidden' => false, 'content' => ['text' => 'Old']]
+        ])]);
+
+        $result = $this->callTool('prepare_changes', [
+            'model' => 'notes/first',
+            'etag' => $this->read()['etag'],
+            'edits' => [['operation' => 'replace', 'field' => 'body', 'id' => 'b1', 'old' => 'Hello', 'new' => 'Hi']]
+        ], $this->props());
+
+        $this->assertFalse($result['isError'], $result['content'][0]['text']);
+        $this->assertSame(['text', 'legacy'], array_column($this->storedBlocks()->toArray(), 'type'));
+    }
+
+    #[Test]
+    public function stores_html_for_a_blocks_field_as_a_text_block(): void
+    {
+        $this->prepare(['body' => '<p>Hello</p>']);
+
+        $this->assertSame('text', $this->app()->page('notes/first')->version('changes')->content()->get('body')->toBlocks()->first()->type());
+    }
+
+    #[Test]
     public function refuses_a_value_kirby_would_drop_and_saves_nothing(): void
     {
         $result = $this->prepareResult(['intro' => 'Changed', 'category' => 'News']);

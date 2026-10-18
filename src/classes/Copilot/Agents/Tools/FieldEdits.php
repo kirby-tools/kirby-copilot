@@ -299,9 +299,7 @@ final class FieldEdits
         $fieldset = $this->fieldset($field, $type);
 
         if ($fieldset === null) {
-            $types = array_map(fn (string $key) => $this->fieldsets[$key]['type'], $field['fieldsets'] ?? []);
-
-            throw new ToolError("{$field['name']} takes no block of the type {$type}. Its types: " . implode(', ', $types) . '.');
+            throw new ToolError(FieldInput::unknownBlockTypeReason($field, $type, $this->fieldsets));
         }
 
         self::refuseUnknownNames($content, $fieldset['fields'], "The block type {$type}");
