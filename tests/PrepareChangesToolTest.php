@@ -534,6 +534,24 @@ final class PrepareChangesToolTest extends McpToolTestCase
     }
 
     #[Test]
+    public function names_the_fields_a_new_translation_holds_in_the_default_language(): void
+    {
+        $props = $this->multilang();
+        unlink(self::indexRoot() . '/content/notes/first/note.de.txt');
+        // Kirby copies the published English values, not the unsaved ones.
+        self::writeContent('notes/first/_changes/note.en.txt', ['Title' => 'First note', 'Summary' => '', 'Lock' => 'ada']);
+
+        $result = $this->callTool('prepare_changes', [
+            'model' => 'notes/first',
+            'language' => 'de',
+            'etag' => $this->read(language: 'de', props: $props)['etag'],
+            'fields' => ['intro' => 'Hallo, Agent']
+        ], $props)['structuredContent'];
+
+        $this->assertSame(['This started the Deutsch translation, and Kirby copied the English values of the fields not sent into it, so these still hold English text: title, summary.'], $result['notices']);
+    }
+
+    #[Test]
     public function ignores_a_field_with_translate_false_in_a_secondary_language_and_points_to_the_default_language(): void
     {
         $props = $this->multilang();

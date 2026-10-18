@@ -12,6 +12,7 @@ use JohannSchopplich\Copilot\Agents\Tool;
 use JohannSchopplich\Copilot\Agents\ToolError;
 use Kirby\Api\Controller\Changes;
 use Kirby\Cms\App;
+use Kirby\Cms\File;
 use Kirby\Cms\Site;
 use Kirby\Content\Lock;
 use Kirby\Data\Json;
@@ -116,6 +117,8 @@ final class PrepareChanges
             $fields = Fields::for($model, $language);
             $current = $fields->fill($read())->toFormValues();
 
+            $isNewTranslation = !ContentVersion::hasTranslation(ContentVersion::source($model, $language), $language);
+
             $fields->submit($values);
             ActiveContent::refuseIntroduced($fields, array_keys($values), $current);
             FieldInput::refuseDropped($fields, $values, $digest->fields);
@@ -150,6 +153,10 @@ final class PrepareChanges
                 $result['inserted'] = $editResult['inserted'];
             }
 
+            if ($isNewTranslation) {
+                $notices = [...$notices, ...self::untranslatedNotices($digest, $values)];
+            }
+
             if ($model instanceof Site) {
                 $notices[] = 'The Panel\'s list of changes leaves out the site, so tell the user to open the site in the Panel.';
             }
@@ -160,6 +167,26 @@ final class PrepareChanges
 
             return $result;
         });
+    }
+
+    /**
+     * Names the fields a new translation took over from the default
+     * language, since Kirby copies the values not sent into it.
+     *
+     * @return list<string>
+     */
+    private static function untranslatedNotices(ContentDigest $digest, array $values): array
+    {
+        $default = App::instance()->defaultLanguage();
+        $content = $digest->model->version('latest')->content($default);
+        $names = array_filter(
+            [...($digest->model instanceof File ? [] : ['title']), ...array_keys(array_filter($digest->fields, fn (array $field) => $field['translate'] && !$field['disabled']))],
+            fn (string $name) => !array_key_exists($name, $values) && $content->get($name)->isNotEmpty()
+        );
+
+        return $names === [] ? [] : [
+            "This started the {$digest->language->name()} translation, and Kirby copied the {$default->name()} values of the fields not sent into it, so these still hold {$default->name()} text: " . implode(', ', $names) . '.'
+        ];
     }
 
     /**
