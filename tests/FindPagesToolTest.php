@@ -39,7 +39,7 @@ final class FindPagesToolTest extends McpToolTestCase
                 'panelUrl' => 'https://example.com/panel/pages/notes+first',
                 'hasChanges' => false
             ],
-            $result['pages'][0]
+            array_diff_key($result['pages'][0], ['modified' => true])
         );
         $this->assertNull($result['pages'][2]['url']);
     }
@@ -170,6 +170,19 @@ final class FindPagesToolTest extends McpToolTestCase
 
         $this->assertSame(['notes/first', 'notes/third', 'notes/second'], array_column($result['pages'], 'id'));
         $this->assertSame('Zebra note', $result['pages'][0]['title']);
+    }
+
+    #[Test]
+    public function returns_and_sorts_by_the_time_the_content_was_last_saved(): void
+    {
+        self::writeContent('notes/notes.txt', ['Title' => 'Notes']);
+        self::writeContent('notes/1_old/note.txt', ['Title' => 'Old'], 1700000000);
+        self::writeContent('notes/2_new/note.txt', ['Title' => 'New'], 1750000000);
+
+        $pages = $this->callTool('find_pages', ['parent' => 'notes', 'sortBy' => 'modified', 'direction' => 'desc'])['structuredContent']['pages'];
+
+        $this->assertSame(['notes/new', 'notes/old'], array_column($pages, 'id'));
+        $this->assertSame([date('c', 1750000000), date('c', 1700000000)], array_column($pages, 'modified'));
     }
 
     #[Test]
