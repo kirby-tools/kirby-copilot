@@ -173,7 +173,7 @@ final class GetContent
             $result['files'] = $files->limit(self::FILE_LIMIT)->values(fn (File $file) => ModelSummary::file($file, $language));
 
             if ($files->count() > self::FILE_LIMIT) {
-                $notices[] = 'Lists the first ' . self::FILE_LIMIT . " of {$files->count()} files.";
+                $notices[] = 'Lists the first ' . self::FILE_LIMIT . " of {$files->count()} files. find_files with `parent` lists the rest.";
             }
         }
 
