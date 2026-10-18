@@ -75,7 +75,7 @@ final class GetContentToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function names_who_else_made_the_unsaved_changes_after_their_lock_ends(): void
+    public function names_who_made_the_unsaved_changes_after_their_lock_ends(): void
     {
         self::writeContent('memo/default.txt', ['Title' => 'Memo']);
         // Kirby's lock ends ten minutes after the last edit.

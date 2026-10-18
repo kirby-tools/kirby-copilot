@@ -48,7 +48,7 @@ final class PrepareChangesToolTest extends McpToolTestCase
         $this->assertTrue($result['hasChanges']);
         $content = $this->read();
         $this->assertSame($content['etag'], $result['etag']);
-        $this->assertNull($content['changesBy']);
+        $this->assertSame('Ada', $content['changesBy']);
         $this->assertSame('https://example.com/panel/pages/notes+first/preview/compare', $result['panelUrl']);
 
         $page = $this->app()->page('notes/first');
