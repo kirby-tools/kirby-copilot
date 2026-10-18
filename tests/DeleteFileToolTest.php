@@ -35,14 +35,14 @@ final class DeleteFileToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function refuses_a_file_with_unsaved_changes(): void
+    public function refuses_a_file_another_user_edits(): void
     {
-        self::writeContent('notes/_changes/notes.md.txt', ['Alt' => 'Edited notes', 'Lock' => 'ada']);
+        self::writeContent('notes/_changes/notes.md.txt', ['Alt' => 'Edited notes', 'Lock' => 'grace']);
 
-        $result = $this->callTool('delete_file', ['file' => 'notes/notes.md'], $this->props());
+        $result = $this->callTool('delete_file', ['file' => 'notes/notes.md'], $this->props(['users' => [1 => ['id' => 'grace', 'email' => 'grace@example.com', 'role' => 'editor']]]));
 
         $this->assertTrue($result['isError']);
-        $this->assertSame('The file has unsaved changes, which someone may still be working on. Ask the user whether to discard them, then try again.', $result['content'][0]['text']);
+        $this->assertSame('grace@example.com is editing this content in the Panel. Try again once they leave its view, or 10 minutes after their last edit.', $result['content'][0]['text']);
         $this->assertFileExists(self::indexRoot() . '/content/notes/notes.md');
     }
 

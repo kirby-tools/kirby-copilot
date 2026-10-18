@@ -6,12 +6,12 @@ namespace JohannSchopplich\Copilot\Agents\Tools;
 
 use JohannSchopplich\Copilot\Agents\AgentWrites;
 use JohannSchopplich\Copilot\Agents\ConnectionPermission;
-use JohannSchopplich\Copilot\Agents\ContentVersion;
 use JohannSchopplich\Copilot\Agents\Tool;
 use JohannSchopplich\Copilot\Agents\ToolError;
 use Kirby\Cms\File;
 use Kirby\Cms\Files;
 use Kirby\Cms\PageRules;
+use Kirby\Content\LockedContentException;
 
 final class DeletePage
 {
@@ -20,7 +20,7 @@ final class DeletePage
         return new Tool(
             name: 'delete_page',
             title: 'Delete page',
-            description: 'Deletes a page or a draft with its files, for good. Call it only when the user asks. A page with subpages, or with unsaved changes to it or its files, can\'t be deleted: ask the user before you delete the subpages or discard the changes.',
+            description: 'Deletes a page or a draft with its files and unsaved changes, for good. Call it only when the user asks. A page with subpages can\'t be deleted: ask the user before you delete the subpages.',
             inputSchema: [
                 'type' => 'object',
                 'properties' => [
@@ -40,7 +40,6 @@ final class DeletePage
         $page = $arguments->page('page');
 
         return AgentWrites::lock(function () use ($page) {
-            // Refusals that discarding changes can't lift, Kirby's and the protected files below, come first, so an agent never asks the user to discard someone's work for a page it still can't delete.
             PageRules::delete($page);
 
             // Kirby deletes the page's files one by one, so a file it refuses to delete would stop the deletion after others are gone.
@@ -50,14 +49,9 @@ final class DeletePage
                 throw new ToolError('The account may not delete these files of the page, which deleting it would delete too: ' . self::fileList($protectedFiles) . '.');
             }
 
-            if ($page->version('changes')->exists('*')) {
-                throw new ToolError('The page has unsaved changes' . ContentVersion::inChangedLanguages($page) . ', which someone may still be working on. Ask the user whether to discard them, then try again.');
-            }
-
-            $changedFiles = $page->files()->filter(fn (File $file) => $file->version('changes')->exists('*'));
-
-            if ($changedFiles->count() > 0) {
-                throw new ToolError('Files of the page have unsaved changes, which someone may still be working on: ' . self::fileList($changedFiles) . '. Ask the user whether to discard them, then try again.');
+            // As the Panel's delete button, since Kirby deletes a page another user edits.
+            if ($page->lock()->isLocked()) {
+                throw new LockedContentException($page->lock());
             }
 
             $page->delete();

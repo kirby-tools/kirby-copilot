@@ -33,31 +33,26 @@ final class DeletePageToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function refuses_a_page_with_unsaved_changes(): void
+    public function deletes_a_page_with_the_account_s_unsaved_changes(): void
     {
         self::writeContent('notes/1_first/_changes/note.txt', ['Title' => 'First note, edited', 'Lock' => 'ada']);
 
         $result = $this->callTool('delete_page', ['page' => 'notes/first'], $this->props());
 
-        $this->assertTrue($result['isError']);
-        $this->assertSame('The page has unsaved changes, which someone may still be working on. Ask the user whether to discard them, then try again.', $result['content'][0]['text']);
-        $this->assertDirectoryExists(self::indexRoot() . '/content/notes/1_first');
+        $this->assertFalse($result['isError'], $result['content'][0]['text']);
+        $this->assertDirectoryDoesNotExist(self::indexRoot() . '/content/notes/1_first');
     }
 
     #[Test]
-    public function refuses_a_page_whose_files_have_unsaved_changes(): void
+    public function refuses_a_page_another_user_edits_before_deleting_its_files(): void
     {
         F::write(self::indexRoot() . '/content/notes/1_first/a.md', 'A');
-        F::write(self::indexRoot() . '/content/notes/1_first/b.md', 'B');
-        F::write(self::indexRoot() . '/content/notes/1_first/c.md', 'C');
-        F::write(self::indexRoot() . '/content/notes/1_first/c.md.txt', 'Template: secret');
-        self::writeContent('notes/1_first/_changes/a.md.txt', ['Alt' => 'A, edited', 'Lock' => 'ada']);
-        self::writeContent('notes/1_first/_changes/c.md.txt', ['Alt' => 'C, edited', 'Template' => 'secret', 'Lock' => 'ada']);
+        self::writeContent('notes/1_first/_changes/note.txt', ['Title' => 'First note, edited', 'Lock' => 'grace']);
 
-        $result = $this->callTool('delete_page', ['page' => 'notes/first'], $this->props(['blueprints' => ['files/secret' => ['options' => ['access' => false]]]]));
+        $result = $this->callTool('delete_page', ['page' => 'notes/first'], $this->props(['users' => [1 => ['id' => 'grace', 'email' => 'grace@example.com', 'role' => 'editor']]]));
 
         $this->assertTrue($result['isError']);
-        $this->assertSame('Files of the page have unsaved changes, which someone may still be working on: a.md, a file the account may not access. Ask the user whether to discard them, then try again.', $result['content'][0]['text']);
+        $this->assertSame('grace@example.com is editing this content in the Panel. Try again once they leave its view, or 10 minutes after their last edit.', $result['content'][0]['text']);
         $this->assertFileExists(self::indexRoot() . '/content/notes/1_first/a.md');
     }
 
@@ -67,7 +62,6 @@ final class DeletePageToolTest extends McpToolTestCase
         F::write(self::indexRoot() . '/content/notes/1_first/a.md', 'A');
         F::write(self::indexRoot() . '/content/notes/1_first/b.md', 'B');
         F::write(self::indexRoot() . '/content/notes/1_first/b.md.txt', 'Template: secret');
-        self::writeContent('notes/1_first/_changes/note.txt', ['Title' => 'First, edited', 'Lock' => 'ada']);
 
         $result = $this->callTool('delete_page', ['page' => 'notes/first'], $this->props([
             'blueprints' => ['files/secret' => ['options' => ['access' => false]]],
@@ -80,10 +74,9 @@ final class DeletePageToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function refuses_a_page_with_subpages_before_its_unsaved_changes_or_files_the_account_may_not_delete(): void
+    public function refuses_a_page_with_subpages_before_files_the_account_may_not_delete(): void
     {
         F::write(self::indexRoot() . '/content/notes/a.md', 'A');
-        self::writeContent('notes/_changes/notes.txt', ['Title' => 'Notes, edited', 'Lock' => 'ada']);
 
         $result = $this->callTool('delete_page', ['page' => 'notes'], $this->props(['users' => [['role' => 'archivist']]]));
 

@@ -6,9 +6,8 @@ namespace JohannSchopplich\Copilot\Agents\Tools;
 
 use JohannSchopplich\Copilot\Agents\AgentWrites;
 use JohannSchopplich\Copilot\Agents\ConnectionPermission;
-use JohannSchopplich\Copilot\Agents\ContentVersion;
 use JohannSchopplich\Copilot\Agents\Tool;
-use JohannSchopplich\Copilot\Agents\ToolError;
+use Kirby\Content\LockedContentException;
 
 final class DeleteFile
 {
@@ -17,7 +16,7 @@ final class DeleteFile
         return new Tool(
             name: 'delete_file',
             title: 'Delete file',
-            description: 'Deletes a file with its content, such as its alt text, for good. Call it only when the user asks. Fields that reference the file keep the reference. A file with unsaved changes can\'t be deleted: ask the user before you discard them.',
+            description: 'Deletes a file with its content, such as its alt text, and its unsaved changes, for good. Call it only when the user asks. Fields that reference the file keep the reference.',
             inputSchema: [
                 'type' => 'object',
                 'properties' => [
@@ -37,8 +36,9 @@ final class DeleteFile
         $file = $arguments->file('file');
 
         return AgentWrites::lock(function () use ($file) {
-            if ($file->version('changes')->exists('*')) {
-                throw new ToolError('The file has unsaved changes' . ContentVersion::inChangedLanguages($file) . ', which someone may still be working on. Ask the user whether to discard them, then try again.');
+            // As the Panel's delete button, since Kirby deletes a file another user edits.
+            if ($file->lock()->isLocked()) {
+                throw new LockedContentException($file->lock());
             }
 
             $file->delete();
