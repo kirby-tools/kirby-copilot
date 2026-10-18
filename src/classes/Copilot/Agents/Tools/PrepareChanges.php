@@ -10,7 +10,6 @@ use JohannSchopplich\Copilot\Agents\ConnectionPermission;
 use JohannSchopplich\Copilot\Agents\ContentVersion;
 use JohannSchopplich\Copilot\Agents\Tool;
 use JohannSchopplich\Copilot\Agents\ToolError;
-use JohannSchopplich\Copilot\FieldDigest;
 use Kirby\Api\Controller\Changes;
 use Kirby\Cms\App;
 use Kirby\Cms\Site;
@@ -104,21 +103,22 @@ final class PrepareChanges
             throw new ToolError(FieldInput::UPDATE_REFUSAL);
         }
 
-        $editResult = FieldEdits::apply($model, $language, $edits, $input);
-        [$values, $ignored] = FieldInput::split($model, $language, $editResult['values']);
+        $digest = new ContentDigest($model, $language);
+        $editResult = FieldEdits::apply($digest, $edits, $input);
+        [$values, $ignored] = FieldInput::split($digest, $editResult['values']);
 
         if ($values === []) {
             throw new ToolError('None of the fields can be written. ' . implode(' ', array_map(fn (array $field) => "{$field['name']}: {$field['reason']}", $ignored)));
         }
 
-        return AgentWrites::write($model, $language, $etag, function () use ($model, $language, $values, $ignored, $editResult) {
+        return AgentWrites::write($model, $language, $etag, function () use ($model, $language, $digest, $values, $ignored, $editResult) {
             $read = fn () => ContentVersion::source($model, $language)->content($language)->toArray();
             $fields = Fields::for($model, $language);
             $current = $fields->fill($read())->toFormValues();
 
             $fields->submit($values);
             ActiveContent::refuseIntroduced($fields, array_keys($values), $current);
-            FieldInput::refuseDropped($fields, $values, FieldDigest::for($model, $language)['fields']);
+            FieldInput::refuseDropped($fields, $values, $digest->fields);
 
             // Kirby refuses changes another user holds open, but hands over the ones they left –
             // without a name once the Panel unlocked them on leaving the view. Without locking, changes are no one's.
@@ -130,9 +130,8 @@ final class PrepareChanges
             Changes::save($model, $values);
 
             $fields->reset()->fill($read());
-            $digest = FieldDigest::for($model, $language);
-            $before = GetContent::compactValues($digest['fields'], $current, $digest['fieldsets']);
-            $after = GetContent::compactValues($digest['fields'], $fields->toFormValues(), $digest['fieldsets']);
+            $before = GetContent::compactValues($digest, $digest->fields, $current);
+            $after = GetContent::compactValues($digest, $digest->fields, $fields->toFormValues());
             $result = [
                 'changed' => array_values(array_filter(array_map(
                     fn (string $name) => ($before[$name] ?? null) === ($after[$name] ?? null) ? null : [

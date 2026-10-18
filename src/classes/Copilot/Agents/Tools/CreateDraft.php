@@ -9,7 +9,6 @@ use JohannSchopplich\Copilot\Agents\ConnectionPermission;
 use JohannSchopplich\Copilot\Agents\ContentVersion;
 use JohannSchopplich\Copilot\Agents\Tool;
 use JohannSchopplich\Copilot\Agents\ToolError;
-use JohannSchopplich\Copilot\FieldDigest;
 use Kirby\Cms\Language;
 use Kirby\Cms\Page;
 use Kirby\Cms\Site;
@@ -74,7 +73,8 @@ final class CreateDraft
             }
         }
 
-        [$values, $fieldIgnored] = FieldInput::split($draft, $language, $input);
+        $digest = new ContentDigest($draft, $language);
+        [$values, $fieldIgnored] = FieldInput::split($digest, $input);
 
         $fields = Fields::for($draft, $language);
         $fields->fill([...$fields->defaults(), ...$values]);
@@ -89,7 +89,7 @@ final class CreateDraft
 
         $fields->fill(['title' => $title]);
         ActiveContent::refuseIntroduced($fields, [...array_keys($values), 'title']);
-        FieldInput::refuseDropped($fields, $values, FieldDigest::for($draft, $language)['fields']);
+        FieldInput::refuseDropped($fields, $values, $digest->fields);
 
         $page = $parent->createChild([
             'slug' => $resolvedInput['slug'] ?: $title,

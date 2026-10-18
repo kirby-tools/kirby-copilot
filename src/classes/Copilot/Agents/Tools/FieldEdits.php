@@ -4,16 +4,12 @@ declare(strict_types = 1);
 
 namespace JohannSchopplich\Copilot\Agents\Tools;
 
-use Closure;
 use JohannSchopplich\Copilot\Agents\ContentVersion;
 use JohannSchopplich\Copilot\Agents\ToolError;
 use JohannSchopplich\Copilot\FieldDigest;
 use Kirby\Cms\Block;
 use Kirby\Cms\File;
-use Kirby\Cms\Language;
 use Kirby\Cms\Layout;
-use Kirby\Cms\Page;
-use Kirby\Cms\Site;
 use Kirby\Form\Field\BlocksField;
 use Kirby\Form\Fields;
 
@@ -27,12 +23,6 @@ final class FieldEdits
 {
     public const OPERATIONS = ['replace', 'set', 'insert', 'move', 'remove'];
 
-    /** @var array<string, array> Digest fields by name */
-    private array $fields;
-
-    /** @var array<string, array> */
-    private array $fieldsets;
-
     private Fields|null $form = null;
 
     /** @var list<array{edit: int, id: string, columns?: list<array{id: string, blocks: list<string>}>}> */
@@ -42,12 +32,8 @@ final class FieldEdits
     private array $placedAfter = [];
 
     private function __construct(
-        private readonly Site|Page|File $model,
-        private readonly Language $language
+        private readonly ContentDigest $digest
     ) {
-        $digest = FieldDigest::for($model, $language);
-        $this->fields = array_column($digest['fields'], null, 'name');
-        $this->fieldsets = $digest['fieldsets'];
     }
 
     /**
@@ -55,13 +41,13 @@ final class FieldEdits
      * @param array<string, mixed> $input The values sent in `fields`
      * @return array{values: array<string, mixed>, inserted: list<array{edit: int, id: string, columns?: list<array{id: string, blocks: list<string>}>}>} `$input` with the edited fields added, and what each edit inserted
      */
-    public static function apply(Site|Page|File $model, Language $language, array $edits, array $input): array
+    public static function apply(ContentDigest $digest, array $edits, array $input): array
     {
         if ($edits === []) {
             return ['values' => $input, 'inserted' => []];
         }
 
-        $fieldEdits = new self($model, $language);
+        $fieldEdits = new self($digest);
         $values = [];
 
         foreach ($edits as $index => $edit) {
@@ -94,7 +80,7 @@ final class FieldEdits
             return $this->replace($name, $value, self::string($edit, 'old'), self::string($edit, 'new', allowEmpty: true), isset($edit['id']) ? self::string($edit, 'id') : null);
         }
 
-        $field = $this->fields[$name] ?? null;
+        $field = $this->digest->fields[$name] ?? null;
 
         if (!is_array($value) || !in_array($field['type'] ?? null, ['blocks', 'layout'], true)) {
             throw new ToolError("{$name} holds no blocks or layout rows. Send it whole in `fields`.");
@@ -118,30 +104,40 @@ final class FieldEdits
      */
     private function currentValue(string $name): mixed
     {
-        if ($name === 'title' && !$this->model instanceof File) {
-            return ContentVersion::source($this->model, $this->language)->content($this->language)->get('title')->value();
+        $model = $this->digest->model;
+        $language = $this->digest->language;
+
+        if ($name === 'title' && !$model instanceof File) {
+            return ContentVersion::source($model, $language)->content($language)->get('title')->value();
         }
 
-        $field = $this->fields[$name] ?? null;
+        $field = $this->digest->fields[$name] ?? null;
 
         if ($field === null) {
-            [, $ignored] = FieldInput::split($this->model, $this->language, [$name => null]);
+            [, $ignored] = FieldInput::split($this->digest, [$name => null]);
 
             throw new ToolError("{$name}: {$ignored[0]['reason']}");
         }
 
-        return GetContent::values($this->model, $this->language, [$field], $this->fieldsets)[$name];
+        return GetContent::values($this->digest, [$field])[$name];
     }
 
     private function replace(string $name, mixed $value, string $old, string $new, string|null $id): mixed
     {
-        $field = $this->fields[$name] ?? ['name' => $name, 'type' => 'text'];
+        $field = $this->digest->fields[$name] ?? ['name' => $name, 'type' => 'text'];
         $count = 0;
         $replaceText = function (string $text) use ($old, $new, &$count) {
             $text = str_replace($old, $new, $text, $replacements);
             $count += $replacements;
 
             return $text;
+        };
+        // Leaves out ids, references, and choices.
+        $replace = fn (array $field, mixed $value) => match (true) {
+            in_array($field['type'], [...FieldDigest::REFERENCE_TYPES, ...FieldDigest::CHOICE_TYPES], true) => $value,
+            is_string($value) => $replaceText($value),
+            $field['type'] === 'entries' && is_array($value) => array_map(fn (mixed $entry) => is_string($entry) ? $replaceText($entry) : $entry, $value),
+            default => $value
         };
 
         if (in_array($field['type'], [...FieldDigest::REFERENCE_TYPES, ...FieldDigest::CHOICE_TYPES], true) || (!is_string($value) && !is_array($value))) {
@@ -150,13 +146,13 @@ final class FieldEdits
 
         if ($id === null) {
             $where = $name;
-            $value = $this->walkText($field, $value, $replaceText);
+            $value = $this->digest->map($field, $value, $replace);
         } elseif (!is_array($value)) {
             throw new ToolError("{$name} holds no blocks. Leave out `id`.");
         } else {
             $item = $this->locate($field, $value, $id, ['block']);
             $where = "the block {$id} of {$name}";
-            $value = self::replaceAt($value, $item['path'], $this->walkBlock($item['parentField'], self::valueAt($value, $item['path']), $replaceText));
+            $value = self::replaceAt($value, $item['path'], $this->digest->mapBlock($item['parentField'], $item['value'], $replace));
         }
 
         if ($count !== 1) {
@@ -175,7 +171,7 @@ final class FieldEdits
         }
 
         $item = $this->locate($field, $value, $id, ['block', 'layout']);
-        $target = self::valueAt($value, $item['path']);
+        $target = $item['value'];
 
         if ($item['kind'] === 'block' && $name === 'isHidden') {
             if (!is_bool($edit['value'])) {
@@ -186,7 +182,7 @@ final class FieldEdits
         }
 
         $isBlock = $item['kind'] === 'block';
-        $subFields = $isBlock ? $this->fieldset($item['parentField'], $target['type'])['fields'] ?? [] : $item['parentField']['settings'] ?? [];
+        $subFields = $isBlock ? $this->digest->fieldset($item['parentField'], $target['type'])['fields'] ?? [] : $item['parentField']['settings'] ?? [];
         $names = array_column($subFields, 'name');
         $name = strtolower($name);
 
@@ -229,7 +225,7 @@ final class FieldEdits
     private function move(array $field, array $value, string $id, array $edit): array
     {
         $item = $this->locate($field, $value, $id, ['block', 'layout']);
-        $movedItem = self::valueAt($value, $item['path']);
+        $movedItem = $item['value'];
         $value = self::removeAt($value, $item['path']);
         $place = $this->place($field, $value, $edit);
 
@@ -239,7 +235,7 @@ final class FieldEdits
                 : 'A block moves only next to another block or `into` a layout column.');
         }
 
-        if ($item['kind'] === 'block' && $this->fieldset($place['parentField'], $movedItem['type']) === null) {
+        if ($item['kind'] === 'block' && $this->digest->fieldset($place['parentField'], $movedItem['type']) === null) {
             throw new ToolError("The block {$id} is of the type {$movedItem['type']}, which its new place doesn't take.");
         }
 
@@ -296,10 +292,10 @@ final class FieldEdits
      */
     private function newBlock(array $field, BlocksField $kirbyField, string $type, array $content): array
     {
-        $fieldset = $this->fieldset($field, $type);
+        $fieldset = $this->digest->fieldset($field, $type);
 
         if ($fieldset === null) {
-            throw new ToolError(FieldInput::unknownBlockTypeReason($field, $type, $this->fieldsets));
+            throw new ToolError(FieldInput::unknownBlockTypeReason($this->digest, $field, $type));
         }
 
         self::refuseUnknownNames($content, $fieldset['fields'], "The block type {$type}");
@@ -310,7 +306,7 @@ final class FieldEdits
         $form->submit(input: $content);
         FieldInput::refuseDropped($form, $content, $fieldset['fields']);
         $block = Block::factory(['content' => $form->toFormValues(), 'type' => $type])->toArray();
-        $block['content'] = GetContent::compactValues($fieldset['fields'], $block['content'], $this->fieldsets);
+        $block['content'] = GetContent::compactValues($this->digest, $fieldset['fields'], $block['content']);
 
         return $block;
     }
@@ -343,7 +339,7 @@ final class FieldEdits
         FieldInput::refuseDropped($form, $settings, $field['settings'] ?? []);
 
         return Layout::factory([
-            'attrs' => GetContent::compactValues($field['settings'] ?? [], $form->toFormValues(), $this->fieldsets),
+            'attrs' => GetContent::compactValues($this->digest, $field['settings'] ?? [], $form->toFormValues()),
             'columns' => array_map(fn (array $column) => [
                 'blocks' => array_map(
                     fn (mixed $block) => is_array($block) ? $this->newBlock($field, $kirbyField, self::string($block, 'type'), self::content($block)) : throw new ToolError('Each block in `blocks` needs a `type` and its `content`.'),
@@ -360,7 +356,7 @@ final class FieldEdits
      */
     private function locate(array $field, array $value, string $id, array $kinds): array
     {
-        foreach ($this->items($field, $value, [], []) as $item) {
+        foreach ($this->digest->items($field, $value) as $item) {
             if ($item['id'] === $id) {
                 if (!in_array($item['kind'], $kinds, true)) {
                     throw new ToolError("{$id} is a {$item['label']}, which this edit doesn't take.");
@@ -374,58 +370,6 @@ final class FieldEdits
     }
 
     /**
-     * Lists the blocks, layout rows, and layout columns of a blocks or layout
-     * value with their paths. `parentField` is the blocks or layout field they sit
-     * in, and `steps` names the blocks a nested blocks or layout field sits in.
-     *
-     * @param list<int|string> $path
-     * @param list<array{0: string, 1: string}> $steps
-     * @return iterable<array{id: string|null, kind: string, label: string, path: list<int|string>, parentField: array, steps: list<array{0: string, 1: string}>}>
-     */
-    private function items(array $field, array $value, array $path, array $steps): iterable
-    {
-        if ($field['type'] === 'blocks') {
-            yield from $this->blockItems($field, $value, $path, $steps);
-
-            return;
-        }
-
-        foreach ($value as $index => $row) {
-            if (!is_array($row)) {
-                continue;
-            }
-
-            yield ['id' => $row['id'] ?? null, 'kind' => 'layout', 'label' => 'layout row', 'path' => [...$path, $index], 'parentField' => $field, 'steps' => $steps];
-
-            foreach ($row['columns'] ?? [] as $columnIndex => $column) {
-                $columnPath = [...$path, $index, 'columns', $columnIndex];
-
-                yield ['id' => $column['id'] ?? null, 'kind' => 'column', 'label' => 'layout column', 'path' => $columnPath, 'parentField' => $field, 'steps' => $steps];
-                yield from $this->blockItems($field, $column['blocks'] ?? [], [...$columnPath, 'blocks'], $steps);
-            }
-        }
-    }
-
-    private function blockItems(array $field, array $blocks, array $path, array $steps): iterable
-    {
-        foreach ($blocks as $index => $block) {
-            if (!is_array($block)) {
-                continue;
-            }
-
-            yield ['id' => $block['id'] ?? null, 'kind' => 'block', 'label' => 'block', 'path' => [...$path, $index], 'parentField' => $field, 'steps' => $steps];
-
-            foreach ($this->fieldset($field, $block['type'] ?? '')['fields'] ?? [] as $subField) {
-                $subValue = $block['content'][$subField['name']] ?? null;
-
-                if (in_array($subField['type'], ['blocks', 'layout'], true) && is_array($subValue)) {
-                    yield from $this->items($subField, $subValue, [...$path, $index, 'content', $subField['name']], [...$steps, [$block['type'], $subField['name']]]);
-                }
-            }
-        }
-    }
-
-    /**
      * Returns the Kirby field behind a blocks or layout field, or behind one
      * nested in the blocks that `$steps` names.
      *
@@ -433,7 +377,7 @@ final class FieldEdits
      */
     private function kirbyField(string $name, array $steps): BlocksField
     {
-        $this->form ??= Fields::for($this->model, $this->language);
+        $this->form ??= Fields::for($this->digest->model, $this->digest->language);
         $field = $this->form->field($name);
 
         foreach ($steps as [$type, $subName]) {
@@ -444,87 +388,12 @@ final class FieldEdits
     }
 
     /**
-     * Replaces every text in a value with what `$transform` returns for it,
-     * leaving out ids, references, and choices.
-     */
-    private function walkText(array $field, mixed $value, Closure $transform): mixed
-    {
-        if (in_array($field['type'], [...FieldDigest::REFERENCE_TYPES, ...FieldDigest::CHOICE_TYPES], true)) {
-            return $value;
-        }
-
-        if (is_string($value)) {
-            return $transform($value);
-        }
-
-        if (!is_array($value)) {
-            return $value;
-        }
-
-        return match ($field['type']) {
-            'structure' => array_map(fn (mixed $row) => is_array($row) ? $this->walkFields($field['fields'] ?? [], $row, $transform) : $row, $value),
-            'object' => $this->walkFields($field['fields'] ?? [], $value, $transform),
-            'entries' => array_map(fn (mixed $entry) => is_string($entry) ? $transform($entry) : $entry, $value),
-            'blocks' => array_map(fn (mixed $block) => is_array($block) ? $this->walkBlock($field, $block, $transform) : $block, $value),
-            'layout' => array_map(fn (mixed $row) => is_array($row) ? $this->walkLayoutRow($field, $row, $transform) : $row, $value),
-            default => $value
-        };
-    }
-
-    private function walkFields(array $fields, array $values, Closure $transform): array
-    {
-        foreach ($fields as $field) {
-            if (array_key_exists($field['name'], $values)) {
-                $values[$field['name']] = $this->walkText($field, $values[$field['name']], $transform);
-            }
-        }
-
-        return $values;
-    }
-
-    private function walkBlock(array $field, array $block, Closure $transform): array
-    {
-        $fieldset = $this->fieldset($field, $block['type'] ?? '');
-
-        if ($fieldset !== null && is_array($block['content'] ?? null)) {
-            $block['content'] = $this->walkFields($fieldset['fields'], $block['content'], $transform);
-        }
-
-        return $block;
-    }
-
-    private function walkLayoutRow(array $layout, array $row, Closure $transform): array
-    {
-        $row['attrs'] = $this->walkFields($layout['settings'] ?? [], $row['attrs'] ?? [], $transform);
-
-        foreach ($row['columns'] ?? [] as $index => $column) {
-            $row['columns'][$index]['blocks'] = array_map(fn (array $block) => $this->walkBlock($layout, $block, $transform), $column['blocks'] ?? []);
-        }
-
-        return $row;
-    }
-
-    /**
-     * Returns the fieldset that a blocks or layout field has for a block type.
-     */
-    private function fieldset(array $field, string $type): array|null
-    {
-        foreach ($field['fieldsets'] ?? [] as $key) {
-            if ($this->fieldsets[$key]['type'] === $type) {
-                return $this->fieldsets[$key];
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Kirby's forms skip a field with `translate: false` outside the default
      * language, so its value would be lost without a word.
      */
     private function refuseSharedFields(array $content, array $fields): void
     {
-        if ($this->language->isDefault()) {
+        if ($this->digest->language->isDefault()) {
             return;
         }
 

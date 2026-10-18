@@ -5,7 +5,6 @@ declare(strict_types = 1);
 namespace JohannSchopplich\Copilot\Agents\Tools;
 
 use JohannSchopplich\Copilot\Agents\ToolError;
-use JohannSchopplich\Copilot\FieldDigest;
 use Kirby\Cms\Blocks;
 use Kirby\Cms\File;
 use Kirby\Cms\Language;
@@ -33,16 +32,16 @@ final class FieldInput
      *
      * @return array{0: array<string, mixed>, 1: list<array{name: string, reason: string}>}
      */
-    public static function split(Site|Page|File $model, Language $language, array $input): array
+    public static function split(ContentDigest $digest, array $input): array
     {
-        $digest = FieldDigest::for($model, $language);
-        $fields = array_column($digest['fields'], null, 'name');
+        $model = $digest->model;
+        $language = $digest->language;
         $values = [];
         $ignored = [];
 
         foreach ($input as $name => $value) {
             $name = strtolower((string)$name);
-            $field = $fields[$name] ?? null;
+            $field = $digest->fields[$name] ?? null;
             $blueprintField = $model->blueprint()->field($name);
 
             $reason = match (true) {
@@ -57,7 +56,7 @@ final class FieldInput
 
             if ($reason === null) {
                 if (in_array($field['type'] ?? null, ['blocks', 'layout'], true)) {
-                    self::refuseUnknownBlocks($model, $language, $field, $value, $digest['fieldsets']);
+                    self::refuseUnknownBlocks($digest, $field, $value);
                 }
 
                 $values[$name] = $value;
@@ -69,12 +68,9 @@ final class FieldInput
         return [$values, $ignored];
     }
 
-    /**
-     * @param array<string, array> $fieldsets
-     */
-    public static function unknownBlockTypeReason(array $field, string $type, array $fieldsets): string
+    public static function unknownBlockTypeReason(ContentDigest $digest, array $field, string $type): string
     {
-        $types = array_map(fn (string $key) => $fieldsets[$key]['type'], $field['fieldsets'] ?? []);
+        $types = array_map(fn (string $key) => $digest->fieldsets[$key]['type'], $field['fieldsets'] ?? []);
 
         return "{$field['name']} takes no block of the type {$type}. Its types: " . implode(', ', $types) . '.';
     }
@@ -158,50 +154,39 @@ final class FieldInput
      * Kirby stores a block of a type its field doesn't take, and the site
      * renders it as nothing. A stored block of a type the blueprint has since
      * dropped stays, as in the Panel.
-     *
-     * @param array<string, array> $fieldsets
      */
-    private static function refuseUnknownBlocks(Site|Page|File $model, Language $language, array $field, mixed $value, array $fieldsets): void
+    private static function refuseUnknownBlocks(ContentDigest $digest, array $field, mixed $value): void
     {
         $items = match (true) {
             !is_string($value) => $value,
             $field['type'] === 'blocks' => Blocks::parse($value),
             default => Data::decode($value, type: 'json', fail: false)
         };
-        $types = array_map(fn (string $key) => $fieldsets[$key]['type'], $field['fieldsets'] ?? []);
-        $storedValue = GetContent::values($model, $language, [$field], $fieldsets)[$field['name']];
+        $storedValue = GetContent::values($digest, [$field])[$field['name']];
         $storedTypes = [];
 
-        foreach (self::blocks($field, $storedValue) as $block) {
-            if (is_array($block) && is_string($block['id'] ?? null)) {
-                $storedTypes[$block['id']] = $block['type'] ?? null;
+        foreach (is_array($storedValue) ? $digest->items($field, $storedValue) : [] as $item) {
+            if ($item['kind'] === 'block' && is_string($item['id'])) {
+                $storedTypes[$item['id']] = $item['value']['type'] ?? null;
             }
         }
 
-        foreach (self::blocks($field, $items) as $block) {
-            $type = $block['type'] ?? null;
+        foreach (is_array($items) ? $digest->items($field, $items) : [] as $item) {
+            if ($item['kind'] !== 'block') {
+                continue;
+            }
+
+            $type = $item['value']['type'] ?? null;
+            $parentField = $item['parentField'];
 
             if (!is_string($type)) {
-                throw new ToolError("Each block in {$field['name']} needs a `type` and its `content`, as get_content returns them.");
+                throw new ToolError("Each block in {$parentField['name']} needs a `type` and its `content`, as get_content returns them.");
             }
 
-            if (!in_array($type, $types, true) && (!is_string($block['id'] ?? null) || ($storedTypes[$block['id']] ?? null) !== $type)) {
-                throw new ToolError(self::unknownBlockTypeReason($field, $type, $fieldsets));
+            if ($digest->fieldset($parentField, $type) === null && (!is_string($item['id']) || ($storedTypes[$item['id']] ?? null) !== $type)) {
+                throw new ToolError(self::unknownBlockTypeReason($digest, $parentField, $type));
             }
         }
-    }
-
-    /**
-     * Lists the blocks of a blocks value, or of the columns of a layout value.
-     */
-    private static function blocks(array $field, mixed $items): array
-    {
-        $blocks = $field['type'] === 'blocks' ? $items : array_merge([], ...array_map(
-            fn (mixed $row) => array_merge([], ...array_map(fn (mixed $column) => $column['blocks'] ?? [], $row['columns'] ?? [])),
-            is_array($items) ? $items : []
-        ));
-
-        return is_array($blocks) ? $blocks : [];
     }
 
     /**

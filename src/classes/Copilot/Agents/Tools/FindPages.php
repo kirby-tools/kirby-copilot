@@ -8,7 +8,6 @@ use JohannSchopplich\Copilot\Agents\ConnectionPermission;
 use JohannSchopplich\Copilot\Agents\ContentVersion;
 use JohannSchopplich\Copilot\Agents\Tool;
 use JohannSchopplich\Copilot\Agents\ToolError;
-use JohannSchopplich\Copilot\FieldDigest;
 use Kirby\Cms\App;
 use Kirby\Cms\Language;
 use Kirby\Cms\Page;
@@ -120,9 +119,9 @@ final class FindPages
      */
     private static function values(Page $page, Language $language, array $names): array
     {
-        $digest = FieldDigest::for($page, $language);
-        $fields = array_values(array_filter($digest['fields'], fn (array $field) => in_array($field['name'], $names, true)));
+        $digest = new ContentDigest($page, $language);
+        $fields = array_values(array_intersect_key($digest->fields, array_flip($names)));
 
-        return array_map(GetContent::shortValue(...), GetContent::values($page, $language, $fields, $digest['fieldsets']));
+        return array_map(GetContent::shortValue(...), GetContent::values($digest, $fields));
     }
 }
