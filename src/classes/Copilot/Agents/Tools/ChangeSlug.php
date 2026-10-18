@@ -17,7 +17,7 @@ final class ChangeSlug
         return new Tool(
             name: 'change_slug',
             title: 'Change slug',
-            description: 'Changes the URL slug of a page in one language. The new URL is live at once. The default language\'s slug renames the page, and links to the old URL break. Another language\'s slug changes only that language\'s URL: links with the old translated slug break, while the default language\'s slug keeps working in that language too. Call it only when the user asks. Returns the page with its new URL.',
+            description: 'Changes the URL slug of a page in one language. A published page\'s new URL is live at once. The default language\'s slug renames the page, and links to the old URL break. Another language\'s slug changes only that language\'s URL: links with the old translated slug break, while the default language\'s slug keeps working in that language too. Call it only when the user asks. Returns the page with its new URL.',
             inputSchema: [
                 'type' => 'object',
                 'properties' => [

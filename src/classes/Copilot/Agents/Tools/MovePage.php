@@ -16,7 +16,7 @@ final class MovePage
         return new Tool(
             name: 'move_page',
             title: 'Move page',
-            description: 'Moves a page or a draft with its subpages and files below another parent, such as an archive. The parent must take pages with the page\'s template. The new URL is live at once, and links to the old one break. Call it only when the user asks. Returns the page with its new URL.',
+            description: 'Moves a page or a draft with its subpages and files below another parent, such as an archive. The parent must take pages with the page\'s template. A published page\'s new URL is live at once, and links to the old one break. Call it only when the user asks. Returns the page with its new URL.',
             inputSchema: [
                 'type' => 'object',
                 'properties' => [

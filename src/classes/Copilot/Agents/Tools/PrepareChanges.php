@@ -152,7 +152,7 @@ final class PrepareChanges
             }
 
             if ($model instanceof Site) {
-                $notices[] = 'The Panel\'s list of changes leaves out the site, so tell the editor to open the site in the Panel.';
+                $notices[] = 'The Panel\'s list of changes leaves out the site, so tell the user to open the site in the Panel.';
             }
 
             if ($notices !== []) {
