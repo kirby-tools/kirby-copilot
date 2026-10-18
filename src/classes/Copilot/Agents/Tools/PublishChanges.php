@@ -10,6 +10,7 @@ use JohannSchopplich\Copilot\Agents\ContentVersion;
 use JohannSchopplich\Copilot\Agents\Tool;
 use JohannSchopplich\Copilot\Agents\ToolError;
 use Kirby\Cms\Page;
+use Kirby\Exception\InvalidArgumentException;
 
 final class PublishChanges
 {
@@ -51,13 +52,15 @@ final class PublishChanges
         }
 
         return AgentWrites::write($model, $language, $etag, function () use ($changes, $language, $isDraft) {
-            $errors = $isDraft ? [] : $changes->errors($language);
+            try {
+                $changes->publish($language);
+            } catch (InvalidArgumentException $exception) {
+                if ($exception->getKey() !== 'error.form.incomplete') {
+                    throw $exception;
+                }
 
-            if ($errors !== []) {
-                throw new ToolError('The changes have validation errors, so they stay unpublished. Fix them with prepare_changes: ' . FieldInput::describeErrors($errors));
+                throw new ToolError('The changes have validation errors, so they stay unpublished. Fix them with prepare_changes: ' . FieldInput::describeErrors($exception->getDetails()));
             }
-
-            $changes->publish($language);
             $model = $changes->model();
 
             $result = ContentVersion::describe($model, $language);

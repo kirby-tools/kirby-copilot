@@ -143,7 +143,7 @@ final class PrepareChanges
                     array_keys($values)
                 ))),
                 'ignored' => $ignored,
-                'warnings' => FieldInput::warnings($fields),
+                'warnings' => FieldInput::warnings($fields, $language),
                 ...ContentVersion::describe($model, $language)
             ];
 

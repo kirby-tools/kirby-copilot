@@ -101,7 +101,7 @@ final class CreateDraft
         return [
             'page' => ModelSummary::page($page),
             'ignored' => [...$fieldIgnored, ...$ignored],
-            'warnings' => FieldInput::warnings($fields),
+            'warnings' => FieldInput::warnings($fields, $language),
             'etag' => ContentVersion::etag($page, $language)
         ];
     }

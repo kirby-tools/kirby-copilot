@@ -75,7 +75,7 @@ final class PublishChangesToolTest extends McpToolTestCase
     {
         // A multi-language site reads `note.en.txt` and `note.de.txt`, so the single-language files go.
         Dir::remove(self::indexRoot() . '/content/notes/1_first');
-        self::writeContent('notes/1_first/note.en.txt', ['Title' => 'First note', 'Intro' => 'Hello']);
+        self::writeContent('notes/1_first/note.en.txt', ['Title' => 'First note', 'Intro' => 'Hello', 'Date' => '2026-01-01']);
         self::writeContent('notes/1_first/note.de.txt', ['Title' => 'Erste Notiz', 'Intro' => 'Hallo']);
         self::writeContent('notes/1_first/_changes/note.en.txt', ['Title' => 'First note', 'Intro' => 'Hello, agent', 'Lock' => 'ada']);
         $props = $this->props([
@@ -83,10 +83,12 @@ final class PublishChangesToolTest extends McpToolTestCase
             'languages' => [
                 ['code' => 'en', 'name' => 'English', 'default' => true],
                 ['code' => 'de', 'name' => 'Deutsch']
-            ]
+            ],
+            // A required shared field, filled in the default language: a translation takes that value, so it neither warns nor blocks publishing there.
+            'blueprints' => ['pages/note' => ['fields' => ['date' => ['type' => 'date', 'required' => true, 'translate' => false]]]]
         ]);
 
-        $this->callTool('prepare_changes', [
+        $prepared = $this->callTool('prepare_changes', [
             'model' => 'notes/first',
             'language' => 'de',
             'etag' => $this->callTool('get_content', ['model' => 'notes/first', 'language' => 'de'], $props)['structuredContent']['etag'],
@@ -96,6 +98,7 @@ final class PublishChangesToolTest extends McpToolTestCase
         $etag = $this->callTool('get_content', ['model' => 'notes/first', 'language' => 'de'], $props)['structuredContent']['etag'];
         $result = $this->callTool('publish_changes', ['model' => 'notes/first', 'language' => 'de', 'etag' => $etag], $props);
 
+        $this->assertSame([], $prepared['structuredContent']['warnings']);
         $this->assertFalse($result['isError'], $result['content'][0]['text']);
         $this->assertSame('https://example.com/panel/pages/notes+first?language=de', $result['structuredContent']['panelUrl']);
 

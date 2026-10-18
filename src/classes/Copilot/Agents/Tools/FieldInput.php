@@ -99,15 +99,21 @@ final class FieldInput
 
     /**
      * Lists the validation errors of the filled fields, which saving ignores
-     * and making content public doesn't.
+     * and making content public doesn't. A field with one value for all
+     * languages is left out in another language, whose publishing checks
+     * the default language's value.
      *
      * @return list<array{field: string, message: string}>
      */
-    public static function warnings(Fields $fields): array
+    public static function warnings(Fields $fields, Language $language): array
     {
         $warnings = [];
 
         foreach ($fields->errors() as $name => $error) {
+            if (!$fields->field($name)->isTranslatable($language)) {
+                continue;
+            }
+
             foreach ($error['message'] as $message) {
                 $warnings[] = ['field' => $name, 'message' => $message];
             }
