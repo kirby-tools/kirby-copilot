@@ -64,7 +64,7 @@ final class ModelSummary
             'template' => $page->intendedTemplate()->name(),
             'status' => $page->status(),
             'url' => $page->isDraft() ? null : $page->url(),
-            'panelUrl' => $page->panel()->url()
+            'panelUrl' => ContentVersion::panelUrl($page, $language)
         ];
     }
 

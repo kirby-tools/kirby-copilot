@@ -85,7 +85,7 @@ final class FindPagesToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function returns_titles_urls_and_has_changes_in_the_requested_language(): void
+    public function returns_titles_urls_panel_urls_and_has_changes_in_the_requested_language(): void
     {
         $page = $this->callTool('find_pages', ['language' => 'de'], $this->multilangProps(), function (App $kirby) {
             $kirby->page('about')->version('changes')->save(['title' => 'About us'], 'en');
@@ -93,6 +93,7 @@ final class FindPagesToolTest extends McpToolTestCase
 
         $this->assertSame('Über uns', $page['title']);
         $this->assertSame('https://example.com/de/about', $page['url']);
+        $this->assertSame('https://example.com/panel/pages/about?language=de', $page['panelUrl']);
         $this->assertFalse($page['hasChanges']);
     }
 
