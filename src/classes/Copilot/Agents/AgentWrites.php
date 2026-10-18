@@ -35,9 +35,6 @@ final class AgentWrites
                 throw new ToolError("The content changed since your etag. Read it again with {$read} and base the call on what it holds now.");
             }
 
-            // `Changes::save()` and `discard()` take no language and write the current one.
-            App::instance()->setCurrentLanguage($language->code());
-
             $result = $write();
             self::record($model, $language);
 

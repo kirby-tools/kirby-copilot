@@ -227,7 +227,8 @@ final class Arguments
 
     /**
      * Makes the requested language, or the default one, Kirby's current
-     * language, which nested fields and page URLs follow.
+     * language, which nested fields, page URLs, `Changes::save()`, and
+     * `Changes::discard()` follow.
      */
     public function language(): Language
     {
