@@ -169,7 +169,7 @@ final class GetContent
         }
 
         if (!$model instanceof File && $names === null) {
-            $files = $model->files()->filter(fn (File $file) => $file->isListable());
+            $files = $model->files()->sorted()->filter(fn (File $file) => $file->isListable());
             $result['files'] = $files->limit(self::FILE_LIMIT)->values(fn (File $file) => ModelSummary::file($file, $language));
 
             if ($files->count() > self::FILE_LIMIT) {

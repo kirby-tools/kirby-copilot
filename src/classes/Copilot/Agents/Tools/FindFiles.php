@@ -68,7 +68,7 @@ final class FindFiles
         $site = App::instance()->site();
         $files = match ($arguments->string('parent')) {
             null => $site->files()->add($site->index(true)->filter('isListable', true)->files()),
-            default => $arguments->parent('parent')->files()
+            default => $arguments->parent('parent')->files()->sorted()
         };
 
         $files = $files->filter(fn (File $file) => $file->isListable());

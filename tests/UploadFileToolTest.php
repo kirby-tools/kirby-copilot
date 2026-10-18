@@ -63,13 +63,16 @@ final class UploadFileToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function uploads_to_a_files_section_without_a_template_with_the_default_template(): void
+    public function uploads_to_the_end_of_a_files_section_without_a_template_with_the_default_template(): void
     {
         self::writeContent('gallery/gallery.txt', ['Title' => 'Gallery']);
+        F::write(self::indexRoot() . '/content/gallery/b.png', base64_decode(self::PNG));
+        self::writeContent('gallery/b.png.txt', ['Sort' => 1]);
 
         $result = $this->upload(['parent' => 'gallery', 'filename' => 'a.png', 'data' => self::PNG]);
 
         $this->assertSame('default', $result['file']['template']);
+        $this->assertSame(['b.png', 'a.png'], array_column($this->callTool('get_content', ['model' => 'gallery'])['structuredContent']['files'], 'filename'));
     }
 
     #[Test]

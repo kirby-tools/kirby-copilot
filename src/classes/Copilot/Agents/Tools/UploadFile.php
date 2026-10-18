@@ -82,13 +82,13 @@ final class UploadFile
         }
 
         if ($template === null && count($templates) > 1) {
-            throw new ToolError("{$parent->title()->value()} accepts files with several templates, so pass one as `template`: " . implode(', ', $templates) . '.');
+            throw new ToolError("{$parent->title()->value()} accepts files with several templates, so pass one as `template`: " . implode(', ', array_keys($templates)) . '.');
         }
 
-        $template ??= $templates[0];
+        $template ??= array_key_first($templates);
 
-        if (!in_array($template, $templates, true)) {
-            throw new ToolError("{$parent->title()->value()} accepts files with the templates: " . implode(', ', $templates) . '.');
+        if (!array_key_exists($template, $templates)) {
+            throw new ToolError("{$parent->title()->value()} accepts files with the templates: " . implode(', ', array_keys($templates)) . '.');
         }
 
         $file = new File(['filename' => $filename, 'parent' => $parent, 'template' => $template]);
@@ -110,6 +110,7 @@ final class UploadFile
             }
 
             $file = $parent->createFile([
+                'content' => ['sort' => $templates[$template]],
                 'source' => $source,
                 'filename' => $filename,
                 'template' => $template
@@ -161,9 +162,11 @@ final class UploadFile
      * Lists the templates a Panel upload to the parent takes, in section
      * order: a files section's own template, or `default` without one, and
      * the upload templates of the fields. A files section that lists
-     * another parent's files or takes no uploads doesn't count.
+     * another parent's files or takes no uploads doesn't count. Each comes
+     * with the sort number a Panel upload gives the new file, which only a
+     * sortable files section sets.
      *
-     * @return list<string>
+     * @return array<string, int|null>
      */
     private static function templates(Site|Page $parent): array
     {
@@ -171,17 +174,14 @@ final class UploadFile
         $templates = [];
 
         foreach ($blueprint->sections() as $section) {
-            if ($section->type() === 'files' && ($section->upload() === false || !$section->parent()->is($parent))) {
-                continue;
+            if ($section->type() !== 'files') {
+                $templates += array_fill_keys($blueprint->acceptedFileTemplates($section->name()), null);
+            } elseif ($section->upload() !== false && $section->parent()->is($parent)) {
+                $templates[$section->template() ?: 'default'] ??= $section->upload()['attributes']['sort'];
             }
-
-            $templates = [...$templates, ...match ($section->type()) {
-                'files' => [$section->template() ?: 'default'],
-                default => $blueprint->acceptedFileTemplates($section->name())
-            }];
         }
 
-        return array_values(array_unique($templates));
+        return $templates;
     }
 
     private static function isInDraft(Site|Page $parent): bool
