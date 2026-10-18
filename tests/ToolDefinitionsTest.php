@@ -98,7 +98,7 @@ final class ToolDefinitionsTest extends McpToolTestCase
         $this->assertFalse($annotations['prepare_changes']['readOnlyHint']);
         $this->assertFalse($annotations['prepare_changes']['destructiveHint']);
         $this->assertTrue($annotations['delete_page']['destructiveHint']);
-        $this->assertTrue($annotations['upload_file']['destructiveHint']);
+        $this->assertFalse($annotations['upload_file']['destructiveHint']);
         $this->assertFalse($annotations['upload_file']['idempotentHint']);
     }
 

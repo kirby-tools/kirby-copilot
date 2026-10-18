@@ -53,7 +53,7 @@ final class UploadFile
                 'required' => ['parent', 'filename'],
                 'additionalProperties' => false
             ],
-            annotations: [...Tool::DESTRUCTIVE, 'idempotentHint' => false, 'openWorldHint' => true],
+            annotations: [...Tool::WRITE, 'idempotentHint' => false, 'openWorldHint' => true],
             permission: ConnectionPermission::Prepare,
             handler: self::run(...)
         );
