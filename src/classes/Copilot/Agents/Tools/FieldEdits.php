@@ -193,13 +193,14 @@ final class FieldEdits
         }
 
         $this->refuseSharedFields([$name => $edit['value']], $subFields);
+        $sent = $this->digest->mapFields($subFields, [$name => $edit['value']], FieldInput::paragraph(...));
         $kirbyField = $this->kirbyField($field['name'], $item['steps']);
         $form = $isBlock ? $kirbyField->form($kirbyField->fields($target['type'])) : $kirbyField->attrsForm();
-        $form->submit(input: [$name => $edit['value']]);
-        FieldInput::refuseDropped($form, [$name => $edit['value']], $subFields);
+        $form->submit(input: $sent);
+        FieldInput::refuseDropped($form, $sent, $subFields);
 
         $key = $isBlock ? 'content' : 'attrs';
-        $target[$key] = [...($target[$key] ?? []), $name => $edit['value']];
+        $target[$key] = [...($target[$key] ?? []), ...$sent];
 
         return self::replaceAt($value, $item['path'], $target);
     }
@@ -300,6 +301,7 @@ final class FieldEdits
 
         self::refuseUnknownNames($content, $fieldset['fields'], "The block type {$type}");
         $this->refuseSharedFields($content, $fieldset['fields']);
+        $content = $this->digest->mapFields($fieldset['fields'], $content, FieldInput::paragraph(...));
 
         $form = $kirbyField->form($kirbyField->fields($type));
         $form->fill(input: $form->defaults());

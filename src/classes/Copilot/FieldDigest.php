@@ -142,6 +142,10 @@ final class FieldDigest
             }
         }
 
+        if ($type === 'writer' && ($props['inline'] ?? false) === true) {
+            $field['inline'] = true;
+        }
+
         if (in_array($type, ['pages', 'files'], true)) {
             $field['query'] = $props['query'] ?? null;
         }

@@ -312,16 +312,26 @@ final class PrepareChangesToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function inserts_blocks_after_the_same_block_in_reading_order(): void
+    public function leaves_plain_text_in_blocks_the_edits_do_not_touch(): void
+    {
+        self::writeBlocks([self::block('b1', 'Plain'), self::block('b2', '<p>Last</p>')]);
+
+        $this->editResult([['operation' => 'replace', 'field' => 'body', 'id' => 'b2', 'old' => 'Last', 'new' => 'End']]);
+
+        $this->assertSame(['Plain', '<p>End</p>'], $this->storedBlocks()->values(fn ($block) => $block->text()->value()));
+    }
+
+    #[Test]
+    public function inserts_plain_text_after_the_same_block_as_paragraphs_in_the_order_sent(): void
     {
         self::writeBlocks([self::block('b1', '<p>First</p>'), self::block('b2', '<p>Last</p>')]);
 
         $this->editResult([
-            ['operation' => 'insert', 'field' => 'body', 'after' => 'b1', 'type' => 'text', 'content' => ['text' => '<p>One</p>']],
-            ['operation' => 'insert', 'field' => 'body', 'after' => 'b1', 'type' => 'text', 'content' => ['text' => '<p>Two</p>']]
+            ['operation' => 'insert', 'field' => 'body', 'after' => 'b1', 'type' => 'text', 'content' => ['text' => 'One']],
+            ['operation' => 'insert', 'field' => 'body', 'after' => 'b1', 'type' => 'text', 'content' => ['text' => "Two\n\nThree"]]
         ]);
 
-        $this->assertSame(['<p>First</p>', '<p>One</p>', '<p>Two</p>', '<p>Last</p>'], $this->storedBlocks()->values(fn ($block) => $block->text()->value()));
+        $this->assertSame(['<p>First</p>', '<p>One</p>', '<p>Two</p><p>Three</p>', '<p>Last</p>'], $this->storedBlocks()->values(fn ($block) => $block->text()->value()));
     }
 
     #[Test]

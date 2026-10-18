@@ -105,7 +105,7 @@ final class PrepareChanges
         }
 
         $digest = new ContentDigest($model, $language);
-        $editResult = FieldEdits::apply($digest, $edits, $input);
+        $editResult = FieldEdits::apply($digest, $edits, $digest->mapFields($digest->fields, $input, FieldInput::paragraph(...)));
         [$values, $ignored] = FieldInput::split($digest, $editResult['values']);
 
         if ($values === []) {

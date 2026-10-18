@@ -68,6 +68,19 @@ final class FieldInput
         return [$values, $ignored];
     }
 
+    /**
+     * Wraps plain text sent for a writer field that isn't `inline` in
+     * paragraphs, one per blank-line-separated part, as the Panel's editor
+     * does, since Kirby stores the text as sent and the site would print it
+     * without them. A `ContentDigest` map.
+     */
+    public static function paragraph(array $field, mixed $value): mixed
+    {
+        $isPlain = is_string($value) && trim($value) !== '' && preg_match('/^\s*<(p|h[1-6]|ul|ol|blockquote|hr)[\s>\/]/i', $value) !== 1;
+
+        return $field['type'] === 'writer' && !($field['inline'] ?? false) && $isPlain ? '<p>' . implode('</p><p>', preg_split('/\R\s*\R/', trim($value))) . '</p>' : $value;
+    }
+
     public static function unknownBlockTypeReason(ContentDigest $digest, array $field, string $type): string
     {
         $types = array_map(fn (string $key) => $digest->fieldsets[$key]['type'], $field['fieldsets'] ?? []);

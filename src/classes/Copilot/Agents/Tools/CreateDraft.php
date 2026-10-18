@@ -74,7 +74,7 @@ final class CreateDraft
         }
 
         $digest = new ContentDigest($draft, $language);
-        [$values, $fieldIgnored] = FieldInput::split($digest, $input);
+        [$values, $fieldIgnored] = FieldInput::split($digest, $digest->mapFields($digest->fields, $input, FieldInput::paragraph(...)));
 
         $fields = Fields::for($draft, $language);
         $fields->fill([...$fields->defaults(), ...$values]);
