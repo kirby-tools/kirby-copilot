@@ -239,7 +239,7 @@ final class McpServer
             return self::refuseMissing($connection, $tool, $exception->permission);
         } catch (LockedContentException $exception) {
             // Kirby's lock messages don't name the editor, and the one for publishing reads "This version is already published".
-            $editor = $exception->getDetails()['user']['email'] ?? 'Another user';
+            $editor = App::instance()->user($exception->getDetails()['user']['id'] ?? null)?->username() ?? 'Another user';
             return self::toolError("{$editor} is editing this content in the Panel. Try again once they leave its view, or 10 minutes after their last edit.");
         } catch (PermissionException $exception) {
             // Kirby's own text, like "The status for this page cannot be changed", doesn't say it is a refusal by permission.

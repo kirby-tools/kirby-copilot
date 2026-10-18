@@ -438,6 +438,41 @@ final class PrepareChangesToolTest extends McpToolTestCase
     }
 
     #[Test]
+    #[TestWith(['grace', 'edits by Grace'], 'after their lock ends')]
+    #[TestWith([null, 'earlier edits'], 'after the Panel unlocked them')]
+    public function notes_when_it_takes_over_unsaved_changes_it_does_not_hold(string|null $lock, string $edits): void
+    {
+        self::writeContent(self::CHANGES, array_filter(['Title' => 'First note', 'Intro' => 'Hello from Grace', 'Lock' => $lock]), time() - 3600);
+
+        $result = $this->prepare(['summary' => 'Changed']);
+
+        $this->assertSame(["The unsaved changes held {$edits}, which now count as yours in the Panel. Tell the user, so they review them before publishing."], $result['notices']);
+        $this->assertSame('Hello from Grace', $this->app()->page('notes/first')->version('changes')->content()->get('intro')->value());
+    }
+
+    #[Test]
+    public function takes_over_unsaved_changes_without_a_note_when_kirby_locks_no_content(): void
+    {
+        self::writeContent(self::CHANGES, ['Title' => 'First note', 'Intro' => 'Hello from Grace'], time() - 3600);
+        $props = $this->props(['options' => ['content' => ['locking' => false]]]);
+
+        $result = $this->callTool('prepare_changes', ['model' => 'notes/first', 'etag' => $this->read(props: $props)['etag'], 'fields' => ['summary' => 'Changed']], $props);
+
+        $this->assertArrayNotHasKey('notices', $result['structuredContent']);
+    }
+
+    #[Test]
+    public function refuses_changes_another_user_holds_open(): void
+    {
+        self::writeContent(self::CHANGES, ['Title' => 'First note', 'Intro' => 'Hello from Grace', 'Lock' => 'grace']);
+
+        $result = $this->prepareResult(['intro' => 'Changed']);
+
+        $this->assertSame('Grace is editing this content in the Panel. Try again once they leave its view, or 10 minutes after their last edit.', $result['content'][0]['text']);
+        $this->assertSame('Hello from Grace', $this->app()->page('notes/first')->version('changes')->content()->get('intro')->value());
+    }
+
+    #[Test]
     public function refuses_a_value_kirby_would_drop_and_saves_nothing(): void
     {
         $result = $this->prepareResult(['intro' => 'Changed', 'category' => 'News']);

@@ -12,7 +12,9 @@ use JohannSchopplich\Copilot\Agents\Tool;
 use JohannSchopplich\Copilot\Agents\ToolError;
 use JohannSchopplich\Copilot\FieldDigest;
 use Kirby\Api\Controller\Changes;
+use Kirby\Cms\App;
 use Kirby\Cms\Site;
+use Kirby\Content\Lock;
 use Kirby\Data\Json;
 use Kirby\Form\Fields;
 use Kirby\Toolkit\Str;
@@ -118,6 +120,13 @@ final class PrepareChanges
             ActiveContent::refuseIntroduced($fields, array_keys($values), $current);
             FieldInput::refuseDropped($fields, $values, FieldDigest::for($model, $language)['fields']);
 
+            // Kirby refuses changes another user holds open, but hands over the ones they left –
+            // without a name once the Panel unlocked them on leaving the view. Without locking, changes are no one's.
+            $owner = Lock::for($model->version('changes'), $language)->user();
+            $notices = !Lock::isEnabled() || $owner?->is(App::instance()->user()) === true ? [] : [
+                'The unsaved changes held ' . ($owner === null ? 'earlier edits' : "edits by {$owner->username()}") . ', which now count as yours in the Panel. Tell the user, so they review them before publishing.'
+            ];
+
             Changes::save($model, $values);
 
             $fields->reset()->fill($read());
@@ -143,7 +152,11 @@ final class PrepareChanges
             }
 
             if ($model instanceof Site) {
-                $result['notices'] = ['The Panel\'s list of changes leaves out the site, so tell the editor to open the site in the Panel.'];
+                $notices[] = 'The Panel\'s list of changes leaves out the site, so tell the editor to open the site in the Panel.';
+            }
+
+            if ($notices !== []) {
+                $result['notices'] = $notices;
             }
 
             return $result;
