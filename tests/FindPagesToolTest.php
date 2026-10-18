@@ -98,6 +98,17 @@ final class FindPagesToolTest extends McpToolTestCase
     }
 
     #[Test]
+    public function counts_unsaved_changes_in_any_language_without_a_language(): void
+    {
+        $find = fn (array $arguments) => $this->callTool('find_pages', $arguments, $this->multilangProps(), function (App $kirby) {
+            $kirby->page('about')->version('changes')->save(['title' => 'Über uns, neu'], 'de');
+        })['structuredContent'];
+
+        $this->assertSame([true], array_column($find(['hasChanges' => true])['pages'], 'hasChanges'));
+        $this->assertSame(0, $find(['language' => 'en', 'hasChanges' => true])['total']);
+    }
+
+    #[Test]
     public function finds_the_pages_not_yet_translated_into_a_language(): void
     {
         $props = $this->multilangProps();
