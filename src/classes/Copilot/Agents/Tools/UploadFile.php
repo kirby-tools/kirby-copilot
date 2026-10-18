@@ -161,23 +161,29 @@ final class UploadFile
     /**
      * Lists the templates a Panel upload to the parent takes, in section
      * order: a files section's own template, or `default` without one, and
-     * the upload templates of the fields. A files section that lists
-     * another parent's files or takes no uploads doesn't count. Each comes
-     * with the sort number a Panel upload gives the new file, which only a
-     * sortable files section sets.
+     * the upload templates of the parent's fields. A files section counts
+     * where it lists the parent's files and takes uploads, on the parent's
+     * view or on those of its ancestors and the site. Each comes with the
+     * sort number a Panel upload gives the new file, which only a sortable
+     * files section sets.
      *
      * @return array<string, int|null>
      */
     private static function templates(Site|Page $parent): array
     {
-        $blueprint = $parent->blueprint();
         $templates = [];
 
-        foreach ($blueprint->sections() as $section) {
-            if ($section->type() !== 'files') {
-                $templates += array_fill_keys($blueprint->acceptedFileTemplates($section->name()), null);
-            } elseif ($section->upload() !== false && $section->parent()->is($parent)) {
-                $templates[$section->template() ?: 'default'] ??= $section->upload()['attributes']['sort'];
+        foreach ($parent instanceof Site ? [$parent] : [$parent, ...$parent->parents()->values(), $parent->site()] as $view) {
+            $blueprint = $view->blueprint();
+
+            foreach ($blueprint->sections() as $section) {
+                if ($section->type() !== 'files') {
+                    if ($view === $parent) {
+                        $templates += array_fill_keys($blueprint->acceptedFileTemplates($section->name()), null);
+                    }
+                } elseif ($section->upload() !== false && $section->parent()->is($parent)) {
+                    $templates[$section->template() ?: 'default'] ??= $section->upload()['attributes']['sort'];
+                }
             }
         }
 

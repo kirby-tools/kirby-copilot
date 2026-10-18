@@ -22,6 +22,7 @@ final class UploadFileToolTest extends McpToolTestCase
         parent::setUp();
 
         self::writeContent('notes/notes.txt', ['Title' => 'Notes']);
+        self::writeContent('press/plain.txt', ['Title' => 'Press']);
     }
 
     #[Test]
@@ -104,6 +105,14 @@ final class UploadFileToolTest extends McpToolTestCase
         $result = $this->upload(['parent' => 'album', 'filename' => 'a.png', 'data' => self::PNG]);
 
         $this->assertSame('image', $result['file']['template']);
+    }
+
+    #[Test]
+    public function takes_a_files_section_on_the_site_that_lists_the_parent(): void
+    {
+        $result = $this->upload(['parent' => 'press', 'filename' => 'a.png', 'data' => self::PNG]);
+
+        $this->assertSame('cover', $result['file']['template']);
     }
 
     #[Test]
@@ -231,6 +240,7 @@ final class UploadFileToolTest extends McpToolTestCase
     {
         return $this->callTool('upload_file', $arguments, [
             'blueprints' => [
+                'site' => ['sections' => ['press' => ['type' => 'files', 'parent' => 'site.find("press")', 'template' => 'cover']]],
                 'pages/default' => [
                     'sections' => [
                         'images' => ['type' => 'files', 'template' => 'image'],

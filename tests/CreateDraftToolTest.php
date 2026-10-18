@@ -107,6 +107,19 @@ final class CreateDraftToolTest extends McpToolTestCase
     }
 
     #[Test]
+    public function takes_a_pages_section_on_the_site_that_lists_the_parent(): void
+    {
+        $props = $this->props(['blueprints' => [
+            'site' => ['sections' => ['notes' => ['type' => 'pages', 'parent' => 'site.find("notes")', 'templates' => ['note']]]],
+            'pages/notes' => ['title' => 'Notes']
+        ]]);
+
+        $result = $this->callTool('create_draft', ['parent' => 'notes', 'template' => 'note', 'title' => 'Hello'], $props);
+
+        $this->assertFalse($result['isError'], $result['content'][0]['text']);
+    }
+
+    #[Test]
     public function refuses_a_role_without_the_create_permission(): void
     {
         $result = $this->createResult(['parent' => 'notes', 'template' => 'note', 'title' => 'Hello'], role: 'reviewer');

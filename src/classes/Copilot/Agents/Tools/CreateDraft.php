@@ -107,8 +107,9 @@ final class CreateDraft
     }
 
     /**
-     * Collects the templates of the parent's pages sections that list the
-     * parent's own drafts and let the Panel add pages.
+     * Collects the templates of the pages sections that list the parent's
+     * drafts and let the Panel add pages: the parent's own, and those on
+     * the views of its ancestors and the site whose `parent` is the parent.
      *
      * @return list<string>
      */
@@ -116,13 +117,15 @@ final class CreateDraft
     {
         $templates = [];
 
-        foreach ($parent->blueprint()->sections() as $section) {
-            if ($section->type() !== 'pages' || $section->add() === false || !in_array($section->status(), ['draft', 'all'], true) || !$section->parent()->is($parent)) {
-                continue;
-            }
+        foreach ($parent instanceof Site ? [$parent] : [$parent, ...$parent->parents()->values(), $parent->site()] as $view) {
+            foreach ($view->blueprint()->sections() as $section) {
+                if ($section->type() !== 'pages' || $section->add() === false || !in_array($section->status(), ['draft', 'all'], true) || !$section->parent()->is($parent)) {
+                    continue;
+                }
 
-            foreach ($section->blueprints() as $blueprint) {
-                $templates[] = $blueprint['name'];
+                foreach ($section->blueprints() as $blueprint) {
+                    $templates[] = $blueprint['name'];
+                }
             }
         }
 
