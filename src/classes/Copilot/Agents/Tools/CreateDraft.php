@@ -13,9 +13,8 @@ use JohannSchopplich\Copilot\FieldDigest;
 use Kirby\Cms\Language;
 use Kirby\Cms\Page;
 use Kirby\Cms\Site;
-use Kirby\Content\MemoryStorage;
 use Kirby\Form\Fields;
-use Kirby\Toolkit\Str;
+use Kirby\Panel\PageCreateDialog;
 
 final class CreateDraft
 {
@@ -30,11 +29,11 @@ final class CreateDraft
                 'properties' => [
                     'parent' => ['type' => 'string', 'description' => Arguments::PARENT_DESCRIPTION],
                     'template' => ['type' => 'string', 'description' => 'A template the parent allows for new pages. A wrong one fails with the list of allowed templates.'],
-                    'title' => ['type' => 'string'],
-                    'slug' => ['type' => 'string', 'description' => 'The URL slug. Defaults to one made from the title.'],
+                    'title' => ['type' => 'string', 'description' => 'Required, unless the template\'s blueprint makes the title from other fields.'],
+                    'slug' => ['type' => 'string', 'description' => 'The URL slug. Defaults to one made from the title, or by the template\'s blueprint.'],
                     'fields' => ['type' => 'object', 'description' => 'Field values by field name.']
                 ],
-                'required' => ['parent', 'template', 'title'],
+                'required' => ['parent', 'template'],
                 'additionalProperties' => false
             ],
             annotations: [...Tool::WRITE, 'idempotentHint' => false],
@@ -48,14 +47,6 @@ final class CreateDraft
         $language = Language::ensure('default');
         $parent = $arguments->parent('parent');
         $template = $arguments->requiredString('template');
-        $title = trim($arguments->requiredString('title'));
-
-        if ($title === '') {
-            throw new ToolError('`title` must be a non-empty string.');
-        }
-
-        $slug = Str::slug($arguments->string('slug') ?? $title);
-
         $templates = self::templates($parent);
 
         if (!in_array($template, $templates, true)) {
@@ -64,15 +55,10 @@ final class CreateDraft
                 : "{$parent->title()->value()} takes new pages with the templates: " . implode(', ', $templates) . '.');
         }
 
-        // A model in memory, as in Kirby's own page create dialog.
-        $draft = Page::factory([
-            'slug' => $slug,
-            'template' => $template,
-            'model' => $template,
-            'parent' => $parent instanceof Page ? $parent : null,
-            'content' => ['title' => $title]
-        ]);
-        $draft->changeStorage(MemoryStorage::class);
+        // Kirby's own page create dialog, for its model in memory and the title and slug its blueprint makes.
+        $dialog = new PageCreateDialog($parent->panel()->path(), null, $template, null);
+        $draft = $dialog->model();
+        $createOptions = $draft->blueprint()->create();
 
         $input = array_change_key_case($arguments->object('fields') ?? []);
         $ignored = [];
@@ -82,17 +68,31 @@ final class CreateDraft
                 $ignored[] = ['name' => $name, 'reason' => "Send the {$name} as `{$name}`."];
                 unset($input[$name]);
             }
+
+            if (is_string($createOptions[$name] ?? null) && $arguments->string($name) !== null) {
+                $ignored[] = ['name' => $name, 'reason' => "The blueprint makes the {$name} from other fields."];
+            }
         }
 
         [$values, $fieldIgnored] = FieldInput::split($draft, $language, $input);
 
         $fields = Fields::for($draft, $language);
-        $fields->fill([...$fields->defaults(), ...$values, 'title' => $title]);
+        $fields->fill([...$fields->defaults(), ...$values]);
+        $resolvedInput = $dialog->resolveFieldTemplates([...$fields->toStoredValues(), 'title' => $arguments->string('title') ?? '', 'slug' => $arguments->string('slug')]);
+        $title = trim($resolvedInput['title']);
+
+        if ($title === '') {
+            throw new ToolError(is_string($createOptions['title'] ?? null)
+                ? 'The blueprint makes the title from other fields, which are empty. Send them in `fields`.'
+                : '`title` must be a non-empty string.');
+        }
+
+        $fields->fill(['title' => $title]);
         ActiveContent::refuseIntroduced($fields, [...array_keys($values), 'title']);
         FieldInput::refuseDropped($fields, $values, FieldDigest::for($draft, $language)['fields']);
 
         $page = $parent->createChild([
-            'slug' => $slug,
+            'slug' => $resolvedInput['slug'] ?: $title,
             'template' => $template,
             'draft' => true,
             'content' => $fields->toStoredValues()

@@ -37,11 +37,23 @@ final class CreateDraftToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function slugifies_the_given_slug(): void
+    public function makes_the_title_and_slug_from_the_blueprint_create_templates(): void
     {
-        $result = $this->create(['parent' => 'notes', 'template' => 'note', 'title' => 'Hello', 'slug' => 'Hello World']);
+        $props = $this->eventProps('{{ page.venue }}, {{ page.day }}');
 
-        $this->assertSame('notes/hello-world', $result['page']['id']);
+        $result = $this->callTool('create_draft', ['parent' => 'notes', 'template' => 'event', 'title' => 'Concert', 'fields' => ['venue' => 'Berlin', 'day' => '2026-11-05']], $props)['structuredContent'];
+
+        $this->assertSame('notes/2026-11-05-berlin', $result['page']['id']);
+        $this->assertSame('Berlin, 2026-11-05', $result['page']['title']);
+        $this->assertSame([['name' => 'title', 'reason' => 'The blueprint makes the title from other fields.']], $result['ignored']);
+    }
+
+    #[Test]
+    public function refuses_a_blueprint_made_title_whose_fields_are_empty(): void
+    {
+        $result = $this->callTool('create_draft', ['parent' => 'notes', 'template' => 'event'], $this->eventProps('{{ page.venue }}'));
+
+        $this->assertSame('The blueprint makes the title from other fields, which are empty. Send them in `fields`.', $result['content'][0]['text']);
     }
 
     #[Test]
@@ -168,6 +180,17 @@ final class CreateDraftToolTest extends McpToolTestCase
     private function createResult(array $arguments, string $role = 'editor'): array
     {
         return $this->callTool('create_draft', $arguments, $this->props(['users' => [['role' => $role]]]));
+    }
+
+    private function eventProps(string $title): array
+    {
+        return $this->props(['blueprints' => [
+            'pages/default' => ['sections' => ['pages' => ['templates' => [2 => 'event']]]],
+            'pages/event' => [
+                'create' => ['title' => $title, 'slug' => '{{ page.day }}-{{ page.venue }}'],
+                'fields' => ['venue' => ['type' => 'text'], 'day' => ['type' => 'date']]
+            ]
+        ]]);
     }
 
     private function props(array $props = []): array
