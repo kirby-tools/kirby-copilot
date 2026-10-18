@@ -2,6 +2,7 @@
 
 declare(strict_types = 1);
 
+use Kirby\Cms\App;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
@@ -13,9 +14,12 @@ final class GetSiteToolTest extends McpToolTestCase
     #[Test]
     public function describes_the_site_the_account_and_the_listable_top_level_pages(): void
     {
-        $site = $this->getSite(['blueprints' => ['users/editor' => ['permissions' => ['johannschopplich.copilot' => ['agentsDelete' => false]]]]]);
+        $site = $this->getSite(
+            ['blueprints' => ['users/editor' => ['permissions' => ['johannschopplich.copilot' => ['agentsDelete' => false]]]]],
+            fn (App $kirby) => $kirby->site()->version('changes')->save(['title' => 'Kirby Playground!'])
+        );
 
-        $this->assertSame(['title' => 'Kirby Playground', 'url' => 'https://example.com', 'panelUrl' => 'https://example.com/panel/site'], $site['site']);
+        $this->assertSame(['title' => 'Kirby Playground', 'url' => 'https://example.com', 'panelUrl' => 'https://example.com/panel/site', 'hasChanges' => true], $site['site']);
         $this->assertSame(['id' => 'ada', 'uuid' => 'user://ada', 'email' => 'ada@example.com', 'name' => 'Ada', 'role' => 'Editor'], $site['account']);
         $this->assertSame(['content:read', 'content:prepare'], $site['permissions']);
         $this->assertSame(['content:delete'], $site['unavailablePermissions']);
@@ -77,7 +81,7 @@ final class GetSiteToolTest extends McpToolTestCase
         $this->assertTrue($site['hasMorePages']);
     }
 
-    private function getSite(array $props = []): array
+    private function getSite(array $props = [], Closure|null $prepare = null): array
     {
         return $this->callTool('get_site', [], array_replace_recursive([
             'site' => [
@@ -94,6 +98,6 @@ final class GetSiteToolTest extends McpToolTestCase
             'blueprints' => [
                 'pages/secret' => ['options' => ['list' => false]]
             ]
-        ], $props))['structuredContent'];
+        ], $props), $prepare)['structuredContent'];
     }
 }
