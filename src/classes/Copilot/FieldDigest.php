@@ -240,7 +240,7 @@ final class FieldDigest
             'select', 'radio', 'toggles' => self::hasPredefinedOptions($props) ? 'predefinedSingleSelection' : 'singleSelection',
             'checkboxes', 'multiselect', 'tags' => self::hasPredefinedOptions($props) ? 'predefinedMultipleSelection' : 'multipleSelection',
             'date' => empty($props['time']) ? 'date' : 'dateWithTime',
-            'structure', 'object' => is_array($props['fields'] ?? null) ? $type . 'WithFields' : $type,
+            'structure', 'object' => empty($props['fields']) ? $type : $type . 'WithFields',
             'entries' => $isBounded ? 'boundedEntries' : 'entries',
             default => $type
         };
