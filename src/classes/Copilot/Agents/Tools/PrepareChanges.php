@@ -13,16 +13,21 @@ use JohannSchopplich\Copilot\Agents\ToolError;
 use JohannSchopplich\Copilot\FieldDigest;
 use Kirby\Api\Controller\Changes;
 use Kirby\Cms\Site;
+use Kirby\Data\Json;
 use Kirby\Form\Fields;
+use Kirby\Toolkit\Str;
 
 final class PrepareChanges
 {
+    /** Characters before the first difference that an excerpt keeps. */
+    private const EXCERPT_CONTEXT_LENGTH = 100;
+
     public static function tool(): Tool
     {
         return new Tool(
             name: 'prepare_changes',
             title: 'Prepare changes',
-            description: 'Writes field values to the unsaved changes of a page, a file, or the site in one language; they go live once published – by an editor in the Panel, or with publish_changes when the user asks. Send values in the shape get_content returns them, the title included. Each value replaces the whole field – send every block or row of a blocks or structure field – and fields you leave out keep their values. To change part of a field – a sentence, one block, or the order of blocks – send `edits` instead of the whole field. Returns what changed, ignored fields with the reason, the ids of inserted blocks and layout rows, validation errors and values their fields don\'t take, the new etag, and the Panel URL to review the changes. For a list field such as blocks or a structure, what changed also counts the items before and after; tell the user when items went missing.',
+            description: 'Writes field values to the unsaved changes of a page, a file, or the site in one language; they go live once published – by an editor in the Panel, or with publish_changes when the user asks. Send values in the shape get_content returns them, the title included. Each value replaces the whole field – send every block or row of a blocks or structure field – and fields you leave out keep their values. To change part of a field – a sentence, one block, or the order of blocks – send `edits` instead of the whole field. Returns what changed, a long value cut to the passage where it starts to differ, ignored fields with the reason, the ids of inserted blocks and layout rows, validation errors and values their fields don\'t take, the new etag, and the Panel URL to review the changes. For a list field such as blocks or a structure, what changed also counts the items before and after; tell the user when items went missing.',
             inputSchema: [
                 'type' => 'object',
                 'properties' => [
@@ -122,8 +127,7 @@ final class PrepareChanges
                 'changed' => array_values(array_filter(array_map(
                     fn (string $name) => ($before[$name] ?? null) === ($after[$name] ?? null) ? null : [
                         'name' => $name,
-                        'before' => GetContent::shortValue($before[$name] ?? null),
-                        'after' => GetContent::shortValue($after[$name] ?? null),
+                        ...self::excerpts($before[$name] ?? null, $after[$name] ?? null),
                         ...self::itemCounts($before[$name] ?? null, $after[$name] ?? null)
                     ],
                     array_keys($values)
@@ -143,6 +147,30 @@ final class PrepareChanges
 
             return $result;
         });
+    }
+
+    /**
+     * Cuts long values down to the passage where they start to differ, so
+     * that a change deep in a long text or blocks field shows in the result.
+     *
+     * @return array{before: mixed, after: mixed}
+     */
+    private static function excerpts(mixed $before, mixed $after): array
+    {
+        $texts = array_map(fn (mixed $value) => is_string($value) ? $value : Json::encode($value), [$before, $after]);
+
+        if (max(Str::length($texts[0]), Str::length($texts[1])) <= GetContent::SHORT_VALUE_LENGTH) {
+            return ['before' => $before, 'after' => $after];
+        }
+
+        $differenceOffset = strspn($texts[0] ^ $texts[1], "\0");
+        $start = max(0, Str::length(mb_strcut($texts[0], 0, $differenceOffset)) - self::EXCERPT_CONTEXT_LENGTH);
+        [$beforeExcerpt, $afterExcerpt] = array_map(
+            fn (string $text) => ($start > 0 ? '…' : '') . Str::short(Str::substr($text, $start), GetContent::SHORT_VALUE_LENGTH),
+            $texts
+        );
+
+        return ['before' => $beforeExcerpt, 'after' => $afterExcerpt];
     }
 
     /**

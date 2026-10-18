@@ -245,6 +245,19 @@ final class PrepareChangesToolTest extends McpToolTestCase
     }
 
     #[Test]
+    public function shows_the_passage_around_the_first_difference_of_a_long_value(): void
+    {
+        $sentences = str_repeat('An unchanged sentence. ', 30);
+        self::writeContent('notes/first/note.txt', ['Title' => 'First note', 'Text' => $sentences . 'Old middle. ' . $sentences, 'Uuid' => 'first-uuid']);
+
+        $changed = $this->prepare(['text' => $sentences . 'New middle. ' . $sentences])['changed'][0];
+
+        $this->assertStringStartsWith('…', $changed['before']);
+        $this->assertStringContainsString('Old middle.', $changed['before']);
+        $this->assertStringContainsString('New middle.', $changed['after']);
+    }
+
+    #[Test]
     public function counts_the_items_of_a_list_field_it_changes(): void
     {
         $result = $this->prepare(['body' => []]);
