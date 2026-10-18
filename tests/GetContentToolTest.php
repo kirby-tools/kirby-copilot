@@ -184,8 +184,13 @@ final class GetContentToolTest extends McpToolTestCase
         $props = array_replace_recursive($this->props(), ['blueprints' => ['pages/note' => ['options' => ['update' => false]]]]);
 
         $content = $this->getContent(['model' => 'notes/first'], props: $props);
+        $block = $this->getContent(['model' => 'notes/first', 'id' => 'b1'], fn (App $kirby) => $kirby->page('notes/first')->version('changes')->save([
+            'title' => 'First note',
+            'body' => json_encode([['id' => 'b1', 'type' => 'heading', 'isHidden' => false, 'content' => ['text' => 'Hi']]])
+        ]), $props);
 
         $this->assertSame(["The account may not change this content – its role or the blueprint's options don't allow it."], $content['notices']);
+        $this->assertSame($content['notices'], $block['notices']);
     }
 
     #[Test]
@@ -198,28 +203,30 @@ final class GetContentToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function omits_the_largest_values_from_a_large_result(): void
+    public function outlines_the_largest_values_of_a_large_result_and_reads_one_block_by_id(): void
     {
         $prepare = function (App $kirby) {
             $kirby->page('notes/first')->version('changes')->save([
                 'title' => 'First note',
                 'intro' => str_repeat('a', 1_000),
-                'body' => json_encode([['id' => 'b1', 'type' => 'heading', 'isHidden' => false, 'content' => ['text' => str_repeat('a', 90_000)]]])
+                'body' => json_encode([['id' => 'b1', 'type' => 'heading', 'isHidden' => false, 'content' => ['level' => 'h2', 'text' => str_repeat('a', 90_000)]]])
             ]);
         };
         $content = $this->getContent(['model' => 'notes/first'], $prepare);
 
         $this->assertSame(str_repeat('a', 1_000), $content['fields'][0]['value']);
         $this->assertArrayNotHasKey('value', $content['fields'][3]);
-        $this->assertSame(['body'], $content['omittedValues']);
+        $this->assertSame([['id' => 'b1', 'type' => 'heading', 'level' => 'h2', 'text' => str_repeat('a', 80) . '…']], $content['fields'][3]['outline']);
         $this->assertSame(
-            ['Left out the values of body to keep the result small. Request them one by one with `fields`.'],
+            ['Left out the values of body to keep the result small. Blocks and layout fields come as an outline instead: get_content with `id` returns one block, layout row, or layout column whole, with `fields` the whole value of one field at a time.'],
             $content['notices']
         );
 
         $body = $this->getContent(['model' => 'notes/first', 'fields' => ['body']], $prepare);
         $this->assertArrayHasKey('value', $body['fields'][0]);
-        $this->assertArrayNotHasKey('omittedValues', $body);
+
+        $block = $this->getContent(['model' => 'notes/first', 'id' => 'b1'], $prepare);
+        $this->assertSame(['body', str_repeat('a', 90_000), ['heading']], [$block['field'], $block['item']['content']['text'], array_keys($block['fieldsets'])]);
     }
 
     #[Test]
