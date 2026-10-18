@@ -383,6 +383,7 @@ final class PrepareChangesToolTest extends McpToolTestCase
     #[TestWith([[['operation' => 'replace', 'field' => 'category', 'old' => 'news', 'new' => 'essay']], 'edit 1: category holds no text to edit. Send it whole in `fields`.'])]
     #[TestWith([[['operation' => 'insert', 'field' => 'text', 'type' => 'text']], 'edit 1: text holds no blocks or layout rows. Send it whole in `fields`.'])]
     #[TestWith([[['operation' => 'replace', 'field' => 'nope', 'old' => 'x', 'new' => 'y']], 'edit 1: nope: There is no such field. get_content lists the fields.'])]
+    #[TestWith([[['operation' => 'set', 'field' => 'body', 'id' => 'b1', 'name' => 'text', 'value' => '<p>Hi</p>'], ['operation' => 'insert', 'field' => 'body', 'type' => 'heading', 'content' => ['level' => 'h9', 'text' => 'Intro']]], 'edit 2: Nothing was written, since Kirby would drop values its fields don\'t take: level doesn\'t take "h9". Its options: h1, h2, h3, h4, h5, h6.'])]
     public function refuses_an_edit_it_cant_apply(array $edits, string $message): void
     {
         $result = $this->editResult($edits);
@@ -429,12 +430,21 @@ final class PrepareChangesToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function warns_of_validation_errors_and_of_a_value_kirby_stores_empty(): void
+    public function warns_of_validation_errors(): void
     {
-        $result = $this->prepare(['summary' => '', 'website' => 'www.example.com', 'category' => 'unknown']);
+        $result = $this->prepare(['summary' => '', 'website' => 'www.example.com']);
 
-        $this->assertSame(['summary', 'website', 'category'], array_column($result['warnings'], 'field'));
-        $this->assertSame('The field doesn\'t take "unknown", so Kirby stored "".', $result['warnings'][2]['message']);
+        $this->assertSame(['summary', 'website'], array_column($result['warnings'], 'field'));
+    }
+
+    #[Test]
+    public function refuses_a_value_kirby_would_drop_and_saves_nothing(): void
+    {
+        $result = $this->prepareResult(['intro' => 'Changed', 'category' => 'News']);
+
+        $this->assertTrue($result['isError']);
+        $this->assertSame("Nothing was written, since Kirby would drop values its fields don't take: category doesn't take \"News\". Its options: news, essay.", $result['content'][0]['text']);
+        $this->assertFalse($this->app()->page('notes/first')->version('changes')->exists());
     }
 
     #[Test]

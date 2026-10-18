@@ -128,17 +128,25 @@ final class CreateDraftToolTest extends McpToolTestCase
     }
 
     #[Test]
-    #[TestWith([['rating' => 'vier'], [['field' => 'rating', 'message' => 'The field doesn\'t take "vier", so Kirby stored 0.']]], 'word for a number')]
-    #[TestWith([['rating' => '0'], []], 'zero as a string')]
-    #[TestWith([['featured' => 'false'], []], 'false as a string')]
-    #[TestWith([['featured' => 'yes'], [['field' => 'featured', 'message' => 'The field doesn\'t take "yes", so Kirby stored false.']]], 'word for a toggle')]
-    #[TestWith([['topics' => ['nonsense']], [['field' => 'topics', 'message' => 'The field doesn\'t take ["nonsense"], so Kirby stored [].']]], 'unknown options only')]
-    #[TestWith([['topics' => 'nonsense'], [['field' => 'topics', 'message' => 'The field doesn\'t take "nonsense", so Kirby stored [].']]], 'unknown option as a string')]
-    public function warns_of_a_value_the_field_does_not_take(array $fields, array $warnings): void
+    #[TestWith([['topics' => ['news', 'nonsense']], 'topics doesn\'t take ["news","nonsense"]. Its options: news, events.'], 'one unknown option')]
+    #[TestWith([['topics' => 'nonsense'], 'topics doesn\'t take "nonsense". Its options: news, events.'], 'unknown option as a string')]
+    public function refuses_a_value_kirby_would_drop(array $fields, string $reason): void
     {
-        $result = $this->create(['parent' => 'notes', 'template' => 'note', 'title' => 'Hello', 'fields' => $fields]);
+        $result = $this->createResult(['parent' => 'notes', 'template' => 'note', 'title' => 'Hello', 'fields' => $fields]);
 
-        $this->assertSame($warnings, $result['warnings']);
+        $this->assertTrue($result['isError']);
+        $this->assertSame("Nothing was written, since Kirby would drop values its fields don't take: {$reason}", $result['content'][0]['text']);
+        $this->assertNull(self::bootApp($this->props())->page('notes/hello'));
+    }
+
+    #[Test]
+    #[TestWith(['rating', '0'], 'zero as a string')]
+    #[TestWith(['featured', 'false'], 'false as a string')]
+    public function takes_a_number_or_toggle_sent_as_a_string(string $name, string $value): void
+    {
+        $this->create(['parent' => 'notes', 'template' => 'note', 'title' => 'Hello', 'fields' => [$name => $value]]);
+
+        $this->assertSame($value, self::bootApp($this->props())->page('notes/hello')->content()->get($name)->value());
     }
 
     #[Test]

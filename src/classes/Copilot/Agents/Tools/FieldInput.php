@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace JohannSchopplich\Copilot\Agents\Tools;
 
+use JohannSchopplich\Copilot\Agents\ToolError;
 use JohannSchopplich\Copilot\FieldDigest;
 use Kirby\Cms\File;
 use Kirby\Cms\Language;
@@ -11,12 +12,15 @@ use Kirby\Cms\Page;
 use Kirby\Cms\Site;
 use Kirby\Data\Json;
 use Kirby\Form\Fields;
+use Kirby\Form\Form;
 
 /**
  * The checks on the field values an agent sends.
  */
 final class FieldInput
 {
+    private const SHARED_FIELD_REASON = 'The field has one value for all languages. Write it in the default language.';
+
     public const UPDATE_REFUSAL = "The account may not change this content – its role or the blueprint's options don't allow it.";
 
     /**
@@ -42,7 +46,7 @@ final class FieldInput
                 $name === 'slug' => 'The slug isn\'t a field. change_slug changes it.',
                 $field === null && $blueprintField !== null => "Agents can't write fields of the type {$blueprintField['type']}; tell the user to edit it in the Panel.",
                 $field === null => 'There is no such field. get_content lists the fields.',
-                !$field['translate'] && !$language->isDefault() => 'The field has one value for all languages. Write it in the default language.',
+                !$field['translate'] && !$language->isDefault() => self::SHARED_FIELD_REASON,
                 $field['disabled'] => 'The field is disabled.',
                 default => null
             };
@@ -58,34 +62,54 @@ final class FieldInput
     }
 
     /**
-     * Lists the validation errors of the filled fields, which saving ignores
-     * and making content public doesn't, and each value an agent sent that
-     * Kirby stores empty, such as an unknown option.
+     * Refuses values Kirby would empty or cut short on saving, such as an
+     * option the field doesn't have, since the field would lose them without
+     * the agent noticing.
      *
      * @param array<string, mixed> $sent
+     * @param list<array> $digestFields The digest fields of the form
+     */
+    public static function refuseDropped(Fields|Form $form, array $sent, array $digestFields): void
+    {
+        $sent = array_change_key_case($sent);
+        $reasons = [];
+
+        foreach ($digestFields as $digestField) {
+            $name = $digestField['name'];
+
+            if (!array_key_exists($name, $sent)) {
+                continue;
+            }
+
+            $field = $form->field($name);
+            $keptValue = $field->toFormValue();
+            $isDropped = ($field->isEmptyValue($keptValue) && !$field->isEmptyValue($sent[$name])) ||
+                (is_array($sent[$name]) && is_array($keptValue) && count($keptValue) < count($sent[$name]));
+
+            if ($isDropped) {
+                $reasons[] = "{$name} doesn't take " . Json::encode($sent[$name]) . '.'
+                    . (isset($digestField['options']) ? ' Its options: ' . implode(', ', array_column($digestField['options'], 'value')) . '.' : '');
+            }
+        }
+
+        if ($reasons !== []) {
+            throw new ToolError("Nothing was written, since Kirby would drop values its fields don't take: " . implode(' ', $reasons));
+        }
+    }
+
+    /**
+     * Lists the validation errors of the filled fields, which saving ignores
+     * and making content public doesn't.
+     *
      * @return list<array{field: string, message: string}>
      */
-    public static function warnings(Fields $fields, array $sent): array
+    public static function warnings(Fields $fields): array
     {
         $warnings = [];
 
         foreach ($fields->errors() as $name => $error) {
             foreach ($error['message'] as $message) {
                 $warnings[] = ['field' => $name, 'message' => $message];
-            }
-        }
-
-        $stored = $fields->toFormValues();
-
-        foreach ($sent as $name => $value) {
-            $storedValue = $stored[$name] ?? null;
-
-            // Loosely, so a "0" Kirby stores as 0 counts as kept, and a toggle sent "off" or "false" as false.
-            $isKept = $value == $storedValue || (is_bool($storedValue) && filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === $storedValue);
-            $isEmptied = (is_scalar($value) && is_scalar($storedValue) && empty($storedValue)) || ($value !== '' && $storedValue === []);
-
-            if ($isEmptied && !$isKept) {
-                $warnings[] = ['field' => $name, 'message' => 'The field doesn\'t take ' . Json::encode($value) . ', so Kirby stored ' . Json::encode($storedValue) . '.'];
             }
         }
 

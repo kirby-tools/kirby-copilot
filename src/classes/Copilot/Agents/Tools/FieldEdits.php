@@ -186,7 +186,8 @@ final class FieldEdits
         }
 
         $isBlock = $item['kind'] === 'block';
-        $names = array_column($isBlock ? $this->fieldset($item['parentField'], $target['type'])['fields'] ?? [] : $item['parentField']['settings'] ?? [], 'name');
+        $subFields = $isBlock ? $this->fieldset($item['parentField'], $target['type'])['fields'] ?? [] : $item['parentField']['settings'] ?? [];
+        $names = array_column($subFields, 'name');
         $name = strtolower($name);
 
         if (!in_array($name, $names, true)) {
@@ -194,6 +195,12 @@ final class FieldEdits
                 ? "The block {$id} has no field {$name}. Its fields: " . implode(', ', $names) . '.'
                 : "The layout row {$id} has no setting {$name}." . ($names === [] ? '' : ' Its settings: ' . implode(', ', $names) . '.'));
         }
+
+        $this->refuseSharedFields([$name => $edit['value']], $subFields);
+        $kirbyField = $this->kirbyField($field['name'], $item['steps']);
+        $form = $isBlock ? $kirbyField->form($kirbyField->fields($target['type'])) : $kirbyField->attrsForm();
+        $form->submit(input: [$name => $edit['value']]);
+        FieldInput::refuseDropped($form, [$name => $edit['value']], $subFields);
 
         $key = $isBlock ? 'content' : 'attrs';
         $target[$key] = [...($target[$key] ?? []), $name => $edit['value']];
@@ -298,10 +305,12 @@ final class FieldEdits
         }
 
         self::refuseUnknownNames($content, $fieldset['fields'], "The block type {$type}");
+        $this->refuseSharedFields($content, $fieldset['fields']);
 
         $form = $kirbyField->form($kirbyField->fields($type));
         $form->fill(input: $form->defaults());
         $form->submit(input: $content);
+        FieldInput::refuseDropped($form, $content, $fieldset['fields']);
         $block = Block::factory(['content' => $form->toFormValues(), 'type' => $type])->toArray();
         $block['content'] = GetContent::compactValues($fieldset['fields'], $block['content'], $this->fieldsets);
 
@@ -328,10 +337,12 @@ final class FieldEdits
 
         $settings = self::content($edit);
         self::refuseUnknownNames($settings, $field['settings'] ?? [], 'The layout rows');
+        $this->refuseSharedFields($settings, $field['settings'] ?? []);
 
         $form = $kirbyField->attrsForm();
         $form->fill(input: $form->defaults());
         $form->submit(input: $settings);
+        FieldInput::refuseDropped($form, $settings, $field['settings'] ?? []);
 
         return Layout::factory([
             'attrs' => GetContent::compactValues($field['settings'] ?? [], $form->toFormValues(), $this->fieldsets),
@@ -507,6 +518,25 @@ final class FieldEdits
         }
 
         return null;
+    }
+
+    /**
+     * Kirby's forms skip a field with `translate: false` outside the default
+     * language, so its value would be lost without a word.
+     */
+    private function refuseSharedFields(array $content, array $fields): void
+    {
+        if ($this->language->isDefault()) {
+            return;
+        }
+
+        $content = array_change_key_case($content);
+
+        foreach ($fields as $field) {
+            if (!$field['translate'] && array_key_exists($field['name'], $content)) {
+                throw new ToolError("{$field['name']} can be changed only in the default language, as in the Panel.");
+            }
+        }
     }
 
     private static function refuseUnknownNames(array $content, array $fields, string $subject): void

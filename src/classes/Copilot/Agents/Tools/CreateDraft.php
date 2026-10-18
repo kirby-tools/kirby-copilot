@@ -9,6 +9,7 @@ use JohannSchopplich\Copilot\Agents\ConnectionPermission;
 use JohannSchopplich\Copilot\Agents\ContentVersion;
 use JohannSchopplich\Copilot\Agents\Tool;
 use JohannSchopplich\Copilot\Agents\ToolError;
+use JohannSchopplich\Copilot\FieldDigest;
 use Kirby\Cms\Language;
 use Kirby\Cms\Page;
 use Kirby\Cms\Site;
@@ -23,7 +24,7 @@ final class CreateDraft
         return new Tool(
             name: 'create_draft',
             title: 'Create draft',
-            description: 'Creates a page as a draft below the site or a page, in the default language; it stays hidden from visitors until change_status makes it public. Read a page with the same template with get_content to see its fields, or create the draft with just a title and read it; send values in the shape get_content returns; fields you leave out get their defaults. Write other languages with prepare_changes afterwards. Returns the draft, ignored fields with the reason, validation errors and values their fields don\'t take, and its etag.',
+            description: 'Creates a page as a draft below the site or a page, in the default language; it stays hidden from visitors until change_status makes it public. Read a page with the same template with get_content to see its fields, or create the draft with just a title and read it; send values in the shape get_content returns; fields you leave out get their defaults. Write other languages with prepare_changes afterwards. Refuses values a field doesn\'t take, such as an unknown option, and names its options. Returns the draft, ignored fields with the reason, validation errors, and its etag.',
             inputSchema: [
                 'type' => 'object',
                 'properties' => [
@@ -88,6 +89,7 @@ final class CreateDraft
         $fields = Fields::for($draft, $language);
         $fields->fill([...$fields->defaults(), ...$values, 'title' => $title]);
         ActiveContent::refuseIntroduced($fields, [...array_keys($values), 'title']);
+        FieldInput::refuseDropped($fields, $values, FieldDigest::for($draft, $language)['fields']);
 
         $page = $parent->createChild([
             'slug' => $slug,
@@ -99,7 +101,7 @@ final class CreateDraft
         return [
             'page' => ModelSummary::page($page),
             'ignored' => [...$fieldIgnored, ...$ignored],
-            'warnings' => FieldInput::warnings($fields, $values),
+            'warnings' => FieldInput::warnings($fields),
             'etag' => ContentVersion::etag($page, $language)
         ];
     }
