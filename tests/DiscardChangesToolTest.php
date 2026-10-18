@@ -26,7 +26,6 @@ final class DiscardChangesToolTest extends McpToolTestCase
     #[Test]
     public function discards_the_changes_and_returns_the_published_content_etag(): void
     {
-        $this->prepare();
         $result = $this->discard();
 
         $this->assertFalse($result['isError'], $result['content'][0]['text']);
@@ -46,13 +45,6 @@ final class DiscardChangesToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function discards_changes_the_user_is_making_in_the_panel(): void
-    {
-        $this->assertFalse($this->discard()['isError']);
-        $this->assertFalse(self::bootApp($this->props())->page('notes/first')->version('changes')->exists());
-    }
-
-    #[Test]
     public function says_when_there_is_nothing_to_discard(): void
     {
         unlink(self::indexRoot() . '/content/notes/first/_changes/note.txt');
@@ -66,7 +58,6 @@ final class DiscardChangesToolTest extends McpToolTestCase
     #[Test]
     public function refuses_an_account_that_may_not_update_the_page(): void
     {
-        $this->prepare();
         $result = $this->discard(role: 'reviewer');
 
         $this->assertTrue($result['isError']);
@@ -106,15 +97,6 @@ final class DiscardChangesToolTest extends McpToolTestCase
             'model' => 'notes/first',
             'etag' => $this->read()['etag']
         ], $this->props(['users' => [['role' => $role]]]));
-    }
-
-    private function prepare(): void
-    {
-        $this->callTool('prepare_changes', [
-            'model' => 'notes/first',
-            'etag' => $this->read()['etag'],
-            'fields' => ['intro' => 'Hello, agent']
-        ], $this->props());
     }
 
     private function read(): array

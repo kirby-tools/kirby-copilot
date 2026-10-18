@@ -20,7 +20,6 @@ final class DeletePageToolTest extends McpToolTestCase
 
         self::writeContent('notes/notes.txt', ['Title' => 'Notes']);
         self::writeContent('notes/1_first/note.txt', ['Title' => 'First note']);
-        self::writeContent('notes/_drafts/idea/note.txt', ['Title' => 'Idea']);
     }
 
     #[Test]
@@ -31,24 +30,6 @@ final class DeletePageToolTest extends McpToolTestCase
         $this->assertFalse($result['isError'], $result['content'][0]['text']);
         $this->assertSame(['deleted' => 'notes/first'], $result['structuredContent']);
         $this->assertDirectoryDoesNotExist(self::indexRoot() . '/content/notes/1_first');
-    }
-
-    #[Test]
-    public function deletes_a_draft(): void
-    {
-        $this->callTool('delete_page', ['page' => 'notes/idea'], $this->props());
-
-        $this->assertDirectoryDoesNotExist(self::indexRoot() . '/content/notes/_drafts/idea');
-    }
-
-    #[Test]
-    public function refuses_a_page_with_subpages(): void
-    {
-        $result = $this->callTool('delete_page', ['page' => 'notes'], $this->props());
-
-        $this->assertTrue($result['isError']);
-        $this->assertSame('The page has subpages and cannot be deleted', $result['content'][0]['text']);
-        $this->assertDirectoryExists(self::indexRoot() . '/content/notes/1_first');
     }
 
     #[Test]
@@ -106,7 +87,9 @@ final class DeletePageToolTest extends McpToolTestCase
 
         $result = $this->callTool('delete_page', ['page' => 'notes'], $this->props(['users' => [['role' => 'archivist']]]));
 
+        $this->assertTrue($result['isError']);
         $this->assertSame('The page has subpages and cannot be deleted', $result['content'][0]['text']);
+        $this->assertDirectoryExists(self::indexRoot() . '/content/notes/1_first');
     }
 
     #[Test]

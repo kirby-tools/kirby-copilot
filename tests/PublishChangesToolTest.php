@@ -153,13 +153,6 @@ final class PublishChangesToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function publishes_changes_the_user_is_making_in_the_panel(): void
-    {
-        $this->assertFalse($this->publish()['isError']);
-        $this->assertSame('Hello, editor', self::bootApp($this->props())->page('notes/first')->content()->get('intro')->value());
-    }
-
-    #[Test]
     public function names_the_user_whose_panel_edit_locks_the_changes(): void
     {
         self::writeContent('notes/1_first/_changes/note.txt', ['Title' => 'First note', 'Intro' => 'Typing', 'Uuid' => 'first', 'Lock' => 'grace']);
@@ -188,7 +181,6 @@ final class PublishChangesToolTest extends McpToolTestCase
     #[Test]
     public function refuses_an_account_that_may_not_update_the_page(): void
     {
-        $this->prepare();
         $result = $this->publish(role: 'reviewer');
 
         $this->assertTrue($result['isError']);

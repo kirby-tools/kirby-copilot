@@ -37,6 +37,14 @@ final class CreateDraftToolTest extends McpToolTestCase
     }
 
     #[Test]
+    public function takes_the_given_slug(): void
+    {
+        $result = $this->create(['parent' => 'notes', 'template' => 'note', 'title' => 'Hello', 'slug' => 'hello-world']);
+
+        $this->assertSame('notes/hello-world', $result['page']['id']);
+    }
+
+    #[Test]
     public function makes_the_title_and_slug_from_the_blueprint_create_templates(): void
     {
         $props = $this->eventProps('{{ page.venue }}, {{ page.day }}');

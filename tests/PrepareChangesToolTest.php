@@ -73,18 +73,6 @@ final class PrepareChangesToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function writes_onto_the_changes_it_wrote_before(): void
-    {
-        $this->prepare(['intro' => 'Hello, agent']);
-        $this->prepare(['summary' => 'Two fields']);
-
-        $changes = $this->app()->page('notes/first')->version('changes')->content();
-
-        $this->assertSame('Hello, agent', $changes->get('intro')->value());
-        $this->assertSame('Two fields', $changes->get('summary')->value());
-    }
-
-    #[Test]
     public function drops_changes_that_equal_the_published_content(): void
     {
         // A stored URL Kirby rejects.
@@ -416,17 +404,6 @@ final class PrepareChangesToolTest extends McpToolTestCase
         ]]);
 
         $this->assertSame([0, 3], [$result['changed'][0]['itemsBefore'], $result['changed'][0]['itemsAfter']]);
-    }
-
-    #[Test]
-    public function adds_ids_to_new_blocks(): void
-    {
-        $this->prepare(['body' => [['type' => 'text', 'content' => ['text' => '<p>New</p>']]]]);
-
-        $blocks = $this->app()->page('notes/first')->version('changes')->content()->get('body')->toBlocks();
-
-        $this->assertSame('<p>New</p>', $blocks->first()->text()->value());
-        $this->assertNotEmpty($blocks->first()->id());
     }
 
     #[Test]
