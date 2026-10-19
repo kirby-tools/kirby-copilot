@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitefd34be6308b1694dc6026ef3f04eb03
+class ComposerStaticInitf79447e9c1ef80b77e16ae3ac1dac506
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -1345,6 +1345,7 @@ class ComposerStaticInitefd34be6308b1694dc6026ef3f04eb03
         'GuzzleHttp\\Promise\\PromisorInterface' => __DIR__ . '/..' . '/guzzlehttp/promises/src/PromisorInterface.php',
         'GuzzleHttp\\Promise\\RejectedPromise' => __DIR__ . '/..' . '/guzzlehttp/promises/src/RejectedPromise.php',
         'GuzzleHttp\\Promise\\RejectionException' => __DIR__ . '/..' . '/guzzlehttp/promises/src/RejectionException.php',
+        'GuzzleHttp\\Promise\\State' => __DIR__ . '/..' . '/guzzlehttp/promises/src/State.php',
         'GuzzleHttp\\Promise\\TaskQueue' => __DIR__ . '/..' . '/guzzlehttp/promises/src/TaskQueue.php',
         'GuzzleHttp\\Promise\\TaskQueueInterface' => __DIR__ . '/..' . '/guzzlehttp/promises/src/TaskQueueInterface.php',
         'GuzzleHttp\\Promise\\Utils' => __DIR__ . '/..' . '/guzzlehttp/promises/src/Utils.php',
@@ -1453,11 +1454,14 @@ class ComposerStaticInitefd34be6308b1694dc6026ef3f04eb03
         'JohannSchopplich\\Copilot\\Agents\\Tools\\Arguments' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/Arguments.php',
         'JohannSchopplich\\Copilot\\Agents\\Tools\\ChangeSlug' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/ChangeSlug.php',
         'JohannSchopplich\\Copilot\\Agents\\Tools\\ChangeStatus' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/ChangeStatus.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tools\\ContentDigest' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/ContentDigest.php',
         'JohannSchopplich\\Copilot\\Agents\\Tools\\CreateDraft' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/CreateDraft.php',
         'JohannSchopplich\\Copilot\\Agents\\Tools\\DeleteFile' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/DeleteFile.php',
         'JohannSchopplich\\Copilot\\Agents\\Tools\\DeletePage' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/DeletePage.php',
         'JohannSchopplich\\Copilot\\Agents\\Tools\\DiscardChanges' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/DiscardChanges.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tools\\FieldEdits' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/FieldEdits.php',
         'JohannSchopplich\\Copilot\\Agents\\Tools\\FieldInput' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/FieldInput.php',
+        'JohannSchopplich\\Copilot\\Agents\\Tools\\FindFiles' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/FindFiles.php',
         'JohannSchopplich\\Copilot\\Agents\\Tools\\FindPages' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/FindPages.php',
         'JohannSchopplich\\Copilot\\Agents\\Tools\\GetContent' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/GetContent.php',
         'JohannSchopplich\\Copilot\\Agents\\Tools\\GetSite' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/GetSite.php',
@@ -2017,9 +2021,9 @@ class ComposerStaticInitefd34be6308b1694dc6026ef3f04eb03
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitefd34be6308b1694dc6026ef3f04eb03::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitefd34be6308b1694dc6026ef3f04eb03::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitefd34be6308b1694dc6026ef3f04eb03::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitf79447e9c1ef80b77e16ae3ac1dac506::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitf79447e9c1ef80b77e16ae3ac1dac506::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitf79447e9c1ef80b77e16ae3ac1dac506::$classMap;
 
         }, null, ClassLoader::class);
     }
