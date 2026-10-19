@@ -40,7 +40,7 @@ final class UploadFile
         return new Tool(
             name: 'upload_file',
             title: 'Upload file',
-            description: 'Uploads a file to the site or a page: from a public HTTPS URL, up to ' . self::MAX_SIZE_TEXT . ' unless the file template sets its own maximum, or as base64 for a small file, up to ' . self::MAX_DATA_SIZE_TEXT . '. An upload to a draft, or a page inside one, needs the Prepare changes permission; one to a published page or the site is live at once and needs Publish changes. The file\'s fields, like the alt text, wait for review – view_image shows an image to describe, prepare_changes writes the fields. Call it only when the user asks. Returns the file and its etag.',
+            description: 'Uploads a file to the site or a page: from a public HTTPS URL, up to ' . self::MAX_SIZE_TEXT . ' unless the file template sets its own maximum, or as base64 for a small file, up to ' . self::MAX_DATA_SIZE_TEXT . '. An upload to a draft, or a page inside one, needs `content:prepare`; one to a published page or the site is live at once and needs `content:publish`. The file\'s fields, like the alt text, wait for review – view_image shows an image to describe, prepare_changes writes the fields. Call it only when the user asks. Returns the file and its etag.',
             inputSchema: [
                 'type' => 'object',
                 'properties' => [
