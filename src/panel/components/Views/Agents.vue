@@ -21,7 +21,8 @@ const props = defineProps({
   licenseStatus: String as PropType<LicenseStatus>,
 });
 
-const DOCS_URL = "https://kirby.tools/docs/copilot/agents";
+const DOCS_URL =
+  "https://kirby.tools/docs/copilot/agents#step-2-add-the-mcp-url-to-your-agent";
 
 const panel = usePanel();
 const docsLinkText = panel.t("johannschopplich.copilot.agents.docs");
