@@ -56,7 +56,7 @@ final class GetSiteToolTest extends McpToolTestCase
                 ['code' => 'de', 'name' => 'Deutsch'],
                 ['code' => 'en', 'name' => 'English', 'default' => true]
             ]
-        ]);
+        ], fn (App $kirby) => $kirby->site()->version('changes')->save(['title' => 'Spielplatz'], 'de'));
 
         $this->assertSame(
             [
@@ -65,6 +65,7 @@ final class GetSiteToolTest extends McpToolTestCase
             ],
             $site['languages']
         );
+        $this->assertSame(['de'], $site['site']['changesIn']);
     }
 
     #[Test]

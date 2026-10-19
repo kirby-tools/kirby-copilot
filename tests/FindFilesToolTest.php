@@ -58,6 +58,9 @@ final class FindFilesToolTest extends McpToolTestCase
 
         $this->assertSame(['team.jpg'], $find(['language' => 'de', 'hasTranslation' => false]));
         $this->assertSame(['logo.png'], $find(['language' => 'de', 'hasTranslation' => true]));
+
+        $files = $this->callTool('find_files', [], $props, fn (App $kirby) => $kirby->site()->file('logo.png')->version('changes')->save(['alt' => 'Das Logo'], 'de'))['structuredContent']['files'];
+        $this->assertSame([['de'], []], array_column($files, 'changesIn'));
     }
 
     #[Test]

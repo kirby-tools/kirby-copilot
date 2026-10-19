@@ -35,6 +35,14 @@ final class ContentVersion
     }
 
     /**
+     * @return list<string>
+     */
+    public static function changesIn(ModelWithContent $model): array
+    {
+        return array_values(App::instance()->languages()->filter(fn (Language $language) => $model->version('changes')->exists($language))->codes());
+    }
+
+    /**
      * Names the user who holds a lock from its `Lock::toArray()` form, which
      * leaves out a user the account may not list.
      */
@@ -63,13 +71,7 @@ final class ContentVersion
      */
     public static function inChangedLanguages(ModelWithContent $model): string
     {
-        $kirby = App::instance();
-
-        if (!$kirby->multilang()) {
-            return '';
-        }
-
-        return ' in ' . implode(', ', $kirby->languages()->filter(fn (Language $language) => $model->version('changes')->exists($language))->codes());
+        return App::instance()->multilang() ? ' in ' . implode(', ', self::changesIn($model)) : '';
     }
 
     /**

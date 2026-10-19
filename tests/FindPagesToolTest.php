@@ -104,8 +104,9 @@ final class FindPagesToolTest extends McpToolTestCase
             $kirby->page('about')->version('changes')->save(['title' => 'Über uns, neu'], 'de');
         })['structuredContent'];
 
-        $this->assertSame([true], array_column($find(['hasChanges' => true])['pages'], 'hasChanges'));
+        $this->assertSame([['de']], array_column($find(['hasChanges' => true])['pages'], 'changesIn'));
         $this->assertSame(0, $find(['language' => 'en', 'hasChanges' => true])['total']);
+        $this->assertArrayNotHasKey('changesIn', $find(['language' => 'de'])['pages'][0]);
     }
 
     #[Test]
