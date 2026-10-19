@@ -95,7 +95,17 @@ final class PrepareChangesToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function names_the_language_to_read_again_in_when_refusing_an_etag_of_another_language(): void
+    public function names_the_language_to_read_again_in_when_refusing_a_stale_etag(): void
+    {
+        $props = $this->multilang();
+
+        $result = $this->callTool('prepare_changes', ['model' => 'notes/first', 'language' => 'de', 'etag' => 'de.stale', 'fields' => ['intro' => 'Hallo, Agent']], $props);
+
+        $this->assertStringContainsString('get_content with `language` "de"', $result['content'][0]['text']);
+    }
+
+    #[Test]
+    public function refuses_an_etag_of_another_language_and_names_both_languages(): void
     {
         $props = $this->multilang();
 
@@ -106,7 +116,7 @@ final class PrepareChangesToolTest extends McpToolTestCase
             'fields' => ['intro' => 'Hallo, Agent']
         ], $props);
 
-        $this->assertStringContainsString('get_content with `language` "de"', $result['content'][0]['text']);
+        $this->assertStringStartsWith('The etag is from the "en" content, but the call writes "de".', $result['content'][0]['text']);
     }
 
     #[Test]

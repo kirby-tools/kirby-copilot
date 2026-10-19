@@ -106,6 +106,27 @@ final class ChangeStatusToolTest extends McpToolTestCase
     }
 
     #[Test]
+    public function refuses_to_publish_a_draft_while_a_page_or_file_going_live_with_it_has_unsaved_changes(): void
+    {
+        $drafts = self::indexRoot() . '/content/notes/_drafts';
+        touch($drafts . '/idea/photo.jpg');
+        self::writeContent('notes/_drafts/idea/_changes/photo.jpg.txt', ['Alt' => 'A lake', 'Lock' => 'ada']);
+        self::writeContent('notes/_drafts/idea/details/note.txt', ['Title' => 'Details']);
+        self::writeContent('notes/_drafts/idea/details/_changes/note.txt', ['Title' => 'More details', 'Lock' => 'ada']);
+        touch($drafts . '/idea/details/plan.pdf');
+        self::writeContent('notes/_drafts/idea/details/_changes/plan.pdf.txt', ['Caption' => 'The plan', 'Lock' => 'ada']);
+        // A subpage that is a draft itself stays hidden.
+        self::writeContent('notes/_drafts/idea/_drafts/sketch/note.txt', ['Title' => 'Sketch']);
+        touch($drafts . '/idea/_drafts/sketch/sketch.pdf');
+        self::writeContent('notes/_drafts/idea/_drafts/sketch/_changes/sketch.pdf.txt', ['Caption' => 'A sketch', 'Lock' => 'ada']);
+
+        $result = $this->callTool('change_status', ['page' => 'notes/idea', 'status' => 'listed'], $this->props());
+
+        $this->assertSame('Pages and files that go live with the draft have unsaved changes, so it stays a draft: notes/idea/details; notes/idea/photo.jpg; notes/idea/details/plan.pdf. Publish them with publish_changes first.', $result['content'][0]['text']);
+        $this->assertSame('draft', self::bootApp($this->props())->page('notes/idea')->status());
+    }
+
+    #[Test]
     public function names_the_languages_of_a_drafts_unsaved_changes(): void
     {
         self::writeContent('notes/_drafts/idea/_changes/note.de.txt', ['Title' => 'Idee', 'Intro' => 'Hallo, Agent', 'Lock' => 'ada']);

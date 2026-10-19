@@ -9,6 +9,8 @@ use JohannSchopplich\Copilot\Agents\ConnectionPermission;
 use JohannSchopplich\Copilot\Agents\ContentVersion;
 use JohannSchopplich\Copilot\Agents\Tool;
 use JohannSchopplich\Copilot\Agents\ToolError;
+use Kirby\Cms\File;
+use Kirby\Cms\Page;
 use Kirby\Content\LockedContentException;
 
 final class ChangeStatus
@@ -18,7 +20,7 @@ final class ChangeStatus
         return new Tool(
             name: 'change_status',
             title: 'Change status',
-            description: 'Changes a page\'s status: `listed` makes it public and lists it in its parent\'s navigation, `unlisted` makes it public without, `draft` hides it from visitors; `position` also reorders a listed page. Call it only when the user asks. A draft with validation errors or unsaved changes stays a draft. A published page\'s unsaved changes stay unsaved. Returns the page\'s status, its position among the listed pages, and its URL unless it is a draft.',
+            description: 'Changes a page\'s status: `listed` makes it public and lists it in its parent\'s navigation, `unlisted` makes it public without, `draft` hides it from visitors; `position` also reorders a listed page. Call it only when the user asks. A draft stays a draft while it has validation errors, or while it or a subpage or file that goes live with it has unsaved changes. A published page\'s unsaved changes stay unsaved. Returns the page\'s status, its position among the listed pages, and its URL unless it is a draft.',
             inputSchema: [
                 'type' => 'object',
                 'properties' => [
@@ -50,15 +52,8 @@ final class ChangeStatus
                 throw new LockedContentException($page->lock());
             }
 
-            // Kirby's own error names the fields only in its details, which a tool
-            // error leaves out.
-            if ($page->isDraft() && $status !== 'draft' && $page->errors() !== []) {
-                throw new ToolError('The page has validation errors, so it stays a draft. Fix them with prepare_changes and publish_changes: ' . FieldInput::describeErrors($page->errors()));
-            }
-
-            // A draft would go live without its unsaved changes, since only published content is public.
-            if ($page->isDraft() && $status !== 'draft' && $page->version('changes')->exists('*')) {
-                throw new ToolError('The draft has unsaved changes' . ContentVersion::inChangedLanguages($page) . ', so it stays a draft. Publish them with publish_changes first.');
+            if ($page->isDraft() && $status !== 'draft') {
+                self::refuseIncompleteDraft($page);
             }
 
             // Kirby moves a listed page without a position to the end.
@@ -81,5 +76,33 @@ final class ChangeStatus
         }
 
         return $result;
+    }
+
+    /**
+     * Refuses to make a draft public while what goes live with it isn't
+     * ready: the draft has validation errors, or the draft, a subpage that
+     * isn't a draft, or a file of either has unsaved changes, which the
+     * status change wouldn't publish.
+     */
+    private static function refuseIncompleteDraft(Page $draft): void
+    {
+        // Kirby's own error names the fields only in its details, which a tool
+        // error leaves out.
+        if ($draft->errors() !== []) {
+            throw new ToolError('The page has validation errors, so it stays a draft. Fix them with prepare_changes and publish_changes: ' . FieldInput::describeErrors($draft->errors()));
+        }
+
+        if ($draft->version('changes')->exists('*')) {
+            throw new ToolError('The draft has unsaved changes' . ContentVersion::inChangedLanguages($draft) . ', so it stays a draft. Publish them with publish_changes first.');
+        }
+
+        $changedModels = array_filter(
+            [...$draft->index()->values(), ...$draft->files()->values(), ...$draft->index()->files()->values()],
+            fn (Page|File $model) => $model->version('changes')->exists('*')
+        );
+
+        if ($changedModels !== []) {
+            throw new ToolError('Pages and files that go live with the draft have unsaved changes, so it stays a draft: ' . implode('; ', array_map(fn (Page|File $model) => $model->id() . ContentVersion::inChangedLanguages($model), $changedModels)) . '. Publish them with publish_changes first.');
+        }
     }
 }

@@ -21,7 +21,9 @@ final class AgentWrites
 
     /**
      * Runs an agent's write to the changes of a model in a language and
-     * records it, unless the content changed since the agent's etag.
+     * records it, unless the agent's etag is from another language or the
+     * content changed since. An etag never picks the language, since an
+     * agent holding etags of two languages would write into the wrong one.
      *
      * @template T
      * @param Closure(): T $write
@@ -29,6 +31,12 @@ final class AgentWrites
      */
     public static function write(ModelWithContent $model, Language $language, string $etag, Closure $write): mixed
     {
+        $etagLanguage = strstr($etag, '.', true);
+
+        if ($etagLanguage !== false && $etagLanguage !== $language->code()) {
+            throw new ToolError("The etag is from the \"{$etagLanguage}\" content, but the call writes \"{$language->code()}\". Set `language` to the language you mean to write, with an etag from that language.");
+        }
+
         return self::lock(function () use ($model, $language, $etag, $write) {
             if ($etag !== ContentVersion::etag($model, $language)) {
                 $read = App::instance()->multilang() ? "get_content with `language` \"{$language->code()}\"" : 'get_content';
