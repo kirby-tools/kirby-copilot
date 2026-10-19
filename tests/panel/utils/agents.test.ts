@@ -208,6 +208,34 @@ describe("checkAgentsSetup", () => {
     ).toEqual([]);
   });
 
+  it("reports a .well-known URL inside the subfolder that a server rule keeps from Kirby", async () => {
+    const subfolderMcpUrl = "https://example.com/site/api/copilot/mcp";
+    const resourceMetadataUrl =
+      "https://example.com/site/.well-known/oauth-protected-resource/site/api/copilot/mcp";
+    const { fetch } = createSite({
+      [subfolderMcpUrl]: () =>
+        new Response(null, {
+          status: 401,
+          headers: {
+            "WWW-Authenticate": `Bearer resource_metadata="${resourceMetadataUrl}", error="invalid_token"`,
+          },
+        }),
+      [resourceMetadataUrl]: () =>
+        new Response("<h1>Forbidden</h1>", { status: 403 }),
+    });
+
+    const problems = await checkAgentsSetup({
+      mcpUrl: subfolderMcpUrl,
+      pageProtocol: "https:",
+      fetch,
+    });
+
+    expect(problems).toContainEqual({
+      type: "wellKnown",
+      url: resourceMetadataUrl,
+    });
+  });
+
   it("reports the domain-root URLs a subfolder install doesn't pass to Kirby", async () => {
     const subfolderMcpUrl = "https://example.com/site/api/copilot/mcp";
     const resourceMetadataUrl =
