@@ -427,6 +427,25 @@ describe("fieldToZodSchema", () => {
     });
   });
 
+  describe("description", () => {
+    it("describes a field with its help and placeholder", () => {
+      const schema = assertSchema(fieldToZodSchema(
+        field({
+          type: "text",
+          label: "Title",
+          name: "title",
+          help: "Keep it under 60 characters",
+          placeholder: "Summer festival",
+          required: true,
+        }),
+      ));
+
+      expect(schema.description).toBe(
+        "\"Title\", single-line plain text without line breaks or formatting\nHelp: Keep it under 60 characters\nPlaceholder: Summer festival",
+      );
+    });
+  });
+
   describe("unknown field types", () => {
     it("omits an unknown sub-field from structure rows", () => {
       const schema = assertSchema(fieldToZodSchema(

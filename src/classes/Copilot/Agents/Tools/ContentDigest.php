@@ -21,6 +21,9 @@ final class ContentDigest
     /** @var array<string, array> Keyed by field name */
     public readonly array $fields;
 
+    /** @var list<array{label?: string, text: string, when?: array}> */
+    public readonly array $info;
+
     /** @var array<string, array> */
     public readonly array $fieldsets;
 
@@ -33,6 +36,7 @@ final class ContentDigest
     ) {
         $digest = FieldDigest::for($model, $language);
         $this->fields = array_column($digest['fields'], null, 'name');
+        $this->info = $digest['info'];
         $this->fieldsets = $digest['fieldsets'];
         $this->unhinted = $digest['unhinted'];
     }

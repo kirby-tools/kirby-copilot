@@ -135,6 +135,25 @@ final class PrepareChangesToolTest extends McpToolTestCase
     }
 
     #[Test]
+    public function writes_a_field_whose_plugin_maps_its_type_onto_a_core_type(): void
+    {
+        App::plugin('test/rating', extends: [
+            'fields' => ['rating' => []],
+            'johannschopplich.copilot' => ['fieldTypes' => ['rating' => 'number']]
+        ]);
+        $props = $this->props(['blueprints' => ['pages/note' => ['fields' => ['stars' => ['type' => 'rating']]]]]);
+
+        $result = $this->callTool('prepare_changes', [
+            'model' => 'notes/first',
+            'etag' => $this->read(props: $props)['etag'],
+            'fields' => ['stars' => 4, 'map' => 'x']
+        ], $props)['structuredContent'];
+
+        $this->assertSame(['stars'], array_column($result['changed'], 'name'));
+        $this->assertSame(['map'], array_column($result['ignored'], 'name'));
+    }
+
+    #[Test]
     public function writes_metaDescription_by_its_camelcase_blueprint_key(): void
     {
         $props = $this->props(['blueprints' => ['pages/note' => ['fields' => ['metaDescription' => ['type' => 'text']]]]]);

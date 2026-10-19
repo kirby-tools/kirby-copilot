@@ -15,7 +15,7 @@ A prompt an editor sends from the Panel – typed, predefined in a blueprint, or
 _Avoid_: editor's own prompt, user prompt (the message role)
 
 **Placeholder**:
-A marker in an editor prompt that stands for a field's current value.
+A marker in an editor prompt that stands for a field's current value; not a field's blueprint `placeholder` text.
 _Avoid_: template variable
 
 **Reference token**:

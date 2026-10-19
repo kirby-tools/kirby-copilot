@@ -234,6 +234,15 @@ export function fieldToZodSchema(
 
   let schema = schemaBuilder(field, context);
 
+  const guidance = [
+    field.help && `Help: ${field.help}`,
+    field.placeholder && `Placeholder: ${field.placeholder}`,
+  ].filter(Boolean);
+
+  if (guidance.length > 0) {
+    schema = schema.describe([schema.description, ...guidance].join("\n"));
+  }
+
   if (field.required === true) {
     const schemaType = schema._zod?.def?.type;
 

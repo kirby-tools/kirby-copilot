@@ -77,6 +77,18 @@ final class FieldsetsRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
+    public function translates_a_help_given_per_language(): void
+    {
+        $result = $this->callFieldsetsRoute([
+            'blocks/test-help' => [
+                'fields' => ['title' => ['type' => 'text', 'help' => ['en' => 'Keep it short', 'de' => 'Kurz halten']]],
+            ],
+        ]);
+
+        $this->assertSame('Keep it short', $this->findBlock($result, 'test-help')['fields']['title']['help']);
+    }
+
+    #[Test]
     public function query_based_options_resolve_to_empty_array(): void
     {
         $result = $this->callFieldsetsRoute([

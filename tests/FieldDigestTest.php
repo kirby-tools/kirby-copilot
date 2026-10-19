@@ -355,6 +355,82 @@ final class FieldDigestTest extends ApiRouteTestCase
     }
 
     #[Test]
+    public function keeps_the_condition_and_input_guidance_of_a_field(): void
+    {
+        $page = self::bootApp([
+            'blueprints' => [
+                'pages/default' => [
+                    'fields' => [
+                        'registrationOpen' => ['type' => 'toggle'],
+                        'registrationUrl' => [
+                            'type' => 'text',
+                            'when' => ['registrationOpen' => true],
+                            'placeholder' => 'events/summer',
+                            'before' => 'https://tickets.example.com/',
+                            'after' => '/register',
+                            'pattern' => '[a-z0-9/-]+'
+                        ]
+                    ]
+                ]
+            ],
+            'site' => ['children' => [['slug' => 'test']]]
+        ])->page('test');
+
+        $this->assertSame(
+            ['when' => ['registrationopen' => true], 'placeholder' => 'events/summer', 'before' => 'https://tickets.example.com/', 'after' => '/register', 'pattern' => '[a-z0-9/-]+'],
+            array_intersect_key(FieldDigest::for($page)['fields'][1], array_flip(['when', 'placeholder', 'before', 'after', 'pattern']))
+        );
+    }
+
+    #[Test]
+    public function leaves_out_the_placeholder_kirby_fills_in_for_the_field_type(): void
+    {
+        $page = self::bootApp([
+            'fields' => [
+                'rating' => ['extends' => 'text', 'props' => ['placeholder' => fn (string $placeholder) => $placeholder]]
+            ],
+            'blueprints' => [
+                'pages/default' => [
+                    'fields' => [
+                        'category' => ['type' => 'select', 'options' => ['news' => 'News']],
+                        'website' => ['type' => 'url'],
+                        'contact' => ['type' => 'email', 'placeholder' => 'press@example.com'],
+                        'score' => ['type' => 'rating', 'placeholder' => 'Rate it']
+                    ]
+                ]
+            ],
+            'site' => ['children' => [['slug' => 'test']]]
+        ])->page('test');
+
+        $this->assertSame([null, null, 'press@example.com', 'Rate it'], array_map(fn (array $field) => $field['placeholder'] ?? null, FieldDigest::for($page)['fields']));
+    }
+
+    #[Test]
+    public function lists_the_info_texts_of_a_structure_a_fieldset_and_layout_settings(): void
+    {
+        $page = self::bootApp([
+            'blueprints' => [
+                'pages/default' => [
+                    'fields' => [
+                        'faq' => ['type' => 'structure', 'fields' => ['faqGuide' => ['type' => 'info', 'text' => 'One question per row.'], 'question' => ['type' => 'text']]],
+                        'body' => ['type' => 'blocks', 'fieldsets' => ['teaser' => ['fields' => ['teaserGuide' => ['type' => 'info', 'text' => 'Under 160 characters.'], 'text' => ['type' => 'text']]]]],
+                        'layout' => ['type' => 'layout', 'settings' => ['fields' => ['settingsGuide' => ['type' => 'info', 'text' => 'Dark rows sparingly.'], 'background' => ['type' => 'text']]]]
+                    ]
+                ]
+            ],
+            'site' => ['children' => [['slug' => 'test']]]
+        ])->page('test');
+
+        $digest = FieldDigest::for($page);
+        [$faq, , $layout] = $digest['fields'];
+
+        $this->assertSame(
+            ['One question per row.', 'Under 160 characters.', 'Dark rows sparingly.'],
+            [$faq['info'][0]['text'], $digest['fieldsets']['teaser']['info'][0]['text'], $layout['info'][0]['text']]
+        );
+    }
+
+    #[Test]
     public function describes_the_settings_of_a_layout_field(): void
     {
         $page = self::bootApp([

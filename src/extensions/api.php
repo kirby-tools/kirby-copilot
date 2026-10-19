@@ -7,8 +7,8 @@ use JohannSchopplich\Copilot\Agents\McpGuard;
 use JohannSchopplich\Copilot\AI\CurlProxyTransport;
 use JohannSchopplich\Copilot\AI\Proxy;
 use JohannSchopplich\Copilot\PanelContext;
+use JohannSchopplich\Copilot\PanelFields;
 use JohannSchopplich\Copilot\ViewButtonOptions;
-use JohannSchopplich\KirbyTools\FieldNormalizer;
 use JohannSchopplich\KirbyTools\FieldResolver;
 use JohannSchopplich\KirbyTools\ModelResolver;
 use JohannSchopplich\Licensing\LicensePanel;
@@ -129,8 +129,10 @@ return [
 
                         $normalizeFieldProps = static function (array $fields) use (&$normalizeFieldProps): array {
                             foreach ($fields as &$field) {
-                                if (isset($field['label'])) {
-                                    $field['label'] = I18n::translate($field['label'], $field['label']);
+                                foreach (['label', 'help', 'placeholder'] as $prop) {
+                                    if (isset($field[$prop])) {
+                                        $field[$prop] = I18n::translate($field[$prop], $field[$prop]);
+                                    }
                                 }
 
                                 if (isset($field['options']) && is_array($field['options'])) {
@@ -168,7 +170,7 @@ return [
                             'name' => $name,
                             'type' => $blockType,
                             'description' => $props['description'] ?? null,
-                            'fields' => FieldNormalizer::normalizeFields($normalizeFieldProps($fields)),
+                            'fields' => PanelFields::normalize($normalizeFieldProps($fields)),
                         ];
                     } catch (\Throwable) {
                         // Skip blocks with invalid blueprints so one bad
@@ -198,7 +200,7 @@ return [
                     throw new NotFoundException('No model found for id: ' . $id);
                 }
 
-                return FieldNormalizer::normalizeFields(FieldResolver::resolveModelFields($model));
+                return PanelFields::normalize(FieldResolver::resolveModelFields($model));
             }
         ],
         ...(Agents::isEnabled() ? [

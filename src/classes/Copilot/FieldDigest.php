@@ -4,14 +4,18 @@ declare(strict_types = 1);
 
 namespace JohannSchopplich\Copilot;
 
+use Closure;
 use JohannSchopplich\KirbyTools\FieldNormalizer;
+use Kirby\Cms\App;
 use Kirby\Cms\Language;
 use Kirby\Cms\ModelWithContent;
 use Kirby\Cms\User;
 use Kirby\Cms\UserPicker;
 use Kirby\Data\Json;
+use Kirby\Form\Field;
 use Kirby\Form\Fields;
 use Kirby\Toolkit\Str;
+use Throwable;
 
 /**
  * Describes a model's fields for an AI that writes their values: the props
@@ -53,7 +57,11 @@ final class FieldDigest
      * `unhinted` names the fields that hold a value but whose type, such as
      * a plugin's, has no hint, so an AI can't write them.
      *
-     * @return array{fields: list<array>, fieldsets: array<string, array>, unhinted: list<array{name: string, type: string, label: string|null}>}
+     * `info` holds the texts of the info fields and the visible info sections
+     * of all tabs, which editors read as guidance. Fieldsets, structure and
+     * object fields, and layout fields for their settings carry their own.
+     *
+     * @return array{fields: list<array>, info: list<array{label?: string, text: string, when?: array}>, fieldsets: array<string, array>, unhinted: list<array{name: string, type: string, label: string|null}>}
      */
     public static function for(ModelWithContent $model, Language|string|null $language = null): array
     {
@@ -65,15 +73,67 @@ final class FieldDigest
 
         foreach ($props as $name => $fieldProps) {
             if (self::isVisibleValueField($fieldProps) && !in_array($name, $digestedNames, true)) {
-                $unhinted[] = ['name' => $name, 'type' => FieldNormalizer::resolveBaseType($fieldProps['type']), 'label' => $fieldProps['label'] ?? null];
+                $unhinted[] = ['name' => $name, 'type' => self::coreType($fieldProps['type']), 'label' => $fieldProps['label'] ?? null];
             }
         }
 
         return [
             'fields' => $fields,
+            'info' => [...self::infoOf($props), ...$digest->sectionInfo()],
             'fieldsets' => $digest->fieldsets,
             'unhinted' => $unhinted
         ];
+    }
+
+    /**
+     * @return array<string, string> The format hints by key
+     */
+    public static function hints(): array
+    {
+        return self::$hints ??= Json::read(dirname(__DIR__, 2) . '/field-hints.json');
+    }
+
+    /**
+     * Resolves a field type to the core type Copilot writes its value as. A
+     * plugin maps its own field types under `johannschopplich.copilot.fieldTypes`
+     * in its extends; any other type resolves through the type it extends.
+     */
+    public static function coreType(string $type): string
+    {
+        foreach (App::instance()->plugins() as $plugin) {
+            $mappedType = $plugin->extends()['johannschopplich.copilot']['fieldTypes'][$type] ?? null;
+
+            if (is_string($mappedType)) {
+                return $mappedType;
+            }
+        }
+
+        return FieldNormalizer::resolveBaseType($type);
+    }
+
+    /**
+     * Returns the field's placeholder unless it is the one Kirby fills in
+     * for the field type, like a select's `—`, which says nothing about the
+     * site.
+     */
+    public static function placeholder(array $props): string|null
+    {
+        $placeholder = $props['placeholder'] ?? null;
+
+        if ($placeholder === null || !isset(Field::$types[$props['type']])) {
+            return $placeholder;
+        }
+
+        try {
+            $default = Field::setup($props['type'])['props']['placeholder'] ?? null;
+            $isDefault = $default instanceof Closure && $default() === $placeholder;
+        } catch (Throwable) {
+            // A class-based field type has no definition to read, and a
+            // plugin's default may need its field or an argument.
+            return $placeholder;
+        }
+
+        return $isDefault ? null : $placeholder;
     }
 
     private function digestFields(array $fields): array
@@ -97,7 +157,7 @@ final class FieldDigest
             return null;
         }
 
-        $type = FieldNormalizer::resolveBaseType($props['type']);
+        $type = self::coreType($props['type']);
         $hint = self::hint($type, $props);
 
         if ($hint === null) {
@@ -112,7 +172,12 @@ final class FieldDigest
             'required' => $props['required'] ?? false,
             'translate' => $props['translate'] ?? true,
             'disabled' => $props['disabled'] ?? false,
-            'hint' => $hint
+            'when' => self::when($props),
+            'hint' => $hint,
+            'placeholder' => self::placeholder($props),
+            'before' => $props['before'] ?? null,
+            'after' => $props['after'] ?? null,
+            'pattern' => $type === 'text' ? $props['pattern'] ?? null : null
         ];
 
         if (in_array($type, self::CHOICE_TYPES, true) && !empty($props['options'])) {
@@ -156,6 +221,7 @@ final class FieldDigest
 
         if (in_array($type, ['structure', 'object'], true)) {
             $field['fields'] = $this->digestFields($props['fields'] ?? []);
+            $field['info'] = self::infoOf($props['fields'] ?? []) ?: null;
         }
 
         if (in_array($type, ['blocks', 'layout'], true)) {
@@ -166,7 +232,9 @@ final class FieldDigest
             $field['layouts'] = $props['layouts'];
 
             if (isset($props['settings'])) {
-                $field['settings'] = $this->digestFields(self::mergeTabFields($props['settings']['tabs'] ?? []));
+                $settings = self::mergeTabFields($props['settings']['tabs'] ?? []);
+                $field['settings'] = $this->digestFields($settings);
+                $field['info'] = self::infoOf($settings) ?: null;
             }
         }
 
@@ -191,14 +259,38 @@ final class FieldDigest
         $keys = [];
 
         foreach ($fieldsets as $type => $fieldset) {
-            $keys[] = $this->addFieldset([
+            $fields = self::mergeTabFields($fieldset['tabs'] ?? []);
+            $keys[] = $this->addFieldset(array_filter([
                 'type' => $type,
                 'name' => $fieldset['name'],
-                'fields' => $this->digestFields(self::mergeTabFields($fieldset['tabs'] ?? []))
-            ]);
+                'fields' => $this->digestFields($fields),
+                'info' => self::infoOf($fields) ?: null
+            ], fn (mixed $value) => $value !== null));
         }
 
         return $keys;
+    }
+
+    /**
+     * Collects the info sections of the blueprint that the Panel shows,
+     * whatever tab they sit in.
+     */
+    private function sectionInfo(): array
+    {
+        $blueprint = $this->model->blueprint();
+        $info = [];
+
+        foreach ($blueprint->tabs() as $tab) {
+            foreach ($tab['columns'] as $column) {
+                foreach ($column['sections'] as $section) {
+                    if ($section['type'] === 'info' && ($section['hidden'] ?? false) !== true) {
+                        $info[] = self::infoEntry([...$blueprint->section($section['name'])->toArray(), 'when' => $section['when'] ?? null]);
+                    }
+                }
+            }
+        }
+
+        return array_values(array_filter($info));
     }
 
     private function addFieldset(array $fieldset): string
@@ -223,6 +315,42 @@ final class FieldDigest
         )));
     }
 
+    /**
+     * @param array<string, array> $fields Props of fields, as the Panel form gets them
+     */
+    private static function infoOf(array $fields): array
+    {
+        $info = [];
+
+        foreach ($fields as $props) {
+            if ($props['type'] === 'info') {
+                $info[] = self::infoEntry($props);
+            }
+        }
+
+        return array_values(array_filter($info));
+    }
+
+    private static function infoEntry(array $props): array|null
+    {
+        $text = trim(Str::unhtml((string)($props['text'] ?? '')));
+
+        return $text === '' ? null : array_filter([
+            'label' => $props['label'] ?? null,
+            'text' => $text,
+            'when' => self::when($props)
+        ], fn (mixed $value) => $value !== null);
+    }
+
+    /**
+     * Kirby matches `when` against field names case-insensitively, and digest
+     * names are lowercase.
+     */
+    private static function when(array $props): array|null
+    {
+        return isset($props['when']) ? array_change_key_case($props['when']) : null;
+    }
+
     private static function isVisibleValueField(array $props): bool
     {
         return ($props['saveable'] ?? false) === true && ($props['hidden'] ?? false) !== true;
@@ -230,8 +358,6 @@ final class FieldDigest
 
     private static function hint(string $type, array $props): string|null
     {
-        self::$hints ??= Json::read(dirname(__DIR__, 2) . '/field-hints.json');
-
         $isBounded = isset($props['min']) || isset($props['max']);
 
         $key = match ($type) {
@@ -245,7 +371,7 @@ final class FieldDigest
             default => $type
         };
 
-        $hint = self::$hints[$key] ?? null;
+        $hint = self::hints()[$key] ?? null;
 
         return $type === 'entries'
             ? str_replace('{type}', $props['field']['type'], $hint)

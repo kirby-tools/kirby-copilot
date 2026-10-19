@@ -2,6 +2,7 @@
 
 declare(strict_types = 1);
 
+use Kirby\Cms\App;
 use Kirby\Exception\InvalidArgumentException;
 use Kirby\Exception\NotFoundException;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
@@ -12,12 +13,37 @@ use PHPUnit\Framework\Attributes\Test;
 #[PreserveGlobalState(false)]
 final class ModelFieldsRouteTest extends ApiRouteTestCase
 {
-    private function callModelFieldsRoute(array $query = []): mixed
+    private function callModelFieldsRoute(array $query = [], array $props = []): mixed
     {
         return $this->callRoute(
-            self::bootApp(['request' => ['query' => $query]]),
+            self::bootApp(['request' => ['query' => $query], ...$props]),
             '__copilot__/model-fields'
         );
+    }
+
+    #[Test]
+    public function returns_the_help_of_a_nested_field_as_plain_text(): void
+    {
+        $fields = $this->callModelFieldsRoute(['id' => 'site'], [
+            'blueprints' => ['site' => ['fields' => [
+                'links' => ['type' => 'structure', 'fields' => ['url' => ['type' => 'url', 'help' => 'Starts with **https://**']]]
+            ]]]
+        ]);
+
+        $this->assertSame('Starts with https://', $fields['links']['fields']['url']['help']);
+    }
+
+    #[Test]
+    public function returns_a_plugin_field_with_the_core_type_its_plugin_maps_it_onto(): void
+    {
+        App::plugin('test/rating', extends: [
+            'fields' => ['rating' => []],
+            'johannschopplich.copilot' => ['fieldTypes' => ['rating' => 'number']]
+        ]);
+
+        $fields = $this->callModelFieldsRoute(['id' => 'site'], ['blueprints' => ['site' => ['fields' => ['stars' => ['type' => 'rating']]]]]);
+
+        $this->assertSame('number', $fields['stars']['type']);
     }
 
     #[Test]

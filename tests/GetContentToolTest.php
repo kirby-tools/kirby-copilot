@@ -161,6 +161,25 @@ final class GetContentToolTest extends McpToolTestCase
     }
 
     #[Test]
+    public function leaves_out_the_default_flags_and_names_the_hint_by_its_key(): void
+    {
+        $content = $this->getContent(['model' => 'notes/first', 'fields' => ['intro']]);
+
+        $this->assertSame([['name' => 'intro', 'type' => 'text', 'label' => 'Intro', 'hint' => 'text', 'value' => 'Hello']], $content['fields']);
+        $this->assertSame(['text' => 'single-line plain text without line breaks or formatting'], $content['hints']);
+    }
+
+    #[Test]
+    public function names_the_hints_of_a_fieldset_by_key_for_a_block_read_by_id(): void
+    {
+        $block = $this->getContent(['model' => 'notes/first', 'id' => 'b1']);
+        $hintKeys = ['predefinedSingleSelection', 'inlineWriter'];
+
+        $this->assertSame($hintKeys, array_column($block['fieldsets']['heading']['fields'], 'hint'));
+        $this->assertSame($hintKeys, array_keys($block['hints']));
+    }
+
+    #[Test]
     public function returns_metaDescription_requested_by_its_camelcase_blueprint_key(): void
     {
         $props = array_replace_recursive($this->props(), ['blueprints' => ['pages/note' => ['fields' => ['metaDescription' => ['type' => 'text']]]]]);
@@ -268,6 +287,38 @@ final class GetContentToolTest extends McpToolTestCase
     }
 
     #[Test]
+    public function returns_the_info_fields_and_visible_info_sections_of_all_tabs(): void
+    {
+        $props = array_replace_recursive($this->props(), [
+            'blueprints' => [
+                'site' => [
+                    'tabs' => [
+                        'content' => [
+                            'fields' => [
+                                'announcement' => ['type' => 'toggle'],
+                                'announcementGuide' => ['type' => 'info', 'label' => 'Announcements', 'text' => 'Keep it to **one sentence**.', 'when' => ['announcement' => true]]
+                            ]
+                        ],
+                        'seo' => [
+                            'sections' => [
+                                'seoGuide' => ['type' => 'info', 'label' => 'Search', 'text' => 'Write titles for people.'],
+                                'archivedGuide' => ['type' => 'info', 'text' => 'Outdated rules.', 'hidden' => true]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]);
+
+        $content = $this->getContent(['model' => 'site'], props: $props);
+
+        $this->assertSame([
+            ['label' => 'Announcements', 'text' => 'Keep it to one sentence.', 'when' => ['announcement' => true]],
+            ['label' => 'Search', 'text' => 'Write titles for people.']
+        ], $content['info']);
+    }
+
+    #[Test]
     public function reads_a_language_and_links_the_panel_in_it(): void
     {
         // The German content goes in through `prepare`, since a secondary translation in the props makes the page fall back to the default blueprint.
@@ -278,7 +329,7 @@ final class GetContentToolTest extends McpToolTestCase
         $this->assertSame('de', $content['language']);
         $this->assertSame('Über uns', $content['model']['title']);
         $this->assertSame(['Hallo', '10'], array_column($content['fields'], 'value'));
-        $this->assertSame([false, true], array_column($content['fields'], 'disabled'));
+        $this->assertSame(['price' => true], array_column($content['fields'], 'disabled', 'name'));
         $this->assertSame('https://example.com/panel/pages/about?language=de', $content['panelUrl']);
         $this->assertArrayNotHasKey('notices', $content);
     }
