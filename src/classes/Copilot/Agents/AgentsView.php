@@ -14,8 +14,8 @@ use Kirby\Toolkit\I18n;
 
 /**
  * The Agents view: the MCP URL and the connections the user may see.
- * Admins see and revoke the connections of every user who may connect, but
- * only a connection's own user changes its permissions.
+ * Admins see and revoke the connections of every user, but only a
+ * connection's own user changes its permissions.
  */
 final class AgentsView
 {
@@ -25,8 +25,7 @@ final class AgentsView
         $isAdmin = $user->isAdmin();
         $rows = [];
 
-        // A user whose role loses access keeps their connections, which work again if the role regains it before their refresh token expires.
-        foreach ($isAdmin ? $kirby->users()->filter(Agents::canConnect(...)) : [$user] as $owner) {
+        foreach ($isAdmin ? $kirby->users() : [$user] as $owner) {
             foreach (ConnectionStore::for($owner)->all() as $connection) {
                 $rows[] = self::row($connection, $owner, $user);
             }
@@ -145,6 +144,7 @@ final class AgentsView
             ],
             'permissions' => array_map(fn (ConnectionPermission $permission) => $permission->label(), $connection->permissions),
             'lastUsedAt' => $connection->lastUsedAt,
+            'hasRoleAccess' => Agents::canConnect($owner),
             'options' => 'copilot-agents/' . $owner->id() . '/' . $connection->id
         ];
 

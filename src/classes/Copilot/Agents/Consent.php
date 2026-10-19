@@ -20,7 +20,11 @@ final class Consent
     {
         $user = $kirby->user();
         $pending = PendingAuthorization::find($kirby->session(), $id);
-        $requestedValues = ConnectionPermission::values(self::requestedBeyondDefaults($pending?->requestedPermissions ?? []));
+        $carriedPermissions = $pending !== null ? self::latestPermissionsOf($user, $pending->client) : null;
+        $requestedValues = ConnectionPermission::values(self::requestedBeyond(
+            $pending?->requestedPermissions ?? [],
+            $carriedPermissions ?? ConnectionPermission::defaults()
+        ));
         $options = array_map(
             fn (array $option) => in_array($option['value'], $requestedValues, true)
                 ? [...$option, 'text' => I18n::template('johannschopplich.copilot.agents.authorize.requested', ['permission' => $option['text']])]
@@ -38,7 +42,7 @@ final class Consent
                 'client' => $pending?->client->toArray(),
                 'redirect' => $pending !== null ? self::describeRedirect($pending->redirectUri) : null,
                 'permissions' => $options,
-                'defaultPermissions' => ConnectionPermission::values(self::defaultPermissions($user, $pending?->requestedPermissions))
+                'defaultPermissions' => ConnectionPermission::values($carriedPermissions ?? self::defaultPermissions($user, $pending?->requestedPermissions))
             ]
         ];
     }
@@ -111,14 +115,37 @@ final class Consent
     }
 
     /**
+     * Returns the permissions of the user's most recently active connection
+     * of the client, or null when there is none or the client is unverified,
+     * since anyone can claim an unverified client's id.
+     *
+     * @return list<ConnectionPermission>|null
+     */
+    private static function latestPermissionsOf(User $user, Client $client): array|null
+    {
+        if (!$client->isVerified) {
+            return null;
+        }
+
+        $connections = array_filter(
+            ConnectionStore::for($user)->all(),
+            fn (Connection $connection) => $connection->client->id === $client->id
+        );
+        usort($connections, fn (Connection $a, Connection $b) => ($b->lastUsedAt ?? $b->createdAt) <=> ($a->lastUsedAt ?? $a->createdAt));
+
+        return $connections[0]->permissions ?? null;
+    }
+
+    /**
      * @param list<ConnectionPermission> $requestedPermissions
+     * @param list<ConnectionPermission> $preselectedPermissions
      * @return list<ConnectionPermission>
      */
-    private static function requestedBeyondDefaults(array $requestedPermissions): array
+    private static function requestedBeyond(array $requestedPermissions, array $preselectedPermissions): array
     {
         return array_values(array_filter(
             $requestedPermissions,
-            fn (ConnectionPermission $permission) => !in_array($permission, ConnectionPermission::defaults(), true)
+            fn (ConnectionPermission $permission) => !in_array($permission, $preselectedPermissions, true)
         ));
     }
 

@@ -63,9 +63,11 @@ const rows = computed(() => {
     permissions: summarizeLabels(connection.permissions, (count) =>
       panel.t("johannschopplich.copilot.agents.more", { count }),
     ),
-    lastUsedAt: connection.lastUsedAt
-      ? formatRelativeTime(connection.lastUsedAt, now, panel.translation.code)
-      : panel.t("johannschopplich.copilot.agents.lastActive.never"),
+    lastUsedAt: !connection.hasRoleAccess
+      ? panel.t("johannschopplich.copilot.agents.lastActive.noRoleAccess")
+      : connection.lastUsedAt
+        ? formatRelativeTime(connection.lastUsedAt, now, panel.translation.code)
+        : panel.t("johannschopplich.copilot.agents.lastActive.never"),
   }));
 });
 

@@ -29,7 +29,7 @@ final class McpServer
     private const META_CLIENT_CAPABILITIES = 'io.modelcontextprotocol/clientCapabilities';
     private const META_SERVER_INFO = 'io.modelcontextprotocol/serverInfo';
 
-    /** Discovery changes only with a plugin update or a renamed site; the tool list also with the connection's permissions, which each call checks again. */
+    /** Discovery changes only with a plugin update or a renamed site; the tool list also with the user's role, which each call checks again. */
     private const CACHE_TTL_MS = 3_600_000;
 
     private const PARSE_ERROR = -32700;
@@ -188,12 +188,18 @@ final class McpServer
         };
     }
 
+    /**
+     * Lists the tools the user's role makes available, not just those of the
+     * connection's permissions, so a call beyond them can ask for the
+     * permission it needs.
+     */
     private function listTools(Connection $connection): array
     {
+        $user = App::instance()->user($connection->userId);
         $tools = [];
 
         foreach ($this->tools as $tool) {
-            if ($connection->hasPermission($tool->permission)) {
+            if ($tool->permission->isAvailableTo($user)) {
                 $tools[] = $tool->toArray();
             }
         }

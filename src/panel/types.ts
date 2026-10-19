@@ -100,6 +100,8 @@ export interface AgentConnection {
   account?: string;
   permissions: string[];
   lastUsedAt: number | null;
+  /** False while the owner's role may not connect agents; the connection works again if the role regains access before its refresh token expires. */
+  hasRoleAccess: boolean;
   /** Path of the row's dropdown route. */
   options: string;
 }

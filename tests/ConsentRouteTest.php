@@ -79,6 +79,32 @@ final class ConsentRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
+    public function preselects_the_permissions_of_the_verified_clients_latest_active_connection(): void
+    {
+        [$kirby, $id] = $this->pending(requestedPermissions: ConnectionPermission::cases());
+        $client = new Client(self::CLAUDE_CODE, 'Claude Code', 'claude.ai', true);
+        $refreshToken = $this->connect($kirby, $client, [ConnectionPermission::Read, ConnectionPermission::Prepare, ConnectionPermission::Delete], time() - 100);
+        $this->connect($kirby, $client, [ConnectionPermission::Read], time() - 50);
+        ConnectionStore::for($kirby->user('editor'))->refresh($refreshToken);
+        $this->connect($kirby, new Client('https://chatgpt.com/oauth/client.json', 'ChatGPT', 'chatgpt.com', true), [ConnectionPermission::Read], time() + 60);
+
+        $props = $this->view($kirby, $id)['props'];
+
+        $this->assertSame(['content:read', 'content:prepare', 'content:delete'], $props['defaultPermissions']);
+        $this->assertSame(['Read content', 'Prepare changes', 'Publish changes (requested by the agent)', 'Delete content'], array_column($props['permissions'], 'text'));
+    }
+
+    #[Test]
+    public function preselects_the_defaults_for_an_unverified_client_with_an_earlier_connection(): void
+    {
+        $client = new Client('kcd_cursor', 'Cursor', null, false);
+        [$kirby, $id] = $this->pending(client: $client);
+        $this->connect($kirby, $client, [ConnectionPermission::Read, ConnectionPermission::Delete], time());
+
+        $this->assertSame(['content:read', 'content:prepare'], $this->view($kirby, $id)['props']['defaultPermissions']);
+    }
+
+    #[Test]
     public function shows_an_expired_request_as_missing(): void
     {
         [$kirby] = $this->pending();
@@ -206,7 +232,7 @@ final class ConsentRouteTest extends ApiRouteTestCase
      * @param list<ConnectionPermission>|null $requestedPermissions
      * @return array{0: App, 1: string}
      */
-    private function pending(string $role = 'admin', string $redirectUri = 'http://localhost:4242/callback', string $state = 'xyz', array $body = [], array|null $requestedPermissions = null): array
+    private function pending(string $role = 'admin', string $redirectUri = 'http://localhost:4242/callback', string $state = 'xyz', array $body = [], array|null $requestedPermissions = null, Client|null $client = null): array
     {
         $kirby = self::bootApp([
             'options' => ['johannschopplich.copilot' => ['agents' => true]],
@@ -228,7 +254,7 @@ final class ConsentRouteTest extends ApiRouteTestCase
         $kirby->impersonate('editor');
 
         $pending = PendingAuthorization::create(
-            new Client(self::CLAUDE_CODE, 'Claude Code', 'claude.ai', true, ['http://localhost/callback']),
+            $client ?? new Client(self::CLAUDE_CODE, 'Claude Code', 'claude.ai', true, ['http://localhost/callback']),
             $redirectUri,
             $state,
             self::CHALLENGE,
@@ -237,6 +263,20 @@ final class ConsentRouteTest extends ApiRouteTestCase
         $pending->store($kirby->session());
 
         return [$kirby, $pending->id];
+    }
+
+    /**
+     * @param list<ConnectionPermission> $permissions
+     */
+    private function connect(App $kirby, Client $client, array $permissions, int $createdAt): Token
+    {
+        ConnectionStore::$clock = fn () => $createdAt;
+        $store = ConnectionStore::for($kirby->user('editor'));
+        $code = $store->create($client, 'http://localhost:4242/callback', 'https://example.com/api/copilot/mcp', $permissions, self::CHALLENGE);
+        $refreshToken = $store->redeemCode($code, fn () => true)['refreshToken'];
+        ConnectionStore::$clock = null;
+
+        return $refreshToken;
     }
 
     private function view(App $kirby, string $id): array

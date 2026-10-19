@@ -244,6 +244,10 @@ final class ConnectionStore
     }
 
     /**
+     * Sets each permission the user's role makes available to whether
+     * `$permissions` holds it, and keeps the others as stored, for when the
+     * role makes them available again.
+     *
      * @param list<ConnectionPermission> $permissions
      */
     public function changePermissions(string $id, array $permissions): bool
@@ -253,7 +257,12 @@ final class ConnectionStore
                 return false;
             }
 
-            $records[$id]['permissions'] = ConnectionPermission::values($permissions);
+            $records[$id]['permissions'] = ConnectionPermission::values(array_values(array_filter(
+                ConnectionPermission::cases(),
+                fn (ConnectionPermission $permission) => $permission->isAvailableTo($this->user)
+                    ? in_array($permission, $permissions, true)
+                    : in_array($permission->value, $records[$id]['permissions'], true)
+            )));
             return true;
         });
     }

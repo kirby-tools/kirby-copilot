@@ -26,8 +26,7 @@ final readonly class Connection
     /**
      * Builds the connection without the permissions the user's role doesn't
      * make available, which caps existing connections too. The record keeps
-     * them for when the role makes them available again, until the user
-     * changes the connection's permissions.
+     * them for when the role makes them available again.
      */
     public static function fromRecord(string $id, User $user, array $record): self
     {

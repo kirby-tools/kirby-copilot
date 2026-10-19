@@ -72,7 +72,7 @@ final class AgentsAreaTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function hides_from_an_admin_the_connections_of_a_role_that_may_not_connect(): void
+    public function shows_an_admin_the_connections_of_a_role_that_may_not_connect_with_hasRoleAccess_false(): void
     {
         $kirby = $this->app(['permissions' => ['access' => ['copilot-agents' => false]]]);
         $this->connect($kirby, 'editor', [ConnectionPermission::Read]);
@@ -81,7 +81,10 @@ final class AgentsAreaTest extends ApiRouteTestCase
 
         $props = $this->area($kirby)['views'][0]['action']()['props'];
 
-        $this->assertSame(['admin@example.com'], array_column($props['connections'], 'account'));
+        $this->assertEquals(
+            ['admin@example.com' => true, 'editor@example.com' => false],
+            array_column($props['connections'], 'hasRoleAccess', 'account')
+        );
     }
 
     #[Test]
@@ -173,6 +176,22 @@ final class AgentsAreaTest extends ApiRouteTestCase
         $this->permissionsDialog($kirby)['submit']('editor', $id);
 
         $this->assertSame([ConnectionPermission::Read, ConnectionPermission::Prepare], ConnectionStore::for($kirby->user('editor'))->find($id)->permissions);
+    }
+
+    #[Test]
+    public function keeps_a_permission_the_role_withholds_when_the_owner_changes_the_others(): void
+    {
+        $kirby = $this->app(['permissions' => ['johannschopplich.copilot' => ['agentsPublish' => false]]]);
+        $id = $this->connect($kirby, 'editor', [ConnectionPermission::Read, ConnectionPermission::Publish]);
+        $kirby = $kirby->clone(['request' => ['method' => 'POST', 'body' => ['permissions' => ['content:delete']]]]);
+        $kirby->impersonate('editor');
+
+        $this->permissionsDialog($kirby)['submit']('editor', $id);
+
+        $this->assertSame(
+            [ConnectionPermission::Read, ConnectionPermission::Publish, ConnectionPermission::Delete],
+            ConnectionStore::for($this->app()->user('editor'))->find($id)->permissions
+        );
     }
 
     #[Test]

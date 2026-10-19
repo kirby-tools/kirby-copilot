@@ -76,12 +76,12 @@ final class McpServerTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function lists_only_the_tools_the_connection_may_use(): void
+    public function lists_the_tools_the_role_makes_available_beyond_the_connections_permissions(): void
     {
         $response = $this->handle(['jsonrpc' => '2.0', 'id' => 1, 'method' => 'tools/list'], ['MCP-Protocol-Version' => '2025-11-25']);
         $tools = $this->decode($response)['result']['tools'];
 
-        $this->assertSame(['echo', 'crash'], array_column($tools, 'name'));
+        $this->assertSame(['echo', 'crash', 'erase'], array_column($tools, 'name'));
         $this->assertStringContainsString('"properties":{}', $response->body());
     }
 
@@ -105,7 +105,7 @@ final class McpServerTest extends ApiRouteTestCase
         $response = $this->handle($this->modern('tools/list'), $this->modernHeaders('tools/list'));
         $result = $this->decode($response)['result'];
 
-        $this->assertSame(['echo', 'crash'], array_column($result['tools'], 'name'));
+        $this->assertSame(['echo', 'crash', 'erase'], array_column($result['tools'], 'name'));
         $this->assertSame('private', $result['cacheScope']);
         $this->assertSame('complete', $result['resultType']);
     }
