@@ -84,7 +84,8 @@ return array_replace_recursive(
             'johannschopplich.copilot.agents.empty' => 'No agents connected yet.',
             'johannschopplich.copilot.agents.revoke' => 'Revoke',
             'johannschopplich.copilot.agents.revoke.confirm' => 'Revoke access for <strong>{agent}</strong> connected as <strong>{account}</strong>? It ends at once, and the agent has to connect again.',
-            'johannschopplich.copilot.agents.reloaded' => 'An agent changed this content, so the view was reloaded.'
+            'johannschopplich.copilot.agents.reloaded' => 'An agent changed this content, so the view was reloaded.',
+            'johannschopplich.copilot.agents.reloaded.instead' => 'An agent changed this content, so the view was reloaded instead. Check the changes, then try again.'
         ],
         'de' => [
             'johannschopplich.copilot.label' => 'Copilot',
@@ -165,7 +166,8 @@ return array_replace_recursive(
             'johannschopplich.copilot.agents.empty' => 'Noch keine Agenten verbunden.',
             'johannschopplich.copilot.agents.revoke' => 'Widerrufen',
             'johannschopplich.copilot.agents.revoke.confirm' => 'Zugriff von <strong>{agent}</strong> als <strong>{account}</strong> widerrufen? Der Agent verliert ihn sofort und muss sich neu verbinden.',
-            'johannschopplich.copilot.agents.reloaded' => 'Ein Agent hat diesen Inhalt geändert, daher wurde die Ansicht neu geladen.'
+            'johannschopplich.copilot.agents.reloaded' => 'Ein Agent hat diesen Inhalt geändert, daher wurde die Ansicht neu geladen.',
+            'johannschopplich.copilot.agents.reloaded.instead' => 'Ein Agent hat diesen Inhalt geändert, daher wurde stattdessen die Ansicht neu geladen. Prüfe die Änderungen und versuche es dann erneut.'
         ],
         'fr' => [
             'johannschopplich.copilot.label' => 'Copilot',
@@ -246,7 +248,8 @@ return array_replace_recursive(
             'johannschopplich.copilot.agents.empty' => 'Aucun agent connecté pour l’instant.',
             'johannschopplich.copilot.agents.revoke' => 'Révoquer',
             'johannschopplich.copilot.agents.revoke.confirm' => 'Révoquer l’accès de <strong>{agent}</strong> en tant que <strong>{account}</strong> ? L’agent le perd immédiatement et doit se reconnecter.',
-            'johannschopplich.copilot.agents.reloaded' => 'Un agent a modifié ce contenu, la vue a donc été rechargée.'
+            'johannschopplich.copilot.agents.reloaded' => 'Un agent a modifié ce contenu, la vue a donc été rechargée.',
+            'johannschopplich.copilot.agents.reloaded.instead' => 'Un agent a modifié ce contenu, la vue a donc été rechargée à la place. Vérifiez les modifications, puis réessayez.'
         ],
         'nl' => [
             'johannschopplich.copilot.label' => 'Copilot',
@@ -327,7 +330,8 @@ return array_replace_recursive(
             'johannschopplich.copilot.agents.empty' => 'Nog geen agents verbonden.',
             'johannschopplich.copilot.agents.revoke' => 'Intrekken',
             'johannschopplich.copilot.agents.revoke.confirm' => 'Toegang van <strong>{agent}</strong> als <strong>{account}</strong> intrekken? De agent verliest die meteen en moet opnieuw verbinding maken.',
-            'johannschopplich.copilot.agents.reloaded' => 'Een agent heeft deze inhoud gewijzigd, dus de weergave is opnieuw geladen.'
+            'johannschopplich.copilot.agents.reloaded' => 'Een agent heeft deze inhoud gewijzigd, dus de weergave is opnieuw geladen.',
+            'johannschopplich.copilot.agents.reloaded.instead' => 'Een agent heeft deze inhoud gewijzigd, dus is in plaats daarvan de weergave opnieuw geladen. Controleer de wijzigingen en probeer het dan opnieuw.'
         ]
     ]
 );
