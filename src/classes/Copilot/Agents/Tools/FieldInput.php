@@ -15,9 +15,6 @@ use Kirby\Data\Json;
 use Kirby\Form\Fields;
 use Kirby\Form\Form;
 
-/**
- * The checks on the field values an agent sends.
- */
 final class FieldInput
 {
     private const SHARED_FIELD_REASON = 'The field has one value for all languages. Write it in the default language.';
@@ -203,7 +200,6 @@ final class FieldInput
     }
 
     /**
-     * Describes why the title can't go into the changes, or returns `null`.
      * Only a role that may change the title writes it, since publishing the
      * changes publishes it too.
      */

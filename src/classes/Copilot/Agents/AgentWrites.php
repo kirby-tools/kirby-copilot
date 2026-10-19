@@ -67,8 +67,7 @@ final class AgentWrites
     }
 
     /**
-     * Returns when an agent last wrote the model's changes in the language,
-     * as a Unix timestamp in milliseconds.
+     * @return int|null Unix timestamp in milliseconds
      */
     public static function lastWrittenAt(ModelWithContent $model, Language $language): int|null
     {

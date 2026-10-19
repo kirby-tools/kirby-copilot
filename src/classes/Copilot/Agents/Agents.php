@@ -8,10 +8,6 @@ use Kirby\Cache\Cache;
 use Kirby\Cms\App;
 use Kirby\Cms\User;
 
-/**
- * Entry point of the Agents feature: whether it is on, its URLs, who may
- * connect, and the tools.
- */
 final class Agents
 {
     /**
@@ -46,8 +42,7 @@ final class Agents
     }
 
     /**
-     * Tells whether the user's role may use the Panel and its Agents area.
-     * Read from the role each time, since editing a role blueprint fires no
+     * Reads the role each time, since editing a role blueprint fires no
      * hook.
      */
     public static function canConnect(User $user): bool

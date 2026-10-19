@@ -71,9 +71,8 @@ final class RedirectUri
     }
 
     /**
-     * Compares a requested redirect URI with a registered one. Native apps
-     * listen on a random loopback port, so the port of a loopback URI
-     * doesn't count (RFC 8252).
+     * Native apps listen on a random loopback port, so the port of a loopback
+     * URI doesn't count (RFC 8252).
      */
     public static function matches(string $registered, string $requested): bool
     {

@@ -91,10 +91,6 @@ final class FieldDigest
         return $digest;
     }
 
-    /**
-     * Returns `null` for a field that holds no value, that the editor never
-     * sees, or whose type has no hint.
-     */
     private function digestField(string $name, array $props): array|null
     {
         if (!self::isVisibleValueField($props)) {
