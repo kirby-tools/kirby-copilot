@@ -57,7 +57,8 @@ export type AgentsSetupProblem =
   | { type: "insecure" }
   | { type: "unreachable"; url: string }
   | { type: "authorizationHeader" }
-  | { type: "wellKnown"; url: string };
+  | { type: "wellKnown"; url: string }
+  | { type: "subfolder"; url: string; folder: string };
 
 /**
  * Probes the URLs an agent requests before it connects, from the browser,
@@ -97,9 +98,22 @@ export async function checkAgentsSetup({
     problems.push({ type: "authorizationHeader" });
   }
 
+  const hintedUrl = challenge?.match(/resource_metadata="([^"]+)"/)?.[1];
+  // Kirby serves the hinted document below its own folder, so the folder is
+  // the path in front of `/.well-known/`.
+  const folder = hintedUrl
+    ? new URL(hintedUrl).pathname.split("/.well-known/")[0]!
+    : "";
+  const reportUnloadable = (url: string) => {
+    problems.push(
+      folder && !new URL(url).pathname.startsWith(`${folder}/`)
+        ? { type: "subfolder", url, folder }
+        : { type: "wellKnown", url },
+    );
+  };
+
   const resourceMetadataUrls = [
-    challenge?.match(/resource_metadata="([^"]+)"/)?.[1] ??
-      `${origin}/.well-known/oauth-protected-resource${pathname}`,
+    hintedUrl ?? `${origin}/.well-known/oauth-protected-resource${pathname}`,
     `${origin}/.well-known/oauth-protected-resource`,
   ];
   let issuer: string | undefined;
@@ -110,7 +124,7 @@ export async function checkAgentsSetup({
     if (metadata?.resource === mcpUrl) {
       issuer ??= metadata.authorization_servers?.[0];
     } else {
-      problems.push({ type: "wellKnown", url });
+      reportUnloadable(url);
     }
   }
 
@@ -123,7 +137,7 @@ export async function checkAgentsSetup({
   );
 
   if (authorizationServerMetadata?.issuer !== (issuer ?? origin)) {
-    problems.push({ type: "wellKnown", url: authorizationServerMetadataUrl });
+    reportUnloadable(authorizationServerMetadataUrl);
   }
 
   return problems;

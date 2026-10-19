@@ -154,7 +154,7 @@ describe("checkAgentsSetup", () => {
     expect(await problems).toEqual([{ type: "unreachable", url: mcpUrl }]);
   });
 
-  it("reports each .well-known URL the host answers itself", async () => {
+  it("reports each .well-known URL a server rule keeps from Kirby", async () => {
     const { fetch } = createSite({
       "https://example.com/.well-known/oauth-protected-resource": () =>
         new Response("<h1>Not Found</h1>", { status: 404 }),
@@ -206,6 +206,47 @@ describe("checkAgentsSetup", () => {
         fetch,
       }),
     ).toEqual([]);
+  });
+
+  it("reports the domain-root URLs a subfolder install doesn't pass to Kirby", async () => {
+    const subfolderMcpUrl = "https://example.com/site/api/copilot/mcp";
+    const resourceMetadataUrl =
+      "https://example.com/site/.well-known/oauth-protected-resource/site/api/copilot/mcp";
+    const { fetch } = createSite({
+      [subfolderMcpUrl]: () =>
+        new Response(null, {
+          status: 401,
+          headers: {
+            "WWW-Authenticate": `Bearer resource_metadata="${resourceMetadataUrl}", error="invalid_token"`,
+          },
+        }),
+      [resourceMetadataUrl]: () =>
+        Response.json({
+          resource: subfolderMcpUrl,
+          authorization_servers: ["https://example.com/site"],
+        }),
+      "https://example.com/.well-known/oauth-protected-resource": () =>
+        new Response("<h1>Not Found</h1>", { status: 404 }),
+    });
+
+    expect(
+      await checkAgentsSetup({
+        mcpUrl: subfolderMcpUrl,
+        pageProtocol: "https:",
+        fetch,
+      }),
+    ).toEqual([
+      {
+        type: "subfolder",
+        url: "https://example.com/.well-known/oauth-protected-resource",
+        folder: "/site",
+      },
+      {
+        type: "subfolder",
+        url: "https://example.com/.well-known/oauth-authorization-server/site",
+        folder: "/site",
+      },
+    ]);
   });
 
   it("reports only an MCP URL with http while the Panel runs on https", async () => {

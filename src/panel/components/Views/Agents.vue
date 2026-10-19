@@ -118,9 +118,12 @@ function copyMcpUrl() {
           :text="
             panel.t(
               `johannschopplich.copilot.agents.setup.${problem.type}`,
-              'url' in problem
-                ? { url: helpers.string.escapeHTML(problem.url) }
-                : {},
+              Object.fromEntries(
+                Object.entries(problem).map(([key, value]) => [
+                  key,
+                  helpers.string.escapeHTML(value),
+                ]),
+              ),
             )
           "
         />
