@@ -36,7 +36,10 @@ function withTelemetryDisabled(sdkModule: AISDKModule): AISDKModule {
     ...sdkModule,
     // An explicit `telemetry` outranks a caller's `experimental_telemetry`,
     // which the SDK only reads as a default for it.
-    streamText: (options) =>
-      sdkModule.streamText({ ...options, telemetry: { isEnabled: false } }),
+    streamText: ((options: Parameters<AISDKModule["streamText"]>[0]) =>
+      sdkModule.streamText({
+        ...options,
+        telemetry: { isEnabled: false },
+      })) as AISDKModule["streamText"],
   };
 }
