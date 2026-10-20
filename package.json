@@ -14,7 +14,7 @@
     "build:playground": "PLAYGROUND=true pnpm run build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier \"src/panel/**\" \"tests/panel/**\" --write",
+    "format": "prettier \"src/panel/**\" \"tests/panel/**\" \"tests/fixtures/**\" --write",
     "test": "vitest",
     "test:types": "tsc --noEmit",
     "release": "pnpm run build && pnpm run build:assets && bumpp --all --execute \"npx zx scripts/pre-release.mjs\" && zx scripts/post-release.mjs"
