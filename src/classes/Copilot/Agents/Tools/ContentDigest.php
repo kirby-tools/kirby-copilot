@@ -41,10 +41,6 @@ final class ContentDigest
         $this->unhinted = $digest['unhinted'];
     }
 
-    /**
-     * Returns the key of the fieldset that a blocks or layout field has for
-     * a block type.
-     */
     public function fieldsetKey(array $field, mixed $type): string|null
     {
         if (!is_string($type)) {

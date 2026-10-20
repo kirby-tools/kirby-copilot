@@ -6,16 +6,8 @@ namespace JohannSchopplich\Copilot;
 
 use Kirby\Toolkit\Str;
 
-/**
- * Prepares field props for Copilot's Panel generation.
- */
 final class PanelFields
 {
-    /**
-     * Resolves the type of each field, nested fields and the fields of
-     * fieldset tabs included, turns its help into plain text, and drops the
-     * placeholder Kirby fills in for the type.
-     */
     public static function normalize(array $fields): array
     {
         foreach ($fields as &$field) {

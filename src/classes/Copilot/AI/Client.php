@@ -14,9 +14,6 @@ use Kirby\Exception\AuthException;
 
 /**
  * Public PHP entry point for AI generation in Copilot.
- *
- * Resolves the configured provider from `johannschopplich.copilot`
- * options and dispatches structured-output requests to it.
  */
 final class Client
 {

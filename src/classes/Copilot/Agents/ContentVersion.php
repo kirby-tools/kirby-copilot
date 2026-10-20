@@ -75,10 +75,10 @@ final class ContentVersion
     }
 
     /**
-     * Identifies what a model's content was when it was read, as
-     * `{language code}.{hash}`. The version is part of it, so publishing or
-     * discarding changes the etag too. Only the fields stored in the
-     * language count, so a write in another language leaves it alone.
+     * Identifies what a model's content was when it was read. The version
+     * is part of it, so publishing or discarding changes the etag too. Only
+     * the fields stored in the language count, so a write in another
+     * language leaves it alone.
      */
     public static function etag(ModelWithContent $model, Language $language): string
     {

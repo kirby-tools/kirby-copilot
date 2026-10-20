@@ -24,7 +24,10 @@ export interface ProviderConfig {
   model?: string;
   completionModel?: string;
   options?: Record<string, any>;
-  /** OpenAI only: force Chat Completions API instead of the default Responses API. */
+  /**
+   * OpenAI only: `chat` forces the Chat Completions API over the default
+   * Responses API.
+   */
   api?: "chat" | "responses";
 }
 
@@ -100,7 +103,7 @@ export interface AgentConnection {
   account?: string;
   permissions: string[];
   lastUsedAt: number | null;
-  /** False while the owner's role may not connect agents; the connection works again if the role regains access before its refresh token expires. */
+  /** False while the owner's role may not connect agents. */
   hasRoleAccess: boolean;
   /** Path of the row's dropdown route. */
   options: string;

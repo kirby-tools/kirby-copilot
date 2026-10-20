@@ -270,7 +270,6 @@ export function fieldToZodSchema(
   return schema;
 }
 
-/** Creates a Zod object schema for fields that contain nested sub-fields (structure, object). */
 function createNestedFieldsSchema(
   field: KirbyStructureFieldProps | KirbyObjectFieldProps,
   context?: SchemaContext,
@@ -296,7 +295,6 @@ function createNestedFieldsSchema(
   return z.object(nestedContentSchema).strict();
 }
 
-/** Creates a Zod schema for text-like fields with minlength/maxlength support. */
 function createTextSchema(
   field: KirbyTextFieldProps | KirbyWriterFieldProps,
   description: string,
@@ -309,7 +307,6 @@ function createTextSchema(
   return schema.describe(description);
 }
 
-/** Creates a Zod schema for numeric fields (number, range). */
 function createNumericSchema(
   field: KirbyNumberFieldProps | KirbyRangeFieldProps,
 ) {
@@ -327,7 +324,6 @@ function createNumericSchema(
   );
 }
 
-/** Creates a Zod schema for single selection fields (select, radio, toggles). */
 function createSingleSelectionSchema(field: KirbyOptionsFieldProps) {
   const values = (field.options ?? [])
     .map((option) => option.value)
@@ -344,7 +340,6 @@ function createSingleSelectionSchema(field: KirbyOptionsFieldProps) {
   return z.string().describe(`"${field.label}", ${fieldHints.singleSelection}`);
 }
 
-/** Creates a Zod schema for multiple selection fields (checkboxes, multiselect, tags). */
 function createMultipleSelectionSchema(field: KirbyOptionsFieldProps) {
   const values = (field.options ?? [])
     .map((option) => option.value)

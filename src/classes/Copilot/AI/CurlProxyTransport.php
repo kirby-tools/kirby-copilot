@@ -5,8 +5,6 @@ declare(strict_types = 1);
 namespace JohannSchopplich\Copilot\AI;
 
 /**
- * Streams the upstream response to the client via cURL.
- *
  * @internal
  */
 final class CurlProxyTransport implements ProxyTransport
@@ -18,12 +16,9 @@ final class CurlProxyTransport implements ProxyTransport
             ob_end_clean();
         }
 
-        // Pre-emit infra/transport hints that are deterministic and needed
-        // by the web server to disable buffering before the first byte.
-        // Status and Content-Type are emitted later from the upstream
-        // response so error JSON (e.g. Gateway 404) surfaces correctly.
-        // `no-transform` prevents CDNs (e.g. Cloudflare) from auto-
-        // compressing text/event-stream responses, which buffers chunks.
+        // Sent before the first byte, when the web server decides whether to
+        // buffer. `no-transform` keeps CDNs such as Cloudflare from compressing
+        // the event stream, which buffers chunks.
         header('Cache-Control: no-store, no-transform');
         // Disable nginx proxy buffering.
         header('X-Accel-Buffering: no');

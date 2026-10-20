@@ -82,9 +82,6 @@ enum ConnectionPermission: string
     }
 
     /**
-     * Returns Read and each chosen permission the user's role makes
-     * available.
-     *
      * @param list<string> $values
      * @return list<self>
      */

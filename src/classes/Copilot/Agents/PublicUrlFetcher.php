@@ -8,7 +8,7 @@ use Closure;
 use Kirby\Cms\App;
 
 /**
- * Fetches an HTTPS URL outside the server's own network: the host must
+ * A fetcher of HTTPS URLs outside the server's own network: the host must
  * resolve to public addresses only, and the connection is pinned to the
  * checked address. A redirect passes the same checks, and none is followed
  * by default, since a client metadata document must not be fetched through
@@ -41,7 +41,7 @@ final class PublicUrlFetcher implements ClientMetadataFetcher
 
     /**
      * @param (Closure(string): list<string>)|null $resolve Returns the addresses of a host name; DNS by default
-     * @param int $maxBytes Fails the fetch of a larger response body
+     * @param int $maxBytes Largest response body before the fetch fails
      * @param int $timeout Seconds for the transfers, redirects included
      */
     public function __construct(

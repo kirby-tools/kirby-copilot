@@ -2,14 +2,6 @@ import type { KirbyBlock } from "kirby-types";
 import { useContent, usePanel } from "kirbyuse";
 import { isObject } from "utilful";
 
-/**
- * Creates a context object from the current Panel content.
- *
- * @remarks
- * Collects all fields from the current content and adds the page title.
- * Non-primitive values are JSON-encoded. Kirby blocks arrays are normalized
- * by stripping internal metadata (`id`, `isHidden`, etc.) before serialization.
- */
 export function createContentContext(): Record<string, string> {
   const panel = usePanel();
   const { currentContent } = useContent();

@@ -300,9 +300,6 @@ final class AuthorizationServer
         return Response::json(Json::encode($data), $status, headers: ['Cache-Control' => 'no-store', 'Pragma' => 'no-cache']);
     }
 
-    /**
-     * Renders an error the user sees instead of the Panel.
-     */
     private static function errorPage(string $message, int $status = 400): Response
     {
         $html = '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>The agent can’t connect</title>'

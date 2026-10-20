@@ -9,9 +9,6 @@ use Kirby\Cms\App;
 use Kirby\Exception\InvalidArgumentException;
 
 /**
- * Resolves the `johannschopplich.copilot` options into a normalized
- * shape for {@see Client} and the provider classes.
- *
  * @internal
  */
 final readonly class Resolver

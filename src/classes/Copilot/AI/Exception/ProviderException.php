@@ -9,9 +9,6 @@ use Kirby\Exception\Exception;
 use Kirby\Toolkit\Str;
 use Throwable;
 
-/**
- * Thrown when an upstream AI provider call fails.
- */
 final class ProviderException extends Exception
 {
     protected static string $defaultKey = 'copilot.ai.provider';

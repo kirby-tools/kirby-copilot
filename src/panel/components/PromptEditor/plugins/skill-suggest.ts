@@ -3,7 +3,7 @@ import type { EditorView } from "prosemirror-view";
 import { Plugin, PluginKey } from "prosemirror-state";
 import { createSkillTriggerRegex } from "../../../composables/skills";
 
-const DROPDOWN_MAX_HEIGHT_PX = 256; // max-height (16rem)
+const DROPDOWN_MAX_HEIGHT_PX = 256; // Keep in sync with the dropdown's `kai-max-h-[16rem]`.
 const VIEWPORT_SAFE_SPACE_PX = 10;
 
 export type DropdownPosition =
@@ -23,7 +23,10 @@ export interface SkillSuggestHandlers {
   onStateChange: (state: SkillSuggestState) => void;
   onCommit: (index: number) => void;
   getOptionCount: (query: string) => number;
-  /** If provided, ARIA combobox attrs are set on the editor DOM. */
+  /**
+   * Id of the dropdown's listbox, which turns on the ARIA combobox attributes
+   * on the editor DOM.
+   */
   listboxId?: string;
 }
 

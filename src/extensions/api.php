@@ -246,7 +246,6 @@ return [
                 }
             ],
             [
-                // Lets an open Panel view reload once an agent changed its model.
                 'pattern' => '__copilot__/agents/last-write',
                 'method' => 'GET',
                 'action' => function () use ($kirby) {

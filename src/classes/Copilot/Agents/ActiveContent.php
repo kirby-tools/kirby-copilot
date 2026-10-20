@@ -19,15 +19,12 @@ use Throwable;
 /**
  * The markup that runs code when a reviewer previews the changes on the
  * Panel's origin: script-like elements, event attributes, and script URLs.
- * A denylist rather than an HTML allowlist, so images, tables, and embeds
- * an editor placed survive a rewrite.
  *
  * Each scalar leaf of a value counts on its own, as templates and snippets
  * print it: as written, and as `kirbytext()` renders it, which turns Markdown
  * links and KirbyTags into HTML and runs the site's kirbytext hooks and the
  * KirbyTags of its plugins. The leaves also count joined, as a page prints
- * them one after another. PHP's HTML5 parser reads all three forms, or libxml
- * before PHP 8.4.
+ * them one after another.
  *
  * A construct counts as the same when it is the same element with the same
  * serialized content, the same attribute with the same value, or the same

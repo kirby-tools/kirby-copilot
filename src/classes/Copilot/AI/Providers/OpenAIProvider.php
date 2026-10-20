@@ -24,8 +24,6 @@ use Throwable;
  *
  * Doubles as the transport for any OpenAI-compatible endpoint
  * (Mistral, Gemini's `/v1beta/openai/`, OpenRouter, Azure, Ollama, …).
- * {@see GeminiProvider} and {@see MistralProvider} extend this class
- * and override the default base URL and the provider name only.
  *
  * @internal
  */

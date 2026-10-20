@@ -15,8 +15,8 @@ use Kirby\Exception\NotFoundException;
 use Kirby\Uuid\Uuid;
 
 /**
- * Reads the arguments of a tool call, which a client may send in any shape,
- * and resolves the models and the language they name.
+ * The arguments of a tool call, which a client may send in any shape, and the
+ * models and the language they name.
  */
 final class Arguments
 {

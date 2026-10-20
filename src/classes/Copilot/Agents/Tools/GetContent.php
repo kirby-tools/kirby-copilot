@@ -22,17 +22,12 @@ use Kirby\Form\FieldClass;
 use Kirby\Form\Fields;
 use Kirby\Toolkit\Str;
 
-/**
- * Pairs each value with what its field expects, so that an agent can write
- * it back in the same shape.
- */
 final class GetContent
 {
     public const SHORT_VALUE_LENGTH = 300;
     private const OUTLINE_TEXT_LENGTH = 80;
     private const FILE_LIMIT = 100;
 
-    /** Flags a field has unless its blueprint says otherwise, left out of the result. */
     private const DEFAULT_FLAGS = ['required' => false, 'translate' => true, 'disabled' => false];
 
     /** Result budget below the 25k tokens that clients like Claude Code accept, at about four characters a token. */
@@ -237,8 +232,7 @@ final class GetContent
     }
 
     /**
-     * Leaves out the default flags of the fields and the fieldsets' fields,
-     * and names each keyed hint by its key, which `hints` spells out once.
+     * Drops default flags and moves each keyed hint into `hints` once.
      */
     private static function slim(array $result): array
     {
@@ -260,7 +254,7 @@ final class GetContent
     }
 
     /**
-     * @param array<string, string> $hints Collects the hints the fields name
+     * @param array<string, string> $hints
      */
     private static function slimFields(array $fields, array &$hints): array
     {

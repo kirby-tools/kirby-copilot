@@ -14,10 +14,10 @@ use Kirby\Form\Field\BlocksField;
 use Kirby\Form\Fields;
 
 /**
- * Turns an agent's edits inside fields into whole field values, so that a
- * change to one sentence or one block doesn't make the agent send the rest
- * of the field again. Blocks, layout rows, and layout columns are found by
- * their ids, wherever they sit in the field.
+ * An agent's edits inside fields, turned into whole field values so that a
+ * change to one sentence or one block doesn't make the agent send the rest of
+ * the field again. Blocks, layout rows, and layout columns are found by their
+ * ids, wherever they sit in the field.
  */
 final class FieldEdits
 {

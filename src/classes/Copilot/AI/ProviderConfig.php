@@ -7,8 +7,6 @@ namespace JohannSchopplich\Copilot\AI;
 use GuzzleHttp\Client as GuzzleClient;
 
 /**
- * Resolved per-provider configuration.
- *
  * @internal
  */
 final readonly class ProviderConfig

@@ -18,7 +18,7 @@ use Kirby\Toolkit\Str;
 use Throwable;
 
 /**
- * Describes a model's fields for an AI that writes their values: the props
+ * Digest of a model's fields for an AI that writes their values: the props
  * the Panel form gets in that language, cut down to what a value needs, plus
  * a format hint per field type.
  */
@@ -57,9 +57,8 @@ final class FieldDigest
      * `unhinted` names the fields that hold a value but whose type, such as
      * a plugin's, has no hint, so an AI can't write them.
      *
-     * `info` holds the texts of the info fields and the visible info sections
-     * of all tabs, which editors read as guidance. Fieldsets, structure and
-     * object fields, and layout fields for their settings carry their own.
+     * `info` holds the texts of the info fields and visible info sections of
+     * all tabs; nested info stays with its fieldset or field.
      *
      * @return array{fields: list<array>, info: list<array{label?: string, text: string, when?: array}>, fieldsets: array<string, array>, unhinted: list<array{name: string, type: string, label: string|null}>}
      */
@@ -86,7 +85,7 @@ final class FieldDigest
     }
 
     /**
-     * @return array<string, string> The format hints by key
+     * @return array<string, string>
      */
     public static function hints(): array
     {
@@ -94,9 +93,7 @@ final class FieldDigest
     }
 
     /**
-     * Resolves a field type to the core type Copilot writes its value as. A
-     * plugin maps its own field types under `johannschopplich.copilot.fieldTypes`
-     * in its extends; any other type resolves through the type it extends.
+     * Resolves a field type to the core type Copilot writes its value as.
      */
     public static function coreType(string $type): string
     {
@@ -271,10 +268,6 @@ final class FieldDigest
         return $keys;
     }
 
-    /**
-     * Collects the info sections of the blueprint that the Panel shows,
-     * whatever tab they sit in.
-     */
     private function sectionInfo(): array
     {
         $blueprint = $this->model->blueprint();

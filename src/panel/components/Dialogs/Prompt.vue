@@ -290,7 +290,6 @@ function getFieldPreview(fieldName: string) {
         @keydown="handleEditorKeydown"
       />
 
-      <!-- Placeholder preview panel -->
       <details
         v-if="hasPlaceholders"
         class="kai-group kai-mx-[var(--spacing-2)] kai-mb-[var(--spacing-2)] kai-rounded-[var(--rounded)] kai-bg-[var(--panel-color-back)]"
@@ -415,7 +414,6 @@ function getFieldPreview(fieldName: string) {
           />
           <ContentDropdown ref="templateDropdown">
             <div class="k-copilot-dropdown-content-body">
-              <!-- Save current prompt button -->
               <k-dropdown-item
                 v-if="prompt.trim()"
                 icon="add"
@@ -424,7 +422,7 @@ function getFieldPreview(fieldName: string) {
                 {{ panel.t("johannschopplich.copilot.template.saveAs") }}
               </k-dropdown-item>
 
-              <!-- Edit templates button (only for user templates) -->
+              <!-- Only user templates are editable. -->
               <k-dropdown-item
                 v-if="templates.length > 0"
                 icon="settings"
@@ -435,7 +433,6 @@ function getFieldPreview(fieldName: string) {
 
               <hr v-if="allTemplates.length > 0" />
 
-              <!-- Templates list (config + user) -->
               <k-dropdown-item
                 v-for="template in allTemplates"
                 :key="template.id"
@@ -444,7 +441,6 @@ function getFieldPreview(fieldName: string) {
                 {{ template.label }}
               </k-dropdown-item>
 
-              <!-- Empty state -->
               <k-dropdown-item v-if="allTemplates.length === 0" disabled>
                 {{ panel.t("johannschopplich.copilot.template.empty") }}
               </k-dropdown-item>
@@ -546,7 +542,7 @@ function getFieldPreview(fieldName: string) {
 }
 
 /* Kirby 5.6 scrolls and masks the dialog body, which clips the licensing
-   buttons above it and the fixed skill suggestions below it */
+   buttons above it and the fixed skill suggestions below it. */
 .k-copilot-prompt-dialog .k-dialog-body.k-scrollable[data-fade][data-axis] {
   overflow: visible;
   mask-image: none;

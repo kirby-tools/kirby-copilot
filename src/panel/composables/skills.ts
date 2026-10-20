@@ -7,13 +7,12 @@ import {
 } from "../utils/reference-tokens";
 import { createGlobalState } from "./state";
 
-// Single source for the skill id charset; must stay in sync with the PHP
-// validation in `PanelContext::normalizeSkills` (`/^[\w\-]+$/`).
+// Keep in sync with the id check in `PanelContext::normalizeSkills`.
 const SKILL_ID_CHARSET = String.raw`[\w\-]`;
 
 /**
- * Matches `@skill://<query>` at the end of a text slice, preceded by the
- * shared token boundary. The lookbehind is zero-width so callers can
+ * Pattern source for `@skill://<query>` at the end of a text slice, preceded
+ * by the shared token boundary. The lookbehind is zero-width so callers can
  * compute `from = cursor - match[0].length`. Caller must pass the slice
  * from block-start to caret.
  */

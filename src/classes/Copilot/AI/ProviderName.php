@@ -8,9 +8,6 @@ use Closure;
 use Kirby\Cms\App;
 
 /**
- * Registry for the AI providers Copilot supports out of the box: the
- * provider name set, per-provider defaults, and API key resolution.
- *
  * @internal
  */
 enum ProviderName: string
@@ -61,8 +58,6 @@ enum ProviderName: string
     }
 
     /**
-     * Returns the normalized providers map from the plugin config.
-     *
      * @return array<string, array<string, mixed>>
      */
     public static function providers(App $kirby): array
@@ -72,10 +67,6 @@ enum ProviderName: string
         return self::normalizeProviders($config['providers'] ?? null);
     }
 
-    /**
-     * Resolves a configured `apiKey` value, which may be a Closure
-     * receiving the app instance.
-     */
     public static function resolveApiKey(mixed $apiKey, App $kirby): mixed
     {
         return $apiKey instanceof Closure ? $apiKey($kirby) : $apiKey;

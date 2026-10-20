@@ -6,11 +6,6 @@ import { PLUGIN_AGENTS_LAST_WRITE_API_ROUTE } from "./constants";
 
 const CHECK_INTERVAL_MS = 10_000;
 
-/**
- * Keeps an open content view from sending fields the editor didn't change
- * over what an agent wrote, and reloads the view once an agent wrote, checked
- * while the tab is visible and when the editor returns to it.
- */
 export const guardAgentWrites: PluginFunction<any> = () => {
   // Plugins install before `window.panel` is the Panel.
   queueMicrotask(() => {
@@ -24,9 +19,8 @@ export const guardAgentWrites: PluginFunction<any> = () => {
 };
 
 /**
- * Calls `guard` once the plugin context says agents are on. The login view
- * can't load the context yet and the Panel logs in without a page load, so
- * each view load asks again until the context answers.
+ * The login view can't load the plugin context and the Panel logs in without
+ * a page load, so each view load asks again until the context answers.
  */
 export function whenAgentsEnabled(panel: Panel, guard: () => void) {
   let hasAnswer = false;
@@ -46,12 +40,6 @@ export function whenAgentsEnabled(panel: Panel, guard: () => void) {
   );
 }
 
-/**
- * Saves only the fields the editor changed, where the Panel would save its
- * whole form, and refuses to publish or discard once an agent wrote to the
- * view's model since it loaded, reloading the view instead. A failed check
- * lets the action through.
- */
 export function keepAgentWrites(panel: Panel) {
   const { content } = panel;
   // Each field's value as JSON, as far as the view knows the server holds it.

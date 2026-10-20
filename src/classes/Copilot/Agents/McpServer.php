@@ -188,11 +188,6 @@ final class McpServer
         };
     }
 
-    /**
-     * Lists the tools the user's role makes available, not just those of the
-     * connection's permissions, so a call beyond them can ask for the
-     * permission it needs.
-     */
     private function listTools(Connection $connection): array
     {
         $user = App::instance()->user($connection->userId);

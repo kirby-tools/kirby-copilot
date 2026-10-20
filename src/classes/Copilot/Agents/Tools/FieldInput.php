@@ -146,9 +146,6 @@ final class FieldInput
         return $warnings;
     }
 
-    /**
-     * Joins Kirby's validation errors into one line for a tool error.
-     */
     public static function describeErrors(array $errors): string
     {
         $messages = [];

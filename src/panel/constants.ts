@@ -12,8 +12,8 @@ export const PLUGIN_AGENTS_LAST_WRITE_API_ROUTE =
 // Marker replaced by the PHP proxy with the real API key.
 export const PROXY_API_KEY_MARKER = "__KIRBY_COPILOT_PROXY__";
 
-// Opens the SSE comment line the PHP proxy appends when the upstream request
-// fails after the response has started streaming.
+// Marker that opens the SSE comment line the PHP proxy appends when the
+// upstream request fails after the response has started streaming.
 export const PROXY_ERROR_MARKER = "__KIRBY_COPILOT_PROXY_ERROR__";
 
 export const STORAGE_KEY_PREFIX = "kirby$copilot$";

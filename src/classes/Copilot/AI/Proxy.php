@@ -17,8 +17,8 @@ use Kirby\Exception\InvalidArgumentException;
 final class Proxy
 {
     /**
-     * Opens the SSE comment line that carries an upstream failure to the Panel
-     * once the response has started streaming.
+     * Marker that opens the SSE comment line carrying an upstream failure to
+     * the Panel once the response has started streaming.
      */
     public const ERROR_MARKER = '__KIRBY_COPILOT_PROXY_ERROR__';
 

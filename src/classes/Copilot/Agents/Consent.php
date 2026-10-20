@@ -115,10 +115,6 @@ final class Consent
     }
 
     /**
-     * Returns the permissions of the user's most recently active connection
-     * of the client, or null when there is none or the client is unverified,
-     * since anyone can claim an unverified client's id.
-     *
      * @return list<ConnectionPermission>|null
      */
     private static function latestPermissionsOf(User $user, Client $client): array|null

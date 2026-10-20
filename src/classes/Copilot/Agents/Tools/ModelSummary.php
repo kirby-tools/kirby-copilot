@@ -11,9 +11,6 @@ use Kirby\Cms\Page;
 use Kirby\Cms\Site;
 use Kirby\Content\Version;
 
-/**
- * Describes a model in a tool result. Tools add their own keys.
- */
 final class ModelSummary
 {
     /**

@@ -11,9 +11,9 @@ use Kirby\Exception\Exception;
 use Kirby\Filesystem\Dir;
 
 /**
- * Keeps a user's connections in a dotfile in their account folder, next to
- * its lock file, so Kirby deletes both together with the user. Tokens are
- * stored as hashes only.
+ * A user's connections, kept in a dotfile in their account folder next to its
+ * lock file, so Kirby deletes both together with the user. Tokens are stored
+ * as hashes only.
  */
 final class ConnectionStore
 {
@@ -244,9 +244,8 @@ final class ConnectionStore
     }
 
     /**
-     * Sets each permission the user's role makes available to whether
-     * `$permissions` holds it, and keeps the others as stored, for when the
-     * role makes them available again.
+     * Keeps the stored permissions the user's role doesn't make available,
+     * for when it does again.
      *
      * @param list<ConnectionPermission> $permissions
      */

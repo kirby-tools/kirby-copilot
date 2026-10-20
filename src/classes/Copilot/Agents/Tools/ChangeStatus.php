@@ -79,10 +79,8 @@ final class ChangeStatus
     }
 
     /**
-     * Refuses to make a draft public while what goes live with it isn't
-     * ready: the draft has validation errors, or the draft, a subpage that
-     * isn't a draft, or a file of either has unsaved changes, which the
-     * status change wouldn't publish.
+     * Unsaved changes don't go live with a status change, so they keep the
+     * draft a draft.
      */
     private static function refuseIncompleteDraft(Page $draft): void
     {

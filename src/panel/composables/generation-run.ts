@@ -22,7 +22,7 @@ type StreamTextOptions = Omit<
 };
 
 export interface GenerationRun {
-  /** Settles when the run has finished, was aborted, or failed. */
+  /** Promise that settles when the run has finished, was aborted, or failed. */
   done: Promise<void>;
   abort: () => void;
 }
@@ -38,13 +38,13 @@ export interface GenerationRunOptions {
 
 export interface TextGenerationSink {
   write: (delta: string) => void | Promise<void>;
-  /** Persisting write after the stream completed; skipped when aborted. */
+  /** Persists the final text once the stream completed; skipped when aborted. */
   persistFinal?: () => void | Promise<void>;
 }
 
 export interface StructuredGenerationSink {
   writePartial: (partial: unknown) => void | Promise<void>;
-  /** Persisting write of the validated final output; skipped when aborted. */
+  /** Persists the validated final output; skipped when aborted. */
   persistFinal: (final: unknown) => void | Promise<void>;
 }
 
