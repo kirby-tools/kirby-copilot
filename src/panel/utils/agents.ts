@@ -112,20 +112,15 @@ export async function checkAgentsSetup({
     );
   };
 
-  const resourceMetadataUrls = [
-    hintedUrl ?? `${origin}/.well-known/oauth-protected-resource${pathname}`,
-    `${origin}/.well-known/oauth-protected-resource`,
-  ];
+  const resourceMetadataUrl =
+    hintedUrl ?? `${origin}/.well-known/oauth-protected-resource${pathname}`;
+  const resourceMetadata = await fetchJson(resourceMetadataUrl, fetch);
   let issuer: string | undefined;
 
-  for (const url of resourceMetadataUrls) {
-    const metadata = await fetchJson(url, fetch);
-
-    if (metadata?.resource === mcpUrl) {
-      issuer ??= metadata.authorization_servers?.[0];
-    } else {
-      reportUnloadable(url);
-    }
+  if (resourceMetadata?.resource === mcpUrl) {
+    issuer = resourceMetadata.authorization_servers?.[0];
+  } else {
+    reportUnloadable(resourceMetadataUrl);
   }
 
   // RFC 8414 puts the well-known segment before an issuer's path.

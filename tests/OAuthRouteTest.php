@@ -61,14 +61,6 @@ final class OAuthRouteTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function serves_protected_resource_metadata_at_the_site_root_too(): void
-    {
-        $metadata = $this->decode(self::bootApp(self::enabled())->call('.well-known/oauth-protected-resource'));
-
-        $this->assertSame(self::MCP_URL, $metadata['resource']);
-    }
-
-    #[Test]
     public function registers_no_endpoint_while_agents_are_off(): void
     {
         $kirby = self::bootApp();
@@ -76,7 +68,7 @@ final class OAuthRouteTest extends ApiRouteTestCase
         $patterns = array_column($api['routes']($kirby), 'pattern');
 
         $this->assertNull($kirby->call('.well-known/oauth-authorization-server'));
-        $this->assertNull($kirby->call('.well-known/oauth-protected-resource'));
+        $this->assertNull($kirby->call('.well-known/oauth-protected-resource/api/copilot/mcp'));
         $this->assertNotContains('copilot/mcp', $patterns);
         $this->assertNotContains('copilot/oauth/token', $patterns);
     }

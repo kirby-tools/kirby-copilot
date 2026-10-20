@@ -21,13 +21,9 @@ return [
         }
     ],
     [
-        // Clients without the `WWW-Authenticate` hint probe the root too, per the MCP authorization spec's discovery rules.
-        'pattern' => [
-            '.well-known/oauth-protected-resource',
-            '.well-known/oauth-protected-resource/(:all)'
-        ],
-        'action' => function (string|null $path = null) {
-            if (!Agents::isEnabled() || ($path !== null && '/' . $path !== parse_url(Agents::mcpUrl(), PHP_URL_PATH))) {
+        'pattern' => '.well-known/oauth-protected-resource/(:all)',
+        'action' => function (string $path) {
+            if (!Agents::isEnabled() || '/' . $path !== parse_url(Agents::mcpUrl(), PHP_URL_PATH)) {
                 $this->next();
             }
 

@@ -80,8 +80,6 @@ describe("checkAgentsSetup", () => {
         }),
       "https://example.com/.well-known/oauth-protected-resource/api/copilot/mcp":
         () => Response.json(resourceMetadata),
-      "https://example.com/.well-known/oauth-protected-resource": () =>
-        Response.json(resourceMetadata),
       "https://example.com/.well-known/oauth-authorization-server": () =>
         Response.json({ issuer: "https://example.com" }),
       ...overrides,
@@ -156,8 +154,8 @@ describe("checkAgentsSetup", () => {
 
   it("reports each .well-known URL a server rule keeps from Kirby", async () => {
     const { fetch } = createSite({
-      "https://example.com/.well-known/oauth-protected-resource": () =>
-        new Response("<h1>Not Found</h1>", { status: 404 }),
+      "https://example.com/.well-known/oauth-protected-resource/api/copilot/mcp":
+        () => new Response("<h1>Not Found</h1>", { status: 404 }),
       "https://example.com/.well-known/oauth-authorization-server": () =>
         new Response("<html></html>", { status: 200 }),
     });
@@ -167,7 +165,7 @@ describe("checkAgentsSetup", () => {
     ).toEqual([
       {
         type: "wellKnown",
-        url: "https://example.com/.well-known/oauth-protected-resource",
+        url: "https://example.com/.well-known/oauth-protected-resource/api/copilot/mcp",
       },
       {
         type: "wellKnown",
@@ -193,8 +191,6 @@ describe("checkAgentsSetup", () => {
           },
         }),
       [resourceMetadataUrl]: () => Response.json(subfolderResourceMetadata),
-      "https://example.com/.well-known/oauth-protected-resource": () =>
-        Response.json(subfolderResourceMetadata),
       "https://example.com/.well-known/oauth-authorization-server/site": () =>
         Response.json({ issuer: "https://example.com/site" }),
     });
@@ -236,7 +232,7 @@ describe("checkAgentsSetup", () => {
     });
   });
 
-  it("reports the domain-root URLs a subfolder install doesn't pass to Kirby", async () => {
+  it("reports the domain-root URL a subfolder install doesn't pass to Kirby", async () => {
     const subfolderMcpUrl = "https://example.com/site/api/copilot/mcp";
     const resourceMetadataUrl =
       "https://example.com/site/.well-known/oauth-protected-resource/site/api/copilot/mcp";
@@ -253,8 +249,6 @@ describe("checkAgentsSetup", () => {
           resource: subfolderMcpUrl,
           authorization_servers: ["https://example.com/site"],
         }),
-      "https://example.com/.well-known/oauth-protected-resource": () =>
-        new Response("<h1>Not Found</h1>", { status: 404 }),
     });
 
     expect(
@@ -264,11 +258,6 @@ describe("checkAgentsSetup", () => {
         fetch,
       }),
     ).toEqual([
-      {
-        type: "subfolder",
-        url: "https://example.com/.well-known/oauth-protected-resource",
-        folder: "/site",
-      },
       {
         type: "subfolder",
         url: "https://example.com/.well-known/oauth-authorization-server/site",
