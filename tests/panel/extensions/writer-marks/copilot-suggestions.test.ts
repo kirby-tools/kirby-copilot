@@ -162,7 +162,9 @@ beforeEach(() => {
   vi.useFakeTimers();
   vi.spyOn(console, "error").mockImplementation(() => {});
   mockStreamText.mockReset();
-  mockStreamText.mockImplementation(() => ({ textStream: neverEndingStream() }));
+  mockStreamText.mockImplementation(() => ({
+    textStream: neverEndingStream(),
+  }));
 });
 
 describe("inline suggestion", () => {

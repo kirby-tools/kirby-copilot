@@ -50,13 +50,11 @@ function createTextModel(deltas: string[]) {
   const chunks: LanguageModelV4StreamPart[] = [
     { type: "stream-start", warnings: [] },
     { type: "text-start", id: "1" },
-    ...deltas.map(
-      (delta): LanguageModelV4StreamPart => ({
-        type: "text-delta",
-        id: "1",
-        delta,
-      }),
-    ),
+    ...deltas.map((delta): LanguageModelV4StreamPart => ({
+      type: "text-delta",
+      id: "1",
+      delta,
+    })),
     { type: "text-end", id: "1" },
     {
       type: "finish",
@@ -84,13 +82,11 @@ function createFailingModel(error: unknown, deltas: string[] = []) {
   const chunks: LanguageModelV4StreamPart[] = [
     { type: "stream-start", warnings: [] },
     { type: "text-start", id: "1" },
-    ...deltas.map(
-      (delta): LanguageModelV4StreamPart => ({
-        type: "text-delta",
-        id: "1",
-        delta,
-      }),
-    ),
+    ...deltas.map((delta): LanguageModelV4StreamPart => ({
+      type: "text-delta",
+      id: "1",
+      delta,
+    })),
     { type: "error", error },
   ];
 

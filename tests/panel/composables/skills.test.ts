@@ -85,7 +85,10 @@ describe("resolveSkillRefs", () => {
   });
 
   it("dedupes repeated token ids", () => {
-    const { resolvedSkills } = resolveSkillRefs([skill({ id: "a" })], ["a", "a"]);
+    const { resolvedSkills } = resolveSkillRefs(
+      [skill({ id: "a" })],
+      ["a", "a"],
+    );
 
     expect(resolvedSkills.map((entry) => entry.id)).toEqual(["a"]);
   });
@@ -101,7 +104,10 @@ describe("resolveSkillRefs", () => {
   });
 
   it("returns empty resolvedSkills and unknownSkillIds for an empty token list", () => {
-    const { resolvedSkills, unknownSkillIds } = resolveSkillRefs([skill({ id: "a" })], []);
+    const { resolvedSkills, unknownSkillIds } = resolveSkillRefs(
+      [skill({ id: "a" })],
+      [],
+    );
 
     expect(resolvedSkills).toEqual([]);
     expect(unknownSkillIds).toEqual([]);
@@ -117,7 +123,10 @@ describe("createSkillRefTokenRegex", () => {
 
     const second = createSkillRefTokenRegex();
     expect(
-      Array.from("@skill://bar and @skill://baz".matchAll(second), (match) => match[1]),
+      Array.from(
+        "@skill://bar and @skill://baz".matchAll(second),
+        (match) => match[1],
+      ),
     ).toEqual(["bar", "baz"]);
   });
 

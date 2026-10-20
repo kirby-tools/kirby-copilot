@@ -17,9 +17,9 @@ describe("reference token grammar", () => {
   it("extracts ids in document order, including duplicates (the caller dedupes)", () => {
     const regex = createRefTokenRegex("page", String.raw`[\w\-/]`);
 
-    expect(extractRefIds("@page://a then @page://b/c then @page://a", regex)).toEqual(
-      ["a", "b/c", "a"],
-    );
+    expect(
+      extractRefIds("@page://a then @page://b/c then @page://a", regex),
+    ).toEqual(["a", "b/c", "a"]);
   });
 
   it("skips a token that directly follows a word character", () => {
