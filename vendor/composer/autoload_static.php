@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitf79447e9c1ef80b77e16ae3ac1dac506
+class ComposerStaticInit6b86cf02125915d27f04d0daba0e74b1
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -1473,6 +1473,7 @@ class ComposerStaticInitf79447e9c1ef80b77e16ae3ac1dac506
         'JohannSchopplich\\Copilot\\Agents\\Tools\\ViewImage' => __DIR__ . '/../..' . '/src/classes/Copilot/Agents/Tools/ViewImage.php',
         'JohannSchopplich\\Copilot\\FieldDigest' => __DIR__ . '/../..' . '/src/classes/Copilot/FieldDigest.php',
         'JohannSchopplich\\Copilot\\PanelContext' => __DIR__ . '/../..' . '/src/classes/Copilot/PanelContext.php',
+        'JohannSchopplich\\Copilot\\PanelFields' => __DIR__ . '/../..' . '/src/classes/Copilot/PanelFields.php',
         'JohannSchopplich\\Copilot\\ViewButtonOptions' => __DIR__ . '/../..' . '/src/classes/Copilot/ViewButtonOptions.php',
         'JohannSchopplich\\KirbyTools\\FieldNormalizer' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-utils/src/FieldNormalizer.php',
         'JohannSchopplich\\KirbyTools\\FieldResolver' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-utils/src/FieldResolver.php',
@@ -2021,9 +2022,9 @@ class ComposerStaticInitf79447e9c1ef80b77e16ae3ac1dac506
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitf79447e9c1ef80b77e16ae3ac1dac506::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitf79447e9c1ef80b77e16ae3ac1dac506::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitf79447e9c1ef80b77e16ae3ac1dac506::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit6b86cf02125915d27f04d0daba0e74b1::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit6b86cf02125915d27f04d0daba0e74b1::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit6b86cf02125915d27f04d0daba0e74b1::$classMap;
 
         }, null, ClassLoader::class);
     }

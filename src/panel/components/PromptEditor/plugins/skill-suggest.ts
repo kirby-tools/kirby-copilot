@@ -24,7 +24,7 @@ export interface SkillSuggestHandlers {
   onCommit: (index: number) => void;
   getOptionCount: (query: string) => number;
   /**
-   * Id of the dropdown's listbox, which turns on the ARIA combobox attributes
+   * ID of the dropdown's listbox, which turns on the ARIA combobox attributes
    * on the editor DOM.
    */
   listboxId?: string;

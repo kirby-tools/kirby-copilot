@@ -1362,6 +1362,7 @@ return array(
     'JohannSchopplich\\Copilot\\Agents\\Tools\\ViewImage' => $baseDir . '/src/classes/Copilot/Agents/Tools/ViewImage.php',
     'JohannSchopplich\\Copilot\\FieldDigest' => $baseDir . '/src/classes/Copilot/FieldDigest.php',
     'JohannSchopplich\\Copilot\\PanelContext' => $baseDir . '/src/classes/Copilot/PanelContext.php',
+    'JohannSchopplich\\Copilot\\PanelFields' => $baseDir . '/src/classes/Copilot/PanelFields.php',
     'JohannSchopplich\\Copilot\\ViewButtonOptions' => $baseDir . '/src/classes/Copilot/ViewButtonOptions.php',
     'JohannSchopplich\\KirbyTools\\FieldNormalizer' => $vendorDir . '/johannschopplich/kirby-tools-utils/src/FieldNormalizer.php',
     'JohannSchopplich\\KirbyTools\\FieldResolver' => $vendorDir . '/johannschopplich/kirby-tools-utils/src/FieldResolver.php',
