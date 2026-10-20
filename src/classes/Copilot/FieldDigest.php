@@ -180,7 +180,7 @@ final class FieldDigest
             'pattern' => $type === 'text' ? $props['pattern'] ?? null : null
         ];
 
-        if (in_array($type, self::CHOICE_TYPES, true) && !empty($props['options'])) {
+        if (in_array($type, self::CHOICE_TYPES, true) && ($props['options'] ?? []) !== []) {
             $field['options'] = array_map(
                 fn (array $option) => ['value' => $option['value'], 'text' => $option['text']],
                 $props['options']
@@ -365,8 +365,8 @@ final class FieldDigest
             'number', 'range' => $isBounded ? 'boundedNumber' : 'number',
             'select', 'radio', 'toggles' => self::hasPredefinedOptions($props) ? 'predefinedSingleSelection' : 'singleSelection',
             'checkboxes', 'multiselect', 'tags' => self::hasPredefinedOptions($props) ? 'predefinedMultipleSelection' : 'multipleSelection',
-            'date' => empty($props['time']) ? 'date' : 'dateWithTime',
-            'structure', 'object' => empty($props['fields']) ? $type : $type . 'WithFields',
+            'date' => ($props['time'] ?? false) === false ? 'date' : 'dateWithTime',
+            'structure', 'object' => ($props['fields'] ?? []) === [] ? $type : $type . 'WithFields',
             'entries' => $isBounded ? 'boundedEntries' : 'entries',
             default => $type
         };
