@@ -28,8 +28,8 @@ final readonly class Client
         return new self(
             id: $data['id'],
             name: $data['name'],
-            host: $data['host'] ?? null,
-            isVerified: $data['isVerified'] ?? false
+            host: $data['host'],
+            isVerified: $data['isVerified']
         );
     }
 

@@ -87,7 +87,7 @@ final class PanelContext
 
         $config['completion'] = self::normalizeCompletion($config['completion'] ?? true);
 
-        $language = $kirby->user()?->language() ?? $kirby->defaultLanguage()?->code() ?? 'en';
+        $language = $kirby->user()?->language() ?? 'en';
         $config['promptTemplates'] = self::normalizePromptTemplates(
             self::validateType($config['promptTemplates'] ?? [], 'promptTemplates', ['array'], []),
             $language

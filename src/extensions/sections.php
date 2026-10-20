@@ -101,8 +101,8 @@ return [
             }
         ],
         'methods' => [
-            'tryResolveQuery' => function ($value, $fallback = null) {
-                return QueryResolver::resolve($this->model(), $value, $fallback);
+            'tryResolveQuery' => function ($value) {
+                return QueryResolver::resolve($this->model(), $value);
             }
         ]
     ]

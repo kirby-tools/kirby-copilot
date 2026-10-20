@@ -41,7 +41,7 @@ final readonly class Connection
                 fn (ConnectionPermission|null $permission) => $permission?->isAvailableTo($user) === true
             )),
             createdAt: $record['createdAt'],
-            lastUsedAt: $record['lastUsedAt'] ?? null
+            lastUsedAt: $record['lastUsedAt']
         );
     }
 

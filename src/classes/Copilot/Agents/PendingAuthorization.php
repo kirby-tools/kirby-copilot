@@ -57,7 +57,7 @@ final readonly class PendingAuthorization
             redirectUri: $data['redirectUri'],
             state: $data['state'],
             codeChallenge: $data['codeChallenge'],
-            requestedPermissions: is_array($data['requestedPermissions'] ?? null) ? array_map(ConnectionPermission::from(...), $data['requestedPermissions']) : null,
+            requestedPermissions: $data['requestedPermissions'] !== null ? array_map(ConnectionPermission::from(...), $data['requestedPermissions']) : null,
             expiresAt: $data['expiresAt']
         );
     }
