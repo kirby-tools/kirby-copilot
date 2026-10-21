@@ -198,7 +198,7 @@ async function generate() {
   if (!ensurePlaygroundApiKey()) return;
 
   if (!currentPrompt.value) {
-    panel.notification.error(panel.t("johannschopplich.copilot.prompt.empty"));
+    panel.notification.info(panel.t("johannschopplich.copilot.prompt.empty"));
     return;
   }
 

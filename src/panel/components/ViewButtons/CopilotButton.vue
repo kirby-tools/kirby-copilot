@@ -60,7 +60,7 @@ async function initPromptDialog() {
   const fields = await getModelFields();
 
   if (fields.length === 0) {
-    panel.notification.error(panel.t("johannschopplich.copilot.fields.empty"));
+    panel.notification.info(panel.t("johannschopplich.copilot.fields.empty"));
     return;
   }
 
