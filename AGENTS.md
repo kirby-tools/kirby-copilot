@@ -2,7 +2,7 @@
 
 Commercial Kirby CMS plugin for AI-assisted content generation in the Kirby Panel.
 
-Use the terms from `CONTEXT.md`. Decisions are in `docs/adr/`.
+Use the terms from `GLOSSARY.md`. Decisions are in `docs/adr/`.
 
 ## Commands
 
