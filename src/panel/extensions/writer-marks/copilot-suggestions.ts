@@ -2,7 +2,8 @@ import type { WriterMarkContext, WriterMarkExtension } from "kirby-types";
 import type { EditorState, PluginSpec, Transaction } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
 import type { CompletionConfig } from "../../types";
-import { isLocalDev, usePanel } from "kirbyuse";
+import { showLicenseToastOnce } from "@kirby-tools/licensing";
+import { usePanel } from "kirbyuse";
 import { PluginKey } from "prosemirror-state";
 import { Decoration, DecorationSet } from "prosemirror-view";
 import { resolveLanguageModel, usePluginContext } from "../../composables";
@@ -64,7 +65,6 @@ interface CopilotSuggestionsMark extends WriterMarkExtension {
   _acceptSuggestion: () => boolean;
   _dismissSuggestion: () => boolean;
   _triggerSuggestion: () => boolean;
-  _showLicenseToastOnce: () => Promise<void>;
 }
 
 export const copilotSuggestions: CopilotSuggestionsMark = {
@@ -100,7 +100,14 @@ export const copilotSuggestions: CopilotSuggestionsMark = {
     setSuggestionMeta(tr, { type: "dismiss" });
     view.dispatch(tr);
 
-    this._showLicenseToastOnce();
+    if (!__PLAYGROUND__) {
+      showLicenseToastOnce({
+        storageKey: ACCEPTED_SUGGESTION_COUNT_STORAGE_KEY,
+        threshold: LICENSE_TOAST_THRESHOLD,
+        resolveContext: usePluginContext,
+        message: usePanel().t("johannschopplich.copilot.licenseToast"),
+      });
+    }
 
     return true;
   },
@@ -116,37 +123,6 @@ export const copilotSuggestions: CopilotSuggestionsMark = {
 
   _triggerSuggestion(this: CopilotSuggestionsMark) {
     return triggerSuggestion(this.editor!.view);
-  },
-
-  async _showLicenseToastOnce() {
-    if (__PLAYGROUND__) return;
-    if (isLocalDev()) return;
-
-    const storedValue = sessionStorage.getItem(
-      ACCEPTED_SUGGESTION_COUNT_STORAGE_KEY,
-    );
-    if (storedValue === "done") return;
-
-    let acceptedSuggestionCount = Number(storedValue) || 0;
-    acceptedSuggestionCount++;
-    sessionStorage.setItem(
-      ACCEPTED_SUGGESTION_COUNT_STORAGE_KEY,
-      String(acceptedSuggestionCount),
-    );
-
-    if (acceptedSuggestionCount < LICENSE_TOAST_THRESHOLD) return;
-
-    const context = await usePluginContext();
-
-    if (["inactive", "invalid"].includes(context.licenseStatus!)) {
-      const panel = usePanel();
-      panel.notification.info({
-        icon: "key",
-        message: panel.t("johannschopplich.copilot.licenseToast"),
-      });
-    }
-
-    sessionStorage.setItem(ACCEPTED_SUGGESTION_COUNT_STORAGE_KEY, "done");
   },
 };
 

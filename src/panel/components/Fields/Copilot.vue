@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { LicenseStatus } from "@kirby-tools/licensing";
 import type {
   KirbyBlocksFieldProps,
   KirbyFieldProps,
@@ -9,6 +8,7 @@ import type { PropType } from "vue";
 import type z from "zod";
 import type { LogLevel } from "../../constants";
 import type { CopilotFieldError, PluginConfig } from "../../types";
+import { licenseProps } from "@kirby-tools/licensing";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import { useContent, usePanel, usePanelEvent } from "kirbyuse";
 import {
@@ -69,14 +69,7 @@ const props = defineProps({
   logLevel: String as PropType<LogLevel>,
   open: Boolean,
   modelFile: Object as PropType<{ mime: string; url: string }>,
-  licenseStatus: {
-    type: String as PropType<LicenseStatus>,
-    required: true,
-  },
-  licenseDialog: {
-    type: String,
-    required: true,
-  },
+  ...licenseProps,
 });
 
 const panel = usePanel();

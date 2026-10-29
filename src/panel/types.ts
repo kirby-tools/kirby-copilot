@@ -1,6 +1,5 @@
-import type { LicenseStatus } from "@kirby-tools/licensing";
+import type { PluginContext } from "@kirby-tools/licensing";
 import type { KirbyFieldProps } from "kirby-types";
-import type { PluginAsset } from "kirbyuse";
 import type { LogLevel, ReasoningEffort } from "./constants";
 
 export type OutputFormat = "text" | "markdown" | "rich-text";
@@ -69,11 +68,8 @@ export interface ButtonOptionsResponse {
   systemPrompt?: string | null;
 }
 
-export interface PluginContextResponse {
+export interface PluginContextResponse extends PluginContext {
   config: PluginConfig;
-  assets: PluginAsset[];
-  licenseStatus: LicenseStatus;
-  licenseDialog: string;
 }
 
 /**
