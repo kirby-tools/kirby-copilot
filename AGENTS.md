@@ -10,13 +10,14 @@ Use the terms from `GLOSSARY.md`. Decisions are in `docs/adr/`.
 composer test          # PHPUnit
 composer csfix         # php-cs-fixer, lives in tools/phpcs/vendor/bin/, not vendor/bin/
 pnpm run test --run    # Vitest
-pnpm run test:types    # typecheck
+pnpm run test:types    # vue-tsc
 pnpm run lint          # ESLint
 ```
 
 ## Conventions
 
 - `__PLAYGROUND__` is a build-time constant defined in `kirbyup.config.js`.
+- `src/panel/site.ts` feeds kirby.tools' Panel mocks.
 - Test methods are snake_case with no `test` prefix, marked `#[Test]`; data providers are camelCase.
 
 ## Search Hints
