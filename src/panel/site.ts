@@ -1,3 +1,4 @@
+export { default as translations } from "../../translations/en.json";
 export { default as CopilotButtonBody } from "./components/Ui/CopilotButtonBody.vue";
 export { default as CopilotFieldBody } from "./components/Ui/CopilotFieldBody.vue";
 export { default as PromptDialogBody } from "./components/Ui/PromptDialogBody.vue";
