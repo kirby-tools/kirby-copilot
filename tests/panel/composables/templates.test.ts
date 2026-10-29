@@ -2,10 +2,13 @@ import type { PromptTemplate } from "../../../src/panel/types";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { installStorageMocks } from "../helpers/mock-storage";
 
-vi.mock("kirbyuse", async () => {
+vi.mock("kirbyuse", async (importOriginal) => {
   const { baseKirbyuseMock } = await import("../helpers/mock-kirbyuse");
+  const { createGlobalState } =
+    await importOriginal<typeof import("kirbyuse")>();
   return {
     ...baseKirbyuseMock(),
+    createGlobalState,
     usePanel: () => ({ user: { language: "en" } }),
   };
 });

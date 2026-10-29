@@ -1,11 +1,11 @@
 import type { Skill } from "../types";
+import { createGlobalState } from "kirbyuse";
 import { ref } from "vue";
 import {
   createRefTokenRegex,
   extractRefIds,
   REF_TOKEN_BOUNDARY_SOURCE,
 } from "../utils/reference-tokens";
-import { createGlobalState } from "./state";
 
 // Keep in sync with the id check in `PanelContext::normalizeSkills`.
 const SKILL_ID_CHARSET = String.raw`[\w\-]`;

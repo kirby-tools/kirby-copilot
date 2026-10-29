@@ -1,5 +1,5 @@
 import type { Skill } from "../../../src/panel/types";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
   createSkillRefTokenRegex,
   createSkillTriggerRegex,
@@ -8,11 +8,6 @@ import {
   stripSkillRefTokens,
   useSkills,
 } from "../../../src/panel/composables/skills";
-
-vi.mock("kirbyuse", async () => {
-  const { baseKirbyuseMock } = await import("../helpers/mock-kirbyuse");
-  return baseKirbyuseMock();
-});
 
 function skill(input: Partial<Skill> & Pick<Skill, "id">): Skill {
   return {

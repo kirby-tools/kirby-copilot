@@ -1,13 +1,8 @@
 import type { DecorationSet } from "prosemirror-view";
 import { EditorState } from "prosemirror-state";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { createDocFromText } from "../../../../../src/panel/components/PromptEditor/editor";
 import { tokenHighlightPlugin } from "../../../../../src/panel/components/PromptEditor/plugins/token-highlight";
-
-vi.mock("kirbyuse", async () => {
-  const { baseKirbyuseMock } = await import("../../../helpers/mock-kirbyuse");
-  return baseKirbyuseMock();
-});
 
 describe("tokenHighlightPlugin", () => {
   it("highlights only placeholders made of word characters", () => {

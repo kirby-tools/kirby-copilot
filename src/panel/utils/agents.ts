@@ -1,3 +1,5 @@
+import { toIntlLocale } from "kirbyuse";
+
 const VISIBLE_LABEL_COUNT = 2;
 
 // The server answers a token it doesn't know with `invalid_token`, which proves that the header arrived.
@@ -41,7 +43,9 @@ export function formatRelativeTime(
   now: number,
   translationCode: string,
 ) {
-  const format = createRelativeTimeFormat(translationCode);
+  const format = new Intl.RelativeTimeFormat(toIntlLocale(translationCode), {
+    numeric: "auto",
+  });
   const elapsed = now / 1000 - timestamp;
 
   for (const [unit, seconds] of RELATIVE_TIME_UNITS) {
@@ -136,14 +140,6 @@ export async function checkAgentsSetup({
   }
 
   return problems;
-}
-
-function createRelativeTimeFormat(translationCode: string) {
-  // Kirby's codes such as `pt_BR` and `sr@latin` aren't BCP 47 tags.
-  return new Intl.RelativeTimeFormat(
-    translationCode.replace("_", "-").replace("@latin", "-Latn"),
-    { numeric: "auto" },
-  );
 }
 
 async function probe(mcpUrl: string, fetch: typeof globalThis.fetch) {

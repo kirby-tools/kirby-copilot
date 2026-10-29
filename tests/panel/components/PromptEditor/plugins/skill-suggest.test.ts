@@ -1,7 +1,7 @@
 import type { Transaction } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
 import { EditorState } from "prosemirror-state";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   createDocFromText,
   getPlainText,
@@ -10,11 +10,6 @@ import {
   commitSkillSuggestion,
   createSkillSuggestPlugin,
 } from "../../../../../src/panel/components/PromptEditor/plugins/skill-suggest";
-
-vi.mock("kirbyuse", async () => {
-  const { baseKirbyuseMock } = await import("../../../helpers/mock-kirbyuse");
-  return baseKirbyuseMock();
-});
 
 function createHeadlessEditor() {
   let state = EditorState.create({

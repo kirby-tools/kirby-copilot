@@ -1,10 +1,9 @@
 import type { PromptTemplate, PromptTemplateInput } from "../types";
-import { usePanel } from "kirbyuse";
+import { createGlobalState, usePanel } from "kirbyuse";
 import { generateRandomId } from "utilful";
 import { computed, reactive } from "vue";
 import { DEFAULT_PROMPT_TEMPLATES } from "../constants";
 import { getHashedStorageKey } from "../utils/shared";
-import { createGlobalState } from "./state";
 
 const TEMPLATE_LIMIT = 50;
 
