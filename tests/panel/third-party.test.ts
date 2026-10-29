@@ -6,10 +6,13 @@ import { z } from "zod";
 import { copilotThirdPartyApi } from "../../src/panel/third-party";
 import contract from "../fixtures/copilot-seam-contract.json";
 
-vi.mock("kirbyuse", async () => {
+vi.mock("kirbyuse", async (importOriginal) => {
   const { baseKirbyuseMock } = await import("./helpers/mock-kirbyuse");
+  const { createGlobalState } =
+    await importOriginal<typeof import("kirbyuse")>();
   return {
     ...baseKirbyuseMock(),
+    createGlobalState,
     // A readable page, so a resolved page reference would change the prompt.
     usePanel: () => ({
       view: { title: "Test Page" },

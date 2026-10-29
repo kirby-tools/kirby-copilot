@@ -10,14 +10,14 @@ import type z from "zod";
 import type { LogLevel } from "../../constants";
 import type { CopilotFieldError, PluginConfig } from "../../types";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
-import { useContent, usePanel } from "kirbyuse";
+import { useContent, usePanel, usePanelEvent } from "kirbyuse";
 import {
   disabled as disabledProp,
   help as helpProp,
   id as idProp,
   name as nameProp,
 } from "kirbyuse/props";
-import { computed, onBeforeUnmount, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import {
   ensurePlaygroundApiKey,
   runStructuredGeneration,
@@ -210,13 +210,7 @@ if (props.files === "auto" && props.modelFile) {
   }
 })();
 
-// Keep this synchronous – an unmount before the async setup resolves would
-// run `off` first, which mitt silently ignores.
-panel.events.on("view.save", onModelSave);
-
-onBeforeUnmount(() => {
-  panel.events.off("view.save", onModelSave);
-});
+usePanelEvent("view.save", onModelSave);
 
 async function generate() {
   if (isGenerating.value) return;

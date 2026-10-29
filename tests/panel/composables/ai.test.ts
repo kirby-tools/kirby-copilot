@@ -13,10 +13,13 @@ const mockPagesGet = vi.fn();
 const defaultContent = { title: "Test", body: "Content" };
 let mockCurrentContent: Record<string, unknown> = defaultContent;
 
-vi.mock("kirbyuse", async () => {
+vi.mock("kirbyuse", async (importOriginal) => {
   const { baseKirbyuseMock } = await import("../helpers/mock-kirbyuse");
+  const { createGlobalState } =
+    await importOriginal<typeof import("kirbyuse")>();
   return {
     ...baseKirbyuseMock(),
+    createGlobalState,
     usePanel: () => ({
       api: {
         endpoint: "/api",

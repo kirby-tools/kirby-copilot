@@ -5,42 +5,25 @@ import type {
   KirbyLayoutFieldProps,
 } from "kirby-types";
 import type { KirbyFieldset } from "../types";
-import { usePanel } from "kirbyuse";
+import { createSharedRequest, usePanel } from "kirbyuse";
 import { PLUGIN_FIELDSETS_API_ROUTE } from "../constants";
 import { generateKirbyBlocksSchema } from "../schemas/blocks";
 import { generateKirbyLayoutsSchema } from "../schemas/layouts";
 import { usePluginContext } from "./plugin";
 
-let fieldsets: KirbyFieldset[] | undefined;
-let pendingPromise: Promise<KirbyFieldset[]> | undefined;
-
-function getFieldsets() {
-  if (fieldsets) return Promise.resolve(fieldsets);
-  if (pendingPromise) return pendingPromise;
-
-  pendingPromise = usePanel()
-    .api.get<KirbyFieldset[]>(
-      PLUGIN_FIELDSETS_API_ROUTE,
-      undefined,
-      undefined,
-      // Avoid showing Panel loading indicator.
-      true,
-    )
-    .then((response) => {
-      fieldsets = response;
-      return fieldsets;
-    })
-    // Without this a failing request stays cached as a rejection and no later view recovers without a full reload.
-    .finally(() => {
-      pendingPromise = undefined;
-    });
-
-  return pendingPromise;
-}
+const fieldsets = createSharedRequest(() =>
+  usePanel().api.get<KirbyFieldset[]>(
+    PLUGIN_FIELDSETS_API_ROUTE,
+    undefined,
+    undefined,
+    // Avoid showing Panel loading indicator.
+    true,
+  ),
+);
 
 export function useBlocks() {
   async function getZodSchema(fieldConfig: KirbyBlocksFieldProps) {
-    let currentFieldsets = await getFieldsets();
+    let currentFieldsets = await fieldsets.get();
     const { config } = await usePluginContext();
 
     const { excludedBlocks } = config;
@@ -71,7 +54,7 @@ export function useBlocks() {
 
 export function useLayouts() {
   async function getZodSchema(fieldConfig: KirbyLayoutFieldProps) {
-    let currentFieldsets = await getFieldsets();
+    let currentFieldsets = await fieldsets.get();
     const { config } = await usePluginContext();
 
     const { excludedBlocks } = config;

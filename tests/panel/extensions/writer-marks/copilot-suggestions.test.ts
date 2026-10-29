@@ -12,11 +12,6 @@ const DEBOUNCE_MS = 300;
 const mockUsePluginContext = vi.fn();
 const mockStreamText = vi.fn();
 
-vi.mock("kirbyuse", async () => {
-  const { baseKirbyuseMock } = await import("../../helpers/mock-kirbyuse");
-  return { ...baseKirbyuseMock(), isLocalDev: () => false };
-});
-
 vi.mock("../../../../src/panel/composables/plugin", () => ({
   usePluginContext: () => mockUsePluginContext(),
 }));

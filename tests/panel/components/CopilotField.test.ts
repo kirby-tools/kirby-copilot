@@ -8,10 +8,10 @@ import CopilotFieldBody from "../../../src/panel/components/Ui/CopilotFieldBody.
 vi.mock("kirbyuse", () => ({
   useContent: () => ({ currentContent: ref({}), isEditable: ref(true) }),
   usePanel: () => ({
-    events: { on: () => {}, off: () => {} },
     view: { path: "site" },
     t: (key: string) => key,
   }),
+  usePanelEvent: () => {},
 }));
 
 vi.mock("@kirby-tools/licensing/components", () => ({
