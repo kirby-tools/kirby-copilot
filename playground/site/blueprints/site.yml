@@ -135,7 +135,7 @@ tabs:
               Copilot generates content **based on your blocks** definitions and fieldsets.<br> It adapts to your project's structure!
 
       - width: 1/3
-        sections:
+        fields:
           copilotBlocks:
             type: copilot
             field: demoBlocks
@@ -187,7 +187,7 @@ tabs:
               Copilot generates content **based on your blocks** definitions and fieldsets.<br> It adapts to your project's structure!
 
       - width: 1/3
-        sections:
+        fields:
           copilotLayouts:
             type: copilot
             field: demoLayouts
@@ -212,7 +212,7 @@ tabs:
             theme: positive
             text: |
               Writer and textarea fields support two interaction modes:
-              - Use the Copilot section on the right, just like with blocks fields.
+              - Use the Copilot field on the right, just like with blocks fields.
               - Use the toolbar button to open a prompt dialog. To open it programmatically, use the shortcut:
                 `Cmd + .` (macOS) or `Ctrl + .` (Windows/Linux).
 
@@ -241,7 +241,7 @@ tabs:
               userPrompt: Write a compelling introduction about the future of web development.
 
       - width: 1/3
-        sections:
+        fields:
           copilotWriter:
             type: copilot
             field: demoWriter
@@ -270,7 +270,7 @@ tabs:
               userPrompt: Write a compelling introduction about the future of web development.
 
       - width: 1/3
-        sections:
+        fields:
           copilotTextarea:
             type: copilot
             field: demoTextarea
@@ -320,7 +320,7 @@ tabs:
             help: Referenced in AI prompts as `{currentYear}`
 
       - width: 1/3
-        sections:
+        fields:
           copilotContext:
             type: copilot
             field: contextDemo

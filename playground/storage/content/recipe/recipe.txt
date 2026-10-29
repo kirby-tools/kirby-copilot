@@ -8,54 +8,52 @@ Instructions: <p><strong>1 Levain (12:30 p.m.)</strong><br>In a smaaaaaaall cont
 
 Ingredients:
 
-- 
+-
   amount: 24g
-  ingredient: >
-    medium protein bread flour (or
-    all-purpose flour)
+  ingredient: |
+    medium protein bread flour (or all-purpose flour)
   notes: Levain
-- 
+-
   amount: 24g
-  ingredient: whole wheat flour
+  ingredient: 'whole wheat flour'
   notes: Levain
-- 
+-
   amount: 48g
   ingredient: water
   notes: Levain
-- 
+-
   amount: 48g
-  ingredient: ripe sourdough starter
+  ingredient: 'ripe sourdough starter'
   notes: Levain
-- 
+-
   amount: 453g
-  ingredient: whole wheat flour
+  ingredient: 'whole wheat flour'
   notes: Autolyse
-- 
+-
   amount: 214g
-  ingredient: >
-    medium-protein flour (or all-purpose
-    flour)
+  ingredient: |
+    medium-protein flour (or all-purpose flour)
   notes: Autolyse
-- 
+-
   amount: 238g
-  ingredient: high-protein bread flour
+  ingredient: 'high-protein bread flour'
   notes: Autolyse
-- 
+-
   amount: 634g
   ingredient: water
   notes: Autolyse
-- 
+-
   amount: 18g
   ingredient: salt
-  notes: Main Dough
-- 
+  notes: 'Main Dough'
+-
   amount: 143g
-  ingredient: ripe levain
-  notes: Main Dough
-- 
+  ingredient: 'ripe levain'
+  notes: 'Main Dough'
+-
   amount: 100g
   ingredient: water
-  notes: Main Dough
+  notes: 'Main Dough'
 
 ----
 
