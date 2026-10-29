@@ -15,7 +15,7 @@ columns:
             icon: title
 
   - width: 1/3
-    sections:
+    fields:
       copilot:
         type: copilot
         field: alt
