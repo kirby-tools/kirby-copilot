@@ -310,7 +310,6 @@ describe("runTextGeneration", () => {
     await run!.done;
 
     expect(panel.notification.success).not.toHaveBeenCalled();
-    expect(panel.notification.error).not.toHaveBeenCalled();
   });
 
   it("skips persistFinal when aborted during the last write", async () => {

@@ -229,14 +229,13 @@ async function generate() {
               false,
             );
           },
-          persistFinal: async (structuredOutput) => {
-            await updateContent({
+          persistFinal: (structuredOutput) =>
+            updateContent({
               [fieldName]: [
                 ...currentFieldContent.value,
                 ...((structuredOutput as unknown[]) ?? []).map(normalizer),
               ],
-            });
-          },
+            }),
         },
       });
     } else {
@@ -262,11 +261,10 @@ async function generate() {
               false,
             );
           },
-          persistFinal: async () => {
-            await updateContent({
+          persistFinal: () =>
+            updateContent({
               [fieldName]: currentFieldContent.value + text,
-            });
-          },
+            }),
         },
       });
     }

@@ -136,10 +136,10 @@ async function reloadIfWritten(panel: Panel) {
 
   try {
     // A refused save leaves the form as is: a newer save took over, or the
-    // view got locked since it loaded.
+    // view locked since the check began.
     if (
       (await hasAgentWritten(panel)) &&
-      (await reloadView(panel, { shouldReloadOnlyWhenSaved: true }))
+      (await reloadView(panel, { onlyWhenSaved: true }))
     ) {
       panel.notification.info(
         panel.t("johannschopplich.copilot.agents.reloaded"),
@@ -162,19 +162,10 @@ async function hasAgentWritten(panel: Panel) {
   return writtenAt !== null && writtenAt > (panel.view.timestamp ?? 0);
 }
 
-/**
- * Saves what the editor typed so far, then reloads the view – with
- * `shouldReloadOnlyWhenSaved`, only once Kirby took the save. Resolves whether
- * it reloaded.
- */
-async function reloadView(
-  panel: Panel,
-  { shouldReloadOnlyWhenSaved = false } = {},
-) {
+/** Saves what the editor typed so far, then reloads the view. */
+async function reloadView(panel: Panel, { onlyWhenSaved = false } = {}) {
   const isSaved = await panel.content.update();
-  // Kirby before 5.6 resolves `undefined` whether or not it saved, so a
-  // refusal there still reloads.
-  if (isSaved === false && shouldReloadOnlyWhenSaved) return false;
+  if (!isSaved && onlyWhenSaved) return false;
 
   await panel.view.reload();
   // A save queued while the view reloaded still holds the form from before.
