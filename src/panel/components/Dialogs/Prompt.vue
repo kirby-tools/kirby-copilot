@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type { LicenseStatus } from "@kirby-tools/licensing";
 import type { KirbyFieldProps } from "kirby-types";
 import type { PropType } from "vue";
 import type { ActiveField, PlaceholderField, PromptContext } from "../../types";
+import { useLicenseStatus } from "@kirby-tools/licensing";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import { usePanel } from "kirbyuse";
 import { TEMPLATE_PLACEHOLDER_RE } from "utilful";
-import { computed, onBeforeUnmount, ref } from "vue";
+import { computed, ref } from "vue";
 import {
   useGenerationHistory,
   useModelFields,
@@ -16,10 +16,7 @@ import {
   useSkills,
   useTemplateDialogs,
 } from "../../composables";
-import {
-  LICENSE_ACTIVATE_EVENT,
-  SUPPORTED_FILE_MIME_TYPES,
-} from "../../constants";
+import { SUPPORTED_FILE_MIME_TYPES } from "../../constants";
 import {
   createContentContext,
   findFieldDefinition,
@@ -65,8 +62,10 @@ const { prompt, files, selectedFieldNames, insertOption } =
 
 const editorComponent = ref<InstanceType<typeof PromptEditor>>();
 const hasLicenseButtons = !__PLAYGROUND__;
-const licenseStatus = ref<LicenseStatus>();
-const licenseDialog = ref<string>();
+const { licenseStatus, licenseDialog } = useLicenseStatus({
+  pluginId: "copilot",
+  resolveContext: usePluginContext,
+});
 
 const modelFields = ref<KirbyFieldProps[]>([...(props.fields ?? [])]);
 const placeholderSearch = ref("");
@@ -126,8 +125,6 @@ const placeholderFields = computed<PlaceholderField[]>(() =>
 
 (async () => {
   const context = await usePluginContext();
-  licenseStatus.value = context.licenseStatus;
-  licenseDialog.value = context.licenseDialog;
   setConfigTemplates(context.config.promptTemplates ?? []);
   setConfigSkills(context.config.skills ?? []);
 
@@ -147,18 +144,6 @@ const placeholderFields = computed<PlaceholderField[]>(() =>
     }
   }
 })();
-
-if (hasLicenseButtons) {
-  // Kirby reopens this dialog from its history after the activation dialog,
-  // with the status it had before.
-  const onActivate = () => {
-    licenseStatus.value = "active";
-  };
-  panel.events.on(LICENSE_ACTIVATE_EVENT, onActivate);
-  onBeforeUnmount(() => {
-    panel.events.off(LICENSE_ACTIVATE_EVENT, onActivate);
-  });
-}
 
 function handleEditorSubmit() {
   if (!prompt.value.trim()) return;

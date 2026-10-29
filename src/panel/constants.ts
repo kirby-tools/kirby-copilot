@@ -8,7 +8,6 @@ export const PLUGIN_PROXY_API_ROUTE = "__copilot__/proxy";
 export const PLUGIN_AGENTS_CONSENT_API_ROUTE = "__copilot__/agents/consent";
 export const PLUGIN_AGENTS_LAST_WRITE_API_ROUTE =
   "__copilot__/agents/last-write";
-export const LICENSE_ACTIVATE_EVENT = "kirby-tools.license.activate.copilot";
 
 // Marker replaced by the PHP proxy with the real API key.
 export const PROXY_API_KEY_MARKER = "__KIRBY_COPILOT_PROXY__";

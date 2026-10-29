@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { LicenseStatus } from "@kirby-tools/licensing";
 import type { PropType } from "vue";
 import type { AgentConnection } from "../../types";
 import type { AgentsSetupProblem } from "../../utils/agents";
+import { licenseProps } from "@kirby-tools/licensing";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import { useHelpers, usePanel } from "kirbyuse";
 import { computed, onMounted, ref } from "vue";
@@ -19,11 +19,7 @@ const props = defineProps({
     type: Array as PropType<AgentConnection[]>,
     default: () => [],
   },
-  licenseStatus: {
-    type: String as PropType<LicenseStatus>,
-    required: true,
-  },
-  licenseDialog: { type: String, required: true },
+  ...licenseProps,
 });
 
 const DOCS_URL = "https://kirby.tools/docs/copilot/agents";
