@@ -4,7 +4,8 @@ import type { PropType } from "vue";
 import type { AgentConnection } from "../../types";
 import type { AgentsSetupProblem } from "../../utils/agents";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
-import { computed, onMounted, ref, useHelpers, usePanel } from "kirbyuse";
+import { useHelpers, usePanel } from "kirbyuse";
+import { computed, onMounted, ref } from "vue";
 import {
   checkAgentsSetup,
   formatRelativeTime,
@@ -18,7 +19,11 @@ const props = defineProps({
     type: Array as PropType<AgentConnection[]>,
     default: () => [],
   },
-  licenseStatus: String as PropType<LicenseStatus>,
+  licenseStatus: {
+    type: String as PropType<LicenseStatus>,
+    required: true,
+  },
+  licenseDialog: { type: String, required: true },
 });
 
 const DOCS_URL = "https://kirby.tools/docs/copilot/agents";
@@ -26,7 +31,7 @@ const DOCS_URL = "https://kirby.tools/docs/copilot/agents";
 const panel = usePanel();
 const docsLinkText = panel.t("johannschopplich.copilot.agents.docs");
 const helpers = useHelpers();
-const licenseStatus = __PLAYGROUND__ ? "active" : props.licenseStatus;
+const hasLicenseButtons = !__PLAYGROUND__;
 const setupProblems = ref<AgentsSetupProblem[]>([]);
 
 onMounted(async () => {
@@ -83,10 +88,9 @@ function copyMcpUrl() {
     <k-header>
       {{ panel.t("johannschopplich.copilot.agents") }}
 
-      <template #buttons>
+      <template v-if="hasLicenseButtons" #buttons>
         <LicensingButtonGroup
-          label="Kirby Copilot"
-          api-namespace="__copilot__"
+          :dialog="licenseDialog"
           :license-status="licenseStatus"
           pricing-url="https://kirby.tools/copilot/buy"
         />
@@ -116,16 +120,10 @@ function copyMcpUrl() {
           class="kai-mt-[var(--spacing-3)]"
           theme="negative"
           icon="alert"
-          :html="true"
           :text="
-            panel.t(
+            panel.th(
               `johannschopplich.copilot.agents.setup.${problem.type}`,
-              Object.fromEntries(
-                Object.entries(problem).map(([key, value]) => [
-                  key,
-                  helpers.string.escapeHTML(value),
-                ]),
-              ),
+              problem,
             )
           "
         />

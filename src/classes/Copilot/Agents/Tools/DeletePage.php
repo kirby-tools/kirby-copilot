@@ -10,7 +10,6 @@ use JohannSchopplich\Copilot\Agents\Tool;
 use JohannSchopplich\Copilot\Agents\ToolError;
 use Kirby\Cms\File;
 use Kirby\Cms\Files;
-use Kirby\Cms\PageRules;
 use Kirby\Content\LockedContentException;
 
 final class DeletePage
@@ -40,10 +39,12 @@ final class DeletePage
         $page = $arguments->page('page');
 
         return AgentWrites::lock(function () use ($page) {
-            PageRules::delete($page);
+            $guards = $page->guards();
+            $guards->ensureAvailable('delete');
+            $guards->validators()->ensure('delete', false);
 
-            // Kirby deletes the page's files one by one, so a file it refuses to delete would stop the deletion after others are gone.
-            $protectedFiles = $page->files()->filter(fn (File $file) => $file->permissions()->can('delete') !== true);
+            // Kirby refuses at the first file it may not delete, so the agent learns them all at once.
+            $protectedFiles = $page->files()->filter(fn (File $file) => $file->guards()->isAvailable('delete') !== true);
 
             if ($protectedFiles->count() > 0) {
                 throw new ToolError('The account may not delete these files of the page, which deleting it would delete too: ' . self::fileList($protectedFiles) . '.');

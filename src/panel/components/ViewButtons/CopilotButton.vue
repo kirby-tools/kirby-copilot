@@ -6,8 +6,9 @@ import type {
 } from "kirby-types";
 import type { PropType } from "vue";
 import type { LogLevel } from "../../constants";
-import type { PromptContext } from "../../types";
-import { ref, useContent, usePanel } from "kirbyuse";
+import type { ButtonOptionsResponse, PromptContext } from "../../types";
+import { useContent, usePanel } from "kirbyuse";
+import { ref } from "vue";
 import { z } from "zod";
 import {
   ensurePlaygroundApiKey,
@@ -19,6 +20,9 @@ import {
 import { PLUGIN_BUTTON_OPTIONS_API_ROUTE } from "../../constants";
 import { fieldToZodSchema } from "../../schemas/fields";
 import { loadAISDK, openPromptDialog } from "../../utils";
+
+// The view button props Kirby passes (`disabled`, `responsive`, …) would override the button's own.
+defineOptions({ inheritAttrs: false });
 
 const props = defineProps({
   label: String,
@@ -48,8 +52,8 @@ const isHovering = ref(false);
 let activeRun: ReturnType<typeof runStructuredGeneration>;
 let isAbortRequested = false;
 
-function hasKirbyQuery(value: string | undefined) {
-  return typeof value === "string" && value.includes("{{");
+function isNonEmptyString(value: unknown) {
+  return typeof value === "string" && value !== "";
 }
 
 async function initPromptDialog() {
@@ -65,10 +69,10 @@ async function initPromptDialog() {
   }
 
   // A view button's props reach the Panel unresolved, so the server resolves
-  // the ones carrying a Kirby query.
-  const buttonOptions: { userPrompt?: string; systemPrompt?: string } =
-    hasKirbyQuery(props.userPrompt) || hasKirbyQuery(props.systemPrompt)
-      ? await panel.api.get(
+  // a prompt given as a non-empty string.
+  const queriedProps: ButtonOptionsResponse =
+    isNonEmptyString(props.userPrompt) || isNonEmptyString(props.systemPrompt)
+      ? await panel.api.get<ButtonOptionsResponse>(
           PLUGIN_BUTTON_OPTIONS_API_ROUTE,
           { path: panel.view.path },
           undefined,
@@ -76,10 +80,14 @@ async function initPromptDialog() {
           true,
         )
       : props;
+  // The route answers `null` for a prop the blueprint doesn't set, like one
+  // from `panel.viewButtons`, which the button then uses as written.
+  const userPrompt = queriedProps.userPrompt ?? props.userPrompt;
+  const systemPrompt = queriedProps.systemPrompt ?? props.systemPrompt;
 
   const promptContext = await openPromptDialog<PromptContext>({
     fields,
-    userPrompt: buttonOptions.userPrompt,
+    userPrompt,
   });
   if (!promptContext) return;
 
@@ -115,7 +123,7 @@ async function initPromptDialog() {
     activeRun = runStructuredGeneration({
       streamOptions: {
         userPrompt: prompt,
-        systemPrompt: buttonOptions.systemPrompt,
+        systemPrompt,
         output: Output.object({ schema: z.object(fieldsSchema) }),
         files,
         logLevel: props.logLevel,
@@ -134,13 +142,13 @@ async function initPromptDialog() {
           if (Object.keys(updatedContent).length > 0) {
             await updateContent(
               updatedContent,
-              // Disable saving content to storage in Kirby 5.
+              // Only the final output is saved.
               false,
             );
           }
         },
         // Scalar field values are replaced ("fill these fields"), unlike the
-        // section, which extends the current field value.
+        // Copilot field, which extends the current field value.
         persistFinal: async (structuredOutput) => {
           const finalContent = processFieldValues({
             object: structuredOutput as Record<string, unknown>,
@@ -219,8 +227,8 @@ function processFieldValues({
     size="sm"
     responsive
     :disabled="!isGenerating && !isContentEditable"
-    @mouseenter.native="isHovering = true"
-    @mouseleave.native="isHovering = false"
+    @mouseenter="isHovering = true"
+    @mouseleave="isHovering = false"
     @click="isHovering && isGenerating ? abort() : initPromptDialog()"
   >
   </k-button>

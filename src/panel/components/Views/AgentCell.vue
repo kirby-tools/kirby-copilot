@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { PropType } from "vue";
 import type { ConnectedAgent } from "../../types";
-import { computed, usePanel } from "kirbyuse";
+import { usePanel } from "kirbyuse";
+import { computed } from "vue";
 
 const props = defineProps({
   value: Object as PropType<ConnectedAgent>,

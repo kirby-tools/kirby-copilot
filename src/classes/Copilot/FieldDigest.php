@@ -4,17 +4,18 @@ declare(strict_types = 1);
 
 namespace JohannSchopplich\Copilot;
 
-use Closure;
-use JohannSchopplich\KirbyTools\FieldNormalizer;
+use Kirby\Blueprint\Normalizer;
 use Kirby\Cms\App;
+use Kirby\Cms\File;
 use Kirby\Cms\Language;
 use Kirby\Cms\ModelWithContent;
 use Kirby\Cms\User;
-use Kirby\Cms\UserPicker;
 use Kirby\Data\Json;
 use Kirby\Form\Field;
 use Kirby\Form\Fields;
+use Kirby\Panel\Collector\UsersCollector;
 use Kirby\Toolkit\Str;
+use KirbyTools\Utils\FieldNormalizer;
 use Throwable;
 
 /**
@@ -24,7 +25,7 @@ use Throwable;
  */
 final class FieldDigest
 {
-    public const REFERENCE_TYPES = ['files', 'pages', 'users'];
+    public const REFERENCE_TYPES = ['filepicker', 'pagepicker', 'userpicker'];
 
     /** Kirby saves the title and slug through their own actions, and a UUID never changes. */
     private const EXCLUDED_FIELD_NAMES = ['title', 'slug', 'uuid'];
@@ -57,8 +58,8 @@ final class FieldDigest
      * `unhinted` names the fields that hold a value but whose type, such as
      * a plugin's, has no hint, so an AI can't write them.
      *
-     * `info` holds the texts of the info fields and visible info sections of
-     * all tabs; nested info stays with its fieldset or field.
+     * `info` holds the texts of the info fields of all tabs; nested info
+     * stays with its fieldset or field.
      *
      * @return array{fields: list<array>, info: list<array{label?: string, text: string, when?: array}>, fieldsets: array<string, array>, unhinted: list<array{name: string, type: string, label: string|null}>}
      */
@@ -78,7 +79,7 @@ final class FieldDigest
 
         return [
             'fields' => $fields,
-            'info' => [...self::infoOf($props), ...$digest->sectionInfo()],
+            'info' => self::infoOf($props),
             'fieldsets' => $digest->fieldsets,
             'unhinted' => $unhinted
         ];
@@ -101,11 +102,11 @@ final class FieldDigest
             $mappedType = $plugin->extends()['johannschopplich.copilot']['fieldTypes'][$type] ?? null;
 
             if (is_string($mappedType)) {
-                return $mappedType;
+                return Normalizer::$fieldAliases[$mappedType] ?? $mappedType;
             }
         }
 
-        return FieldNormalizer::resolveBaseType($type);
+        return FieldNormalizer::resolveBaseType(Normalizer::$fieldAliases[$type] ?? $type);
     }
 
     /**
@@ -122,11 +123,10 @@ final class FieldDigest
         }
 
         try {
-            $default = Field::setup($props['type'])['props']['placeholder'] ?? null;
-            $isDefault = $default instanceof Closure && $default() === $placeholder;
+            $field = new (Field::resolve($props['type']))(name: $props['name'] ?? $props['type']);
+            $isDefault = method_exists($field, 'placeholder') && $field->placeholder() === $placeholder;
         } catch (Throwable) {
-            // A class-based field type has no definition to read, and a
-            // plugin's default may need its field or an argument.
+            // A plugin's field may need more than a name to be built.
             return $placeholder;
         }
 
@@ -179,7 +179,7 @@ final class FieldDigest
 
         if (in_array($type, self::CHOICE_TYPES, true) && ($props['options'] ?? []) !== []) {
             $field['options'] = array_map(
-                fn (array $option) => ['value' => $option['value'], 'text' => $option['text']],
+                fn (array $option) => ['value' => $option['value'], 'text' => Str::unhtml((string)$option['text'])],
                 $props['options']
             );
         }
@@ -204,11 +204,11 @@ final class FieldDigest
             $field['inline'] = true;
         }
 
-        if (in_array($type, ['pages', 'files'], true)) {
+        if (in_array($type, ['pagepicker', 'filepicker'], true)) {
             $field['query'] = $props['query'] ?? null;
         }
 
-        if ($type === 'users') {
+        if ($type === 'userpicker') {
             $field['options'] = $this->userOptions($props['query'] ?? null);
         }
 
@@ -239,11 +239,18 @@ final class FieldDigest
     }
 
     /**
-     * Lists the users the Panel's picker offers, which no other tool names.
+     * Lists the users the Panel's user picker offers, which no other tool
+     * names, collected as its dialog collects them.
      */
     private function userOptions(string|null $query): array
     {
-        $users = (new UserPicker(['model' => $this->model, 'query' => $query, 'limit' => self::USER_OPTION_LIMIT]))->items();
+        $users = (new UsersCollector(
+            limit: self::USER_OPTION_LIMIT,
+            // The collector queries a site, page or user, so a file hands over its parent.
+            parent: $this->model instanceof File ? $this->model->parent() : $this->model,
+            query: $query ?? ($this->model instanceof User ? 'user.siblings' : 'kirby.users'),
+            sortBy: 'username asc'
+        ))->models(paginated: true);
 
         return $users->values(fn (User $user) => ['value' => $user->uuid()?->toString() ?? $user->id(), 'text' => $user->username()]);
     }
@@ -266,24 +273,6 @@ final class FieldDigest
         }
 
         return $keys;
-    }
-
-    private function sectionInfo(): array
-    {
-        $blueprint = $this->model->blueprint();
-        $info = [];
-
-        foreach ($blueprint->tabs() as $tab) {
-            foreach ($tab['columns'] as $column) {
-                foreach ($column['sections'] as $section) {
-                    if ($section['type'] === 'info' && ($section['hidden'] ?? false) !== true) {
-                        $info[] = self::infoEntry([...$blueprint->section($section['name'])->toArray(), 'when' => $section['when'] ?? null]);
-                    }
-                }
-            }
-        }
-
-        return array_values(array_filter($info));
     }
 
     private function addFieldset(array $fieldset): string
@@ -316,7 +305,10 @@ final class FieldDigest
         $info = [];
 
         foreach ($fields as $props) {
-            if ($props['type'] === 'info') {
+            // Kirby replaces a field it can't build with the info field `Blueprint::fieldError()` returns.
+            $isError = ($props['theme'] ?? null) === 'negative' && ($props['label'] ?? null) === 'Error';
+
+            if ($props['type'] === 'info' && !$isError) {
                 $info[] = self::infoEntry($props);
             }
         }

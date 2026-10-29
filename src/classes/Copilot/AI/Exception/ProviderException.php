@@ -42,22 +42,17 @@ final class ProviderException extends Exception
             $message .= ' (' . implode(', ', $context) . ')';
         }
 
-        // TODO: Drop K4 compat in v4 – use named args `details:`, `httpCode:` and `previous:` once Kirby 5 is the floor.
-        parent::__construct([
-            'details' => [
+        parent::__construct(
+            message: $message,
+            details: [
                 'providerName' => $providerName,
                 'model' => $model,
                 'responseId' => $responseId,
                 'responseExcerpt' => $excerpt,
             ],
-            'httpCode' => $httpCode,
-            'previous' => $previous,
-        ]);
-
-        // Kirby templates `{…}` placeholders out of the message it is handed and
-        // evaluates each as a query, which strips a JSON excerpt down to `-` and
-        // constructs an `App` on the way, so the message never passes through.
-        $this->message = $message;
+            httpCode: $httpCode,
+            previous: $previous,
+        );
     }
 
     private static function shorten(string $value): string

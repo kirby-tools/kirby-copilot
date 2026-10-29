@@ -140,12 +140,10 @@ export async function checkAgentsSetup({
 
 function createRelativeTimeFormat(translationCode: string) {
   // Kirby's codes such as `pt_BR` and `sr@latin` aren't BCP 47 tags.
-  const locale =
-    translationCode === "sr@latin"
-      ? "sr-Latn"
-      : translationCode.replace("_", "-");
-
-  return new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+  return new Intl.RelativeTimeFormat(
+    translationCode.replace("_", "-").replace("@latin", "-Latn"),
+    { numeric: "auto" },
+  );
 }
 
 async function probe(mcpUrl: string, fetch: typeof globalThis.fetch) {

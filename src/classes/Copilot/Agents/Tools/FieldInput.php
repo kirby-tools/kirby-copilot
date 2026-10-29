@@ -19,6 +19,9 @@ final class FieldInput
 {
     private const SHARED_FIELD_REASON = 'The field has one value for all languages. Write it in the default language.';
 
+    /** Validations of a value outside the field's options. */
+    private const OPTION_VALIDATIONS = ['accepted', 'option', 'options'];
+
     public const UPDATE_REFUSAL = "The account may not change this content – its role or the blueprint's options don't allow it.";
 
     /**
@@ -86,9 +89,9 @@ final class FieldInput
     }
 
     /**
-     * Refuses values Kirby would empty or cut short on saving, such as an
-     * option the field doesn't have, since the field would lose them without
-     * the agent noticing.
+     * Refuses values Kirby would empty or cut short on saving, which the
+     * field would lose without the agent noticing, and options the field
+     * doesn't have, which Kirby keeps but reports as invalid.
      *
      * @param array<string, mixed> $sent
      * @param list<array> $digestFields The digest fields of the form
@@ -108,7 +111,8 @@ final class FieldInput
             $field = $form->field($name);
             $keptValue = $field->toFormValue();
             $isDropped = ($field->isEmptyValue($keptValue) && !$field->isEmptyValue($sent[$name])) ||
-                (is_array($sent[$name]) && is_array($keptValue) && count($keptValue) < count($sent[$name]));
+                (is_array($sent[$name]) && is_array($keptValue) && count($keptValue) < count($sent[$name])) ||
+                array_intersect_key($field->errors(), array_flip(self::OPTION_VALIDATIONS)) !== [];
 
             if ($isDropped) {
                 $reasons[] = "{$name} doesn't take " . Json::encode($sent[$name]) . '.'
@@ -205,7 +209,7 @@ final class FieldInput
         return match (true) {
             $model instanceof File => 'Files have no title.',
             !is_string($title) || trim($title) === '' => 'The title can\'t be empty.',
-            $model->permissions()->can('changeTitle') !== true => 'The account may not change the title.',
+            $model->guards()->isAvailable('changeTitle') !== true => 'The account may not change the title.',
             default => null
         };
     }

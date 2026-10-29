@@ -1,24 +1,36 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { PluginContextResponse } from "../../../src/panel/types";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { LICENSE_ACTIVATE_EVENT } from "../../../src/panel/constants";
+import { createEventBus } from "../helpers/event-bus";
 
-const get = vi.fn();
+const api = { get: vi.fn() };
+const events = createEventBus();
 
 vi.mock("kirbyuse", () => ({
   registerPluginAssets: vi.fn(),
+  usePanel: () => ({ api, events }),
 }));
+
+function contextResponse(
+  licenseStatus: PluginContextResponse["licenseStatus"],
+): PluginContextResponse {
+  return {
+    config: {} as PluginContextResponse["config"],
+    assets: [],
+    licenseStatus,
+    licenseDialog: "johannschopplich-kirby-copilot/activate",
+  };
+}
 
 beforeEach(() => {
   vi.resetModules();
-  get.mockReset();
-  vi.stubGlobal("window", { panel: { api: { get } } });
-});
-
-afterEach(() => {
-  vi.unstubAllGlobals();
+  api.get.mockReset();
+  events.clear();
 });
 
 describe("usePluginContext", () => {
   it("requests the context once and serves the cached response afterwards", async () => {
-    get.mockResolvedValue({ config: {}, assets: [] });
+    api.get.mockResolvedValue(contextResponse("active"));
     const { usePluginContext } =
       await import("../../../src/panel/composables/plugin");
 
@@ -28,18 +40,32 @@ describe("usePluginContext", () => {
     ]);
     await usePluginContext();
 
-    expect(get).toHaveBeenCalledTimes(1);
+    expect(api.get).toHaveBeenCalledTimes(1);
     expect(first).toBe(second);
   });
 
   it("retries after a failed request instead of caching the rejection", async () => {
-    get.mockRejectedValueOnce(new Error('Unknown provider "banana"'));
-    get.mockResolvedValueOnce({ config: {}, assets: [] });
+    api.get.mockRejectedValueOnce(new Error('Unknown provider "banana"'));
+    api.get.mockResolvedValueOnce(contextResponse("active"));
     const { usePluginContext } =
       await import("../../../src/panel/composables/plugin");
 
     await expect(usePluginContext()).rejects.toThrow("banana");
 
-    expect(await usePluginContext()).toEqual({ config: {}, assets: [] });
+    expect(await usePluginContext()).toEqual(contextResponse("active"));
+  });
+
+  it("refetches the cached context after LICENSE_ACTIVATE_EVENT", async () => {
+    const { usePluginContext } =
+      await import("../../../src/panel/composables/plugin");
+    api.get
+      .mockResolvedValueOnce(contextResponse("inactive"))
+      .mockResolvedValueOnce(contextResponse("active"));
+
+    await usePluginContext();
+    events.emit(LICENSE_ACTIVATE_EVENT, undefined);
+
+    expect((await usePluginContext()).licenseStatus).toBe("active");
+    expect(api.get).toHaveBeenCalledTimes(2);
   });
 });

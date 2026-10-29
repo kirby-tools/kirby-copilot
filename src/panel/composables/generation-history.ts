@@ -1,4 +1,4 @@
-import { ref } from "kirbyuse";
+import { ref } from "vue";
 import { getHashedStorageKey } from "../utils/shared";
 
 const MAX_HISTORY = 50;

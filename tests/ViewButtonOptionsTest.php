@@ -64,6 +64,19 @@ final class ViewButtonOptionsTest extends ApiRouteTestCase
     }
 
     #[Test]
+    public function keeps_the_placeholders_the_panel_fills_in(): void
+    {
+        $page = $this->appWithButtons([
+            'copilot' => ['userPrompt' => 'Write a teaser for "{title}"']
+        ])->page('test');
+
+        $this->assertSame(
+            'Write a teaser for "{title}"',
+            ViewButtonOptions::resolve($page)['userPrompt']
+        );
+    }
+
+    #[Test]
     public function reads_props_nested_under_props(): void
     {
         $page = $this->appWithButtons([

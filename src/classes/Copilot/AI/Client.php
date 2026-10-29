@@ -74,9 +74,8 @@ final class Client
         $config = $this->resolver->forProvider($name);
 
         if ($config->apiKey === null) {
-            // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
             throw new AuthException(
-                'Missing API key in "johannschopplich.copilot.providers.' . $name->value . '.apiKey"'
+                message: 'Missing API key in "johannschopplich.copilot.providers.' . $name->value . '.apiKey"'
             );
         }
     }

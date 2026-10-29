@@ -1,7 +1,7 @@
 import { guardAgentWrites } from "./agents";
 import PromptDialog from "./components/Dialogs/Prompt.vue";
+import CopilotField from "./components/Fields/Copilot.vue";
 import PlaygroundApiKeyField from "./components/Playground/ApiKey.vue";
-import CopilotSection from "./components/Sections/Copilot.vue";
 import CopilotButton from "./components/ViewButtons/CopilotButton.vue";
 import AgentCell from "./components/Views/AgentCell.vue";
 import AgentsView from "./components/Views/Agents.vue";
@@ -10,7 +10,6 @@ import { icons } from "./config/icons";
 import { copilot as copilotButton } from "./extensions/textarea-buttons/copilot";
 import { copilot as copilotMark } from "./extensions/writer-marks/copilot";
 import { copilotSuggestions as copilotSuggestionsMark } from "./extensions/writer-marks/copilot-suggestions";
-import { legacyViewButtonMixin } from "./legacy";
 import { copilotThirdPartyApi } from "./third-party";
 import "virtual:uno.css";
 import "./styles/copilot-suggestions.css";
@@ -26,10 +25,8 @@ window.panel.plugin("johannschopplich/copilot", {
     "k-copilot-agents-authorize-view": AgentsAuthorizeView,
     "k-table-copilot-agent-cell": AgentCell,
   },
-  sections: {
-    copilot: CopilotSection,
-  },
   fields: {
+    copilot: CopilotField,
     ...(__PLAYGROUND__ && {
       "playground-api-key": PlaygroundApiKeyField,
     }),
@@ -46,7 +43,6 @@ window.panel.plugin("johannschopplich/copilot", {
   },
   icons,
   use: {
-    legacyViewButtonSupport: legacyViewButtonMixin,
     guardAgentWrites,
   },
 });

@@ -39,9 +39,8 @@ final class PanelContext
         $conflictingNames = array_keys(array_filter($providerNames, fn (int $count) => $count > 1));
 
         if ($conflictingNames !== [] && $kirby->option('debug')) {
-            // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
             throw new InvalidArgumentException(
-                'Conflicting provider keys: ' . implode(', ', $conflictingNames) .
+                message: 'Conflicting provider keys: ' . implode(', ', $conflictingNames) .
                 ' – provider names are case-insensitive'
             );
         }
@@ -125,9 +124,8 @@ final class PanelContext
         }
 
         if (App::instance()->option('debug')) {
-            // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
             throw new InvalidArgumentException(
-                'Invalid ' . $path . ': expected ' . implode(' or ', $types) .
+                message: 'Invalid ' . $path . ': expected ' . implode(' or ', $types) .
                 ', got ' . get_debug_type($value)
             );
         }
@@ -166,9 +164,8 @@ final class PanelContext
         if (App::instance()->option('debug')) {
             $value = $parent[$lastKey];
 
-            // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
             throw new InvalidArgumentException(
-                'Invalid ' . $path . ': ' . (is_scalar($value) ? (string)$value : json_encode($value)) .
+                message: 'Invalid ' . $path . ': ' . (is_scalar($value) ? (string)$value : json_encode($value)) .
                 '. Must be one of: ' . implode(', ', $allowed)
             );
         }
@@ -264,9 +261,8 @@ final class PanelContext
         $duplicateIds = array_keys(array_filter($idCounts, fn (int $count) => $count > 1));
 
         if ($duplicateIds !== [] && App::instance()->option('debug')) {
-            // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
             throw new InvalidArgumentException(
-                'Duplicate skill ids: ' . implode(', ', $duplicateIds)
+                message: 'Duplicate skill ids: ' . implode(', ', $duplicateIds)
             );
         }
 
@@ -280,9 +276,8 @@ final class PanelContext
     private static function reportRejectedEntry(string $option, string|int $key, string $reason): void
     {
         if (App::instance()->option('debug')) {
-            // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
             throw new InvalidArgumentException(
-                'Invalid ' . $option . '[' . $key . ']: ' . $reason
+                message: 'Invalid ' . $option . '[' . $key . ']: ' . $reason
             );
         }
     }

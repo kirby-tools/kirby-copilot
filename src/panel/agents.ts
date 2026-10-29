@@ -1,15 +1,16 @@
 import type { Panel, PanelContentVersions } from "kirby-types";
-import type { PluginFunction } from "vue";
-import { watch } from "kirbyuse";
+import type { Plugin } from "vue";
+import { usePanel } from "kirbyuse";
+import { watch } from "vue";
 import { usePluginContext } from "./composables/plugin";
 import { PLUGIN_AGENTS_LAST_WRITE_API_ROUTE } from "./constants";
 
 const CHECK_INTERVAL_MS = 10_000;
 
-export const guardAgentWrites: PluginFunction<any> = () => {
+export const guardAgentWrites: Plugin = () => {
   // Plugins install before `window.panel` is the Panel.
   queueMicrotask(() => {
-    const panel = window.panel;
+    const panel = usePanel();
 
     whenAgentsEnabled(panel, () => {
       keepAgentWrites(panel);

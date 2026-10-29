@@ -4,8 +4,9 @@ import type { KirbyFieldProps } from "kirby-types";
 import type { PropType } from "vue";
 import type { ActiveField, PromptContext, PromptTemplate } from "../../types";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
-import { computed, isKirby5, ref, usePanel } from "kirbyuse";
+import { usePanel } from "kirbyuse";
 import { TEMPLATE_PLACEHOLDER_RE } from "utilful";
+import { computed, onBeforeUnmount, ref } from "vue";
 import {
   useGenerationHistory,
   useModelFields,
@@ -15,7 +16,10 @@ import {
   useSkills,
   useTemplateDialogs,
 } from "../../composables";
-import { SUPPORTED_FILE_MIME_TYPES } from "../../constants";
+import {
+  LICENSE_ACTIVATE_EVENT,
+  SUPPORTED_FILE_MIME_TYPES,
+} from "../../constants";
 import {
   createContentContext,
   findFieldDefinition,
@@ -41,7 +45,6 @@ const emit = defineEmits<{
   (event: "success"): void;
 }>();
 
-const _isKirby5 = isKirby5();
 const panel = usePanel();
 const {
   lastPrompt,
@@ -62,6 +65,7 @@ const { prompt, files, selectedFieldNames, insertOption } =
 
 const editorComponent = ref<InstanceType<typeof PromptEditor>>();
 const licenseStatus = ref<LicenseStatus>();
+const licenseDialog = ref<string>();
 
 const modelFields = ref<KirbyFieldProps[]>([...(props.fields ?? [])]);
 const fieldsDropdown = ref<{ toggle: () => void }>();
@@ -119,6 +123,7 @@ const filteredPlaceholderFields = computed(() => {
 (async () => {
   const context = await usePluginContext();
   licenseStatus.value = __PLAYGROUND__ ? "active" : context.licenseStatus;
+  licenseDialog.value = context.licenseDialog;
   setConfigTemplates(context.config.promptTemplates ?? []);
   setConfigSkills(context.config.skills ?? []);
 
@@ -139,6 +144,16 @@ const filteredPlaceholderFields = computed(() => {
     }
   }
 })();
+
+// Kirby reopens this dialog from its history after the activation dialog,
+// with the status it had before.
+function onActivate() {
+  licenseStatus.value = "active";
+}
+panel.events.on(LICENSE_ACTIVATE_EVENT, onActivate);
+onBeforeUnmount(() => {
+  panel.events.off(LICENSE_ACTIVATE_EVENT, onActivate);
+});
 
 function handleEditorSubmit() {
   if (!prompt.value.trim()) return;
@@ -321,7 +336,7 @@ function getFieldPreview(fieldName: string) {
           <k-button
             icon="attachment"
             :badge="
-              _isKirby5 && files.length > 0
+              files.length > 0
                 ? {
                     theme: 'notice',
                     text: files.length,
@@ -367,9 +382,9 @@ function getFieldPreview(fieldName: string) {
                     panel.t('johannschopplich.copilot.fieldPicker.search')
                   "
                   @input="placeholderSearch = $event"
-                  @click.native.stop
-                  @keydown.native.stop
-                  @keydown.escape.native.prevent="togglePlaceholderDropdown()"
+                  @click.stop
+                  @keydown.stop
+                  @keydown.escape.prevent="togglePlaceholderDropdown()"
                 />
               </div>
             </header>
@@ -522,9 +537,8 @@ function getFieldPreview(fieldName: string) {
       </div>
 
       <LicensingButtonGroup
-        v-if="licenseStatus !== undefined"
-        label="Kirby Copilot"
-        api-namespace="__copilot__"
+        v-if="licenseStatus && licenseDialog"
+        :dialog="licenseDialog"
         :license-status="licenseStatus"
         pricing-url="https://kirby.tools/copilot/buy"
         class="k-copilot-prompt-dialog-licensing-buttons kai-absolute kai-right-0 kai-top-[calc(-0.25rem-24px-2px)]"
@@ -541,8 +555,8 @@ function getFieldPreview(fieldName: string) {
   overflow: visible;
 }
 
-/* Kirby 5.6 scrolls and masks the dialog body, which clips the licensing
-   buttons above it and the fixed skill suggestions below it. */
+/* Kirby scrolls and masks the dialog body, which clips the licensing buttons
+   above it and the fixed skill suggestions below it. */
 .k-copilot-prompt-dialog .k-dialog-body.k-scrollable[data-fade][data-axis] {
   overflow: visible;
   mask-image: none;

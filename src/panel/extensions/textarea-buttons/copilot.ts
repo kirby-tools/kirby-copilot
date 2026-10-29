@@ -1,10 +1,11 @@
 import type { TextareaButton, TextareaToolbarContext } from "kirby-types";
+import { usePanel } from "kirbyuse";
 import { streamTextToField } from "../shared";
 
 export const copilot: TextareaButton = {
   icon: "sparkling",
   get label() {
-    return window.panel.t("johannschopplich.copilot.label");
+    return usePanel().t("johannschopplich.copilot.label");
   },
   shortcut: ".",
 

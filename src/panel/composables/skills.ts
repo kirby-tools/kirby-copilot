@@ -1,5 +1,5 @@
 import type { Skill } from "../types";
-import { ref } from "kirbyuse";
+import { ref } from "vue";
 import {
   createRefTokenRegex,
   extractRefIds,

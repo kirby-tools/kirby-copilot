@@ -45,6 +45,17 @@ final class FieldDigestTest extends ApiRouteTestCase
     }
 
     #[Test]
+    public function lists_queried_option_texts_without_the_html_escaping_kirby_adds(): void
+    {
+        $page = self::bootApp([
+            'blueprints' => ['pages/default' => ['fields' => ['category' => ['type' => 'radio', 'options' => ['type' => 'query', 'query' => 'site.children.not(page)', 'value' => '{{ item.slug }}', 'text' => '{{ item.title }}']]]]],
+            'site' => ['children' => [['slug' => 'test'], ['slug' => 'news', 'content' => ['title' => 'News & Events']]]]
+        ])->page('test');
+
+        $this->assertSame([['value' => 'news', 'text' => 'News & Events']], FieldDigest::for($page)['fields'][0]['options']);
+    }
+
+    #[Test]
     public function describes_a_link_field_without_its_link_types_as_options(): void
     {
         $page = self::bootApp([
@@ -204,7 +215,7 @@ final class FieldDigestTest extends ApiRouteTestCase
             'blueprints' => [
                 'pages/default' => [
                     'fields' => [
-                        'cover' => ['type' => 'files', 'multiple' => false],
+                        'cover' => ['type' => 'files', 'multiple' => false, 'query' => 'page.images'],
                         'related' => ['type' => 'pages', 'query' => 'site.find("notes").children'],
                         'authors' => ['type' => 'users', 'max' => 3]
                     ]
@@ -225,7 +236,7 @@ final class FieldDigestTest extends ApiRouteTestCase
             array_column($digest, 'hint')
         );
         $this->assertSame([1, null, 3], array_map(fn (array $field) => $field['max'] ?? null, $digest));
-        $this->assertSame(['page.files', 'site.find("notes").children'], [$digest[0]['query'], $digest[1]['query']]);
+        $this->assertSame(['page.images', 'site.find("notes").children'], [$digest[0]['query'], $digest[1]['query']]);
         $this->assertSame([['value' => 'user://ada', 'text' => 'Ada'], ['value' => 'user://grace', 'text' => 'grace@example.com']], $digest[2]['options']);
     }
 
@@ -241,6 +252,35 @@ final class FieldDigestTest extends ApiRouteTestCase
         $kirby->impersonate('ada');
 
         $this->assertSame('ada', FieldDigest::for($kirby->page('test'))['fields'][0]['options'][0]['value']);
+    }
+
+    #[Test]
+    public function offers_no_users_to_a_role_without_access_to_them(): void
+    {
+        $kirby = self::bootApp([
+            'blueprints' => [
+                'pages/default' => ['fields' => ['authors' => ['type' => 'users']]],
+                'users/editor' => ['name' => 'editor', 'permissions' => ['access' => ['users' => false]]]
+            ],
+            'site' => ['children' => [['slug' => 'test']]],
+            'users' => [['id' => 'ada', 'email' => 'ada@example.com', 'role' => 'editor']]
+        ]);
+        $kirby->impersonate('ada');
+
+        $this->assertSame([], FieldDigest::for($kirby->page('test'))['fields'][0]['options']);
+    }
+
+    #[Test]
+    public function offers_users_on_a_file(): void
+    {
+        $kirby = self::bootApp([
+            'blueprints' => ['files/default' => ['fields' => ['authors' => ['type' => 'users']]]],
+            'site' => ['children' => [['slug' => 'test', 'files' => [['filename' => 'cover.jpg']]]]],
+            'users' => [['id' => 'ada', 'email' => 'ada@example.com', 'role' => 'admin']]
+        ]);
+        $kirby->impersonate('ada');
+
+        $this->assertSame('ada@example.com', FieldDigest::for($kirby->file('test/cover.jpg'))['fields'][0]['options'][0]['text']);
     }
 
     #[Test]
@@ -289,7 +329,7 @@ final class FieldDigestTest extends ApiRouteTestCase
     {
         $page = self::bootApp([
             'fields' => [
-                'headline-text' => ['extends' => 'text']
+                'headline-text' => CustomTextField::class
             ],
             'blueprints' => [
                 'pages/default' => [
@@ -302,6 +342,22 @@ final class FieldDigestTest extends ApiRouteTestCase
         ])->page('test');
 
         $this->assertSame('text', FieldDigest::for($page)['fields'][0]['type']);
+    }
+
+    #[Test]
+    public function describes_a_plugin_field_mapped_onto_pages_as_page_uuids(): void
+    {
+        App::plugin('test/related', extends: [
+            'fields' => ['related' => PluginField::class],
+            'johannschopplich.copilot' => ['fieldTypes' => ['related' => 'pages']]
+        ]);
+
+        $page = self::bootApp([
+            'blueprints' => ['pages/default' => ['fields' => ['seealso' => ['type' => 'related']]]],
+            'site' => ['children' => [['slug' => 'test']]]
+        ])->page('test');
+
+        $this->assertSame('a list of page UUIDs (page://...)', FieldDigest::for($page)['fields'][0]['hint']);
     }
 
     #[Test]
@@ -387,7 +443,7 @@ final class FieldDigestTest extends ApiRouteTestCase
     {
         $page = self::bootApp([
             'fields' => [
-                'rating' => ['extends' => 'text', 'props' => ['placeholder' => fn (string $placeholder) => $placeholder]]
+                'rating' => SourcedTextField::class
             ],
             'blueprints' => [
                 'pages/default' => [
@@ -395,7 +451,7 @@ final class FieldDigestTest extends ApiRouteTestCase
                         'category' => ['type' => 'select', 'options' => ['news' => 'News']],
                         'website' => ['type' => 'url'],
                         'contact' => ['type' => 'email', 'placeholder' => 'press@example.com'],
-                        'score' => ['type' => 'rating', 'placeholder' => 'Rate it']
+                        'score' => ['type' => 'rating', 'source' => 'reviews', 'placeholder' => 'Rate it']
                     ]
                 ]
             ],
@@ -428,6 +484,21 @@ final class FieldDigestTest extends ApiRouteTestCase
             ['One question per row.', 'Under 160 characters.', 'Dark rows sparingly.'],
             [$faq['info'][0]['text'], $digest['fieldsets']['teaser']['info'][0]['text'], $layout['info'][0]['text']]
         );
+    }
+
+    #[Test]
+    public function keeps_a_negative_info_text_but_leaves_out_the_error_field_of_a_nested_copilot_field(): void
+    {
+        $page = self::bootApp([
+            'blueprints' => ['pages/default' => ['fields' => ['links' => ['type' => 'structure', 'fields' => [
+                'url' => ['type' => 'url'],
+                'warning' => ['type' => 'info', 'theme' => 'negative', 'text' => 'No tracking links.'],
+                'copilot' => ['type' => 'copilot', 'field' => 'url']
+            ]]]]],
+            'site' => ['children' => [['slug' => 'test']]]
+        ])->page('test');
+
+        $this->assertSame(['No tracking links.'], array_column(FieldDigest::for($page)['fields'][0]['info'], 'text'));
     }
 
     #[Test]

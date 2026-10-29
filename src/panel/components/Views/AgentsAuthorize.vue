@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { PropType } from "vue";
 import type { ConnectedAgent } from "../../types";
-import { ref, usePanel } from "kirbyuse";
+import { usePanel } from "kirbyuse";
+import { ref } from "vue";
 import { PLUGIN_AGENTS_CONSENT_API_ROUTE } from "../../constants";
 
 const props = defineProps({

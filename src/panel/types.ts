@@ -65,10 +65,16 @@ export interface PluginConfig {
   agents: boolean;
 }
 
+export interface ButtonOptionsResponse {
+  userPrompt?: string | null;
+  systemPrompt?: string | null;
+}
+
 export interface PluginContextResponse {
   config: PluginConfig;
   assets: PluginAsset[];
-  licenseStatus?: LicenseStatus;
+  licenseStatus: LicenseStatus;
+  licenseDialog: string;
 }
 
 /**

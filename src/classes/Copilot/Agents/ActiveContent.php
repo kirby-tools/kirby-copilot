@@ -10,7 +10,6 @@ use Generator;
 use Kirby\Cms\App;
 use Kirby\Form\Field;
 use Kirby\Form\Field\BlocksField;
-use Kirby\Form\FieldClass;
 use Kirby\Form\Fields;
 use Kirby\Form\Form;
 use RuntimeException;
@@ -156,7 +155,7 @@ final class ActiveContent
      *
      * @return array<string, array{string, string}> The place to name in a refusal and the scheme
      */
-    private static function scriptUrls(Field|FieldClass $field, mixed $value, string|null $parentName = null): array
+    private static function scriptUrls(Field $field, mixed $value, string|null $parentName = null): array
     {
         $urls = [];
         $scheme = in_array($field->type(), ['url', 'link'], true) && is_string($value)
@@ -184,7 +183,7 @@ final class ActiveContent
      *
      * @return Generator<Form>
      */
-    private static function nestedForms(Field|FieldClass $field, mixed $value): Generator
+    private static function nestedForms(Field $field, mixed $value): Generator
     {
         if (!is_array($value)) {
             return;
@@ -209,7 +208,7 @@ final class ActiveContent
                 }
                 break;
             case 'object':
-                yield $field->form($value);
+                yield $field->form()->fill(input: $value);
         }
     }
 
