@@ -124,14 +124,23 @@ async function reloadIfWritten(panel: Panel) {
     document.visibilityState !== "visible" ||
     !lock ||
     !panel.view.timestamp ||
-    panel.content.isProcessing
+    panel.content.isProcessing ||
+    // Saving would only open Kirby's lock dialog again on every check. A lock
+    // taken after the view loaded reaches `isLocked()` only once that dialog
+    // closes and reloads the view, so no check saves while a dialog is open.
+    panel.content.isLocked() ||
+    panel.dialog.isOpen
   ) {
     return;
   }
 
   try {
-    if (await hasAgentWritten(panel)) {
-      await reloadView(panel);
+    // A refused save leaves the form as is: a newer save took over, or the
+    // view locked since the check began.
+    if (
+      (await hasAgentWritten(panel)) &&
+      (await reloadView(panel, { onlyWhenSaved: true }))
+    ) {
       panel.notification.info(
         panel.t("johannschopplich.copilot.agents.reloaded"),
       );
@@ -153,12 +162,13 @@ async function hasAgentWritten(panel: Panel) {
   return writtenAt !== null && writtenAt > (panel.view.timestamp ?? 0);
 }
 
-/**
- * Saves what the editor typed so far, then reloads the view.
- */
-async function reloadView(panel: Panel) {
-  await panel.content.update();
+/** Saves what the editor typed so far, then reloads the view. */
+async function reloadView(panel: Panel, { onlyWhenSaved = false } = {}) {
+  const isSaved = await panel.content.update();
+  if (!isSaved && onlyWhenSaved) return false;
+
   await panel.view.reload();
   // A save queued while the view reloaded still holds the form from before.
   panel.content.cancelSaving();
+  return true;
 }

@@ -38,14 +38,20 @@ export interface GenerationRunOptions {
 
 export interface TextGenerationSink {
   write: (delta: string) => void | Promise<void>;
-  /** Persists the final text once the stream completed; skipped when aborted. */
-  persistFinal?: () => void | Promise<void>;
+  /**
+   * Persists the final text once the stream completed; skipped when aborted.
+   * `false` reports that Kirby refused the save.
+   */
+  persistFinal?: () => boolean | void | Promise<boolean | void>;
 }
 
 export interface StructuredGenerationSink {
   writePartial: (partial: unknown) => void | Promise<void>;
-  /** Persists the validated final output; skipped when aborted. */
-  persistFinal: (final: unknown) => void | Promise<void>;
+  /**
+   * Persists the validated final output; skipped when aborted. `false`
+   * reports that Kirby refused the save.
+   */
+  persistFinal: (final: unknown) => boolean | void | Promise<boolean | void>;
 }
 
 let hasActiveRun = false;
@@ -86,7 +92,7 @@ export function runTextGeneration({
 
     if (signal.aborted) return;
 
-    await sink.persistFinal?.();
+    return sink.persistFinal?.();
   });
 }
 
@@ -121,13 +127,13 @@ export function runStructuredGeneration({
 
     // Abort must never reach the persisting write.
     if (signal.aborted) return;
-    await sink.persistFinal(structuredOutput);
+    return sink.persistFinal(structuredOutput);
   });
 }
 
 function startGenerationRun(
   { escapeToAbort = false }: GenerationRunOptions,
-  execute: (signal: AbortSignal) => Promise<void>,
+  execute: (signal: AbortSignal) => Promise<boolean | void>,
 ): GenerationRun | undefined {
   if (hasActiveRun) {
     const panel = usePanel();
@@ -154,9 +160,11 @@ function startGenerationRun(
     if (escapeToAbort) document.addEventListener("keydown", handleEscape);
 
     try {
-      await execute(signal);
+      const isPersisted = await execute(signal);
 
-      if (signal.aborted) return;
+      // A refused save is a lock, which Kirby's dialog explains, or one a
+      // newer save replaced.
+      if (signal.aborted || isPersisted === false) return;
 
       panel.notification.success({
         icon: "check",

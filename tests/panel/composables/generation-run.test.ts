@@ -295,6 +295,23 @@ describe("runTextGeneration", () => {
     expect(panel.notification.success).toHaveBeenCalledOnce();
   });
 
+  it("skips the success notification when persistFinal resolves false", async () => {
+    const run = runTextGeneration({
+      streamOptions: {
+        userPrompt: "Write",
+        model: createTextModel(["Hello"]),
+      },
+      sink: {
+        write: () => {},
+        persistFinal: async () => false,
+      },
+    });
+
+    await run!.done;
+
+    expect(panel.notification.success).not.toHaveBeenCalled();
+  });
+
   it("skips persistFinal when aborted during the last write", async () => {
     const persistFinal = vi.fn();
 
