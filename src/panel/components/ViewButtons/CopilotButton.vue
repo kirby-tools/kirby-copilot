@@ -20,6 +20,7 @@ import {
 import { PLUGIN_BUTTON_OPTIONS_API_ROUTE } from "../../constants";
 import { fieldToZodSchema } from "../../schemas/fields";
 import { loadAISDK, openPromptDialog } from "../../utils";
+import CopilotButtonBody from "../Ui/CopilotButtonBody.vue";
 
 // The view button props Kirby passes (`disabled`, `responsive`, …) would override the button's own.
 defineOptions({ inheritAttrs: false });
@@ -29,14 +30,8 @@ const props = defineProps({
   userPrompt: String,
   systemPrompt: String,
   logLevel: String as PropType<LogLevel>,
-  icon: {
-    type: String,
-    default: "sparkling",
-  },
-  theme: {
-    type: String,
-    default: "notice-icon",
-  },
+  icon: String,
+  theme: String,
 });
 
 const panel = usePanel();
@@ -48,7 +43,6 @@ const {
 const { getModelFields } = useModelFields();
 
 const isGenerating = ref(false);
-const isHovering = ref(false);
 let activeRun: ReturnType<typeof runStructuredGeneration>;
 let isAbortRequested = false;
 
@@ -217,19 +211,13 @@ function processFieldValues({
 </script>
 
 <template>
-  <k-button
-    :icon="
-      isHovering && isGenerating ? 'cancel' : isGenerating ? 'loader' : icon
-    "
-    :text="label || panel.t('johannschopplich.copilot.label')"
-    :theme="isHovering && isGenerating ? 'notice' : theme"
-    variant="filled"
-    size="sm"
-    responsive
+  <CopilotButtonBody
+    :label="label || panel.t('johannschopplich.copilot.label')"
+    :icon="icon"
+    :theme="theme"
+    :is-generating="isGenerating"
     :disabled="!isGenerating && !isContentEditable"
-    @mouseenter="isHovering = true"
-    @mouseleave="isHovering = false"
-    @click="isHovering && isGenerating ? abort() : initPromptDialog()"
-  >
-  </k-button>
+    @click="initPromptDialog()"
+    @abort="abort()"
+  />
 </template>
