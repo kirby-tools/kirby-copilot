@@ -2,7 +2,7 @@
 
 # Kirby Copilot
 
-Kirby Copilot is a plugin for [Kirby CMS](https://getkirby.com) that brings AI assistance into the Panel without forcing a workflow. Pick the surfaces that fit your blueprints – view button, toolbar, inline suggestions, section – or skip them entirely and call the same provider stack from PHP. Agents like Claude or ChatGPT can connect as well: they prepare changes over MCP, and by default you publish them in the Panel.
+Kirby Copilot is a plugin for [Kirby CMS](https://getkirby.com) that brings AI assistance into the Panel without forcing a workflow. Pick the surfaces that fit your blueprints – view button, toolbar, inline suggestions, field – or skip them entirely and call the same provider stack from PHP. Agents like Claude or ChatGPT can connect as well: they prepare changes over MCP, and by default you publish them in the Panel.
 
 > [!TIP]
 > Explore the [interactive playground](https://try.kirbycopilot.com) or [install the plugin](https://kirby.tools/docs/copilot/getting-started/installation) to try Kirby Copilot for yourself.
@@ -27,7 +27,7 @@ Kirby Copilot is a commercial plugin that requires a license. You can install an
 
 ## Requirements
 
-- Kirby 4 or Kirby 5
+- Kirby 6
 
 ## Installation
 
@@ -40,6 +40,26 @@ composer require johannschopplich/kirby-copilot
 ### Manual Installation
 
 Download and copy this repository to `/site/plugins/kirby-copilot`.
+
+## Upgrading from Copilot 3
+
+Copilot 4 requires Kirby 6, which has no plugin sections, so the Copilot section is a field now. Kirby shows `Invalid section type ("copilot")` until you move it from `sections:` to `fields:`. Its options stay the same:
+
+```yaml
+# Copilot 3
+sections:
+  copilot:
+    type: copilot
+    field: text
+
+# Copilot 4
+fields:
+  copilot:
+    type: copilot
+    field: text
+```
+
+The field works only among the top-level fields of a blueprint, not inside a blocks, layout, structure, or object field.
 
 ## Documentation
 
@@ -59,7 +79,7 @@ For the sake of reproducible bug reports, please include the following informati
 
 - Kirby & Kirby Copilot version
 - Browser environment (name, version, operating system)
-- Global and section configuration (without any sensitive information)
+- Global and field configuration (without any sensitive information)
 - Steps to reproduce the bug (if no reproduction is provided)
 - Screenshots or screen recordings if applicable
 
