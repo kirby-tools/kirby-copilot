@@ -28,7 +28,7 @@ importers:
         version: 5.0.62(zod@4.6.7)
       '@antfu/eslint-config':
         specifier: ^9.5.1
-        version: 9.5.1(@typescript-eslint/typescript-estree@8.71.2(typescript@6.0.3))(@typescript-eslint/utils@8.71.2(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3))(@unocss/eslint-plugin@66.11.0(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3))(@vue/compiler-sfc@3.5.44)(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3)(vitest@5.0.5(@types/node@26.6.5)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1)))
+        version: 9.5.1(@typescript-eslint/typescript-estree@8.71.2(typescript@6.0.3))(@typescript-eslint/utils@8.71.2(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3))(@unocss/eslint-plugin@66.11.0(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3))(@vue/compiler-sfc@3.5.44)(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3)(vitest@5.0.5(@types/node@26.6.5)(happy-dom@21.0.4)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1)))
       '@kirby-tools/licensing':
         specifier: ^0.9.0
         version: 0.9.0(kirbyuse@1.4.2(prosemirror-commands@1.7.2)(prosemirror-model@1.25.12)(prosemirror-state@1.4.4)(prosemirror-view@1.42.6))
@@ -47,6 +47,9 @@ importers:
       eslint:
         specifier: ^10.13.0
         version: 10.13.0(jiti@2.7.0)
+      happy-dom:
+        specifier: ^21.0.4
+        version: 21.0.4
       jiti:
         specifier: ^2.7.0
         version: 2.7.0
@@ -97,13 +100,13 @@ importers:
         version: 66.11.0(@oxc-project/types@0.154.0)(cac@7.1.0)(rolldown@1.2.14)(rollup@4.64.10)(srvx@1.0.6)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1))
       utilful:
         specifier: ^3.5.1
-        version: 3.5.1(vitest@5.0.5(@types/node@26.6.5)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1)))
+        version: 3.5.1(vitest@5.0.5(@types/node@26.6.5)(happy-dom@21.0.4)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1)))
       vite:
         specifier: ^6.4.3
         version: 6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1)
       vitest:
         specifier: ^5.0.5
-        version: 5.0.5(@types/node@26.6.5)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1))
+        version: 5.0.5(@types/node@26.6.5)(happy-dom@21.0.4)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1))
       vue:
         specifier: ^2.7.16
         version: 2.7.16
@@ -1186,6 +1189,12 @@ packages:
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
 
+  '@types/whatwg-mimetype@3.0.2':
+    resolution: {integrity: sha512-c2AKvDT8ToxLIOUlN51gTiHXflsfIFisS4pO7pDPoKouJCESkhZnEy623gwP9laCy5lnLDAw1vAzu2vM2YLOrA==}
+
+  '@types/ws@8.18.2':
+    resolution: {integrity: sha512-67MQl+fpWKVTT1NYdnmo3U4sc/xPo/zQBncVnI74qmQa0z/b+1g6iYqNmGCPbxO+zz2aklb08a0oHfegiVd0/w==}
+
   '@typescript-eslint/eslint-plugin@8.71.2':
     resolution: {integrity: sha512-K72/pvT7qpm8q3k8G5u93NCSN1RcLxX5h7Gw0bQpbMXviBHeY6Nx1WEwmk9wP+eKTSQ8ecxvcgt/ZX/rB938xQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -1574,6 +1583,10 @@ packages:
     resolution: {integrity: sha512-1R4kiYKXGViqEN0CnoDrXc1StD9niAwu+j2dukWzrD4bJgsD4lDmEp0CRbc6E/vYJIfTHwPmwyaKtVSudICdPA==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
+
+  buffer-image-size@0.6.4:
+    resolution: {integrity: sha512-nEh+kZOPY1w+gcCMobZ6ETUp9WfibndnosbpwB1iJk/8Gt5ZF2bhS6+B6bPYz424KtwsR6Rflc3tCz1/ghX2dQ==}
+    engines: {node: '>=4.0'}
 
   builtin-modules@5.4.0:
     resolution: {integrity: sha512-JCWSCdun+4Ovd9BhM/Vtlmwb7oD6Wl4YiPRXXwhAuwlPhW1un/MKgXn7GZoFm53ginnoNzus69V8JWx0K393jg==}
@@ -2138,6 +2151,10 @@ packages:
         optional: true
       ocache:
         optional: true
+
+  happy-dom@21.0.4:
+    resolution: {integrity: sha512-tFm+GaLBgo6o0awHnvHaNoraVo27qJ+2tZEtZ+cIa08hXbeitrxAJajLI05hsUy/2/YTKcUjQYzHe5mCcraLBw==}
+    engines: {node: '>=20.0.0'}
 
   hashery@1.5.1:
     resolution: {integrity: sha512-iZyKG96/JwPz1N55vj2Ie2vXbhu440zfUfJvSwEqEbeLluk7NnapfGqa7LH0mOsnDxTF85Mx8/dyR6HfqcbmbQ==}
@@ -3174,6 +3191,10 @@ packages:
   web-worker@1.5.0:
     resolution: {integrity: sha512-RiMReJrTAiA+mBjGONMnjVDP2u3p9R1vkcGz6gDIrOMT3oGuYwX2WRMYI9ipkphSuE5XKEhydbhNEJh4NY9mlw==}
 
+  whatwg-mimetype@3.0.0:
+    resolution: {integrity: sha512-nt+N2dzIutVRxARx1nghPKGv1xHikU7HKdfafKkLNLindmPU/ch3U31NOCGGA/dmPcmb1VlofO0vnKAcsm0o/Q==}
+    engines: {node: '>=12'}
+
   which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
     engines: {node: '>= 8'}
@@ -3187,6 +3208,18 @@ packages:
   word-wrap@1.2.5:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
     engines: {node: '>=0.10.0'}
+
+  ws@8.22.0:
+    resolution: {integrity: sha512-Ydggc987+RO0AnWtZ/7Wq9FtNvcrL1b/RO0ud9mWjUPgDrsAAwQSF51sm2hm1XofbU/4jkpGEsLFsZZxU+1DOg==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
 
   xml-name-validator@5.0.0:
     resolution: {integrity: sha512-EvGK8EJ3DhaHfbRlETOWAS5pO9MZITeauHKJyb8wyajUfQUenkIg2MvLDTZ4T/TgIcm3HU0TFBgWWboAZ30UHg==}
@@ -3281,7 +3314,7 @@ snapshots:
     dependencies:
       json-schema: 0.4.0
 
-  '@antfu/eslint-config@9.5.1(@typescript-eslint/typescript-estree@8.71.2(typescript@6.0.3))(@typescript-eslint/utils@8.71.2(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3))(@unocss/eslint-plugin@66.11.0(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3))(@vue/compiler-sfc@3.5.44)(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3)(vitest@5.0.5(@types/node@26.6.5)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1)))':
+  '@antfu/eslint-config@9.5.1(@typescript-eslint/typescript-estree@8.71.2(typescript@6.0.3))(@typescript-eslint/utils@8.71.2(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3))(@unocss/eslint-plugin@66.11.0(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3))(@vue/compiler-sfc@3.5.44)(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3)(vitest@5.0.5(@types/node@26.6.5)(happy-dom@21.0.4)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1)))':
     dependencies:
       '@antfu/install-pkg': 2.1.0
       '@clack/prompts': 1.8.1
@@ -3291,7 +3324,7 @@ snapshots:
       '@stylistic/eslint-plugin': 5.10.0(eslint@10.13.0(jiti@2.7.0))
       '@typescript-eslint/eslint-plugin': 8.71.2(@typescript-eslint/parser@8.71.2(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3)
       '@typescript-eslint/parser': 8.71.2(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3)
-      '@vitest/eslint-plugin': 1.6.27(@typescript-eslint/eslint-plugin@8.71.2(@typescript-eslint/parser@8.71.2(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3)(vitest@5.0.5(@types/node@26.6.5)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1)))
+      '@vitest/eslint-plugin': 1.6.27(@typescript-eslint/eslint-plugin@8.71.2(@typescript-eslint/parser@8.71.2(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3)(vitest@5.0.5(@types/node@26.6.5)(happy-dom@21.0.4)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1)))
       ansis: 4.4.0
       cac: 7.1.0
       eslint: 10.13.0(jiti@2.7.0)
@@ -4073,6 +4106,12 @@ snapshots:
 
   '@types/unist@3.0.3': {}
 
+  '@types/whatwg-mimetype@3.0.2': {}
+
+  '@types/ws@8.18.2':
+    dependencies:
+      '@types/node': 26.6.5
+
   '@typescript-eslint/eslint-plugin@8.71.2(@typescript-eslint/parser@8.71.2(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3)':
     dependencies:
       '@eslint-community/regexpp': 4.12.2
@@ -4373,7 +4412,7 @@ snapshots:
       vite: 6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1)
       vue: 2.7.16
 
-  '@vitest/eslint-plugin@1.6.27(@typescript-eslint/eslint-plugin@8.71.2(@typescript-eslint/parser@8.71.2(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3)(vitest@5.0.5(@types/node@26.6.5)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1)))':
+  '@vitest/eslint-plugin@1.6.27(@typescript-eslint/eslint-plugin@8.71.2(@typescript-eslint/parser@8.71.2(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3)(vitest@5.0.5(@types/node@26.6.5)(happy-dom@21.0.4)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1)))':
     dependencies:
       '@typescript-eslint/scope-manager': 8.71.2
       '@typescript-eslint/utils': 8.71.2(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3)
@@ -4381,7 +4420,7 @@ snapshots:
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 8.71.2(@typescript-eslint/parser@8.71.2(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.13.0(jiti@2.7.0))(typescript@6.0.3)
       typescript: 6.0.3
-      vitest: 5.0.5(@types/node@26.6.5)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1))
+      vitest: 5.0.5(@types/node@26.6.5)(happy-dom@21.0.4)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1))
     transitivePeerDependencies:
       - supports-color
 
@@ -4594,6 +4633,10 @@ snapshots:
       electron-to-chromium: 1.5.459
       node-releases: 2.0.59
       update-browserslist-db: 1.3.4(browserslist@4.29.3)
+
+  buffer-image-size@0.6.4:
+    dependencies:
+      '@types/node': 26.6.5
 
   builtin-modules@5.4.0: {}
 
@@ -5175,6 +5218,19 @@ snapshots:
       srvx: 1.0.6
     optionalDependencies:
       crossws: 0.4.15(srvx@1.0.6)
+
+  happy-dom@21.0.4:
+    dependencies:
+      '@types/node': 26.6.5
+      '@types/whatwg-mimetype': 3.0.2
+      '@types/ws': 8.18.2
+      buffer-image-size: 0.6.4
+      entities: 7.0.1
+      whatwg-mimetype: 3.0.0
+      ws: 8.22.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   hashery@1.5.1:
     dependencies:
@@ -6266,9 +6322,9 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  utilful@3.5.1(vitest@5.0.5(@types/node@26.6.5)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1))):
+  utilful@3.5.1(vitest@5.0.5(@types/node@26.6.5)(happy-dom@21.0.4)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1))):
     optionalDependencies:
-      vitest: 5.0.5(@types/node@26.6.5)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1))
+      vitest: 5.0.5(@types/node@26.6.5)(happy-dom@21.0.4)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1))
 
   verkit@0.3.2: {}
 
@@ -6296,7 +6352,7 @@ snapshots:
       sass: 1.105.2
       yaml: 2.9.1
 
-  vitest@5.0.5(@types/node@26.6.5)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1)):
+  vitest@5.0.5(@types/node@26.6.5)(happy-dom@21.0.4)(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1)):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/mocker': 5.0.5(vite@6.4.4(@types/node@26.6.5)(jiti@2.7.0)(sass@1.105.2)(yaml@2.9.1))
@@ -6314,6 +6370,7 @@ snapshots:
       why-is-node-running: 3.2.1
     optionalDependencies:
       '@types/node': 26.6.5
+      happy-dom: 21.0.4
     transitivePeerDependencies:
       - msw
 
@@ -6353,6 +6410,8 @@ snapshots:
 
   web-worker@1.5.0: {}
 
+  whatwg-mimetype@3.0.0: {}
+
   which@2.0.2:
     dependencies:
       isexe: 2.0.0
@@ -6360,6 +6419,8 @@ snapshots:
   why-is-node-running@3.2.1: {}
 
   word-wrap@1.2.5: {}
+
+  ws@8.22.0: {}
 
   xml-name-validator@5.0.0: {}
 

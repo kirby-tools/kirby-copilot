@@ -127,11 +127,10 @@ const filteredPlaceholderFields = computed(() => {
     modelFields.value = await getModelFields();
   }
 
-  if (props.activeField) {
+  if (props.activeField?.path) {
     const fieldDefinition = findFieldDefinition(
       modelFields.value,
-      props.activeField.name,
-      props.activeField.type,
+      props.activeField.path,
     ) as (KirbyFieldProps & { copilot?: { userPrompt?: string } }) | undefined;
 
     if (typeof fieldDefinition?.copilot?.userPrompt === "string") {

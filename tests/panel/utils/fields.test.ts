@@ -1,9 +1,11 @@
+// @vitest-environment happy-dom
 import { describe, expect, it } from "vitest";
 import {
   findFieldDefinition,
+  getFieldPath,
   getResponseFormat,
 } from "../../../src/panel/utils/fields";
-import { blocksField, field, structureField } from "../utils";
+import { blocksField, field, layoutField, structureField } from "../utils";
 
 describe("getResponseFormat", () => {
   it.each([
@@ -22,156 +24,143 @@ describe("getResponseFormat", () => {
 });
 
 describe("findFieldDefinition", () => {
-  describe("direct field matching", () => {
-    it("finds a field by name", () => {
-      const titleField = field({ type: "text", name: "title", label: "Title" });
-      const result = findFieldDefinition(titleField, "title");
-      expect(result).toBe(titleField);
-    });
+  it("resolves a top-level field by its name, not a nested field of that name", () => {
+    const fields = [
+      blocksField("body", {
+        text: { text: field({ type: "writer", name: "text" }) },
+      }),
+      field({ type: "textarea", name: "text" }),
+    ];
 
-    it("returns undefined when field name does not match", () => {
-      const titleField = field({ type: "text", name: "title", label: "Title" });
-      const result = findFieldDefinition(titleField, "description");
-      expect(result).toBeUndefined();
-    });
+    expect(findFieldDefinition(fields, "text")).toBe(fields[1]);
   });
 
-  describe("array of fields", () => {
-    it("finds the field matching the name", () => {
-      const fields = [
-        field({ type: "text", name: "title", label: "Title" }),
-        field({ type: "textarea", name: "description", label: "Description" }),
-      ];
-      const result = findFieldDefinition(fields, "description");
-      expect(result).toBe(fields[1]);
-    });
+  it("resolves a block field through its blocks field and fieldset", () => {
+    const aside = field({ type: "writer", name: "text", label: "Aside" });
+    const fields = [
+      blocksField("body", {
+        note: { text: field({ type: "writer", name: "text" }) },
+      }),
+      blocksField("aside", { note: { text: aside } }),
+    ];
 
-    it("returns undefined when no field matches the name", () => {
-      const fields = [
-        field({ type: "text", name: "title", label: "Title" }),
-        field({ type: "textarea", name: "description", label: "Description" }),
-      ];
-      const result = findFieldDefinition(fields, "content");
-      expect(result).toBeUndefined();
-    });
+    expect(
+      findFieldDefinition(fields, "aside/fieldsets/note/fields/text"),
+    ).toBe(aside);
   });
 
-  describe("structure fields", () => {
-    it("finds a field two levels deep", () => {
-      const outer = structureField("outer", {
-        inner: structureField("inner", {
-          deep: field({ type: "text", name: "deep", label: "Deep" }),
-        }),
-      });
-      const result = findFieldDefinition(outer, "deep");
-      expect(result?.name).toBe("deep");
-    });
+  it("resolves a field in a structure row", () => {
+    const summary = field({ type: "textarea", name: "summary" });
+    const fields = [
+      field({ type: "textarea", name: "summary" }),
+      structureField("links", { summary }),
+    ];
+
+    expect(findFieldDefinition(fields, "links+summary")).toBe(summary);
   });
 
-  describe("blocks fields", () => {
-    it("finds a field in a fieldset tab", () => {
-      const blocks = blocksField("blocks", {
-        text: {
-          content: field({ type: "writer", name: "content", label: "Content" }),
-        },
-      });
+  it("resolves a field in the settings of a layout, from any of its tabs", () => {
+    const background = field({ type: "text", name: "background" });
+    const layout = layoutField(
+      "layout",
+      {},
+      { content: {}, style: { background } },
+    );
 
-      const result = findFieldDefinition(blocks, "content");
-      expect(result?.name).toBe("content");
-      expect(result?.type).toBe("writer");
-    });
+    expect(findFieldDefinition([layout], "layout/fields/background")).toBe(
+      background,
+    );
+  });
 
-    it("finds fields across multiple fieldsets", () => {
-      const blocks = blocksField("blocks", {
-        text: {
-          text: field({ type: "writer", name: "text", label: "Text" }),
-        },
-        heading: {
-          level: field({ type: "select", name: "level", label: "Level" }),
-        },
-      });
+  it("finds nothing for a fieldset the field lacks", () => {
+    const layout = layoutField(
+      "layout",
+      { note: { text: field({ type: "writer", name: "text" }) } },
+      { content: { text: field({ type: "text", name: "text" }) } },
+    );
 
-      const result = findFieldDefinition(blocks, "level");
-      expect(result?.name).toBe("level");
-      expect(result?.type).toBe("select");
-    });
+    expect(
+      findFieldDefinition([layout], "layout/fieldsets/quote/fields/text"),
+    ).toBeUndefined();
+  });
+});
 
-    it("skips fieldsets without tabs", () => {
-      const blocksField = {
-        type: "blocks",
-        name: "blocks",
-        fieldsets: {
-          empty: {
-            name: "Empty",
-            // No `tabs` property.
-          },
-          text: {
-            name: "Text",
-            tabs: {
-              content: {
-                fields: {
-                  content: field({
-                    type: "writer",
-                    name: "content",
-                    label: "Content",
-                  }),
-                },
-              },
+describe("getFieldPath", () => {
+  it("names the blocks field and fieldset a block field sits in", () => {
+    document.body.innerHTML = `
+      <div class="k-field k-field-name-body">
+        <div class="k-block-container k-block-container-fieldset-note">
+          <div class="k-field k-field-name-text" id="active"></div>
+        </div>
+      </div>`;
+
+    expect(getFieldPath(document.getElementById("active")!)).toBe(
+      "body/fieldsets/note/fields/text",
+    );
+  });
+
+  it.each([
+    { fieldset: "text", inputClass: "k-block-type-text-input", field: "text" },
+    {
+      fieldset: "quote",
+      inputClass: "k-block-type-quote-citation",
+      field: "citation",
+    },
+  ])(
+    "names the field a `$fieldset` block edits inline",
+    ({ fieldset, inputClass, field }) => {
+      document.body.innerHTML = `
+        <div class="k-field k-field-name-body">
+          <div class="k-block-container k-block-container-fieldset-${fieldset}">
+            <div class="${inputClass}">
+              <div contenteditable="true" id="active"></div>
+            </div>
+          </div>
+        </div>`;
+
+      expect(getFieldPath(document.getElementById("active")!)).toBe(
+        `body/fieldsets/${fieldset}/fields/${field}`,
+      );
+    },
+  );
+
+  it("starts a drawer field's path from its API endpoint", () => {
+    document.body.innerHTML = `
+      <div class="k-drawer">
+        <div class="k-field k-field-name-body">
+          <div class="k-block-container k-block-container-fieldset-note">
+            <div class="k-field k-field-name-text" id="active"></div>
+          </div>
+        </div>
+      </div>`;
+    const drawerTabs = {
+      content: {
+        fields: {
+          body: {
+            endpoints: {
+              model: "pages/fields",
+              field: "pages/fields/fields/links+body",
             },
           },
         },
-      } as any;
+      },
+    };
 
-      const result = findFieldDefinition(blocksField, "content");
-      expect(result?.name).toBe("content");
-    });
-
-    it("skips tabs without fields", () => {
-      const blocksField = {
-        type: "blocks",
-        name: "blocks",
-        fieldsets: {
-          text: {
-            name: "Text",
-            tabs: {
-              empty: {
-                // No `fields` property.
-              },
-              content: {
-                fields: {
-                  content: field({
-                    type: "writer",
-                    name: "content",
-                    label: "Content",
-                  }),
-                },
-              },
-            },
-          },
-        },
-      } as any;
-
-      const result = findFieldDefinition(blocksField, "content");
-      expect(result?.name).toBe("content");
-    });
+    expect(getFieldPath(document.getElementById("active")!, drawerTabs)).toBe(
+      "links+body/fieldsets/note/fields/text",
+    );
   });
 
-  describe("fieldType", () => {
-    it("returns undefined when the name matches but the type does not", () => {
-      const items = structureField("items", {
-        title: field({ type: "text", name: "title", label: "Title" }),
-        description: field({
-          type: "textarea",
-          name: "description",
-          label: "Description",
-        }),
-      });
+  it("gives no path to a drawer field without an API endpoint", () => {
+    document.body.innerHTML = `
+      <div class="k-drawer">
+        <div class="k-field k-field-name-text" id="active"></div>
+      </div>`;
 
-      const textResult = findFieldDefinition(items, "title", "text");
-      expect(textResult?.type).toBe("text");
-
-      const textareaResult = findFieldDefinition(items, "title", "textarea");
-      expect(textareaResult).toBeUndefined();
-    });
+    expect(
+      getFieldPath(document.getElementById("active")!, {
+        content: { fields: { text: {} } },
+      }),
+    ).toBeUndefined();
   });
 });
