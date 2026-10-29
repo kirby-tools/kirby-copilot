@@ -2,7 +2,7 @@
 import type { LicenseStatus } from "@kirby-tools/licensing";
 import type { KirbyFieldProps } from "kirby-types";
 import type { PropType } from "vue";
-import type { ActiveField, PromptContext, PromptTemplate } from "../../types";
+import type { ActiveField, PlaceholderField, PromptContext } from "../../types";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import { usePanel } from "kirbyuse";
 import { TEMPLATE_PLACEHOLDER_RE } from "utilful";
@@ -28,7 +28,7 @@ import {
 } from "../../utils";
 import { insertRefToken } from "../../utils/reference-tokens";
 import PromptEditor from "../PromptEditor/PromptEditor.vue";
-import ContentDropdown from "../Ui/ContentDropdown.vue";
+import PromptDialogBody from "../Ui/PromptDialogBody.vue";
 
 const props = defineProps({
   fields: Array as PropType<KirbyFieldProps[]>,
@@ -64,18 +64,34 @@ const { prompt, files, selectedFieldNames, insertOption } =
   usePromptDialogState();
 
 const editorComponent = ref<InstanceType<typeof PromptEditor>>();
+const hasLicenseButtons = !__PLAYGROUND__;
 const licenseStatus = ref<LicenseStatus>();
 const licenseDialog = ref<string>();
 
 const modelFields = ref<KirbyFieldProps[]>([...(props.fields ?? [])]);
-const fieldsDropdown = ref<{ toggle: () => void }>();
-const placeholderDropdown = ref<InstanceType<typeof ContentDropdown>>();
-const isPlaceholderDropdownOpen = ref(false);
 const placeholderSearch = ref("");
-const templateDropdown = ref<InstanceType<typeof ContentDropdown>>();
-const historyDropdown = ref<InstanceType<typeof ContentDropdown>>();
 
-const selectionInsertOptions = [
+const labels = {
+  preview: panel.t("johannschopplich.copilot.preview"),
+  selectFiles: panel.t("johannschopplich.copilot.files.select"),
+  clearFiles: panel.t("johannschopplich.copilot.delete"),
+  insert: panel.t("johannschopplich.copilot.fieldPicker.insert"),
+  search: panel.t("johannschopplich.copilot.fieldPicker.search"),
+  selectPages: panel.t("johannschopplich.copilot.pages.select"),
+  notFound: panel.t("johannschopplich.copilot.fieldPicker.notFound"),
+  templates: panel.t("johannschopplich.copilot.templates"),
+  saveTemplate: panel.t("johannschopplich.copilot.template.saveAs"),
+  editTemplates: panel.t("johannschopplich.copilot.template.edit"),
+  noTemplates: panel.t("johannschopplich.copilot.template.empty"),
+  history: panel.t("johannschopplich.copilot.history"),
+  fields: panel.t("johannschopplich.copilot.fields"),
+  generate: panel.t("johannschopplich.copilot.generate"),
+};
+
+const selectionInsertOptions: {
+  value: NonNullable<PromptContext["insertMode"]>;
+  text: string;
+}[] = [
   {
     value: "replace",
     text: panel.t("johannschopplich.copilot.replace"),
@@ -102,27 +118,15 @@ const resolvedPrompt = computed(() =>
   resolvePlaceholders(prompt.value, contentContext),
 );
 
-const placeholderFields = computed(() => [
-  {
-    name: "title",
-    label: panel.t("title"),
-  },
-  ...modelFields.value,
-]);
-const filteredPlaceholderFields = computed(() => {
-  const query = placeholderSearch.value.toLowerCase();
-  if (!query.trim()) return placeholderFields.value;
-
-  return placeholderFields.value.filter(
-    (field) =>
-      field.name.toLowerCase().includes(query) ||
-      (field.label && field.label.toLowerCase().includes(query)),
-  );
-});
+const placeholderFields = computed<PlaceholderField[]>(() =>
+  [{ name: "title", label: panel.t("title") }, ...modelFields.value].map(
+    ({ name, label }) => ({ name, label, preview: getFieldPreview(name) }),
+  ),
+);
 
 (async () => {
   const context = await usePluginContext();
-  licenseStatus.value = __PLAYGROUND__ ? "active" : context.licenseStatus;
+  licenseStatus.value = context.licenseStatus;
   licenseDialog.value = context.licenseDialog;
   setConfigTemplates(context.config.promptTemplates ?? []);
   setConfigSkills(context.config.skills ?? []);
@@ -145,15 +149,17 @@ const filteredPlaceholderFields = computed(() => {
   }
 })();
 
-// Kirby reopens this dialog from its history after the activation dialog,
-// with the status it had before.
-function onActivate() {
-  licenseStatus.value = "active";
+if (hasLicenseButtons) {
+  // Kirby reopens this dialog from its history after the activation dialog,
+  // with the status it had before.
+  const onActivate = () => {
+    licenseStatus.value = "active";
+  };
+  panel.events.on(LICENSE_ACTIVATE_EVENT, onActivate);
+  onBeforeUnmount(() => {
+    panel.events.off(LICENSE_ACTIVATE_EVENT, onActivate);
+  });
 }
-panel.events.on(LICENSE_ACTIVATE_EVENT, onActivate);
-onBeforeUnmount(() => {
-  panel.events.off(LICENSE_ACTIVATE_EVENT, onActivate);
-});
 
 function handleEditorSubmit() {
   if (!prompt.value.trim()) return;
@@ -202,9 +208,6 @@ async function pickFiles() {
 }
 
 function pickPages() {
-  placeholderDropdown.value?.close();
-  isPlaceholderDropdownOpen.value = false;
-
   // Save cursor position before the dialog unmounts the editor.
   const cursorOffset =
     editorComponent.value?.getCursorOffset() ?? prompt.value.length;
@@ -240,31 +243,14 @@ function pickPages() {
   });
 }
 
-function togglePlaceholderDropdown() {
-  if (!isPlaceholderDropdownOpen.value) {
-    placeholderSearch.value = "";
-  }
-
-  isPlaceholderDropdownOpen.value = !isPlaceholderDropdownOpen.value;
-  placeholderDropdown.value?.toggle();
-}
-
 function insertFieldPlaceholder(fieldName: string) {
   const placeholder = `{${fieldName}}`;
   editorComponent.value?.insertAtCursor(placeholder);
 }
 
-function loadTemplate(template: PromptTemplate) {
-  prompt.value = template.prompt;
-  currentIndex.value = -1;
-  templateDropdown.value?.close();
-  editorComponent.value?.focus();
-}
-
-function loadPromptFromHistory(promptText: string) {
+function loadPrompt(promptText: string) {
   prompt.value = promptText;
   currentIndex.value = -1;
-  historyDropdown.value?.close();
   editorComponent.value?.focus();
 }
 
@@ -287,8 +273,30 @@ function getFieldPreview(fieldName: string) {
     class="k-copilot-prompt-dialog"
     @cancel="emit('cancel')"
   >
-    <div
-      class="kai-relative kai-rounded-[var(--rounded)] has-[.ProseMirror:focus]:kai-outline-[2px] has-[.ProseMirror:focus]:kai-outline-[var(--color-focus)] has-[.ProseMirror:focus]:kai-outline"
+    <PromptDialogBody
+      v-model:selected-field-names="selectedFieldNames"
+      v-model:insert-option="insertOption"
+      v-model:placeholder-search="placeholderSearch"
+      :labels="labels"
+      :prompt="prompt"
+      :preview="hasPlaceholders ? resolvedPrompt : undefined"
+      :file-count="files.length"
+      :fields="isFieldGenerationMode ? modelFields : undefined"
+      :selection="selection"
+      :insert-options="selectionInsertOptions"
+      :placeholder-fields="placeholderFields"
+      :templates="templates"
+      :all-templates="allTemplates"
+      :recent-prompts="recentPrompts"
+      @pick-files="pickFiles()"
+      @clear-files="files = []"
+      @pick-pages="pickPages()"
+      @insert-placeholder="insertFieldPlaceholder($event)"
+      @save-template="openSaveTemplateDialog(prompt)"
+      @edit-templates="openEditTemplatesDialog()"
+      @load-template="loadPrompt($event.prompt)"
+      @load-prompt="loadPrompt($event)"
+      @submit="submit()"
     >
       <PromptEditor
         ref="editorComponent"
@@ -305,245 +313,18 @@ function getFieldPreview(fieldName: string) {
         @keydown="handleEditorKeydown"
       />
 
-      <details
-        v-if="hasPlaceholders"
-        class="kai-group kai-mx-[var(--spacing-2)] kai-mb-[var(--spacing-2)] kai-rounded-[var(--rounded)] kai-bg-[var(--panel-color-back)]"
+      <template
+        v-if="hasLicenseButtons && licenseStatus && licenseDialog"
+        #licensing
       >
-        <summary
-          class="kai-flex kai-cursor-pointer kai-list-none kai-items-center kai-gap-0.5 kai-rounded-[var(--rounded)] kai-p-1.5 [&::-webkit-details-marker]:kai-hidden focus:kai-outline-[2px] focus:kai-outline-[var(--color-focus)] focus:kai-outline"
-        >
-          <k-icon
-            type="angle-dropdown"
-            class="kai-[transform:rotate(-90deg)] kai-size-[var(--icon-size)] kai-transition-transform group-open:kai-[transform:rotate(0deg)]"
-          />
-          <span>{{ panel.t("johannschopplich.copilot.preview") }}</span>
-        </summary>
-        <div class="kai-px-1.5 kai-py-[var(--spacing-2)]">
-          <p
-            class="kai-whitespace-pre-wrap kai-leading-[1.375]"
-            v-text="resolvedPrompt"
-          />
-        </div>
-      </details>
-
-      <div
-        class="kai-flex kai-items-center kai-justify-between kai-px-[var(--spacing-2)] kai-pb-[var(--spacing-2)]"
-      >
-        <div
-          class="kai-flex kai-flex-wrap kai-items-center kai-gap-[var(--spacing-1)]"
-        >
-          <!-- File picker button -->
-          <k-button
-            icon="attachment"
-            :badge="
-              files.length > 0
-                ? {
-                    theme: 'notice',
-                    text: files.length,
-                  }
-                : undefined
-            "
-            :aria-label="
-              files.length > 0
-                ? `${panel.t('johannschopplich.copilot.files.select')} (${files.length})`
-                : panel.t('johannschopplich.copilot.files.select')
-            "
-            @click="pickFiles()"
-          />
-          <k-button
-            v-if="files.length > 0"
-            :text="panel.t('johannschopplich.copilot.delete')"
-            variant="dimmed"
-            size="sm"
-            @click="files = []"
-          />
-
-          <!-- Placeholder insertion dropdown -->
-          <k-button
-            icon="copilot-text-snippet"
-            :dropdown="true"
-            :aria-label="panel.t('johannschopplich.copilot.fieldPicker.insert')"
-            class="max-sm:kai-hidden"
-            @click="togglePlaceholderDropdown()"
-          />
-          <ContentDropdown
-            ref="placeholderDropdown"
-            @close="isPlaceholderDropdownOpen = false"
-          >
-            <header
-              v-if="modelFields.length > 5"
-              class="k-copilot-dropdown-content-header"
-            >
-              <div class="k-copilot-dropdown-content-search">
-                <k-search-input
-                  :value="placeholderSearch"
-                  type="text"
-                  :placeholder="
-                    panel.t('johannschopplich.copilot.fieldPicker.search')
-                  "
-                  @input="placeholderSearch = $event"
-                  @click.stop
-                  @keydown.stop
-                  @keydown.escape.prevent="togglePlaceholderDropdown()"
-                />
-              </div>
-            </header>
-
-            <div class="k-copilot-dropdown-content-body">
-              <k-dropdown-item icon="url" @click="pickPages()">
-                {{ panel.t("johannschopplich.copilot.pages.select") }}
-              </k-dropdown-item>
-              <hr />
-              <k-dropdown-item
-                v-for="field in filteredPlaceholderFields"
-                :key="field.name"
-                @click="insertFieldPlaceholder(field.name)"
-              >
-                <span
-                  class="kai-w-full kai-inline-flex kai-items-center kai-gap-[var(--spacing-3)]"
-                >
-                  <span>{{ field.label || field.name }}</span>
-                  <span
-                    v-if="getFieldPreview(field.name)"
-                    class="kai-truncate kai-text-[length:var(--text-xs)]/[1.5] kai-text-[color:var(--color-text-dimmed)]"
-                    v-text="getFieldPreview(field.name)"
-                  />
-                </span>
-              </k-dropdown-item>
-              <k-dropdown-item
-                v-if="filteredPlaceholderFields.length === 0"
-                disabled
-              >
-                {{ panel.t("johannschopplich.copilot.fieldPicker.notFound") }}
-              </k-dropdown-item>
-            </div>
-          </ContentDropdown>
-
-          <!-- Templates dropdown -->
-          <k-button
-            icon="bookmark"
-            :dropdown="true"
-            :aria-label="panel.t('johannschopplich.copilot.templates')"
-            class="max-sm:kai-hidden"
-            @click="templateDropdown?.toggle()"
-          />
-          <ContentDropdown ref="templateDropdown">
-            <div class="k-copilot-dropdown-content-body">
-              <k-dropdown-item
-                v-if="prompt.trim()"
-                icon="add"
-                @click="openSaveTemplateDialog(prompt)"
-              >
-                {{ panel.t("johannschopplich.copilot.template.saveAs") }}
-              </k-dropdown-item>
-
-              <!-- Only user templates are editable. -->
-              <k-dropdown-item
-                v-if="templates.length > 0"
-                icon="settings"
-                @click="openEditTemplatesDialog()"
-              >
-                {{ panel.t("johannschopplich.copilot.template.edit") }}
-              </k-dropdown-item>
-
-              <hr v-if="allTemplates.length > 0" />
-
-              <k-dropdown-item
-                v-for="template in allTemplates"
-                :key="template.id"
-                @click="loadTemplate(template)"
-              >
-                {{ template.label }}
-              </k-dropdown-item>
-
-              <k-dropdown-item v-if="allTemplates.length === 0" disabled>
-                {{ panel.t("johannschopplich.copilot.template.empty") }}
-              </k-dropdown-item>
-            </div>
-          </ContentDropdown>
-
-          <!-- History dropdown -->
-          <template v-if="recentPrompts.length > 0">
-            <k-button
-              icon="clock"
-              :aria-label="panel.t('johannschopplich.copilot.history')"
-              :dropdown="true"
-              class="max-sm:kai-hidden"
-              @click="historyDropdown?.toggle()"
-            />
-            <ContentDropdown ref="historyDropdown">
-              <div class="k-copilot-dropdown-content-body">
-                <k-dropdown-item
-                  v-for="(promptText, index) in recentPrompts"
-                  :key="index"
-                  @click="loadPromptFromHistory(promptText)"
-                >
-                  {{ promptText }}
-                </k-dropdown-item>
-              </div>
-            </ContentDropdown>
-          </template>
-        </div>
-
-        <!-- Action buttons -->
-        <div class="kai-flex kai-gap-[var(--spacing-2)]">
-          <template v-if="isFieldGenerationMode">
-            <k-button
-              :text="panel.t('johannschopplich.copilot.fields')"
-              variant="filled"
-              :badge="
-                selectedFieldNames.length > 0
-                  ? {
-                      theme: 'info',
-                      text: selectedFieldNames.length,
-                    }
-                  : undefined
-              "
-              dropdown
-              @click="fieldsDropdown?.toggle()"
-            />
-            <k-picklist-dropdown
-              ref="fieldsDropdown"
-              :options="
-                modelFields.map((field) => ({
-                  value: field.name,
-                  text: field.label || field.name,
-                }))
-              "
-              :empty="false"
-              :value="selectedFieldNames"
-              @input="selectedFieldNames = $event"
-            />
-          </template>
-          <k-select-input
-            v-else-if="selection"
-            class="kai-underline kai-underline-offset-[var(--link-underline-offset)]"
-            :options="selectionInsertOptions"
-            :empty="false"
-            :value="insertOption"
-            @input="insertOption = $event"
-          />
-
-          <k-button
-            theme="notice-icon"
-            variant="filled"
-            icon="sparkling"
-            :disabled="!prompt.trim()"
-            @click="submit()"
-          >
-            {{ panel.t("johannschopplich.copilot.generate") }}
-          </k-button>
-        </div>
-      </div>
-
-      <LicensingButtonGroup
-        v-if="licenseStatus && licenseDialog"
-        :dialog="licenseDialog"
-        :license-status="licenseStatus"
-        pricing-url="https://kirby.tools/copilot/buy"
-        class="k-copilot-prompt-dialog-licensing-buttons kai-absolute kai-right-0 kai-top-[calc(-0.25rem-24px-2px)]"
-      />
-    </div>
+        <LicensingButtonGroup
+          :dialog="licenseDialog"
+          :license-status="licenseStatus"
+          pricing-url="https://kirby.tools/copilot/buy"
+          class="k-copilot-prompt-dialog-licensing-buttons kai-absolute kai-right-0 kai-top-[calc(-0.25rem-24px-2px)]"
+        />
+      </template>
+    </PromptDialogBody>
   </k-dialog>
 </template>
 

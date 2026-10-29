@@ -8,7 +8,7 @@ import type {
 import type { PropType } from "vue";
 import type z from "zod";
 import type { LogLevel } from "../../constants";
-import type { PluginConfig } from "../../types";
+import type { CopilotFieldError, PluginConfig } from "../../types";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import { useContent, usePanel } from "kirbyuse";
 import {
@@ -36,6 +36,7 @@ import {
   loadAISDK,
   openFilePicker,
 } from "../../utils";
+import CopilotFieldBody from "../Ui/CopilotFieldBody.vue";
 
 const props = defineProps({
   // Declared to keep `disabled` off `k-field`, so the field never looks disabled.
@@ -118,11 +119,55 @@ const files = ref<File[]>([]);
 let activeRun: ReturnType<typeof runTextGeneration>;
 let isAbortRequested = false;
 
-const canEdit = computed(() => props.editable);
-const canAttachFiles = computed(() => props.files === true);
 const canUndo = computed(
   () => !isGenerating.value && currentFieldContent.value !== undefined,
 );
+
+const labels = {
+  generate: panel.t("johannschopplich.copilot.generate"),
+  stop: panel.t("johannschopplich.copilot.stop"),
+  undo: panel.t("johannschopplich.copilot.undo"),
+  prompt: panel.t("johannschopplich.copilot.prompt.label"),
+  context: panel.t("johannschopplich.copilot.context"),
+  placeholder: panel.t("johannschopplich.copilot.prompt.placeholder"),
+  reset: panel.t("johannschopplich.copilot.context.reset"),
+  selectFiles: panel.t("johannschopplich.copilot.files.select"),
+  clearFiles: panel.t("johannschopplich.copilot.delete"),
+};
+const error = computed<CopilotFieldError | undefined>(() => {
+  if (!config.value) return;
+
+  if (!config.value.providers?.[config.value.provider]?.model) {
+    return { type: "model", provider: config.value.provider };
+  }
+
+  if (
+    !targetField.value ||
+    !(targetField.value.name.toLowerCase() in currentContent.value)
+  ) {
+    return {
+      type: "field",
+      field: targetField.value?.name ?? String(props.field),
+    };
+  }
+
+  if (!props.editable && !props.userPrompt) {
+    return { type: "userPrompt" };
+  }
+
+  return undefined;
+});
+const modelFileText = computed(() => {
+  if (!props.modelFile) return;
+
+  return panel.t(
+    `johannschopplich.copilot.context.file.${
+      SUPPORTED_IMAGE_MIME_TYPES.includes(props.modelFile.mime)
+        ? "model"
+        : "unsupported"
+    }`,
+  );
+});
 
 watch(currentPrompt, (value) => {
   if (!isStorageEnabled.value) return;
@@ -309,14 +354,32 @@ function onModelSave() {
 </script>
 
 <template>
-  <k-field
+  <CopilotFieldBody
     :id="id"
+    v-model:prompt="currentPrompt"
+    v-model:open="isDetailsOpen"
     :help="help"
-    :input="false"
     :label="label"
     :name="name"
-    type="copilot"
-    class="k-copilot-field"
+    :labels="labels"
+    :is-loading="!config"
+    :error="error"
+    :icon="icon"
+    :theme="theme ?? undefined"
+    :size="size ?? undefined"
+    :editable="editable"
+    :files="$props.files"
+    :user-prompt="userPrompt"
+    :is-generating="isGenerating"
+    :can-undo="canUndo"
+    :is-read-only="!isContentEditable"
+    :file-count="files.length"
+    :model-file-text="modelFileText"
+    @generate="generate()"
+    @abort="abort()"
+    @undo="undo()"
+    @pick-files="pickFiles()"
+    @clear-files="files = []"
   >
     <template v-if="hasLicenseButtons" #options>
       <LicensingButtonGroup
@@ -325,150 +388,5 @@ function onModelSave() {
         pricing-url="https://kirby.tools/copilot/buy"
       />
     </template>
-
-    <template v-if="config">
-      <k-box v-if="!config.providers?.[config.provider]?.model" theme="empty">
-        <k-text>
-          Missing
-          <code>model</code>
-          property in the
-          <code>{{
-            `johannschopplich.copilot.providers.${config.provider}`
-          }}</code>
-          global configuration.
-        </k-text>
-      </k-box>
-      <k-box
-        v-else-if="
-          !targetField || !(targetField.name.toLowerCase() in currentContent)
-        "
-        theme="empty"
-      >
-        <k-text>
-          The <code>{{ targetField?.name ?? field }}</code> field does not exist
-          in the current model.
-        </k-text>
-      </k-box>
-      <k-box v-else-if="!canEdit && !userPrompt" theme="empty">
-        <k-text>
-          If the user prompt cannot be edited by the user, a default
-          <code>userPrompt</code> has to be set in the field configuration.
-        </k-text>
-      </k-box>
-      <div v-else class="[&>*+*]:kai-mt-[var(--spacing-4)]">
-        <k-button-group layout="collapsed">
-          <k-button
-            :icon="isGenerating ? 'loader' : icon"
-            :text="panel.t('johannschopplich.copilot.generate')"
-            :theme="theme || 'notice-icon'"
-            variant="filled"
-            :size="size || 'md'"
-            :disabled="isGenerating || !isContentEditable"
-            @click="generate()"
-          />
-          <k-button
-            v-if="isGenerating"
-            icon="cancel"
-            :text="panel.t('johannschopplich.copilot.stop')"
-            theme="notice"
-            variant="filled"
-            :size="size || 'md'"
-            @click="abort()"
-          />
-          <k-button
-            v-if="canUndo"
-            icon="undo"
-            :text="panel.t('johannschopplich.copilot.undo')"
-            variant="filled"
-            :size="size || 'md'"
-            @click="undo()"
-          />
-        </k-button-group>
-
-        <details
-          v-if="canEdit || canAttachFiles"
-          :open="isDetailsOpen"
-          @toggle="isDetailsOpen = ($event.target as HTMLDetailsElement).open"
-        >
-          <summary>
-            {{
-              [
-                ...(canEdit
-                  ? [panel.t("johannschopplich.copilot.prompt.label")]
-                  : []),
-                ...(canAttachFiles
-                  ? [panel.t("johannschopplich.copilot.context")]
-                  : []),
-              ].join(", ")
-            }}
-          </summary>
-
-          <div
-            class="kai-mt-[var(--spacing-3)] [&>*+*]:kai-mt-[var(--spacing-2)]"
-          >
-            <div v-if="canEdit" class="kai-text-right">
-              <k-input
-                :key="isDetailsOpen ? 1 : 0"
-                :value="currentPrompt"
-                class="kai-mb-[var(--spacing-1)]"
-                :placeholder="
-                  panel.t('johannschopplich.copilot.prompt.placeholder')
-                "
-                type="textarea"
-                :buttons="false"
-                @input="currentPrompt = $event"
-              />
-              <k-button
-                v-if="userPrompt && currentPrompt !== userPrompt"
-                icon="undo"
-                :text="panel.t('johannschopplich.copilot.context.reset')"
-                variant="dimmed"
-                size="xs"
-                @click="currentPrompt = userPrompt"
-              />
-            </div>
-
-            <k-button-group v-if="canAttachFiles" layout="collapsed">
-              <k-button
-                icon="attachment"
-                :text="panel.t('johannschopplich.copilot.files.select')"
-                variant="filled"
-                :badge="
-                  files.length > 0
-                    ? {
-                        theme: 'notice',
-                        text: files.length,
-                      }
-                    : undefined
-                "
-                size="sm"
-                class="!kai-rounded-[var(--button-rounded)]"
-                @click="pickFiles()"
-              />
-              <k-button
-                v-if="files.length > 0"
-                :text="panel.t('johannschopplich.copilot.delete')"
-                variant="dimmed"
-                size="sm"
-                @click="files = []"
-              />
-            </k-button-group>
-            <k-box v-else-if="modelFile" theme="none">
-              <k-text>
-                {{
-                  panel.t(
-                    `johannschopplich.copilot.context.file.${
-                      SUPPORTED_IMAGE_MIME_TYPES.includes(modelFile.mime)
-                        ? "model"
-                        : "unsupported"
-                    }`,
-                  )
-                }}
-              </k-text>
-            </k-box>
-          </div>
-        </details>
-      </div>
-    </template>
-  </k-field>
+  </CopilotFieldBody>
 </template>

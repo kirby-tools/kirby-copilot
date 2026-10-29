@@ -114,3 +114,45 @@ export interface AgentConnection {
   /** Path of the row's dropdown route. */
   options: string;
 }
+
+export interface CopilotFieldLabels {
+  generate: string;
+  stop: string;
+  undo: string;
+  prompt: string;
+  context: string;
+  placeholder: string;
+  reset: string;
+  selectFiles: string;
+  clearFiles: string;
+}
+
+export type CopilotFieldError =
+  | { type: "model"; provider: string }
+  | { type: "field"; field: string }
+  | { type: "userPrompt" };
+
+export interface PromptDialogLabels {
+  preview: string;
+  selectFiles: string;
+  clearFiles: string;
+  insert: string;
+  search: string;
+  selectPages: string;
+  notFound: string;
+  templates: string;
+  saveTemplate: string;
+  editTemplates: string;
+  noTemplates: string;
+  history: string;
+  fields: string;
+  generate: string;
+}
+
+/** Field the prompt dialog offers as a `{name}` placeholder. */
+export interface PlaceholderField {
+  name: string;
+  label?: string;
+  /** Start of the field's current value. */
+  preview?: string;
+}
