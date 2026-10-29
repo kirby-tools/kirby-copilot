@@ -82,6 +82,7 @@ export function blocksField(
 export function layoutField(
   name: string,
   blockTypes: Record<string, Record<string, KirbyFieldProps>>,
+  settingsTabs?: Record<string, Record<string, KirbyFieldProps>>,
 ): KirbyLayoutFieldProps {
   const fieldsets = {} as KirbyLayoutFieldProps["fieldsets"];
   for (const [blockType, fields] of Object.entries(blockTypes)) {
@@ -95,10 +96,22 @@ export function layoutField(
     } as unknown as KirbyFieldsetProps;
   }
 
+  const settings = settingsTabs
+    ? {
+        tabs: Object.fromEntries(
+          Object.entries(settingsTabs).map(([tab, fields]) => [
+            tab,
+            { name: tab, fields },
+          ]),
+        ),
+      }
+    : undefined;
+
   return field({
     type: "layout",
     name,
     fieldsets,
+    settings,
   }) as unknown as KirbyLayoutFieldProps;
 }
 

@@ -1,6 +1,7 @@
 import type { ActiveField, OutputFormat, PromptContext } from "../types";
+import { usePanel } from "kirbyuse";
 import { ensurePlaygroundApiKey, runTextGeneration } from "../composables";
-import { openPromptDialog } from "../utils";
+import { getFieldPath, openPromptDialog } from "../utils";
 
 export async function streamTextToField(
   selection: string | undefined,
@@ -71,18 +72,16 @@ export async function streamTextToField(
 }
 
 function getActiveField(): ActiveField | undefined {
-  const element = document.activeElement?.closest<HTMLElement>(".k-field");
+  const focusedElement = document.activeElement;
+  if (!(focusedElement instanceof HTMLElement)) return;
+
+  const element = focusedElement.closest<HTMLElement>(".k-field");
   if (!element) return;
 
-  const nameClass = [...element.classList].find((c) =>
-    c.startsWith("k-field-name-"),
-  );
-  const typeClass = [...element.classList].find((c) =>
-    c.startsWith("k-field-type-"),
-  );
-
-  const name = nameClass?.replace("k-field-name-", "");
-  const type = typeClass?.replace("k-field-type-", "");
-
-  return name ? { element, name, type } : undefined;
+  // A block preview's input sits inside the blocks field's `.k-field`, so the
+  // path starts at the input.
+  return {
+    element,
+    path: getFieldPath(focusedElement, usePanel().drawer.props?.tabs),
+  };
 }

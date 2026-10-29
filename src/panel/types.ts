@@ -7,8 +7,7 @@ export type OutputFormat = "text" | "markdown" | "rich-text";
 
 export interface ActiveField {
   element: HTMLElement;
-  name: string;
-  type?: string;
+  path?: string;
 }
 
 export interface PromptContext {
