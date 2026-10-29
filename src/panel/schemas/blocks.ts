@@ -16,7 +16,7 @@ export function generateBlockSchema(
   const contentSchema: Record<string, z.ZodType> = {};
 
   for (const field of Object.values(fields)) {
-    if (field.disabled || field.hidden) continue;
+    if (field.saveable === false || field.disabled || field.hidden) continue;
     if (EXCLUDED_FIELD_TYPES.has(field.type)) continue;
 
     const fieldSchema = fieldToZodSchema(field, context);

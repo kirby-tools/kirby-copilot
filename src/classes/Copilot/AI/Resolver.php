@@ -28,9 +28,8 @@ final readonly class Resolver
         $config = $kirby->option('johannschopplich.copilot', []);
 
         if (!isset($config['provider'])) {
-            // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
             throw new InvalidArgumentException(
-                'Missing required option "johannschopplich.copilot.provider"'
+                message: 'Missing required option "johannschopplich.copilot.provider"'
             );
         }
 
@@ -38,9 +37,8 @@ final readonly class Resolver
         $defaultProvider = ProviderName::tryFrom($providerName);
 
         if ($defaultProvider === null) {
-            // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
             throw new InvalidArgumentException(
-                'Unknown provider "' . $providerName . '" – set "johannschopplich.copilot.provider" to one of: ' .
+                message: 'Unknown provider "' . $providerName . '" – set "johannschopplich.copilot.provider" to one of: ' .
                 implode(', ', array_column(ProviderName::cases(), 'value'))
             );
         }

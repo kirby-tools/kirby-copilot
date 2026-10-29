@@ -148,7 +148,7 @@ final class PrepareChangesToolTest extends McpToolTestCase
     public function writes_a_field_whose_plugin_maps_its_type_onto_a_core_type(): void
     {
         App::plugin('test/rating', extends: [
-            'fields' => ['rating' => []],
+            'fields' => ['rating' => PluginField::class],
             'johannschopplich.copilot' => ['fieldTypes' => ['rating' => 'number']]
         ]);
         $props = $this->props(['blueprints' => ['pages/note' => ['fields' => ['stars' => ['type' => 'rating']]]]]);
@@ -231,6 +231,7 @@ final class PrepareChangesToolTest extends McpToolTestCase
     #[TestWith(['cta', 'javascript:alert(1)', '`cta`'], 'script URL in a link field with custom links')]
     #[TestWith(['body', [['type' => 'button', 'content' => ['link' => 'javascript:alert(1)']]], '`link` in `body`'], 'script URL in a block')]
     #[TestWith(['links', [['url' => 'javascript:alert(1)']], '`url` in `links`'], 'script URL in a structure row')]
+    #[TestWith(['contact', ['url' => 'javascript:alert(1)'], '`url` in `contact`'], 'script URL in an object')]
     public function refuses_a_script_url(string $name, mixed $value, string $place): void
     {
         $result = $this->prepareResult([$name => $value]);
@@ -756,7 +757,7 @@ final class PrepareChangesToolTest extends McpToolTestCase
         return array_replace_recursive([
             'options' => ['johannschopplich.copilot' => ['agents' => true]],
             // A plugin's field type, which has no format hint.
-            'fields' => ['locator' => []],
+            'fields' => ['locator' => PluginField::class],
             'blueprints' => [
                 'pages/note' => [
                     'fields' => [
@@ -770,6 +771,7 @@ final class PrepareChangesToolTest extends McpToolTestCase
                         'website' => ['type' => 'url'],
                         'cta' => ['type' => 'link', 'options' => ['url', 'custom']],
                         'links' => ['type' => 'structure', 'fields' => ['url' => ['type' => 'url']]],
+                        'contact' => ['type' => 'object', 'fields' => ['url' => ['type' => 'url']]],
                         'category' => ['type' => 'select', 'options' => ['news', 'essay']],
                         'map' => ['type' => 'locator'],
                         'entries' => ['type' => 'entries']

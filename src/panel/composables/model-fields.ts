@@ -25,6 +25,7 @@ export function useModelFields() {
 
     const filteredFields = Object.values(fields).filter(
       (field) =>
+        field.saveable !== false &&
         !EXCLUDED_FIELD_TYPES.has(field.type) &&
         !field.disabled &&
         !field.hidden,

@@ -40,7 +40,7 @@ abstract class ApiRouteTestCase extends TestCase
 
         foreach ($routes as $route) {
             if (($route['pattern'] ?? '') === $pattern && ($route['method'] ?? 'GET') === $method) {
-                return $route['action'](...$arguments);
+                return $route['action']->call($kirby->api(), ...$arguments);
             }
         }
 

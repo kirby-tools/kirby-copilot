@@ -18,12 +18,21 @@ import fieldHints from "../../field-hints.json";
 /**
  * Field types excluded from AI generation:
  * - UI elements without content: gap, headline, info, line
- * - Reference types the model cannot resolve: files, pages, users
+ * - Reference types the model cannot resolve: filepicker, pagepicker, userpicker
  * - Fields the editor never sees: hidden
  */
 export const EXCLUDED_FIELD_TYPES = new Set(
   /// keep-sorted
-  ["files", "gap", "headline", "hidden", "info", "line", "pages", "users"],
+  [
+    "filepicker",
+    "gap",
+    "headline",
+    "hidden",
+    "info",
+    "line",
+    "pagepicker",
+    "userpicker",
+  ],
 );
 
 const FIELD_TYPE_TO_SCHEMA: Record<string, SchemaBuilder> = {
@@ -279,7 +288,9 @@ function createNestedFieldsSchema(
   const nestedContentSchema: Record<string, z.ZodType> = {};
 
   for (const [fieldName, subField] of Object.entries(field.fields)) {
-    if (subField.disabled || subField.hidden) continue;
+    if (subField.saveable === false || subField.disabled || subField.hidden) {
+      continue;
+    }
     if (EXCLUDED_FIELD_TYPES.has(subField.type)) continue;
 
     const schema = fieldToZodSchema(

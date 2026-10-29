@@ -2,7 +2,7 @@ import type { WriterMarkContext, WriterMarkExtension } from "kirby-types";
 import type { EditorState, PluginSpec, Transaction } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
 import type { CompletionConfig } from "../../types";
-import { isLocalDev } from "kirbyuse";
+import { isLocalDev, usePanel } from "kirbyuse";
 import { PluginKey } from "prosemirror-state";
 import { Decoration, DecorationSet } from "prosemirror-view";
 import { resolveLanguageModel, usePluginContext } from "../../composables";
@@ -72,6 +72,10 @@ export const copilotSuggestions: CopilotSuggestionsMark = {
     return "copilot-suggestions";
   },
 
+  get schema() {
+    return {};
+  },
+
   keys(this: CopilotSuggestionsMark, _context: WriterMarkContext) {
     return {
       Tab: () => this._acceptSuggestion(),
@@ -135,9 +139,10 @@ export const copilotSuggestions: CopilotSuggestionsMark = {
     const context = await usePluginContext();
 
     if (["inactive", "invalid"].includes(context.licenseStatus!)) {
-      window.panel.notification.info({
+      const panel = usePanel();
+      panel.notification.info({
         icon: "key",
-        message: window.panel.t("johannschopplich.copilot.licenseToast"),
+        message: panel.t("johannschopplich.copilot.licenseToast"),
       });
     }
 

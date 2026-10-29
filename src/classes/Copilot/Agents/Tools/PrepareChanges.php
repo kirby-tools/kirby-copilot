@@ -100,7 +100,7 @@ final class PrepareChanges
         }
 
         // Kirby disables every field of a model the account can't update, so one refusal replaces a "disabled" per field.
-        if ($model->permissions()->can('update') !== true) {
+        if ($model->guards()->isAvailable('update') !== true) {
             throw new ToolError(FieldInput::UPDATE_REFUSAL);
         }
 

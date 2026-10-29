@@ -18,6 +18,8 @@ use Kirby\Cms\Site;
 use Kirby\Exception\PermissionException;
 use Kirby\Filesystem\Dir;
 use Kirby\Filesystem\F;
+use Kirby\Form\Field\FileListField;
+use Kirby\Form\Fields;
 
 /**
  * Kirby checks the template's `accept` rules and the file's contents, as for
@@ -94,7 +96,7 @@ final class UploadFile
         $file = new File(['filename' => $filename, 'parent' => $parent, 'template' => $template]);
 
         // Kirby checks this only once the file is downloaded.
-        if ($file->permissions()->can('create') !== true) {
+        if ($file->guards()->isAvailable('create') !== true) {
             throw new PermissionException(message: 'The file cannot be created');
         }
 
@@ -159,13 +161,13 @@ final class UploadFile
     }
 
     /**
-     * Lists the templates a Panel upload to the parent takes, in section
-     * order: a files section's own template, or `default` without one, and
-     * the upload templates of the parent's fields. A files section counts
+     * Lists the templates a Panel upload to the parent takes, in field
+     * order: a file list's own template, or `default` without one, and the
+     * upload templates of the parent's other fields. A file list counts
      * where it lists the parent's files and takes uploads, on the parent's
      * view or on those of its ancestors and the site. Each comes with the
      * sort number a Panel upload gives the new file, which only a sortable
-     * files section sets.
+     * file list sets.
      *
      * @return array<string, int|null>
      */
@@ -174,15 +176,13 @@ final class UploadFile
         $templates = [];
 
         foreach ($parent instanceof Site ? [$parent] : [$parent, ...$parent->parents()->values(), $parent->site()] as $view) {
-            $blueprint = $view->blueprint();
-
-            foreach ($blueprint->sections() as $section) {
-                if ($section->type() !== 'files') {
+            foreach (Fields::for($view) as $field) {
+                if (!$field instanceof FileListField) {
                     if ($view === $parent) {
-                        $templates += array_fill_keys($blueprint->acceptedFileTemplates($section->name()), null);
+                        $templates += array_fill_keys($view->blueprint()->acceptedFileTemplates($field->name()), null);
                     }
-                } elseif ($section->upload() !== false && $section->parent()->is($parent)) {
-                    $templates[$section->template() ?: 'default'] ??= $section->upload()['attributes']['sort'];
+                } elseif ($field->upload() !== false && $field->parentModel()->is($parent)) {
+                    $templates[$field->template() ?: 'default'] ??= $field->upload()['attributes']['sort'];
                 }
             }
         }

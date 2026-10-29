@@ -1,12 +1,13 @@
 <?php
 
-use JohannSchopplich\Licensing\LicensePanel;
+use KirbyTools\Licensing\LicensePanel;
 
 return array_replace_recursive(
     LicensePanel::translations(),
     [
         'en' => [
             'johannschopplich.copilot.label' => 'Copilot',
+            'johannschopplich.copilot.field.nested' => 'A Copilot field works only among the top-level fields of a blueprint, not inside a blocks, layout, structure, or object field.',
             'johannschopplich.copilot.generate' => 'Generate',
             'johannschopplich.copilot.stop' => 'Stop',
             'johannschopplich.copilot.undo' => 'Undo',
@@ -89,6 +90,7 @@ return array_replace_recursive(
         ],
         'de' => [
             'johannschopplich.copilot.label' => 'Copilot',
+            'johannschopplich.copilot.field.nested' => 'Ein Copilot-Feld funktioniert nur auf der obersten Ebene eines Blueprints, nicht in einem Blocks-, Layout-, Structure- oder Object-Feld.',
             'johannschopplich.copilot.generate' => 'Generieren',
             'johannschopplich.copilot.stop' => 'Stop',
             'johannschopplich.copilot.undo' => 'Rückgängig',
@@ -171,6 +173,7 @@ return array_replace_recursive(
         ],
         'fr' => [
             'johannschopplich.copilot.label' => 'Copilot',
+            'johannschopplich.copilot.field.nested' => 'Un champ Copilot ne fonctionne qu’au premier niveau des champs d’un blueprint, pas dans un champ blocks, layout, structure ou object.',
             'johannschopplich.copilot.generate' => 'Générer',
             'johannschopplich.copilot.stop' => 'Arrêter',
             'johannschopplich.copilot.undo' => 'Annuler',
@@ -253,6 +256,7 @@ return array_replace_recursive(
         ],
         'nl' => [
             'johannschopplich.copilot.label' => 'Copilot',
+            'johannschopplich.copilot.field.nested' => 'Een Copilot-veld werkt alleen op het hoogste niveau van een blueprint, niet in een blocks-, layout-, structure- of object-veld.',
             'johannschopplich.copilot.generate' => 'Genereren',
             'johannschopplich.copilot.stop' => 'Stoppen',
             'johannschopplich.copilot.undo' => 'Ongedaan maken',

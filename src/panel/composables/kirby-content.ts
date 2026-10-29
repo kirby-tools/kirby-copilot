@@ -5,6 +5,7 @@ import type {
   KirbyLayoutFieldProps,
 } from "kirby-types";
 import type { KirbyFieldset } from "../types";
+import { usePanel } from "kirbyuse";
 import { PLUGIN_FIELDSETS_API_ROUTE } from "../constants";
 import { generateKirbyBlocksSchema } from "../schemas/blocks";
 import { generateKirbyLayoutsSchema } from "../schemas/layouts";
@@ -17,8 +18,8 @@ function getFieldsets() {
   if (fieldsets) return Promise.resolve(fieldsets);
   if (pendingPromise) return pendingPromise;
 
-  pendingPromise = window.panel.api
-    .get<KirbyFieldset[]>(
+  pendingPromise = usePanel()
+    .api.get<KirbyFieldset[]>(
       PLUGIN_FIELDSETS_API_ROUTE,
       undefined,
       undefined,
