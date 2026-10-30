@@ -5,8 +5,8 @@ import type {
   KirbyLayoutFieldProps,
 } from "kirby-types";
 import type { PropType } from "vue";
-import type { LogLevel } from "../../constants";
-import type { ButtonOptionsResponse, PromptContext } from "../../types";
+import type { LogLevel } from "../constants";
+import type { ButtonOptionsResponse, PromptContext } from "../types";
 import { useContent, usePanel } from "kirbyuse";
 import { ref } from "vue";
 import { z } from "zod";
@@ -16,11 +16,11 @@ import {
   useBlocks,
   useLayouts,
   useModelFields,
-} from "../../composables";
-import { PLUGIN_BUTTON_OPTIONS_API_ROUTE } from "../../constants";
-import { fieldToZodSchema } from "../../schemas/fields";
-import { loadAISDK, openPromptDialog } from "../../utils";
-import CopilotButtonBody from "../Ui/CopilotButtonBody.vue";
+} from "../composables";
+import { PLUGIN_BUTTON_OPTIONS_API_ROUTE } from "../constants";
+import { fieldToZodSchema } from "../schemas/fields";
+import { loadAISDK, openPromptDialog } from "../utils";
+import ViewButtonBody from "./Ui/ViewButtonBody.vue";
 
 // The view button props Kirby passes (`disabled`, `responsive`, …) would override the button's own.
 defineOptions({ inheritAttrs: false });
@@ -211,7 +211,7 @@ function processFieldValues({
 </script>
 
 <template>
-  <CopilotButtonBody
+  <ViewButtonBody
     :label="label || panel.t('johannschopplich.copilot.label')"
     :icon="icon"
     :theme="theme"

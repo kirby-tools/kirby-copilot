@@ -2,8 +2,8 @@
 import { mount, shallowMount } from "@vue/test-utils";
 import { beforeEach, expect, it, vi } from "vitest";
 import { defineComponent, h, ref } from "vue";
-import CopilotButtonBody from "../../../src/panel/components/Ui/CopilotButtonBody.vue";
-import CopilotButton from "../../../src/panel/components/ViewButtons/CopilotButton.vue";
+import ViewButtonBody from "../../../src/panel/components/Ui/ViewButtonBody.vue";
+import ViewButton from "../../../src/panel/components/ViewButton.vue";
 import { PLUGIN_BUTTON_OPTIONS_API_ROUTE } from "../../../src/panel/constants";
 
 // Kirby 6's `k-button` sets `inheritAttrs: false` and passes no listener but
@@ -43,8 +43,8 @@ beforeEach(() => {
 });
 
 async function openDialog(props: Record<string, unknown> = {}) {
-  const wrapper = shallowMount(CopilotButton, { props });
-  wrapper.findComponent(CopilotButtonBody).vm.$emit("click");
+  const wrapper = shallowMount(ViewButton, { props });
+  wrapper.findComponent(ViewButtonBody).vm.$emit("click");
   await vi.waitFor(() => expect(openPromptDialog).toHaveBeenCalled());
 }
 
@@ -81,15 +81,13 @@ it("skips the button-options route without a prompt", async () => {
 });
 
 it("keeps the disabled prop Kirby passes off its button", () => {
-  const wrapper = shallowMount(CopilotButton, { attrs: { disabled: true } });
+  const wrapper = shallowMount(ViewButton, { attrs: { disabled: true } });
 
-  expect(wrapper.findComponent(CopilotButtonBody).props("disabled")).toBe(
-    false,
-  );
+  expect(wrapper.findComponent(ViewButtonBody).props("disabled")).toBe(false);
 });
 
 it("emits abort instead of click while hovered with isGenerating", async () => {
-  const wrapper = mount(CopilotButtonBody, {
+  const wrapper = mount(ViewButtonBody, {
     props: { label: "Copilot", isGenerating: true },
     global: { components: { "k-button": KButton } },
   });

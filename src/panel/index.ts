@@ -1,11 +1,11 @@
 import { guardAgentWrites } from "./agents";
-import PromptDialog from "./components/Dialogs/Prompt.vue";
-import CopilotField from "./components/Fields/Copilot.vue";
-import PlaygroundApiKeyField from "./components/Playground/ApiKey.vue";
-import CopilotButton from "./components/ViewButtons/CopilotButton.vue";
-import AgentCell from "./components/Views/AgentCell.vue";
-import AgentsView from "./components/Views/Agents.vue";
-import AgentsAuthorizeView from "./components/Views/AgentsAuthorize.vue";
+import AgentCell from "./components/AgentCell.vue";
+import AgentsView from "./components/AgentsView.vue";
+import ConsentView from "./components/ConsentView.vue";
+import Field from "./components/Field.vue";
+import ApiKeyField from "./components/Playground/ApiKeyField.vue";
+import PromptDialog from "./components/PromptDialog.vue";
+import ViewButton from "./components/ViewButton.vue";
 import { icons } from "./config/icons";
 import { copilot as copilotButton } from "./extensions/textarea-buttons/copilot";
 import { copilot as copilotMark } from "./extensions/writer-marks/copilot";
@@ -17,18 +17,18 @@ import "./styles/copilot-generating.css";
 
 window.panel.plugin("johannschopplich/copilot", {
   viewButtons: {
-    copilot: CopilotButton,
+    copilot: ViewButton,
   },
   components: {
     "k-copilot-prompt-dialog": PromptDialog,
     "k-copilot-agents-view": AgentsView,
-    "k-copilot-agents-authorize-view": AgentsAuthorizeView,
+    "k-copilot-consent-view": ConsentView,
     "k-table-copilot-agent-cell": AgentCell,
   },
   fields: {
-    copilot: CopilotField,
+    copilot: Field,
     ...(__PLAYGROUND__ && {
-      "playground-api-key": PlaygroundApiKeyField,
+      "playground-api-key": ApiKeyField,
     }),
   },
   textareaButtons: {

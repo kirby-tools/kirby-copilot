@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { PropType } from "vue";
-import type { ConnectedAgent } from "../../types";
+import type { ConnectedAgent } from "../types";
 import { usePanel } from "kirbyuse";
 import { computed } from "vue";
 

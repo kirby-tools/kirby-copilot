@@ -6,8 +6,8 @@ import type {
 } from "kirby-types";
 import type { PropType } from "vue";
 import type z from "zod";
-import type { LogLevel } from "../../constants";
-import type { CopilotFieldError, PluginConfig } from "../../types";
+import type { LogLevel } from "../constants";
+import type { CopilotFieldError, PluginConfig } from "../types";
 import { licenseProps } from "@kirby-tools/licensing";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import { useContent, usePanel, usePanelEvent } from "kirbyuse";
@@ -25,19 +25,19 @@ import {
   useBlocks,
   useLayouts,
   usePluginContext,
-} from "../../composables";
+} from "../composables";
 import {
   SUPPORTED_FILE_MIME_TYPES,
   SUPPORTED_IMAGE_MIME_TYPES,
-} from "../../constants";
+} from "../constants";
 import {
   getHashedStorageKey,
   getResponseFormat,
   loadAISDK,
   openFilePicker,
-} from "../../utils";
-import { createFieldLabels } from "../../utils/labels";
-import CopilotFieldBody from "../Ui/CopilotFieldBody.vue";
+} from "../utils";
+import { createFieldLabels } from "../utils/labels";
+import FieldBody from "./Ui/FieldBody.vue";
 
 const props = defineProps({
   // Declared to keep `disabled` off `k-field`, so the field never looks disabled.
@@ -332,7 +332,7 @@ function onModelSave() {
 </script>
 
 <template>
-  <CopilotFieldBody
+  <FieldBody
     :id="id"
     v-model:prompt="currentPrompt"
     v-model:open="isDetailsOpen"
@@ -366,5 +366,5 @@ function onModelSave() {
         pricing-url="https://kirby.tools/copilot/buy"
       />
     </template>
-  </CopilotFieldBody>
+  </FieldBody>
 </template>

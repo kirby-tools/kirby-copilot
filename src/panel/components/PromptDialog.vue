@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { KirbyFieldProps } from "kirby-types";
 import type { PropType } from "vue";
-import type { ActiveField, PlaceholderField, PromptContext } from "../../types";
+import type { ActiveField, PlaceholderField, PromptContext } from "../types";
 import { useLicenseStatus } from "@kirby-tools/licensing";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import { usePanel } from "kirbyuse";
@@ -15,21 +15,18 @@ import {
   usePromptTemplates,
   useSkills,
   useTemplateDialogs,
-} from "../../composables";
-import { SUPPORTED_FILE_MIME_TYPES } from "../../constants";
+} from "../composables";
+import { SUPPORTED_FILE_MIME_TYPES } from "../constants";
 import {
   createContentContext,
   findFieldDefinition,
   openFilePicker,
   resolvePlaceholders,
-} from "../../utils";
-import {
-  createInsertOptions,
-  createPromptDialogLabels,
-} from "../../utils/labels";
-import { insertRefToken } from "../../utils/reference-tokens";
-import PromptEditor from "../PromptEditor/PromptEditor.vue";
-import PromptDialogBody from "../Ui/PromptDialogBody.vue";
+} from "../utils";
+import { createInsertOptions, createPromptDialogLabels } from "../utils/labels";
+import { insertRefToken } from "../utils/reference-tokens";
+import PromptEditor from "./PromptEditor/PromptEditor.vue";
+import PromptDialogBody from "./Ui/PromptDialogBody.vue";
 
 const props = defineProps({
   fields: Array as PropType<KirbyFieldProps[]>,

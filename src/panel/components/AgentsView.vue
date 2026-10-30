@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { PropType } from "vue";
-import type { AgentConnection } from "../../types";
-import type { AgentsSetupProblem } from "../../utils/agents";
+import type { AgentConnection } from "../types";
+import type { AgentsSetupProblem } from "../utils/agents";
 import { licenseProps } from "@kirby-tools/licensing";
 import { LicensingButtonGroup } from "@kirby-tools/licensing/components";
 import { useHelpers, usePanel } from "kirbyuse";
@@ -10,7 +10,7 @@ import {
   checkAgentsSetup,
   formatRelativeTime,
   summarizeLabels,
-} from "../../utils/agents";
+} from "../utils/agents";
 
 const props = defineProps({
   mcpUrl: { type: String, required: true },

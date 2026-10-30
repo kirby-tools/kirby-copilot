@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { PropType } from "vue";
-import type { ConnectedAgent } from "../../types";
+import type { ConnectedAgent } from "../types";
 import { usePanel } from "kirbyuse";
 import { ref } from "vue";
-import { PLUGIN_AGENTS_CONSENT_API_ROUTE } from "../../constants";
+import { PLUGIN_AGENTS_CONSENT_API_ROUTE } from "../constants";
 
 const props = defineProps({
   id: String,
@@ -45,7 +45,7 @@ async function decide(isApproved: boolean) {
 </script>
 
 <template>
-  <k-panel-outside class="k-copilot-agents-authorize-view">
+  <k-panel-outside class="k-copilot-consent-view">
     <div class="k-dialog">
       <k-dialog-body v-if="client" class="[&>*+*]:kai-mt-[var(--spacing-6)]">
         <header class="[&>*+*]:kai-mt-[var(--spacing-2)]">
