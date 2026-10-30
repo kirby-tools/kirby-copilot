@@ -36,6 +36,7 @@ import {
   loadAISDK,
   openFilePicker,
 } from "../../utils";
+import { createFieldLabels } from "../../utils/labels";
 import CopilotFieldBody from "../Ui/CopilotFieldBody.vue";
 
 const props = defineProps({
@@ -116,17 +117,7 @@ const canUndo = computed(
   () => !isGenerating.value && currentFieldContent.value !== undefined,
 );
 
-const labels = {
-  generate: panel.t("johannschopplich.copilot.generate"),
-  stop: panel.t("johannschopplich.copilot.stop"),
-  undo: panel.t("johannschopplich.copilot.undo"),
-  prompt: panel.t("johannschopplich.copilot.prompt.label"),
-  context: panel.t("johannschopplich.copilot.context"),
-  placeholder: panel.t("johannschopplich.copilot.prompt.placeholder"),
-  reset: panel.t("johannschopplich.copilot.context.reset"),
-  selectFiles: panel.t("johannschopplich.copilot.files.select"),
-  clearFiles: panel.t("johannschopplich.copilot.delete"),
-};
+const labels = createFieldLabels(panel.t);
 const error = computed<CopilotFieldError | undefined>(() => {
   if (!config.value) return;
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PropType } from "vue";
 import type {
+  InsertOption,
   PlaceholderField,
   PromptContext,
   PromptDialogLabels,
@@ -35,9 +36,7 @@ const props = defineProps({
   selection: String,
   insertOption: String as PropType<PromptContext["insertMode"]>,
   insertOptions: {
-    type: Array as PropType<
-      { value: NonNullable<PromptContext["insertMode"]>; text: string }[]
-    >,
+    type: Array as PropType<InsertOption[]>,
     default: () => [],
   },
   placeholderFields: {
