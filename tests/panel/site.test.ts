@@ -13,17 +13,13 @@ describe("site barrel", () => {
   it("loads without `window`", async () => {
     expect(globalThis.window).toBeUndefined();
 
-    const {
-      AgentsAuthorize,
-      CopilotButtonBody,
-      CopilotFieldBody,
-      PromptDialogBody,
-    } = await import("../../src/panel/site");
+    const { ConsentView, FieldBody, PromptDialogBody, ViewButtonBody } =
+      await import("../../src/panel/site");
 
-    expect(AgentsAuthorize).toBeTypeOf("object");
-    expect(CopilotButtonBody).toBeTypeOf("object");
-    expect(CopilotFieldBody).toBeTypeOf("object");
+    expect(ConsentView).toBeTypeOf("object");
+    expect(FieldBody).toBeTypeOf("object");
     expect(PromptDialogBody).toBeTypeOf("object");
+    expect(ViewButtonBody).toBeTypeOf("object");
   });
 
   it("imports only kirbyuse, kirbyuse/props and vue", async () => {

@@ -33,7 +33,7 @@ final class Consent
         );
 
         return [
-            'component' => 'k-copilot-agents-authorize-view',
+            'component' => 'k-copilot-consent-view',
             'title' => I18n::translate('johannschopplich.copilot.agents.authorize'),
             'props' => [
                 'id' => $id,

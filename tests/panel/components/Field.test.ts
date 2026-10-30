@@ -2,8 +2,8 @@
 import { shallowMount } from "@vue/test-utils";
 import { expect, it, vi } from "vitest";
 import { ref } from "vue";
-import CopilotField from "../../../src/panel/components/Fields/Copilot.vue";
-import CopilotFieldBody from "../../../src/panel/components/Ui/CopilotFieldBody.vue";
+import Field from "../../../src/panel/components/Field.vue";
+import FieldBody from "../../../src/panel/components/Ui/FieldBody.vue";
 
 vi.mock("kirbyuse", () => ({
   useContent: () => ({ currentContent: ref({}), isEditable: ref(true) }),
@@ -23,7 +23,7 @@ vi.mock("../../../src/panel/composables", () => ({
 }));
 
 it("keeps disabled off k-field", () => {
-  const wrapper = shallowMount(CopilotField, {
+  const wrapper = shallowMount(Field, {
     props: {
       name: "copilot",
       label: "Copilot",
@@ -34,6 +34,6 @@ it("keeps disabled off k-field", () => {
   });
 
   expect(
-    wrapper.findComponent(CopilotFieldBody).attributes("disabled"),
+    wrapper.findComponent(FieldBody).attributes("disabled"),
   ).toBeUndefined();
 });
