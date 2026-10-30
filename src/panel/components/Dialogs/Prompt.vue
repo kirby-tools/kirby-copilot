@@ -23,6 +23,10 @@ import {
   openFilePicker,
   resolvePlaceholders,
 } from "../../utils";
+import {
+  createInsertOptions,
+  createPromptDialogLabels,
+} from "../../utils/labels";
 import { insertRefToken } from "../../utils/reference-tokens";
 import PromptEditor from "../PromptEditor/PromptEditor.vue";
 import PromptDialogBody from "../Ui/PromptDialogBody.vue";
@@ -70,36 +74,9 @@ const { licenseStatus, licenseDialog } = useLicenseStatus({
 const modelFields = ref<KirbyFieldProps[]>([...(props.fields ?? [])]);
 const placeholderSearch = ref("");
 
-const labels = {
-  preview: panel.t("johannschopplich.copilot.preview"),
-  selectFiles: panel.t("johannschopplich.copilot.files.select"),
-  clearFiles: panel.t("johannschopplich.copilot.delete"),
-  insert: panel.t("johannschopplich.copilot.fieldPicker.insert"),
-  search: panel.t("johannschopplich.copilot.fieldPicker.search"),
-  selectPages: panel.t("johannschopplich.copilot.pages.select"),
-  notFound: panel.t("johannschopplich.copilot.fieldPicker.notFound"),
-  templates: panel.t("johannschopplich.copilot.templates"),
-  saveTemplate: panel.t("johannschopplich.copilot.template.saveAs"),
-  editTemplates: panel.t("johannschopplich.copilot.template.edit"),
-  noTemplates: panel.t("johannschopplich.copilot.template.empty"),
-  history: panel.t("johannschopplich.copilot.history"),
-  fields: panel.t("johannschopplich.copilot.fields"),
-  generate: panel.t("johannschopplich.copilot.generate"),
-};
+const labels = createPromptDialogLabels(panel.t);
 
-const selectionInsertOptions: {
-  value: NonNullable<PromptContext["insertMode"]>;
-  text: string;
-}[] = [
-  {
-    value: "replace",
-    text: panel.t("johannschopplich.copilot.replace"),
-  },
-  {
-    value: "append",
-    text: panel.t("johannschopplich.copilot.append"),
-  },
-];
+const selectionInsertOptions = createInsertOptions(panel.t);
 // Prompt dialog is used in two contexts:
 // 1. Multi-field generation mode (Panel view button).
 // 2. Inline mode (toolbar) with append/replace selection option.

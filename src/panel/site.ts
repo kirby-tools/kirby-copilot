@@ -4,3 +4,4 @@ export { default as CopilotFieldBody } from "./components/Ui/CopilotFieldBody.vu
 export { default as PromptDialogBody } from "./components/Ui/PromptDialogBody.vue";
 export { default as AgentsAuthorize } from "./components/Views/AgentsAuthorize.vue";
 export type * from "./types";
+export * from "./utils/labels";

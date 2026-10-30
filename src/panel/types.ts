@@ -4,6 +4,8 @@ import type { LogLevel, ReasoningEffort } from "./constants";
 
 export type OutputFormat = "text" | "markdown" | "rich-text";
 
+export type Translate = (key: string, data?: Record<string, unknown>) => string;
+
 export interface ActiveField {
   element: HTMLElement;
   path?: string;
@@ -126,6 +128,11 @@ export type CopilotFieldError =
   | { type: "model"; provider: string }
   | { type: "field"; field: string }
   | { type: "userPrompt" };
+
+export interface InsertOption {
+  value: NonNullable<PromptContext["insertMode"]>;
+  text: string;
+}
 
 export interface PromptDialogLabels {
   preview: string;
