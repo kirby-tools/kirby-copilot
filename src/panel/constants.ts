@@ -1,5 +1,3 @@
-import type { AISDKModule } from "./utils/ai";
-
 export const PLUGIN_CONTEXT_API_ROUTE = "__copilot__/context";
 export const PLUGIN_BUTTON_OPTIONS_API_ROUTE = "__copilot__/button-options";
 export const PLUGIN_MODEL_FIELDS_API_ROUTE = "__copilot__/model-fields";
@@ -24,7 +22,8 @@ export const DEFAULT_LOG_LEVEL: LogLevel = "warn";
 
 export interface ProviderDefinition {
   /** AI SDK factory on the lazy-loaded module that instantiates the provider client. */
-  factory: keyof AISDKModule;
+  factory:
+    "createAnthropic" | "createGoogle" | "createMistral" | "createOpenAI";
   defaultCompletionModel: string;
   /**
    * Content field in the playground blueprint that holds the selected model.
