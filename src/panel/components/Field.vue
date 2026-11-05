@@ -70,6 +70,10 @@ const props = defineProps({
   ...licenseProps,
 });
 
+// Declared so the form's `@input` listener doesn't fall through to the root,
+// where the prompt's native `input` events would become the field's value.
+defineEmits<{ (event: "input", value: unknown): void }>();
+
 const panel = usePanel();
 const {
   currentContent,
