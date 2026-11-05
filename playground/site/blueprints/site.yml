@@ -140,7 +140,6 @@ tabs:
             type: copilot
             field: demoBlocks
             userPrompt: Create an engaging landing page for the Kirby CMS. Showcase what it offers for designers and developers.
-            open: true
 
   layoutFields:
     label: Layout Fields
@@ -192,7 +191,6 @@ tabs:
             type: copilot
             field: demoLayouts
             userPrompt: Create a modern landing page for the Kirby CMS with hero section, features, testimonials, and call-to-action. Showcase what it offers for designers and developers.
-            open: true
 
           infoLayoutTip:
             label: Required Models
@@ -329,7 +327,6 @@ tabs:
 
               Make it modern and engaging for today's audience.
             files: false
-            open: true
             help: This prompt uses context from the **Site Title** and **Current Year** fields.
 
   pages:

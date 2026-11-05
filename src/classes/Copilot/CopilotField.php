@@ -45,14 +45,8 @@ final class CopilotField extends DisplayField
     #[Prop]
     protected string|null $theme = null;
 
-    #[Prop]
-    protected string|null $size = null;
-
     #[Prop(computed: true)]
     protected string|null $logLevel = null;
-
-    #[Prop]
-    protected bool $open = false;
 
     #[Prop(computed: true)]
     protected array|null $modelFile = null;

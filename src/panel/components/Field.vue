@@ -40,7 +40,6 @@ import { createFieldLabels } from "../utils/labels";
 import FieldBody from "./Ui/FieldBody.vue";
 
 const props = defineProps({
-  // Declared to keep `disabled` off `k-field`, so the field never looks disabled.
   ...disabledProp,
   ...helpProp,
   ...idProp,
@@ -66,9 +65,7 @@ const props = defineProps({
   },
   icon: String,
   theme: String,
-  size: String,
   logLevel: String as PropType<LogLevel>,
-  open: Boolean,
   modelFile: Object as PropType<{ mime: string; url: string }>,
   ...licenseProps,
 });
@@ -101,11 +98,6 @@ const currentPrompt = ref(
     localStorage.getItem(`${storageKey.value}$prompt`)) ||
     props.userPrompt ||
     "",
-);
-const isDetailsOpen = ref(
-  (isStorageEnabled.value &&
-    localStorage.getItem(`${storageKey.value}$open`) === "true") ||
-    props.open,
 );
 const currentFieldContent = ref<any>();
 const files = ref<File[]>([]);
@@ -160,16 +152,6 @@ watch(currentPrompt, (value) => {
     localStorage.setItem(`${storageKey.value}$prompt`, value);
   } else {
     localStorage.removeItem(`${storageKey.value}$prompt`);
-  }
-});
-
-watch(isDetailsOpen, (value) => {
-  if (!isStorageEnabled.value) return;
-
-  if (value) {
-    localStorage.setItem(`${storageKey.value}$open`, "true");
-  } else {
-    localStorage.removeItem(`${storageKey.value}$open`);
   }
 });
 
@@ -233,7 +215,7 @@ async function generate() {
           userPrompt: currentPrompt.value,
           systemPrompt: props.systemPrompt,
           output: Output.array({ element: schema as z.ZodObject }),
-          files: files.value,
+          files: [...files.value],
           logLevel: props.logLevel,
         },
         escapeToAbort: true,
@@ -270,7 +252,7 @@ async function generate() {
           userPrompt: currentPrompt.value,
           systemPrompt: props.systemPrompt,
           responseFormat,
-          files: files.value,
+          files: [...files.value],
           logLevel: props.logLevel,
         },
         escapeToAbort: true,
@@ -335,7 +317,7 @@ function onModelSave() {
   <FieldBody
     :id="id"
     v-model:prompt="currentPrompt"
-    v-model:open="isDetailsOpen"
+    :disabled="disabled || !isContentEditable"
     :help="help"
     :label="label"
     :name="name"
@@ -344,20 +326,18 @@ function onModelSave() {
     :error="error"
     :icon="icon"
     :theme="theme ?? undefined"
-    :size="size ?? undefined"
     :editable="editable"
     :files="$props.files"
     :user-prompt="userPrompt"
     :is-generating="isGenerating"
     :can-undo="canUndo"
-    :is-read-only="!isContentEditable"
-    :file-count="files.length"
+    :file-names="files.map((file) => file.name)"
     :model-file-text="modelFileText"
     @generate="generate()"
     @abort="abort()"
     @undo="undo()"
     @pick-files="pickFiles()"
-    @clear-files="files = []"
+    @remove-file="files.splice($event, 1)"
   >
     <template v-if="hasLicenseButtons" #options>
       <LicensingButtonGroup

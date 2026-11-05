@@ -2,13 +2,15 @@
 import type { PropType } from "vue";
 import type { CopilotFieldError, CopilotFieldLabels } from "../../types";
 import {
+  disabled as disabledProp,
   help as helpProp,
   id as idProp,
   name as nameProp,
 } from "kirbyuse/props";
-import { computed } from "vue";
+import { computed, nextTick, useTemplateRef } from "vue";
 
 const props = defineProps({
+  ...disabledProp,
   ...helpProp,
   ...idProp,
   ...nameProp,
@@ -31,10 +33,6 @@ const props = defineProps({
     type: String,
     default: "notice-icon",
   },
-  size: {
-    type: String,
-    default: "md",
-  },
   editable: {
     type: Boolean,
     default: true,
@@ -48,14 +46,11 @@ const props = defineProps({
     default: "",
   },
   userPrompt: String,
-  open: Boolean,
   isGenerating: Boolean,
   canUndo: Boolean,
-  /** Content the editor may not change. */
-  isReadOnly: Boolean,
-  fileCount: {
-    type: Number,
-    default: 0,
+  fileNames: {
+    type: Array as PropType<string[]>,
+    default: () => [],
   },
   /** Note on the file a file view attaches with `files: auto`. */
   modelFileText: String,
@@ -66,27 +61,85 @@ const emit = defineEmits<{
   (event: "abort"): void;
   (event: "undo"): void;
   (event: "pickFiles"): void;
-  (event: "clearFiles"): void;
+  (event: "removeFile", index: number): void;
   (event: "update:prompt", value: string): void;
-  (event: "update:open", value: boolean): void;
 }>();
 
+const attachButton = useTemplateRef<{ focus: () => void }>("attachButton");
+
 const canAttachFiles = computed(() => props.files === true);
-const summary = computed(() =>
-  [
-    props.editable && props.labels.prompt,
-    canAttachFiles.value && props.labels.context,
-  ]
-    .filter(Boolean)
-    .join(", "),
+const canGenerate = computed(() => !props.disabled && !props.isLoading);
+const canResetPrompt = computed(
+  () =>
+    props.editable && !!props.userPrompt && props.prompt !== props.userPrompt,
 );
+// Kirby's input frame reads as "type here", so a composer with nothing to type
+// and no files to pick goes without it.
+const hasInputFrame = computed(() => props.editable || canAttachFiles.value);
+const fileTags = computed(() =>
+  canAttachFiles.value
+    ? props.fileNames.map((name, index) => ({
+        text: name,
+        value: index,
+        icon: "attachment",
+      }))
+    : [],
+);
+const actionButtons = computed(() => [
+  ...(props.canUndo
+    ? [
+        {
+          key: "undo",
+          icon: "undo",
+          title: props.labels.undo,
+          disabled: props.disabled,
+          click: () => emit("undo"),
+        },
+      ]
+    : []),
+  props.isGenerating
+    ? {
+        key: "run",
+        icon: "loader",
+        text: props.labels.stop,
+        click: (event: MouseEvent) => {
+          // Generate turns into Stop on the first click of a double-click.
+          if (event.detail > 1) return;
+          emit("abort");
+        },
+      }
+    : {
+        key: "run",
+        icon: props.isLoading ? "loader" : props.icon,
+        text: props.labels.generate,
+        theme: props.theme,
+        disabled: !canGenerate.value,
+        click: () => emit("generate"),
+      },
+]);
+
+async function removeFileTag(remainingIndexes: number[]) {
+  const index = fileTags.value.findIndex(
+    (tag) => !remainingIndexes.includes(tag.value),
+  );
+  if (index < 0) return;
+
+  emit("removeFile", index);
+
+  // The tags unmount with the last one, which would drop focus to the body.
+  if (remainingIndexes.length === 0) {
+    await nextTick();
+    attachButton.value?.focus();
+  }
+}
 </script>
 
 <template>
   <k-field
     :id="id"
+    :disabled="disabled"
     :help="help"
-    :input="false"
+    :input="editable && !error ? id : false"
     :label="label"
     :name="name"
     type="copilot"
@@ -96,120 +149,109 @@ const summary = computed(() =>
       <slot name="options" />
     </template>
 
-    <template v-if="!isLoading">
-      <k-box v-if="error?.type === 'model'" theme="empty">
-        <k-text>
-          Missing
-          <code>model</code>
-          property in the
-          <code>{{
-            `johannschopplich.copilot.providers.${error.provider}`
-          }}</code>
-          global configuration.
-        </k-text>
-      </k-box>
-      <k-box v-else-if="error?.type === 'field'" theme="empty">
-        <k-text>
-          The <code>{{ error.field }}</code> field does not exist in the current
-          model.
-        </k-text>
-      </k-box>
-      <k-box v-else-if="error?.type === 'userPrompt'" theme="empty">
-        <k-text>
-          If the user prompt cannot be edited by the user, a default
-          <code>userPrompt</code> has to be set in the field configuration.
-        </k-text>
-      </k-box>
-      <div v-else class="[&>*+*]:kai-mt-[var(--spacing-4)]">
-        <k-button-group layout="collapsed">
+    <k-box v-if="error?.type === 'model'" theme="negative">
+      <k-text size="small">
+        Missing
+        <code>model</code>
+        property in the
+        <code>{{
+          `johannschopplich.copilot.providers.${error.provider}`
+        }}</code>
+        global configuration.
+      </k-text>
+    </k-box>
+    <k-box v-else-if="error?.type === 'field'" theme="negative">
+      <k-text size="small">
+        The <code>{{ error.field }}</code> field does not exist in the current
+        model.
+      </k-text>
+    </k-box>
+    <k-box v-else-if="error?.type === 'userPrompt'" theme="negative">
+      <k-text size="small">
+        If the user prompt cannot be edited by the user, a default
+        <code>userPrompt</code> has to be set in the field configuration.
+      </k-text>
+    </k-box>
+    <k-input v-else-if="hasInputFrame" type="textarea" :disabled="disabled">
+      <k-textarea-input
+        v-if="editable"
+        :id="id"
+        :value="prompt"
+        :placeholder="labels.placeholder"
+        :buttons="false"
+        :disabled="disabled"
+        @input="emit('update:prompt', $event)"
+        @submit="canGenerate && emit('generate')"
+      />
+      <div
+        v-if="fileTags.length"
+        class="kai-px-[var(--input-padding)] kai-pb-[var(--input-padding)] first:kai-pt-[var(--input-padding)]"
+      >
+        <k-tags
+          :value="fileTags"
+          :disabled="disabled || isGenerating"
+          :draggable="false"
+          removable
+          theme="light"
+          @input="removeFileTag"
+        />
+      </div>
+      <!-- `k-input` focuses the textarea on any click inside it. -->
+      <k-bar
+        class="kai-[--bar-height:auto] kai-p-[var(--spacing-1)] [&:not(:first-child)]:kai-[border-top:1px_solid_var(--toolbar-border)]"
+        @click.stop
+      >
+        <k-button-group v-if="canAttachFiles || canResetPrompt">
           <k-button
-            :icon="isGenerating ? 'loader' : icon"
-            :text="labels.generate"
-            :theme="theme"
-            variant="filled"
-            :size="size"
-            :disabled="isGenerating || isReadOnly"
-            @click="emit('generate')"
+            v-if="canAttachFiles"
+            ref="attachButton"
+            icon="attachment"
+            :title="labels.selectFiles"
+            :disabled="disabled || isGenerating"
+            size="xs"
+            @click="emit('pickFiles')"
           />
           <k-button
-            v-if="isGenerating"
-            icon="cancel"
-            :text="labels.stop"
-            theme="notice"
-            variant="filled"
-            :size="size"
-            @click="emit('abort')"
-          />
-          <k-button
-            v-if="canUndo"
-            icon="undo"
-            :text="labels.undo"
-            variant="filled"
-            :size="size"
-            @click="emit('undo')"
+            v-if="canResetPrompt"
+            icon="refresh"
+            :title="labels.reset"
+            :disabled="disabled"
+            size="xs"
+            @click="emit('update:prompt', userPrompt!)"
           />
         </k-button-group>
-
-        <details
-          v-if="summary"
-          :open="open"
-          @toggle="
-            emit('update:open', ($event.target as HTMLDetailsElement).open)
-          "
+        <span
+          v-if="modelFileText"
+          class="kai-px-[var(--spacing-1)] kai-text-[color:var(--input-color-description)] kai-leading-[var(--leading-tight)]"
         >
-          <summary>{{ summary }}</summary>
-
-          <div
-            class="kai-mt-[var(--spacing-3)] [&>*+*]:kai-mt-[var(--spacing-2)]"
-          >
-            <div v-if="editable" class="kai-text-right">
-              <k-input
-                :key="open ? 1 : 0"
-                :value="prompt"
-                class="kai-mb-[var(--spacing-1)]"
-                :placeholder="labels.placeholder"
-                type="textarea"
-                :buttons="false"
-                @input="emit('update:prompt', $event)"
-              />
-              <k-button
-                v-if="userPrompt && prompt !== userPrompt"
-                icon="undo"
-                :text="labels.reset"
-                variant="dimmed"
-                size="xs"
-                @click="emit('update:prompt', userPrompt)"
-              />
-            </div>
-
-            <k-button-group v-if="canAttachFiles" layout="collapsed">
-              <k-button
-                icon="attachment"
-                :text="labels.selectFiles"
-                variant="filled"
-                :badge="
-                  fileCount > 0
-                    ? { theme: 'notice', text: fileCount }
-                    : undefined
-                "
-                size="sm"
-                class="!kai-rounded-[var(--button-rounded)]"
-                @click="emit('pickFiles')"
-              />
-              <k-button
-                v-if="fileCount > 0"
-                :text="labels.clearFiles"
-                variant="dimmed"
-                size="sm"
-                @click="emit('clearFiles')"
-              />
-            </k-button-group>
-            <k-box v-else-if="modelFileText" theme="none">
-              <k-text>{{ modelFileText }}</k-text>
-            </k-box>
-          </div>
-        </details>
-      </div>
-    </template>
+          {{ modelFileText }}
+        </span>
+        <k-button-group layout="collapsed" class="kai-ms-auto kai-shrink-0">
+          <k-button
+            v-for="{ key, ...button } in actionButtons"
+            :key="key"
+            v-bind="button"
+            variant="filled"
+            size="xs"
+          />
+        </k-button-group>
+      </k-bar>
+    </k-input>
+    <k-bar v-else class="kai-[--bar-height:auto]">
+      <span
+        v-if="modelFileText"
+        class="kai-text-[length:var(--text-sm)] kai-text-[color:var(--color-text-dimmed)] kai-leading-[var(--leading-tight)]"
+      >
+        {{ modelFileText }}
+      </span>
+      <k-button-group layout="collapsed" class="kai-ms-auto kai-shrink-0">
+        <k-button
+          v-for="{ key, ...button } in actionButtons"
+          :key="key"
+          v-bind="button"
+          variant="filled"
+        />
+      </k-button-group>
+    </k-bar>
   </k-field>
 </template>

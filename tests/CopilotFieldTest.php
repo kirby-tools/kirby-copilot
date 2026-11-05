@@ -24,9 +24,7 @@ final class CopilotFieldTest extends ApiRouteTestCase
             'files' => 'auto',
             'icon' => 'ai',
             'theme' => 'positive',
-            'size' => 'lg',
-            'logLevel' => 'debug',
-            'open' => true
+            'logLevel' => 'debug'
         ]))->toArray();
 
         $expected = [
@@ -36,8 +34,6 @@ final class CopilotFieldTest extends ApiRouteTestCase
             'licenseDialog' => 'johannschopplich-kirby-copilot/activate',
             'licenseStatus' => 'inactive',
             'logLevel' => 'debug',
-            'open' => true,
-            'size' => 'lg',
             'storage' => false,
             'systemPrompt' => 'Answer as JSON: {"title": "…"}',
             'theme' => 'positive',

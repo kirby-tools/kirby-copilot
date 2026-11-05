@@ -10,12 +10,9 @@ export function createFieldLabels(t: Translate): CopilotFieldLabels {
     generate: t("johannschopplich.copilot.generate"),
     stop: t("johannschopplich.copilot.stop"),
     undo: t("johannschopplich.copilot.undo"),
-    prompt: t("johannschopplich.copilot.prompt.label"),
-    context: t("johannschopplich.copilot.context"),
     placeholder: t("johannschopplich.copilot.prompt.placeholder"),
-    reset: t("johannschopplich.copilot.context.reset"),
+    reset: t("johannschopplich.copilot.prompt.reset"),
     selectFiles: t("johannschopplich.copilot.files.select"),
-    clearFiles: t("johannschopplich.copilot.delete"),
   };
 }
 

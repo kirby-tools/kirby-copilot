@@ -116,12 +116,9 @@ export interface CopilotFieldLabels {
   generate: string;
   stop: string;
   undo: string;
-  prompt: string;
-  context: string;
   placeholder: string;
   reset: string;
   selectFiles: string;
-  clearFiles: string;
 }
 
 export type CopilotFieldError =
