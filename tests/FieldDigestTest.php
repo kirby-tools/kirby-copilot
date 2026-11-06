@@ -45,14 +45,14 @@ final class FieldDigestTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function lists_queried_option_texts_without_the_html_escaping_kirby_adds(): void
+    public function lists_an_ampersand_and_an_apostrophe_in_a_queried_option_text_unescaped(): void
     {
         $page = self::bootApp([
             'blueprints' => ['pages/default' => ['fields' => ['category' => ['type' => 'radio', 'options' => ['type' => 'query', 'query' => 'site.children.not(page)', 'value' => '{{ item.slug }}', 'text' => '{{ item.title }}']]]]],
-            'site' => ['children' => [['slug' => 'test'], ['slug' => 'news', 'content' => ['title' => 'News & Events']]]]
+            'site' => ['children' => [['slug' => 'test'], ['slug' => 'news', 'content' => ['title' => "Editor's News & Events"]]]]
         ])->page('test');
 
-        $this->assertSame([['value' => 'news', 'text' => 'News & Events']], FieldDigest::for($page)['fields'][0]['options']);
+        $this->assertSame([['value' => 'news', 'text' => "Editor's News & Events"]], FieldDigest::for($page)['fields'][0]['options']);
     }
 
     #[Test]
@@ -119,17 +119,6 @@ final class FieldDigestTest extends ApiRouteTestCase
             ['article', 'landing', 'product'],
             array_column(self::findField($relatedPages['fields'], 'source')['options'], 'value')
         );
-    }
-
-    #[Test]
-    public function lists_an_ampersand_and_an_apostrophe_in_a_queried_option_text_unescaped(): void
-    {
-        $page = self::bootApp([
-            'blueprints' => ['pages/default' => ['fields' => ['category' => ['type' => 'radio', 'options' => ['type' => 'query', 'query' => 'site.children.not(page)', 'value' => '{{ item.slug }}', 'text' => '{{ item.title }}']]]]],
-            'site' => ['children' => [['slug' => 'test'], ['slug' => 'news', 'content' => ['title' => "Editor's News & Events"]]]]
-        ])->page('test');
-
-        $this->assertSame([['value' => 'news', 'text' => "Editor's News & Events"]], FieldDigest::for($page)['fields'][0]['options']);
     }
 
     #[Test]
