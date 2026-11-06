@@ -139,7 +139,7 @@ async function reloadIfWritten(panel: Panel) {
     // view locked since the check began.
     if (
       (await hasAgentWritten(panel)) &&
-      (await reloadView(panel, { onlyWhenSaved: true }))
+      (await reloadView(panel, { shouldReloadOnlyWhenSaved: true }))
     ) {
       panel.notification.info(
         panel.t("johannschopplich.copilot.agents.reloaded"),
@@ -163,9 +163,12 @@ async function hasAgentWritten(panel: Panel) {
 }
 
 /** Saves what the editor typed so far, then reloads the view. */
-async function reloadView(panel: Panel, { onlyWhenSaved = false } = {}) {
+async function reloadView(
+  panel: Panel,
+  { shouldReloadOnlyWhenSaved = false } = {},
+) {
   const isSaved = await panel.content.update();
-  if (!isSaved && onlyWhenSaved) return false;
+  if (!isSaved && shouldReloadOnlyWhenSaved) return false;
 
   await panel.view.reload();
   // A save queued while the view reloaded still holds the form from before.
