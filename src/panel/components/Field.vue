@@ -85,8 +85,9 @@ const hasLicenseButtons = !__PLAYGROUND__;
 const targetField = computed(() =>
   typeof props.field === "object" ? props.field : undefined,
 );
+// Without a textarea, a stored prompt would run hidden from the editor.
 const isStorageEnabled = computed(
-  () => props.storage && targetField.value !== undefined,
+  () => props.storage && props.editable && targetField.value !== undefined,
 );
 const storageKey = computed(() =>
   targetField.value
