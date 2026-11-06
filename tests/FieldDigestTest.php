@@ -111,6 +111,17 @@ final class FieldDigestTest extends ApiRouteTestCase
     }
 
     #[Test]
+    public function lists_an_ampersand_and_an_apostrophe_in_a_queried_option_text_unescaped(): void
+    {
+        $page = self::bootApp([
+            'blueprints' => ['pages/default' => ['fields' => ['category' => ['type' => 'radio', 'options' => ['type' => 'query', 'query' => 'site.children.not(page)', 'value' => '{{ item.slug }}', 'text' => '{{ item.title }}']]]]],
+            'site' => ['children' => [['slug' => 'test'], ['slug' => 'news', 'content' => ['title' => "Editor's News & Events"]]]]
+        ])->page('test');
+
+        $this->assertSame([['value' => 'news', 'text' => "Editor's News & Events"]], FieldDigest::for($page)['fields'][0]['options']);
+    }
+
+    #[Test]
     public function merges_the_fields_of_all_tabs_of_a_fieldset(): void
     {
         $hero = FieldDigest::for($this->playgroundApp()->page('landing'))['fieldsets']['hero'];

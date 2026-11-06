@@ -179,7 +179,7 @@ final class FieldDigest
 
         if (in_array($type, self::CHOICE_TYPES, true) && ($props['options'] ?? []) !== []) {
             $field['options'] = array_map(
-                fn (array $option) => ['value' => $option['value'], 'text' => $option['text']],
+                fn (array $option) => ['value' => $option['value'], 'text' => html_entity_decode((string)$option['text'], ENT_QUOTES | ENT_HTML5, 'UTF-8')],
                 $props['options']
             );
         }
