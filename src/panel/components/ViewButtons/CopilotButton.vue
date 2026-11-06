@@ -148,7 +148,7 @@ async function initPromptDialog() {
             currentContent: _currentContent,
           });
 
-          await updateContent(finalContent);
+          return updateContent(finalContent);
         },
       },
     });
