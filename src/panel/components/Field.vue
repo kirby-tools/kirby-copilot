@@ -160,7 +160,7 @@ watch(currentPrompt, (value) => {
   }
 });
 
-if (props.files === "auto" && props.modelFile) {
+if (props.modelFile) {
   const { mime, url } = props.modelFile;
 
   if (SUPPORTED_IMAGE_MIME_TYPES.includes(mime)) {
