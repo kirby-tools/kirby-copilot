@@ -125,18 +125,15 @@ async function reloadIfWritten(panel: Panel) {
     !lock ||
     !panel.view.timestamp ||
     panel.content.isProcessing ||
-    // Saving would only open Kirby's lock dialog again on every check. A lock
-    // taken after the view loaded reaches `isLocked()` only once that dialog
-    // closes and reloads the view, so no check saves while a dialog is open.
+    // Saving would reopen Kirby's lock dialog on every check.
     panel.content.isLocked() ||
+    // `isLocked()` misses a newer lock until its dialog closes.
     panel.dialog.isOpen
   ) {
     return;
   }
 
   try {
-    // A refused save leaves the form as is: a newer save took over, or the
-    // view got locked since it loaded.
     if (
       (await hasAgentWritten(panel)) &&
       (await reloadView(panel, { shouldReloadOnlyWhenSaved: true }))
@@ -162,11 +159,7 @@ async function hasAgentWritten(panel: Panel) {
   return writtenAt !== null && writtenAt > (panel.view.timestamp ?? 0);
 }
 
-/**
- * Saves what the editor typed so far, then reloads the view – with
- * `shouldReloadOnlyWhenSaved`, only once Kirby took the save. Resolves whether
- * it reloaded.
- */
+/** Saves what the editor typed so far, then reloads the view. */
 async function reloadView(
   panel: Panel,
   { shouldReloadOnlyWhenSaved = false } = {},

@@ -73,8 +73,7 @@ const canResetPrompt = computed(
   () =>
     props.editable && !!props.userPrompt && props.prompt !== props.userPrompt,
 );
-// Kirby's input frame reads as "type here", so a composer with nothing to type
-// and no files to pick goes without it.
+// Kirby's input frame reads as "type here", so it needs a prompt or files.
 const hasInputFrame = computed(() => props.editable || canAttachFiles.value);
 const fileTags = computed(() =>
   canAttachFiles.value
