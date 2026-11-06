@@ -136,7 +136,7 @@ async function reloadIfWritten(panel: Panel) {
 
   try {
     // A refused save leaves the form as is: a newer save took over, or the
-    // view locked since the check began.
+    // view got locked since it loaded.
     if (
       (await hasAgentWritten(panel)) &&
       (await reloadView(panel, { shouldReloadOnlyWhenSaved: true }))
@@ -162,7 +162,11 @@ async function hasAgentWritten(panel: Panel) {
   return writtenAt !== null && writtenAt > (panel.view.timestamp ?? 0);
 }
 
-/** Saves what the editor typed so far, then reloads the view. */
+/**
+ * Saves what the editor typed so far, then reloads the view – with
+ * `shouldReloadOnlyWhenSaved`, only once Kirby took the save. Resolves whether
+ * it reloaded.
+ */
 async function reloadView(
   panel: Panel,
   { shouldReloadOnlyWhenSaved = false } = {},

@@ -162,8 +162,8 @@ function startGenerationRun(
     try {
       const isPersisted = await execute(signal);
 
-      // A refused save is a lock, which Kirby's dialog explains, or one a
-      // newer save replaced.
+      // Kirby refuses a save for a lock, which its dialog explains, or for a
+      // newer save that took over.
       if (signal.aborted || isPersisted === false) return;
 
       panel.notification.success({
