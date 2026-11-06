@@ -102,6 +102,8 @@ const canUndo = computed(
 watch(currentPrompt, (value) => {
   if (!isInitialized.value) return;
   if (!isStorageEnabled.value) return;
+  // The stored prompt belongs to the editable sections of the same field.
+  if (!permissions.value.includes("edit")) return;
 
   if (value && value !== userPrompt.value) {
     localStorage.setItem(`${storageKey}$prompt`, value);
@@ -167,8 +169,11 @@ watch(isDetailsOpen, (value) => {
   }
 
   // Storage only decides whether a previous session overrides the defaults.
+  // Without a textarea, a stored prompt would run hidden from the editor.
   currentPrompt.value =
-    (isStorageEnabled.value && localStorage.getItem(`${storageKey}$prompt`)) ||
+    (isStorageEnabled.value &&
+      response.editable === true &&
+      localStorage.getItem(`${storageKey}$prompt`)) ||
     userPrompt.value ||
     "";
   isDetailsOpen.value =
