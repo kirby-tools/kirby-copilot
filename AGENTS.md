@@ -7,11 +7,11 @@ Use the terms from `GLOSSARY.md`. Decisions are in `docs/adr/`.
 ## Commands
 
 ```bash
-composer test          # PHPUnit
-composer csfix         # php-cs-fixer, lives in tools/phpcs/vendor/bin/, not vendor/bin/
-pnpm run test --run    # Vitest
-pnpm run test:types    # vue-tsc
-pnpm run lint          # ESLint
+composer test
+composer csfix         # lives in tools/phpcs/vendor/bin/, not vendor/bin/
+pnpm run test --run
+pnpm run test:types
+pnpm run lint
 ```
 
 ## Conventions
@@ -19,8 +19,3 @@ pnpm run lint          # ESLint
 - `__PLAYGROUND__` is a build-time constant defined in `kirbyup.config.js`.
 - `src/panel/site.ts` feeds kirby.tools' Panel mocks.
 - Test methods are snake_case with no `test` prefix, marked `#[Test]`; data providers are camelCase.
-
-## Search Hints
-
-- `useStreamText` – main AI streaming composable
-- `PLUGIN_PROXY_API_ROUTE` – AI proxy endpoint constant
