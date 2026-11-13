@@ -9,8 +9,6 @@ Kirby Copilot is a plugin for [Kirby CMS](https://getkirby.com) that brings AI a
 
 ## Features
 
-Whether you are building sites for clients or managing content yourself, Kirby Copilot brings AI-assisted creation and editing to the Panel.
-
 - 🧭 **View Button**: Fill several fields from one prompt, with files and other pages as context.
 - 🧱 **Blocks & Layouts**: Whole layouts from your own block blueprints, custom blocks included.
 - ⚡ **Inline Suggestions**: Ghost text after a pause – Tab keeps it.
@@ -39,7 +37,7 @@ composer require johannschopplich/kirby-copilot
 
 ### Manual Installation
 
-Download and copy this repository to `/site/plugins/kirby-copilot`.
+Download a [release](https://github.com/kirby-tools/kirby-copilot/releases) and extract it to `/site/plugins/kirby-copilot`.
 
 ## Upgrading from Copilot 3
 
