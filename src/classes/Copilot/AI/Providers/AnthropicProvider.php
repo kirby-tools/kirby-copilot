@@ -7,7 +7,6 @@ namespace JohannSchopplich\Copilot\AI\Providers;
 use Anthropic\Client as AnthropicClient;
 use Anthropic\Core\Exceptions\APIException;
 use Anthropic\Messages\TextBlock;
-use Anthropic\Messages\ToolUseBlock;
 use Anthropic\RequestOptions;
 use JohannSchopplich\Copilot\AI\Exception\ProviderException;
 use JohannSchopplich\Copilot\AI\ProviderConfig;
@@ -18,10 +17,8 @@ use Throwable;
 /**
  * Anthropic provider backed by the official `anthropic-ai/sdk`.
  *
- * Anthropic's wire format differs from OpenAI's (system prompt is a
- * top-level field; structured output is delivered via a forced tool
- * call), so this provider does not extend {@see OpenAIProvider}. Retry
- * is handled by the SDK.
+ * Anthropic's wire format differs from OpenAI's, so this provider does not
+ * extend {@see OpenAIProvider}. Retry is handled by the SDK.
  *
  * @internal
  */
@@ -45,14 +42,11 @@ final class AnthropicProvider implements Provider
             'maxTokens' => self::DEFAULT_MAX_TOKENS,
             'messages' => $chatMessages,
             'system' => $system,
-            'tools' => [
-                [
-                    'name' => 'structured_response',
-                    'input_schema' => $schema,
-                ],
-            ],
-            'toolChoice' => ['type' => 'tool', 'name' => 'structured_response'],
             ...$this->config->options,
+            'outputConfig' => [
+                ...($this->config->options['outputConfig'] ?? []),
+                'format' => ['type' => 'json_schema', 'schema' => $schema],
+            ],
         ];
 
         try {
@@ -65,17 +59,18 @@ final class AnthropicProvider implements Provider
             );
         }
 
-        foreach ($message->content as $block) {
-            if ($block instanceof ToolUseBlock) {
-                return $block->input;
-            }
+        $content = $this->firstTextBlock($message->content);
+        $decoded = json_decode($content ?? '', associative: true);
+
+        if (!is_array($decoded) || ($decoded !== [] && array_is_list($decoded))) {
+            $this->fail(
+                reason: 'response was not a JSON object',
+                responseExcerpt: $content,
+                responseId: $message->id,
+            );
         }
 
-        $this->fail(
-            reason: 'response did not contain a tool_use block',
-            responseExcerpt: $this->firstTextBlock($message->content),
-            responseId: $message->id,
-        );
+        return $decoded;
     }
 
     public function generateText(array $messages): string

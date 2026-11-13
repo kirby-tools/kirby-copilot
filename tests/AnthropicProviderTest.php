@@ -140,10 +140,10 @@ final class AnthropicProviderTest extends TestCase
     }
 
     #[Test]
-    public function generate_object_returns_the_tool_use_input(): void
+    public function generate_object_returns_the_decoded_json_text(): void
     {
         [, $provider] = $this->fixture(
-            responses: [$this->toolUseResponse(input: ['greeting' => 'hello'])],
+            responses: [$this->textOnlyResponse('{"greeting":"hello"}')],
         );
 
         $result = $provider->generateObject(
@@ -158,7 +158,7 @@ final class AnthropicProviderTest extends TestCase
     public function extracts_system_message_to_top_level_system_field(): void
     {
         [, $provider] = $this->fixture(
-            responses: [$this->toolUseResponse(input: ['ok' => true])],
+            responses: [$this->textOnlyResponse('{"ok":true}')],
         );
 
         $provider->generateObject(
@@ -176,16 +176,17 @@ final class AnthropicProviderTest extends TestCase
     }
 
     #[Test]
-    public function generate_object_forces_the_structured_response_tool_with_the_schema(): void
+    public function generate_object_requests_the_schema_as_output_format(): void
     {
         [, $provider] = $this->fixture(
-            responses: [$this->toolUseResponse(input: ['ok' => true])],
+            responses: [$this->textOnlyResponse('{"ok":true}')],
         );
 
         $schema = [
             'type' => 'object',
             'properties' => ['ok' => ['type' => 'boolean']],
             'required' => ['ok'],
+            'additionalProperties' => false,
         ];
 
         $provider->generateObject(
@@ -194,10 +195,26 @@ final class AnthropicProviderTest extends TestCase
         );
 
         $body = $this->lastRequestBody();
-        $this->assertSame('tool', $body['tool_choice']['type'] ?? null);
-        $this->assertSame('structured_response', $body['tool_choice']['name'] ?? null);
-        $this->assertSame('structured_response', $body['tools'][0]['name'] ?? null);
-        $this->assertSame($schema, $body['tools'][0]['input_schema'] ?? null);
+        $this->assertSame(['type' => 'json_schema', 'schema' => $schema], $body['output_config']['format'] ?? null);
+        $this->assertArrayNotHasKey('tool_choice', $body);
+    }
+
+    #[Test]
+    public function generate_object_keeps_the_output_format_next_to_an_output_config_option(): void
+    {
+        [, $provider] = $this->fixture(
+            responses: [$this->textOnlyResponse('{"ok":true}')],
+            options: ['outputConfig' => ['effort' => 'low']],
+        );
+
+        $provider->generateObject(
+            messages: [['role' => 'user', 'content' => 'hi']],
+            schema: ['type' => 'object'],
+        );
+
+        $body = $this->lastRequestBody();
+        $this->assertSame('low', $body['output_config']['effort'] ?? null);
+        $this->assertSame('json_schema', $body['output_config']['format']['type'] ?? null);
     }
 
     #[Test]
@@ -242,7 +259,7 @@ final class AnthropicProviderTest extends TestCase
     public function applies_default_max_tokens_when_options_omit_it(): void
     {
         [, $provider] = $this->fixture(
-            responses: [$this->toolUseResponse(input: ['ok' => true])],
+            responses: [$this->textOnlyResponse('{"ok":true}')],
         );
 
         $provider->generateObject(
@@ -294,7 +311,7 @@ final class AnthropicProviderTest extends TestCase
     public function passes_config_options_through_to_request(): void
     {
         [, $provider] = $this->fixture(
-            responses: [$this->toolUseResponse(input: ['ok' => true])],
+            responses: [$this->textOnlyResponse('{"ok":true}')],
             options: ['maxTokens' => 8000],
         );
 
@@ -319,22 +336,6 @@ final class AnthropicProviderTest extends TestCase
         );
 
         $this->assertSame('hello world', $result);
-    }
-
-    #[Test]
-    public function generate_text_omits_tools_and_tool_choice(): void
-    {
-        [, $provider] = $this->fixture(
-            responses: [$this->textBlocksResponse(['ok'])],
-        );
-
-        $provider->generateText(
-            messages: [['role' => 'user', 'content' => 'hi']],
-        );
-
-        $body = $this->lastRequestBody();
-        $this->assertArrayNotHasKey('tools', $body);
-        $this->assertArrayNotHasKey('tool_choice', $body);
     }
 
     #[Test]
