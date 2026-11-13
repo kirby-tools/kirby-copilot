@@ -80,8 +80,12 @@ function createModelFailingBeforeOutput() {
 }
 
 describe("third-party seam contract", () => {
-  it("exposes the apiVersion and every method the fixture pins", () => {
+  it("exposes the apiVersion and exactly the methods the fixture pins", () => {
     expect(copilotThirdPartyApi.apiVersion).toBe(contract.apiVersion);
+    expect(Object.keys(copilotThirdPartyApi)).toEqual([
+      "apiVersion",
+      ...contract.methods,
+    ]);
 
     for (const method of contract.methods) {
       expect(
