@@ -69,9 +69,7 @@ async function initPromptDialog() {
       ? await panel.api.get<ButtonOptionsResponse>(
           PLUGIN_BUTTON_OPTIONS_API_ROUTE,
           { path: panel.view.path },
-          undefined,
-          // Avoid showing Panel loading indicator.
-          true,
+          { silent: true },
         )
       : props;
   // The route answers `null` for a prop the blueprint doesn't set, like one

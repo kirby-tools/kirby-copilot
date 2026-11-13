@@ -12,13 +12,9 @@ import { generateKirbyLayoutsSchema } from "../schemas/layouts";
 import { usePluginContext } from "./plugin";
 
 const fieldsets = createSharedRequest(() =>
-  usePanel().api.get<KirbyFieldset[]>(
-    PLUGIN_FIELDSETS_API_ROUTE,
-    undefined,
-    undefined,
-    // Avoid showing Panel loading indicator.
-    true,
-  ),
+  usePanel().api.get<KirbyFieldset[]>(PLUGIN_FIELDSETS_API_ROUTE, undefined, {
+    silent: true,
+  }),
 );
 
 export function useBlocks() {

@@ -151,8 +151,7 @@ async function hasAgentWritten(panel: Panel) {
   const { writtenAt } = await panel.api.get<{ writtenAt: number | null }>(
     PLUGIN_AGENTS_LAST_WRITE_API_ROUTE,
     { model: panel.view.path, language: panel.language.code ?? undefined },
-    undefined,
-    true,
+    { silent: true },
   );
 
   // Both timestamps are server time in milliseconds.

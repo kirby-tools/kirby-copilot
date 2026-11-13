@@ -56,8 +56,7 @@ it("resolves the userPrompt through the button-options route", async () => {
   expect(api.get).toHaveBeenCalledWith(
     PLUGIN_BUTTON_OPTIONS_API_ROUTE,
     { path: "pages/about" },
-    undefined,
-    true,
+    { silent: true },
   );
   expect(openPromptDialog).toHaveBeenCalledWith(
     expect.objectContaining({ userPrompt: "Write about Kirby" }),

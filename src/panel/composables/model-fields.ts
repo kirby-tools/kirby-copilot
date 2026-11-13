@@ -18,9 +18,7 @@ export function useModelFields() {
     const fields = await panel.api.get<Record<string, KirbyFieldProps>>(
       PLUGIN_MODEL_FIELDS_API_ROUTE,
       { id },
-      undefined,
-      // Avoid showing Panel loading indicator.
-      true,
+      { silent: true },
     );
 
     const filteredFields = Object.values(fields).filter(
