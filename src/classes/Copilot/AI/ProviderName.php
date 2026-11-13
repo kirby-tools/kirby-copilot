@@ -7,9 +7,6 @@ namespace JohannSchopplich\Copilot\AI;
 use Closure;
 use Kirby\Cms\App;
 
-/**
- * @internal
- */
 enum ProviderName: string
 {
     case OpenAI = 'openai';
