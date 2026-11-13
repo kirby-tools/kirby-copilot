@@ -27,6 +27,9 @@ final class AnthropicProvider implements Provider
     public const DEFAULT_BASE_URL = 'https://api.anthropic.com';
     public const DEFAULT_MAX_TOKENS = 32000;
 
+    private const SUPPORTED_STRING_FORMATS = ['date-time', 'time', 'date', 'duration', 'email', 'hostname', 'uri', 'ipv4', 'ipv6', 'uuid'];
+    private const DESCRIPTION_CONSTRAINT_KEYS = ['minimum', 'maximum', 'exclusiveMinimum', 'exclusiveMaximum', 'multipleOf', 'minLength', 'maxLength', 'pattern', 'minItems', 'maxItems', 'uniqueItems', 'minProperties', 'maxProperties', 'not'];
+
     public function __construct(
         private readonly ProviderConfig $config,
         private readonly AnthropicClient|null $client = null,
@@ -45,7 +48,7 @@ final class AnthropicProvider implements Provider
             ...$this->config->options,
             'outputConfig' => [
                 ...($this->config->options['outputConfig'] ?? []),
-                'format' => ['type' => 'json_schema', 'schema' => $schema],
+                'format' => ['type' => 'json_schema', 'schema' => self::sanitizeSchema($schema)],
             ],
         ];
 
@@ -134,6 +137,54 @@ final class AnthropicProvider implements Provider
             $chatMessages,
             $systemParts !== [] ? implode("\n\n", $systemParts) : null,
         ];
+    }
+
+    /**
+     * Moves the constraint keywords Anthropic's structured output rejects into
+     * the description and closes objects, after the AI SDK's Anthropic provider.
+     */
+    private static function sanitizeSchema(array $schema): array
+    {
+        $constraints = [];
+
+        foreach (self::DESCRIPTION_CONSTRAINT_KEYS as $key) {
+            if (isset($schema[$key]) && $schema[$key] !== false) {
+                $value = is_string($schema[$key]) ? $schema[$key] : json_encode($schema[$key]);
+                $constraints[] = strtolower(preg_replace('#[A-Z]#', ' $0', $key)) . ': ' . $value;
+                unset($schema[$key]);
+            }
+        }
+
+        if (isset($schema['format']) && !in_array($schema['format'], self::SUPPORTED_STRING_FORMATS, true)) {
+            $constraints[] = 'format: ' . $schema['format'];
+            unset($schema['format']);
+        }
+
+        if ($constraints !== []) {
+            $text = implode('; ', $constraints) . '.';
+            $schema['description'] = isset($schema['description']) ? $schema['description'] . "\n" . $text : $text;
+        }
+
+        if (($schema['type'] ?? null) === 'object' || isset($schema['properties'])) {
+            $schema['additionalProperties'] = false;
+        }
+
+        if (isset($schema['oneOf'])) {
+            $schema['anyOf'] ??= $schema['oneOf'];
+            unset($schema['oneOf']);
+        }
+
+        foreach (['properties', '$defs', 'definitions', 'anyOf', 'allOf'] as $key) {
+            if (isset($schema[$key]) && is_array($schema[$key])) {
+                $schema[$key] = array_map(fn ($definition) => is_array($definition) ? self::sanitizeSchema($definition) : $definition, $schema[$key]);
+            }
+        }
+
+        if (isset($schema['items']) && is_array($schema['items'])) {
+            $schema['items'] = self::sanitizeSchema($schema['items']);
+        }
+
+        return $schema;
     }
 
     private function client(): AnthropicClient

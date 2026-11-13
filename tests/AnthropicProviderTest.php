@@ -200,6 +200,40 @@ final class AnthropicProviderTest extends TestCase
     }
 
     #[Test]
+    public function generate_object_moves_constraints_anthropic_rejects_into_the_description(): void
+    {
+        [, $provider] = $this->fixture(
+            responses: [$this->textOnlyResponse('{"translations":["a","b"]}')],
+        );
+
+        $provider->generateObject(
+            messages: [['role' => 'user', 'content' => 'hi']],
+            schema: [
+                'type' => 'object',
+                'properties' => [
+                    'translations' => ['type' => 'array', 'minItems' => 2, 'maxItems' => 2, 'items' => ['type' => 'string']],
+                    'date' => ['type' => 'string', 'format' => 'date'],
+                    'pattern' => ['type' => 'string', 'format' => 'regex'],
+                    'value' => ['oneOf' => [['type' => 'string'], ['type' => 'number']]],
+                ],
+                'required' => ['translations'],
+            ],
+        );
+
+        $this->assertSame([
+            'type' => 'object',
+            'properties' => [
+                'translations' => ['type' => 'array', 'items' => ['type' => 'string'], 'description' => 'min items: 2; max items: 2.'],
+                'date' => ['type' => 'string', 'format' => 'date'],
+                'pattern' => ['type' => 'string', 'description' => 'format: regex.'],
+                'value' => ['anyOf' => [['type' => 'string'], ['type' => 'number']]],
+            ],
+            'required' => ['translations'],
+            'additionalProperties' => false,
+        ], $this->lastRequestBody()['output_config']['format']['schema'] ?? null);
+    }
+
+    #[Test]
     public function generate_object_keeps_the_output_format_next_to_an_output_config_option(): void
     {
         [, $provider] = $this->fixture(
