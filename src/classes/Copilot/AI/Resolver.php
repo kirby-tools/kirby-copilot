@@ -27,13 +27,7 @@ final readonly class Resolver
         $kirby = App::instance();
         $config = $kirby->option('johannschopplich.copilot', []);
 
-        if (!isset($config['provider'])) {
-            throw new InvalidArgumentException(
-                message: 'Missing required option "johannschopplich.copilot.provider"'
-            );
-        }
-
-        $providerName = strtolower((string)$config['provider']);
+        $providerName = strtolower((string)($config['provider'] ?? ProviderName::Google->value));
         $defaultProvider = ProviderName::tryFrom($providerName);
 
         if ($defaultProvider === null) {
