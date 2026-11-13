@@ -18,7 +18,7 @@ Kirby::plugin(
     extends: [
         'options' => [
             'agents' => false,
-            // On, unlike Kirby's plugin caches, since `RateLimit` and `AgentWrites` don't work without it.
+            // On, unlike Kirby's plugin caches, since `AgentWrites` doesn't work without it.
             'cache.agents' => true
         ],
         // Role blueprints set these to `false` to withhold a connection permission from agents.
