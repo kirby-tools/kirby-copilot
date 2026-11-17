@@ -6,10 +6,13 @@ import { z } from "zod";
 import { copilotThirdPartyApi } from "../../src/panel/third-party";
 import contract from "../fixtures/copilot-seam-contract.json";
 
-vi.mock("kirbyuse", async () => {
+vi.mock("kirbyuse", async (importOriginal) => {
   const { baseKirbyuseMock } = await import("./helpers/mock-kirbyuse");
+  const { createGlobalState } =
+    await importOriginal<typeof import("kirbyuse")>();
   return {
     ...baseKirbyuseMock(),
+    createGlobalState,
     // A readable page, so a resolved page reference would change the prompt.
     usePanel: () => ({
       view: { title: "Test Page" },
@@ -77,8 +80,12 @@ function createModelFailingBeforeOutput() {
 }
 
 describe("third-party seam contract", () => {
-  it("exposes the apiVersion and every method the fixture pins", () => {
+  it("exposes the apiVersion and exactly the methods the fixture pins", () => {
     expect(copilotThirdPartyApi.apiVersion).toBe(contract.apiVersion);
+    expect(Object.keys(copilotThirdPartyApi)).toEqual([
+      "apiVersion",
+      ...contract.methods,
+    ]);
 
     for (const method of contract.methods) {
       expect(

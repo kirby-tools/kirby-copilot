@@ -12,10 +12,7 @@ return [
             'assets/panel.css',
             env('PLAYGROUND') !== false ? 'assets/panel-demo.css' : null
         ]),
-        'favicon' => 'favicon.ico',
-        'vue' => [
-            'compiler' => false
-        ]
+        'favicon' => 'favicon.ico'
     ],
 
     'johannschopplich.copilot' => [

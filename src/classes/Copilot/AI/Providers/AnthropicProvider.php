@@ -7,7 +7,6 @@ namespace JohannSchopplich\Copilot\AI\Providers;
 use Anthropic\Client as AnthropicClient;
 use Anthropic\Core\Exceptions\APIException;
 use Anthropic\Messages\TextBlock;
-use Anthropic\Messages\ToolUseBlock;
 use Anthropic\RequestOptions;
 use JohannSchopplich\Copilot\AI\Exception\ProviderException;
 use JohannSchopplich\Copilot\AI\ProviderConfig;
@@ -18,10 +17,8 @@ use Throwable;
 /**
  * Anthropic provider backed by the official `anthropic-ai/sdk`.
  *
- * Anthropic's wire format differs from OpenAI's (system prompt is a
- * top-level field; structured output is delivered via a forced tool
- * call), so this provider does not extend {@see OpenAIProvider}. Retry
- * is handled by the SDK.
+ * Anthropic's wire format differs from OpenAI's, so this provider does not
+ * extend {@see OpenAIProvider}. Retry is handled by the SDK.
  *
  * @internal
  */
@@ -29,6 +26,9 @@ final class AnthropicProvider implements Provider
 {
     public const DEFAULT_BASE_URL = 'https://api.anthropic.com';
     public const DEFAULT_MAX_TOKENS = 32000;
+
+    private const SUPPORTED_STRING_FORMATS = ['date-time', 'time', 'date', 'duration', 'email', 'hostname', 'uri', 'ipv4', 'ipv6', 'uuid'];
+    private const DESCRIPTION_CONSTRAINT_KEYS = ['minimum', 'maximum', 'exclusiveMinimum', 'exclusiveMaximum', 'multipleOf', 'minLength', 'maxLength', 'pattern', 'minItems', 'maxItems', 'uniqueItems', 'minProperties', 'maxProperties', 'not'];
 
     public function __construct(
         private readonly ProviderConfig $config,
@@ -45,14 +45,11 @@ final class AnthropicProvider implements Provider
             'maxTokens' => self::DEFAULT_MAX_TOKENS,
             'messages' => $chatMessages,
             'system' => $system,
-            'tools' => [
-                [
-                    'name' => 'structured_response',
-                    'input_schema' => $schema,
-                ],
-            ],
-            'toolChoice' => ['type' => 'tool', 'name' => 'structured_response'],
             ...$this->config->options,
+            'outputConfig' => [
+                ...($this->config->options['outputConfig'] ?? []),
+                'format' => ['type' => 'json_schema', 'schema' => self::sanitizeSchema($schema)],
+            ],
         ];
 
         try {
@@ -65,17 +62,18 @@ final class AnthropicProvider implements Provider
             );
         }
 
-        foreach ($message->content as $block) {
-            if ($block instanceof ToolUseBlock) {
-                return $block->input;
-            }
+        $content = $this->firstTextBlock($message->content);
+        $decoded = json_decode($content ?? '', associative: true);
+
+        if (!is_array($decoded) || ($decoded !== [] && array_is_list($decoded))) {
+            $this->fail(
+                reason: 'response was not a JSON object',
+                responseExcerpt: $content,
+                responseId: $message->id,
+            );
         }
 
-        $this->fail(
-            reason: 'response did not contain a tool_use block',
-            responseExcerpt: $this->firstTextBlock($message->content),
-            responseId: $message->id,
-        );
+        return $decoded;
     }
 
     public function generateText(array $messages): string
@@ -139,6 +137,54 @@ final class AnthropicProvider implements Provider
             $chatMessages,
             $systemParts !== [] ? implode("\n\n", $systemParts) : null,
         ];
+    }
+
+    /**
+     * Moves the constraint keywords Anthropic's structured output rejects into
+     * the description and closes objects, after the AI SDK's Anthropic provider.
+     */
+    private static function sanitizeSchema(array $schema): array
+    {
+        $constraints = [];
+
+        foreach (self::DESCRIPTION_CONSTRAINT_KEYS as $key) {
+            if (isset($schema[$key]) && $schema[$key] !== false) {
+                $value = is_string($schema[$key]) ? $schema[$key] : json_encode($schema[$key]);
+                $constraints[] = strtolower(preg_replace('#[A-Z]#', ' $0', $key)) . ': ' . $value;
+                unset($schema[$key]);
+            }
+        }
+
+        if (isset($schema['format']) && !in_array($schema['format'], self::SUPPORTED_STRING_FORMATS, true)) {
+            $constraints[] = 'format: ' . $schema['format'];
+            unset($schema['format']);
+        }
+
+        if ($constraints !== []) {
+            $text = implode('; ', $constraints) . '.';
+            $schema['description'] = isset($schema['description']) ? $schema['description'] . "\n" . $text : $text;
+        }
+
+        if (($schema['type'] ?? null) === 'object' || isset($schema['properties'])) {
+            $schema['additionalProperties'] = false;
+        }
+
+        if (isset($schema['oneOf'])) {
+            $schema['anyOf'] ??= $schema['oneOf'];
+            unset($schema['oneOf']);
+        }
+
+        foreach (['properties', '$defs', 'definitions', 'anyOf', 'allOf'] as $key) {
+            if (isset($schema[$key]) && is_array($schema[$key])) {
+                $schema[$key] = array_map(fn ($definition) => is_array($definition) ? self::sanitizeSchema($definition) : $definition, $schema[$key]);
+            }
+        }
+
+        if (isset($schema['items']) && is_array($schema['items'])) {
+            $schema['items'] = self::sanitizeSchema($schema['items']);
+        }
+
+        return $schema;
     }
 
     private function client(): AnthropicClient
@@ -218,9 +264,8 @@ final class AnthropicProvider implements Provider
     private function apiKey(): string
     {
         if ($this->config->apiKey === null) {
-            // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
             throw new AuthException(
-                'Missing API key in "johannschopplich.copilot.providers.' . $this->providerName()->value . '.apiKey"'
+                message: 'Missing API key in "johannschopplich.copilot.providers.' . $this->providerName()->value . '.apiKey"'
             );
         }
 

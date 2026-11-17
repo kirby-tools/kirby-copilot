@@ -1,6 +1,6 @@
 import type { PromptContext } from "../types";
-import { ref } from "kirbyuse";
-import { createGlobalState } from "./state";
+import { createGlobalState } from "kirbyuse";
+import { ref } from "vue";
 
 export const usePromptDialogState = createGlobalState(() => {
   const prompt = ref("");

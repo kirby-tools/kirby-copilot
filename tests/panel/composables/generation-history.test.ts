@@ -1,11 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { installStorageMocks } from "../helpers/mock-storage";
 
-vi.mock("kirbyuse", async () => {
-  const { baseKirbyuseMock } = await import("../helpers/mock-kirbyuse");
-  return baseKirbyuseMock();
-});
-
 const storage = installStorageMocks();
 
 beforeEach(() => {

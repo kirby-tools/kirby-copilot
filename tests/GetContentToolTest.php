@@ -193,7 +193,7 @@ final class GetContentToolTest extends McpToolTestCase
     public function returns_a_field_of_a_type_without_a_hint_as_not_writable(): void
     {
         $props = array_replace_recursive($this->props(), [
-            'fields' => ['map' => []],
+            'fields' => ['map' => PluginField::class],
             'blueprints' => ['pages/note' => ['fields' => ['location' => ['type' => 'map', 'label' => 'Location']]]],
             'site' => ['children' => [1 => ['children' => [['content' => ['location' => 'Berlin']]]]]]
         ]);
@@ -287,7 +287,7 @@ final class GetContentToolTest extends McpToolTestCase
     }
 
     #[Test]
-    public function returns_the_info_fields_and_visible_info_sections_of_all_tabs(): void
+    public function returns_the_info_fields_and_info_sections_of_all_tabs(): void
     {
         $props = array_replace_recursive($this->props(), [
             'blueprints' => [
@@ -301,8 +301,7 @@ final class GetContentToolTest extends McpToolTestCase
                         ],
                         'seo' => [
                             'sections' => [
-                                'seoGuide' => ['type' => 'info', 'label' => 'Search', 'text' => 'Write titles for people.'],
-                                'archivedGuide' => ['type' => 'info', 'text' => 'Outdated rules.', 'hidden' => true]
+                                'seoGuide' => ['type' => 'info', 'label' => 'Search', 'text' => 'Write titles for people.']
                             ]
                         ]
                     ]

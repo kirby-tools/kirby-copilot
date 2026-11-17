@@ -1,20 +1,17 @@
 import type { PromptTemplate, PromptTemplateInput } from "../types";
-import { computed, reactive, usePanel } from "kirbyuse";
+import { createGlobalState } from "kirbyuse";
 import { generateRandomId } from "utilful";
-import { DEFAULT_PROMPT_TEMPLATES } from "../constants";
+import { computed, reactive } from "vue";
 import { getHashedStorageKey } from "../utils/shared";
-import { createGlobalState } from "./state";
 
 const TEMPLATE_LIMIT = 50;
 
 const usePromptTemplatesState = createGlobalState(() => {
   const storageKey = getHashedStorageKey("templates", window.location.hostname);
   const storedTemplates = localStorage.getItem(storageKey);
-  const hasStoredTemplates = !!storedTemplates;
-
   const initialTemplates: PromptTemplate[] = storedTemplates
     ? JSON.parse(storedTemplates)
-    : getDefaultTemplates();
+    : [];
 
   const state = reactive({
     templates: initialTemplates,
@@ -24,12 +21,11 @@ const usePromptTemplatesState = createGlobalState(() => {
   return {
     state,
     storageKey,
-    hasStoredTemplates,
   };
 });
 
 export function usePromptTemplates() {
-  const { state, storageKey, hasStoredTemplates } = usePromptTemplatesState();
+  const { state, storageKey } = usePromptTemplatesState();
 
   const allTemplates = computed(() => [
     ...state.configTemplates,
@@ -111,10 +107,6 @@ export function usePromptTemplates() {
       createdAt: 0,
       isReadOnly: true,
     }));
-
-    if (newTemplates.length > 0 && !hasStoredTemplates) {
-      state.templates = [];
-    }
   }
 
   return {
@@ -124,16 +116,4 @@ export function usePromptTemplates() {
     setTemplates,
     setConfigTemplates,
   };
-}
-
-function getDefaultTemplates(): PromptTemplate[] {
-  const { user } = usePanel();
-  const templates =
-    DEFAULT_PROMPT_TEMPLATES[user.language!] || DEFAULT_PROMPT_TEMPLATES.en!;
-
-  return templates.map((template) => ({
-    id: generateRandomId(),
-    ...template,
-    createdAt: Date.now(),
-  }));
 }

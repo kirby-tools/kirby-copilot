@@ -4,11 +4,6 @@ import { nextTick, reactive } from "vue";
 import { keepAgentWrites, whenAgentsEnabled } from "../../src/panel/agents";
 import { usePluginContext } from "../../src/panel/composables/plugin";
 
-vi.mock("kirbyuse", async () => {
-  const { baseKirbyuseMock } = await import("./helpers/mock-kirbyuse");
-  return baseKirbyuseMock();
-});
-
 vi.mock("../../src/panel/composables/plugin", () => ({
   usePluginContext: vi.fn(),
 }));

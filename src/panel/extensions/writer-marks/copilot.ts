@@ -1,5 +1,6 @@
 import type { WriterMarkContext, WriterMarkExtension } from "kirby-types";
 import type { EditorState, Transaction } from "prosemirror-state";
+import { usePanel } from "kirbyuse";
 import { DOMParser } from "prosemirror-model";
 import { streamTextToField } from "../shared";
 
@@ -21,10 +22,14 @@ export const copilot: CopilotMark = {
     return "copilot";
   },
 
+  get schema() {
+    return {};
+  },
+
   get button() {
     return {
       icon: "sparkling",
-      label: window.panel.t("johannschopplich.copilot.label"),
+      label: usePanel().t("johannschopplich.copilot.label"),
     };
   },
 

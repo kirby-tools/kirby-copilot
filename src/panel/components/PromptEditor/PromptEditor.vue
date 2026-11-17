@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { SkillSuggestState } from "./plugins/skill-suggest";
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "kirbyuse";
 import { EditorState, TextSelection } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { generateRandomId } from "utilful";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { filterSkills, useSkills } from "../../composables/skills";
 import {
   createDocFromText,

@@ -8,16 +8,16 @@ Description: <p>The <strong>ZEHA Leather Shoe Liga</strong> is a masterpiece of 
 
 Features:
 
-- 
-  title: Premium Leather Construction
+-
+  title: 'Premium Leather Construction'
   description: '<p>Made from <em>soft, high-grade calfskin leather</em> that adapts to the shape of your foot for maximum comfort.</p>'
   icon: leather-texture
-- 
-  title: Signature Zeha Double Stripes
+-
+  title: 'Signature Zeha Double Stripes'
   description: '<p>Features the iconic <strong>double-stripe design</strong> in red and cream, an unmistakable mark of Zeha craftsmanship since 1897.</p>'
   icon: brand-logo
-- 
-  title: Rugged Outsole
+-
+  title: 'Rugged Outsole'
   description: '<p>Equipped with a durable, honey-colored rubber lug sole that offers <strong>superior grip</strong> and longevity.</p>'
   icon: shoe-sole
 

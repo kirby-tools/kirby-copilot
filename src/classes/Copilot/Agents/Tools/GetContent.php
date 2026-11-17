@@ -18,7 +18,6 @@ use Kirby\Content\Lock;
 use Kirby\Content\Version;
 use Kirby\Data\Json;
 use Kirby\Form\Field;
-use Kirby\Form\FieldClass;
 use Kirby\Form\Fields;
 use Kirby\Toolkit\Str;
 
@@ -134,7 +133,7 @@ final class GetContent
 
         $notices = [];
 
-        if ($model->permissions()->can('update') !== true) {
+        if ($model->guards()->isAvailable('update') !== true) {
             $notices[] = FieldInput::UPDATE_REFUSAL;
         }
 
@@ -223,7 +222,7 @@ final class GetContent
         $fields = Fields::for($model, $language);
         $latest = $fields->fill($model->version('latest')->content($language)->toArray())->toFormValues();
         $changes = $fields->reset()->fill($model->version('changes')->content($language)->toArray())->toFormValues();
-        $names = $fields->filter(fn (Field|FieldClass $field) => $field->isTranslatable($language))->keys();
+        $names = $fields->filter(fn (Field $field) => $field->isTranslatable($language))->keys();
 
         return array_values(array_filter(
             array_unique([...$names, 'title']),

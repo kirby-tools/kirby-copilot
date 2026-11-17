@@ -4,11 +4,10 @@ declare(strict_types = 1);
 
 namespace JohannSchopplich\Copilot;
 
-use JohannSchopplich\KirbyTools\QueryResolver;
 use Kirby\Cms\ModelWithContent;
 
 /**
- * A section computes its props on the server, a view button does not:
+ * A field computes its props on the server, a view button does not:
  * `Kirby\Panel\Ui\Component::props()` hands custom attributes to the Panel
  * verbatim. The button therefore asks for its own props by model, and the
  * query never travels through the request.
@@ -25,9 +24,14 @@ final class ViewButtonOptions
         $props = self::props($model);
 
         return [
-            'userPrompt' => QueryResolver::resolve($model, $props['userPrompt'] ?? null),
-            'systemPrompt' => QueryResolver::resolve($model, $props['systemPrompt'] ?? null)
+            'userPrompt' => self::resolveQuery($model, $props['userPrompt'] ?? null),
+            'systemPrompt' => self::resolveQuery($model, $props['systemPrompt'] ?? null)
         ];
+    }
+
+    private static function resolveQuery(ModelWithContent $model, mixed $value): mixed
+    {
+        return is_string($value) ? PromptQuery::resolve($model, $value) : $value;
     }
 
     private static function props(ModelWithContent $model): array

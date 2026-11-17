@@ -30,7 +30,7 @@
   "layout": "Kirby layout with columns and blocks",
   "entries": "multiple entries of {type} values",
   "boundedEntries": "multiple entries of {type} values within the defined count range",
-  "files": "a list of file UUIDs (file://...)",
-  "pages": "a list of page UUIDs (page://...)",
-  "users": "a list of user UUIDs (user://...)"
+  "filepicker": "a list of file UUIDs (file://...)",
+  "pagepicker": "a list of page UUIDs (page://...)",
+  "userpicker": "a list of user UUIDs (user://...)"
 }

@@ -1,11 +1,11 @@
 <script lang="ts">
-import { computed } from "kirbyuse";
 import {
   after as _after,
   before as _before,
   help as _help,
   label as _label,
 } from "kirbyuse/props";
+import { computed } from "vue";
 import { STORAGE_KEY_PREFIX } from "../../constants";
 
 const propsDefinition = {

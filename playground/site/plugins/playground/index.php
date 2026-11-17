@@ -5,6 +5,7 @@ use Kirby\Cms\App;
 use Kirby\Cms\ModelWithContent;
 use Kirby\Content\PlainTextStorage;
 use Kirby\Exception\Exception;
+use Kirby\Form\Field\TextField;
 use Kirby\Panel\Panel;
 
 load([
@@ -60,7 +61,7 @@ App::plugin('johannschopplich/playground', [
                     [
                         'pattern' => '(:all)',
                         'action' => function () use ($kirby) {
-                            go(Panel::url($kirby->user() === null ? 'login' : 'site'));
+                            go($kirby->panel()->url($kirby->user() === null ? 'login' : 'site'));
                         }
                     ]
                 ],
@@ -93,8 +94,6 @@ App::plugin('johannschopplich/playground', [
         }
     ],
     'fields' => [
-        'playground-api-key' => [
-            'extends' => 'text'
-        ]
+        'playground-api-key' => TextField::class
     ]
 ]);

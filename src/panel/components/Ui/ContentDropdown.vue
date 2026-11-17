@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "kirbyuse";
+import { ref } from "vue";
 
 const emit = defineEmits<{
   (event: "close"): void;
@@ -27,7 +27,7 @@ defineExpose({
 </script>
 
 <template>
-  <k-dropdown-content
+  <k-dropdown
     ref="dropdown"
     align-x="start"
     :navigate="false"
@@ -41,7 +41,7 @@ defineExpose({
     >
       <slot />
     </k-navigate>
-  </k-dropdown-content>
+  </k-dropdown>
 </template>
 
 <style>

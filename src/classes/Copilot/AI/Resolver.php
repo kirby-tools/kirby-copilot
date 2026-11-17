@@ -8,9 +8,6 @@ use Closure;
 use Kirby\Cms\App;
 use Kirby\Exception\InvalidArgumentException;
 
-/**
- * @internal
- */
 final readonly class Resolver
 {
     /**
@@ -27,20 +24,12 @@ final readonly class Resolver
         $kirby = App::instance();
         $config = $kirby->option('johannschopplich.copilot', []);
 
-        if (!isset($config['provider'])) {
-            // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
-            throw new InvalidArgumentException(
-                'Missing required option "johannschopplich.copilot.provider"'
-            );
-        }
-
-        $providerName = strtolower((string)$config['provider']);
+        $providerName = strtolower((string)($config['provider'] ?? ProviderName::Google->value));
         $defaultProvider = ProviderName::tryFrom($providerName);
 
         if ($defaultProvider === null) {
-            // TODO: Drop K4 compat in v4 – use named arg `message:` once Kirby 5 is the floor.
             throw new InvalidArgumentException(
-                'Unknown provider "' . $providerName . '" – set "johannschopplich.copilot.provider" to one of: ' .
+                message: 'Unknown provider "' . $providerName . '" – set "johannschopplich.copilot.provider" to one of: ' .
                 implode(', ', array_column(ProviderName::cases(), 'value'))
             );
         }

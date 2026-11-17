@@ -4,12 +4,12 @@ declare(strict_types = 1);
 
 namespace JohannSchopplich\Copilot\Agents;
 
-use JohannSchopplich\Licensing\Licenses;
+use JohannSchopplich\Copilot\Licensing;
 use Kirby\Cms\App;
 use Kirby\Cms\User;
 use Kirby\Exception\NotFoundException;
 use Kirby\Exception\PermissionException;
-use Kirby\Toolkit\Escape;
+use Kirby\Toolkit\HtmlString;
 use Kirby\Toolkit\I18n;
 
 /**
@@ -40,7 +40,8 @@ final class AgentsView
                 'mcpUrl' => Agents::mcpUrl(),
                 'isAdmin' => $isAdmin,
                 'connections' => $rows,
-                'licenseStatus' => Licenses::read('johannschopplich/kirby-copilot')->getStatus()
+                'licenseStatus' => Licensing::status(),
+                'licenseDialog' => Licensing::dialog()
             ]
         ];
     }
@@ -76,9 +77,9 @@ final class AgentsView
         return [
             'component' => 'k-remove-dialog',
             'props' => [
-                'text' => I18n::template('johannschopplich.copilot.agents.revoke.confirm', [
-                    'agent' => Escape::html($connection->client->name),
-                    'account' => Escape::html($kirby->user($userId)->email())
+                'text' => HtmlString::translate('johannschopplich.copilot.agents.revoke.confirm', [
+                    'agent' => $connection->client->name,
+                    'account' => $kirby->user($userId)->email()
                 ]),
                 'submitButton' => [
                     'icon' => 'trash',

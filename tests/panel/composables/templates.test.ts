@@ -2,11 +2,13 @@ import type { PromptTemplate } from "../../../src/panel/types";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { installStorageMocks } from "../helpers/mock-storage";
 
-vi.mock("kirbyuse", async () => {
+vi.mock("kirbyuse", async (importOriginal) => {
   const { baseKirbyuseMock } = await import("../helpers/mock-kirbyuse");
+  const { createGlobalState } =
+    await importOriginal<typeof import("kirbyuse")>();
   return {
     ...baseKirbyuseMock(),
-    usePanel: () => ({ user: { language: "en" } }),
+    createGlobalState,
   };
 });
 
@@ -47,18 +49,10 @@ async function seedStorage(templates: PromptTemplate[] | unknown) {
 
 describe("usePromptTemplates", () => {
   describe("initial state", () => {
-    it("falls back to default templates for the user's language when storage is empty", async () => {
+    it("starts with no templates when storage is empty", async () => {
       const { templates } = await loadComposable();
 
-      expect(templates.value.length).toBeGreaterThan(0);
-      for (const template of templates.value) {
-        expect(template).toMatchObject({
-          id: expect.stringMatching(/^rand-/),
-          label: expect.any(String),
-          prompt: expect.any(String),
-          createdAt: 1_700_000_000_000,
-        });
-      }
+      expect(templates.value).toEqual([]);
     });
 
     it("loads stored templates verbatim when storage has data", async () => {
@@ -85,10 +79,6 @@ describe("usePromptTemplates", () => {
   });
 
   describe("addTemplate", () => {
-    beforeEach(async () => {
-      await seedStorage([]);
-    });
-
     it("prepends a new template with a generated id and current timestamp", async () => {
       const { addTemplate, templates } = await loadComposable();
 
@@ -140,10 +130,6 @@ describe("usePromptTemplates", () => {
   });
 
   describe("setTemplates", () => {
-    beforeEach(async () => {
-      await seedStorage([]);
-    });
-
     it("imports inputs with trimmed label and prompt", async () => {
       const { setTemplates, templates } = await loadComposable();
 
@@ -255,29 +241,6 @@ describe("usePromptTemplates", () => {
 
       const configOnly = allTemplates.value.filter((t) => t.isReadOnly);
       expect(configOnly.map((t) => t.id)).toEqual(["config-0", "config-1"]);
-    });
-
-    it("clears default templates when storage is empty", async () => {
-      // Storage is empty → initial state = defaults.
-      const { templates, setConfigTemplates } = await loadComposable();
-      expect(templates.value.length).toBeGreaterThan(0);
-
-      setConfigTemplates([{ label: "Config", prompt: "p" }]);
-
-      expect(templates.value).toEqual([]);
-    });
-
-    it("preserves user-customized templates when config templates are provided", async () => {
-      await seedStorage([
-        { id: "user-1", label: "Mine", prompt: "P", createdAt: 1 },
-      ]);
-
-      const { templates, setConfigTemplates } = await loadComposable();
-
-      setConfigTemplates([{ label: "Config", prompt: "p" }]);
-
-      expect(templates.value).toHaveLength(1);
-      expect(templates.value[0]?.id).toBe("user-1");
     });
   });
 

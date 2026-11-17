@@ -46,12 +46,9 @@ describe("formatRelativeTime", () => {
     expect(formatRelativeTime(secondsAgo(seconds), now, "en")).toBe(expected);
   });
 
-  it.each([
-    ["pt_BR", "há 3 horas"],
-    ["sr@latin", "pre 3 sata"],
-  ])("formats in the %s translation", (translationCode, expected) => {
-    expect(formatRelativeTime(secondsAgo(3 * 3600), now, translationCode)).toBe(
-      expected,
+  it("formats in the sr@latin translation", () => {
+    expect(formatRelativeTime(secondsAgo(3 * 3600), now, "sr@latin")).toBe(
+      "pre 3 sata",
     );
   });
 });

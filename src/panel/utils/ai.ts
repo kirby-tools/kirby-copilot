@@ -28,8 +28,7 @@ export async function loadAISDK(): Promise<AISDKModule> {
  * dispatcher and skips the derived promise entirely.
  *
  * The guard belongs here rather than at each call site because `loadAISDK` is
- * the only way into the SDK, including for third-party consumers reaching it
- * through the seam.
+ * the only way into the SDK.
  */
 function withTelemetryDisabled(sdkModule: AISDKModule): AISDKModule {
   return {

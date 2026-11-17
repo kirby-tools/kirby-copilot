@@ -1,9 +1,10 @@
-import type { LicenseStatus } from "@kirby-tools/licensing";
+import type { PluginContext } from "@kirby-tools/licensing";
 import type { KirbyFieldProps } from "kirby-types";
-import type { PluginAsset } from "kirbyuse";
 import type { LogLevel, ReasoningEffort } from "./constants";
 
 export type OutputFormat = "text" | "markdown" | "rich-text";
+
+export type Translate = (key: string, data?: Record<string, unknown>) => string;
 
 export interface ActiveField {
   element: HTMLElement;
@@ -64,10 +65,13 @@ export interface PluginConfig {
   agents: boolean;
 }
 
-export interface PluginContextResponse {
+export interface ButtonOptionsResponse {
+  userPrompt?: string | null;
+  systemPrompt?: string | null;
+}
+
+export interface PluginContextResponse extends PluginContext {
   config: PluginConfig;
-  assets: PluginAsset[];
-  licenseStatus?: LicenseStatus;
 }
 
 /**
@@ -106,4 +110,48 @@ export interface AgentConnection {
   hasRoleAccess: boolean;
   /** Path of the row's dropdown route. */
   options: string;
+}
+
+export interface CopilotFieldLabels {
+  generate: string;
+  stop: string;
+  undo: string;
+  placeholder: string;
+  reset: string;
+  selectFiles: string;
+}
+
+export type CopilotFieldError =
+  | { type: "model"; provider: string }
+  | { type: "field"; field: string }
+  | { type: "userPrompt" };
+
+export interface InsertOption {
+  value: NonNullable<PromptContext["insertMode"]>;
+  text: string;
+}
+
+export interface PromptDialogLabels {
+  preview: string;
+  selectFiles: string;
+  clearFiles: string;
+  insert: string;
+  search: string;
+  selectPages: string;
+  notFound: string;
+  templates: string;
+  saveTemplate: string;
+  editTemplates: string;
+  noTemplates: string;
+  history: string;
+  fields: string;
+  generate: string;
+}
+
+/** Field the prompt dialog offers as a `{name}` placeholder. */
+export interface PlaceholderField {
+  name: string;
+  label?: string;
+  /** Start of the field's current value. */
+  preview?: string;
 }

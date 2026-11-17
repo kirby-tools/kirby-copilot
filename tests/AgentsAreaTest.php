@@ -119,7 +119,7 @@ final class AgentsAreaTest extends ApiRouteTestCase
 
         $this->assertStringStartsWith(
             'Revoke access for <strong>Claude Code</strong> connected as <strong>editor@example.com</strong>?',
-            $this->revokeDialog($kirby)['load']('editor', $id)['props']['text']
+            $this->revokeDialog($kirby)['load']('editor', $id)['props']['text']->value()
         );
     }
 

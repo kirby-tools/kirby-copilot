@@ -17,14 +17,13 @@ use PHPUnit\Framework\Attributes\Test;
 final class ResolverTest extends ApiRouteTestCase
 {
     #[Test]
-    public function from_kirby_options_throws_without_a_provider_option(): void
+    public function from_kirby_options_defaults_to_google_without_a_provider_option(): void
     {
         self::bootApp(['options' => ['johannschopplich.copilot' => []]]);
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing required option "johannschopplich.copilot.provider"');
+        $resolver = Resolver::fromKirbyOptions();
 
-        Resolver::fromKirbyOptions();
+        $this->assertSame(ProviderName::Google, $resolver->defaultProvider);
     }
 
     #[Test]

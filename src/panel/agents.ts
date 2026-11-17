@@ -1,15 +1,16 @@
 import type { Panel, PanelContentVersions } from "kirby-types";
-import type { PluginFunction } from "vue";
-import { watch } from "kirbyuse";
+import type { Plugin } from "vue";
+import { usePanel } from "kirbyuse";
+import { watch } from "vue";
 import { usePluginContext } from "./composables/plugin";
 import { PLUGIN_AGENTS_LAST_WRITE_API_ROUTE } from "./constants";
 
 const CHECK_INTERVAL_MS = 10_000;
 
-export const guardAgentWrites: PluginFunction<any> = () => {
+export const guardAgentWrites: Plugin = () => {
   // Plugins install before `window.panel` is the Panel.
   queueMicrotask(() => {
-    const panel = window.panel;
+    const panel = usePanel();
 
     whenAgentsEnabled(panel, () => {
       keepAgentWrites(panel);
@@ -150,8 +151,7 @@ async function hasAgentWritten(panel: Panel) {
   const { writtenAt } = await panel.api.get<{ writtenAt: number | null }>(
     PLUGIN_AGENTS_LAST_WRITE_API_ROUTE,
     { model: panel.view.path, language: panel.language.code ?? undefined },
-    undefined,
-    true,
+    { silent: true },
   );
 
   // Both timestamps are server time in milliseconds.
@@ -164,8 +164,7 @@ async function reloadView(
   { shouldReloadOnlyWhenSaved = false } = {},
 ) {
   const isSaved = await panel.content.update();
-  // Kirby before 5.6 resolves `undefined`, saved or not.
-  if (isSaved === false && shouldReloadOnlyWhenSaved) return false;
+  if (!isSaved && shouldReloadOnlyWhenSaved) return false;
 
   await panel.view.reload();
   // A save queued while the view reloaded still holds the form from before.

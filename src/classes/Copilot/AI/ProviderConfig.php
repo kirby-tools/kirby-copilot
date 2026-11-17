@@ -6,9 +6,6 @@ namespace JohannSchopplich\Copilot\AI;
 
 use GuzzleHttp\Client as GuzzleClient;
 
-/**
- * @internal
- */
 final readonly class ProviderConfig
 {
     public const DEFAULT_TIMEOUT = 120;

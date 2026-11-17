@@ -1,6 +1,5 @@
 import { resolveLanguageModel, useStreamText } from "./composables/ai";
 import { usePluginContext } from "./composables/plugin";
-import { loadAISDK } from "./utils/ai";
 
 /**
  * API surface for other plugins, registered as
@@ -13,8 +12,7 @@ import { loadAISDK } from "./utils/ai";
 export const copilotThirdPartyApi = {
   apiVersion: 2,
   resolvePluginContext: usePluginContext,
-  streamText: useStreamText,
+  streamText: (options: Omit<Parameters<typeof useStreamText>[0], "output">) =>
+    useStreamText(options),
   resolveLanguageModel,
-  // TODO: Drop `loadAISDK` and the raw `output` option from the third-party seam in v4 – consumers pass `outputSchema` since apiVersion 2.
-  loadAISDK,
 };

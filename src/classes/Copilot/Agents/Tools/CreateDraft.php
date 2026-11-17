@@ -12,8 +12,9 @@ use JohannSchopplich\Copilot\Agents\ToolError;
 use Kirby\Cms\Language;
 use Kirby\Cms\Page;
 use Kirby\Cms\Site;
+use Kirby\Form\Field\PageListField;
 use Kirby\Form\Fields;
-use Kirby\Panel\PageCreateDialog;
+use Kirby\Panel\Controller\Dialog\PageCreateDialogController;
 
 final class CreateDraft
 {
@@ -55,7 +56,7 @@ final class CreateDraft
         }
 
         // Kirby's own page create dialog, for its model in memory and the title and slug its blueprint makes.
-        $dialog = new PageCreateDialog($parent->panel()->path(), null, $template, null);
+        $dialog = new PageCreateDialogController(parent: $parent, blueprints: [['name' => $template]]);
         $draft = $dialog->model();
         $createOptions = $draft->blueprint()->create();
 
@@ -78,7 +79,7 @@ final class CreateDraft
 
         $fields = Fields::for($draft, $language);
         $fields->fill([...$fields->defaults(), ...$values]);
-        $resolvedInput = $dialog->resolveFieldTemplates([...$fields->toStoredValues(), 'title' => $arguments->string('title') ?? '', 'slug' => $arguments->string('slug')]);
+        $resolvedInput = $dialog->resolveFieldTemplates([...$fields->toStoredValues(), 'title' => $arguments->string('title') ?? '', 'slug' => $arguments->string('slug')], ['title', 'slug']);
         $title = trim($resolvedInput['title']);
 
         if ($title === '') {
@@ -107,7 +108,7 @@ final class CreateDraft
     }
 
     /**
-     * Collects the templates of the pages sections that list the parent's
+     * Collects the templates of the page lists that list the parent's
      * drafts and let the Panel add pages: the parent's own, and those on
      * the views of its ancestors and the site whose `parent` is the parent.
      *
@@ -118,12 +119,12 @@ final class CreateDraft
         $templates = [];
 
         foreach ($parent instanceof Site ? [$parent] : [$parent, ...$parent->parents()->values(), $parent->site()] as $view) {
-            foreach ($view->blueprint()->sections() as $section) {
-                if ($section->type() !== 'pages' || $section->add() === false || !in_array($section->status(), ['draft', 'all'], true) || !$section->parent()->is($parent)) {
+            foreach (Fields::for($view) as $field) {
+                if (!$field instanceof PageListField || $field->add() === false || !in_array($field->status(), ['draft', 'all'], true) || !$field->parentModel()->is($parent)) {
                     continue;
                 }
 
-                foreach ($section->blueprints() as $blueprint) {
+                foreach ($field->blueprints() as $blueprint) {
                     $templates[] = $blueprint['name'];
                 }
             }
