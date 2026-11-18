@@ -56,7 +56,7 @@ final class CreateDraft
         }
 
         // Kirby's own page create dialog, for its model in memory and the title and slug its blueprint makes.
-        $dialog = new PageCreateDialogController(parent: $parent, blueprints: [['name' => $template]]);
+        $dialog = new PageCreateDialogController(parent: $parent, blueprints: [$template]);
         $draft = $dialog->model();
         $createOptions = $draft->blueprint()->create();
 
@@ -124,9 +124,7 @@ final class CreateDraft
                     continue;
                 }
 
-                foreach ($field->blueprints() as $blueprint) {
-                    $templates[] = $blueprint['name'];
-                }
+                $templates = [...$templates, ...array_map(basename(...), $field->acceptedPageBlueprints())];
             }
         }
 

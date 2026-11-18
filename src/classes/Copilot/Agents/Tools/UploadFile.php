@@ -179,10 +179,10 @@ final class UploadFile
             foreach (Fields::for($view) as $field) {
                 if (!$field instanceof FileListField) {
                     if ($view === $parent) {
-                        $templates += array_fill_keys($view->blueprint()->acceptedFileTemplates($field->name()), null);
+                        $templates += array_fill_keys($view->blueprint()->acceptRules()->fileBlueprints($field->name()), null);
                     }
                 } elseif ($field->upload() !== false && $field->parentModel()->is($parent)) {
-                    $templates[$field->template() ?: 'default'] ??= $field->upload()['attributes']['sort'];
+                    $templates[$field->blueprint() ?: 'default'] ??= $field->upload()['attributes']['sort'];
                 }
             }
         }
