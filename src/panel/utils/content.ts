@@ -7,7 +7,9 @@ export function createContentContext(): Record<string, string> {
   const { currentContent } = useContent();
   const context = {
     ...currentContent.value,
-    title: panel.view.title,
+    // Kirby's preview view titles itself "… | Preview"; files and users
+    // usually lack a content title.
+    title: currentContent.value.title || panel.view.title,
   };
 
   return Object.fromEntries(

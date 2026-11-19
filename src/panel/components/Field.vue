@@ -78,6 +78,7 @@ const panel = usePanel();
 const {
   currentContent,
   isEditable: isContentEditable,
+  modelPath,
   update: updateContent,
 } = useContent();
 
@@ -91,7 +92,7 @@ const isStorageEnabled = computed(
 );
 const storageKey = computed(() =>
   targetField.value
-    ? getHashedStorageKey(panel.view.path, targetField.value.name.toLowerCase())
+    ? getHashedStorageKey(modelPath.value, targetField.value.name.toLowerCase())
     : undefined,
 );
 

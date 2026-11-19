@@ -38,6 +38,7 @@ const panel = usePanel();
 const {
   currentContent,
   isEditable: isContentEditable,
+  modelPath,
   update: updateContent,
 } = useContent();
 const { getModelFields } = useModelFields();
@@ -68,7 +69,7 @@ async function initPromptDialog() {
     isNonEmptyString(props.userPrompt) || isNonEmptyString(props.systemPrompt)
       ? await panel.api.get<ButtonOptionsResponse>(
           PLUGIN_BUTTON_OPTIONS_API_ROUTE,
-          { path: panel.view.path },
+          { path: modelPath.value },
           { silent: true },
         )
       : props;

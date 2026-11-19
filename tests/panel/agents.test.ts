@@ -1,8 +1,9 @@
 import type { Panel } from "kirby-types";
 import { describe, expect, it, vi } from "vitest";
-import { nextTick, reactive } from "vue";
+import { nextTick, reactive, ref } from "vue";
 import { keepAgentWrites, whenAgentsEnabled } from "../../src/panel/agents";
 import { usePluginContext } from "../../src/panel/composables/plugin";
+import { PLUGIN_AGENTS_LAST_WRITE_API_ROUTE } from "../../src/panel/constants";
 
 vi.mock("../../src/panel/composables/plugin", () => ({
   usePluginContext: vi.fn(),
@@ -48,6 +49,11 @@ describe("keepAgentWrites", () => {
       "johannschopplich.copilot.agents.reloaded.instead",
     );
 
+    expect(panel.api.get).toHaveBeenCalledWith(
+      PLUGIN_AGENTS_LAST_WRITE_API_ROUTE,
+      { model: "pages/notes", language: undefined },
+      { silent: true },
+    );
     expect(requests.map(({ method }) => method)).toEqual(["save"]);
     expect(panel.view.timestamp).toBeGreaterThan(VIEW_LOADED_AT);
   });
@@ -105,9 +111,8 @@ function createPanel({ writtenAt }: { writtenAt: number | null }) {
   });
 
   const panel = reactive({
-    api: { get: async () => ({ writtenAt }) },
+    api: { get: vi.fn(async () => ({ writtenAt })) },
     view: {
-      path: "pages/notes",
       timestamp: VIEW_LOADED_AT,
       props: { versions: loadVersions() },
       async reload() {
@@ -143,7 +148,7 @@ function createPanel({ writtenAt }: { writtenAt: number | null }) {
     },
   }) as unknown as Panel;
 
-  keepAgentWrites(panel);
+  keepAgentWrites(panel, ref("pages/notes"));
 
   return { panel, requests, server };
 }

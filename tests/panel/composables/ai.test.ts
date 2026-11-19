@@ -10,7 +10,7 @@ import {
 import { CopilotError } from "../../../src/panel/utils/error";
 
 const mockPagesGet = vi.fn();
-const defaultContent = { title: "Test", body: "Content" };
+const defaultContent = { title: "Test Page", body: "Content" };
 let mockCurrentContent: Record<string, unknown> = defaultContent;
 
 vi.mock("kirbyuse", async (importOriginal) => {
@@ -29,7 +29,7 @@ vi.mock("kirbyuse", async (importOriginal) => {
           id: (id: string) => id.replaceAll("/", "+"),
         },
       },
-      view: { title: "Test Page" },
+      view: { title: "Test Page | Preview" },
     }),
     useContent: () => ({
       currentContent: { value: mockCurrentContent },

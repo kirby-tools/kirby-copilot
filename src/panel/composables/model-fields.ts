@@ -1,5 +1,5 @@
 import type { KirbyFieldProps } from "kirby-types";
-import { usePanel } from "kirbyuse";
+import { useContent, usePanel } from "kirbyuse";
 import { PLUGIN_MODEL_FIELDS_API_ROUTE } from "../constants";
 import { EXCLUDED_FIELD_TYPES } from "../schemas/fields";
 
@@ -7,9 +7,10 @@ const modelFieldsCache = new Map<string, KirbyFieldProps[]>();
 
 export function useModelFields() {
   const panel = usePanel();
+  const { modelPath } = useContent();
 
   async function getModelFields() {
-    const { path: id } = panel.view;
+    const id = modelPath.value!;
 
     if (modelFieldsCache.has(id)) {
       return modelFieldsCache.get(id)!;

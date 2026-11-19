@@ -1,6 +1,6 @@
 import type { Panel, PanelContentVersions } from "kirby-types";
-import type { Plugin } from "vue";
-import { usePanel } from "kirbyuse";
+import type { Plugin, Ref } from "vue";
+import { useContent, usePanel } from "kirbyuse";
 import { watch } from "vue";
 import { usePluginContext } from "./composables/plugin";
 import { PLUGIN_AGENTS_LAST_WRITE_API_ROUTE } from "./constants";
@@ -11,10 +11,11 @@ export const guardAgentWrites: Plugin = () => {
   // Plugins install before `window.panel` is the Panel.
   queueMicrotask(() => {
     const panel = usePanel();
+    const { modelPath } = useContent();
 
     whenAgentsEnabled(panel, () => {
-      keepAgentWrites(panel);
-      reloadOnAgentWrites(panel);
+      keepAgentWrites(panel, modelPath);
+      reloadOnAgentWrites(panel, modelPath);
     });
   });
 };
@@ -41,7 +42,10 @@ export function whenAgentsEnabled(panel: Panel, guard: () => void) {
   );
 }
 
-export function keepAgentWrites(panel: Panel) {
+export function keepAgentWrites(
+  panel: Panel,
+  modelPath: Readonly<Ref<string | undefined>>,
+) {
   const { content } = panel;
   // Each field's value as JSON, as far as the view knows the server holds it.
   let savedValues: Map<string, string> | undefined;
@@ -87,7 +91,7 @@ export function keepAgentWrites(panel: Panel) {
   for (const action of ["publish", "discard"] as const) {
     const run = content[action] as (...args: unknown[]) => Promise<void>;
     content[action] = async (...args: unknown[]) => {
-      if (await hasAgentWritten(panel).catch(() => false)) {
+      if (await hasAgentWritten(panel, modelPath).catch(() => false)) {
         await reloadView(panel);
         // The reload closes the discard confirmation, and its overlay reports
         // the close a task later, which would also close the error dialog.
@@ -102,12 +106,15 @@ export function keepAgentWrites(panel: Panel) {
   }
 }
 
-function reloadOnAgentWrites(panel: Panel) {
+function reloadOnAgentWrites(
+  panel: Panel,
+  modelPath: Readonly<Ref<string | undefined>>,
+) {
   // Returning to a tab fires both events.
   let pendingCheck: Promise<void> | undefined;
 
   function check() {
-    pendingCheck ??= reloadIfWritten(panel).finally(() => {
+    pendingCheck ??= reloadIfWritten(panel, modelPath).finally(() => {
       pendingCheck = undefined;
     });
   }
@@ -117,7 +124,10 @@ function reloadOnAgentWrites(panel: Panel) {
   setInterval(check, CHECK_INTERVAL_MS);
 }
 
-async function reloadIfWritten(panel: Panel) {
+async function reloadIfWritten(
+  panel: Panel,
+  modelPath: Readonly<Ref<string | undefined>>,
+) {
   const { lock } = panel.view.props;
 
   if (
@@ -135,7 +145,7 @@ async function reloadIfWritten(panel: Panel) {
 
   try {
     if (
-      (await hasAgentWritten(panel)) &&
+      (await hasAgentWritten(panel, modelPath)) &&
       (await reloadView(panel, { shouldReloadOnlyWhenSaved: true }))
     ) {
       panel.notification.info(
@@ -147,10 +157,16 @@ async function reloadIfWritten(panel: Panel) {
   }
 }
 
-async function hasAgentWritten(panel: Panel) {
+async function hasAgentWritten(
+  panel: Panel,
+  modelPath: Readonly<Ref<string | undefined>>,
+) {
   const { writtenAt } = await panel.api.get<{ writtenAt: number | null }>(
     PLUGIN_AGENTS_LAST_WRITE_API_ROUTE,
-    { model: panel.view.path, language: panel.language.code ?? undefined },
+    {
+      model: modelPath.value,
+      language: panel.language.code ?? undefined,
+    },
     { silent: true },
   );
 

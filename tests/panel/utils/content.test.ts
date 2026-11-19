@@ -77,13 +77,27 @@ describe("createReferencePageContent", () => {
 });
 
 describe("createContentContext", () => {
-  it("merges currentContent with panel.view.title", () => {
-    mockCurrentContent.value = { body: "hello" };
-    mockView.title = "My Page";
+  it("takes the title from currentContent over panel.view.title", () => {
+    mockCurrentContent.value = { body: "hello", title: "My Page" };
+    mockView.title = "My Page | Preview";
 
     const result = createContentContext();
     expect(result).toEqual({ body: "hello", title: "My Page" });
   });
+
+  it.each([
+    ["no", { body: "hello" }],
+    ["an empty", { body: "hello", title: "" }],
+  ])(
+    "falls back to panel.view.title when currentContent has %s title",
+    (_, content) => {
+      mockCurrentContent.value = content;
+      mockView.title = "photo.jpg";
+
+      const result = createContentContext();
+      expect(result).toEqual({ body: "hello", title: "photo.jpg" });
+    },
+  );
 
   it("stringifies primitives as strings", () => {
     mockCurrentContent.value = { count: 3, flag: false };

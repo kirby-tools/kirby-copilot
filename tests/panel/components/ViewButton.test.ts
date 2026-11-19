@@ -20,10 +20,13 @@ const api = { get: vi.fn() };
 const openPromptDialog = vi.hoisted(() => vi.fn());
 
 vi.mock("kirbyuse", () => ({
-  useContent: () => ({ currentContent: ref({}), isEditable: ref(true) }),
+  useContent: () => ({
+    currentContent: ref({}),
+    isEditable: ref(true),
+    modelPath: ref("pages/about"),
+  }),
   usePanel: () => ({
     api,
-    view: { path: "pages/about" },
     t: (key: string) => key,
   }),
 }));
