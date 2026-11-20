@@ -4,6 +4,9 @@ import type { ConnectedAgent } from "../types";
 import { usePanel } from "kirbyuse";
 import { computed } from "vue";
 
+// Kirby's table cell hands every cell props this one doesn't declare.
+defineOptions({ inheritAttrs: false });
+
 const props = defineProps({
   value: Object as PropType<ConnectedAgent>,
 });
