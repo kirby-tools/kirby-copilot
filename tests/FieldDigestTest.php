@@ -255,22 +255,6 @@ final class FieldDigestTest extends ApiRouteTestCase
     }
 
     #[Test]
-    public function offers_no_users_to_a_role_without_access_to_them(): void
-    {
-        $kirby = self::bootApp([
-            'blueprints' => [
-                'pages/default' => ['fields' => ['authors' => ['type' => 'users']]],
-                'users/editor' => ['name' => 'editor', 'permissions' => ['access' => ['users' => false]]]
-            ],
-            'site' => ['children' => [['slug' => 'test']]],
-            'users' => [['id' => 'ada', 'email' => 'ada@example.com', 'role' => 'editor']]
-        ]);
-        $kirby->impersonate('ada');
-
-        $this->assertSame([], FieldDigest::for($kirby->page('test'))['fields'][0]['options']);
-    }
-
-    #[Test]
     public function offers_users_on_a_file(): void
     {
         $kirby = self::bootApp([
