@@ -57,6 +57,25 @@ final class CreateDraftToolTest extends McpToolTestCase
     }
 
     #[Test]
+    public function renders_the_create_templates_and_field_defaults_with_the_drafts_uuid(): void
+    {
+        $props = $this->props(['blueprints' => [
+            'pages/default' => ['sections' => ['pages' => ['templates' => [2 => 'event']]]],
+            'pages/event' => [
+                'create' => ['title' => 'Event', 'slug' => '{{ page.uuid.id }}'],
+                'fields' => ['ref' => ['type' => 'text', 'default' => '{{ page.uuid.id }}']]
+            ]
+        ]]);
+
+        $result = $this->callTool('create_draft', ['parent' => 'notes', 'template' => 'event'], $props)['structuredContent'];
+
+        $draft = self::bootApp($props)->page($result['page']['id']);
+        $uuid = $draft->uuid()->id();
+        $this->assertSame($uuid, $draft->slug());
+        $this->assertSame($uuid, $draft->ref()->value());
+    }
+
+    #[Test]
     public function refuses_a_blueprint_made_title_whose_fields_are_empty(): void
     {
         $result = $this->callTool('create_draft', ['parent' => 'notes', 'template' => 'event'], $this->eventProps('{{ page.venue }}'));

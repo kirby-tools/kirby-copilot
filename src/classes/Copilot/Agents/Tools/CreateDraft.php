@@ -96,7 +96,8 @@ final class CreateDraft
             'slug' => $resolvedInput['slug'] ?: $title,
             'template' => $template,
             'draft' => true,
-            'content' => $fields->toStoredValues()
+            // The UUID the title, slug and defaults were made with, as Kirby's own create dialog keeps it.
+            'content' => [...$fields->toStoredValues(), 'uuid' => $draft->uuid()?->id()]
         ]);
 
         return [
