@@ -72,10 +72,6 @@ export const copilotSuggestions: CopilotSuggestionsMark = {
     return "copilot-suggestions";
   },
 
-  get schema() {
-    return {};
-  },
-
   keys(this: CopilotSuggestionsMark, _context: WriterMarkContext) {
     return {
       Tab: () => this._acceptSuggestion(),

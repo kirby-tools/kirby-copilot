@@ -22,10 +22,6 @@ export const copilot: CopilotMark = {
     return "copilot";
   },
 
-  get schema() {
-    return {};
-  },
-
   get button() {
     return {
       icon: "sparkling",
