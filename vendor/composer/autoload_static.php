@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit6b86cf02125915d27f04d0daba0e74b1
+class ComposerStaticInit66933539aa6c4d16701abfb02dca4fb2
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -1494,7 +1494,6 @@ class ComposerStaticInit6b86cf02125915d27f04d0daba0e74b1
         'KirbyTools\\Utils\\FieldNormalizer' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-utils/src/FieldNormalizer.php',
         'KirbyTools\\Utils\\FieldResolver' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-utils/src/FieldResolver.php',
         'KirbyTools\\Utils\\ModelResolver' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-utils/src/ModelResolver.php',
-        'KirbyTools\\Utils\\QueryResolver' => __DIR__ . '/..' . '/johannschopplich/kirby-tools-utils/src/QueryResolver.php',
         'Kirby\\ComposerInstaller\\CmsInstaller' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/CmsInstaller.php',
         'Kirby\\ComposerInstaller\\Installer' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/Installer.php',
         'Kirby\\ComposerInstaller\\Plugin' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/Plugin.php',
@@ -2027,9 +2026,9 @@ class ComposerStaticInit6b86cf02125915d27f04d0daba0e74b1
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit6b86cf02125915d27f04d0daba0e74b1::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit6b86cf02125915d27f04d0daba0e74b1::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit6b86cf02125915d27f04d0daba0e74b1::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit66933539aa6c4d16701abfb02dca4fb2::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit66933539aa6c4d16701abfb02dca4fb2::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit66933539aa6c4d16701abfb02dca4fb2::$classMap;
 
         }, null, ClassLoader::class);
     }
