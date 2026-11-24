@@ -10,8 +10,7 @@ Ingredients:
 
 -
   amount: 24g
-  ingredient: |
-    medium protein bread flour (or all-purpose flour)
+  ingredient: 'medium protein bread flour (or all-purpose flour)'
   notes: Levain
 -
   amount: 24g
@@ -31,8 +30,7 @@ Ingredients:
   notes: Autolyse
 -
   amount: 214g
-  ingredient: |
-    medium-protein flour (or all-purpose flour)
+  ingredient: 'medium-protein flour (or all-purpose flour)'
   notes: Autolyse
 -
   amount: 238g
