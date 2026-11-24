@@ -31,7 +31,7 @@
     "guzzlehttp/guzzle": "^7.10"
   },
   "require-dev": {
-    "getkirby/cms": "^6.0@beta",
+    "getkirby/cms": "^6.0",
     "phpunit/phpunit": "^12",
     "vlucas/phpdotenv": "^5"
   },
