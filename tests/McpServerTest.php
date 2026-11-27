@@ -308,7 +308,8 @@ final class McpServerTest extends ApiRouteTestCase
     #[Test]
     public function returns_an_unexpected_failure_as_a_tool_error_that_hides_its_message(): void
     {
-        ini_set('error_log', '/dev/null');
+        $this->expectErrorLog();
+
         $response = $this->handle(
             ['jsonrpc' => '2.0', 'id' => 7, 'method' => 'tools/call', 'params' => ['name' => 'crash', 'arguments' => []]],
             ['MCP-Protocol-Version' => '2025-11-25']

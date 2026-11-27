@@ -193,6 +193,8 @@ final class ProxyTest extends ApiRouteTestCase
     #[Test]
     public function returns_502_json_when_the_transport_fails_before_output(): void
     {
+        $this->expectErrorLog();
+
         $transport = new FakeProxyTransport(
             new ProxyTransportResult(7, 'Failed to connect'),
         );
@@ -210,6 +212,8 @@ final class ProxyTest extends ApiRouteTestCase
     #[Test]
     public function appends_the_error_marker_when_the_transport_fails_mid_stream(): void
     {
+        $this->expectErrorLog();
+
         $chunk = "data: {\"delta\":\"Hi\"}\n\n";
         $transport = new FakeProxyTransport(
             new ProxyTransportResult(28, 'Operation timed out'),
