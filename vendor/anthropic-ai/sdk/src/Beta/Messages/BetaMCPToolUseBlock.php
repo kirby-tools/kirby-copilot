@@ -7,6 +7,7 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type BetaMCPToolUseBlockShape = array{
@@ -23,7 +24,7 @@ final class BetaMCPToolUseBlock implements BaseModel
     use SdkModel;
 
     /** @var 'mcp_tool_use' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('mcp_tool_use'))]
     public string $type = 'mcp_tool_use';
 
     #[Required]
@@ -34,13 +35,13 @@ final class BetaMCPToolUseBlock implements BaseModel
     public array $input;
 
     /**
-     * The name of the MCP tool.
+     * The name of the MCP tool
      */
     #[Required]
     public string $name;
 
     /**
-     * The name of the MCP server.
+     * The name of the MCP server
      */
     #[Required('server_name')]
     public string $serverName;
@@ -56,7 +57,7 @@ final class BetaMCPToolUseBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaMCPToolUseBlock)
+     * (new BetaMCPToolUseBlock())
      *   ->withID(...)
      *   ->withInput(...)
      *   ->withName(...)
@@ -111,7 +112,7 @@ final class BetaMCPToolUseBlock implements BaseModel
     }
 
     /**
-     * The name of the MCP tool.
+     * The name of the MCP tool
      */
     public function withName(string $name): self
     {
@@ -122,7 +123,7 @@ final class BetaMCPToolUseBlock implements BaseModel
     }
 
     /**
-     * The name of the MCP server.
+     * The name of the MCP server
      */
     public function withServerName(string $serverName): self
     {

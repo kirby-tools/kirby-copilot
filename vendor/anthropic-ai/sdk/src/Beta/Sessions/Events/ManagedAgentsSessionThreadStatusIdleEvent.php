@@ -1,0 +1,213 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Beta\Sessions\Events;
+
+use Anthropic\Beta\Sessions\Events\ManagedAgentsSessionThreadStatusIdleEvent\StopReason;
+use Anthropic\Core\Attributes\Required;
+use Anthropic\Core\Concerns\SdkModel;
+use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
+
+/**
+ * A session thread has yielded and is awaiting input. Emitted on the thread's own stream and cross-posted to the primary stream for child threads.
+ *
+ * @phpstan-import-type ManagedAgentsSessionRefusalStopDetailsShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsSessionRefusalStopDetails
+ * @phpstan-import-type StopReasonShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsSessionThreadStatusIdleEvent\StopReason
+ * @phpstan-import-type StopReasonVariants from \Anthropic\Beta\Sessions\Events\ManagedAgentsSessionThreadStatusIdleEvent\StopReason
+ *
+ * @phpstan-type ManagedAgentsSessionThreadStatusIdleEventShape = array{
+ *   id: string,
+ *   agentName: string,
+ *   processedAt: \DateTimeInterface,
+ *   sessionThreadID: string,
+ *   stopDetails: null|ManagedAgentsSessionRefusalStopDetails|ManagedAgentsSessionRefusalStopDetailsShape,
+ *   stopReason: StopReasonShape,
+ *   type: 'session.thread_status_idle',
+ * }
+ */
+final class ManagedAgentsSessionThreadStatusIdleEvent implements BaseModel
+{
+    /** @use SdkModel<ManagedAgentsSessionThreadStatusIdleEventShape> */
+    use SdkModel;
+
+    /** @var 'session.thread_status_idle' $type */
+    #[Required(type: new ConstantOf('session.thread_status_idle'))]
+    public string $type = 'session.thread_status_idle';
+
+    /**
+     * Unique identifier for this event.
+     */
+    #[Required]
+    public string $id;
+
+    /**
+     * Name of the agent the thread runs.
+     */
+    #[Required('agent_name')]
+    public string $agentName;
+
+    /**
+     * Timestamp of the status transition.
+     */
+    #[Required('processed_at')]
+    public \DateTimeInterface $processedAt;
+
+    /**
+     * Public sthr_ ID of the thread that went idle.
+     */
+    #[Required('session_thread_id')]
+    public string $sessionThreadID;
+
+    /**
+     * Structured information about why the thread stopped. `null` when there is nothing more to report.
+     */
+    #[Required('stop_details')]
+    public ?ManagedAgentsSessionRefusalStopDetails $stopDetails;
+
+    /** @var StopReasonVariants $stopReason */
+    #[Required('stop_reason', union: StopReason::class)]
+    public ManagedAgentsSessionEndTurn|ManagedAgentsSessionRequiresAction|ManagedAgentsSessionRetriesExhausted|ManagedAgentsSessionBudgetReached|ManagedAgentsSessionRefusal $stopReason;
+
+    /**
+     * `new ManagedAgentsSessionThreadStatusIdleEvent()` is missing required properties by the API.
+     *
+     * To enforce required parameters use
+     * ```
+     * ManagedAgentsSessionThreadStatusIdleEvent::with(
+     *   id: ...,
+     *   agentName: ...,
+     *   processedAt: ...,
+     *   sessionThreadID: ...,
+     *   stopDetails: ...,
+     *   stopReason: ...,
+     * )
+     * ```
+     *
+     * Otherwise ensure the following setters are called
+     *
+     * ```
+     * (new ManagedAgentsSessionThreadStatusIdleEvent())
+     *   ->withID(...)
+     *   ->withAgentName(...)
+     *   ->withProcessedAt(...)
+     *   ->withSessionThreadID(...)
+     *   ->withStopDetails(...)
+     *   ->withStopReason(...)
+     * ```
+     */
+    public function __construct()
+    {
+        $this->initialize();
+    }
+
+    /**
+     * Construct an instance from the required parameters.
+     *
+     * You must use named parameters to construct any parameters with a default value.
+     *
+     * @param ManagedAgentsSessionRefusalStopDetails|ManagedAgentsSessionRefusalStopDetailsShape|null $stopDetails
+     * @param StopReasonShape $stopReason
+     */
+    public static function with(
+        string $id,
+        string $agentName,
+        \DateTimeInterface $processedAt,
+        string $sessionThreadID,
+        ManagedAgentsSessionRefusalStopDetails|array|null $stopDetails,
+        ManagedAgentsSessionEndTurn|array|ManagedAgentsSessionRequiresAction|ManagedAgentsSessionRetriesExhausted|ManagedAgentsSessionBudgetReached|ManagedAgentsSessionRefusal $stopReason,
+    ): self {
+        $self = new self;
+
+        $self['id'] = $id;
+        $self['agentName'] = $agentName;
+        $self['processedAt'] = $processedAt;
+        $self['sessionThreadID'] = $sessionThreadID;
+        $self['stopDetails'] = $stopDetails;
+        $self['stopReason'] = $stopReason;
+
+        return $self;
+    }
+
+    /**
+     * Unique identifier for this event.
+     */
+    public function withID(string $id): self
+    {
+        $self = clone $this;
+        $self['id'] = $id;
+
+        return $self;
+    }
+
+    /**
+     * Name of the agent the thread runs.
+     */
+    public function withAgentName(string $agentName): self
+    {
+        $self = clone $this;
+        $self['agentName'] = $agentName;
+
+        return $self;
+    }
+
+    /**
+     * Timestamp of the status transition.
+     */
+    public function withProcessedAt(\DateTimeInterface $processedAt): self
+    {
+        $self = clone $this;
+        $self['processedAt'] = $processedAt;
+
+        return $self;
+    }
+
+    /**
+     * Public sthr_ ID of the thread that went idle.
+     */
+    public function withSessionThreadID(string $sessionThreadID): self
+    {
+        $self = clone $this;
+        $self['sessionThreadID'] = $sessionThreadID;
+
+        return $self;
+    }
+
+    /**
+     * Structured information about why the thread stopped. `null` when there is nothing more to report.
+     *
+     * @param ManagedAgentsSessionRefusalStopDetails|ManagedAgentsSessionRefusalStopDetailsShape|null $stopDetails
+     */
+    public function withStopDetails(
+        ManagedAgentsSessionRefusalStopDetails|array|null $stopDetails
+    ): self {
+        $self = clone $this;
+        $self['stopDetails'] = $stopDetails;
+
+        return $self;
+    }
+
+    /**
+     * @param StopReasonShape $stopReason
+     */
+    public function withStopReason(
+        ManagedAgentsSessionEndTurn|array|ManagedAgentsSessionRequiresAction|ManagedAgentsSessionRetriesExhausted|ManagedAgentsSessionBudgetReached|ManagedAgentsSessionRefusal $stopReason,
+    ): self {
+        $self = clone $this;
+        $self['stopReason'] = $stopReason;
+
+        return $self;
+    }
+
+    /**
+     * @param 'session.thread_status_idle' $type
+     */
+    public function withType(string $type): self
+    {
+        $self = clone $this;
+        $self['type'] = $type;
+
+        return $self;
+    }
+}

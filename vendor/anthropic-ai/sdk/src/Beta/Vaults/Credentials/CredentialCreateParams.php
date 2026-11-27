@@ -13,18 +13,19 @@ use Anthropic\Core\Concerns\SdkParams;
 use Anthropic\Core\Contracts\BaseModel;
 
 /**
- * Create Credential.
+ * Create a Credential
  *
  * @see Anthropic\Services\Beta\Vaults\CredentialsService::create()
  *
- * @phpstan-import-type AuthVariants from \Anthropic\Beta\Vaults\Credentials\CredentialCreateParams\Auth
  * @phpstan-import-type AuthShape from \Anthropic\Beta\Vaults\Credentials\CredentialCreateParams\Auth
+ * @phpstan-import-type AuthVariants from \Anthropic\Beta\Vaults\Credentials\CredentialCreateParams\Auth
  *
  * @phpstan-type CredentialCreateParamsShape = array{
  *   auth: AuthShape,
  *   displayName?: string|null,
  *   metadata?: array<string,string>|null,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class CredentialCreateParams implements BaseModel
@@ -34,12 +35,12 @@ final class CredentialCreateParams implements BaseModel
     use SdkParams;
 
     /**
-     * Authentication details for creating a credential.
+     * Authentication configuration for the credential.
      *
      * @var AuthVariants $auth
      */
     #[Required(union: Auth::class)]
-    public ManagedAgentsMCPOAuthCreateParams|ManagedAgentsStaticBearerCreateParams $auth;
+    public ManagedAgentsMCPOAuthCreateParams|ManagedAgentsStaticBearerCreateParams|ManagedAgentsEnvironmentVariableCreateParams $auth;
 
     /**
      * Human-readable name for the credential. Up to 255 characters.
@@ -56,12 +57,20 @@ final class CredentialCreateParams implements BaseModel
     public ?array $metadata;
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this header.
      *
      * @var list<string|value-of<AnthropicBeta>>|null $betas
      */
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
 
     /**
      * `new CredentialCreateParams()` is missing required properties by the API.
@@ -74,7 +83,7 @@ final class CredentialCreateParams implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new CredentialCreateParams)->withAuth(...)
+     * (new CredentialCreateParams())->withAuth(...)
      * ```
      */
     public function __construct()
@@ -92,10 +101,11 @@ final class CredentialCreateParams implements BaseModel
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>>|null $betas
      */
     public static function with(
-        ManagedAgentsMCPOAuthCreateParams|array|ManagedAgentsStaticBearerCreateParams $auth,
+        ManagedAgentsMCPOAuthCreateParams|array|ManagedAgentsStaticBearerCreateParams|ManagedAgentsEnvironmentVariableCreateParams $auth,
         ?string $displayName = null,
         ?array $metadata = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
     ): self {
         $self = new self;
 
@@ -104,17 +114,18 @@ final class CredentialCreateParams implements BaseModel
         null !== $displayName && $self['displayName'] = $displayName;
         null !== $metadata && $self['metadata'] = $metadata;
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
 
     /**
-     * Authentication details for creating a credential.
+     * Authentication configuration for the credential.
      *
      * @param AuthShape $auth
      */
     public function withAuth(
-        ManagedAgentsMCPOAuthCreateParams|array|ManagedAgentsStaticBearerCreateParams $auth,
+        ManagedAgentsMCPOAuthCreateParams|array|ManagedAgentsStaticBearerCreateParams|ManagedAgentsEnvironmentVariableCreateParams $auth,
     ): self {
         $self = clone $this;
         $self['auth'] = $auth;
@@ -147,7 +158,7 @@ final class CredentialCreateParams implements BaseModel
     }
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this header.
      *
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas
      */
@@ -155,6 +166,19 @@ final class CredentialCreateParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

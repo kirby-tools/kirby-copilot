@@ -1,0 +1,30 @@
+name: Ruby Lint
+
+on:
+  pull_request:
+    paths:
+      - "libraries/ruby/**"
+      - ".github/workflows/ruby-lint.yml"
+
+jobs:
+  build:
+    name: Ruby Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          working-directory: libraries/ruby
+
+      - name: Install dependencies
+        run: |
+          bundler install
+        working-directory: libraries/ruby
+
+      - name: Build
+        run: |
+          bundler exec rake build
+        working-directory: libraries/ruby

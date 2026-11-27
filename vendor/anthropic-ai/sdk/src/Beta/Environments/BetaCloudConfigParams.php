@@ -9,6 +9,7 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * Request params for `cloud` environment configuration.
@@ -16,9 +17,9 @@ use Anthropic\Core\Contracts\BaseModel;
  * Fields default to null; on update, omitted fields preserve the
  * existing value.
  *
- * @phpstan-import-type NetworkingVariants from \Anthropic\Beta\Environments\BetaCloudConfigParams\Networking
  * @phpstan-import-type NetworkingShape from \Anthropic\Beta\Environments\BetaCloudConfigParams\Networking
  * @phpstan-import-type BetaPackagesParamsShape from \Anthropic\Beta\Environments\BetaPackagesParams
+ * @phpstan-import-type NetworkingVariants from \Anthropic\Beta\Environments\BetaCloudConfigParams\Networking
  *
  * @phpstan-type BetaCloudConfigParamsShape = array{
  *   type: 'cloud',
@@ -32,11 +33,11 @@ final class BetaCloudConfigParams implements BaseModel
     use SdkModel;
 
     /**
-     * Environment type.
+     * Environment type
      *
      * @var 'cloud' $type
      */
-    #[Required]
+    #[Required(type: new ConstantOf('cloud'))]
     public string $type = 'cloud';
 
     /**
@@ -48,9 +49,7 @@ final class BetaCloudConfigParams implements BaseModel
     public BetaUnrestrictedNetwork|BetaLimitedNetworkParams|null $networking;
 
     /**
-     * Specify packages (and optionally their versions) available in this environment.
-     *
-     * When versioning, use the version semantics relevant for the package manager, e.g. for `pip` use `package==1.0.0`. You are responsible for validating the package and version exist. Unversioned installs the latest.
+     * Package manager configuration. Under `limited` networking, requires `networking.allow_package_managers` to be `true`. Omit on update to preserve the existing value.
      */
     #[Optional(nullable: true)]
     public ?BetaPackagesParams $packages;
@@ -81,7 +80,7 @@ final class BetaCloudConfigParams implements BaseModel
     }
 
     /**
-     * Environment type.
+     * Environment type
      *
      * @param 'cloud' $type
      */
@@ -108,9 +107,7 @@ final class BetaCloudConfigParams implements BaseModel
     }
 
     /**
-     * Specify packages (and optionally their versions) available in this environment.
-     *
-     * When versioning, use the version semantics relevant for the package manager, e.g. for `pip` use `package==1.0.0`. You are responsible for validating the package and version exist. Unversioned installs the latest.
+     * Package manager configuration. Under `limited` networking, requires `networking.allow_package_managers` to be `true`. Omit on update to preserve the existing value.
      *
      * @param BetaPackagesParams|BetaPackagesParamsShape|null $packages
      */

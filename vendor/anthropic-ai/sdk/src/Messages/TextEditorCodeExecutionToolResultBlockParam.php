@@ -8,11 +8,12 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type ContentVariants from \Anthropic\Messages\TextEditorCodeExecutionToolResultBlockParam\Content
  * @phpstan-import-type ContentShape from \Anthropic\Messages\TextEditorCodeExecutionToolResultBlockParam\Content
  * @phpstan-import-type CacheControlEphemeralShape from \Anthropic\Messages\CacheControlEphemeral
+ * @phpstan-import-type ContentVariants from \Anthropic\Messages\TextEditorCodeExecutionToolResultBlockParam\Content
  *
  * @phpstan-type TextEditorCodeExecutionToolResultBlockParamShape = array{
  *   content: ContentShape,
@@ -27,7 +28,7 @@ final class TextEditorCodeExecutionToolResultBlockParam implements BaseModel
     use SdkModel;
 
     /** @var 'text_editor_code_execution_tool_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('text_editor_code_execution_tool_result'))]
     public string $type = 'text_editor_code_execution_tool_result';
 
     /** @var ContentVariants $content */
@@ -54,7 +55,7 @@ final class TextEditorCodeExecutionToolResultBlockParam implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new TextEditorCodeExecutionToolResultBlockParam)
+     * (new TextEditorCodeExecutionToolResultBlockParam())
      *   ->withContent(...)
      *   ->withToolUseID(...)
      * ```

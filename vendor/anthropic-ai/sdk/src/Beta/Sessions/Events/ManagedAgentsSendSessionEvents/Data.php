@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Anthropic\Beta\Sessions\Events\ManagedAgentsSendSessionEvents;
 
+use Anthropic\Beta\Sessions\BetaManagedAgentsSystemMessageEvent;
+use Anthropic\Beta\Sessions\BetaManagedAgentsUserToolResultEvent;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsUserCustomToolResultEvent;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsUserDefineOutcomeEvent;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsUserInterruptEvent;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsUserMessageEvent;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsUserToolConfirmationEvent;
@@ -19,9 +22,12 @@ use Anthropic\Core\Conversion\Contracts\ConverterSource;
  * @phpstan-import-type ManagedAgentsUserInterruptEventShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsUserInterruptEvent
  * @phpstan-import-type ManagedAgentsUserToolConfirmationEventShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsUserToolConfirmationEvent
  * @phpstan-import-type ManagedAgentsUserCustomToolResultEventShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsUserCustomToolResultEvent
+ * @phpstan-import-type ManagedAgentsUserDefineOutcomeEventShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsUserDefineOutcomeEvent
+ * @phpstan-import-type BetaManagedAgentsUserToolResultEventShape from \Anthropic\Beta\Sessions\BetaManagedAgentsUserToolResultEvent
+ * @phpstan-import-type BetaManagedAgentsSystemMessageEventShape from \Anthropic\Beta\Sessions\BetaManagedAgentsSystemMessageEvent
  *
- * @phpstan-type DataVariants = ManagedAgentsUserMessageEvent|ManagedAgentsUserInterruptEvent|ManagedAgentsUserToolConfirmationEvent|ManagedAgentsUserCustomToolResultEvent
- * @phpstan-type DataShape = DataVariants|ManagedAgentsUserMessageEventShape|ManagedAgentsUserInterruptEventShape|ManagedAgentsUserToolConfirmationEventShape|ManagedAgentsUserCustomToolResultEventShape
+ * @phpstan-type DataVariants = ManagedAgentsUserMessageEvent|ManagedAgentsUserInterruptEvent|ManagedAgentsUserToolConfirmationEvent|ManagedAgentsUserCustomToolResultEvent|ManagedAgentsUserDefineOutcomeEvent|BetaManagedAgentsUserToolResultEvent|BetaManagedAgentsSystemMessageEvent
+ * @phpstan-type DataShape = DataVariants|ManagedAgentsUserMessageEventShape|ManagedAgentsUserInterruptEventShape|ManagedAgentsUserToolConfirmationEventShape|ManagedAgentsUserCustomToolResultEventShape|ManagedAgentsUserDefineOutcomeEventShape|BetaManagedAgentsUserToolResultEventShape|BetaManagedAgentsSystemMessageEventShape
  */
 final class Data implements ConverterSource
 {
@@ -42,6 +48,9 @@ final class Data implements ConverterSource
             'user.interrupt' => ManagedAgentsUserInterruptEvent::class,
             'user.tool_confirmation' => ManagedAgentsUserToolConfirmationEvent::class,
             'user.custom_tool_result' => ManagedAgentsUserCustomToolResultEvent::class,
+            'user.define_outcome' => ManagedAgentsUserDefineOutcomeEvent::class,
+            'user.tool_result' => BetaManagedAgentsUserToolResultEvent::class,
+            'system.message' => BetaManagedAgentsSystemMessageEvent::class,
         ];
     }
 }

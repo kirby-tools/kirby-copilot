@@ -4,133 +4,142 @@ declare(strict_types=1);
 
 namespace Anthropic\Beta\Agents;
 
-use Anthropic\Beta\Agents\BetaManagedAgentsAgentToolConfigParams\Name;
-use Anthropic\Beta\Agents\BetaManagedAgentsAgentToolConfigParams\PermissionPolicy;
-use Anthropic\Core\Attributes\Optional;
-use Anthropic\Core\Attributes\Required;
-use Anthropic\Core\Concerns\SdkModel;
-use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Beta\Agents\BetaManagedAgentsAgentToolConfigParams\Type;
+use Anthropic\Core\Concerns\SdkUnion;
+use Anthropic\Core\Conversion\Contracts\Converter;
+use Anthropic\Core\Conversion\Contracts\ConverterSource;
 
 /**
  * Configuration override for a specific tool within a toolset.
  *
- * @phpstan-import-type PermissionPolicyVariants from \Anthropic\Beta\Agents\BetaManagedAgentsAgentToolConfigParams\PermissionPolicy
- * @phpstan-import-type PermissionPolicyShape from \Anthropic\Beta\Agents\BetaManagedAgentsAgentToolConfigParams\PermissionPolicy
+ * @phpstan-import-type BetaManagedAgentsBashToolConfigParamsShape from \Anthropic\Beta\Agents\BetaManagedAgentsBashToolConfigParams
+ * @phpstan-import-type BetaManagedAgentsEditToolConfigParamsShape from \Anthropic\Beta\Agents\BetaManagedAgentsEditToolConfigParams
+ * @phpstan-import-type BetaManagedAgentsReadToolConfigParamsShape from \Anthropic\Beta\Agents\BetaManagedAgentsReadToolConfigParams
+ * @phpstan-import-type BetaManagedAgentsWriteToolConfigParamsShape from \Anthropic\Beta\Agents\BetaManagedAgentsWriteToolConfigParams
+ * @phpstan-import-type BetaManagedAgentsGlobToolConfigParamsShape from \Anthropic\Beta\Agents\BetaManagedAgentsGlobToolConfigParams
+ * @phpstan-import-type BetaManagedAgentsGrepToolConfigParamsShape from \Anthropic\Beta\Agents\BetaManagedAgentsGrepToolConfigParams
+ * @phpstan-import-type BetaManagedAgentsWebFetchToolConfigParamsShape from \Anthropic\Beta\Agents\BetaManagedAgentsWebFetchToolConfigParams
+ * @phpstan-import-type BetaManagedAgentsWebSearchToolConfigParamsShape from \Anthropic\Beta\Agents\BetaManagedAgentsWebSearchToolConfigParams
+ * @phpstan-import-type PermissionPolicyShape from \Anthropic\Beta\Agents\BetaManagedAgentsBashToolConfigParams\PermissionPolicy
+ * @phpstan-import-type PermissionPolicyShape from \Anthropic\Beta\Agents\BetaManagedAgentsEditToolConfigParams\PermissionPolicy as PermissionPolicyShape1
+ * @phpstan-import-type PermissionPolicyShape from \Anthropic\Beta\Agents\BetaManagedAgentsReadToolConfigParams\PermissionPolicy as PermissionPolicyShape2
+ * @phpstan-import-type PermissionPolicyShape from \Anthropic\Beta\Agents\BetaManagedAgentsWriteToolConfigParams\PermissionPolicy as PermissionPolicyShape3
+ * @phpstan-import-type PermissionPolicyShape from \Anthropic\Beta\Agents\BetaManagedAgentsGlobToolConfigParams\PermissionPolicy as PermissionPolicyShape4
+ * @phpstan-import-type PermissionPolicyShape from \Anthropic\Beta\Agents\BetaManagedAgentsGrepToolConfigParams\PermissionPolicy as PermissionPolicyShape5
+ * @phpstan-import-type PermissionPolicyShape from \Anthropic\Beta\Agents\BetaManagedAgentsWebFetchToolConfigParams\PermissionPolicy as PermissionPolicyShape6
+ * @phpstan-import-type PermissionPolicyShape from \Anthropic\Beta\Agents\BetaManagedAgentsWebSearchToolConfigParams\PermissionPolicy as PermissionPolicyShape7
+ * @phpstan-import-type BetaManagedAgentsWebFetchURLSourcesParamsShape from \Anthropic\Beta\Agents\BetaManagedAgentsWebFetchURLSourcesParams
+ * @phpstan-import-type BetaManagedAgentsUserLocationShape from \Anthropic\Beta\Agents\BetaManagedAgentsUserLocation
  *
- * @phpstan-type BetaManagedAgentsAgentToolConfigParamsShape = array{
- *   name: Name|value-of<Name>,
- *   enabled?: bool|null,
- *   permissionPolicy?: PermissionPolicyShape|null,
- * }
+ * @phpstan-type BetaManagedAgentsAgentToolConfigParamsVariants = BetaManagedAgentsBashToolConfigParams|BetaManagedAgentsEditToolConfigParams|BetaManagedAgentsReadToolConfigParams|BetaManagedAgentsWriteToolConfigParams|BetaManagedAgentsGlobToolConfigParams|BetaManagedAgentsGrepToolConfigParams|BetaManagedAgentsWebFetchToolConfigParams|BetaManagedAgentsWebSearchToolConfigParams
+ * @phpstan-type BetaManagedAgentsAgentToolConfigParamsShape = BetaManagedAgentsAgentToolConfigParamsVariants|BetaManagedAgentsBashToolConfigParamsShape|BetaManagedAgentsEditToolConfigParamsShape|BetaManagedAgentsReadToolConfigParamsShape|BetaManagedAgentsWriteToolConfigParamsShape|BetaManagedAgentsGlobToolConfigParamsShape|BetaManagedAgentsGrepToolConfigParamsShape|BetaManagedAgentsWebFetchToolConfigParamsShape|BetaManagedAgentsWebSearchToolConfigParamsShape
  */
-final class BetaManagedAgentsAgentToolConfigParams implements BaseModel
+final class BetaManagedAgentsAgentToolConfigParams implements ConverterSource
 {
-    /** @use SdkModel<BetaManagedAgentsAgentToolConfigParamsShape> */
-    use SdkModel;
+    use SdkUnion;
 
-    /**
-     * Built-in agent tool identifier.
-     *
-     * @var value-of<Name> $name
-     */
-    #[Required(enum: Name::class)]
-    public string $name;
-
-    /**
-     * Whether this tool is enabled and available to Claude. Overrides the default_config setting.
-     */
-    #[Optional(nullable: true)]
-    public ?bool $enabled;
-
-    /**
-     * Permission policy for tool execution.
-     *
-     * @var PermissionPolicyVariants|null $permissionPolicy
-     */
-    #[Optional(
-        'permission_policy',
-        union: PermissionPolicy::class,
-        nullable: true
-    )]
-    public BetaManagedAgentsAlwaysAllowPolicy|BetaManagedAgentsAlwaysAskPolicy|null $permissionPolicy;
-
-    /**
-     * `new BetaManagedAgentsAgentToolConfigParams()` is missing required properties by the API.
-     *
-     * To enforce required parameters use
-     * ```
-     * BetaManagedAgentsAgentToolConfigParams::with(name: ...)
-     * ```
-     *
-     * Otherwise ensure the following setters are called
-     *
-     * ```
-     * (new BetaManagedAgentsAgentToolConfigParams)->withName(...)
-     * ```
-     */
-    public function __construct()
+    public static function discriminator(): string
     {
-        $this->initialize();
+        return 'type';
     }
 
     /**
-     * Construct an instance from the required parameters.
+     * @return list<string|Converter|ConverterSource>|array<string,string|Converter|ConverterSource>
+     */
+    public static function variants(): array
+    {
+        return [
+            'bash' => BetaManagedAgentsBashToolConfigParams::class,
+            'edit' => BetaManagedAgentsEditToolConfigParams::class,
+            'read' => BetaManagedAgentsReadToolConfigParams::class,
+            'write' => BetaManagedAgentsWriteToolConfigParams::class,
+            'glob' => BetaManagedAgentsGlobToolConfigParams::class,
+            'grep' => BetaManagedAgentsGrepToolConfigParams::class,
+            'web_fetch' => BetaManagedAgentsWebFetchToolConfigParams::class,
+            'web_search' => BetaManagedAgentsWebSearchToolConfigParams::class,
+        ];
+    }
+
+    /**
+     * Constructs the variant whose `type` matches the given value, forwarding the remaining arguments to its own `with()`.
      *
-     * You must use named parameters to construct any parameters with a default value.
+     * @param ($type is Type::BASH|'bash' ? PermissionPolicyShape|null : ($type is Type::EDIT|'edit' ? PermissionPolicyShape1|null : ($type is Type::READ|'read' ? PermissionPolicyShape2|null : ($type is Type::WRITE|'write' ? PermissionPolicyShape3|null : ($type is Type::GLOB|'glob' ? PermissionPolicyShape4|null : ($type is Type::GREP|'grep' ? PermissionPolicyShape5|null : ($type is Type::WEB_FETCH|'web_fetch' ? PermissionPolicyShape6|null : PermissionPolicyShape7|null))))))) $permissionPolicy
+     * @param list<string>|null $allowedDomains
+     * @param list<string>|null $blockedDomains
+     * @param BetaManagedAgentsWebFetchURLSourcesParams|BetaManagedAgentsWebFetchURLSourcesParamsShape|null $urlSources
+     * @param BetaManagedAgentsUserLocation|BetaManagedAgentsUserLocationShape|null $userLocation
      *
-     * @param Name|value-of<Name> $name
-     * @param PermissionPolicyShape|null $permissionPolicy
+     * @return ($type is Type::BASH|'bash' ? BetaManagedAgentsBashToolConfigParams : ($type is Type::EDIT|'edit' ? BetaManagedAgentsEditToolConfigParams : ($type is Type::READ|'read' ? BetaManagedAgentsReadToolConfigParams : ($type is Type::WRITE|'write' ? BetaManagedAgentsWriteToolConfigParams : ($type is Type::GLOB|'glob' ? BetaManagedAgentsGlobToolConfigParams : ($type is Type::GREP|'grep' ? BetaManagedAgentsGrepToolConfigParams : ($type is Type::WEB_FETCH|'web_fetch' ? BetaManagedAgentsWebFetchToolConfigParams : ($type is Type::WEB_SEARCH|'web_search' ? BetaManagedAgentsWebSearchToolConfigParams : BetaManagedAgentsBashToolConfigParams|BetaManagedAgentsEditToolConfigParams|BetaManagedAgentsReadToolConfigParams|BetaManagedAgentsWriteToolConfigParams|BetaManagedAgentsGlobToolConfigParams|BetaManagedAgentsGrepToolConfigParams|BetaManagedAgentsWebFetchToolConfigParams|BetaManagedAgentsWebSearchToolConfigParams))))))))
+     *
+     * @throws \UnhandledMatchError
      */
     public static function with(
-        Name|string $name,
+        Type|string $type,
         ?bool $enabled = null,
-        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy|null $permissionPolicy = null,
-    ): self {
-        $self = new self;
-
-        $self['name'] = $name;
-
-        null !== $enabled && $self['enabled'] = $enabled;
-        null !== $permissionPolicy && $self['permissionPolicy'] = $permissionPolicy;
-
-        return $self;
-    }
-
-    /**
-     * Built-in agent tool identifier.
-     *
-     * @param Name|value-of<Name> $name
-     */
-    public function withName(Name|string $name): self
-    {
-        $self = clone $this;
-        $self['name'] = $name;
-
-        return $self;
-    }
-
-    /**
-     * Whether this tool is enabled and available to Claude. Overrides the default_config setting.
-     */
-    public function withEnabled(?bool $enabled): self
-    {
-        $self = clone $this;
-        $self['enabled'] = $enabled;
-
-        return $self;
-    }
-
-    /**
-     * Permission policy for tool execution.
-     *
-     * @param PermissionPolicyShape|null $permissionPolicy
-     */
-    public function withPermissionPolicy(
-        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy|null $permissionPolicy,
-    ): self {
-        $self = clone $this;
-        $self['permissionPolicy'] = $permissionPolicy;
-
-        return $self;
+        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy|BetaManagedAgentsAutoPolicy|null $permissionPolicy = null,
+        ?array $allowedDomains = null,
+        ?array $blockedDomains = null,
+        ?int $maxContentTokens = null,
+        BetaManagedAgentsWebFetchURLSourcesParams|array|null $urlSources = null,
+        BetaManagedAgentsUserLocation|array|null $userLocation = null,
+    ): BetaManagedAgentsBashToolConfigParams|BetaManagedAgentsEditToolConfigParams|BetaManagedAgentsReadToolConfigParams|BetaManagedAgentsWriteToolConfigParams|BetaManagedAgentsGlobToolConfigParams|BetaManagedAgentsGrepToolConfigParams|BetaManagedAgentsWebFetchToolConfigParams|BetaManagedAgentsWebSearchToolConfigParams {
+        return match ($type) {
+            Type::BASH, 'bash' => BetaManagedAgentsBashToolConfigParams::with(
+                type: 'bash',
+                enabled: $enabled,
+                // @phpstan-ignore argument.type
+                permissionPolicy: $permissionPolicy,
+            ),
+            Type::EDIT, 'edit' => BetaManagedAgentsEditToolConfigParams::with(
+                type: 'edit',
+                enabled: $enabled,
+                // @phpstan-ignore argument.type
+                permissionPolicy: $permissionPolicy,
+            ),
+            Type::READ, 'read' => BetaManagedAgentsReadToolConfigParams::with(
+                type: 'read',
+                enabled: $enabled,
+                // @phpstan-ignore argument.type
+                permissionPolicy: $permissionPolicy,
+            ),
+            Type::WRITE, 'write' => BetaManagedAgentsWriteToolConfigParams::with(
+                type: 'write',
+                enabled: $enabled,
+                // @phpstan-ignore argument.type
+                permissionPolicy: $permissionPolicy,
+            ),
+            Type::GLOB, 'glob' => BetaManagedAgentsGlobToolConfigParams::with(
+                type: 'glob',
+                enabled: $enabled,
+                // @phpstan-ignore argument.type
+                permissionPolicy: $permissionPolicy,
+            ),
+            Type::GREP, 'grep' => BetaManagedAgentsGrepToolConfigParams::with(
+                type: 'grep',
+                enabled: $enabled,
+                // @phpstan-ignore argument.type
+                permissionPolicy: $permissionPolicy,
+            ),
+            Type::WEB_FETCH, 'web_fetch' => BetaManagedAgentsWebFetchToolConfigParams::with(
+                type: 'web_fetch',
+                allowedDomains: $allowedDomains,
+                blockedDomains: $blockedDomains,
+                enabled: $enabled,
+                maxContentTokens: $maxContentTokens,
+                // @phpstan-ignore argument.type
+                permissionPolicy: $permissionPolicy,
+                urlSources: $urlSources,
+            ),
+            Type::WEB_SEARCH, 'web_search' => BetaManagedAgentsWebSearchToolConfigParams::with(
+                type: 'web_search',
+                allowedDomains: $allowedDomains,
+                blockedDomains: $blockedDomains,
+                enabled: $enabled,
+                // @phpstan-ignore argument.type
+                permissionPolicy: $permissionPolicy,
+                userLocation: $userLocation,
+            ),
+            default => throw new \UnhandledMatchError(sprintf('Unhandled match case %s', var_export($type, true)))
+        };
     }
 }

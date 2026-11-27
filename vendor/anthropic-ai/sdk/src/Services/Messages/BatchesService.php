@@ -4,17 +4,22 @@ declare(strict_types=1);
 
 namespace Anthropic\Services\Messages;
 
+use Anthropic\ClaudeCodeKeyCreatorNotMemberException;
 use Anthropic\Client;
+use Anthropic\CMEKKeyDisabledException;
 use Anthropic\Core\Contracts\BaseStream;
 use Anthropic\Core\Exceptions\APIException;
 use Anthropic\Core\Util;
+use Anthropic\EnforcedSpendLimitReachedException;
 use Anthropic\Messages\Batches\BatchCreateParams\Request;
 use Anthropic\Messages\Batches\DeletedMessageBatch;
 use Anthropic\Messages\Batches\MessageBatch;
 use Anthropic\Messages\Batches\MessageBatchIndividualResponse;
+use Anthropic\OrganizationOnHoldException;
 use Anthropic\Page;
 use Anthropic\RequestOptions;
 use Anthropic\ServiceContracts\Messages\BatchesContract;
+use Anthropic\WorkspaceHumanReviewDisabledException;
 
 /**
  * @phpstan-import-type RequestShape from \Anthropic\Messages\Batches\BatchCreateParams\Request
@@ -42,18 +47,35 @@ final class BatchesService implements BatchesContract
      *
      * The Message Batches API can be used to process multiple Messages API requests at once. Once a Message Batch is created, it begins processing immediately. Batches can take up to 24 hours to complete.
      *
-     * Learn more about the Message Batches API in our [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
+     * Learn more about the Message Batches API in our [user guide](https://platform.claude.com/docs/en/build-with-claude/batch-processing)
      *
-     * @param list<Request|RequestShape> $requests List of requests for prompt completion. Each is an individual request to create a Message.
+     * @param list<Request|RequestShape> $requests Body param: List of requests for prompt completion. Each is an individual request to create a Message.
+     * @param string $userProfileID Header param: The user profile ID to attribute the requests in this batch to. Use when acting on behalf of a party other than your organization. Applies to every request in the batch; an individual request whose `user_profile_id` body field conflicts with this header is errored.
+     * @param string $workspaceID Header param: Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CMEKKeyDisabledException
+     * @throws OrganizationOnHoldException
+     * @throws WorkspaceHumanReviewDisabledException
+     * @throws EnforcedSpendLimitReachedException
      * @throws APIException
      */
     public function create(
         array $requests,
-        RequestOptions|array|null $requestOptions = null
+        ?string $userProfileID = null,
+        ?string $workspaceID = null,
+        RequestOptions|array|null $requestOptions = null,
     ): MessageBatch {
-        $params = Util::removeNulls(['requests' => $requests]);
+        $params = Util::removeNulls(
+            [
+                'requests' => $requests,
+                'userProfileID' => $userProfileID,
+                'workspaceID' => $workspaceID,
+            ],
+        );
 
         // @phpstan-ignore-next-line argument.type
         $response = $this->raw->create(params: $params, requestOptions: $requestOptions);
@@ -66,19 +88,27 @@ final class BatchesService implements BatchesContract
      *
      * This endpoint is idempotent and can be used to poll for Message Batch completion. To access the results of a Message Batch, make a request to the `results_url` field in the response.
      *
-     * Learn more about the Message Batches API in our [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
+     * Learn more about the Message Batches API in our [user guide](https://platform.claude.com/docs/en/build-with-claude/batch-processing)
      *
-     * @param string $messageBatchID ID of the Message Batch
+     * @param string $messageBatchID ID of the Message Batch.
+     * @param string $workspaceID Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function retrieve(
         string $messageBatchID,
-        RequestOptions|array|null $requestOptions = null
+        ?string $workspaceID = null,
+        RequestOptions|array|null $requestOptions = null,
     ): MessageBatch {
+        $params = Util::removeNulls(['workspaceID' => $workspaceID]);
+
         // @phpstan-ignore-next-line argument.type
-        $response = $this->raw->retrieve($messageBatchID, requestOptions: $requestOptions);
+        $response = $this->raw->retrieve($messageBatchID, params: $params, requestOptions: $requestOptions);
 
         return $response->parse();
     }
@@ -88,27 +118,38 @@ final class BatchesService implements BatchesContract
      *
      * List all Message Batches within a Workspace. Most recently created batches are returned first.
      *
-     * Learn more about the Message Batches API in our [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
+     * Learn more about the Message Batches API in our [user guide](https://platform.claude.com/docs/en/build-with-claude/batch-processing)
      *
-     * @param string $afterID ID of the object to use as a cursor for pagination. When provided, returns the page of results immediately after this object.
-     * @param string $beforeID ID of the object to use as a cursor for pagination. When provided, returns the page of results immediately before this object.
-     * @param int $limit Number of items to return per page.
+     * @param string $afterID Query param: ID of the object to use as a cursor for pagination. When provided, returns the page of results immediately after this object.
+     * @param string $beforeID Query param: ID of the object to use as a cursor for pagination. When provided, returns the page of results immediately before this object.
+     * @param int $limit Query param: Number of items to return per page.
      *
      * Defaults to `20`. Ranges from `1` to `1000`.
+     * @param string $workspaceID Header param: Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
      * @return Page<MessageBatch>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function list(
         ?string $afterID = null,
         ?string $beforeID = null,
-        int $limit = 20,
+        ?int $limit = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): Page {
         $params = Util::removeNulls(
-            ['afterID' => $afterID, 'beforeID' => $beforeID, 'limit' => $limit]
+            [
+                'afterID' => $afterID,
+                'beforeID' => $beforeID,
+                'limit' => $limit,
+                'workspaceID' => $workspaceID,
+            ],
         );
 
         // @phpstan-ignore-next-line argument.type
@@ -124,19 +165,27 @@ final class BatchesService implements BatchesContract
      *
      * Message Batches can only be deleted once they've finished processing. If you'd like to delete an in-progress batch, you must first cancel it.
      *
-     * Learn more about the Message Batches API in our [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
+     * Learn more about the Message Batches API in our [user guide](https://platform.claude.com/docs/en/build-with-claude/batch-processing)
      *
-     * @param string $messageBatchID ID of the Message Batch
+     * @param string $messageBatchID ID of the Message Batch.
+     * @param string $workspaceID Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function delete(
         string $messageBatchID,
-        RequestOptions|array|null $requestOptions = null
+        ?string $workspaceID = null,
+        RequestOptions|array|null $requestOptions = null,
     ): DeletedMessageBatch {
+        $params = Util::removeNulls(['workspaceID' => $workspaceID]);
+
         // @phpstan-ignore-next-line argument.type
-        $response = $this->raw->delete($messageBatchID, requestOptions: $requestOptions);
+        $response = $this->raw->delete($messageBatchID, params: $params, requestOptions: $requestOptions);
 
         return $response->parse();
     }
@@ -148,19 +197,27 @@ final class BatchesService implements BatchesContract
      *
      * The number of canceled requests is specified in `request_counts`. To determine which requests were canceled, check the individual results within the batch. Note that cancellation may not result in any canceled requests if they were non-interruptible.
      *
-     * Learn more about the Message Batches API in our [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
+     * Learn more about the Message Batches API in our [user guide](https://platform.claude.com/docs/en/build-with-claude/batch-processing)
      *
-     * @param string $messageBatchID ID of the Message Batch
+     * @param string $messageBatchID ID of the Message Batch.
+     * @param string $workspaceID Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function cancel(
         string $messageBatchID,
-        RequestOptions|array|null $requestOptions = null
+        ?string $workspaceID = null,
+        RequestOptions|array|null $requestOptions = null,
     ): MessageBatch {
+        $params = Util::removeNulls(['workspaceID' => $workspaceID]);
+
         // @phpstan-ignore-next-line argument.type
-        $response = $this->raw->cancel($messageBatchID, requestOptions: $requestOptions);
+        $response = $this->raw->cancel($messageBatchID, params: $params, requestOptions: $requestOptions);
 
         return $response->parse();
     }
@@ -168,19 +225,28 @@ final class BatchesService implements BatchesContract
     /**
      * @api
      *
-     * @param string $messageBatchID ID of the Message Batch
+     * @param string $messageBatchID ID of the Message Batch.
+     * @param string $workspaceID Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
      * @return BaseStream<MessageBatchIndividualResponse>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CMEKKeyDisabledException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function resultsStream(
         string $messageBatchID,
-        RequestOptions|array|null $requestOptions = null
+        ?string $workspaceID = null,
+        RequestOptions|array|null $requestOptions = null,
     ): BaseStream {
+        $params = Util::removeNulls(['workspaceID' => $workspaceID]);
+
         // @phpstan-ignore-next-line argument.type
-        $response = $this->raw->resultsStream($messageBatchID, requestOptions: $requestOptions);
+        $response = $this->raw->resultsStream($messageBatchID, params: $params, requestOptions: $requestOptions);
 
         return $response->parse();
     }

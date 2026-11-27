@@ -8,11 +8,12 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type TextCitationParamVariants from \Anthropic\Messages\TextCitationParam
  * @phpstan-import-type CacheControlEphemeralShape from \Anthropic\Messages\CacheControlEphemeral
  * @phpstan-import-type TextCitationParamShape from \Anthropic\Messages\TextCitationParam
+ * @phpstan-import-type TextCitationParamVariants from \Anthropic\Messages\TextCitationParam
  *
  * @phpstan-type TextBlockParamShape = array{
  *   text: string,
@@ -27,7 +28,7 @@ final class TextBlockParam implements BaseModel
     use SdkModel;
 
     /** @var 'text' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('text'))]
     public string $type = 'text';
 
     #[Required]
@@ -54,7 +55,7 @@ final class TextBlockParam implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new TextBlockParam)->withText(...)
+     * (new TextBlockParam())->withText(...)
      * ```
      */
     public function __construct()

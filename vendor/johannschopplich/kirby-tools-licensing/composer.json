@@ -2,14 +2,14 @@
   "name": "johannschopplich/kirby-tools-licensing",
   "description": "License system backend for Kirby Tools plugins",
   "type": "library",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "license": "AGPL-3.0-or-later",
   "homepage": "https://github.com/kirby-tools/licensing-backend#readme",
   "authors": [
     {
       "name": "Johann Schopplich",
       "email": "hello@johannschopplich.com",
-      "homepage": "https://johannschopplich.com"
+      "homepage": "https://johann.schopplich.com"
     }
   ],
   "require": {

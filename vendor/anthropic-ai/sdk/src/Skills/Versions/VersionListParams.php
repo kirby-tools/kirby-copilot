@@ -1,0 +1,109 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Skills\Versions;
+
+use Anthropic\Core\Attributes\Optional;
+use Anthropic\Core\Concerns\SdkModel;
+use Anthropic\Core\Concerns\SdkParams;
+use Anthropic\Core\Contracts\BaseModel;
+
+/**
+ * List Skill Versions
+ *
+ * @see Anthropic\Services\Skills\VersionsService::list()
+ *
+ * @phpstan-type VersionListParamsShape = array{
+ *   limit?: int|null, page?: string|null, workspaceID?: string|null
+ * }
+ */
+final class VersionListParams implements BaseModel
+{
+    /** @use SdkModel<VersionListParamsShape> */
+    use SdkModel;
+    use SdkParams;
+
+    /**
+     * Number of results to return per page.
+     *
+     * Ranges from `1` to `1000`. Defaults to `20`.
+     */
+    #[Optional(nullable: true)]
+    public ?int $limit;
+
+    /**
+     * Optionally set to the `next_page` token from the previous response.
+     */
+    #[Optional(nullable: true)]
+    public ?string $page;
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
+
+    public function __construct()
+    {
+        $this->initialize();
+    }
+
+    /**
+     * Construct an instance from the required parameters.
+     *
+     * You must use named parameters to construct any parameters with a default value.
+     */
+    public static function with(
+        ?int $limit = null,
+        ?string $page = null,
+        ?string $workspaceID = null
+    ): self {
+        $self = new self;
+
+        null !== $limit && $self['limit'] = $limit;
+        null !== $page && $self['page'] = $page;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
+
+        return $self;
+    }
+
+    /**
+     * Number of results to return per page.
+     *
+     * Ranges from `1` to `1000`. Defaults to `20`.
+     */
+    public function withLimit(?int $limit): self
+    {
+        $self = clone $this;
+        $self['limit'] = $limit;
+
+        return $self;
+    }
+
+    /**
+     * Optionally set to the `next_page` token from the previous response.
+     */
+    public function withPage(?string $page): self
+    {
+        $self = clone $this;
+        $self['page'] = $page;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
+
+        return $self;
+    }
+}

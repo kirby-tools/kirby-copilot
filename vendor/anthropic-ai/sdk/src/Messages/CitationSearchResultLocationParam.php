@@ -7,6 +7,7 @@ namespace Anthropic\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type CitationSearchResultLocationParamShape = array{
@@ -25,21 +26,39 @@ final class CitationSearchResultLocationParam implements BaseModel
     use SdkModel;
 
     /** @var 'search_result_location' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('search_result_location'))]
     public string $type = 'search_result_location';
 
+    /**
+     * The full text of the cited block range, concatenated.
+     *
+     * Always equals the contents of `content[start_block_index:end_block_index]` joined together. The text block is the minimal citable unit; this field is never a substring of a single block. Not counted toward output tokens, and not counted toward input tokens when sent back in subsequent turns.
+     */
     #[Required('cited_text')]
     public string $citedText;
 
+    /**
+     * Exclusive 0-based end index of the cited block range in the source's `content` array.
+     *
+     * Always greater than `start_block_index`; a single-block citation has `end_block_index = start_block_index + 1`.
+     */
     #[Required('end_block_index')]
     public int $endBlockIndex;
 
+    /**
+     * 0-based index of the cited search result among all `search_result` content blocks in the request, in the order they appear across messages and tool results.
+     *
+     * Counted separately from `document_index`; server-side web search results are not included in this count.
+     */
     #[Required('search_result_index')]
     public int $searchResultIndex;
 
     #[Required]
     public string $source;
 
+    /**
+     * 0-based index of the first cited block in the source's `content` array.
+     */
     #[Required('start_block_index')]
     public int $startBlockIndex;
 
@@ -64,7 +83,7 @@ final class CitationSearchResultLocationParam implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new CitationSearchResultLocationParam)
+     * (new CitationSearchResultLocationParam())
      *   ->withCitedText(...)
      *   ->withEndBlockIndex(...)
      *   ->withSearchResultIndex(...)
@@ -103,6 +122,11 @@ final class CitationSearchResultLocationParam implements BaseModel
         return $self;
     }
 
+    /**
+     * The full text of the cited block range, concatenated.
+     *
+     * Always equals the contents of `content[start_block_index:end_block_index]` joined together. The text block is the minimal citable unit; this field is never a substring of a single block. Not counted toward output tokens, and not counted toward input tokens when sent back in subsequent turns.
+     */
     public function withCitedText(string $citedText): self
     {
         $self = clone $this;
@@ -111,6 +135,11 @@ final class CitationSearchResultLocationParam implements BaseModel
         return $self;
     }
 
+    /**
+     * Exclusive 0-based end index of the cited block range in the source's `content` array.
+     *
+     * Always greater than `start_block_index`; a single-block citation has `end_block_index = start_block_index + 1`.
+     */
     public function withEndBlockIndex(int $endBlockIndex): self
     {
         $self = clone $this;
@@ -119,6 +148,11 @@ final class CitationSearchResultLocationParam implements BaseModel
         return $self;
     }
 
+    /**
+     * 0-based index of the cited search result among all `search_result` content blocks in the request, in the order they appear across messages and tool results.
+     *
+     * Counted separately from `document_index`; server-side web search results are not included in this count.
+     */
     public function withSearchResultIndex(int $searchResultIndex): self
     {
         $self = clone $this;
@@ -135,6 +169,9 @@ final class CitationSearchResultLocationParam implements BaseModel
         return $self;
     }
 
+    /**
+     * 0-based index of the first cited block in the source's `content` array.
+     */
     public function withStartBlockIndex(int $startBlockIndex): self
     {
         $self = clone $this;

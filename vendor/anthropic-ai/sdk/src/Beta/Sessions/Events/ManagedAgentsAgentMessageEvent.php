@@ -4,27 +4,33 @@ declare(strict_types=1);
 
 namespace Anthropic\Beta\Sessions\Events;
 
-use Anthropic\Beta\Sessions\Events\ManagedAgentsAgentMessageEvent\Type;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsAgentMessageEvent\Content;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * An agent response event in the session conversation.
  *
- * @phpstan-import-type ManagedAgentsTextBlockShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsTextBlock
+ * @phpstan-import-type ContentShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsAgentMessageEvent\Content
+ * @phpstan-import-type ContentVariants from \Anthropic\Beta\Sessions\Events\ManagedAgentsAgentMessageEvent\Content
  *
  * @phpstan-type ManagedAgentsAgentMessageEventShape = array{
  *   id: string,
- *   content: list<ManagedAgentsTextBlock|ManagedAgentsTextBlockShape>,
+ *   content: list<ContentShape>,
  *   processedAt: \DateTimeInterface,
- *   type: Type|value-of<Type>,
+ *   type: 'agent.message',
  * }
  */
 final class ManagedAgentsAgentMessageEvent implements BaseModel
 {
     /** @use SdkModel<ManagedAgentsAgentMessageEventShape> */
     use SdkModel;
+
+    /** @var 'agent.message' $type */
+    #[Required(type: new ConstantOf('agent.message'))]
+    public string $type = 'agent.message';
 
     /**
      * Unique identifier for this event.
@@ -35,39 +41,32 @@ final class ManagedAgentsAgentMessageEvent implements BaseModel
     /**
      * Array of text blocks comprising the agent response.
      *
-     * @var list<ManagedAgentsTextBlock> $content
+     * @var list<ContentVariants> $content
      */
-    #[Required(list: ManagedAgentsTextBlock::class)]
+    #[Required(list: Content::class)]
     public array $content;
 
     /**
-     * A timestamp in RFC 3339 format.
+     * Timestamp when this response was generated.
      */
     #[Required('processed_at')]
     public \DateTimeInterface $processedAt;
-
-    /** @var value-of<Type> $type */
-    #[Required(enum: Type::class)]
-    public string $type;
 
     /**
      * `new ManagedAgentsAgentMessageEvent()` is missing required properties by the API.
      *
      * To enforce required parameters use
      * ```
-     * ManagedAgentsAgentMessageEvent::with(
-     *   id: ..., content: ..., processedAt: ..., type: ...
-     * )
+     * ManagedAgentsAgentMessageEvent::with(id: ..., content: ..., processedAt: ...)
      * ```
      *
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ManagedAgentsAgentMessageEvent)
+     * (new ManagedAgentsAgentMessageEvent())
      *   ->withID(...)
      *   ->withContent(...)
      *   ->withProcessedAt(...)
-     *   ->withType(...)
      * ```
      */
     public function __construct()
@@ -80,21 +79,18 @@ final class ManagedAgentsAgentMessageEvent implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
-     * @param list<ManagedAgentsTextBlock|ManagedAgentsTextBlockShape> $content
-     * @param Type|value-of<Type> $type
+     * @param list<ContentShape> $content
      */
     public static function with(
         string $id,
         array $content,
-        \DateTimeInterface $processedAt,
-        Type|string $type,
+        \DateTimeInterface $processedAt
     ): self {
         $self = new self;
 
         $self['id'] = $id;
         $self['content'] = $content;
         $self['processedAt'] = $processedAt;
-        $self['type'] = $type;
 
         return $self;
     }
@@ -113,7 +109,7 @@ final class ManagedAgentsAgentMessageEvent implements BaseModel
     /**
      * Array of text blocks comprising the agent response.
      *
-     * @param list<ManagedAgentsTextBlock|ManagedAgentsTextBlockShape> $content
+     * @param list<ContentShape> $content
      */
     public function withContent(array $content): self
     {
@@ -124,7 +120,7 @@ final class ManagedAgentsAgentMessageEvent implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * Timestamp when this response was generated.
      */
     public function withProcessedAt(\DateTimeInterface $processedAt): self
     {
@@ -135,9 +131,9 @@ final class ManagedAgentsAgentMessageEvent implements BaseModel
     }
 
     /**
-     * @param Type|value-of<Type> $type
+     * @param 'agent.message' $type
      */
-    public function withType(Type|string $type): self
+    public function withType(string $type): self
     {
         $self = clone $this;
         $self['type'] = $type;

@@ -4,22 +4,23 @@ declare(strict_types=1);
 
 namespace Anthropic\Beta\MemoryStores;
 
-use Anthropic\Beta\MemoryStores\BetaManagedAgentsMemoryStore\Type;
-use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
+ * A `memory_store`: a named container for agent memories, scoped to a workspace. Attach a store to a session via `resources[]` to mount it as a directory the agent can read and write.
+ *
  * @phpstan-type BetaManagedAgentsMemoryStoreShape = array{
  *   id: string,
+ *   archivedAt: \DateTimeInterface|null,
  *   createdAt: \DateTimeInterface,
+ *   description: string,
+ *   metadata: array<string,string>,
  *   name: string,
- *   type: Type|value-of<Type>,
+ *   type: 'memory_store',
  *   updatedAt: \DateTimeInterface,
- *   archivedAt?: \DateTimeInterface|null,
- *   description?: string|null,
- *   metadata?: array<string,string>|null,
  * }
  */
 final class BetaManagedAgentsMemoryStore implements BaseModel
@@ -27,40 +28,61 @@ final class BetaManagedAgentsMemoryStore implements BaseModel
     /** @use SdkModel<BetaManagedAgentsMemoryStoreShape> */
     use SdkModel;
 
+    /** @var 'memory_store' $type */
+    #[Required(type: new ConstantOf('memory_store'))]
+    public string $type = 'memory_store';
+
+    /**
+     * The unique ID of the memory store (`memstore_...`). Use it to attach the store to a session.
+     */
     #[Required]
     public string $id;
 
     /**
-     * A timestamp in RFC 3339 format.
+     * When the memory store was archived, in RFC 3339, or `null` if it hasn't been.
+     *
+     * Archiving can't be undone. An archived store can't be attached to new sessions. You can't create or update its memories or update the store. You can still read and delete its memories, redact their versions, and delete the store.
+     *
+     * See the [memory guide](https://platform.claude.com/docs/en/managed-agents/memory#archive-a-store) to learn more about archiving.
+     */
+    #[Required('archived_at')]
+    public ?\DateTimeInterface $archivedAt;
+
+    /**
+     * When the memory store was created, in RFC 3339.
      */
     #[Required('created_at')]
     public \DateTimeInterface $createdAt;
 
+    /**
+     * Free-text description of what the store contains, up to 1,024 characters. Included in the agent's system prompt when the store is attached, so word it to be useful to the agent. Empty string when unset.
+     */
+    #[Required]
+    public string $description;
+
+    /**
+     * Key-value pairs for your own use, such as the end user that the store belongs to.
+     *
+     * A store has at most 16 pairs. Keys are 1 to 64 characters long and values at most 512 characters. You can't filter lists by metadata.
+     *
+     * @var array<string,string> $metadata
+     */
+    #[Required(map: 'string')]
+    public array $metadata;
+
+    /**
+     * Human-readable name for the store. 1–255 characters. The store's mount-path slug under `/mnt/memory/` is derived from this name.
+     */
     #[Required]
     public string $name;
 
-    /** @var value-of<Type> $type */
-    #[Required(enum: Type::class)]
-    public string $type;
-
     /**
-     * A timestamp in RFC 3339 format.
+     * When the memory store was last changed, in RFC 3339.
+     *
+     * Changing its `name`, `description`, or `metadata` updates it. Archiving the store does too. Changes to the store's memories don't.
      */
     #[Required('updated_at')]
     public \DateTimeInterface $updatedAt;
-
-    /**
-     * A timestamp in RFC 3339 format.
-     */
-    #[Optional('archived_at', nullable: true)]
-    public ?\DateTimeInterface $archivedAt;
-
-    #[Optional]
-    public ?string $description;
-
-    /** @var array<string,string>|null $metadata */
-    #[Optional(map: 'string')]
-    public ?array $metadata;
 
     /**
      * `new BetaManagedAgentsMemoryStore()` is missing required properties by the API.
@@ -68,18 +90,26 @@ final class BetaManagedAgentsMemoryStore implements BaseModel
      * To enforce required parameters use
      * ```
      * BetaManagedAgentsMemoryStore::with(
-     *   id: ..., createdAt: ..., name: ..., type: ..., updatedAt: ...
+     *   id: ...,
+     *   archivedAt: ...,
+     *   createdAt: ...,
+     *   description: ...,
+     *   metadata: ...,
+     *   name: ...,
+     *   updatedAt: ...,
      * )
      * ```
      *
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaManagedAgentsMemoryStore)
+     * (new BetaManagedAgentsMemoryStore())
      *   ->withID(...)
+     *   ->withArchivedAt(...)
      *   ->withCreatedAt(...)
+     *   ->withDescription(...)
+     *   ->withMetadata(...)
      *   ->withName(...)
-     *   ->withType(...)
      *   ->withUpdatedAt(...)
      * ```
      */
@@ -93,34 +123,33 @@ final class BetaManagedAgentsMemoryStore implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
-     * @param Type|value-of<Type> $type
-     * @param array<string,string>|null $metadata
+     * @param array<string,string> $metadata
      */
     public static function with(
         string $id,
+        ?\DateTimeInterface $archivedAt,
         \DateTimeInterface $createdAt,
+        string $description,
+        array $metadata,
         string $name,
-        Type|string $type,
         \DateTimeInterface $updatedAt,
-        ?\DateTimeInterface $archivedAt = null,
-        ?string $description = null,
-        ?array $metadata = null,
     ): self {
         $self = new self;
 
         $self['id'] = $id;
+        $self['archivedAt'] = $archivedAt;
         $self['createdAt'] = $createdAt;
+        $self['description'] = $description;
+        $self['metadata'] = $metadata;
         $self['name'] = $name;
-        $self['type'] = $type;
         $self['updatedAt'] = $updatedAt;
-
-        null !== $archivedAt && $self['archivedAt'] = $archivedAt;
-        null !== $description && $self['description'] = $description;
-        null !== $metadata && $self['metadata'] = $metadata;
 
         return $self;
     }
 
+    /**
+     * The unique ID of the memory store (`memstore_...`). Use it to attach the store to a session.
+     */
     public function withID(string $id): self
     {
         $self = clone $this;
@@ -130,48 +159,11 @@ final class BetaManagedAgentsMemoryStore implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
-     */
-    public function withCreatedAt(\DateTimeInterface $createdAt): self
-    {
-        $self = clone $this;
-        $self['createdAt'] = $createdAt;
-
-        return $self;
-    }
-
-    public function withName(string $name): self
-    {
-        $self = clone $this;
-        $self['name'] = $name;
-
-        return $self;
-    }
-
-    /**
-     * @param Type|value-of<Type> $type
-     */
-    public function withType(Type|string $type): self
-    {
-        $self = clone $this;
-        $self['type'] = $type;
-
-        return $self;
-    }
-
-    /**
-     * A timestamp in RFC 3339 format.
-     */
-    public function withUpdatedAt(\DateTimeInterface $updatedAt): self
-    {
-        $self = clone $this;
-        $self['updatedAt'] = $updatedAt;
-
-        return $self;
-    }
-
-    /**
-     * A timestamp in RFC 3339 format.
+     * When the memory store was archived, in RFC 3339, or `null` if it hasn't been.
+     *
+     * Archiving can't be undone. An archived store can't be attached to new sessions. You can't create or update its memories or update the store. You can still read and delete its memories, redact their versions, and delete the store.
+     *
+     * See the [memory guide](https://platform.claude.com/docs/en/managed-agents/memory#archive-a-store) to learn more about archiving.
      */
     public function withArchivedAt(?\DateTimeInterface $archivedAt): self
     {
@@ -181,6 +173,20 @@ final class BetaManagedAgentsMemoryStore implements BaseModel
         return $self;
     }
 
+    /**
+     * When the memory store was created, in RFC 3339.
+     */
+    public function withCreatedAt(\DateTimeInterface $createdAt): self
+    {
+        $self = clone $this;
+        $self['createdAt'] = $createdAt;
+
+        return $self;
+    }
+
+    /**
+     * Free-text description of what the store contains, up to 1,024 characters. Included in the agent's system prompt when the store is attached, so word it to be useful to the agent. Empty string when unset.
+     */
     public function withDescription(string $description): self
     {
         $self = clone $this;
@@ -190,12 +196,51 @@ final class BetaManagedAgentsMemoryStore implements BaseModel
     }
 
     /**
+     * Key-value pairs for your own use, such as the end user that the store belongs to.
+     *
+     * A store has at most 16 pairs. Keys are 1 to 64 characters long and values at most 512 characters. You can't filter lists by metadata.
+     *
      * @param array<string,string> $metadata
      */
     public function withMetadata(array $metadata): self
     {
         $self = clone $this;
         $self['metadata'] = $metadata;
+
+        return $self;
+    }
+
+    /**
+     * Human-readable name for the store. 1–255 characters. The store's mount-path slug under `/mnt/memory/` is derived from this name.
+     */
+    public function withName(string $name): self
+    {
+        $self = clone $this;
+        $self['name'] = $name;
+
+        return $self;
+    }
+
+    /**
+     * @param 'memory_store' $type
+     */
+    public function withType(string $type): self
+    {
+        $self = clone $this;
+        $self['type'] = $type;
+
+        return $self;
+    }
+
+    /**
+     * When the memory store was last changed, in RFC 3339.
+     *
+     * Changing its `name`, `description`, or `metadata` updates it. Archiving the store does too. Changes to the store's memories don't.
+     */
+    public function withUpdatedAt(\DateTimeInterface $updatedAt): self
+    {
+        $self = clone $this;
+        $self['updatedAt'] = $updatedAt;
 
         return $self;
     }

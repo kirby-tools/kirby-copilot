@@ -11,12 +11,15 @@ use Anthropic\Core\Concerns\SdkParams;
 use Anthropic\Core\Contracts\BaseModel;
 
 /**
- * Get User Profile.
+ * Get a user profile by ID to check the details stored for it.
+ *
+ * See the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles) for how to set up and manage profiles.
  *
  * @see Anthropic\Services\Beta\UserProfilesService::retrieve()
  *
  * @phpstan-type UserProfileRetrieveParamsShape = array{
- *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null
+ *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class UserProfileRetrieveParams implements BaseModel
@@ -33,6 +36,14 @@ final class UserProfileRetrieveParams implements BaseModel
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
 
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
+
     public function __construct()
     {
         $this->initialize();
@@ -45,11 +56,14 @@ final class UserProfileRetrieveParams implements BaseModel
      *
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>>|null $betas
      */
-    public static function with(?array $betas = null): self
-    {
+    public static function with(
+        ?array $betas = null,
+        ?string $workspaceID = null
+    ): self {
         $self = new self;
 
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
@@ -63,6 +77,19 @@ final class UserProfileRetrieveParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

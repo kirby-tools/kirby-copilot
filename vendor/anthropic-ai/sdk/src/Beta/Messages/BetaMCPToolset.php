@@ -8,6 +8,7 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * Configuration for a group of tools from an MCP server.
@@ -18,6 +19,7 @@ use Anthropic\Core\Contracts\BaseModel;
  * @phpstan-import-type BetaCacheControlEphemeralShape from \Anthropic\Beta\Messages\BetaCacheControlEphemeral
  * @phpstan-import-type BetaMCPToolConfigShape from \Anthropic\Beta\Messages\BetaMCPToolConfig
  * @phpstan-import-type BetaMCPToolDefaultConfigShape from \Anthropic\Beta\Messages\BetaMCPToolDefaultConfig
+ * @phpstan-import-type BetaMCPToolParamShape from \Anthropic\Beta\Messages\BetaMCPToolParam
  *
  * @phpstan-type BetaMCPToolsetShape = array{
  *   mcpServerName: string,
@@ -25,6 +27,7 @@ use Anthropic\Core\Contracts\BaseModel;
  *   cacheControl?: null|BetaCacheControlEphemeral|BetaCacheControlEphemeralShape,
  *   configs?: array<string,BetaMCPToolConfig|BetaMCPToolConfigShape>|null,
  *   defaultConfig?: null|BetaMCPToolDefaultConfig|BetaMCPToolDefaultConfigShape,
+ *   tools?: list<BetaMCPToolParam|BetaMCPToolParamShape>|null,
  * }
  */
 final class BetaMCPToolset implements BaseModel
@@ -33,11 +36,11 @@ final class BetaMCPToolset implements BaseModel
     use SdkModel;
 
     /** @var 'mcp_toolset' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('mcp_toolset'))]
     public string $type = 'mcp_toolset';
 
     /**
-     * Name of the MCP server to configure tools for.
+     * Name of the MCP server to configure tools for
      */
     #[Required('mcp_server_name')]
     public string $mcpServerName;
@@ -49,7 +52,7 @@ final class BetaMCPToolset implements BaseModel
     public ?BetaCacheControlEphemeral $cacheControl;
 
     /**
-     * Configuration overrides for specific tools, keyed by tool name.
+     * Configuration overrides for specific tools, keyed by tool name
      *
      * @var array<string,BetaMCPToolConfig>|null $configs
      */
@@ -57,10 +60,18 @@ final class BetaMCPToolset implements BaseModel
     public ?array $configs;
 
     /**
-     * Default configuration applied to all tools from this server.
+     * Default configuration applied to all tools from this server
      */
     #[Optional('default_config')]
     public ?BetaMCPToolDefaultConfig $defaultConfig;
+
+    /**
+     * The server's tool listing, pinned: when present, the server is not asked for its tools before sampling and exactly these entries, with `default_config` and `configs` applied, are the toolset's tools. Copy it from the `mcp_tool_listing` block of an earlier response.
+     *
+     * @var list<BetaMCPToolParam>|null $tools
+     */
+    #[Optional(list: BetaMCPToolParam::class, nullable: true)]
+    public ?array $tools;
 
     /**
      * `new BetaMCPToolset()` is missing required properties by the API.
@@ -73,7 +84,7 @@ final class BetaMCPToolset implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaMCPToolset)->withMCPServerName(...)
+     * (new BetaMCPToolset())->withMCPServerName(...)
      * ```
      */
     public function __construct()
@@ -89,12 +100,14 @@ final class BetaMCPToolset implements BaseModel
      * @param BetaCacheControlEphemeral|BetaCacheControlEphemeralShape|null $cacheControl
      * @param array<string,BetaMCPToolConfig|BetaMCPToolConfigShape>|null $configs
      * @param BetaMCPToolDefaultConfig|BetaMCPToolDefaultConfigShape|null $defaultConfig
+     * @param list<BetaMCPToolParam|BetaMCPToolParamShape>|null $tools
      */
     public static function with(
         string $mcpServerName,
         BetaCacheControlEphemeral|array|null $cacheControl = null,
         ?array $configs = null,
         BetaMCPToolDefaultConfig|array|null $defaultConfig = null,
+        ?array $tools = null,
     ): self {
         $self = new self;
 
@@ -103,12 +116,13 @@ final class BetaMCPToolset implements BaseModel
         null !== $cacheControl && $self['cacheControl'] = $cacheControl;
         null !== $configs && $self['configs'] = $configs;
         null !== $defaultConfig && $self['defaultConfig'] = $defaultConfig;
+        null !== $tools && $self['tools'] = $tools;
 
         return $self;
     }
 
     /**
-     * Name of the MCP server to configure tools for.
+     * Name of the MCP server to configure tools for
      */
     public function withMCPServerName(string $mcpServerName): self
     {
@@ -144,7 +158,7 @@ final class BetaMCPToolset implements BaseModel
     }
 
     /**
-     * Configuration overrides for specific tools, keyed by tool name.
+     * Configuration overrides for specific tools, keyed by tool name
      *
      * @param array<string,BetaMCPToolConfig|BetaMCPToolConfigShape>|null $configs
      */
@@ -157,7 +171,7 @@ final class BetaMCPToolset implements BaseModel
     }
 
     /**
-     * Default configuration applied to all tools from this server.
+     * Default configuration applied to all tools from this server
      *
      * @param BetaMCPToolDefaultConfig|BetaMCPToolDefaultConfigShape $defaultConfig
      */
@@ -166,6 +180,19 @@ final class BetaMCPToolset implements BaseModel
     ): self {
         $self = clone $this;
         $self['defaultConfig'] = $defaultConfig;
+
+        return $self;
+    }
+
+    /**
+     * The server's tool listing, pinned: when present, the server is not asked for its tools before sampling and exactly these entries, with `default_config` and `configs` applied, are the toolset's tools. Copy it from the `mcp_tool_listing` block of an earlier response.
+     *
+     * @param list<BetaMCPToolParam|BetaMCPToolParamShape>|null $tools
+     */
+    public function withTools(?array $tools): self
+    {
+        $self = clone $this;
+        $self['tools'] = $tools;
 
         return $self;
     }

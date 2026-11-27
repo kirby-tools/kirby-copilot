@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Anthropic\Beta\Sessions\Events;
 
-use Anthropic\Beta\Sessions\Events\ManagedAgentsSpanModelRequestEndEvent\Type;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * Emitted when a model request completes.
@@ -20,13 +20,17 @@ use Anthropic\Core\Contracts\BaseModel;
  *   modelRequestStartID: string,
  *   modelUsage: ManagedAgentsSpanModelUsage|ManagedAgentsSpanModelUsageShape,
  *   processedAt: \DateTimeInterface,
- *   type: Type|value-of<Type>,
+ *   type: 'span.model_request_end',
  * }
  */
 final class ManagedAgentsSpanModelRequestEndEvent implements BaseModel
 {
     /** @use SdkModel<ManagedAgentsSpanModelRequestEndEventShape> */
     use SdkModel;
+
+    /** @var 'span.model_request_end' $type */
+    #[Required(type: new ConstantOf('span.model_request_end'))]
+    public string $type = 'span.model_request_end';
 
     /**
      * Unique identifier for this event.
@@ -47,20 +51,16 @@ final class ManagedAgentsSpanModelRequestEndEvent implements BaseModel
     public string $modelRequestStartID;
 
     /**
-     * Token usage for a single model request.
+     * Token usage for this model request.
      */
     #[Required('model_usage')]
     public ManagedAgentsSpanModelUsage $modelUsage;
 
     /**
-     * A timestamp in RFC 3339 format.
+     * Timestamp when the model request completed.
      */
     #[Required('processed_at')]
     public \DateTimeInterface $processedAt;
-
-    /** @var value-of<Type> $type */
-    #[Required(enum: Type::class)]
-    public string $type;
 
     /**
      * `new ManagedAgentsSpanModelRequestEndEvent()` is missing required properties by the API.
@@ -73,20 +73,18 @@ final class ManagedAgentsSpanModelRequestEndEvent implements BaseModel
      *   modelRequestStartID: ...,
      *   modelUsage: ...,
      *   processedAt: ...,
-     *   type: ...,
      * )
      * ```
      *
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ManagedAgentsSpanModelRequestEndEvent)
+     * (new ManagedAgentsSpanModelRequestEndEvent())
      *   ->withID(...)
      *   ->withIsError(...)
      *   ->withModelRequestStartID(...)
      *   ->withModelUsage(...)
      *   ->withProcessedAt(...)
-     *   ->withType(...)
      * ```
      */
     public function __construct()
@@ -100,7 +98,6 @@ final class ManagedAgentsSpanModelRequestEndEvent implements BaseModel
      * You must use named parameters to construct any parameters with a default value.
      *
      * @param ManagedAgentsSpanModelUsage|ManagedAgentsSpanModelUsageShape $modelUsage
-     * @param Type|value-of<Type> $type
      */
     public static function with(
         string $id,
@@ -108,7 +105,6 @@ final class ManagedAgentsSpanModelRequestEndEvent implements BaseModel
         string $modelRequestStartID,
         ManagedAgentsSpanModelUsage|array $modelUsage,
         \DateTimeInterface $processedAt,
-        Type|string $type,
     ): self {
         $self = new self;
 
@@ -117,7 +113,6 @@ final class ManagedAgentsSpanModelRequestEndEvent implements BaseModel
         $self['modelRequestStartID'] = $modelRequestStartID;
         $self['modelUsage'] = $modelUsage;
         $self['processedAt'] = $processedAt;
-        $self['type'] = $type;
 
         return $self;
     }
@@ -156,7 +151,7 @@ final class ManagedAgentsSpanModelRequestEndEvent implements BaseModel
     }
 
     /**
-     * Token usage for a single model request.
+     * Token usage for this model request.
      *
      * @param ManagedAgentsSpanModelUsage|ManagedAgentsSpanModelUsageShape $modelUsage
      */
@@ -170,7 +165,7 @@ final class ManagedAgentsSpanModelRequestEndEvent implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * Timestamp when the model request completed.
      */
     public function withProcessedAt(\DateTimeInterface $processedAt): self
     {
@@ -181,9 +176,9 @@ final class ManagedAgentsSpanModelRequestEndEvent implements BaseModel
     }
 
     /**
-     * @param Type|value-of<Type> $type
+     * @param 'span.model_request_end' $type
      */
-    public function withType(Type|string $type): self
+    public function withType(string $type): self
     {
         $self = clone $this;
         $self['type'] = $type;

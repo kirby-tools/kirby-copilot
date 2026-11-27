@@ -8,11 +8,12 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type ContentVariants from \Anthropic\Beta\Messages\BetaToolSearchToolResultBlockParam\Content
  * @phpstan-import-type ContentShape from \Anthropic\Beta\Messages\BetaToolSearchToolResultBlockParam\Content
  * @phpstan-import-type BetaCacheControlEphemeralShape from \Anthropic\Beta\Messages\BetaCacheControlEphemeral
+ * @phpstan-import-type ContentVariants from \Anthropic\Beta\Messages\BetaToolSearchToolResultBlockParam\Content
  *
  * @phpstan-type BetaToolSearchToolResultBlockParamShape = array{
  *   content: ContentShape,
@@ -27,7 +28,7 @@ final class BetaToolSearchToolResultBlockParam implements BaseModel
     use SdkModel;
 
     /** @var 'tool_search_tool_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('tool_search_tool_result'))]
     public string $type = 'tool_search_tool_result';
 
     /** @var ContentVariants $content */
@@ -54,7 +55,7 @@ final class BetaToolSearchToolResultBlockParam implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaToolSearchToolResultBlockParam)->withContent(...)->withToolUseID(...)
+     * (new BetaToolSearchToolResultBlockParam())->withContent(...)->withToolUseID(...)
      * ```
      */
     public function __construct()

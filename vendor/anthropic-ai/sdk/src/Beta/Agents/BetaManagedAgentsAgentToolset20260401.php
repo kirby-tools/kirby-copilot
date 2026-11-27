@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace Anthropic\Beta\Agents;
 
-use Anthropic\Beta\Agents\BetaManagedAgentsAgentToolset20260401\Type;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-import-type BetaManagedAgentsAgentToolConfigShape from \Anthropic\Beta\Agents\BetaManagedAgentsAgentToolConfig
  * @phpstan-import-type BetaManagedAgentsAgentToolsetDefaultConfigShape from \Anthropic\Beta\Agents\BetaManagedAgentsAgentToolsetDefaultConfig
+ * @phpstan-import-type BetaManagedAgentsAgentToolConfigVariants from \Anthropic\Beta\Agents\BetaManagedAgentsAgentToolConfig
  *
  * @phpstan-type BetaManagedAgentsAgentToolset20260401Shape = array{
- *   configs: list<BetaManagedAgentsAgentToolConfig|BetaManagedAgentsAgentToolConfigShape>,
+ *   configs: list<BetaManagedAgentsAgentToolConfigShape>,
  *   defaultConfig: BetaManagedAgentsAgentToolsetDefaultConfig|BetaManagedAgentsAgentToolsetDefaultConfigShape,
- *   type: Type|value-of<Type>,
+ *   type: 'agent_toolset_20260401',
  * }
  */
 final class BetaManagedAgentsAgentToolset20260401 implements BaseModel
@@ -24,7 +25,11 @@ final class BetaManagedAgentsAgentToolset20260401 implements BaseModel
     /** @use SdkModel<BetaManagedAgentsAgentToolset20260401Shape> */
     use SdkModel;
 
-    /** @var list<BetaManagedAgentsAgentToolConfig> $configs */
+    /** @var 'agent_toolset_20260401' $type */
+    #[Required(type: new ConstantOf('agent_toolset_20260401'))]
+    public string $type = 'agent_toolset_20260401';
+
+    /** @var list<BetaManagedAgentsAgentToolConfigVariants> $configs */
     #[Required(list: BetaManagedAgentsAgentToolConfig::class)]
     public array $configs;
 
@@ -34,27 +39,20 @@ final class BetaManagedAgentsAgentToolset20260401 implements BaseModel
     #[Required('default_config')]
     public BetaManagedAgentsAgentToolsetDefaultConfig $defaultConfig;
 
-    /** @var value-of<Type> $type */
-    #[Required(enum: Type::class)]
-    public string $type;
-
     /**
      * `new BetaManagedAgentsAgentToolset20260401()` is missing required properties by the API.
      *
      * To enforce required parameters use
      * ```
-     * BetaManagedAgentsAgentToolset20260401::with(
-     *   configs: ..., defaultConfig: ..., type: ...
-     * )
+     * BetaManagedAgentsAgentToolset20260401::with(configs: ..., defaultConfig: ...)
      * ```
      *
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaManagedAgentsAgentToolset20260401)
+     * (new BetaManagedAgentsAgentToolset20260401())
      *   ->withConfigs(...)
      *   ->withDefaultConfig(...)
-     *   ->withType(...)
      * ```
      */
     public function __construct()
@@ -67,26 +65,23 @@ final class BetaManagedAgentsAgentToolset20260401 implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
-     * @param list<BetaManagedAgentsAgentToolConfig|BetaManagedAgentsAgentToolConfigShape> $configs
+     * @param list<BetaManagedAgentsAgentToolConfigShape> $configs
      * @param BetaManagedAgentsAgentToolsetDefaultConfig|BetaManagedAgentsAgentToolsetDefaultConfigShape $defaultConfig
-     * @param Type|value-of<Type> $type
      */
     public static function with(
         array $configs,
         BetaManagedAgentsAgentToolsetDefaultConfig|array $defaultConfig,
-        Type|string $type,
     ): self {
         $self = new self;
 
         $self['configs'] = $configs;
         $self['defaultConfig'] = $defaultConfig;
-        $self['type'] = $type;
 
         return $self;
     }
 
     /**
-     * @param list<BetaManagedAgentsAgentToolConfig|BetaManagedAgentsAgentToolConfigShape> $configs
+     * @param list<BetaManagedAgentsAgentToolConfigShape> $configs
      */
     public function withConfigs(array $configs): self
     {
@@ -111,9 +106,9 @@ final class BetaManagedAgentsAgentToolset20260401 implements BaseModel
     }
 
     /**
-     * @param Type|value-of<Type> $type
+     * @param 'agent_toolset_20260401' $type
      */
-    public function withType(Type|string $type): self
+    public function withType(string $type): self
     {
         $self = clone $this;
         $self['type'] = $type;

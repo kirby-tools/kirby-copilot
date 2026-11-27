@@ -8,6 +8,7 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\WebSearchTool20260209\AllowedCaller;
 
 /**
@@ -39,11 +40,11 @@ final class WebSearchTool20260209 implements BaseModel
      *
      * @var 'web_search' $name
      */
-    #[Required]
+    #[Required(type: new ConstantOf('web_search'))]
     public string $name = 'web_search';
 
     /** @var 'web_search_20260209' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('web_search_20260209'))]
     public string $type = 'web_search_20260209';
 
     /** @var list<value-of<AllowedCaller>>|null $allowedCallers */
@@ -85,7 +86,7 @@ final class WebSearchTool20260209 implements BaseModel
     public ?int $maxUses;
 
     /**
-     * When true, guarantees schema validation on tool names and inputs.
+     * When true, guarantees schema validation on tool names and inputs
      */
     #[Optional]
     public ?bool $strict;
@@ -236,7 +237,7 @@ final class WebSearchTool20260209 implements BaseModel
     }
 
     /**
-     * When true, guarantees schema validation on tool names and inputs.
+     * When true, guarantees schema validation on tool names and inputs
      */
     public function withStrict(bool $strict): self
     {

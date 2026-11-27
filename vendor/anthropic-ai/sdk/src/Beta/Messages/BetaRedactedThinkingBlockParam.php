@@ -7,6 +7,7 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type BetaRedactedThinkingBlockParamShape = array{
@@ -19,9 +20,12 @@ final class BetaRedactedThinkingBlockParam implements BaseModel
     use SdkModel;
 
     /** @var 'redacted_thinking' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('redacted_thinking'))]
     public string $type = 'redacted_thinking';
 
+    /**
+     * The `data` value of this redacted thinking block, exactly as returned by the API in a previous response. Opaque and encrypted; pass it back unchanged.
+     */
     #[Required]
     public string $data;
 
@@ -36,7 +40,7 @@ final class BetaRedactedThinkingBlockParam implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaRedactedThinkingBlockParam)->withData(...)
+     * (new BetaRedactedThinkingBlockParam())->withData(...)
      * ```
      */
     public function __construct()
@@ -58,6 +62,9 @@ final class BetaRedactedThinkingBlockParam implements BaseModel
         return $self;
     }
 
+    /**
+     * The `data` value of this redacted thinking block, exactly as returned by the API in a previous response. Opaque and encrypted; pass it back unchanged.
+     */
     public function withData(string $data): self
     {
         $self = clone $this;

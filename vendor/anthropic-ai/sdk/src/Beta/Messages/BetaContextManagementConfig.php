@@ -10,8 +10,8 @@ use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
 
 /**
- * @phpstan-import-type EditVariants from \Anthropic\Beta\Messages\BetaContextManagementConfig\Edit
  * @phpstan-import-type EditShape from \Anthropic\Beta\Messages\BetaContextManagementConfig\Edit
+ * @phpstan-import-type EditVariants from \Anthropic\Beta\Messages\BetaContextManagementConfig\Edit
  *
  * @phpstan-type BetaContextManagementConfigShape = array{
  *   edits?: list<EditShape>|null
@@ -23,7 +23,7 @@ final class BetaContextManagementConfig implements BaseModel
     use SdkModel;
 
     /**
-     * List of context management edits to apply.
+     * List of context management edits to apply
      *
      * @var list<EditVariants>|null $edits
      */
@@ -52,7 +52,7 @@ final class BetaContextManagementConfig implements BaseModel
     }
 
     /**
-     * List of context management edits to apply.
+     * List of context management edits to apply
      *
      * @param list<EditShape> $edits
      */

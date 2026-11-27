@@ -1,0 +1,209 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Beta\Sessions;
+
+use Anthropic\Core\Attributes\Optional;
+use Anthropic\Core\Attributes\Required;
+use Anthropic\Core\Concerns\SdkModel;
+use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
+
+/**
+ * Emitted when an UpdateSession request changed at least one field. Carries only the fields that changed; absent fields were not part of the update. The new configuration applies from the next turn.
+ *
+ * @phpstan-import-type BetaManagedAgentsSessionAgentShape from \Anthropic\Beta\Sessions\BetaManagedAgentsSessionAgent
+ * @phpstan-import-type BetaManagedAgentsBudgetLimitShape from \Anthropic\Beta\Sessions\BetaManagedAgentsBudgetLimit
+ *
+ * @phpstan-type BetaManagedAgentsSessionUpdatedEventShape = array{
+ *   id: string,
+ *   processedAt: \DateTimeInterface,
+ *   type: 'session.updated',
+ *   agent?: null|BetaManagedAgentsSessionAgent|BetaManagedAgentsSessionAgentShape,
+ *   budget?: null|BetaManagedAgentsBudgetLimit|BetaManagedAgentsBudgetLimitShape,
+ *   metadata?: array<string,string>|null,
+ *   title?: string|null,
+ * }
+ */
+final class BetaManagedAgentsSessionUpdatedEvent implements BaseModel
+{
+    /** @use SdkModel<BetaManagedAgentsSessionUpdatedEventShape> */
+    use SdkModel;
+
+    /** @var 'session.updated' $type */
+    #[Required(type: new ConstantOf('session.updated'))]
+    public string $type = 'session.updated';
+
+    /**
+     * Unique identifier for this event.
+     */
+    #[Required]
+    public string $id;
+
+    /**
+     * Timestamp when the update was applied.
+     */
+    #[Required('processed_at')]
+    public \DateTimeInterface $processedAt;
+
+    /**
+     * The session's effective agent configuration after the update. Present only when the update changed `agent` (tools or mcp_servers); when present it is the full materialised snapshot, not a diff.
+     */
+    #[Optional(nullable: true)]
+    public ?BetaManagedAgentsSessionAgent $agent;
+
+    /**
+     * The session's budget after the update: the new budget when set or replaced, or null when the update removed it. Present only when the update changed the budget.
+     */
+    #[Optional(nullable: true)]
+    public ?BetaManagedAgentsBudgetLimit $budget;
+
+    /**
+     * The session's full metadata bag after the update. Present when the update set non-empty metadata; absent when metadata was unchanged or cleared to empty.
+     *
+     * @var array<string,string>|null $metadata
+     */
+    #[Optional(map: 'string')]
+    public ?array $metadata;
+
+    /**
+     * The session's new title. Present only when the update changed it.
+     */
+    #[Optional(nullable: true)]
+    public ?string $title;
+
+    /**
+     * `new BetaManagedAgentsSessionUpdatedEvent()` is missing required properties by the API.
+     *
+     * To enforce required parameters use
+     * ```
+     * BetaManagedAgentsSessionUpdatedEvent::with(id: ..., processedAt: ...)
+     * ```
+     *
+     * Otherwise ensure the following setters are called
+     *
+     * ```
+     * (new BetaManagedAgentsSessionUpdatedEvent())->withID(...)->withProcessedAt(...)
+     * ```
+     */
+    public function __construct()
+    {
+        $this->initialize();
+    }
+
+    /**
+     * Construct an instance from the required parameters.
+     *
+     * You must use named parameters to construct any parameters with a default value.
+     *
+     * @param BetaManagedAgentsSessionAgent|BetaManagedAgentsSessionAgentShape|null $agent
+     * @param BetaManagedAgentsBudgetLimit|BetaManagedAgentsBudgetLimitShape|null $budget
+     * @param array<string,string>|null $metadata
+     */
+    public static function with(
+        string $id,
+        \DateTimeInterface $processedAt,
+        BetaManagedAgentsSessionAgent|array|null $agent = null,
+        BetaManagedAgentsBudgetLimit|array|null $budget = null,
+        ?array $metadata = null,
+        ?string $title = null,
+    ): self {
+        $self = new self;
+
+        $self['id'] = $id;
+        $self['processedAt'] = $processedAt;
+
+        null !== $agent && $self['agent'] = $agent;
+        null !== $budget && $self['budget'] = $budget;
+        null !== $metadata && $self['metadata'] = $metadata;
+        null !== $title && $self['title'] = $title;
+
+        return $self;
+    }
+
+    /**
+     * Unique identifier for this event.
+     */
+    public function withID(string $id): self
+    {
+        $self = clone $this;
+        $self['id'] = $id;
+
+        return $self;
+    }
+
+    /**
+     * Timestamp when the update was applied.
+     */
+    public function withProcessedAt(\DateTimeInterface $processedAt): self
+    {
+        $self = clone $this;
+        $self['processedAt'] = $processedAt;
+
+        return $self;
+    }
+
+    /**
+     * @param 'session.updated' $type
+     */
+    public function withType(string $type): self
+    {
+        $self = clone $this;
+        $self['type'] = $type;
+
+        return $self;
+    }
+
+    /**
+     * The session's effective agent configuration after the update. Present only when the update changed `agent` (tools or mcp_servers); when present it is the full materialised snapshot, not a diff.
+     *
+     * @param BetaManagedAgentsSessionAgent|BetaManagedAgentsSessionAgentShape|null $agent
+     */
+    public function withAgent(
+        BetaManagedAgentsSessionAgent|array|null $agent
+    ): self {
+        $self = clone $this;
+        $self['agent'] = $agent;
+
+        return $self;
+    }
+
+    /**
+     * The session's budget after the update: the new budget when set or replaced, or null when the update removed it. Present only when the update changed the budget.
+     *
+     * @param BetaManagedAgentsBudgetLimit|BetaManagedAgentsBudgetLimitShape|null $budget
+     */
+    public function withBudget(
+        BetaManagedAgentsBudgetLimit|array|null $budget
+    ): self {
+        $self = clone $this;
+        $self['budget'] = $budget;
+
+        return $self;
+    }
+
+    /**
+     * The session's full metadata bag after the update. Present when the update set non-empty metadata; absent when metadata was unchanged or cleared to empty.
+     *
+     * @param array<string,string> $metadata
+     */
+    public function withMetadata(array $metadata): self
+    {
+        $self = clone $this;
+        $self['metadata'] = $metadata;
+
+        return $self;
+    }
+
+    /**
+     * The session's new title. Present only when the update changed it.
+     */
+    public function withTitle(?string $title): self
+    {
+        $self = clone $this;
+        $self['title'] = $title;
+
+        return $self;
+    }
+}

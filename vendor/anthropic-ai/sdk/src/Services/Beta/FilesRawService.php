@@ -5,19 +5,27 @@ declare(strict_types=1);
 namespace Anthropic\Services\Beta;
 
 use Anthropic\Beta\AnthropicBeta;
-use Anthropic\Beta\Files\DeletedFile;
+use Anthropic\Beta\Files\BetaDeletedFile;
+use Anthropic\Beta\Files\BetaFileMetadata;
 use Anthropic\Beta\Files\FileDeleteParams;
 use Anthropic\Beta\Files\FileDownloadParams;
 use Anthropic\Beta\Files\FileListParams;
-use Anthropic\Beta\Files\FileMetadata;
 use Anthropic\Beta\Files\FileRetrieveMetadataParams;
 use Anthropic\Beta\Files\FileUploadParams;
+use Anthropic\ClaudeCodeKeyCreatorNotMemberException;
 use Anthropic\Client;
+use Anthropic\CMEKKeyDisabledException;
+use Anthropic\CMEKKeyNetworkBlockedException;
 use Anthropic\Core\Contracts\BaseResponse;
 use Anthropic\Core\Exceptions\APIException;
 use Anthropic\Core\FileParam;
+use Anthropic\Core\Implementation\ApiCallInfo;
 use Anthropic\Core\Util;
-use Anthropic\Page;
+use Anthropic\Files\FileExpiredException;
+use Anthropic\Files\FileNotDownloadableException;
+use Anthropic\Files\StorageQuotaExceededException;
+use Anthropic\OrganizationOnHoldException;
+use Anthropic\PageCursor;
 use Anthropic\RequestOptions;
 use Anthropic\ServiceContracts\Beta\FilesRawContract;
 
@@ -38,16 +46,21 @@ final class FilesRawService implements FilesRawContract
      * List Files
      *
      * @param array{
-     *   afterID?: string,
-     *   beforeID?: string,
+     *   ids?: list<string>|null,
      *   limit?: int,
+     *   page?: string|null,
      *   scopeID?: string,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|FileListParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<Page<FileMetadata>>
+     * @return BaseResponse<PageCursor<BetaFileMetadata>>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CMEKKeyDisabledException
+     * @throws CMEKKeyNetworkBlockedException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function list(
@@ -58,7 +71,7 @@ final class FilesRawService implements FilesRawContract
             $params,
             $requestOptions,
         );
-        $query_params = array_flip(['afterID', 'beforeID', 'limit', 'scopeID']);
+        $query_params = array_flip(['ids', 'limit', 'page', 'scopeID']);
 
         /** @var array<string,string> */
         $header_params = array_diff_key($parsed, $query_params);
@@ -66,25 +79,26 @@ final class FilesRawService implements FilesRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: 'v1/files?beta=true',
+            path: 'v1/files',
             query: Util::array_transform_keys(
                 array_intersect_key($parsed, $query_params),
-                [
-                    'afterID' => 'after_id',
-                    'beforeID' => 'before_id',
-                    'scopeID' => 'scope_id',
-                ],
+                ['scopeID' => 'scope_id']
             ),
             headers: Util::array_transform_keys(
                 $header_params,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
-            options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'files-api-2025-04-14']],
-                $options,
-            ),
-            convert: FileMetadata::class,
-            page: Page::class,
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.files.list',
+                route: '/v1/files',
+                query: ['ids', 'limit', 'page', 'scope_id'],
+            )),
+            convert: BetaFileMetadata::class,
+            page: PageCursor::class,
         );
     }
 
@@ -93,14 +107,19 @@ final class FilesRawService implements FilesRawContract
      *
      * Delete File
      *
-     * @param string $fileID ID of the File
+     * @param string $fileID ID of the File.
      * @param array{
-     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|FileDeleteParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<DeletedFile>
+     * @return BaseResponse<BetaDeletedFile>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CMEKKeyDisabledException
+     * @throws CMEKKeyNetworkBlockedException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function delete(
@@ -116,16 +135,21 @@ final class FilesRawService implements FilesRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'delete',
-            path: ['v1/files/%1$s?beta=true', $fileID],
+            path: ['v1/files/%1$s', $fileID],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
-            options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'files-api-2025-04-14']],
-                $options,
-            ),
-            convert: DeletedFile::class,
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.files.delete',
+                route: '/v1/files/{file_id}',
+                attributes: ['anthropic.file.id' => $fileID],
+            )),
+            convert: BetaDeletedFile::class,
         );
     }
 
@@ -134,14 +158,21 @@ final class FilesRawService implements FilesRawContract
      *
      * Download File
      *
-     * @param string $fileID ID of the File
+     * @param string $fileID ID of the File.
      * @param array{
-     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|FileDownloadParams $params
      * @param RequestOpts|null $requestOptions
      *
      * @return BaseResponse<string>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CMEKKeyDisabledException
+     * @throws CMEKKeyNetworkBlockedException
+     * @throws FileNotDownloadableException
+     * @throws OrganizationOnHoldException
+     * @throws FileExpiredException
      * @throws APIException
      */
     public function download(
@@ -157,16 +188,21 @@ final class FilesRawService implements FilesRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: ['v1/files/%1$s/content?beta=true', $fileID],
+            path: ['v1/files/%1$s/content', $fileID],
             headers: Util::array_transform_keys(
                 ['Accept' => 'application/binary', ...$parsed],
-                ['betas' => 'anthropic-beta'],
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
-            options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'files-api-2025-04-14']],
-                $options,
-            ),
-            convert: 'string',
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.files.download',
+                route: '/v1/files/{file_id}/content',
+                attributes: ['anthropic.file.id' => $fileID],
+            )),
+            convert: 'binary',
         );
     }
 
@@ -175,14 +211,19 @@ final class FilesRawService implements FilesRawContract
      *
      * Get File Metadata
      *
-     * @param string $fileID ID of the File
+     * @param string $fileID ID of the File.
      * @param array{
-     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|FileRetrieveMetadataParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<FileMetadata>
+     * @return BaseResponse<BetaFileMetadata>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CMEKKeyDisabledException
+     * @throws CMEKKeyNetworkBlockedException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function retrieveMetadata(
@@ -198,16 +239,21 @@ final class FilesRawService implements FilesRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: ['v1/files/%1$s?beta=true', $fileID],
+            path: ['v1/files/%1$s', $fileID],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
-            options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'files-api-2025-04-14']],
-                $options,
-            ),
-            convert: FileMetadata::class,
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.files.retrieve_metadata',
+                route: '/v1/files/{file_id}',
+                attributes: ['anthropic.file.id' => $fileID],
+            )),
+            convert: BetaFileMetadata::class,
         );
     }
 
@@ -218,12 +264,19 @@ final class FilesRawService implements FilesRawContract
      *
      * @param array{
      *   file: string|FileParam,
+     *   expiresInSeconds?: int,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|FileUploadParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<FileMetadata>
+     * @return BaseResponse<BetaFileMetadata>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CMEKKeyDisabledException
+     * @throws CMEKKeyNetworkBlockedException
+     * @throws OrganizationOnHoldException
+     * @throws StorageQuotaExceededException
      * @throws APIException
      */
     public function upload(
@@ -234,12 +287,14 @@ final class FilesRawService implements FilesRawContract
             $params,
             $requestOptions,
         );
-        $header_params = ['betas' => 'anthropic-beta'];
+        $header_params = [
+            'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+        ];
 
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: 'v1/files?beta=true',
+            path: 'v1/files',
             headers: Util::array_transform_keys(
                 [
                     'Content-Type' => 'multipart/form-data',
@@ -254,11 +309,14 @@ final class FilesRawService implements FilesRawContract
                 $parsed,
                 array_flip(array_keys($header_params))
             ),
-            options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'files-api-2025-04-14']],
-                $options,
-            ),
-            convert: FileMetadata::class,
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.files.upload',
+                route: '/v1/files',
+                createdId: 'anthropic.file.id',
+            )),
+            convert: BetaFileMetadata::class,
         );
     }
 }

@@ -7,10 +7,11 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type BetaCodeExecutionToolResultBlockContentVariants from \Anthropic\Beta\Messages\BetaCodeExecutionToolResultBlockContent
  * @phpstan-import-type BetaCodeExecutionToolResultBlockContentShape from \Anthropic\Beta\Messages\BetaCodeExecutionToolResultBlockContent
+ * @phpstan-import-type BetaCodeExecutionToolResultBlockContentVariants from \Anthropic\Beta\Messages\BetaCodeExecutionToolResultBlockContent
  *
  * @phpstan-type BetaCodeExecutionToolResultBlockShape = array{
  *   content: BetaCodeExecutionToolResultBlockContentShape,
@@ -24,16 +25,12 @@ final class BetaCodeExecutionToolResultBlock implements BaseModel
     use SdkModel;
 
     /** @var 'code_execution_tool_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('code_execution_tool_result'))]
     public string $type = 'code_execution_tool_result';
 
-    /**
-     * Code execution result with encrypted stdout for PFC + web_search results.
-     *
-     * @var BetaCodeExecutionToolResultBlockContentVariants $content
-     */
+    /** @var BetaCodeExecutionToolResultBlockContentVariants $content */
     #[Required]
-    public BetaCodeExecutionToolResultError|BetaCodeExecutionResultBlock|BetaEncryptedCodeExecutionResultBlock $content;
+    public BetaCodeExecutionToolResultErrorObject|BetaCodeExecutionResultBlock|BetaEncryptedCodeExecutionResultBlock $content;
 
     #[Required('tool_use_id')]
     public string $toolUseID;
@@ -49,7 +46,7 @@ final class BetaCodeExecutionToolResultBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaCodeExecutionToolResultBlock)->withContent(...)->withToolUseID(...)
+     * (new BetaCodeExecutionToolResultBlock())->withContent(...)->withToolUseID(...)
      * ```
      */
     public function __construct()
@@ -65,7 +62,7 @@ final class BetaCodeExecutionToolResultBlock implements BaseModel
      * @param BetaCodeExecutionToolResultBlockContentShape $content
      */
     public static function with(
-        BetaCodeExecutionToolResultError|array|BetaCodeExecutionResultBlock|BetaEncryptedCodeExecutionResultBlock $content,
+        BetaCodeExecutionToolResultErrorObject|array|BetaCodeExecutionResultBlock|BetaEncryptedCodeExecutionResultBlock $content,
         string $toolUseID,
     ): self {
         $self = new self;
@@ -77,12 +74,10 @@ final class BetaCodeExecutionToolResultBlock implements BaseModel
     }
 
     /**
-     * Code execution result with encrypted stdout for PFC + web_search results.
-     *
      * @param BetaCodeExecutionToolResultBlockContentShape $content
      */
     public function withContent(
-        BetaCodeExecutionToolResultError|array|BetaCodeExecutionResultBlock|BetaEncryptedCodeExecutionResultBlock $content,
+        BetaCodeExecutionToolResultErrorObject|array|BetaCodeExecutionResultBlock|BetaEncryptedCodeExecutionResultBlock $content,
     ): self {
         $self = clone $this;
         $self['content'] = $content;

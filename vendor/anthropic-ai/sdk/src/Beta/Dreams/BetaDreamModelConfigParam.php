@@ -1,0 +1,113 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Beta\Dreams;
+
+use Anthropic\Beta\Dreams\BetaDreamModelConfigParam\Speed;
+use Anthropic\Core\Attributes\Optional;
+use Anthropic\Core\Attributes\Required;
+use Anthropic\Core\Concerns\SdkModel;
+use Anthropic\Core\Contracts\BaseModel;
+
+/**
+ * The object form of `model` in a request to create a dream.
+ *
+ * @phpstan-type BetaDreamModelConfigParamShape = array{
+ *   id: string, speed?: null|Speed|value-of<Speed>
+ * }
+ */
+final class BetaDreamModelConfigParam implements BaseModel
+{
+    /** @use SdkModel<BetaDreamModelConfigParamShape> */
+    use SdkModel;
+
+    /**
+     * The ID of the model to run the dream with.
+     *
+     * The ID can be 1 to 256 characters long.
+     *
+     * The [Availability section of the Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#feature-availability) lists the supported models.
+     */
+    #[Required]
+    public string $id;
+
+    /**
+     * How fast the model generates output for the dream. Defaults to `standard`.
+     *
+     * Dreams accept only `standard`.
+     *
+     * @var value-of<Speed>|null $speed
+     */
+    #[Optional(enum: Speed::class, nullable: true)]
+    public ?string $speed;
+
+    /**
+     * `new BetaDreamModelConfigParam()` is missing required properties by the API.
+     *
+     * To enforce required parameters use
+     * ```
+     * BetaDreamModelConfigParam::with(id: ...)
+     * ```
+     *
+     * Otherwise ensure the following setters are called
+     *
+     * ```
+     * (new BetaDreamModelConfigParam())->withID(...)
+     * ```
+     */
+    public function __construct()
+    {
+        $this->initialize();
+    }
+
+    /**
+     * Construct an instance from the required parameters.
+     *
+     * You must use named parameters to construct any parameters with a default value.
+     *
+     * @param Speed|value-of<Speed>|null $speed
+     */
+    public static function with(
+        string $id,
+        Speed|string|null $speed = null
+    ): self {
+        $self = new self;
+
+        $self['id'] = $id;
+
+        null !== $speed && $self['speed'] = $speed;
+
+        return $self;
+    }
+
+    /**
+     * The ID of the model to run the dream with.
+     *
+     * The ID can be 1 to 256 characters long.
+     *
+     * The [Availability section of the Dreams guide](https://platform.claude.com/docs/en/managed-agents/dreams#feature-availability) lists the supported models.
+     */
+    public function withID(string $id): self
+    {
+        $self = clone $this;
+        $self['id'] = $id;
+
+        return $self;
+    }
+
+    /**
+     * How fast the model generates output for the dream. Defaults to `standard`.
+     *
+     * Dreams accept only `standard`.
+     *
+     * @param Speed|value-of<Speed>|null $speed
+     */
+    public function withSpeed(Speed|string|null $speed): self
+    {
+        $self = clone $this;
+        $self['speed'] = $speed;
+
+        return $self;
+    }
+}

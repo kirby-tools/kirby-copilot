@@ -10,14 +10,15 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type ClearToolInputsVariants from \Anthropic\Beta\Messages\BetaClearToolUses20250919Edit\ClearToolInputs
- * @phpstan-import-type TriggerVariants from \Anthropic\Beta\Messages\BetaClearToolUses20250919Edit\Trigger
  * @phpstan-import-type BetaInputTokensClearAtLeastShape from \Anthropic\Beta\Messages\BetaInputTokensClearAtLeast
  * @phpstan-import-type ClearToolInputsShape from \Anthropic\Beta\Messages\BetaClearToolUses20250919Edit\ClearToolInputs
  * @phpstan-import-type BetaToolUsesKeepShape from \Anthropic\Beta\Messages\BetaToolUsesKeep
  * @phpstan-import-type TriggerShape from \Anthropic\Beta\Messages\BetaClearToolUses20250919Edit\Trigger
+ * @phpstan-import-type ClearToolInputsVariants from \Anthropic\Beta\Messages\BetaClearToolUses20250919Edit\ClearToolInputs
+ * @phpstan-import-type TriggerVariants from \Anthropic\Beta\Messages\BetaClearToolUses20250919Edit\Trigger
  *
  * @phpstan-type BetaClearToolUses20250919EditShape = array{
  *   type: 'clear_tool_uses_20250919',
@@ -34,7 +35,7 @@ final class BetaClearToolUses20250919Edit implements BaseModel
     use SdkModel;
 
     /** @var 'clear_tool_uses_20250919' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('clear_tool_uses_20250919'))]
     public string $type = 'clear_tool_uses_20250919';
 
     /**
@@ -44,7 +45,7 @@ final class BetaClearToolUses20250919Edit implements BaseModel
     public ?BetaInputTokensClearAtLeast $clearAtLeast;
 
     /**
-     * Whether to clear all tool inputs (bool) or specific tool inputs to clear (list).
+     * Whether to clear all tool inputs (bool) or specific tool inputs to clear (list)
      *
      * @var ClearToolInputsVariants|null $clearToolInputs
      */
@@ -56,7 +57,7 @@ final class BetaClearToolUses20250919Edit implements BaseModel
     public bool|array|null $clearToolInputs;
 
     /**
-     * Tool names whose uses are preserved from clearing.
+     * Tool names whose uses are preserved from clearing
      *
      * @var list<string>|null $excludeTools
      */
@@ -64,13 +65,13 @@ final class BetaClearToolUses20250919Edit implements BaseModel
     public ?array $excludeTools;
 
     /**
-     * Number of tool uses to retain in the conversation.
+     * Number of tool uses to retain in the conversation
      */
     #[Optional]
     public ?BetaToolUsesKeep $keep;
 
     /**
-     * Condition that triggers the context management strategy.
+     * Condition that triggers the context management strategy
      *
      * @var TriggerVariants|null $trigger
      */
@@ -137,7 +138,7 @@ final class BetaClearToolUses20250919Edit implements BaseModel
     }
 
     /**
-     * Whether to clear all tool inputs (bool) or specific tool inputs to clear (list).
+     * Whether to clear all tool inputs (bool) or specific tool inputs to clear (list)
      *
      * @param ClearToolInputsShape|null $clearToolInputs
      */
@@ -150,7 +151,7 @@ final class BetaClearToolUses20250919Edit implements BaseModel
     }
 
     /**
-     * Tool names whose uses are preserved from clearing.
+     * Tool names whose uses are preserved from clearing
      *
      * @param list<string>|null $excludeTools
      */
@@ -163,7 +164,7 @@ final class BetaClearToolUses20250919Edit implements BaseModel
     }
 
     /**
-     * Number of tool uses to retain in the conversation.
+     * Number of tool uses to retain in the conversation
      *
      * @param BetaToolUsesKeep|BetaToolUsesKeepShape $keep
      */
@@ -176,7 +177,7 @@ final class BetaClearToolUses20250919Edit implements BaseModel
     }
 
     /**
-     * Condition that triggers the context management strategy.
+     * Condition that triggers the context management strategy
      *
      * @param TriggerShape $trigger
      */

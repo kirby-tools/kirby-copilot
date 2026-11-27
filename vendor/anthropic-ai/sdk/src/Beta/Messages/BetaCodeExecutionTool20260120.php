@@ -9,9 +9,14 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * Code execution tool with REPL state persistence (daemon mode + gVisor checkpoint).
+ * A `tools` entry for the code execution tool, version `code_execution_20260120`. It adds REPL state persistence to version `code_execution_20250825`.
+ *
+ * REPL state persistence applies with programmatic tool calling. With it, the Python interpreter state, such as variable bindings, persists across requests that reuse the container.
+ *
+ * See the [code execution tool guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/code-execution-tool#tool-versions) to learn what each tool version adds.
  *
  * @phpstan-import-type BetaCacheControlEphemeralShape from \Anthropic\Beta\Messages\BetaCacheControlEphemeral
  *
@@ -36,11 +41,11 @@ final class BetaCodeExecutionTool20260120 implements BaseModel
      *
      * @var 'code_execution' $name
      */
-    #[Required]
+    #[Required(type: new ConstantOf('code_execution'))]
     public string $name = 'code_execution';
 
     /** @var 'code_execution_20260120' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('code_execution_20260120'))]
     public string $type = 'code_execution_20260120';
 
     /** @var list<value-of<AllowedCaller>>|null $allowedCallers */
@@ -60,7 +65,7 @@ final class BetaCodeExecutionTool20260120 implements BaseModel
     public ?bool $deferLoading;
 
     /**
-     * When true, guarantees schema validation on tool names and inputs.
+     * When true, guarantees schema validation on tool names and inputs
      */
     #[Optional]
     public ?bool $strict;
@@ -157,7 +162,7 @@ final class BetaCodeExecutionTool20260120 implements BaseModel
     }
 
     /**
-     * When true, guarantees schema validation on tool names and inputs.
+     * When true, guarantees schema validation on tool names and inputs
      */
     public function withStrict(bool $strict): self
     {

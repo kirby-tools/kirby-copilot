@@ -7,6 +7,7 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type BetaMemoryTool20250818RenameCommandShape = array{
@@ -19,21 +20,21 @@ final class BetaMemoryTool20250818RenameCommand implements BaseModel
     use SdkModel;
 
     /**
-     * Command type identifier.
+     * Command type identifier
      *
      * @var 'rename' $command
      */
-    #[Required]
+    #[Required(type: new ConstantOf('rename'))]
     public string $command = 'rename';
 
     /**
-     * New path for the file or directory.
+     * New path for the file or directory
      */
     #[Required('new_path')]
     public string $newPath;
 
     /**
-     * Current path of the file or directory.
+     * Current path of the file or directory
      */
     #[Required('old_path')]
     public string $oldPath;
@@ -49,7 +50,7 @@ final class BetaMemoryTool20250818RenameCommand implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaMemoryTool20250818RenameCommand)->withNewPath(...)->withOldPath(...)
+     * (new BetaMemoryTool20250818RenameCommand())->withNewPath(...)->withOldPath(...)
      * ```
      */
     public function __construct()
@@ -73,7 +74,7 @@ final class BetaMemoryTool20250818RenameCommand implements BaseModel
     }
 
     /**
-     * Command type identifier.
+     * Command type identifier
      *
      * @param 'rename' $command
      */
@@ -86,7 +87,7 @@ final class BetaMemoryTool20250818RenameCommand implements BaseModel
     }
 
     /**
-     * New path for the file or directory.
+     * New path for the file or directory
      */
     public function withNewPath(string $newPath): self
     {
@@ -97,7 +98,7 @@ final class BetaMemoryTool20250818RenameCommand implements BaseModel
     }
 
     /**
-     * Current path of the file or directory.
+     * Current path of the file or directory
      */
     public function withOldPath(string $oldPath): self
     {

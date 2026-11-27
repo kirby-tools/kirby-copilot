@@ -1,0 +1,101 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Beta\Dreams;
+
+use Anthropic\Beta\Dreams\BetaDreamModelConfig\Speed;
+use Anthropic\Core\Attributes\Optional;
+use Anthropic\Core\Attributes\Required;
+use Anthropic\Core\Concerns\SdkModel;
+use Anthropic\Core\Contracts\BaseModel;
+
+/**
+ * The model that runs a dream, from the request that created it.
+ *
+ * The dream uses this model for all of its work. The response always gives the model as an object, even if the request gave only a model ID.
+ *
+ * @phpstan-type BetaDreamModelConfigShape = array{
+ *   id: string, speed?: null|Speed|value-of<Speed>
+ * }
+ */
+final class BetaDreamModelConfig implements BaseModel
+{
+    /** @use SdkModel<BetaDreamModelConfigShape> */
+    use SdkModel;
+
+    /**
+     * The ID of the model that runs the dream, as given in the request that created it.
+     */
+    #[Required]
+    public string $id;
+
+    /**
+     * How fast the model generates output for the dream. Always `standard`.
+     *
+     * @var value-of<Speed>|null $speed
+     */
+    #[Optional(enum: Speed::class)]
+    public ?string $speed;
+
+    /**
+     * `new BetaDreamModelConfig()` is missing required properties by the API.
+     *
+     * To enforce required parameters use
+     * ```
+     * BetaDreamModelConfig::with(id: ...)
+     * ```
+     *
+     * Otherwise ensure the following setters are called
+     *
+     * ```
+     * (new BetaDreamModelConfig())->withID(...)
+     * ```
+     */
+    public function __construct()
+    {
+        $this->initialize();
+    }
+
+    /**
+     * Construct an instance from the required parameters.
+     *
+     * You must use named parameters to construct any parameters with a default value.
+     *
+     * @param Speed|value-of<Speed>|null $speed
+     */
+    public static function with(string $id, Speed|string|null $speed = null): self
+    {
+        $self = new self;
+
+        $self['id'] = $id;
+
+        null !== $speed && $self['speed'] = $speed;
+
+        return $self;
+    }
+
+    /**
+     * The ID of the model that runs the dream, as given in the request that created it.
+     */
+    public function withID(string $id): self
+    {
+        $self = clone $this;
+        $self['id'] = $id;
+
+        return $self;
+    }
+
+    /**
+     * How fast the model generates output for the dream. Always `standard`.
+     *
+     * @param Speed|value-of<Speed> $speed
+     */
+    public function withSpeed(Speed|string $speed): self
+    {
+        $self = clone $this;
+        $self['speed'] = $speed;
+
+        return $self;
+    }
+}

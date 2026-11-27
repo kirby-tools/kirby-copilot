@@ -7,11 +7,12 @@ namespace Anthropic\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Lib\Contracts\StructuredOutputModel;
 
 /**
- * @phpstan-import-type TextCitationVariants from \Anthropic\Messages\TextCitation
  * @phpstan-import-type TextCitationShape from \Anthropic\Messages\TextCitation
+ * @phpstan-import-type TextCitationVariants from \Anthropic\Messages\TextCitation
  *
  * @phpstan-type TextBlockShape = array{
  *   citations: list<TextCitationShape>|null, text: string, type: 'text'
@@ -23,7 +24,7 @@ final class TextBlock implements BaseModel
     use SdkModel;
 
     /** @var 'text' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('text'))]
     public string $type = 'text';
 
     /**
@@ -76,7 +77,7 @@ final class TextBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new TextBlock)->withCitations(...)->withText(...)
+     * (new TextBlock())->withCitations(...)->withText(...)
      * ```
      */
     public function __construct()

@@ -14,8 +14,10 @@ use Anthropic\Core\Conversion\ListOf;
 use Psr\Http\Message\ResponseInterface;
 
 /**
+ * @phpstan-import-type NormalizedRequest from \Anthropic\Core\BaseClient
+ *
  * @phpstan-type PageShape = array{
- *   data?: list<mixed>|null,
+ *   data?: list<array<string,mixed>>|null,
  *   hasMore?: bool|null,
  *   firstID?: string|null,
  *   lastID?: string|null,
@@ -49,13 +51,7 @@ final class Page implements BaseModel, BasePage
     /**
      * @internal
      *
-     * @param array{
-     *   method: string,
-     *   path: string,
-     *   query: array<string,mixed>,
-     *   headers: array<string,string|list<string>|null>,
-     *   body: mixed,
-     * } $requestInfo
+     * @param NormalizedRequest $requestInfo
      */
     public function __construct(
         private string|Converter|ConverterSource $convert,
@@ -67,40 +63,32 @@ final class Page implements BaseModel, BasePage
     ) {
         $this->initialize();
 
-        if (!is_array($this->parsedBody)) {
+        $page = Conversion::coerce(self::class, value: $this->parsedBody);
+        if (!$page instanceof self) {
             return;
         }
 
-        // @phpstan-ignore-next-line argument.type
-        self::__unserialize($this->parsedBody);
+        self::__unserialize($page->toProperties());
 
-        if (is_array($items = $this->offsetGet('data'))) {
+        // The page class is shared across list methods, so the item type arrives
+        // at runtime and the items are converted separately.
+        if (is_array($items = $this->data ?? null)) {
+            /** @var list<TItem> $parsed */
             $parsed = Conversion::coerce(new ListOf($convert), value: $items);
-            // @phpstan-ignore-next-line
-            $this->offsetSet('data', value: $parsed);
+            $this->data = $parsed;
         }
     }
 
     /** @return list<TItem> */
     public function getItems(): array
     {
-        // @phpstan-ignore-next-line return.type
-        return $this->offsetGet('data') ?? [];
+        return $this->data ?? [];
     }
 
     /**
      * @internal
      *
-     * @return array{
-     *   array{
-     *     method: string,
-     *     path: string,
-     *     query: array<string,mixed>,
-     *     headers: array<string,string|list<string>|null>,
-     *     body: mixed,
-     *   },
-     *   RequestOptions,
-     * }|null
+     * @return array{NormalizedRequest, RequestOptions}|null
      */
     public function nextRequest(): ?array
     {
@@ -108,18 +96,25 @@ final class Page implements BaseModel, BasePage
             return null;
         }
 
-        if (!($prev = $this->firstID ?? null) && !($next = $this->lastID ?? null)) {
-            return null;
+        $nextRequest = $this->requestInfo;
+        if (!is_null($nextRequest['query']['before_id'] ?? null)) {
+            if (!($prev = $this->firstID ?? null)) {
+                return null;
+            }
+            $nextRequest['query'] = array_replace(
+                $nextRequest['query'],
+                ['before_id' => $prev]
+            );
+        } else {
+            if (!($next = $this->lastID ?? null)) {
+                return null;
+            }
+            $nextRequest['query'] = array_replace(
+                $nextRequest['query'],
+                ['after_id' => $next]
+            );
         }
 
-        $nextRequest = array_merge_recursive(
-            $this->requestInfo,
-            [
-                'query' => empty($prev) ? ['after_id' => $next] : ['before_id' => $prev],
-            ],
-        );
-
-        // @phpstan-ignore-next-line return.type
-        return [$nextRequest, $this->options];
+        return [$nextRequest, $this->options->withExtraQueryParams([])];
     }
 }

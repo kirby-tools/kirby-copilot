@@ -6,9 +6,11 @@ namespace Anthropic\Bedrock;
 
 use Anthropic\Aws\AwsAuth;
 use Anthropic\Bedrock\Services\MantleMessagesService;
+use Anthropic\Client;
 use Anthropic\Core\BaseClient;
 use Anthropic\Core\Util;
 use Anthropic\RequestOptions;
+use Http\Discovery\Exception\NotFoundException;
 use Http\Discovery\Psr17FactoryDiscovery;
 use Http\Discovery\Psr18ClientDiscovery;
 use Psr\Http\Message\RequestInterface;
@@ -20,21 +22,22 @@ use const Anthropic\VERSION;
  *
  * Connects to the Bedrock Mantle gateway at
  * https://bedrock-mantle.{region}.api.aws/anthropic with support for
- * x-api-key auth and AWS SigV4 signing.
+ * API key auth and AWS SigV4 signing.
  *
  * Only the /v1/messages endpoint (and subpaths) are supported.
  *
  * Auth is resolved by precedence:
  *  0. $skipAuth (no auth — skips all below)
- *  1. $apiKey arg (x-api-key header)
+ *  1. $apiKey arg (Authorization: Bearer header)
  *  2. $awsAccessKey + $awsSecretAccessKey args (SigV4)
  *  3. $awsProfile arg (SigV4 via named profile)
- *  4. AWS_BEARER_TOKEN_BEDROCK env var (x-api-key header)
- *  5. ANTHROPIC_AWS_API_KEY env var fallback (x-api-key header)
+ *  4. AWS_BEARER_TOKEN_BEDROCK env var (Authorization: Bearer header)
+ *  5. ANTHROPIC_AWS_API_KEY env var fallback (Authorization: Bearer header)
  *  6. Default AWS credential chain (SigV4)
  *
  * @phpstan-import-type NormalizedRequest from \Anthropic\Core\BaseClient
  * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ * @phpstan-import-type OpenTelemetryOptions from \Anthropic\Core\BaseClient
  */
 final class MantleClient extends BaseClient
 {
@@ -46,6 +49,7 @@ final class MantleClient extends BaseClient
 
     /**
      * @param RequestOpts|null $requestOptions
+     * @param OpenTelemetryOptions|null $openTelemetry
      */
     public function __construct(
         ?string $apiKey = null,
@@ -57,6 +61,7 @@ final class MantleClient extends BaseClient
         ?string $baseUrl = null,
         bool $skipAuth = false,
         RequestOptions|array|null $requestOptions = null,
+        array|false|null $openTelemetry = null,
     ) {
         $this->auth = new AwsAuth(
             serviceName: 'bedrock-mantle',
@@ -72,27 +77,30 @@ final class MantleClient extends BaseClient
             awsRegion: $awsRegion,
             baseUrl: $baseUrl,
             skipAuth: $skipAuth,
-            useBearerAuth: true,
         );
 
-        $options = RequestOptions::parse(
-            RequestOptions::with(
-                uriFactory: Psr17FactoryDiscovery::findUriFactory(),
-                streamFactory: Psr17FactoryDiscovery::findStreamFactory(),
-                requestFactory: Psr17FactoryDiscovery::findRequestFactory(),
-                transporter: Psr18ClientDiscovery::find(),
-            ),
-            $requestOptions,
-        );
+        try {
+            $options = RequestOptions::parse(
+                RequestOptions::with(
+                    uriFactory: Psr17FactoryDiscovery::findUriFactory(),
+                    streamFactory: Psr17FactoryDiscovery::findStreamFactory(),
+                    requestFactory: Psr17FactoryDiscovery::findRequestFactory(),
+                    transporter: Psr18ClientDiscovery::find(),
+                ),
+                $requestOptions,
+            );
+        } catch (NotFoundException $e) {
+            throw new NotFoundException("No PSR-18 HTTP client or PSR-17 factory found. If you don't have one in your project, run `composer require guzzlehttp/guzzle`.", previous: $e);
+        }
 
         parent::__construct(
             headers: [
-                'anthropic-version' => '2023-06-01',
+                'anthropic-version' => Client::ANTHROPIC_API_VERSION,
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
                 'User-Agent' => sprintf('anthropic/PHP %s', VERSION),
                 'X-Stainless-Lang' => 'php',
-                'X-Stainless-Package-Version' => '0.0.1',
+                'X-Stainless-Package-Version' => VERSION,
                 'X-Stainless-Arch' => Util::machtype(),
                 'X-Stainless-OS' => Util::ostype(),
                 'X-Stainless-Runtime' => php_sapi_name(),
@@ -100,6 +108,7 @@ final class MantleClient extends BaseClient
             ],
             baseUrl: $this->auth->getBaseUrl(),
             options: $options,
+            openTelemetry: $openTelemetry,
         );
 
         $this->messages = new MantleMessagesService($this);
@@ -113,7 +122,7 @@ final class MantleClient extends BaseClient
      * @param array<string,string|int|list<string|int>|null> $headers
      * @param RequestOpts|null $opts
      *
-     * @return array{NormalizedRequest, RequestOptions}
+     * @return array{NormalizedRequest, RequestOptions, string}
      */
     protected function buildRequest(
         string $method,

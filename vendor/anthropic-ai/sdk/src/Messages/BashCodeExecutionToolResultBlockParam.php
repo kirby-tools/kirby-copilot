@@ -8,11 +8,12 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type ContentVariants from \Anthropic\Messages\BashCodeExecutionToolResultBlockParam\Content
  * @phpstan-import-type ContentShape from \Anthropic\Messages\BashCodeExecutionToolResultBlockParam\Content
  * @phpstan-import-type CacheControlEphemeralShape from \Anthropic\Messages\CacheControlEphemeral
+ * @phpstan-import-type ContentVariants from \Anthropic\Messages\BashCodeExecutionToolResultBlockParam\Content
  *
  * @phpstan-type BashCodeExecutionToolResultBlockParamShape = array{
  *   content: ContentShape,
@@ -27,7 +28,7 @@ final class BashCodeExecutionToolResultBlockParam implements BaseModel
     use SdkModel;
 
     /** @var 'bash_code_execution_tool_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('bash_code_execution_tool_result'))]
     public string $type = 'bash_code_execution_tool_result';
 
     /** @var ContentVariants $content */
@@ -54,7 +55,7 @@ final class BashCodeExecutionToolResultBlockParam implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BashCodeExecutionToolResultBlockParam)
+     * (new BashCodeExecutionToolResultBlockParam())
      *   ->withContent(...)
      *   ->withToolUseID(...)
      * ```

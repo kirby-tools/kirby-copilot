@@ -5,19 +5,24 @@ declare(strict_types=1);
 namespace Anthropic\Services\Beta\Skills;
 
 use Anthropic\Beta\AnthropicBeta;
+use Anthropic\Beta\Skills\Versions\DeletedSkillVersion;
+use Anthropic\Beta\Skills\Versions\SkillVersion;
 use Anthropic\Beta\Skills\Versions\VersionCreateParams;
 use Anthropic\Beta\Skills\Versions\VersionDeleteParams;
-use Anthropic\Beta\Skills\Versions\VersionDeleteResponse;
-use Anthropic\Beta\Skills\Versions\VersionGetResponse;
+use Anthropic\Beta\Skills\Versions\VersionDownloadParams;
 use Anthropic\Beta\Skills\Versions\VersionListParams;
-use Anthropic\Beta\Skills\Versions\VersionListResponse;
-use Anthropic\Beta\Skills\Versions\VersionNewResponse;
 use Anthropic\Beta\Skills\Versions\VersionRetrieveParams;
+use Anthropic\ClaudeCodeKeyCreatorNotMemberException;
 use Anthropic\Client;
+use Anthropic\CMEKContextUnavailableException;
+use Anthropic\CMEKKeyDisabledException;
+use Anthropic\CMEKKeyNetworkBlockedException;
 use Anthropic\Core\Contracts\BaseResponse;
 use Anthropic\Core\Exceptions\APIException;
 use Anthropic\Core\FileParam;
+use Anthropic\Core\Implementation\ApiCallInfo;
 use Anthropic\Core\Util;
+use Anthropic\OrganizationOnHoldException;
 use Anthropic\PageCursor;
 use Anthropic\RequestOptions;
 use Anthropic\ServiceContracts\Beta\Skills\VersionsRawContract;
@@ -42,13 +47,19 @@ final class VersionsRawService implements VersionsRawContract
      *
      * The format and length of IDs may change over time.
      * @param array{
-     *   files?: list<string|FileParam>|null,
+     *   files: list<string|FileParam>,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|VersionCreateParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<VersionNewResponse>
+     * @return BaseResponse<SkillVersion>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CMEKKeyDisabledException
+     * @throws CMEKKeyNetworkBlockedException
+     * @throws OrganizationOnHoldException
+     * @throws CMEKContextUnavailableException
      * @throws APIException
      */
     public function create(
@@ -60,12 +71,14 @@ final class VersionsRawService implements VersionsRawContract
             $params,
             $requestOptions,
         );
-        $header_params = ['betas' => 'anthropic-beta'];
+        $header_params = [
+            'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+        ];
 
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: ['v1/skills/%1$s/versions?beta=true', $skillID],
+            path: ['v1/skills/%1$s/versions', $skillID],
             headers: Util::array_transform_keys(
                 [
                     'Content-Type' => 'multipart/form-data',
@@ -80,11 +93,15 @@ final class VersionsRawService implements VersionsRawContract
                 $parsed,
                 array_flip(array_keys($header_params))
             ),
-            options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'skills-2025-10-02']],
-                $options
-            ),
-            convert: VersionNewResponse::class,
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.skills.versions.create',
+                route: '/v1/skills/{skill_id}/versions',
+                attributes: ['anthropic.skill.id' => $skillID],
+                createdId: 'anthropic.skill.version.id',
+            )),
+            convert: SkillVersion::class,
         );
     }
 
@@ -93,16 +110,20 @@ final class VersionsRawService implements VersionsRawContract
      *
      * Get Skill Version
      *
-     * @param string $version Path param: Version identifier for the skill.
+     * @param string $version Path param: Identifies the skill version: a version ID, or the literal `latest` for the skill's most recent version.
      *
-     * Each version is identified by a Unix epoch timestamp (e.g., "1759178010641129").
+     * Requests carrying the `skills-2025-10-02` beta header address versions by their Unix epoch timestamp instead (e.g., "1759178010641129").
      * @param array{
-     *   skillID: string, betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   skillID: string,
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|VersionRetrieveParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<VersionGetResponse>
+     * @return BaseResponse<SkillVersion>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function retrieve(
@@ -120,16 +141,24 @@ final class VersionsRawService implements VersionsRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: ['v1/skills/%1$s/versions/%2$s?beta=true', $skillID, $version],
+            path: ['v1/skills/%1$s/versions/%2$s', $skillID, $version],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
-            options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'skills-2025-10-02']],
-                $options
-            ),
-            convert: VersionGetResponse::class,
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.skills.versions.retrieve',
+                route: '/v1/skills/{skill_id}/versions/{version}',
+                attributes: [
+                    'anthropic.skill.id' => $skillID,
+                    'anthropic.skill.version.id' => $version,
+                ],
+            )),
+            convert: SkillVersion::class,
         );
     }
 
@@ -145,11 +174,14 @@ final class VersionsRawService implements VersionsRawContract
      *   limit?: int|null,
      *   page?: string|null,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|VersionListParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<PageCursor<VersionListResponse>>
+     * @return BaseResponse<PageCursor<SkillVersion>>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function list(
@@ -169,17 +201,23 @@ final class VersionsRawService implements VersionsRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: ['v1/skills/%1$s/versions?beta=true', $skillID],
+            path: ['v1/skills/%1$s/versions', $skillID],
             query: array_intersect_key($parsed, $query_params),
             headers: Util::array_transform_keys(
                 $header_params,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
-            options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'skills-2025-10-02']],
-                $options
-            ),
-            convert: VersionListResponse::class,
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.skills.versions.list',
+                route: '/v1/skills/{skill_id}/versions',
+                query: ['limit', 'page'],
+                attributes: ['anthropic.skill.id' => $skillID],
+            )),
+            convert: SkillVersion::class,
             page: PageCursor::class,
         );
     }
@@ -189,16 +227,20 @@ final class VersionsRawService implements VersionsRawContract
      *
      * Delete Skill Version
      *
-     * @param string $version Path param: Version identifier for the skill.
+     * @param string $version Path param: Identifies the skill version by its version ID.
      *
-     * Each version is identified by a Unix epoch timestamp (e.g., "1759178010641129").
+     * Requests carrying the `skills-2025-10-02` beta header address versions by their Unix epoch timestamp instead (e.g., "1759178010641129").
      * @param array{
-     *   skillID: string, betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   skillID: string,
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|VersionDeleteParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<VersionDeleteResponse>
+     * @return BaseResponse<DeletedSkillVersion>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function delete(
@@ -216,16 +258,79 @@ final class VersionsRawService implements VersionsRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'delete',
-            path: ['v1/skills/%1$s/versions/%2$s?beta=true', $skillID, $version],
+            path: ['v1/skills/%1$s/versions/%2$s', $skillID, $version],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
-            options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'skills-2025-10-02']],
-                $options
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.skills.versions.delete',
+                route: '/v1/skills/{skill_id}/versions/{version}',
+                attributes: [
+                    'anthropic.skill.id' => $skillID,
+                    'anthropic.skill.version.id' => $version,
+                ],
+            )),
+            convert: DeletedSkillVersion::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * Download a skill version's content as a zip archive.
+     *
+     * @param string $version Path param: Identifies the skill version by its version ID.
+     *
+     * Requests carrying the `skills-2025-10-02` beta header address versions by their Unix epoch timestamp instead (e.g., "1759178010641129").
+     * @param array{
+     *   skillID: string,
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
+     * }|VersionDownloadParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<string>
+     *
+     * @throws APIException
+     */
+    public function download(
+        string $version,
+        array|VersionDownloadParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = VersionDownloadParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+        $skillID = $parsed['skillID'];
+        unset($parsed['skillID']);
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'get',
+            path: ['v1/skills/%1$s/versions/%2$s/content', $skillID, $version],
+            headers: Util::array_transform_keys(
+                ['Accept' => 'application/binary', ...$parsed],
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
-            convert: VersionDeleteResponse::class,
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.skills.versions.download',
+                route: '/v1/skills/{skill_id}/versions/{version}/content',
+                attributes: [
+                    'anthropic.skill.id' => $skillID,
+                    'anthropic.skill.version.id' => $version,
+                ],
+            )),
+            convert: 'binary',
         );
     }
 }

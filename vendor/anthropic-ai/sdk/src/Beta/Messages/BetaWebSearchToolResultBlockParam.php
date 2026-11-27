@@ -9,13 +9,14 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type BetaWebSearchToolResultBlockParamContentVariants from \Anthropic\Beta\Messages\BetaWebSearchToolResultBlockParamContent
- * @phpstan-import-type CallerVariants from \Anthropic\Beta\Messages\BetaWebSearchToolResultBlockParam\Caller
  * @phpstan-import-type BetaWebSearchToolResultBlockParamContentShape from \Anthropic\Beta\Messages\BetaWebSearchToolResultBlockParamContent
  * @phpstan-import-type BetaCacheControlEphemeralShape from \Anthropic\Beta\Messages\BetaCacheControlEphemeral
  * @phpstan-import-type CallerShape from \Anthropic\Beta\Messages\BetaWebSearchToolResultBlockParam\Caller
+ * @phpstan-import-type BetaWebSearchToolResultBlockParamContentVariants from \Anthropic\Beta\Messages\BetaWebSearchToolResultBlockParamContent
+ * @phpstan-import-type CallerVariants from \Anthropic\Beta\Messages\BetaWebSearchToolResultBlockParam\Caller
  *
  * @phpstan-type BetaWebSearchToolResultBlockParamShape = array{
  *   content: BetaWebSearchToolResultBlockParamContentShape,
@@ -31,12 +32,12 @@ final class BetaWebSearchToolResultBlockParam implements BaseModel
     use SdkModel;
 
     /** @var 'web_search_tool_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('web_search_tool_result'))]
     public string $type = 'web_search_tool_result';
 
     /** @var BetaWebSearchToolResultBlockParamContentVariants $content */
     #[Required(union: BetaWebSearchToolResultBlockParamContent::class)]
-    public array|BetaWebSearchToolRequestError $content;
+    public array|BetaWebSearchToolRequestErrorObject $content;
 
     #[Required('tool_use_id')]
     public string $toolUseID;
@@ -47,11 +48,7 @@ final class BetaWebSearchToolResultBlockParam implements BaseModel
     #[Optional('cache_control', nullable: true)]
     public ?BetaCacheControlEphemeral $cacheControl;
 
-    /**
-     * Tool invocation directly from the model.
-     *
-     * @var CallerVariants|null $caller
-     */
+    /** @var CallerVariants|null $caller */
     #[Optional(union: Caller::class)]
     public BetaDirectCaller|BetaServerToolCaller|BetaServerToolCaller20260120|null $caller;
 
@@ -66,7 +63,7 @@ final class BetaWebSearchToolResultBlockParam implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaWebSearchToolResultBlockParam)->withContent(...)->withToolUseID(...)
+     * (new BetaWebSearchToolResultBlockParam())->withContent(...)->withToolUseID(...)
      * ```
      */
     public function __construct()
@@ -84,7 +81,7 @@ final class BetaWebSearchToolResultBlockParam implements BaseModel
      * @param CallerShape|null $caller
      */
     public static function with(
-        array|BetaWebSearchToolRequestError $content,
+        array|BetaWebSearchToolRequestErrorObject $content,
         string $toolUseID,
         BetaCacheControlEphemeral|array|null $cacheControl = null,
         BetaDirectCaller|array|BetaServerToolCaller|BetaServerToolCaller20260120|null $caller = null,
@@ -104,7 +101,7 @@ final class BetaWebSearchToolResultBlockParam implements BaseModel
      * @param BetaWebSearchToolResultBlockParamContentShape $content
      */
     public function withContent(
-        array|BetaWebSearchToolRequestError $content
+        array|BetaWebSearchToolRequestErrorObject $content
     ): self {
         $self = clone $this;
         $self['content'] = $content;
@@ -146,8 +143,6 @@ final class BetaWebSearchToolResultBlockParam implements BaseModel
     }
 
     /**
-     * Tool invocation directly from the model.
-     *
      * @param CallerShape $caller
      */
     public function withCaller(

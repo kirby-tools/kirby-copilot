@@ -20,6 +20,11 @@ trait SdkUnion
         return null;
     }
 
+    public static function discriminatorProperty(): ?string
+    {
+        return static::discriminator();
+    }
+
     /**
      * @return array<string, Converter|ConverterSource|string>|list<Converter|ConverterSource|string>
      */
@@ -30,10 +35,14 @@ trait SdkUnion
 
     public static function converter(): Converter
     {
-        if (isset(static::$converter)) {
-            return static::$converter;
+        if (isset(self::$converter)) {
+            return self::$converter;
         }
 
-        return static::$converter = new UnionOf(discriminator: static::discriminator(), variants: static::variants());
+        return self::$converter = new UnionOf(
+            discriminator: static::discriminator(),
+            discriminatorProperty: static::discriminatorProperty(),
+            variants: static::variants(),
+        );
     }
 }

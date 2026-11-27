@@ -1,0 +1,63 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\ServiceContracts\Beta\Organization\Workspaces;
+
+use Anthropic\Beta\Organization\Workspaces\RateLimits\BetaWorkspaceRateLimit;
+use Anthropic\Beta\Organization\Workspaces\RateLimits\BetaWorkspaceRateLimitUpdateValue;
+use Anthropic\Beta\Organization\Workspaces\RateLimits\RateLimitListParams\GroupType;
+use Anthropic\Core\Exceptions\APIException;
+use Anthropic\PageCursor;
+use Anthropic\RequestOptions;
+use Anthropic\SandboxEgressRestrictedException;
+
+/**
+ * @phpstan-import-type BetaWorkspaceRateLimitUpdateValueShape from \Anthropic\Beta\Organization\Workspaces\RateLimits\BetaWorkspaceRateLimitUpdateValue
+ * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ */
+interface RateLimitsContract
+{
+    /**
+     * @api
+     *
+     * @param string $rateLimitID Path param: The `id` of the organization's rate-limit entry to set overrides for.
+     * @param string $workspaceID Path param: The ID of the workspace.
+     * @param list<BetaWorkspaceRateLimitUpdateValue|BetaWorkspaceRateLimitUpdateValueShape> $limits Body param: Limits to set or clear. Unspecified limit types are unchanged.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @throws SandboxEgressRestrictedException
+     * @throws APIException
+     */
+    public function update(
+        string $rateLimitID,
+        string $workspaceID,
+        array $limits,
+        RequestOptions|array|null $requestOptions = null,
+    ): BetaWorkspaceRateLimit;
+
+    /**
+     * @api
+     *
+     * @param string $workspaceID The ID of the workspace.
+     * @param GroupType|value-of<GroupType>|null $groupType Filter by group type.
+     * @param bool $includeInherited Also list the limiter values the workspace inherits from the organization, including groups with no workspace-level override.
+     * @param int|null $limit Maximum number of items to return per page. Ranges from `1` to `1000`.
+     *
+     * When omitted, every remaining entry is returned in a single page and `next_page` is `null`.
+     * @param string|null $page Opaque cursor from a previous response's `next_page`.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return PageCursor<BetaWorkspaceRateLimit>
+     *
+     * @throws APIException
+     */
+    public function list(
+        string $workspaceID,
+        GroupType|string|null $groupType = null,
+        ?bool $includeInherited = null,
+        ?int $limit = null,
+        ?string $page = null,
+        RequestOptions|array|null $requestOptions = null,
+    ): PageCursor;
+}

@@ -12,13 +12,14 @@ use Anthropic\Core\Concerns\SdkParams;
 use Anthropic\Core\Contracts\BaseModel;
 
 /**
- * Get Skill Version.
+ * Get Skill Version
  *
  * @see Anthropic\Services\Beta\Skills\VersionsService::retrieve()
  *
  * @phpstan-type VersionRetrieveParamsShape = array{
  *   skillID: string,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class VersionRetrieveParams implements BaseModel
@@ -44,6 +45,14 @@ final class VersionRetrieveParams implements BaseModel
     public ?array $betas;
 
     /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
+
+    /**
      * `new VersionRetrieveParams()` is missing required properties by the API.
      *
      * To enforce required parameters use
@@ -54,7 +63,7 @@ final class VersionRetrieveParams implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new VersionRetrieveParams)->withSkillID(...)
+     * (new VersionRetrieveParams())->withSkillID(...)
      * ```
      */
     public function __construct()
@@ -69,13 +78,17 @@ final class VersionRetrieveParams implements BaseModel
      *
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>>|null $betas
      */
-    public static function with(string $skillID, ?array $betas = null): self
-    {
+    public static function with(
+        string $skillID,
+        ?array $betas = null,
+        ?string $workspaceID = null
+    ): self {
         $self = new self;
 
         $self['skillID'] = $skillID;
 
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
@@ -102,6 +115,19 @@ final class VersionRetrieveParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

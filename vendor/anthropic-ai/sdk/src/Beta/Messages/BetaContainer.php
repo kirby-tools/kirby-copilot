@@ -9,14 +9,14 @@ use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
 
 /**
- * Information about the container used in the request (for the code execution tool).
+ * Information about the container used in the request (for the code execution tool)
  *
- * @phpstan-import-type BetaSkillShape from \Anthropic\Beta\Messages\BetaSkill
+ * @phpstan-import-type BetaContainerSkillShape from \Anthropic\Beta\Messages\BetaContainerSkill
  *
  * @phpstan-type BetaContainerShape = array{
  *   id: string,
  *   expiresAt: \DateTimeInterface,
- *   skills: list<BetaSkill|BetaSkillShape>|null,
+ *   skills: list<BetaContainerSkill|BetaContainerSkillShape>|null,
  * }
  */
 final class BetaContainer implements BaseModel
@@ -25,7 +25,7 @@ final class BetaContainer implements BaseModel
     use SdkModel;
 
     /**
-     * Identifier for the container used in this request.
+     * Identifier for the container used in this request
      */
     #[Required]
     public string $id;
@@ -37,11 +37,11 @@ final class BetaContainer implements BaseModel
     public \DateTimeInterface $expiresAt;
 
     /**
-     * Skills loaded in the container.
+     * Skills loaded in the container
      *
-     * @var list<BetaSkill>|null $skills
+     * @var list<BetaContainerSkill>|null $skills
      */
-    #[Required(list: BetaSkill::class)]
+    #[Required(list: BetaContainerSkill::class)]
     public ?array $skills;
 
     /**
@@ -55,7 +55,7 @@ final class BetaContainer implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaContainer)->withID(...)->withExpiresAt(...)->withSkills(...)
+     * (new BetaContainer())->withID(...)->withExpiresAt(...)->withSkills(...)
      * ```
      */
     public function __construct()
@@ -68,7 +68,7 @@ final class BetaContainer implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
-     * @param list<BetaSkill|BetaSkillShape>|null $skills
+     * @param list<BetaContainerSkill|BetaContainerSkillShape>|null $skills
      */
     public static function with(
         string $id,
@@ -85,7 +85,7 @@ final class BetaContainer implements BaseModel
     }
 
     /**
-     * Identifier for the container used in this request.
+     * Identifier for the container used in this request
      */
     public function withID(string $id): self
     {
@@ -107,9 +107,9 @@ final class BetaContainer implements BaseModel
     }
 
     /**
-     * Skills loaded in the container.
+     * Skills loaded in the container
      *
-     * @param list<BetaSkill|BetaSkillShape>|null $skills
+     * @param list<BetaContainerSkill|BetaContainerSkillShape>|null $skills
      */
     public function withSkills(?array $skills): self
     {

@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace Anthropic\Messages;
 
+use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\ToolUseBlock\Caller;
 
 /**
- * @phpstan-import-type CallerVariants from \Anthropic\Messages\ToolUseBlock\Caller
  * @phpstan-import-type CallerShape from \Anthropic\Messages\ToolUseBlock\Caller
+ * @phpstan-import-type CallerVariants from \Anthropic\Messages\ToolUseBlock\Caller
  *
  * @phpstan-type ToolUseBlockShape = array{
  *   id: string,
@@ -19,6 +21,7 @@ use Anthropic\Messages\ToolUseBlock\Caller;
  *   input: array<string,mixed>,
  *   name: string,
  *   type: 'tool_use',
+ *   toolsetName?: string|null,
  * }
  */
 final class ToolUseBlock implements BaseModel
@@ -27,17 +30,13 @@ final class ToolUseBlock implements BaseModel
     use SdkModel;
 
     /** @var 'tool_use' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('tool_use'))]
     public string $type = 'tool_use';
 
     #[Required]
     public string $id;
 
-    /**
-     * Tool invocation directly from the model.
-     *
-     * @var CallerVariants $caller
-     */
+    /** @var CallerVariants $caller */
     #[Required(union: Caller::class)]
     public DirectCaller|ServerToolCaller|ServerToolCaller20260120 $caller;
 
@@ -47,6 +46,12 @@ final class ToolUseBlock implements BaseModel
 
     #[Required]
     public string $name;
+
+    /**
+     * For a toolset member tool_use, the toolset family.
+     */
+    #[Optional('toolset_name', nullable: true)]
+    public ?string $toolsetName;
 
     /**
      * `new ToolUseBlock()` is missing required properties by the API.
@@ -59,7 +64,11 @@ final class ToolUseBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ToolUseBlock)->withID(...)->withCaller(...)->withInput(...)->withName(...)
+     * (new ToolUseBlock())
+     *   ->withID(...)
+     *   ->withCaller(...)
+     *   ->withInput(...)
+     *   ->withName(...)
      * ```
      */
     public function __construct()
@@ -82,6 +91,7 @@ final class ToolUseBlock implements BaseModel
         DirectCaller|array|ServerToolCaller|ServerToolCaller20260120 $caller = [
             'type' => 'direct',
         ],
+        ?string $toolsetName = null,
     ): self {
         $self = new self;
 
@@ -89,6 +99,8 @@ final class ToolUseBlock implements BaseModel
         $self['caller'] = $caller;
         $self['input'] = $input;
         $self['name'] = $name;
+
+        null !== $toolsetName && $self['toolsetName'] = $toolsetName;
 
         return $self;
     }
@@ -102,8 +114,6 @@ final class ToolUseBlock implements BaseModel
     }
 
     /**
-     * Tool invocation directly from the model.
-     *
      * @param CallerShape $caller
      */
     public function withCaller(
@@ -141,6 +151,17 @@ final class ToolUseBlock implements BaseModel
     {
         $self = clone $this;
         $self['type'] = $type;
+
+        return $self;
+    }
+
+    /**
+     * For a toolset member tool_use, the toolset family.
+     */
+    public function withToolsetName(?string $toolsetName): self
+    {
+        $self = clone $this;
+        $self['toolsetName'] = $toolsetName;
 
         return $self;
     }

@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace Anthropic\ServiceContracts\Beta\Sessions;
 
+use Anthropic\Beta\Sessions\BetaManagedAgentsDeltaEvent;
+use Anthropic\Beta\Sessions\BetaManagedAgentsSessionUpdatedEvent;
+use Anthropic\Beta\Sessions\BetaManagedAgentsSessionUsageEvent;
+use Anthropic\Beta\Sessions\BetaManagedAgentsStartEvent;
+use Anthropic\Beta\Sessions\BetaManagedAgentsSystemMessageEvent;
+use Anthropic\Beta\Sessions\BetaManagedAgentsUserToolResultEvent;
 use Anthropic\Beta\Sessions\Events\EventListParams;
 use Anthropic\Beta\Sessions\Events\EventSendParams;
 use Anthropic\Beta\Sessions\Events\EventStreamParams;
@@ -13,6 +19,8 @@ use Anthropic\Beta\Sessions\Events\ManagedAgentsAgentMCPToolUseEvent;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsAgentMessageEvent;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsAgentThinkingEvent;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsAgentThreadContextCompactedEvent;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsAgentThreadMessageReceivedEvent;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsAgentThreadMessageSentEvent;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsAgentToolResultEvent;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsAgentToolUseEvent;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsSendSessionEvents;
@@ -22,12 +30,28 @@ use Anthropic\Beta\Sessions\Events\ManagedAgentsSessionStatusIdleEvent;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsSessionStatusRescheduledEvent;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsSessionStatusRunningEvent;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsSessionStatusTerminatedEvent;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsSessionThreadCreatedEvent;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsSessionThreadStatusIdleEvent;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsSessionThreadStatusRescheduledEvent;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsSessionThreadStatusRunningEvent;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsSessionThreadStatusTerminatedEvent;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsSpanModelRequestEndEvent;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsSpanModelRequestStartEvent;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsSpanOutcomeEvaluationEndEvent;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsSpanOutcomeEvaluationOngoingEvent;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsSpanOutcomeEvaluationStartEvent;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsUserCustomToolResultEvent;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsUserDefineOutcomeEvent;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsUserInterruptEvent;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsUserMessageEvent;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsUserToolConfirmationEvent;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsWorkflowRunCreatedEvent;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsWorkflowRunErrorEvent;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsWorkflowRunPhaseEndedEvent;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsWorkflowRunPhaseStartedEvent;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsWorkflowRunStatusEndedEvent;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsWorkflowRunStatusIdleEvent;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsWorkflowRunStatusRunningEvent;
 use Anthropic\Core\Contracts\BaseResponse;
 use Anthropic\Core\Contracts\BaseStream;
 use Anthropic\Core\Exceptions\APIException;
@@ -42,11 +66,11 @@ interface EventsRawContract
     /**
      * @api
      *
-     * @param string $sessionID Path param: Path parameter session_id
+     * @param string $sessionID Path param
      * @param array<string,mixed>|EventListParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<PageCursor<ManagedAgentsUserMessageEvent|ManagedAgentsUserInterruptEvent|ManagedAgentsUserToolConfirmationEvent|ManagedAgentsUserCustomToolResultEvent|ManagedAgentsAgentCustomToolUseEvent|ManagedAgentsAgentMessageEvent|ManagedAgentsAgentThinkingEvent|ManagedAgentsAgentMCPToolUseEvent|ManagedAgentsAgentMCPToolResultEvent|ManagedAgentsAgentToolUseEvent|ManagedAgentsAgentToolResultEvent|ManagedAgentsAgentThreadContextCompactedEvent|ManagedAgentsSessionErrorEvent|ManagedAgentsSessionStatusRescheduledEvent|ManagedAgentsSessionStatusRunningEvent|ManagedAgentsSessionStatusIdleEvent|ManagedAgentsSessionStatusTerminatedEvent|ManagedAgentsSpanModelRequestStartEvent|ManagedAgentsSpanModelRequestEndEvent|ManagedAgentsSessionDeletedEvent,>,>
+     * @return BaseResponse<PageCursor<ManagedAgentsUserMessageEvent|ManagedAgentsUserInterruptEvent|ManagedAgentsUserToolConfirmationEvent|ManagedAgentsUserCustomToolResultEvent|ManagedAgentsAgentCustomToolUseEvent|ManagedAgentsAgentMessageEvent|ManagedAgentsAgentThinkingEvent|ManagedAgentsAgentMCPToolUseEvent|ManagedAgentsAgentMCPToolResultEvent|ManagedAgentsAgentToolUseEvent|ManagedAgentsAgentToolResultEvent|ManagedAgentsAgentThreadMessageReceivedEvent|ManagedAgentsAgentThreadMessageSentEvent|ManagedAgentsAgentThreadContextCompactedEvent|ManagedAgentsSessionErrorEvent|ManagedAgentsSessionStatusRescheduledEvent|ManagedAgentsSessionStatusRunningEvent|ManagedAgentsSessionStatusIdleEvent|ManagedAgentsSessionStatusTerminatedEvent|ManagedAgentsSessionThreadCreatedEvent|ManagedAgentsSpanOutcomeEvaluationStartEvent|ManagedAgentsSpanOutcomeEvaluationEndEvent|ManagedAgentsSpanModelRequestStartEvent|ManagedAgentsSpanModelRequestEndEvent|ManagedAgentsSpanOutcomeEvaluationOngoingEvent|ManagedAgentsUserDefineOutcomeEvent|ManagedAgentsSessionDeletedEvent|ManagedAgentsSessionThreadStatusRunningEvent|ManagedAgentsSessionThreadStatusIdleEvent|ManagedAgentsSessionThreadStatusTerminatedEvent|BetaManagedAgentsUserToolResultEvent|ManagedAgentsSessionThreadStatusRescheduledEvent|BetaManagedAgentsSessionUpdatedEvent|BetaManagedAgentsSystemMessageEvent|BetaManagedAgentsSessionUsageEvent|ManagedAgentsWorkflowRunCreatedEvent|ManagedAgentsWorkflowRunStatusEndedEvent|ManagedAgentsWorkflowRunPhaseStartedEvent|ManagedAgentsWorkflowRunPhaseEndedEvent|ManagedAgentsWorkflowRunStatusRunningEvent|ManagedAgentsWorkflowRunStatusIdleEvent|ManagedAgentsWorkflowRunErrorEvent>>
      *
      * @throws APIException
      */
@@ -59,7 +83,7 @@ interface EventsRawContract
     /**
      * @api
      *
-     * @param string $sessionID Path param: Path parameter session_id
+     * @param string $sessionID Path param
      * @param array<string,mixed>|EventSendParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -76,11 +100,11 @@ interface EventsRawContract
     /**
      * @api
      *
-     * @param string $sessionID Path parameter session_id
+     * @param string $sessionID Path param
      * @param array<string,mixed>|EventStreamParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<BaseStream<ManagedAgentsUserMessageEvent|ManagedAgentsUserInterruptEvent|ManagedAgentsUserToolConfirmationEvent|ManagedAgentsUserCustomToolResultEvent|ManagedAgentsAgentCustomToolUseEvent|ManagedAgentsAgentMessageEvent|ManagedAgentsAgentThinkingEvent|ManagedAgentsAgentMCPToolUseEvent|ManagedAgentsAgentMCPToolResultEvent|ManagedAgentsAgentToolUseEvent|ManagedAgentsAgentToolResultEvent|ManagedAgentsAgentThreadContextCompactedEvent|ManagedAgentsSessionErrorEvent|ManagedAgentsSessionStatusRescheduledEvent|ManagedAgentsSessionStatusRunningEvent|ManagedAgentsSessionStatusIdleEvent|ManagedAgentsSessionStatusTerminatedEvent|ManagedAgentsSpanModelRequestStartEvent|ManagedAgentsSpanModelRequestEndEvent|ManagedAgentsSessionDeletedEvent,>,>
+     * @return BaseResponse<BaseStream<ManagedAgentsUserMessageEvent|ManagedAgentsUserInterruptEvent|ManagedAgentsUserToolConfirmationEvent|ManagedAgentsUserCustomToolResultEvent|ManagedAgentsAgentCustomToolUseEvent|ManagedAgentsAgentMessageEvent|ManagedAgentsAgentThinkingEvent|ManagedAgentsAgentMCPToolUseEvent|ManagedAgentsAgentMCPToolResultEvent|ManagedAgentsAgentToolUseEvent|ManagedAgentsAgentToolResultEvent|ManagedAgentsAgentThreadMessageReceivedEvent|ManagedAgentsAgentThreadMessageSentEvent|ManagedAgentsAgentThreadContextCompactedEvent|ManagedAgentsSessionErrorEvent|ManagedAgentsSessionStatusRescheduledEvent|ManagedAgentsSessionStatusRunningEvent|ManagedAgentsSessionStatusIdleEvent|ManagedAgentsSessionStatusTerminatedEvent|ManagedAgentsSessionThreadCreatedEvent|ManagedAgentsSpanOutcomeEvaluationStartEvent|ManagedAgentsSpanOutcomeEvaluationEndEvent|ManagedAgentsSpanModelRequestStartEvent|ManagedAgentsSpanModelRequestEndEvent|ManagedAgentsSpanOutcomeEvaluationOngoingEvent|ManagedAgentsUserDefineOutcomeEvent|ManagedAgentsSessionDeletedEvent|ManagedAgentsSessionThreadStatusRunningEvent|ManagedAgentsSessionThreadStatusIdleEvent|ManagedAgentsSessionThreadStatusTerminatedEvent|BetaManagedAgentsUserToolResultEvent|ManagedAgentsSessionThreadStatusRescheduledEvent|BetaManagedAgentsSessionUpdatedEvent|BetaManagedAgentsStartEvent|BetaManagedAgentsDeltaEvent|BetaManagedAgentsSystemMessageEvent|BetaManagedAgentsSessionUsageEvent|ManagedAgentsWorkflowRunCreatedEvent|ManagedAgentsWorkflowRunStatusEndedEvent|ManagedAgentsWorkflowRunPhaseStartedEvent|ManagedAgentsWorkflowRunPhaseEndedEvent|ManagedAgentsWorkflowRunStatusRunningEvent|ManagedAgentsWorkflowRunStatusIdleEvent|ManagedAgentsWorkflowRunErrorEvent>>
      *
      * @throws APIException
      */

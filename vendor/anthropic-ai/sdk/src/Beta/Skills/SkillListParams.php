@@ -11,7 +11,7 @@ use Anthropic\Core\Concerns\SdkParams;
 use Anthropic\Core\Contracts\BaseModel;
 
 /**
- * List Skills.
+ * List Skills
  *
  * @see Anthropic\Services\Beta\SkillsService::list()
  *
@@ -20,6 +20,7 @@ use Anthropic\Core\Contracts\BaseModel;
  *   page?: string|null,
  *   source?: string|null,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class SkillListParams implements BaseModel
@@ -31,7 +32,7 @@ final class SkillListParams implements BaseModel
     /**
      * Number of results to return per page.
      *
-     * Maximum value is 100. Defaults to 20.
+     * Ranges from `1` to `1000`. Defaults to `20`.
      */
     #[Optional]
     public ?int $limit;
@@ -62,6 +63,14 @@ final class SkillListParams implements BaseModel
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
 
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
+
     public function __construct()
     {
         $this->initialize();
@@ -79,6 +88,7 @@ final class SkillListParams implements BaseModel
         ?string $page = null,
         ?string $source = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
     ): self {
         $self = new self;
 
@@ -86,6 +96,7 @@ final class SkillListParams implements BaseModel
         null !== $page && $self['page'] = $page;
         null !== $source && $self['source'] = $source;
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
@@ -93,7 +104,7 @@ final class SkillListParams implements BaseModel
     /**
      * Number of results to return per page.
      *
-     * Maximum value is 100. Defaults to 20.
+     * Ranges from `1` to `1000`. Defaults to `20`.
      */
     public function withLimit(int $limit): self
     {
@@ -140,6 +151,19 @@ final class SkillListParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

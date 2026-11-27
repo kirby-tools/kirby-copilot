@@ -7,6 +7,7 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type BetaMemoryTool20250818StrReplaceCommandShape = array{
@@ -19,27 +20,27 @@ final class BetaMemoryTool20250818StrReplaceCommand implements BaseModel
     use SdkModel;
 
     /**
-     * Command type identifier.
+     * Command type identifier
      *
      * @var 'str_replace' $command
      */
-    #[Required]
+    #[Required(type: new ConstantOf('str_replace'))]
     public string $command = 'str_replace';
 
     /**
-     * Text to replace with.
+     * Text to replace with
      */
     #[Required('new_str')]
     public string $newStr;
 
     /**
-     * Text to search for and replace.
+     * Text to search for and replace
      */
     #[Required('old_str')]
     public string $oldStr;
 
     /**
-     * Path to the file where text should be replaced.
+     * Path to the file where text should be replaced
      */
     #[Required]
     public string $path;
@@ -57,7 +58,7 @@ final class BetaMemoryTool20250818StrReplaceCommand implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaMemoryTool20250818StrReplaceCommand)
+     * (new BetaMemoryTool20250818StrReplaceCommand())
      *   ->withNewStr(...)
      *   ->withOldStr(...)
      *   ->withPath(...)
@@ -88,7 +89,7 @@ final class BetaMemoryTool20250818StrReplaceCommand implements BaseModel
     }
 
     /**
-     * Command type identifier.
+     * Command type identifier
      *
      * @param 'str_replace' $command
      */
@@ -101,7 +102,7 @@ final class BetaMemoryTool20250818StrReplaceCommand implements BaseModel
     }
 
     /**
-     * Text to replace with.
+     * Text to replace with
      */
     public function withNewStr(string $newStr): self
     {
@@ -112,7 +113,7 @@ final class BetaMemoryTool20250818StrReplaceCommand implements BaseModel
     }
 
     /**
-     * Text to search for and replace.
+     * Text to search for and replace
      */
     public function withOldStr(string $oldStr): self
     {
@@ -123,7 +124,7 @@ final class BetaMemoryTool20250818StrReplaceCommand implements BaseModel
     }
 
     /**
-     * Path to the file where text should be replaced.
+     * Path to the file where text should be replaced
      */
     public function withPath(string $path): self
     {

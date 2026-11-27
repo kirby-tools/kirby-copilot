@@ -58,7 +58,7 @@ final class BetaEffortCapability implements BaseModel
     public bool $supported;
 
     /**
-     * Indicates whether a capability is supported.
+     * Whether the model supports xhigh effort level.
      */
     #[Required]
     public ?BetaCapabilitySupport $xhigh;
@@ -76,7 +76,7 @@ final class BetaEffortCapability implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaEffortCapability)
+     * (new BetaEffortCapability())
      *   ->withHigh(...)
      *   ->withLow(...)
      *   ->withMax(...)
@@ -185,7 +185,7 @@ final class BetaEffortCapability implements BaseModel
     }
 
     /**
-     * Indicates whether a capability is supported.
+     * Whether the model supports xhigh effort level.
      *
      * @param BetaCapabilitySupport|BetaCapabilitySupportShape|null $xhigh
      */

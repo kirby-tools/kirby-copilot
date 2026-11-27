@@ -8,6 +8,7 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\ThinkingConfigEnabled\Display;
 
 /**
@@ -21,7 +22,7 @@ final class ThinkingConfigEnabled implements BaseModel
     use SdkModel;
 
     /** @var 'enabled' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('enabled'))]
     public string $type = 'enabled';
 
     /**
@@ -29,13 +30,13 @@ final class ThinkingConfigEnabled implements BaseModel
      *
      * Must be ≥1024 and less than `max_tokens`.
      *
-     * See [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking) for details.
+     * See [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking) for details.
      */
     #[Required('budget_tokens')]
     public int $budgetTokens;
 
     /**
-     * Controls how thinking content appears in the response. When set to `summarized`, thinking is returned normally. When set to `omitted`, thinking content is redacted but a signature is returned for multi-turn continuity. Defaults to `summarized`.
+     * Controls how thinking content appears in the response. When set to `summarized`, thinking is returned normally. When set to `omitted`, thinking content is redacted but a signature is returned for multi-turn continuity. The default depends on the model; see [Controlling thinking display](https://platform.claude.com/docs/en/build-with-claude/thinking#controlling-thinking-display).
      *
      * @var value-of<Display>|null $display
      */
@@ -53,7 +54,7 @@ final class ThinkingConfigEnabled implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ThinkingConfigEnabled)->withBudgetTokens(...)
+     * (new ThinkingConfigEnabled())->withBudgetTokens(...)
      * ```
      */
     public function __construct()
@@ -86,7 +87,7 @@ final class ThinkingConfigEnabled implements BaseModel
      *
      * Must be ≥1024 and less than `max_tokens`.
      *
-     * See [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking) for details.
+     * See [extended thinking](https://platform.claude.com/docs/en/build-with-claude/extended-thinking) for details.
      */
     public function withBudgetTokens(int $budgetTokens): self
     {
@@ -108,7 +109,7 @@ final class ThinkingConfigEnabled implements BaseModel
     }
 
     /**
-     * Controls how thinking content appears in the response. When set to `summarized`, thinking is returned normally. When set to `omitted`, thinking content is redacted but a signature is returned for multi-turn continuity. Defaults to `summarized`.
+     * Controls how thinking content appears in the response. When set to `summarized`, thinking is returned normally. When set to `omitted`, thinking content is redacted but a signature is returned for multi-turn continuity. The default depends on the model; see [Controlling thinking display](https://platform.claude.com/docs/en/build-with-claude/thinking#controlling-thinking-display).
      *
      * @param Display|value-of<Display>|null $display
      */

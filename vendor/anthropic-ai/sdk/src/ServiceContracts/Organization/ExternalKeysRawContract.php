@@ -1,0 +1,124 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\ServiceContracts\Organization;
+
+use Anthropic\Core\Contracts\BaseResponse;
+use Anthropic\Core\Exceptions\APIException;
+use Anthropic\Organization\ExternalKeys\ExternalKey;
+use Anthropic\Organization\ExternalKeys\ExternalKeyCreateParams;
+use Anthropic\Organization\ExternalKeys\ExternalKeyDeleteResponse;
+use Anthropic\Organization\ExternalKeys\ExternalKeyInWorkspacePolicyException;
+use Anthropic\Organization\ExternalKeys\ExternalKeyListParams;
+use Anthropic\Organization\ExternalKeys\ExternalKeyUpdateParams;
+use Anthropic\Organization\ExternalKeys\ExternalKeyValidateResponse;
+use Anthropic\PageCursor;
+use Anthropic\RequestOptions;
+use Anthropic\SandboxEgressRestrictedException;
+use Anthropic\UserProfiles\UserProfileNotFoundException;
+
+/**
+ * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ */
+interface ExternalKeysRawContract
+{
+    /**
+     * @api
+     *
+     * @param array<string,mixed>|ExternalKeyCreateParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<ExternalKey>
+     *
+     * @throws UserProfileNotFoundException
+     * @throws SandboxEgressRestrictedException
+     * @throws APIException
+     */
+    public function create(
+        array|ExternalKeyCreateParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse;
+
+    /**
+     * @api
+     *
+     * @param string $externalKeyID ID of the External Key.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<ExternalKey>
+     *
+     * @throws APIException
+     */
+    public function retrieve(
+        string $externalKeyID,
+        RequestOptions|array|null $requestOptions = null
+    ): BaseResponse;
+
+    /**
+     * @api
+     *
+     * @param string $externalKeyID ID of the External Key.
+     * @param array<string,mixed>|ExternalKeyUpdateParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<ExternalKey>
+     *
+     * @throws ExternalKeyInWorkspacePolicyException
+     * @throws SandboxEgressRestrictedException
+     * @throws APIException
+     */
+    public function update(
+        string $externalKeyID,
+        array|ExternalKeyUpdateParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse;
+
+    /**
+     * @api
+     *
+     * @param array<string,mixed>|ExternalKeyListParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<PageCursor<ExternalKey>>
+     *
+     * @throws APIException
+     */
+    public function list(
+        array|ExternalKeyListParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse;
+
+    /**
+     * @api
+     *
+     * @param string $externalKeyID ID of the External Key.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<ExternalKeyDeleteResponse>
+     *
+     * @throws ExternalKeyInWorkspacePolicyException
+     * @throws SandboxEgressRestrictedException
+     * @throws APIException
+     */
+    public function delete(
+        string $externalKeyID,
+        RequestOptions|array|null $requestOptions = null
+    ): BaseResponse;
+
+    /**
+     * @api
+     *
+     * @param string $externalKeyID ID of the External Key.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<ExternalKeyValidateResponse>
+     *
+     * @throws SandboxEgressRestrictedException
+     * @throws APIException
+     */
+    public function validate(
+        string $externalKeyID,
+        RequestOptions|array|null $requestOptions = null
+    ): BaseResponse;
+}

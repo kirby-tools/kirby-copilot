@@ -1,0 +1,138 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Beta\Agents;
+
+use Anthropic\Beta\Agents\BetaManagedAgentsReadToolConfigParams\PermissionPolicy;
+use Anthropic\Beta\Agents\BetaManagedAgentsReadToolConfigParams\Type;
+use Anthropic\Core\Attributes\Optional;
+use Anthropic\Core\Attributes\Required;
+use Anthropic\Core\Concerns\SdkModel;
+use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
+
+/**
+ * Configuration override for the read tool.
+ *
+ * @phpstan-import-type PermissionPolicyShape from \Anthropic\Beta\Agents\BetaManagedAgentsReadToolConfigParams\PermissionPolicy
+ * @phpstan-import-type PermissionPolicyVariants from \Anthropic\Beta\Agents\BetaManagedAgentsReadToolConfigParams\PermissionPolicy
+ *
+ * @phpstan-type BetaManagedAgentsReadToolConfigParamsShape = array{
+ *   name: 'read',
+ *   enabled?: bool|null,
+ *   permissionPolicy?: PermissionPolicyShape|null,
+ *   type?: null|Type|value-of<Type>,
+ * }
+ */
+final class BetaManagedAgentsReadToolConfigParams implements BaseModel
+{
+    /** @use SdkModel<BetaManagedAgentsReadToolConfigParamsShape> */
+    use SdkModel;
+
+    /**
+     * Must be "read".
+     *
+     * @var 'read' $name
+     */
+    #[Required(type: new ConstantOf('read'))]
+    public string $name = 'read';
+
+    /**
+     * Whether this tool is enabled and available to Claude. Overrides the default_config setting.
+     */
+    #[Optional(nullable: true)]
+    public ?bool $enabled;
+
+    /**
+     * Permission policy for this tool. Controls whether tool calls are auto-approved or require confirmation.
+     *
+     * @var PermissionPolicyVariants|null $permissionPolicy
+     */
+    #[Optional(
+        'permission_policy',
+        union: PermissionPolicy::class,
+        nullable: true
+    )]
+    public BetaManagedAgentsAlwaysAllowPolicy|BetaManagedAgentsAlwaysAskPolicy|BetaManagedAgentsAutoPolicy|null $permissionPolicy;
+
+    /** @var value-of<Type>|null $type */
+    #[Optional(enum: Type::class)]
+    public ?string $type;
+
+    public function __construct()
+    {
+        $this->initialize();
+    }
+
+    /**
+     * Construct an instance from the required parameters.
+     *
+     * You must use named parameters to construct any parameters with a default value.
+     *
+     * @param PermissionPolicyShape|null $permissionPolicy
+     * @param Type|value-of<Type>|null $type
+     */
+    public static function with(
+        ?bool $enabled = null,
+        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy|BetaManagedAgentsAutoPolicy|null $permissionPolicy = null,
+        Type|string|null $type = null,
+    ): self {
+        $self = new self;
+
+        null !== $enabled && $self['enabled'] = $enabled;
+        null !== $permissionPolicy && $self['permissionPolicy'] = $permissionPolicy;
+        null !== $type && $self['type'] = $type;
+
+        return $self;
+    }
+
+    /**
+     * Must be "read".
+     *
+     * @param 'read' $name
+     */
+    public function withName(string $name): self
+    {
+        $self = clone $this;
+        $self['name'] = $name;
+
+        return $self;
+    }
+
+    /**
+     * Whether this tool is enabled and available to Claude. Overrides the default_config setting.
+     */
+    public function withEnabled(?bool $enabled): self
+    {
+        $self = clone $this;
+        $self['enabled'] = $enabled;
+
+        return $self;
+    }
+
+    /**
+     * Permission policy for this tool. Controls whether tool calls are auto-approved or require confirmation.
+     *
+     * @param PermissionPolicyShape|null $permissionPolicy
+     */
+    public function withPermissionPolicy(
+        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy|BetaManagedAgentsAutoPolicy|null $permissionPolicy,
+    ): self {
+        $self = clone $this;
+        $self['permissionPolicy'] = $permissionPolicy;
+
+        return $self;
+    }
+
+    /**
+     * @param Type|value-of<Type> $type
+     */
+    public function withType(Type|string $type): self
+    {
+        $self = clone $this;
+        $self['type'] = $type;
+
+        return $self;
+    }
+}

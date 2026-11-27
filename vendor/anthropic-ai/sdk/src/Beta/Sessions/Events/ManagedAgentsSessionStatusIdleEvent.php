@@ -5,28 +5,34 @@ declare(strict_types=1);
 namespace Anthropic\Beta\Sessions\Events;
 
 use Anthropic\Beta\Sessions\Events\ManagedAgentsSessionStatusIdleEvent\StopReason;
-use Anthropic\Beta\Sessions\Events\ManagedAgentsSessionStatusIdleEvent\Type;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * Indicates the agent has paused and is awaiting user input.
  *
- * @phpstan-import-type StopReasonVariants from \Anthropic\Beta\Sessions\Events\ManagedAgentsSessionStatusIdleEvent\StopReason
+ * @phpstan-import-type ManagedAgentsSessionRefusalStopDetailsShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsSessionRefusalStopDetails
  * @phpstan-import-type StopReasonShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsSessionStatusIdleEvent\StopReason
+ * @phpstan-import-type StopReasonVariants from \Anthropic\Beta\Sessions\Events\ManagedAgentsSessionStatusIdleEvent\StopReason
  *
  * @phpstan-type ManagedAgentsSessionStatusIdleEventShape = array{
  *   id: string,
  *   processedAt: \DateTimeInterface,
+ *   stopDetails: null|ManagedAgentsSessionRefusalStopDetails|ManagedAgentsSessionRefusalStopDetailsShape,
  *   stopReason: StopReasonShape,
- *   type: Type|value-of<Type>,
+ *   type: 'session.status_idle',
  * }
  */
 final class ManagedAgentsSessionStatusIdleEvent implements BaseModel
 {
     /** @use SdkModel<ManagedAgentsSessionStatusIdleEventShape> */
     use SdkModel;
+
+    /** @var 'session.status_idle' $type */
+    #[Required(type: new ConstantOf('session.status_idle'))]
+    public string $type = 'session.status_idle';
 
     /**
      * Unique identifier for this event.
@@ -35,22 +41,20 @@ final class ManagedAgentsSessionStatusIdleEvent implements BaseModel
     public string $id;
 
     /**
-     * A timestamp in RFC 3339 format.
+     * Timestamp of status change.
      */
     #[Required('processed_at')]
     public \DateTimeInterface $processedAt;
 
     /**
-     * The agent completed its turn naturally and is ready for the next user message.
-     *
-     * @var StopReasonVariants $stopReason
+     * Structured information about why the session stopped. `null` when there is nothing more to report.
      */
-    #[Required('stop_reason', union: StopReason::class)]
-    public ManagedAgentsSessionEndTurn|ManagedAgentsSessionRequiresAction|ManagedAgentsSessionRetriesExhausted $stopReason;
+    #[Required('stop_details')]
+    public ?ManagedAgentsSessionRefusalStopDetails $stopDetails;
 
-    /** @var value-of<Type> $type */
-    #[Required(enum: Type::class)]
-    public string $type;
+    /** @var StopReasonVariants $stopReason */
+    #[Required('stop_reason', union: StopReason::class)]
+    public ManagedAgentsSessionEndTurn|ManagedAgentsSessionRequiresAction|ManagedAgentsSessionRetriesExhausted|ManagedAgentsSessionBudgetReached|ManagedAgentsSessionRefusal $stopReason;
 
     /**
      * `new ManagedAgentsSessionStatusIdleEvent()` is missing required properties by the API.
@@ -58,18 +62,18 @@ final class ManagedAgentsSessionStatusIdleEvent implements BaseModel
      * To enforce required parameters use
      * ```
      * ManagedAgentsSessionStatusIdleEvent::with(
-     *   id: ..., processedAt: ..., stopReason: ..., type: ...
+     *   id: ..., processedAt: ..., stopDetails: ..., stopReason: ...
      * )
      * ```
      *
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ManagedAgentsSessionStatusIdleEvent)
+     * (new ManagedAgentsSessionStatusIdleEvent())
      *   ->withID(...)
      *   ->withProcessedAt(...)
+     *   ->withStopDetails(...)
      *   ->withStopReason(...)
-     *   ->withType(...)
      * ```
      */
     public function __construct()
@@ -82,21 +86,21 @@ final class ManagedAgentsSessionStatusIdleEvent implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
+     * @param ManagedAgentsSessionRefusalStopDetails|ManagedAgentsSessionRefusalStopDetailsShape|null $stopDetails
      * @param StopReasonShape $stopReason
-     * @param Type|value-of<Type> $type
      */
     public static function with(
         string $id,
         \DateTimeInterface $processedAt,
-        ManagedAgentsSessionEndTurn|array|ManagedAgentsSessionRequiresAction|ManagedAgentsSessionRetriesExhausted $stopReason,
-        Type|string $type,
+        ManagedAgentsSessionRefusalStopDetails|array|null $stopDetails,
+        ManagedAgentsSessionEndTurn|array|ManagedAgentsSessionRequiresAction|ManagedAgentsSessionRetriesExhausted|ManagedAgentsSessionBudgetReached|ManagedAgentsSessionRefusal $stopReason,
     ): self {
         $self = new self;
 
         $self['id'] = $id;
         $self['processedAt'] = $processedAt;
+        $self['stopDetails'] = $stopDetails;
         $self['stopReason'] = $stopReason;
-        $self['type'] = $type;
 
         return $self;
     }
@@ -113,7 +117,7 @@ final class ManagedAgentsSessionStatusIdleEvent implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * Timestamp of status change.
      */
     public function withProcessedAt(\DateTimeInterface $processedAt): self
     {
@@ -124,12 +128,24 @@ final class ManagedAgentsSessionStatusIdleEvent implements BaseModel
     }
 
     /**
-     * The agent completed its turn naturally and is ready for the next user message.
+     * Structured information about why the session stopped. `null` when there is nothing more to report.
      *
+     * @param ManagedAgentsSessionRefusalStopDetails|ManagedAgentsSessionRefusalStopDetailsShape|null $stopDetails
+     */
+    public function withStopDetails(
+        ManagedAgentsSessionRefusalStopDetails|array|null $stopDetails
+    ): self {
+        $self = clone $this;
+        $self['stopDetails'] = $stopDetails;
+
+        return $self;
+    }
+
+    /**
      * @param StopReasonShape $stopReason
      */
     public function withStopReason(
-        ManagedAgentsSessionEndTurn|array|ManagedAgentsSessionRequiresAction|ManagedAgentsSessionRetriesExhausted $stopReason,
+        ManagedAgentsSessionEndTurn|array|ManagedAgentsSessionRequiresAction|ManagedAgentsSessionRetriesExhausted|ManagedAgentsSessionBudgetReached|ManagedAgentsSessionRefusal $stopReason,
     ): self {
         $self = clone $this;
         $self['stopReason'] = $stopReason;
@@ -138,9 +154,9 @@ final class ManagedAgentsSessionStatusIdleEvent implements BaseModel
     }
 
     /**
-     * @param Type|value-of<Type> $type
+     * @param 'session.status_idle' $type
      */
-    public function withType(Type|string $type): self
+    public function withType(string $type): self
     {
         $self = clone $this;
         $self['type'] = $type;

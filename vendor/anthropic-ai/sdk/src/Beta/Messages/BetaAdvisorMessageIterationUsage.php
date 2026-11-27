@@ -7,6 +7,7 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\Model;
 
 /**
@@ -30,15 +31,15 @@ final class BetaAdvisorMessageIterationUsage implements BaseModel
     use SdkModel;
 
     /**
-     * Usage for an advisor sub-inference iteration.
+     * Usage for an advisor sub-inference iteration
      *
      * @var 'advisor_message' $type
      */
-    #[Required]
+    #[Required(type: new ConstantOf('advisor_message'))]
     public string $type = 'advisor_message';
 
     /**
-     * Breakdown of cached tokens by TTL.
+     * Breakdown of cached tokens by TTL
      */
     #[Required('cache_creation')]
     public ?BetaCacheCreation $cacheCreation;
@@ -62,7 +63,9 @@ final class BetaAdvisorMessageIterationUsage implements BaseModel
     public int $inputTokens;
 
     /**
-     * The model that will complete your prompt.\n\nSee [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
+     * The model that will complete your prompt.
+     *
+     * See [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
      *
      * @var string|value-of<Model> $model
      */
@@ -93,7 +96,7 @@ final class BetaAdvisorMessageIterationUsage implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaAdvisorMessageIterationUsage)
+     * (new BetaAdvisorMessageIterationUsage())
      *   ->withCacheCreation(...)
      *   ->withCacheCreationInputTokens(...)
      *   ->withCacheReadInputTokens(...)
@@ -136,7 +139,7 @@ final class BetaAdvisorMessageIterationUsage implements BaseModel
     }
 
     /**
-     * Breakdown of cached tokens by TTL.
+     * Breakdown of cached tokens by TTL
      *
      * @param BetaCacheCreation|BetaCacheCreationShape|null $cacheCreation
      */
@@ -184,7 +187,9 @@ final class BetaAdvisorMessageIterationUsage implements BaseModel
     }
 
     /**
-     * The model that will complete your prompt.\n\nSee [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
+     * The model that will complete your prompt.
+     *
+     * See [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
      *
      * @param string|Model|value-of<Model> $model
      */
@@ -208,7 +213,7 @@ final class BetaAdvisorMessageIterationUsage implements BaseModel
     }
 
     /**
-     * Usage for an advisor sub-inference iteration.
+     * Usage for an advisor sub-inference iteration
      *
      * @param 'advisor_message' $type
      */

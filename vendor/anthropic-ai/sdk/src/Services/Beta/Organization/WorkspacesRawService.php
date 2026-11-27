@@ -1,0 +1,388 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Services\Beta\Organization;
+
+use Anthropic\Beta\AnthropicBeta;
+use Anthropic\Beta\Organization\BetaApprovalRequiredException;
+use Anthropic\Beta\Organization\BetaAuthorizationCheckUnavailableException;
+use Anthropic\Beta\Organization\BetaHumanReviewNotAvailableException;
+use Anthropic\Beta\Organization\BetaOrganizationNotEligibleException;
+use Anthropic\Beta\Organization\ExternalStorage\ExternalStorageNotAvailableException;
+use Anthropic\Beta\Organization\ExternalStorage\GrantRequiredException;
+use Anthropic\Beta\Organization\ExternalStorage\InvalidStorageARNException;
+use Anthropic\Beta\Organization\ExternalStorage\StorageAttachLimitReachedException;
+use Anthropic\Beta\Organization\ExternalStorage\StorageChangedConcurrentlyException;
+use Anthropic\Beta\Organization\ExternalStorage\StorageNotAttachableException;
+use Anthropic\Beta\Organization\ExternalStorage\StorageProfileStillRequiredException;
+use Anthropic\Beta\Organization\ExternalStorage\StorageVerificationFailedException;
+use Anthropic\Beta\Organization\Workspaces\DataResidencyCreateConfig;
+use Anthropic\Beta\Organization\Workspaces\DataResidencyUpdateConfig;
+use Anthropic\Beta\Organization\Workspaces\HumanReviewOnWithExternalStorageException;
+use Anthropic\Beta\Organization\Workspaces\InferenceDataPrivacyCreateParam;
+use Anthropic\Beta\Organization\Workspaces\InferenceDataPrivacyUpdateParam;
+use Anthropic\Beta\Organization\Workspaces\TranscriptsStorageRequiredException;
+use Anthropic\Beta\Organization\Workspaces\Workspace;
+use Anthropic\Beta\Organization\Workspaces\WorkspaceArchiveParams;
+use Anthropic\Beta\Organization\Workspaces\WorkspaceChangedConcurrentlyException;
+use Anthropic\Beta\Organization\Workspaces\WorkspaceCreateParams;
+use Anthropic\Beta\Organization\Workspaces\WorkspaceListParams;
+use Anthropic\Beta\Organization\Workspaces\WorkspaceRetrieveParams;
+use Anthropic\Beta\Organization\Workspaces\WorkspaceUpdateParams;
+use Anthropic\Client;
+use Anthropic\Core\Contracts\BaseResponse;
+use Anthropic\Core\Exceptions\APIException;
+use Anthropic\Core\Implementation\ApiCallInfo;
+use Anthropic\Core\Util;
+use Anthropic\Organization\ChangeOutcomeUnknownException;
+use Anthropic\Organization\ExternalKeys\ExternalKeyChangedException;
+use Anthropic\Organization\ExternalKeys\ExternalKeyValidationFailedException;
+use Anthropic\Organization\ExternalKeys\ExternalKeyValidationTimedOutException;
+use Anthropic\Organization\Workspaces\KeyProfileMismatchException;
+use Anthropic\Organization\Workspaces\StorageAttachedDuringArchiveException;
+use Anthropic\Organization\Workspaces\StorageProfileMismatchException;
+use Anthropic\Organization\Workspaces\WorkspaceCreatedIncompleteException;
+use Anthropic\Organization\Workspaces\WorkspacePolicyViolationException;
+use Anthropic\Page;
+use Anthropic\RequestOptions;
+use Anthropic\SandboxEgressRestrictedException;
+use Anthropic\ServiceContracts\Beta\Organization\WorkspacesRawContract;
+use Anthropic\UserProfiles\UserProfileNotFoundException;
+
+/**
+ * @phpstan-import-type DataResidencyCreateConfigShape from \Anthropic\Beta\Organization\Workspaces\DataResidencyCreateConfig
+ * @phpstan-import-type InferenceDataPrivacyCreateParamShape from \Anthropic\Beta\Organization\Workspaces\InferenceDataPrivacyCreateParam
+ * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ * @phpstan-import-type DataResidencyUpdateConfigShape from \Anthropic\Beta\Organization\Workspaces\DataResidencyUpdateConfig
+ * @phpstan-import-type InferenceDataPrivacyUpdateParamShape from \Anthropic\Beta\Organization\Workspaces\InferenceDataPrivacyUpdateParam
+ */
+final class WorkspacesRawService implements WorkspacesRawContract
+{
+    // @phpstan-ignore-next-line
+    /**
+     * @internal
+     */
+    public function __construct(private Client $client) {}
+
+    /**
+     * @api
+     *
+     * Create Workspace
+     *
+     * @param array{
+     *   name: string,
+     *   dataResidency?: DataResidencyCreateConfig|DataResidencyCreateConfigShape|null,
+     *   displayColor?: string|null,
+     *   externalKeyID?: string|null,
+     *   inferenceDataPrivacy?: InferenceDataPrivacyCreateParam|InferenceDataPrivacyCreateParamShape|null,
+     *   tags?: array<string,string>|null,
+     *   userProfileID?: string|null,
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     * }|WorkspaceCreateParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<Workspace>
+     *
+     * @throws BetaApprovalRequiredException
+     * @throws ExternalKeyValidationFailedException
+     * @throws ExternalKeyValidationTimedOutException
+     * @throws ExternalStorageNotAvailableException
+     * @throws GrantRequiredException
+     * @throws BetaHumanReviewNotAvailableException
+     * @throws HumanReviewOnWithExternalStorageException
+     * @throws InvalidStorageARNException
+     * @throws KeyProfileMismatchException
+     * @throws BetaOrganizationNotEligibleException
+     * @throws StorageNotAttachableException
+     * @throws StorageProfileMismatchException
+     * @throws StorageVerificationFailedException
+     * @throws TranscriptsStorageRequiredException
+     * @throws UserProfileNotFoundException
+     * @throws WorkspacePolicyViolationException
+     * @throws SandboxEgressRestrictedException
+     * @throws ExternalKeyChangedException
+     * @throws BetaAuthorizationCheckUnavailableException
+     * @throws WorkspaceCreatedIncompleteException
+     * @throws APIException
+     */
+    public function create(
+        array|WorkspaceCreateParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = WorkspaceCreateParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+        $header_params = ['betas' => 'anthropic-beta'];
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'post',
+            path: 'v1/organizations/workspaces',
+            headers: Util::array_transform_keys(
+                array_intersect_key($parsed, array_flip(array_keys($header_params))),
+                $header_params,
+            ),
+            body: (object) array_diff_key(
+                $parsed,
+                array_flip(array_keys($header_params))
+            ),
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.organization.workspaces.create',
+                route: '/v1/organizations/workspaces',
+                createdId: 'anthropic.organization.workspace.id',
+            )),
+            convert: Workspace::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * Get Workspace
+     *
+     * @param string $workspaceID ID of the Workspace.
+     * @param array{
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     * }|WorkspaceRetrieveParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<Workspace>
+     *
+     * @throws APIException
+     */
+    public function retrieve(
+        string $workspaceID,
+        array|WorkspaceRetrieveParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = WorkspaceRetrieveParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'get',
+            path: ['v1/organizations/workspaces/%1$s', $workspaceID],
+            headers: Util::array_transform_keys(
+                $parsed,
+                ['betas' => 'anthropic-beta']
+            ),
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.organization.workspaces.retrieve',
+                route: '/v1/organizations/workspaces/{workspace_id}',
+                attributes: ['anthropic.organization.workspace.id' => $workspaceID],
+            )),
+            convert: Workspace::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * Update Workspace
+     *
+     * @param string $workspaceID Path param
+     * @param array{
+     *   dataResidency?: DataResidencyUpdateConfig|DataResidencyUpdateConfigShape|null,
+     *   displayColor?: string,
+     *   externalKeyID?: string,
+     *   inferenceDataPrivacy?: InferenceDataPrivacyUpdateParam|InferenceDataPrivacyUpdateParamShape|null,
+     *   name?: string,
+     *   tags?: array<string,string|null>|null,
+     *   userProfileID?: string,
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     * }|WorkspaceUpdateParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<Workspace>
+     *
+     * @throws BetaApprovalRequiredException
+     * @throws ExternalKeyValidationFailedException
+     * @throws ExternalKeyValidationTimedOutException
+     * @throws ExternalStorageNotAvailableException
+     * @throws GrantRequiredException
+     * @throws BetaHumanReviewNotAvailableException
+     * @throws HumanReviewOnWithExternalStorageException
+     * @throws InvalidStorageARNException
+     * @throws KeyProfileMismatchException
+     * @throws BetaOrganizationNotEligibleException
+     * @throws StorageAttachLimitReachedException
+     * @throws StorageNotAttachableException
+     * @throws StorageProfileMismatchException
+     * @throws StorageProfileStillRequiredException
+     * @throws StorageVerificationFailedException
+     * @throws TranscriptsStorageRequiredException
+     * @throws UserProfileNotFoundException
+     * @throws WorkspacePolicyViolationException
+     * @throws SandboxEgressRestrictedException
+     * @throws ExternalKeyChangedException
+     * @throws StorageChangedConcurrentlyException
+     * @throws WorkspaceChangedConcurrentlyException
+     * @throws BetaAuthorizationCheckUnavailableException
+     * @throws ChangeOutcomeUnknownException
+     * @throws APIException
+     */
+    public function update(
+        string $workspaceID,
+        array|WorkspaceUpdateParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = WorkspaceUpdateParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+        $header_params = ['betas' => 'anthropic-beta'];
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'post',
+            path: ['v1/organizations/workspaces/%1$s', $workspaceID],
+            headers: Util::array_transform_keys(
+                array_intersect_key($parsed, array_flip(array_keys($header_params))),
+                $header_params,
+            ),
+            body: (object) array_diff_key(
+                $parsed,
+                array_flip(array_keys($header_params))
+            ),
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.organization.workspaces.update',
+                route: '/v1/organizations/workspaces/{workspace_id}',
+                attributes: ['anthropic.organization.workspace.id' => $workspaceID],
+            )),
+            convert: Workspace::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * List Workspaces
+     *
+     * @param array{
+     *   afterID?: string,
+     *   beforeID?: string,
+     *   ids?: list<string>,
+     *   includeArchived?: bool,
+     *   includeDefault?: bool,
+     *   limit?: int,
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     * }|WorkspaceListParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<Page<Workspace>>
+     *
+     * @throws APIException
+     */
+    public function list(
+        array|WorkspaceListParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = WorkspaceListParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+        $query_params = array_flip(
+            [
+                'afterID',
+                'beforeID',
+                'ids',
+                'includeArchived',
+                'includeDefault',
+                'limit',
+            ],
+        );
+
+        /** @var array<string,string> */
+        $header_params = array_diff_key($parsed, $query_params);
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'get',
+            path: 'v1/organizations/workspaces',
+            query: Util::array_transform_keys(
+                array_intersect_key($parsed, $query_params),
+                [
+                    'afterID' => 'after_id',
+                    'beforeID' => 'before_id',
+                    'includeArchived' => 'include_archived',
+                    'includeDefault' => 'include_default',
+                ],
+            ),
+            headers: Util::array_transform_keys(
+                $header_params,
+                ['betas' => 'anthropic-beta']
+            ),
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.organization.workspaces.list',
+                route: '/v1/organizations/workspaces',
+                query: [
+                    'after_id',
+                    'before_id',
+                    'ids',
+                    'include_archived',
+                    'include_default',
+                    'limit',
+                ],
+            )),
+            convert: Workspace::class,
+            page: Page::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * Archive Workspace
+     *
+     * @param array{
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     * }|WorkspaceArchiveParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<Workspace>
+     *
+     * @throws SandboxEgressRestrictedException
+     * @throws StorageAttachedDuringArchiveException
+     * @throws APIException
+     */
+    public function archive(
+        string $workspaceID,
+        array|WorkspaceArchiveParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = WorkspaceArchiveParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'post',
+            path: ['v1/organizations/workspaces/%1$s/archive', $workspaceID],
+            headers: Util::array_transform_keys(
+                $parsed,
+                ['betas' => 'anthropic-beta']
+            ),
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.organization.workspaces.archive',
+                route: '/v1/organizations/workspaces/{workspace_id}/archive',
+                attributes: ['anthropic.organization.workspace.id' => $workspaceID],
+            )),
+            convert: Workspace::class,
+        );
+    }
+}

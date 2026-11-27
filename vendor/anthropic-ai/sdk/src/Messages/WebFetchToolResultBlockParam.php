@@ -8,14 +8,15 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\WebFetchToolResultBlockParam\Caller;
 
 /**
- * @phpstan-import-type ContentVariants from \Anthropic\Messages\WebFetchToolResultBlockParam\Content
- * @phpstan-import-type CallerVariants from \Anthropic\Messages\WebFetchToolResultBlockParam\Caller
  * @phpstan-import-type ContentShape from \Anthropic\Messages\WebFetchToolResultBlockParam\Content
  * @phpstan-import-type CacheControlEphemeralShape from \Anthropic\Messages\CacheControlEphemeral
  * @phpstan-import-type CallerShape from \Anthropic\Messages\WebFetchToolResultBlockParam\Caller
+ * @phpstan-import-type ContentVariants from \Anthropic\Messages\WebFetchToolResultBlockParam\Content
+ * @phpstan-import-type CallerVariants from \Anthropic\Messages\WebFetchToolResultBlockParam\Caller
  *
  * @phpstan-type WebFetchToolResultBlockParamShape = array{
  *   content: ContentShape,
@@ -31,7 +32,7 @@ final class WebFetchToolResultBlockParam implements BaseModel
     use SdkModel;
 
     /** @var 'web_fetch_tool_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('web_fetch_tool_result'))]
     public string $type = 'web_fetch_tool_result';
 
     /** @var ContentVariants $content */
@@ -47,11 +48,7 @@ final class WebFetchToolResultBlockParam implements BaseModel
     #[Optional('cache_control', nullable: true)]
     public ?CacheControlEphemeral $cacheControl;
 
-    /**
-     * Tool invocation directly from the model.
-     *
-     * @var CallerVariants|null $caller
-     */
+    /** @var CallerVariants|null $caller */
     #[Optional(union: Caller::class)]
     public DirectCaller|ServerToolCaller|ServerToolCaller20260120|null $caller;
 
@@ -66,7 +63,7 @@ final class WebFetchToolResultBlockParam implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new WebFetchToolResultBlockParam)->withContent(...)->withToolUseID(...)
+     * (new WebFetchToolResultBlockParam())->withContent(...)->withToolUseID(...)
      * ```
      */
     public function __construct()
@@ -146,8 +143,6 @@ final class WebFetchToolResultBlockParam implements BaseModel
     }
 
     /**
-     * Tool invocation directly from the model.
-     *
      * @param CallerShape $caller
      */
     public function withCaller(

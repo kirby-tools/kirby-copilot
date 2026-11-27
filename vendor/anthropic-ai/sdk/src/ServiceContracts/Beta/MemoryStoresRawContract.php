@@ -40,7 +40,7 @@ interface MemoryStoresRawContract
     /**
      * @api
      *
-     * @param string $memoryStoreID Path parameter memory_store_id
+     * @param string $memoryStoreID The ID of the memory store to retrieve (`memstore_...`).
      * @param array<string,mixed>|MemoryStoreRetrieveParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -57,7 +57,9 @@ interface MemoryStoresRawContract
     /**
      * @api
      *
-     * @param string $memoryStoreID Path param: Path parameter memory_store_id
+     * @param string $memoryStoreID Path param: The ID of the memory store to update (`memstore_...`).
+     *
+     * The request fails with HTTP status 400 if the store is archived.
      * @param array<string,mixed>|MemoryStoreUpdateParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -89,7 +91,9 @@ interface MemoryStoresRawContract
     /**
      * @api
      *
-     * @param string $memoryStoreID Path parameter memory_store_id
+     * @param string $memoryStoreID The ID of the memory store to delete (`memstore_...`).
+     *
+     * Deleting a store also deletes all its memories and memory versions. It can't be undone.
      * @param array<string,mixed>|MemoryStoreDeleteParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -106,7 +110,9 @@ interface MemoryStoresRawContract
     /**
      * @api
      *
-     * @param string $memoryStoreID Path parameter memory_store_id
+     * @param string $memoryStoreID The ID of the memory store to archive (`memstore_...`).
+     *
+     * Archiving can't be undone. Archiving a store that is already archived returns it unchanged.
      * @param array<string,mixed>|MemoryStoreArchiveParams $params
      * @param RequestOpts|null $requestOptions
      *

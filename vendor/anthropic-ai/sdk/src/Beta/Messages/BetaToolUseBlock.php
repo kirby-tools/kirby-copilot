@@ -9,10 +9,11 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type CallerVariants from \Anthropic\Beta\Messages\BetaToolUseBlock\Caller
  * @phpstan-import-type CallerShape from \Anthropic\Beta\Messages\BetaToolUseBlock\Caller
+ * @phpstan-import-type CallerVariants from \Anthropic\Beta\Messages\BetaToolUseBlock\Caller
  *
  * @phpstan-type BetaToolUseBlockShape = array{
  *   id: string,
@@ -20,6 +21,7 @@ use Anthropic\Core\Contracts\BaseModel;
  *   name: string,
  *   type: 'tool_use',
  *   caller?: CallerShape|null,
+ *   toolsetName?: string|null,
  * }
  */
 final class BetaToolUseBlock implements BaseModel
@@ -28,7 +30,7 @@ final class BetaToolUseBlock implements BaseModel
     use SdkModel;
 
     /** @var 'tool_use' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('tool_use'))]
     public string $type = 'tool_use';
 
     #[Required]
@@ -41,13 +43,15 @@ final class BetaToolUseBlock implements BaseModel
     #[Required]
     public string $name;
 
-    /**
-     * Tool invocation directly from the model.
-     *
-     * @var CallerVariants|null $caller
-     */
+    /** @var CallerVariants|null $caller */
     #[Optional(union: Caller::class)]
     public BetaDirectCaller|BetaServerToolCaller|BetaServerToolCaller20260120|null $caller;
+
+    /**
+     * For a toolset member tool_use, the toolset family.
+     */
+    #[Optional('toolset_name', nullable: true)]
+    public ?string $toolsetName;
 
     /**
      * `new BetaToolUseBlock()` is missing required properties by the API.
@@ -60,7 +64,7 @@ final class BetaToolUseBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaToolUseBlock)->withID(...)->withInput(...)->withName(...)
+     * (new BetaToolUseBlock())->withID(...)->withInput(...)->withName(...)
      * ```
      */
     public function __construct()
@@ -81,6 +85,7 @@ final class BetaToolUseBlock implements BaseModel
         array $input,
         string $name,
         BetaDirectCaller|array|BetaServerToolCaller|BetaServerToolCaller20260120|null $caller = null,
+        ?string $toolsetName = null,
     ): self {
         $self = new self;
 
@@ -89,6 +94,7 @@ final class BetaToolUseBlock implements BaseModel
         $self['name'] = $name;
 
         null !== $caller && $self['caller'] = $caller;
+        null !== $toolsetName && $self['toolsetName'] = $toolsetName;
 
         return $self;
     }
@@ -132,8 +138,6 @@ final class BetaToolUseBlock implements BaseModel
     }
 
     /**
-     * Tool invocation directly from the model.
-     *
      * @param CallerShape $caller
      */
     public function withCaller(
@@ -141,6 +145,17 @@ final class BetaToolUseBlock implements BaseModel
     ): self {
         $self = clone $this;
         $self['caller'] = $caller;
+
+        return $self;
+    }
+
+    /**
+     * For a toolset member tool_use, the toolset family.
+     */
+    public function withToolsetName(?string $toolsetName): self
+    {
+        $self = clone $this;
+        $self['toolsetName'] = $toolsetName;
 
         return $self;
     }

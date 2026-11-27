@@ -12,12 +12,15 @@ use Anthropic\Core\Contracts\BaseModel;
 /**
  * List all Message Batches within a Workspace. Most recently created batches are returned first.
  *
- * Learn more about the Message Batches API in our [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
+ * Learn more about the Message Batches API in our [user guide](https://platform.claude.com/docs/en/build-with-claude/batch-processing)
  *
  * @see Anthropic\Services\Messages\BatchesService::list()
  *
  * @phpstan-type BatchListParamsShape = array{
- *   afterID?: string|null, beforeID?: string|null, limit?: int|null
+ *   afterID?: string|null,
+ *   beforeID?: string|null,
+ *   limit?: int|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class BatchListParams implements BaseModel
@@ -46,6 +49,14 @@ final class BatchListParams implements BaseModel
     #[Optional]
     public ?int $limit;
 
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
+
     public function __construct()
     {
         $this->initialize();
@@ -59,13 +70,15 @@ final class BatchListParams implements BaseModel
     public static function with(
         ?string $afterID = null,
         ?string $beforeID = null,
-        ?int $limit = null
+        ?int $limit = null,
+        ?string $workspaceID = null,
     ): self {
         $self = new self;
 
         null !== $afterID && $self['afterID'] = $afterID;
         null !== $beforeID && $self['beforeID'] = $beforeID;
         null !== $limit && $self['limit'] = $limit;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
@@ -101,6 +114,19 @@ final class BatchListParams implements BaseModel
     {
         $self = clone $this;
         $self['limit'] = $limit;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

@@ -1,0 +1,198 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Services\Beta\Sessions;
+
+use Anthropic\Beta\AnthropicBeta;
+use Anthropic\Beta\Sessions\Threads\ManagedAgentsSessionThread;
+use Anthropic\Beta\Sessions\Threads\ManagedAgentsSessionThreadStatus;
+use Anthropic\Beta\Sessions\Threads\ThreadArchiveParams;
+use Anthropic\Beta\Sessions\Threads\ThreadListParams;
+use Anthropic\Beta\Sessions\Threads\ThreadRetrieveParams;
+use Anthropic\Client;
+use Anthropic\Core\Contracts\BaseResponse;
+use Anthropic\Core\Exceptions\APIException;
+use Anthropic\Core\Implementation\ApiCallInfo;
+use Anthropic\Core\Util;
+use Anthropic\PageCursor;
+use Anthropic\RequestOptions;
+use Anthropic\ServiceContracts\Beta\Sessions\ThreadsRawContract;
+
+/**
+ * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ */
+final class ThreadsRawService implements ThreadsRawContract
+{
+    // @phpstan-ignore-next-line
+    /**
+     * @internal
+     */
+    public function __construct(private Client $client) {}
+
+    /**
+     * @api
+     *
+     * Get Session Thread
+     *
+     * @param string $threadID Path param
+     * @param array{
+     *   sessionID: string,
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
+     * }|ThreadRetrieveParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<ManagedAgentsSessionThread>
+     *
+     * @throws APIException
+     */
+    public function retrieve(
+        string $threadID,
+        array|ThreadRetrieveParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = ThreadRetrieveParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+        $sessionID = $parsed['sessionID'];
+        unset($parsed['sessionID']);
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'get',
+            path: ['v1/sessions/%1$s/threads/%2$s', $sessionID, $threadID],
+            headers: Util::array_transform_keys(
+                $parsed,
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
+            ),
+            options: RequestOptions::parse(
+                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                $options,
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.sessions.threads.retrieve',
+                route: '/v1/sessions/{session_id}/threads/{thread_id}',
+                attributes: [
+                    'anthropic.session.id' => $sessionID,
+                    'anthropic.session.thread.id' => $threadID,
+                ],
+            )),
+            convert: ManagedAgentsSessionThread::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * List Session Threads
+     *
+     * @param string $sessionID Path param
+     * @param array{
+     *   limit?: int,
+     *   page?: string,
+     *   statuses?: list<ManagedAgentsSessionThreadStatus|value-of<ManagedAgentsSessionThreadStatus>>,
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
+     * }|ThreadListParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<PageCursor<ManagedAgentsSessionThread>>
+     *
+     * @throws APIException
+     */
+    public function list(
+        string $sessionID,
+        array|ThreadListParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = ThreadListParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+        $query_params = array_flip(['limit', 'page', 'statuses']);
+
+        /** @var array<string,string> */
+        $header_params = array_diff_key($parsed, $query_params);
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'get',
+            path: ['v1/sessions/%1$s/threads', $sessionID],
+            query: array_intersect_key($parsed, $query_params),
+            headers: Util::array_transform_keys(
+                $header_params,
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
+            ),
+            options: RequestOptions::parse(
+                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                $options,
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.sessions.threads.list',
+                route: '/v1/sessions/{session_id}/threads',
+                query: ['limit', 'page', 'statuses'],
+                attributes: ['anthropic.session.id' => $sessionID],
+            )),
+            convert: ManagedAgentsSessionThread::class,
+            page: PageCursor::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * Archive Session Thread
+     *
+     * @param string $threadID Path param
+     * @param array{
+     *   sessionID: string,
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
+     * }|ThreadArchiveParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<ManagedAgentsSessionThread>
+     *
+     * @throws APIException
+     */
+    public function archive(
+        string $threadID,
+        array|ThreadArchiveParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = ThreadArchiveParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+        $sessionID = $parsed['sessionID'];
+        unset($parsed['sessionID']);
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'post',
+            path: ['v1/sessions/%1$s/threads/%2$s/archive', $sessionID, $threadID],
+            headers: Util::array_transform_keys(
+                $parsed,
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
+            ),
+            options: RequestOptions::parse(
+                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                $options,
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.sessions.threads.archive',
+                route: '/v1/sessions/{session_id}/threads/{thread_id}/archive',
+                attributes: [
+                    'anthropic.session.id' => $sessionID,
+                    'anthropic.session.thread.id' => $threadID,
+                ],
+            )),
+            convert: ManagedAgentsSessionThread::class,
+        );
+    }
+}

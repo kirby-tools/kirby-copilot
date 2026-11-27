@@ -5,23 +5,24 @@ declare(strict_types=1);
 namespace Anthropic\Beta\Sessions\Resources;
 
 use Anthropic\Beta\AnthropicBeta;
-use Anthropic\Beta\Sessions\Resources\ResourceAddParams\Type;
 use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Concerns\SdkParams;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * Add Session Resource.
+ * Add Session Resource
  *
  * @see Anthropic\Services\Beta\Sessions\ResourcesService::add()
  *
  * @phpstan-type ResourceAddParamsShape = array{
+ *   type: 'file',
  *   fileID: string,
- *   type: Type|value-of<Type>,
  *   mountPath?: string|null,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class ResourceAddParams implements BaseModel
@@ -30,15 +31,15 @@ final class ResourceAddParams implements BaseModel
     use SdkModel;
     use SdkParams;
 
+    /** @var 'file' $type */
+    #[Required(type: new ConstantOf('file'))]
+    public string $type = 'file';
+
     /**
      * ID of a previously uploaded file.
      */
     #[Required('file_id')]
     public string $fileID;
-
-    /** @var value-of<Type> $type */
-    #[Required(enum: Type::class)]
-    public string $type;
 
     /**
      * Mount path in the container. Defaults to `/mnt/session/uploads/<file_id>`.
@@ -47,7 +48,7 @@ final class ResourceAddParams implements BaseModel
     public ?string $mountPath;
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this header.
      *
      * @var list<string|value-of<AnthropicBeta>>|null $betas
      */
@@ -55,17 +56,25 @@ final class ResourceAddParams implements BaseModel
     public ?array $betas;
 
     /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
+
+    /**
      * `new ResourceAddParams()` is missing required properties by the API.
      *
      * To enforce required parameters use
      * ```
-     * ResourceAddParams::with(fileID: ..., type: ...)
+     * ResourceAddParams::with(fileID: ...)
      * ```
      *
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ResourceAddParams)->withFileID(...)->withType(...)
+     * (new ResourceAddParams())->withFileID(...)
      * ```
      */
     public function __construct()
@@ -78,22 +87,32 @@ final class ResourceAddParams implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
-     * @param Type|value-of<Type> $type
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>>|null $betas
      */
     public static function with(
         string $fileID,
-        Type|string $type,
         ?string $mountPath = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
     ): self {
         $self = new self;
 
         $self['fileID'] = $fileID;
-        $self['type'] = $type;
 
         null !== $mountPath && $self['mountPath'] = $mountPath;
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
+
+        return $self;
+    }
+
+    /**
+     * @param 'file' $type
+     */
+    public function withType(string $type): self
+    {
+        $self = clone $this;
+        $self['type'] = $type;
 
         return $self;
     }
@@ -110,17 +129,6 @@ final class ResourceAddParams implements BaseModel
     }
 
     /**
-     * @param Type|value-of<Type> $type
-     */
-    public function withType(Type|string $type): self
-    {
-        $self = clone $this;
-        $self['type'] = $type;
-
-        return $self;
-    }
-
-    /**
      * Mount path in the container. Defaults to `/mnt/session/uploads/<file_id>`.
      */
     public function withMountPath(?string $mountPath): self
@@ -132,7 +140,7 @@ final class ResourceAddParams implements BaseModel
     }
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this header.
      *
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas
      */
@@ -140,6 +148,19 @@ final class ResourceAddParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

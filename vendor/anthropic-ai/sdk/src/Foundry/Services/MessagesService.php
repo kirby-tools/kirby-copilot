@@ -9,9 +9,11 @@ use Anthropic\Core\Exceptions\APIException;
 use Anthropic\Core\Util;
 use Anthropic\Foundry\Client;
 use Anthropic\Messages\CacheControlEphemeral;
+use Anthropic\Messages\ContainerParams;
+use Anthropic\Messages\DiagnosticsParam;
 use Anthropic\Messages\Message;
 use Anthropic\Messages\MessageCreateParams\ServiceTier;
-use Anthropic\Messages\MessageParam;
+use Anthropic\Messages\MessageCreateParams\Speed;
 use Anthropic\Messages\MessageTokensCount;
 use Anthropic\Messages\Metadata;
 use Anthropic\Messages\Model;
@@ -23,6 +25,7 @@ use Anthropic\Messages\RawMessageDeltaEvent;
 use Anthropic\Messages\RawMessageStartEvent;
 use Anthropic\Messages\RawMessageStopEvent;
 use Anthropic\Messages\ThinkingConfigAdaptive;
+use Anthropic\Messages\ThinkingConfigBetweenTools;
 use Anthropic\Messages\ThinkingConfigDisabled;
 use Anthropic\Messages\ThinkingConfigEnabled;
 use Anthropic\Messages\ToolChoiceAny;
@@ -33,6 +36,8 @@ use Anthropic\RequestOptions;
 use Anthropic\ServiceContracts\MessagesContract;
 
 /**
+ * @phpstan-import-type MessageCreateParamsContainerShape from \Anthropic\Messages\MessageCreateParamsContainer
+ * @phpstan-import-type DiagnosticsParamShape from \Anthropic\Messages\DiagnosticsParam
  * @phpstan-import-type MessageParamShape from \Anthropic\Messages\MessageParam
  * @phpstan-import-type MetadataShape from \Anthropic\Messages\Metadata
  * @phpstan-import-type OutputConfigShape from \Anthropic\Messages\OutputConfig
@@ -61,13 +66,15 @@ final class MessagesService implements MessagesContract
     /**
      * @api
      *
-     * @param list<MessageParam|MessageParamShape> $messages
+     * @param list<MessageParamShape> $messages
      * @param Model::CLAUDE_OPUS_4_5|Model::CLAUDE_OPUS_4_6|Model::CLAUDE_SONNET_4_5|Model::CLAUDE_HAIKU_4_5 $model
+     * @param MessageCreateParamsContainerShape|null $container
+     * @param DiagnosticsParam|DiagnosticsParamShape|null $diagnostics
      * @param Metadata|MetadataShape $metadata
      * @param OutputConfig|OutputConfigShape $outputConfig
      * @param list<string> $stopSequences
      * @param SystemShape $system
-     * @param ThinkingConfigEnabled|ThinkingConfigDisabled|ThinkingConfigAdaptive|ThinkingConfigParamShape|null $thinking
+     * @param ThinkingConfigEnabled|ThinkingConfigDisabled|ThinkingConfigBetweenTools|ThinkingConfigAdaptive|ThinkingConfigParamShape|null $thinking
      * @param ToolChoiceAuto|ToolChoiceAny|ToolChoiceTool|ToolChoiceNone|ToolChoiceShape|null $toolChoice
      * @param list<ToolUnionShape> $tools
      * @param RequestOpts|null $requestOptions
@@ -79,19 +86,20 @@ final class MessagesService implements MessagesContract
         array $messages,
         Model|string $model,
         CacheControlEphemeral|array|null $cacheControl = null,
-        ?string $container = null,
+        string|ContainerParams|array|null $container = null,
+        DiagnosticsParam|array|null $diagnostics = null,
         ?string $inferenceGeo = null,
         Metadata|array|null $metadata = null,
         OutputConfig|array|null $outputConfig = null,
         ServiceTier|string|null $serviceTier = null,
+        Speed|string|null $speed = null,
         ?array $stopSequences = null,
         string|array|null $system = null,
-        ?float $temperature = null,
-        ThinkingConfigEnabled|array|ThinkingConfigDisabled|ThinkingConfigAdaptive|null $thinking = null,
+        ThinkingConfigEnabled|array|ThinkingConfigDisabled|ThinkingConfigBetweenTools|ThinkingConfigAdaptive|null $thinking = null,
         ToolChoiceAuto|array|ToolChoiceAny|ToolChoiceTool|ToolChoiceNone|null $toolChoice = null,
         ?array $tools = null,
-        ?int $topK = null,
-        ?float $topP = null,
+        ?string $userProfileID = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): Message {
         $params = Util::removeNulls(
@@ -101,17 +109,18 @@ final class MessagesService implements MessagesContract
                 'model' => $model,
                 'cacheControl' => $cacheControl,
                 'container' => $container,
+                'diagnostics' => $diagnostics,
                 'metadata' => $metadata,
                 'outputConfig' => $outputConfig,
                 'serviceTier' => $serviceTier,
+                'speed' => $speed,
                 'stopSequences' => $stopSequences,
                 'system' => $system,
-                'temperature' => $temperature,
                 'thinking' => $thinking,
                 'toolChoice' => $toolChoice,
                 'tools' => $tools,
-                'topK' => $topK,
-                'topP' => $topP,
+                'userProfileID' => $userProfileID,
+                'workspaceID' => $workspaceID,
             ],
         );
 
@@ -124,13 +133,15 @@ final class MessagesService implements MessagesContract
     /**
      * @api
      *
-     * @param list<MessageParam|MessageParamShape> $messages
+     * @param list<MessageParamShape> $messages
      * @param Model::CLAUDE_OPUS_4_5|Model::CLAUDE_OPUS_4_6|Model::CLAUDE_SONNET_4_5|Model::CLAUDE_HAIKU_4_5 $model
+     * @param MessageCreateParamsContainerShape|null $container
+     * @param DiagnosticsParam|DiagnosticsParamShape|null $diagnostics
      * @param Metadata|MetadataShape $metadata
      * @param OutputConfig|OutputConfigShape $outputConfig
      * @param list<string> $stopSequences
      * @param SystemShape $system
-     * @param ThinkingConfigEnabled|ThinkingConfigDisabled|ThinkingConfigAdaptive|ThinkingConfigParamShape|null $thinking
+     * @param ThinkingConfigEnabled|ThinkingConfigDisabled|ThinkingConfigBetweenTools|ThinkingConfigAdaptive|ThinkingConfigParamShape|null $thinking
      * @param ToolChoiceAuto|ToolChoiceAny|ToolChoiceTool|ToolChoiceNone|ToolChoiceShape|null $toolChoice
      * @param list<ToolUnionShape> $tools
      * @param RequestOpts|null $requestOptions
@@ -144,19 +155,20 @@ final class MessagesService implements MessagesContract
         array $messages,
         Model|string $model,
         CacheControlEphemeral|array|null $cacheControl = null,
-        ?string $container = null,
+        string|ContainerParams|array|null $container = null,
+        DiagnosticsParam|array|null $diagnostics = null,
         ?string $inferenceGeo = null,
         Metadata|array|null $metadata = null,
         OutputConfig|array|null $outputConfig = null,
         ServiceTier|string|null $serviceTier = null,
+        Speed|string|null $speed = null,
         ?array $stopSequences = null,
         string|array|null $system = null,
-        ?float $temperature = null,
-        ThinkingConfigEnabled|array|ThinkingConfigDisabled|ThinkingConfigAdaptive|null $thinking = null,
+        ThinkingConfigEnabled|array|ThinkingConfigDisabled|ThinkingConfigBetweenTools|ThinkingConfigAdaptive|null $thinking = null,
         ToolChoiceAuto|array|ToolChoiceAny|ToolChoiceTool|ToolChoiceNone|null $toolChoice = null,
         ?array $tools = null,
-        ?int $topK = null,
-        ?float $topP = null,
+        ?string $userProfileID = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): BaseStream {
         $params = Util::removeNulls(
@@ -166,17 +178,18 @@ final class MessagesService implements MessagesContract
                 'model' => $model,
                 'cacheControl' => $cacheControl,
                 'container' => $container,
+                'diagnostics' => $diagnostics,
                 'metadata' => $metadata,
                 'outputConfig' => $outputConfig,
                 'serviceTier' => $serviceTier,
+                'speed' => $speed,
                 'stopSequences' => $stopSequences,
                 'system' => $system,
-                'temperature' => $temperature,
                 'thinking' => $thinking,
                 'toolChoice' => $toolChoice,
                 'tools' => $tools,
-                'topK' => $topK,
-                'topP' => $topP,
+                'userProfileID' => $userProfileID,
+                'workspaceID' => $workspaceID,
             ],
         );
 
@@ -189,11 +202,11 @@ final class MessagesService implements MessagesContract
     /**
      * @api
      *
-     * @param list<MessageParam|MessageParamShape> $messages
+     * @param list<MessageParamShape> $messages
      * @param Model::CLAUDE_OPUS_4_5|Model::CLAUDE_OPUS_4_6|Model::CLAUDE_SONNET_4_5|Model::CLAUDE_HAIKU_4_5 $model
      * @param OutputConfig|OutputConfigShape $outputConfig
      * @param SystemShape $system
-     * @param ThinkingConfigEnabled|ThinkingConfigDisabled|ThinkingConfigAdaptive|ThinkingConfigParamShape|null $thinking
+     * @param ThinkingConfigEnabled|ThinkingConfigDisabled|ThinkingConfigBetweenTools|ThinkingConfigAdaptive|ThinkingConfigParamShape|null $thinking
      * @param ToolChoiceAuto|ToolChoiceAny|ToolChoiceTool|ToolChoiceNone|ToolChoiceShape|null $toolChoice
      * @param list<MessageCountTokensToolShape> $tools
      * @param RequestOpts|null $requestOptions
@@ -205,10 +218,13 @@ final class MessagesService implements MessagesContract
         Model|string $model,
         CacheControlEphemeral|array|null $cacheControl = null,
         OutputConfig|array|null $outputConfig = null,
+        \Anthropic\Messages\MessageCountTokensParams\Speed|string|null $speed = null,
         string|array|null $system = null,
-        ThinkingConfigEnabled|array|ThinkingConfigDisabled|ThinkingConfigAdaptive|null $thinking = null,
+        ThinkingConfigEnabled|array|ThinkingConfigDisabled|ThinkingConfigBetweenTools|ThinkingConfigAdaptive|null $thinking = null,
         ToolChoiceAuto|array|ToolChoiceAny|ToolChoiceTool|ToolChoiceNone|null $toolChoice = null,
         ?array $tools = null,
+        ?string $userProfileID = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): MessageTokensCount {
         $params = Util::removeNulls(
@@ -217,10 +233,13 @@ final class MessagesService implements MessagesContract
                 'model' => $model,
                 'cacheControl' => $cacheControl,
                 'outputConfig' => $outputConfig,
+                'speed' => $speed,
                 'system' => $system,
                 'thinking' => $thinking,
                 'toolChoice' => $toolChoice,
                 'tools' => $tools,
+                'userProfileID' => $userProfileID,
+                'workspaceID' => $workspaceID,
             ],
         );
 

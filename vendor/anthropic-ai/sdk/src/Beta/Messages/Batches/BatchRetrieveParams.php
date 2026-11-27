@@ -13,12 +13,13 @@ use Anthropic\Core\Contracts\BaseModel;
 /**
  * This endpoint is idempotent and can be used to poll for Message Batch completion. To access the results of a Message Batch, make a request to the `results_url` field in the response.
  *
- * Learn more about the Message Batches API in our [user guide](https://docs.claude.com/en/docs/build-with-claude/batch-processing)
+ * Learn more about the Message Batches API in our [user guide](https://platform.claude.com/docs/en/build-with-claude/batch-processing)
  *
  * @see Anthropic\Services\Beta\Messages\BatchesService::retrieve()
  *
  * @phpstan-type BatchRetrieveParamsShape = array{
- *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null
+ *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class BatchRetrieveParams implements BaseModel
@@ -35,6 +36,14 @@ final class BatchRetrieveParams implements BaseModel
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
 
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
+
     public function __construct()
     {
         $this->initialize();
@@ -47,11 +56,14 @@ final class BatchRetrieveParams implements BaseModel
      *
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>>|null $betas
      */
-    public static function with(?array $betas = null): self
-    {
+    public static function with(
+        ?array $betas = null,
+        ?string $workspaceID = null
+    ): self {
         $self = new self;
 
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
@@ -65,6 +77,19 @@ final class BatchRetrieveParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

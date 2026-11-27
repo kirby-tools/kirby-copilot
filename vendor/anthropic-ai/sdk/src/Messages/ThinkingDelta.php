@@ -7,6 +7,7 @@ namespace Anthropic\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type ThinkingDeltaShape = array{
@@ -19,9 +20,12 @@ final class ThinkingDelta implements BaseModel
     use SdkModel;
 
     /** @var 'thinking_delta' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('thinking_delta'))]
     public string $type = 'thinking_delta';
 
+    /**
+     * The incremental `thinking` text for this content block. Concatenate the `thinking` values of successive `thinking_delta` events to assemble the block's full `thinking` value.
+     */
     #[Required]
     public string $thinking;
 
@@ -36,7 +40,7 @@ final class ThinkingDelta implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ThinkingDelta)->withThinking(...)
+     * (new ThinkingDelta())->withThinking(...)
      * ```
      */
     public function __construct()
@@ -58,6 +62,9 @@ final class ThinkingDelta implements BaseModel
         return $self;
     }
 
+    /**
+     * The incremental `thinking` text for this content block. Concatenate the `thinking` values of successive `thinking_delta` events to assemble the block's full `thinking` value.
+     */
     public function withThinking(string $thinking): self
     {
         $self = clone $this;

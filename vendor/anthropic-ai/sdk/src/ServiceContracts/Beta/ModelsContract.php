@@ -6,7 +6,10 @@ namespace Anthropic\ServiceContracts\Beta;
 
 use Anthropic\Beta\AnthropicBeta;
 use Anthropic\Beta\Models\BetaModelInfo;
+use Anthropic\Beta\Models\ModelListParams\Lifecycle;
+use Anthropic\ClaudeCodeKeyCreatorNotMemberException;
 use Anthropic\Core\Exceptions\APIException;
+use Anthropic\OrganizationOnHoldException;
 use Anthropic\Page;
 use Anthropic\RequestOptions;
 
@@ -18,15 +21,21 @@ interface ModelsContract
     /**
      * @api
      *
-     * @param string $modelID model identifier or alias
-     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas optional header to specify the beta version(s) you want to use
+     * @param string $modelID Model identifier or alias.
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Optional header to specify the beta version(s) you want to use.
+     * @param string $workspaceID Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function retrieve(
         string $modelID,
         ?array $betas = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): BetaModelInfo;
 
@@ -35,21 +44,29 @@ interface ModelsContract
      *
      * @param string $afterID Query param: ID of the object to use as a cursor for pagination. When provided, returns the page of results immediately after this object.
      * @param string $beforeID Query param: ID of the object to use as a cursor for pagination. When provided, returns the page of results immediately before this object.
+     * @param list<Lifecycle|value-of<Lifecycle>> $lifecycle Query param: Filter the list to models in any of the given lifecycle stages (`active`, `deprecated`, or `retired`). Up to 3 values. When omitted, the list contains the `active` and `deprecated` models; `retired` models appear only when `retired` is requested explicitly.
      * @param int $limit Query param: Number of items to return per page.
      *
      * Defaults to `20`. Ranges from `1` to `1000`.
-     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas header param: Optional header to specify the beta version(s) you want to use
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Header param: Optional header to specify the beta version(s) you want to use.
+     * @param string $workspaceID Header param: Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
      * @return Page<BetaModelInfo>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function list(
         ?string $afterID = null,
         ?string $beforeID = null,
-        int $limit = 20,
+        ?array $lifecycle = null,
+        ?int $limit = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): Page;
 }

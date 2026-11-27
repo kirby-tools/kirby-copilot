@@ -7,10 +7,11 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type ContentVariants from \Anthropic\Beta\Messages\BetaAdvisorToolResultBlock\Content
  * @phpstan-import-type ContentShape from \Anthropic\Beta\Messages\BetaAdvisorToolResultBlock\Content
+ * @phpstan-import-type ContentVariants from \Anthropic\Beta\Messages\BetaAdvisorToolResultBlock\Content
  *
  * @phpstan-type BetaAdvisorToolResultBlockShape = array{
  *   content: ContentShape, toolUseID: string, type: 'advisor_tool_result'
@@ -22,12 +23,12 @@ final class BetaAdvisorToolResultBlock implements BaseModel
     use SdkModel;
 
     /** @var 'advisor_tool_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('advisor_tool_result'))]
     public string $type = 'advisor_tool_result';
 
     /** @var ContentVariants $content */
     #[Required]
-    public BetaAdvisorToolResultError|BetaAdvisorResultBlock|BetaAdvisorRedactedResultBlock $content;
+    public BetaAdvisorToolResultErrorObject|BetaAdvisorResultBlock|BetaAdvisorRedactedResultBlock $content;
 
     #[Required('tool_use_id')]
     public string $toolUseID;
@@ -43,7 +44,7 @@ final class BetaAdvisorToolResultBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaAdvisorToolResultBlock)->withContent(...)->withToolUseID(...)
+     * (new BetaAdvisorToolResultBlock())->withContent(...)->withToolUseID(...)
      * ```
      */
     public function __construct()
@@ -59,7 +60,7 @@ final class BetaAdvisorToolResultBlock implements BaseModel
      * @param ContentShape $content
      */
     public static function with(
-        BetaAdvisorToolResultError|array|BetaAdvisorResultBlock|BetaAdvisorRedactedResultBlock $content,
+        BetaAdvisorToolResultErrorObject|array|BetaAdvisorResultBlock|BetaAdvisorRedactedResultBlock $content,
         string $toolUseID,
     ): self {
         $self = new self;
@@ -74,7 +75,7 @@ final class BetaAdvisorToolResultBlock implements BaseModel
      * @param ContentShape $content
      */
     public function withContent(
-        BetaAdvisorToolResultError|array|BetaAdvisorResultBlock|BetaAdvisorRedactedResultBlock $content,
+        BetaAdvisorToolResultErrorObject|array|BetaAdvisorResultBlock|BetaAdvisorRedactedResultBlock $content,
     ): self {
         $self = clone $this;
         $self['content'] = $content;

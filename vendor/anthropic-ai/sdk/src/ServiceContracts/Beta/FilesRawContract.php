@@ -4,16 +4,23 @@ declare(strict_types=1);
 
 namespace Anthropic\ServiceContracts\Beta;
 
-use Anthropic\Beta\Files\DeletedFile;
+use Anthropic\Beta\Files\BetaDeletedFile;
+use Anthropic\Beta\Files\BetaFileMetadata;
 use Anthropic\Beta\Files\FileDeleteParams;
 use Anthropic\Beta\Files\FileDownloadParams;
 use Anthropic\Beta\Files\FileListParams;
-use Anthropic\Beta\Files\FileMetadata;
 use Anthropic\Beta\Files\FileRetrieveMetadataParams;
 use Anthropic\Beta\Files\FileUploadParams;
+use Anthropic\ClaudeCodeKeyCreatorNotMemberException;
+use Anthropic\CMEKKeyDisabledException;
+use Anthropic\CMEKKeyNetworkBlockedException;
 use Anthropic\Core\Contracts\BaseResponse;
 use Anthropic\Core\Exceptions\APIException;
-use Anthropic\Page;
+use Anthropic\Files\FileExpiredException;
+use Anthropic\Files\FileNotDownloadableException;
+use Anthropic\Files\StorageQuotaExceededException;
+use Anthropic\OrganizationOnHoldException;
+use Anthropic\PageCursor;
 use Anthropic\RequestOptions;
 
 /**
@@ -27,8 +34,12 @@ interface FilesRawContract
      * @param array<string,mixed>|FileListParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<Page<FileMetadata>>
+     * @return BaseResponse<PageCursor<BetaFileMetadata>>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CMEKKeyDisabledException
+     * @throws CMEKKeyNetworkBlockedException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function list(
@@ -39,12 +50,16 @@ interface FilesRawContract
     /**
      * @api
      *
-     * @param string $fileID ID of the File
+     * @param string $fileID ID of the File.
      * @param array<string,mixed>|FileDeleteParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<DeletedFile>
+     * @return BaseResponse<BetaDeletedFile>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CMEKKeyDisabledException
+     * @throws CMEKKeyNetworkBlockedException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function delete(
@@ -56,12 +71,18 @@ interface FilesRawContract
     /**
      * @api
      *
-     * @param string $fileID ID of the File
+     * @param string $fileID ID of the File.
      * @param array<string,mixed>|FileDownloadParams $params
      * @param RequestOpts|null $requestOptions
      *
      * @return BaseResponse<string>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CMEKKeyDisabledException
+     * @throws CMEKKeyNetworkBlockedException
+     * @throws FileNotDownloadableException
+     * @throws OrganizationOnHoldException
+     * @throws FileExpiredException
      * @throws APIException
      */
     public function download(
@@ -73,12 +94,16 @@ interface FilesRawContract
     /**
      * @api
      *
-     * @param string $fileID ID of the File
+     * @param string $fileID ID of the File.
      * @param array<string,mixed>|FileRetrieveMetadataParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<FileMetadata>
+     * @return BaseResponse<BetaFileMetadata>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CMEKKeyDisabledException
+     * @throws CMEKKeyNetworkBlockedException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function retrieveMetadata(
@@ -93,8 +118,13 @@ interface FilesRawContract
      * @param array<string,mixed>|FileUploadParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<FileMetadata>
+     * @return BaseResponse<BetaFileMetadata>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CMEKKeyDisabledException
+     * @throws CMEKKeyNetworkBlockedException
+     * @throws OrganizationOnHoldException
+     * @throws StorageQuotaExceededException
      * @throws APIException
      */
     public function upload(

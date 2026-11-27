@@ -13,11 +13,16 @@ use Anthropic\Beta\Messages\Batches\BatchRetrieveParams;
 use Anthropic\Beta\Messages\Batches\DeletedMessageBatch;
 use Anthropic\Beta\Messages\Batches\MessageBatch;
 use Anthropic\Beta\Messages\Batches\MessageBatchIndividualResponse;
+use Anthropic\ClaudeCodeKeyCreatorNotMemberException;
+use Anthropic\CMEKKeyDisabledException;
 use Anthropic\Core\Contracts\BaseResponse;
 use Anthropic\Core\Contracts\BaseStream;
 use Anthropic\Core\Exceptions\APIException;
+use Anthropic\EnforcedSpendLimitReachedException;
+use Anthropic\OrganizationOnHoldException;
 use Anthropic\Page;
 use Anthropic\RequestOptions;
+use Anthropic\WorkspaceHumanReviewDisabledException;
 
 /**
  * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
@@ -32,6 +37,11 @@ interface BatchesRawContract
      *
      * @return BaseResponse<MessageBatch>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CMEKKeyDisabledException
+     * @throws OrganizationOnHoldException
+     * @throws WorkspaceHumanReviewDisabledException
+     * @throws EnforcedSpendLimitReachedException
      * @throws APIException
      */
     public function create(
@@ -42,12 +52,14 @@ interface BatchesRawContract
     /**
      * @api
      *
-     * @param string $messageBatchID ID of the Message Batch
+     * @param string $messageBatchID ID of the Message Batch.
      * @param array<string,mixed>|BatchRetrieveParams $params
      * @param RequestOpts|null $requestOptions
      *
      * @return BaseResponse<MessageBatch>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function retrieve(
@@ -64,6 +76,8 @@ interface BatchesRawContract
      *
      * @return BaseResponse<Page<MessageBatch>>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function list(
@@ -74,12 +88,14 @@ interface BatchesRawContract
     /**
      * @api
      *
-     * @param string $messageBatchID ID of the Message Batch
+     * @param string $messageBatchID ID of the Message Batch.
      * @param array<string,mixed>|BatchDeleteParams $params
      * @param RequestOpts|null $requestOptions
      *
      * @return BaseResponse<DeletedMessageBatch>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function delete(
@@ -91,12 +107,14 @@ interface BatchesRawContract
     /**
      * @api
      *
-     * @param string $messageBatchID ID of the Message Batch
+     * @param string $messageBatchID ID of the Message Batch.
      * @param array<string,mixed>|BatchCancelParams $params
      * @param RequestOpts|null $requestOptions
      *
      * @return BaseResponse<MessageBatch>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function cancel(
@@ -108,12 +126,15 @@ interface BatchesRawContract
     /**
      * @api
      *
-     * @param string $messageBatchID ID of the Message Batch
+     * @param string $messageBatchID ID of the Message Batch.
      * @param array<string,mixed>|BatchResultsParams $params
      * @param RequestOpts|null $requestOptions
      *
      * @return BaseResponse<BaseStream<MessageBatchIndividualResponse>>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CMEKKeyDisabledException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function resultsStream(

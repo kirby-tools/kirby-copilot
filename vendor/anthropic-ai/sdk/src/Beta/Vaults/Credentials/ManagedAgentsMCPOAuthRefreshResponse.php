@@ -13,8 +13,8 @@ use Anthropic\Core\Contracts\BaseModel;
 /**
  * OAuth refresh token configuration returned in credential responses.
  *
- * @phpstan-import-type TokenEndpointAuthVariants from \Anthropic\Beta\Vaults\Credentials\ManagedAgentsMCPOAuthRefreshResponse\TokenEndpointAuth
  * @phpstan-import-type TokenEndpointAuthShape from \Anthropic\Beta\Vaults\Credentials\ManagedAgentsMCPOAuthRefreshResponse\TokenEndpointAuth
+ * @phpstan-import-type TokenEndpointAuthVariants from \Anthropic\Beta\Vaults\Credentials\ManagedAgentsMCPOAuthRefreshResponse\TokenEndpointAuth
  *
  * @phpstan-type ManagedAgentsMCPOAuthRefreshResponseShape = array{
  *   clientID: string,
@@ -30,7 +30,7 @@ final class ManagedAgentsMCPOAuthRefreshResponse implements BaseModel
     use SdkModel;
 
     /**
-     * OAuth client ID.
+     * The OAuth client ID used when refreshing the access token.
      */
     #[Required('client_id')]
     public string $clientID;
@@ -41,11 +41,7 @@ final class ManagedAgentsMCPOAuthRefreshResponse implements BaseModel
     #[Required('token_endpoint')]
     public string $tokenEndpoint;
 
-    /**
-     * Token endpoint requires no client authentication.
-     *
-     * @var TokenEndpointAuthVariants $tokenEndpointAuth
-     */
+    /** @var TokenEndpointAuthVariants $tokenEndpointAuth */
     #[Required('token_endpoint_auth', union: TokenEndpointAuth::class)]
     public ManagedAgentsTokenEndpointAuthNoneResponse|ManagedAgentsTokenEndpointAuthBasicResponse|ManagedAgentsTokenEndpointAuthPostResponse $tokenEndpointAuth;
 
@@ -74,7 +70,7 @@ final class ManagedAgentsMCPOAuthRefreshResponse implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ManagedAgentsMCPOAuthRefreshResponse)
+     * (new ManagedAgentsMCPOAuthRefreshResponse())
      *   ->withClientID(...)
      *   ->withTokenEndpoint(...)
      *   ->withTokenEndpointAuth(...)
@@ -112,7 +108,7 @@ final class ManagedAgentsMCPOAuthRefreshResponse implements BaseModel
     }
 
     /**
-     * OAuth client ID.
+     * The OAuth client ID used when refreshing the access token.
      */
     public function withClientID(string $clientID): self
     {
@@ -134,8 +130,6 @@ final class ManagedAgentsMCPOAuthRefreshResponse implements BaseModel
     }
 
     /**
-     * Token endpoint requires no client authentication.
-     *
      * @param TokenEndpointAuthShape $tokenEndpointAuth
      */
     public function withTokenEndpointAuth(

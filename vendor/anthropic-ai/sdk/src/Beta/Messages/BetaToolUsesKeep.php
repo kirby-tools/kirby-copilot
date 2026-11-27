@@ -7,6 +7,7 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type BetaToolUsesKeepShape = array{type: 'tool_uses', value: int}
@@ -17,7 +18,7 @@ final class BetaToolUsesKeep implements BaseModel
     use SdkModel;
 
     /** @var 'tool_uses' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('tool_uses'))]
     public string $type = 'tool_uses';
 
     #[Required]
@@ -34,7 +35,7 @@ final class BetaToolUsesKeep implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaToolUsesKeep)->withValue(...)
+     * (new BetaToolUsesKeep())->withValue(...)
      * ```
      */
     public function __construct()

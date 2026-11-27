@@ -5,20 +5,30 @@ declare(strict_types=1);
 namespace Anthropic\Beta\UserProfiles;
 
 use Anthropic\Beta\AnthropicBeta;
+use Anthropic\Beta\UserProfiles\UserProfileCreateParams\AccessType;
 use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Concerns\SdkParams;
 use Anthropic\Core\Contracts\BaseModel;
 
 /**
- * Create User Profile.
+ * Register one of your end customers and get the ID to send on the requests you make for them.
+ *
+ * See the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles#create-a-profile-for-each-end-customer) for what to send.
  *
  * @see Anthropic\Services\Beta\UserProfilesService::create()
  *
+ * @phpstan-import-type BetaUserProfileExternalUserDetailsParamsShape from \Anthropic\Beta\UserProfiles\BetaUserProfileExternalUserDetailsParams
+ *
  * @phpstan-type UserProfileCreateParamsShape = array{
+ *   accessType?: null|AccessType|value-of<AccessType>,
  *   externalID?: string|null,
+ *   externalUserDetails?: null|BetaUserProfileExternalUserDetailsParams|BetaUserProfileExternalUserDetailsParamsShape,
+ *   externalUserOnboardedAt?: \DateTimeInterface|null,
  *   metadata?: array<string,string>|null,
+ *   name?: string|null,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class UserProfileCreateParams implements BaseModel
@@ -28,10 +38,30 @@ final class UserProfileCreateParams implements BaseModel
     use SdkParams;
 
     /**
-     * Platform's own identifier for this user. Not enforced unique. Maximum 255 characters.
+     * How the platform uses the API for this entity. `application` (default): the profile represents an individual end-user of the platform's product. `passthrough`: the profile identifies a company the platform resells Claude access to.
+     *
+     * @var value-of<AccessType>|null $accessType
+     */
+    #[Optional('access_type', enum: AccessType::class)]
+    public ?string $accessType;
+
+    /**
+     * Platform's own identifier for this user. Not enforced unique. Maximum 255 characters. Legacy field, accepted only under the `user-profiles-2026-03-24` and `user-profiles-2026-08-18` beta headers; without one of them, send `external_user_details.reference_id`.
      */
     #[Optional('external_id', nullable: true)]
     public ?string $externalID;
+
+    /**
+     * Details about the entity this profile represents, as the platform states them. Every field is optional. Not accepted under the legacy `user-profiles-2026-03-24` and `user-profiles-2026-08-18` beta headers, which take the top-level `external_id` (and, under `user-profiles-2026-08-18`, `external_user_onboarded_at`) instead.
+     */
+    #[Optional('external_user_details')]
+    public ?BetaUserProfileExternalUserDetailsParams $externalUserDetails;
+
+    /**
+     * When the entity this profile represents opened its account with the platform, in RFC 3339 format: for an `application` profile, when the end-user signed up; for a `passthrough` profile, when the company became the platform's customer. Must be a complete timestamp no more than 1 minute in the future. Optional. Legacy field, accepted only under the `user-profiles-2026-08-18` beta header; without a legacy header, send `external_user_details.onboarded_at`.
+     */
+    #[Optional('external_user_onboarded_at')]
+    public ?\DateTimeInterface $externalUserOnboardedAt;
 
     /**
      * Free-form key-value data to attach to this user profile. Maximum 16 keys, with keys up to 64 characters and values up to 512 characters. Values must be non-empty strings.
@@ -42,12 +72,26 @@ final class UserProfileCreateParams implements BaseModel
     public ?array $metadata;
 
     /**
+     * Optional for all profiles. Real-world name of the entity this profile represents (company or individual); for a company the platform resells Claude access to (`access_type` `passthrough`), that company's name where known. Maximum 255 characters.
+     */
+    #[Optional(nullable: true)]
+    public ?string $name;
+
+    /**
      * Optional header to specify the beta version(s) you want to use.
      *
      * @var list<string|value-of<AnthropicBeta>>|null $betas
      */
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
 
     public function __construct()
     {
@@ -59,30 +103,81 @@ final class UserProfileCreateParams implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
+     * @param AccessType|value-of<AccessType>|null $accessType
+     * @param BetaUserProfileExternalUserDetailsParams|BetaUserProfileExternalUserDetailsParamsShape|null $externalUserDetails
      * @param array<string,string>|null $metadata
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>>|null $betas
      */
     public static function with(
+        AccessType|string|null $accessType = null,
         ?string $externalID = null,
+        BetaUserProfileExternalUserDetailsParams|array|null $externalUserDetails = null,
+        ?\DateTimeInterface $externalUserOnboardedAt = null,
         ?array $metadata = null,
-        ?array $betas = null
+        ?string $name = null,
+        ?array $betas = null,
+        ?string $workspaceID = null,
     ): self {
         $self = new self;
 
+        null !== $accessType && $self['accessType'] = $accessType;
         null !== $externalID && $self['externalID'] = $externalID;
+        null !== $externalUserDetails && $self['externalUserDetails'] = $externalUserDetails;
+        null !== $externalUserOnboardedAt && $self['externalUserOnboardedAt'] = $externalUserOnboardedAt;
         null !== $metadata && $self['metadata'] = $metadata;
+        null !== $name && $self['name'] = $name;
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
 
     /**
-     * Platform's own identifier for this user. Not enforced unique. Maximum 255 characters.
+     * How the platform uses the API for this entity. `application` (default): the profile represents an individual end-user of the platform's product. `passthrough`: the profile identifies a company the platform resells Claude access to.
+     *
+     * @param AccessType|value-of<AccessType> $accessType
+     */
+    public function withAccessType(AccessType|string $accessType): self
+    {
+        $self = clone $this;
+        $self['accessType'] = $accessType;
+
+        return $self;
+    }
+
+    /**
+     * Platform's own identifier for this user. Not enforced unique. Maximum 255 characters. Legacy field, accepted only under the `user-profiles-2026-03-24` and `user-profiles-2026-08-18` beta headers; without one of them, send `external_user_details.reference_id`.
      */
     public function withExternalID(?string $externalID): self
     {
         $self = clone $this;
         $self['externalID'] = $externalID;
+
+        return $self;
+    }
+
+    /**
+     * Details about the entity this profile represents, as the platform states them. Every field is optional. Not accepted under the legacy `user-profiles-2026-03-24` and `user-profiles-2026-08-18` beta headers, which take the top-level `external_id` (and, under `user-profiles-2026-08-18`, `external_user_onboarded_at`) instead.
+     *
+     * @param BetaUserProfileExternalUserDetailsParams|BetaUserProfileExternalUserDetailsParamsShape $externalUserDetails
+     */
+    public function withExternalUserDetails(
+        BetaUserProfileExternalUserDetailsParams|array $externalUserDetails
+    ): self {
+        $self = clone $this;
+        $self['externalUserDetails'] = $externalUserDetails;
+
+        return $self;
+    }
+
+    /**
+     * When the entity this profile represents opened its account with the platform, in RFC 3339 format: for an `application` profile, when the end-user signed up; for a `passthrough` profile, when the company became the platform's customer. Must be a complete timestamp no more than 1 minute in the future. Optional. Legacy field, accepted only under the `user-profiles-2026-08-18` beta header; without a legacy header, send `external_user_details.onboarded_at`.
+     */
+    public function withExternalUserOnboardedAt(
+        \DateTimeInterface $externalUserOnboardedAt
+    ): self {
+        $self = clone $this;
+        $self['externalUserOnboardedAt'] = $externalUserOnboardedAt;
 
         return $self;
     }
@@ -101,6 +196,17 @@ final class UserProfileCreateParams implements BaseModel
     }
 
     /**
+     * Optional for all profiles. Real-world name of the entity this profile represents (company or individual); for a company the platform resells Claude access to (`access_type` `passthrough`), that company's name where known. Maximum 255 characters.
+     */
+    public function withName(?string $name): self
+    {
+        $self = clone $this;
+        $self['name'] = $name;
+
+        return $self;
+    }
+
+    /**
      * Optional header to specify the beta version(s) you want to use.
      *
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas
@@ -109,6 +215,19 @@ final class UserProfileCreateParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

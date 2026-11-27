@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace Anthropic\Beta\Sessions\Events;
 
-use Anthropic\Beta\Sessions\Events\ManagedAgentsAgentMCPToolUseEvent\EvaluatedPermission;
-use Anthropic\Beta\Sessions\Events\ManagedAgentsAgentMCPToolUseEvent\Type;
 use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * Event emitted when the agent invokes a tool provided by an MCP server.
+ *
+ * @phpstan-import-type ManagedAgentsAgentToolEvaluationShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsAgentToolEvaluation
+ * @phpstan-import-type ManagedAgentsAgentToolEvaluationVariants from \Anthropic\Beta\Sessions\Events\ManagedAgentsAgentToolEvaluation
  *
  * @phpstan-type ManagedAgentsAgentMCPToolUseEventShape = array{
  *   id: string,
@@ -20,14 +22,20 @@ use Anthropic\Core\Contracts\BaseModel;
  *   mcpServerName: string,
  *   name: string,
  *   processedAt: \DateTimeInterface,
- *   type: Type|value-of<Type>,
- *   evaluatedPermission?: null|EvaluatedPermission|value-of<EvaluatedPermission>,
+ *   type: 'agent.mcp_tool_use',
+ *   evaluatedPermission?: null|ManagedAgentsAgentEvaluatedPermission|value-of<ManagedAgentsAgentEvaluatedPermission>,
+ *   evaluation?: ManagedAgentsAgentToolEvaluationShape|null,
+ *   sessionThreadID?: string|null,
  * }
  */
 final class ManagedAgentsAgentMCPToolUseEvent implements BaseModel
 {
     /** @use SdkModel<ManagedAgentsAgentMCPToolUseEventShape> */
     use SdkModel;
+
+    /** @var 'agent.mcp_tool_use' $type */
+    #[Required(type: new ConstantOf('agent.mcp_tool_use'))]
+    public string $type = 'agent.mcp_tool_use';
 
     /**
      * Unique identifier for this event.
@@ -56,22 +64,35 @@ final class ManagedAgentsAgentMCPToolUseEvent implements BaseModel
     public string $name;
 
     /**
-     * A timestamp in RFC 3339 format.
+     * Timestamp when this event was processed.
      */
     #[Required('processed_at')]
     public \DateTimeInterface $processedAt;
 
-    /** @var value-of<Type> $type */
-    #[Required(enum: Type::class)]
-    public string $type;
+    /**
+     * The evaluated permission policy for this tool invocation.
+     *
+     * @var value-of<ManagedAgentsAgentEvaluatedPermission>|null $evaluatedPermission
+     */
+    #[Optional(
+        'evaluated_permission',
+        enum: ManagedAgentsAgentEvaluatedPermission::class
+    )]
+    public ?string $evaluatedPermission;
 
     /**
-     * AgentEvaluatedPermission enum.
+     * Which resolved permission_policy produced evaluated_permission: always_allow, always_ask, or auto (with the server's per-invocation judgement). Absent only when the server refused the call before any policy applied (for example, the named tool is not enabled in the session); such a refusal has evaluated_permission deny. An event recorded before this field existed reads as the arm its evaluated_permission implies (always_allow for allow, always_ask for ask).
      *
-     * @var value-of<EvaluatedPermission>|null $evaluatedPermission
+     * @var ManagedAgentsAgentToolEvaluationVariants|null $evaluation
      */
-    #[Optional('evaluated_permission', enum: EvaluatedPermission::class)]
-    public ?string $evaluatedPermission;
+    #[Optional(union: ManagedAgentsAgentToolEvaluation::class)]
+    public ManagedAgentsAgentToolEvaluationAlwaysAllow|ManagedAgentsAgentToolEvaluationAlwaysAsk|ManagedAgentsAgentToolEvaluationAuto|null $evaluation;
+
+    /**
+     * When set, this event was cross-posted from a subagent's thread to surface its permission request on the primary thread's stream. Empty on the thread's own events. Informational only: the server routes the matching `user.tool_confirmation` by `tool_use_id`, so clients do not send it back.
+     */
+    #[Optional('session_thread_id', nullable: true)]
+    public ?string $sessionThreadID;
 
     /**
      * `new ManagedAgentsAgentMCPToolUseEvent()` is missing required properties by the API.
@@ -79,25 +100,19 @@ final class ManagedAgentsAgentMCPToolUseEvent implements BaseModel
      * To enforce required parameters use
      * ```
      * ManagedAgentsAgentMCPToolUseEvent::with(
-     *   id: ...,
-     *   input: ...,
-     *   mcpServerName: ...,
-     *   name: ...,
-     *   processedAt: ...,
-     *   type: ...,
+     *   id: ..., input: ..., mcpServerName: ..., name: ..., processedAt: ...
      * )
      * ```
      *
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ManagedAgentsAgentMCPToolUseEvent)
+     * (new ManagedAgentsAgentMCPToolUseEvent())
      *   ->withID(...)
      *   ->withInput(...)
      *   ->withMCPServerName(...)
      *   ->withName(...)
      *   ->withProcessedAt(...)
-     *   ->withType(...)
      * ```
      */
     public function __construct()
@@ -111,8 +126,8 @@ final class ManagedAgentsAgentMCPToolUseEvent implements BaseModel
      * You must use named parameters to construct any parameters with a default value.
      *
      * @param array<string,mixed> $input
-     * @param Type|value-of<Type> $type
-     * @param EvaluatedPermission|value-of<EvaluatedPermission>|null $evaluatedPermission
+     * @param ManagedAgentsAgentEvaluatedPermission|value-of<ManagedAgentsAgentEvaluatedPermission>|null $evaluatedPermission
+     * @param ManagedAgentsAgentToolEvaluationShape|null $evaluation
      */
     public static function with(
         string $id,
@@ -120,8 +135,9 @@ final class ManagedAgentsAgentMCPToolUseEvent implements BaseModel
         string $mcpServerName,
         string $name,
         \DateTimeInterface $processedAt,
-        Type|string $type,
-        EvaluatedPermission|string|null $evaluatedPermission = null,
+        ManagedAgentsAgentEvaluatedPermission|string|null $evaluatedPermission = null,
+        ManagedAgentsAgentToolEvaluationAlwaysAllow|array|ManagedAgentsAgentToolEvaluationAlwaysAsk|ManagedAgentsAgentToolEvaluationAuto|null $evaluation = null,
+        ?string $sessionThreadID = null,
     ): self {
         $self = new self;
 
@@ -130,9 +146,10 @@ final class ManagedAgentsAgentMCPToolUseEvent implements BaseModel
         $self['mcpServerName'] = $mcpServerName;
         $self['name'] = $name;
         $self['processedAt'] = $processedAt;
-        $self['type'] = $type;
 
         null !== $evaluatedPermission && $self['evaluatedPermission'] = $evaluatedPermission;
+        null !== $evaluation && $self['evaluation'] = $evaluation;
+        null !== $sessionThreadID && $self['sessionThreadID'] = $sessionThreadID;
 
         return $self;
     }
@@ -184,7 +201,7 @@ final class ManagedAgentsAgentMCPToolUseEvent implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * Timestamp when this event was processed.
      */
     public function withProcessedAt(\DateTimeInterface $processedAt): self
     {
@@ -195,9 +212,9 @@ final class ManagedAgentsAgentMCPToolUseEvent implements BaseModel
     }
 
     /**
-     * @param Type|value-of<Type> $type
+     * @param 'agent.mcp_tool_use' $type
      */
-    public function withType(Type|string $type): self
+    public function withType(string $type): self
     {
         $self = clone $this;
         $self['type'] = $type;
@@ -206,15 +223,40 @@ final class ManagedAgentsAgentMCPToolUseEvent implements BaseModel
     }
 
     /**
-     * AgentEvaluatedPermission enum.
+     * The evaluated permission policy for this tool invocation.
      *
-     * @param EvaluatedPermission|value-of<EvaluatedPermission> $evaluatedPermission
+     * @param ManagedAgentsAgentEvaluatedPermission|value-of<ManagedAgentsAgentEvaluatedPermission> $evaluatedPermission
      */
     public function withEvaluatedPermission(
-        EvaluatedPermission|string $evaluatedPermission
+        ManagedAgentsAgentEvaluatedPermission|string $evaluatedPermission
     ): self {
         $self = clone $this;
         $self['evaluatedPermission'] = $evaluatedPermission;
+
+        return $self;
+    }
+
+    /**
+     * Which resolved permission_policy produced evaluated_permission: always_allow, always_ask, or auto (with the server's per-invocation judgement). Absent only when the server refused the call before any policy applied (for example, the named tool is not enabled in the session); such a refusal has evaluated_permission deny. An event recorded before this field existed reads as the arm its evaluated_permission implies (always_allow for allow, always_ask for ask).
+     *
+     * @param ManagedAgentsAgentToolEvaluationShape $evaluation
+     */
+    public function withEvaluation(
+        ManagedAgentsAgentToolEvaluationAlwaysAllow|array|ManagedAgentsAgentToolEvaluationAlwaysAsk|ManagedAgentsAgentToolEvaluationAuto $evaluation,
+    ): self {
+        $self = clone $this;
+        $self['evaluation'] = $evaluation;
+
+        return $self;
+    }
+
+    /**
+     * When set, this event was cross-posted from a subagent's thread to surface its permission request on the primary thread's stream. Empty on the thread's own events. Informational only: the server routes the matching `user.tool_confirmation` by `tool_use_id`, so clients do not send it back.
+     */
+    public function withSessionThreadID(?string $sessionThreadID): self
+    {
+        $self = clone $this;
+        $self['sessionThreadID'] = $sessionThreadID;
 
         return $self;
     }

@@ -7,11 +7,15 @@ namespace Anthropic\Services\Beta;
 use Anthropic\Beta\AnthropicBeta;
 use Anthropic\Beta\Models\BetaModelInfo;
 use Anthropic\Beta\Models\ModelListParams;
+use Anthropic\Beta\Models\ModelListParams\Lifecycle;
 use Anthropic\Beta\Models\ModelRetrieveParams;
+use Anthropic\ClaudeCodeKeyCreatorNotMemberException;
 use Anthropic\Client;
 use Anthropic\Core\Contracts\BaseResponse;
 use Anthropic\Core\Exceptions\APIException;
+use Anthropic\Core\Implementation\ApiCallInfo;
 use Anthropic\Core\Util;
+use Anthropic\OrganizationOnHoldException;
 use Anthropic\Page;
 use Anthropic\RequestOptions;
 use Anthropic\ServiceContracts\Beta\ModelsRawContract;
@@ -34,14 +38,17 @@ final class ModelsRawService implements ModelsRawContract
      *
      * The Models API response can be used to determine information about a specific model or resolve a model alias to a model ID.
      *
-     * @param string $modelID model identifier or alias
+     * @param string $modelID Model identifier or alias.
      * @param array{
-     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|ModelRetrieveParams $params
      * @param RequestOpts|null $requestOptions
      *
      * @return BaseResponse<BetaModelInfo>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function retrieve(
@@ -57,12 +64,20 @@ final class ModelsRawService implements ModelsRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: ['v1/models/%1$s?beta=true', $modelID],
+            path: ['v1/models/%1$s', $modelID],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
-            options: $options,
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.models.retrieve',
+                route: '/v1/models/{model_id}',
+                attributes: ['anthropic.model.id' => $modelID],
+            )),
             convert: BetaModelInfo::class,
         );
     }
@@ -77,13 +92,17 @@ final class ModelsRawService implements ModelsRawContract
      * @param array{
      *   afterID?: string,
      *   beforeID?: string,
+     *   lifecycle?: list<Lifecycle|value-of<Lifecycle>>,
      *   limit?: int,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|ModelListParams $params
      * @param RequestOpts|null $requestOptions
      *
      * @return BaseResponse<Page<BetaModelInfo>>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function list(
@@ -94,7 +113,7 @@ final class ModelsRawService implements ModelsRawContract
             $params,
             $requestOptions,
         );
-        $query_params = array_flip(['afterID', 'beforeID', 'limit']);
+        $query_params = array_flip(['afterID', 'beforeID', 'lifecycle', 'limit']);
 
         /** @var array<string,string> */
         $header_params = array_diff_key($parsed, $query_params);
@@ -102,16 +121,24 @@ final class ModelsRawService implements ModelsRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: 'v1/models?beta=true',
+            path: 'v1/models',
             query: Util::array_transform_keys(
                 array_intersect_key($parsed, $query_params),
                 ['afterID' => 'after_id', 'beforeID' => 'before_id'],
             ),
             headers: Util::array_transform_keys(
                 $header_params,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
-            options: $options,
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.models.list',
+                route: '/v1/models',
+                query: ['after_id', 'before_id', 'lifecycle', 'limit'],
+            )),
             convert: BetaModelInfo::class,
             page: Page::class,
         );

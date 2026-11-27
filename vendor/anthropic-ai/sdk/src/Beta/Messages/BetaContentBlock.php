@@ -9,8 +9,6 @@ use Anthropic\Core\Conversion\Contracts\Converter;
 use Anthropic\Core\Conversion\Contracts\ConverterSource;
 
 /**
- * Response model for a file uploaded to the container.
- *
  * @phpstan-import-type BetaTextBlockShape from \Anthropic\Beta\Messages\BetaTextBlock
  * @phpstan-import-type BetaThinkingBlockShape from \Anthropic\Beta\Messages\BetaThinkingBlock
  * @phpstan-import-type BetaRedactedThinkingBlockShape from \Anthropic\Beta\Messages\BetaRedactedThinkingBlock
@@ -27,9 +25,11 @@ use Anthropic\Core\Conversion\Contracts\ConverterSource;
  * @phpstan-import-type BetaMCPToolResultBlockShape from \Anthropic\Beta\Messages\BetaMCPToolResultBlock
  * @phpstan-import-type BetaContainerUploadBlockShape from \Anthropic\Beta\Messages\BetaContainerUploadBlock
  * @phpstan-import-type BetaCompactionBlockShape from \Anthropic\Beta\Messages\BetaCompactionBlock
+ * @phpstan-import-type BetaFallbackBlockShape from \Anthropic\Beta\Messages\BetaFallbackBlock
+ * @phpstan-import-type BetaMCPToolListingBlockShape from \Anthropic\Beta\Messages\BetaMCPToolListingBlock
  *
- * @phpstan-type BetaContentBlockVariants = BetaTextBlock|BetaThinkingBlock|BetaRedactedThinkingBlock|BetaToolUseBlock|BetaServerToolUseBlock|BetaWebSearchToolResultBlock|BetaWebFetchToolResultBlock|BetaAdvisorToolResultBlock|BetaCodeExecutionToolResultBlock|BetaBashCodeExecutionToolResultBlock|BetaTextEditorCodeExecutionToolResultBlock|BetaToolSearchToolResultBlock|BetaMCPToolUseBlock|BetaMCPToolResultBlock|BetaContainerUploadBlock|BetaCompactionBlock
- * @phpstan-type BetaContentBlockShape = BetaContentBlockVariants|BetaTextBlockShape|BetaThinkingBlockShape|BetaRedactedThinkingBlockShape|BetaToolUseBlockShape|BetaServerToolUseBlockShape|BetaWebSearchToolResultBlockShape|BetaWebFetchToolResultBlockShape|BetaAdvisorToolResultBlockShape|BetaCodeExecutionToolResultBlockShape|BetaBashCodeExecutionToolResultBlockShape|BetaTextEditorCodeExecutionToolResultBlockShape|BetaToolSearchToolResultBlockShape|BetaMCPToolUseBlockShape|BetaMCPToolResultBlockShape|BetaContainerUploadBlockShape|BetaCompactionBlockShape
+ * @phpstan-type BetaContentBlockVariants = BetaTextBlock|BetaThinkingBlock|BetaRedactedThinkingBlock|BetaToolUseBlock|BetaServerToolUseBlock|BetaWebSearchToolResultBlock|BetaWebFetchToolResultBlock|BetaAdvisorToolResultBlock|BetaCodeExecutionToolResultBlock|BetaBashCodeExecutionToolResultBlock|BetaTextEditorCodeExecutionToolResultBlock|BetaToolSearchToolResultBlock|BetaMCPToolUseBlock|BetaMCPToolResultBlock|BetaContainerUploadBlock|BetaCompactionBlock|BetaFallbackBlock|BetaMCPToolListingBlock
+ * @phpstan-type BetaContentBlockShape = BetaContentBlockVariants|BetaTextBlockShape|BetaThinkingBlockShape|BetaRedactedThinkingBlockShape|BetaToolUseBlockShape|BetaServerToolUseBlockShape|BetaWebSearchToolResultBlockShape|BetaWebFetchToolResultBlockShape|BetaAdvisorToolResultBlockShape|BetaCodeExecutionToolResultBlockShape|BetaBashCodeExecutionToolResultBlockShape|BetaTextEditorCodeExecutionToolResultBlockShape|BetaToolSearchToolResultBlockShape|BetaMCPToolUseBlockShape|BetaMCPToolResultBlockShape|BetaContainerUploadBlockShape|BetaCompactionBlockShape|BetaFallbackBlockShape|BetaMCPToolListingBlockShape
  */
 final class BetaContentBlock implements ConverterSource
 {
@@ -62,6 +62,8 @@ final class BetaContentBlock implements ConverterSource
             'mcp_tool_result' => BetaMCPToolResultBlock::class,
             'container_upload' => BetaContainerUploadBlock::class,
             'compaction' => BetaCompactionBlock::class,
+            'fallback' => BetaFallbackBlock::class,
+            'mcp_tool_listing' => BetaMCPToolListingBlock::class,
         ];
     }
 }

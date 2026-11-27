@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Anthropic\ServiceContracts\Beta;
 
+use Anthropic\Beta\UserProfiles\BetaDeletedUserProfile;
 use Anthropic\Beta\UserProfiles\BetaUserProfile;
 use Anthropic\Beta\UserProfiles\BetaUserProfileEnrollmentURL;
 use Anthropic\Beta\UserProfiles\UserProfileCreateEnrollmentURLParams;
 use Anthropic\Beta\UserProfiles\UserProfileCreateParams;
+use Anthropic\Beta\UserProfiles\UserProfileDeleteParams;
 use Anthropic\Beta\UserProfiles\UserProfileListParams;
 use Anthropic\Beta\UserProfiles\UserProfileRetrieveParams;
 use Anthropic\Beta\UserProfiles\UserProfileUpdateParams;
@@ -39,7 +41,7 @@ interface UserProfilesRawContract
     /**
      * @api
      *
-     * @param string $userProfileID Path parameter user_profile_id
+     * @param string $userProfileID The ID of the user profile to get (`uprof_...`).
      * @param array<string,mixed>|UserProfileRetrieveParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -56,7 +58,7 @@ interface UserProfilesRawContract
     /**
      * @api
      *
-     * @param string $userProfileID Path param: Path parameter user_profile_id
+     * @param string $userProfileID Path param: The ID of the user profile to update (`uprof_...`).
      * @param array<string,mixed>|UserProfileUpdateParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -88,7 +90,24 @@ interface UserProfilesRawContract
     /**
      * @api
      *
-     * @param string $userProfileID Path parameter user_profile_id
+     * @param string $userProfileID The ID of the user profile to delete (`uprof_...`).
+     * @param array<string,mixed>|UserProfileDeleteParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<BetaDeletedUserProfile>
+     *
+     * @throws APIException
+     */
+    public function delete(
+        string $userProfileID,
+        array|UserProfileDeleteParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse;
+
+    /**
+     * @api
+     *
+     * @param string $userProfileID The ID of the user profile to create an enrollment URL for (`uprof_...`).
      * @param array<string,mixed>|UserProfileCreateEnrollmentURLParams $params
      * @param RequestOpts|null $requestOptions
      *

@@ -1,0 +1,107 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\ServiceContracts\Beta\Tunnels;
+
+use Anthropic\Beta\AnthropicBeta;
+use Anthropic\Beta\Tunnels\Certificates\TunnelCertificate;
+use Anthropic\Core\Exceptions\APIException;
+use Anthropic\PageCursor;
+use Anthropic\RequestOptions;
+
+/**
+ * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ */
+interface CertificatesContract
+{
+    /**
+     * @api
+     *
+     * @param string $tunnelID Path param: ID of the tunnel (`tnl_...`).
+     * @param string $caCertificatePEM Body param: PEM-encoded X.509 CA certificate. Must contain exactly one certificate and no private-key material. Maximum 8KB.
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Header param: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this header.
+     * @param string $workspaceID Header param: Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @throws APIException
+     */
+    public function create(
+        string $tunnelID,
+        string $caCertificatePEM,
+        ?array $betas = null,
+        ?string $workspaceID = null,
+        RequestOptions|array|null $requestOptions = null,
+    ): TunnelCertificate;
+
+    /**
+     * @api
+     *
+     * @param string $certificateID Path param: ID of the certificate (`tcrt_...`).
+     * @param string $tunnelID Path param: ID of the tunnel (`tnl_...`).
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Header param: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this header.
+     * @param string $workspaceID Header param: Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @throws APIException
+     */
+    public function retrieve(
+        string $certificateID,
+        string $tunnelID,
+        ?array $betas = null,
+        ?string $workspaceID = null,
+        RequestOptions|array|null $requestOptions = null,
+    ): TunnelCertificate;
+
+    /**
+     * @api
+     *
+     * @param string $tunnelID Path param: ID of the tunnel (`tnl_...`).
+     * @param bool $includeArchived Query param: Whether to include archived certificates in the results. Defaults to false.
+     * @param int $limit Query param: Maximum number of certificates to return per page. Defaults to 20, maximum 1000.
+     * @param string $page Query param: Opaque pagination cursor from a previous `list_tunnel_certificates` response.
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Header param: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this header.
+     * @param string $workspaceID Header param: Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return PageCursor<TunnelCertificate>
+     *
+     * @throws APIException
+     */
+    public function list(
+        string $tunnelID,
+        ?bool $includeArchived = null,
+        ?int $limit = null,
+        ?string $page = null,
+        ?array $betas = null,
+        ?string $workspaceID = null,
+        RequestOptions|array|null $requestOptions = null,
+    ): PageCursor;
+
+    /**
+     * @api
+     *
+     * @param string $certificateID Path param: ID of the certificate to archive (`tcrt_...`).
+     * @param string $tunnelID Path param: ID of the tunnel (`tnl_...`).
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Header param: This endpoint is in beta: requests must send `mcp-tunnels-2026-06-22` in this header.
+     * @param string $workspaceID Header param: Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @throws APIException
+     */
+    public function archive(
+        string $certificateID,
+        string $tunnelID,
+        ?array $betas = null,
+        ?string $workspaceID = null,
+        RequestOptions|array|null $requestOptions = null,
+    ): TunnelCertificate;
+}

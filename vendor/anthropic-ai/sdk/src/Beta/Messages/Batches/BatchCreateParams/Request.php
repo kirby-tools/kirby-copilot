@@ -30,7 +30,7 @@ final class Request implements BaseModel
     /**
      * Messages API creation parameters for the individual request.
      *
-     * See the [Messages API reference](https://docs.claude.com/en/api/messages) for full documentation on available parameters.
+     * See the [Messages API reference](https://platform.claude.com/docs/en/api/messages) for full documentation on available parameters.
      */
     #[Required]
     public Params $params;
@@ -46,7 +46,7 @@ final class Request implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new Request)->withCustomID(...)->withParams(...)
+     * (new Request())->withCustomID(...)->withParams(...)
      * ```
      */
     public function __construct()
@@ -87,7 +87,7 @@ final class Request implements BaseModel
     /**
      * Messages API creation parameters for the individual request.
      *
-     * See the [Messages API reference](https://docs.claude.com/en/api/messages) for full documentation on available parameters.
+     * See the [Messages API reference](https://platform.claude.com/docs/en/api/messages) for full documentation on available parameters.
      *
      * @param Params|ParamsShape $params
      */

@@ -14,20 +14,20 @@ use Anthropic\Beta\MemoryStores\Memories\ManagedAgentsPrecondition;
 use Anthropic\Beta\MemoryStores\Memories\MemoryCreateParams;
 use Anthropic\Beta\MemoryStores\Memories\MemoryDeleteParams;
 use Anthropic\Beta\MemoryStores\Memories\MemoryListParams;
-use Anthropic\Beta\MemoryStores\Memories\MemoryListParams\Order;
 use Anthropic\Beta\MemoryStores\Memories\MemoryRetrieveParams;
 use Anthropic\Beta\MemoryStores\Memories\MemoryUpdateParams;
 use Anthropic\Client;
 use Anthropic\Core\Contracts\BaseResponse;
 use Anthropic\Core\Exceptions\APIException;
+use Anthropic\Core\Implementation\ApiCallInfo;
 use Anthropic\Core\Util;
 use Anthropic\PageCursor;
 use Anthropic\RequestOptions;
 use Anthropic\ServiceContracts\Beta\MemoryStores\MemoriesRawContract;
 
 /**
- * @phpstan-import-type ManagedAgentsPreconditionShape from \Anthropic\Beta\MemoryStores\Memories\ManagedAgentsPrecondition
  * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ * @phpstan-import-type ManagedAgentsPreconditionShape from \Anthropic\Beta\MemoryStores\Memories\ManagedAgentsPrecondition
  */
 final class MemoriesRawService implements MemoriesRawContract
 {
@@ -40,14 +40,15 @@ final class MemoriesRawService implements MemoriesRawContract
     /**
      * @api
      *
-     * CreateMemory
+     * Create a Memory
      *
-     * @param string $memoryStoreID Path param: Path parameter memory_store_id
+     * @param string $memoryStoreID Path param: The ID of the memory store to create the memory in (`memstore_...`).
      * @param array{
      *   content: string|null,
      *   path: string,
      *   view?: ManagedAgentsMemoryView|value-of<ManagedAgentsMemoryView>,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|MemoryCreateParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -65,12 +66,14 @@ final class MemoriesRawService implements MemoriesRawContract
             $requestOptions,
         );
         $query_params = array_flip(['view']);
-        $header_params = ['betas' => 'anthropic-beta'];
+        $header_params = [
+            'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+        ];
 
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: ['v1/memory_stores/%1$s/memories?beta=true', $memoryStoreID],
+            path: ['v1/memory_stores/%1$s/memories', $memoryStoreID],
             query: array_intersect_key($parsed, $query_params),
             headers: Util::array_transform_keys(
                 array_intersect_key($parsed, array_flip(array_keys($header_params))),
@@ -81,9 +84,15 @@ final class MemoriesRawService implements MemoriesRawContract
                 array_flip(array_keys([...$query_params, ...$header_params]))
             ),
             options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                ['extraHeaders' => ['anthropic-beta' => 'agent-memory-2026-07-22']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.memory_stores.memories.create',
+                route: '/v1/memory_stores/{memory_store_id}/memories',
+                query: ['view'],
+                attributes: ['gen_ai.memory.store.id' => $memoryStoreID],
+                createdId: 'gen_ai.memory.record.id',
+            )),
             convert: ManagedAgentsMemory::class,
         );
     }
@@ -91,13 +100,14 @@ final class MemoriesRawService implements MemoriesRawContract
     /**
      * @api
      *
-     * GetMemory
+     * Retrieve a Memory
      *
-     * @param string $memoryID Path param: Path parameter memory_id
+     * @param string $memoryID Path param: The ID of the memory to retrieve (`mem_...`).
      * @param array{
      *   memoryStoreID: string,
      *   view?: ManagedAgentsMemoryView|value-of<ManagedAgentsMemoryView>,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|MemoryRetrieveParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -124,20 +134,26 @@ final class MemoriesRawService implements MemoriesRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: [
-                'v1/memory_stores/%1$s/memories/%2$s?beta=true',
-                $memoryStoreID,
-                $memoryID,
-            ],
+            path: ['v1/memory_stores/%1$s/memories/%2$s', $memoryStoreID, $memoryID],
             query: array_intersect_key($parsed, $query_params),
             headers: Util::array_transform_keys(
                 $header_params,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                ['extraHeaders' => ['anthropic-beta' => 'agent-memory-2026-07-22']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.memory_stores.memories.retrieve',
+                route: '/v1/memory_stores/{memory_store_id}/memories/{memory_id}',
+                query: ['view'],
+                attributes: [
+                    'gen_ai.memory.store.id' => $memoryStoreID,
+                    'gen_ai.memory.record.id' => $memoryID,
+                ],
+            )),
             convert: ManagedAgentsMemory::class,
         );
     }
@@ -145,9 +161,9 @@ final class MemoriesRawService implements MemoriesRawContract
     /**
      * @api
      *
-     * UpdateMemory
+     * Update a Memory
      *
-     * @param string $memoryID Path param: Path parameter memory_id
+     * @param string $memoryID Path param: The ID of the memory to update (`mem_...`).
      * @param array{
      *   memoryStoreID: string,
      *   view?: ManagedAgentsMemoryView|value-of<ManagedAgentsMemoryView>,
@@ -155,6 +171,7 @@ final class MemoriesRawService implements MemoriesRawContract
      *   path?: string|null,
      *   precondition?: ManagedAgentsPrecondition|ManagedAgentsPreconditionShape,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|MemoryUpdateParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -174,16 +191,14 @@ final class MemoriesRawService implements MemoriesRawContract
         $memoryStoreID = $parsed['memoryStoreID'];
         unset($parsed['memoryStoreID']);
         $query_params = array_flip(['view']);
-        $header_params = ['betas' => 'anthropic-beta'];
+        $header_params = [
+            'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+        ];
 
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: [
-                'v1/memory_stores/%1$s/memories/%2$s?beta=true',
-                $memoryStoreID,
-                $memoryID,
-            ],
+            path: ['v1/memory_stores/%1$s/memories/%2$s', $memoryStoreID, $memoryID],
             query: array_intersect_key($parsed, $query_params),
             headers: Util::array_transform_keys(
                 array_intersect_key($parsed, array_flip(array_keys($header_params))),
@@ -197,9 +212,17 @@ final class MemoriesRawService implements MemoriesRawContract
                 array_flip(['memoryStoreID']),
             ),
             options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                ['extraHeaders' => ['anthropic-beta' => 'agent-memory-2026-07-22']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.memory_stores.memories.update',
+                route: '/v1/memory_stores/{memory_store_id}/memories/{memory_id}',
+                query: ['view'],
+                attributes: [
+                    'gen_ai.memory.store.id' => $memoryStoreID,
+                    'gen_ai.memory.record.id' => $memoryID,
+                ],
+            )),
             convert: ManagedAgentsMemory::class,
         );
     }
@@ -207,18 +230,17 @@ final class MemoriesRawService implements MemoriesRawContract
     /**
      * @api
      *
-     * ListMemories
+     * List Memories
      *
-     * @param string $memoryStoreID Path param: Path parameter memory_store_id
+     * @param string $memoryStoreID Path param: The ID of the memory store to list memories from (`memstore_...`).
      * @param array{
      *   depth?: int,
      *   limit?: int,
-     *   order?: Order|value-of<Order>,
-     *   orderBy?: string,
      *   page?: string,
      *   pathPrefix?: string,
      *   view?: ManagedAgentsMemoryView|value-of<ManagedAgentsMemoryView>,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|MemoryListParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -236,7 +258,7 @@ final class MemoriesRawService implements MemoriesRawContract
             $requestOptions,
         );
         $query_params = array_flip(
-            ['depth', 'limit', 'order', 'orderBy', 'page', 'pathPrefix', 'view']
+            ['depth', 'limit', 'page', 'pathPrefix', 'view']
         );
 
         /** @var array<string,string> */
@@ -245,19 +267,27 @@ final class MemoriesRawService implements MemoriesRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: ['v1/memory_stores/%1$s/memories?beta=true', $memoryStoreID],
+            path: ['v1/memory_stores/%1$s/memories', $memoryStoreID],
             query: Util::array_transform_keys(
                 array_intersect_key($parsed, $query_params),
-                ['orderBy' => 'order_by', 'pathPrefix' => 'path_prefix'],
+                ['pathPrefix' => 'path_prefix'],
             ),
             headers: Util::array_transform_keys(
                 $header_params,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                ['extraHeaders' => ['anthropic-beta' => 'agent-memory-2026-07-22']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.memory_stores.memories.list',
+                route: '/v1/memory_stores/{memory_store_id}/memories',
+                query: ['depth', 'limit', 'page', 'path_prefix', 'view'],
+                contentQuery: ['page'],
+                attributes: ['gen_ai.memory.store.id' => $memoryStoreID],
+            )),
             convert: ManagedAgentsMemoryListItem::class,
             page: PageCursor::class,
         );
@@ -266,13 +296,14 @@ final class MemoriesRawService implements MemoriesRawContract
     /**
      * @api
      *
-     * DeleteMemory
+     * Delete a Memory
      *
-     * @param string $memoryID Path param: Path parameter memory_id
+     * @param string $memoryID Path param: The ID of the memory to delete (`mem_...`).
      * @param array{
      *   memoryStoreID: string,
      *   expectedContentSha256?: string,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|MemoryDeleteParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -299,23 +330,29 @@ final class MemoriesRawService implements MemoriesRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'delete',
-            path: [
-                'v1/memory_stores/%1$s/memories/%2$s?beta=true',
-                $memoryStoreID,
-                $memoryID,
-            ],
+            path: ['v1/memory_stores/%1$s/memories/%2$s', $memoryStoreID, $memoryID],
             query: Util::array_transform_keys(
                 array_intersect_key($parsed, $query_params),
                 ['expectedContentSha256' => 'expected_content_sha256'],
             ),
             headers: Util::array_transform_keys(
                 $header_params,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                ['extraHeaders' => ['anthropic-beta' => 'agent-memory-2026-07-22']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.memory_stores.memories.delete',
+                route: '/v1/memory_stores/{memory_store_id}/memories/{memory_id}',
+                query: ['expected_content_sha256'],
+                attributes: [
+                    'gen_ai.memory.store.id' => $memoryStoreID,
+                    'gen_ai.memory.record.id' => $memoryID,
+                ],
+            )),
             convert: ManagedAgentsDeletedMemory::class,
         );
     }

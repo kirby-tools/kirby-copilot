@@ -11,7 +11,6 @@ use Anthropic\Beta\Sessions\Resources\ManagedAgentsGitHubRepositoryResource;
 use Anthropic\Beta\Sessions\Resources\ManagedAgentsMemoryStoreResource;
 use Anthropic\Beta\Sessions\Resources\ManagedAgentsSessionResource;
 use Anthropic\Beta\Sessions\Resources\ResourceAddParams;
-use Anthropic\Beta\Sessions\Resources\ResourceAddParams\Type;
 use Anthropic\Beta\Sessions\Resources\ResourceDeleteParams;
 use Anthropic\Beta\Sessions\Resources\ResourceGetResponse;
 use Anthropic\Beta\Sessions\Resources\ResourceListParams;
@@ -21,6 +20,7 @@ use Anthropic\Beta\Sessions\Resources\ResourceUpdateResponse;
 use Anthropic\Client;
 use Anthropic\Core\Contracts\BaseResponse;
 use Anthropic\Core\Exceptions\APIException;
+use Anthropic\Core\Implementation\ApiCallInfo;
 use Anthropic\Core\Util;
 use Anthropic\PageCursor;
 use Anthropic\RequestOptions;
@@ -42,13 +42,15 @@ final class ResourcesRawService implements ResourcesRawContract
      *
      * Get Session Resource
      *
-     * @param string $resourceID Path param: Path parameter resource_id
+     * @param string $resourceID Path param
      * @param array{
-     *   sessionID: string, betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   sessionID: string,
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|ResourceRetrieveParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<ManagedAgentsGitHubRepositoryResource|ManagedAgentsFileResource|ManagedAgentsMemoryStoreResource,>
+     * @return BaseResponse<ManagedAgentsGitHubRepositoryResource|ManagedAgentsFileResource|ManagedAgentsMemoryStoreResource>
      *
      * @throws APIException
      */
@@ -67,17 +69,24 @@ final class ResourcesRawService implements ResourcesRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: [
-                'v1/sessions/%1$s/resources/%2$s?beta=true', $sessionID, $resourceID,
-            ],
+            path: ['v1/sessions/%1$s/resources/%2$s', $sessionID, $resourceID],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.sessions.resources.retrieve',
+                route: '/v1/sessions/{session_id}/resources/{resource_id}',
+                attributes: [
+                    'anthropic.session.id' => $sessionID,
+                    'anthropic.session.resource.id' => $resourceID,
+                ],
+            )),
             convert: ResourceGetResponse::class,
         );
     }
@@ -87,15 +96,16 @@ final class ResourcesRawService implements ResourcesRawContract
      *
      * Update Session Resource
      *
-     * @param string $resourceID Path param: Path parameter resource_id
+     * @param string $resourceID Path param
      * @param array{
      *   sessionID: string,
      *   authorizationToken: string,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|ResourceUpdateParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<ManagedAgentsGitHubRepositoryResource|ManagedAgentsFileResource|ManagedAgentsMemoryStoreResource,>
+     * @return BaseResponse<ManagedAgentsGitHubRepositoryResource|ManagedAgentsFileResource|ManagedAgentsMemoryStoreResource>
      *
      * @throws APIException
      */
@@ -110,14 +120,14 @@ final class ResourcesRawService implements ResourcesRawContract
         );
         $sessionID = $parsed['sessionID'];
         unset($parsed['sessionID']);
-        $header_params = ['betas' => 'anthropic-beta'];
+        $header_params = [
+            'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+        ];
 
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: [
-                'v1/sessions/%1$s/resources/%2$s?beta=true', $sessionID, $resourceID,
-            ],
+            path: ['v1/sessions/%1$s/resources/%2$s', $sessionID, $resourceID],
             headers: Util::array_transform_keys(
                 array_intersect_key($parsed, array_flip(array_keys($header_params))),
                 $header_params,
@@ -129,7 +139,14 @@ final class ResourcesRawService implements ResourcesRawContract
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.sessions.resources.update',
+                route: '/v1/sessions/{session_id}/resources/{resource_id}',
+                attributes: [
+                    'anthropic.session.id' => $sessionID,
+                    'anthropic.session.resource.id' => $resourceID,
+                ],
+            )),
             convert: ResourceUpdateResponse::class,
         );
     }
@@ -139,15 +156,16 @@ final class ResourcesRawService implements ResourcesRawContract
      *
      * List Session Resources
      *
-     * @param string $sessionID Path param: Path parameter session_id
+     * @param string $sessionID Path param
      * @param array{
      *   limit?: int,
      *   page?: string,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|ResourceListParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<PageCursor<ManagedAgentsGitHubRepositoryResource|ManagedAgentsFileResource|ManagedAgentsMemoryStoreResource,>,>
+     * @return BaseResponse<PageCursor<ManagedAgentsGitHubRepositoryResource|ManagedAgentsFileResource|ManagedAgentsMemoryStoreResource>>
      *
      * @throws APIException
      */
@@ -168,16 +186,23 @@ final class ResourcesRawService implements ResourcesRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: ['v1/sessions/%1$s/resources?beta=true', $sessionID],
+            path: ['v1/sessions/%1$s/resources', $sessionID],
             query: array_intersect_key($parsed, $query_params),
             headers: Util::array_transform_keys(
                 $header_params,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.sessions.resources.list',
+                route: '/v1/sessions/{session_id}/resources',
+                query: ['limit', 'page'],
+                attributes: ['anthropic.session.id' => $sessionID],
+            )),
             convert: ManagedAgentsSessionResource::class,
             page: PageCursor::class,
         );
@@ -188,9 +213,11 @@ final class ResourcesRawService implements ResourcesRawContract
      *
      * Delete Session Resource
      *
-     * @param string $resourceID Path param: Path parameter resource_id
+     * @param string $resourceID Path param
      * @param array{
-     *   sessionID: string, betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   sessionID: string,
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|ResourceDeleteParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -213,17 +240,24 @@ final class ResourcesRawService implements ResourcesRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'delete',
-            path: [
-                'v1/sessions/%1$s/resources/%2$s?beta=true', $sessionID, $resourceID,
-            ],
+            path: ['v1/sessions/%1$s/resources/%2$s', $sessionID, $resourceID],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.sessions.resources.delete',
+                route: '/v1/sessions/{session_id}/resources/{resource_id}',
+                attributes: [
+                    'anthropic.session.id' => $sessionID,
+                    'anthropic.session.resource.id' => $resourceID,
+                ],
+            )),
             convert: ManagedAgentsDeleteSessionResource::class,
         );
     }
@@ -233,12 +267,13 @@ final class ResourcesRawService implements ResourcesRawContract
      *
      * Add Session Resource
      *
-     * @param string $sessionID Path param: Path parameter session_id
+     * @param string $sessionID Path param
      * @param array{
      *   fileID: string,
-     *   type: Type|value-of<Type>,
+     *   type?: 'file',
      *   mountPath?: string|null,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|ResourceAddParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -255,12 +290,14 @@ final class ResourcesRawService implements ResourcesRawContract
             $params,
             $requestOptions,
         );
-        $header_params = ['betas' => 'anthropic-beta'];
+        $header_params = [
+            'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+        ];
 
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: ['v1/sessions/%1$s/resources?beta=true', $sessionID],
+            path: ['v1/sessions/%1$s/resources', $sessionID],
             headers: Util::array_transform_keys(
                 array_intersect_key($parsed, array_flip(array_keys($header_params))),
                 $header_params,
@@ -272,7 +309,12 @@ final class ResourcesRawService implements ResourcesRawContract
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.sessions.resources.add',
+                route: '/v1/sessions/{session_id}/resources',
+                attributes: ['anthropic.session.id' => $sessionID],
+                createdId: 'anthropic.session.resource.id',
+            )),
             convert: ManagedAgentsFileResource::class,
         );
     }

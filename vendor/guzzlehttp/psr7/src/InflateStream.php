@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace GuzzleHttp\Psr7;
 
+use GuzzleHttp\Psr7\Exception\TimeoutException;
 use Psr\Http\Message\StreamInterface;
 
 /**
@@ -20,58 +21,115 @@ use Psr\Http\Message\StreamInterface;
 final class InflateStream implements StreamInterface
 {
     use StreamDecoratorTrait;
+    use NonSerializableStreamTrait;
 
-    /** @var StreamInterface */
-    private $stream;
+    private StreamInterface $stream;
 
-    /** @var StreamInterface|null */
-    private $source;
+    private ?StreamInterface $source;
+
+    private ?ReadFailureCapturingStream $capturingSource;
 
     public function __construct(StreamInterface $stream)
     {
         $this->source = $stream;
-        $inflated = self::inflate($stream);
+        $this->capturingSource = new ReadFailureCapturingStream($stream);
+        $inflated = self::inflate($this->capturingSource);
         $this->stream = $stream->isSeekable() ? $inflated : new NoSeekStream($inflated);
+    }
+
+    public function eof(): bool
+    {
+        return ($this->capturingSource === null || !$this->capturingSource->hasReadFailure()) && $this->stream->eof();
+    }
+
+    public function seek(int $offset, int $whence = SEEK_SET): void
+    {
+        $this->stream->seek($offset, $whence);
+
+        if ($offset === 0 && $whence === SEEK_SET && $this->capturingSource !== null) {
+            $this->capturingSource->takeReadFailure();
+            $this->stream = self::inflate($this->capturingSource);
+        }
+    }
+
+    public function read(int $length): string
+    {
+        if ($length <= 0 || $this->source === null || $this->capturingSource === null) {
+            return $this->stream->read($length);
+        }
+
+        // A source failure that follows decoded bytes is reported by the next read.
+        $failure = $this->capturingSource->takeReadFailure();
+
+        if ($failure === null) {
+            try {
+                $data = $this->stream->read($length);
+            } catch (TimeoutException $e) {
+                throw $e;
+            } catch (\RuntimeException $e) {
+                if (StreamTimeout::isReadTimedOut($this->source)) {
+                    throw new TimeoutException('Unable to read from stream: timed out', 0, $e);
+                }
+
+                throw $e;
+            }
+
+            if ($data !== '') {
+                return $data;
+            }
+
+            $failure = $this->capturingSource->takeReadFailure();
+        }
+
+        if ($failure instanceof TimeoutException || StreamTimeout::isReadTimedOut($this->source)) {
+            throw new TimeoutException('Unable to read from stream: timed out', 0, $failure);
+        }
+
+        if ($failure !== null) {
+            throw new \RuntimeException('Unable to read from stream', 0, $failure);
+        }
+
+        return '';
     }
 
     public function close(): void
     {
+        $source = $this->source;
         $this->source = null;
-        $this->stream->close();
+        $this->capturingSource = null;
+
+        $exception = null;
+
+        try {
+            $this->stream->close();
+        } catch (\Throwable $e) {
+            $exception = $e;
+        }
+
+        if ($source !== null) {
+            try {
+                $source->close();
+            } catch (\Throwable $e) {
+                if ($exception === null) {
+                    $exception = $e;
+                }
+            }
+        }
+
+        if ($exception !== null) {
+            throw $exception;
+        }
     }
 
     public function detach()
     {
         $this->source = null;
+        if ($this->capturingSource !== null) {
+            $this->capturingSource->stopCapturing();
+            $this->capturingSource = null;
+        }
 
         return $this->stream->detach();
-    }
-
-    public function seek($offset, $whence = SEEK_SET): void
-    {
-        if (!\is_int($offset)) {
-            \trigger_deprecation(
-                'guzzlehttp/psr7',
-                '2.11',
-                'Passing %s to StreamInterface::seek() is deprecated; guzzlehttp/psr7 3.0 requires int for $offset.',
-                \get_debug_type($offset)
-            );
-        }
-
-        if (!\is_int($whence)) {
-            \trigger_deprecation(
-                'guzzlehttp/psr7',
-                '2.11',
-                'Passing %s to StreamInterface::seek() is deprecated; guzzlehttp/psr7 3.0 requires int for $whence.',
-                \get_debug_type($whence)
-            );
-        }
-
-        $this->stream->seek($offset, $whence);
-
-        if ($offset === 0 && $whence === SEEK_SET && $this->source !== null) {
-            $this->stream = self::inflate($this->source);
-        }
     }
 
     private static function inflate(StreamInterface $stream): Stream

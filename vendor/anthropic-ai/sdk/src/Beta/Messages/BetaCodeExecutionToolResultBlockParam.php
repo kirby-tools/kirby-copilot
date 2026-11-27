@@ -8,11 +8,12 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type BetaCodeExecutionToolResultBlockParamContentVariants from \Anthropic\Beta\Messages\BetaCodeExecutionToolResultBlockParamContent
  * @phpstan-import-type BetaCodeExecutionToolResultBlockParamContentShape from \Anthropic\Beta\Messages\BetaCodeExecutionToolResultBlockParamContent
  * @phpstan-import-type BetaCacheControlEphemeralShape from \Anthropic\Beta\Messages\BetaCacheControlEphemeral
+ * @phpstan-import-type BetaCodeExecutionToolResultBlockParamContentVariants from \Anthropic\Beta\Messages\BetaCodeExecutionToolResultBlockParamContent
  *
  * @phpstan-type BetaCodeExecutionToolResultBlockParamShape = array{
  *   content: BetaCodeExecutionToolResultBlockParamContentShape,
@@ -27,14 +28,10 @@ final class BetaCodeExecutionToolResultBlockParam implements BaseModel
     use SdkModel;
 
     /** @var 'code_execution_tool_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('code_execution_tool_result'))]
     public string $type = 'code_execution_tool_result';
 
-    /**
-     * Code execution result with encrypted stdout for PFC + web_search results.
-     *
-     * @var BetaCodeExecutionToolResultBlockParamContentVariants $content
-     */
+    /** @var BetaCodeExecutionToolResultBlockParamContentVariants $content */
     #[Required]
     public BetaCodeExecutionToolResultErrorParam|BetaCodeExecutionResultBlockParam|BetaEncryptedCodeExecutionResultBlockParam $content;
 
@@ -58,7 +55,7 @@ final class BetaCodeExecutionToolResultBlockParam implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaCodeExecutionToolResultBlockParam)
+     * (new BetaCodeExecutionToolResultBlockParam())
      *   ->withContent(...)
      *   ->withToolUseID(...)
      * ```
@@ -92,8 +89,6 @@ final class BetaCodeExecutionToolResultBlockParam implements BaseModel
     }
 
     /**
-     * Code execution result with encrypted stdout for PFC + web_search results.
-     *
      * @param BetaCodeExecutionToolResultBlockParamContentShape $content
      */
     public function withContent(

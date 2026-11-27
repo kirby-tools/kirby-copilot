@@ -9,12 +9,13 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type BetaWebSearchToolResultBlockContentVariants from \Anthropic\Beta\Messages\BetaWebSearchToolResultBlockContent
- * @phpstan-import-type CallerVariants from \Anthropic\Beta\Messages\BetaWebSearchToolResultBlock\Caller
  * @phpstan-import-type BetaWebSearchToolResultBlockContentShape from \Anthropic\Beta\Messages\BetaWebSearchToolResultBlockContent
  * @phpstan-import-type CallerShape from \Anthropic\Beta\Messages\BetaWebSearchToolResultBlock\Caller
+ * @phpstan-import-type BetaWebSearchToolResultBlockContentVariants from \Anthropic\Beta\Messages\BetaWebSearchToolResultBlockContent
+ * @phpstan-import-type CallerVariants from \Anthropic\Beta\Messages\BetaWebSearchToolResultBlock\Caller
  *
  * @phpstan-type BetaWebSearchToolResultBlockShape = array{
  *   content: BetaWebSearchToolResultBlockContentShape,
@@ -29,21 +30,17 @@ final class BetaWebSearchToolResultBlock implements BaseModel
     use SdkModel;
 
     /** @var 'web_search_tool_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('web_search_tool_result'))]
     public string $type = 'web_search_tool_result';
 
     /** @var BetaWebSearchToolResultBlockContentVariants $content */
     #[Required(union: BetaWebSearchToolResultBlockContent::class)]
-    public BetaWebSearchToolResultError|array $content;
+    public BetaWebSearchToolResultErrorObject|array $content;
 
     #[Required('tool_use_id')]
     public string $toolUseID;
 
-    /**
-     * Tool invocation directly from the model.
-     *
-     * @var CallerVariants|null $caller
-     */
+    /** @var CallerVariants|null $caller */
     #[Optional(union: Caller::class)]
     public BetaDirectCaller|BetaServerToolCaller|BetaServerToolCaller20260120|null $caller;
 
@@ -58,7 +55,7 @@ final class BetaWebSearchToolResultBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaWebSearchToolResultBlock)->withContent(...)->withToolUseID(...)
+     * (new BetaWebSearchToolResultBlock())->withContent(...)->withToolUseID(...)
      * ```
      */
     public function __construct()
@@ -75,7 +72,7 @@ final class BetaWebSearchToolResultBlock implements BaseModel
      * @param CallerShape|null $caller
      */
     public static function with(
-        BetaWebSearchToolResultError|array $content,
+        BetaWebSearchToolResultErrorObject|array $content,
         string $toolUseID,
         BetaDirectCaller|array|BetaServerToolCaller|BetaServerToolCaller20260120|null $caller = null,
     ): self {
@@ -93,7 +90,7 @@ final class BetaWebSearchToolResultBlock implements BaseModel
      * @param BetaWebSearchToolResultBlockContentShape $content
      */
     public function withContent(
-        BetaWebSearchToolResultError|array $content
+        BetaWebSearchToolResultErrorObject|array $content
     ): self {
         $self = clone $this;
         $self['content'] = $content;
@@ -121,8 +118,6 @@ final class BetaWebSearchToolResultBlock implements BaseModel
     }
 
     /**
-     * Tool invocation directly from the model.
-     *
      * @param CallerShape $caller
      */
     public function withCaller(

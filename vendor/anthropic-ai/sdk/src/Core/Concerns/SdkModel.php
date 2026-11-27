@@ -44,7 +44,24 @@ trait SdkModel
      */
     public function __unserialize(array $data): void
     {
+        // Map API field names (e.g. `next_page`) to PHP property names
+        // (e.g. `nextPage`) so that callers may pass either form. Page
+        // models hydrate directly from the raw API payload via this method.
+        $apiToProperty = [];
+        foreach (self::$converter->properties as $name => $info) {
+            if ($info->apiName !== $name) {
+                $apiToProperty[$info->apiName] = $name;
+            }
+        }
+
         foreach ($data as $key => $value) {
+            if (
+                !array_key_exists($key, array: self::$converter->properties)
+                && array_key_exists($key, array: $apiToProperty)
+            ) {
+                $key = $apiToProperty[$key];
+            }
+
             // @phpstan-ignore-next-line argument.type
             $this->offsetSet($key, value: $value);
         }
@@ -73,14 +90,14 @@ trait SdkModel
      *
      * Magic get is intended to occur when we have manually unset
      * a native class property, indicating an omitted value,
-     * or a property overridden with an incongruent type
+     * or a property overridden with an incongruent type.
      *
      * @throws \Exception
      */
     public function __get(string $key): mixed
     {
         if (!array_key_exists($key, array: self::$converter->properties)) {
-            throw new \RuntimeException("Property '{$key}' does not exist in {$this}::class");
+            throw new \RuntimeException("Property '{$key}' does not exist in ".static::class);
         }
 
         // The unset property was overridden by a value with an incongruent type.
@@ -91,7 +108,7 @@ trait SdkModel
             );
         }
 
-        // An optional property which was unset to be omitted from serialized is being accessed.
+        // A property which was unset because its value was omitted is being accessed.
         // Return null to match user's expectations.
         // @phpstan-ignore-next-line return.type
         return null;
@@ -104,8 +121,9 @@ trait SdkModel
      */
     public function toProperties(): array
     {
+        // array_replace, not spread: extra data keeps the payload's numeric-string keys, which PHP stores as integers and spread renumbers.
         // @phpstan-ignore-next-line return.type
-        return [...Util::get_object_vars($this), ...$this->_data];
+        return array_replace(Util::get_object_vars($this), $this->_data);
     }
 
     /**
@@ -115,23 +133,15 @@ trait SdkModel
      */
     public function offsetExists(mixed $offset): bool
     {
-        // @phpstan-ignore-next-line function.alreadyNarrowedType
-        if (!is_string($offset)) {
-            throw new \InvalidArgumentException;
-        }
+        self::requireStringOffset($offset);
 
         if (array_key_exists($offset, array: $this->_data)) {
             return true;
         }
 
         if (array_key_exists($offset, array: self::$converter->properties)) {
-            if (isset($this->{$offset})) {
-                return true;
-            }
-
-            $property = self::$converter->properties[$offset]->property;
-
-            return $property->isInitialized($this);
+            return isset($this->{$offset})
+                || self::$converter->properties[$offset]->property->isInitialized($this);
         }
 
         return false;
@@ -144,15 +154,13 @@ trait SdkModel
      */
     public function &offsetGet(mixed $offset): mixed
     {
-        // @phpstan-ignore-next-line function.alreadyNarrowedType
-        if (!is_string($offset)) {
-            throw new \InvalidArgumentException;
-        }
+        self::requireStringOffset($offset);
 
         // @phpstan-ignore-next-line function.alreadyNarrowedType
         if (!$this->offsetExists($offset)) {
-            // @phpstan-ignore-next-line return.type
-            return null;
+            $null = null;
+
+            return $null;
         }
 
         if (array_key_exists($offset, array: $this->_data)) {
@@ -171,10 +179,7 @@ trait SdkModel
      */
     public function offsetSet(mixed $offset, mixed $value): void
     {
-        // @phpstan-ignore-next-line function.alreadyNarrowedType
-        if (!is_string($offset)) {
-            throw new \InvalidArgumentException;
-        }
+        self::requireStringOffset($offset);
 
         $type = array_key_exists($offset, array: self::$converter->properties)
             ? self::$converter->properties[$offset]->type
@@ -182,8 +187,8 @@ trait SdkModel
 
         $coerced = Conversion::coerce($type, value: $value, state: new CoerceState(translateNames: false));
 
-        // @phpstan-ignore-next-line function.alreadyNarrowedType
-        if (property_exists($this, property: $offset)) {
+        // Only API properties are set from data, so a key can't reach private state such as `_data`.
+        if (array_key_exists($offset, array: self::$converter->properties)) {
             try {
                 // @phpstan-ignore-next-line assign.propertyType
                 $this->{$offset} = $coerced;
@@ -206,13 +211,9 @@ trait SdkModel
      */
     public function offsetUnset(mixed $offset): void
     {
-        // @phpstan-ignore-next-line function.alreadyNarrowedType
-        if (!is_string($offset)) {
-            throw new \InvalidArgumentException;
-        }
+        self::requireStringOffset($offset);
 
-        // @phpstan-ignore-next-line function.alreadyNarrowedType
-        if (property_exists($this, property: $offset)) {
+        if (array_key_exists($offset, array: self::$converter->properties)) {
             unset($this->{$offset});
         }
 
@@ -222,12 +223,13 @@ trait SdkModel
     /**
      * @internal
      *
-     * @return array<string, mixed>
+     * @return array<string, mixed>|\stdClass
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): array|\stdClass
     {
+        // stdClass when no properties are set, so json_encode renders {} rather than [].
         // @phpstan-ignore-next-line argument.type
-        return Conversion::dump(self::converter(), value: $this->__serialize());
+        return Conversion::dump(self::converter(), value: $this);
     }
 
     /**
@@ -281,5 +283,17 @@ trait SdkModel
         }
 
         return $value;
+    }
+
+    /**
+     * @internal
+     */
+    private static function requireStringOffset(mixed $offset): void
+    {
+        // A separate method: the array-access methods document $offset as a string, so PHPStan reports is_string() there as always true.
+        // PHPStan 2.2.4 to 2.2.13 report that for a trait even under an ignore comment, so do not inline this check.
+        if (!is_string($offset)) {
+            throw new \InvalidArgumentException;
+        }
     }
 }

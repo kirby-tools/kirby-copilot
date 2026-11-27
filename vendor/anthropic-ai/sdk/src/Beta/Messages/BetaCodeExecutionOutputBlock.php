@@ -7,6 +7,7 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type BetaCodeExecutionOutputBlockShape = array{
@@ -19,7 +20,7 @@ final class BetaCodeExecutionOutputBlock implements BaseModel
     use SdkModel;
 
     /** @var 'code_execution_output' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('code_execution_output'))]
     public string $type = 'code_execution_output';
 
     #[Required('file_id')]
@@ -36,7 +37,7 @@ final class BetaCodeExecutionOutputBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaCodeExecutionOutputBlock)->withFileID(...)
+     * (new BetaCodeExecutionOutputBlock())->withFileID(...)
      * ```
      */
     public function __construct()

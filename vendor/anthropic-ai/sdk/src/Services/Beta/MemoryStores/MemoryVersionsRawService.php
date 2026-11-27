@@ -14,6 +14,7 @@ use Anthropic\Beta\MemoryStores\MemoryVersions\MemoryVersionRetrieveParams;
 use Anthropic\Client;
 use Anthropic\Core\Contracts\BaseResponse;
 use Anthropic\Core\Exceptions\APIException;
+use Anthropic\Core\Implementation\ApiCallInfo;
 use Anthropic\Core\Util;
 use Anthropic\PageCursor;
 use Anthropic\RequestOptions;
@@ -33,13 +34,14 @@ final class MemoryVersionsRawService implements MemoryVersionsRawContract
     /**
      * @api
      *
-     * GetMemoryVersion
+     * Retrieve a Memory Version
      *
-     * @param string $memoryVersionID Path param: Path parameter memory_version_id
+     * @param string $memoryVersionID Path param: The ID of the memory version to retrieve (`memver_...`).
      * @param array{
      *   memoryStoreID: string,
      *   view?: ManagedAgentsMemoryView|value-of<ManagedAgentsMemoryView>,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|MemoryVersionRetrieveParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -67,19 +69,29 @@ final class MemoryVersionsRawService implements MemoryVersionsRawContract
         return $this->client->request(
             method: 'get',
             path: [
-                'v1/memory_stores/%1$s/memory_versions/%2$s?beta=true',
+                'v1/memory_stores/%1$s/memory_versions/%2$s',
                 $memoryStoreID,
                 $memoryVersionID,
             ],
             query: array_intersect_key($parsed, $query_params),
             headers: Util::array_transform_keys(
                 $header_params,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                ['extraHeaders' => ['anthropic-beta' => 'agent-memory-2026-07-22']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.memory_stores.memory_versions.retrieve',
+                route: '/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}',
+                query: ['view'],
+                attributes: [
+                    'gen_ai.memory.store.id' => $memoryStoreID,
+                    'anthropic.memory_store.memory_version.id' => $memoryVersionID,
+                ],
+            )),
             convert: ManagedAgentsMemoryVersion::class,
         );
     }
@@ -87,9 +99,9 @@ final class MemoryVersionsRawService implements MemoryVersionsRawContract
     /**
      * @api
      *
-     * ListMemoryVersions
+     * List Memory Versions
      *
-     * @param string $memoryStoreID Path param: Path parameter memory_store_id
+     * @param string $memoryStoreID Path param: The ID of the memory store whose version history to list (`memstore_...`).
      * @param array{
      *   apiKeyID?: string,
      *   createdAtGte?: \DateTimeInterface,
@@ -98,9 +110,11 @@ final class MemoryVersionsRawService implements MemoryVersionsRawContract
      *   memoryID?: string,
      *   operation?: ManagedAgentsMemoryVersionOperation|value-of<ManagedAgentsMemoryVersionOperation>,
      *   page?: string,
+     *   serviceAccountID?: string,
      *   sessionID?: string,
      *   view?: ManagedAgentsMemoryView|value-of<ManagedAgentsMemoryView>,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|MemoryVersionListParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -126,6 +140,7 @@ final class MemoryVersionsRawService implements MemoryVersionsRawContract
                 'memoryID',
                 'operation',
                 'page',
+                'serviceAccountID',
                 'sessionID',
                 'view',
             ],
@@ -137,7 +152,7 @@ final class MemoryVersionsRawService implements MemoryVersionsRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: ['v1/memory_stores/%1$s/memory_versions?beta=true', $memoryStoreID],
+            path: ['v1/memory_stores/%1$s/memory_versions', $memoryStoreID],
             query: Util::array_transform_keys(
                 array_intersect_key($parsed, $query_params),
                 [
@@ -145,17 +160,36 @@ final class MemoryVersionsRawService implements MemoryVersionsRawContract
                     'createdAtGte' => 'created_at[gte]',
                     'createdAtLte' => 'created_at[lte]',
                     'memoryID' => 'memory_id',
+                    'serviceAccountID' => 'service_account_id',
                     'sessionID' => 'session_id',
                 ],
             ),
             headers: Util::array_transform_keys(
                 $header_params,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                ['extraHeaders' => ['anthropic-beta' => 'agent-memory-2026-07-22']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.memory_stores.memory_versions.list',
+                route: '/v1/memory_stores/{memory_store_id}/memory_versions',
+                query: [
+                    'api_key_id',
+                    'created_at[gte]',
+                    'created_at[lte]',
+                    'limit',
+                    'memory_id',
+                    'operation',
+                    'page',
+                    'service_account_id',
+                    'session_id',
+                    'view',
+                ],
+                attributes: ['gen_ai.memory.store.id' => $memoryStoreID],
+            )),
             convert: ManagedAgentsMemoryVersion::class,
             page: PageCursor::class,
         );
@@ -164,12 +198,13 @@ final class MemoryVersionsRawService implements MemoryVersionsRawContract
     /**
      * @api
      *
-     * RedactMemoryVersion
+     * Redact a Memory Version
      *
-     * @param string $memoryVersionID Path param: Path parameter memory_version_id
+     * @param string $memoryVersionID Path param: The ID of the memory version to redact (`memver_...`).
      * @param array{
      *   memoryStoreID: string,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|MemoryVersionRedactParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -193,18 +228,27 @@ final class MemoryVersionsRawService implements MemoryVersionsRawContract
         return $this->client->request(
             method: 'post',
             path: [
-                'v1/memory_stores/%1$s/memory_versions/%2$s/redact?beta=true',
+                'v1/memory_stores/%1$s/memory_versions/%2$s/redact',
                 $memoryStoreID,
                 $memoryVersionID,
             ],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                ['extraHeaders' => ['anthropic-beta' => 'agent-memory-2026-07-22']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.memory_stores.memory_versions.redact',
+                route: '/v1/memory_stores/{memory_store_id}/memory_versions/{memory_version_id}/redact',
+                attributes: [
+                    'gen_ai.memory.store.id' => $memoryStoreID,
+                    'anthropic.memory_store.memory_version.id' => $memoryVersionID,
+                ],
+            )),
             convert: ManagedAgentsMemoryVersion::class,
         );
     }

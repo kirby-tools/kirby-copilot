@@ -5,20 +5,30 @@ declare(strict_types=1);
 namespace Anthropic\Beta\UserProfiles;
 
 use Anthropic\Beta\AnthropicBeta;
+use Anthropic\Beta\UserProfiles\UserProfileUpdateParams\AccessType;
 use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Concerns\SdkParams;
 use Anthropic\Core\Contracts\BaseModel;
 
 /**
- * Update User Profile.
+ * Change the details of a user profile, leaving the fields that you don't send as they are.
+ *
+ * See the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles#update-a-profile) for how each field is updated.
  *
  * @see Anthropic\Services\Beta\UserProfilesService::update()
  *
+ * @phpstan-import-type BetaUserProfileExternalUserDetailsParamsShape from \Anthropic\Beta\UserProfiles\BetaUserProfileExternalUserDetailsParams
+ *
  * @phpstan-type UserProfileUpdateParamsShape = array{
+ *   accessType?: null|AccessType|value-of<AccessType>,
  *   externalID?: string|null,
+ *   externalUserDetails?: null|BetaUserProfileExternalUserDetailsParams|BetaUserProfileExternalUserDetailsParamsShape,
+ *   externalUserOnboardedAt?: \DateTimeInterface|null,
  *   metadata?: array<string,string>|null,
+ *   name?: string|null,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class UserProfileUpdateParams implements BaseModel
@@ -28,10 +38,30 @@ final class UserProfileUpdateParams implements BaseModel
     use SdkParams;
 
     /**
-     * If present, replaces the stored external_id. Omit to leave unchanged. Maximum 255 characters.
+     * If present, replaces the stored access type. Omit to leave unchanged.
+     *
+     * @var value-of<AccessType>|null $accessType
+     */
+    #[Optional('access_type', enum: AccessType::class, nullable: true)]
+    public ?string $accessType;
+
+    /**
+     * If present, replaces the stored external_id. Omit to leave unchanged. Maximum 255 characters. Legacy field, accepted only under the `user-profiles-2026-03-24` and `user-profiles-2026-08-18` beta headers; without one of them, send `external_user_details.reference_id`.
      */
     #[Optional('external_id', nullable: true)]
     public ?string $externalID;
+
+    /**
+     * Details about the entity this profile represents, as the platform states them. Each field sent replaces the stored value; omit a field to leave it unchanged. Once set, a value cannot be cleared and `null` is rejected. Not accepted under the legacy `user-profiles-2026-03-24` and `user-profiles-2026-08-18` beta headers.
+     */
+    #[Optional('external_user_details')]
+    public ?BetaUserProfileExternalUserDetailsParams $externalUserDetails;
+
+    /**
+     * If present, replaces the stored account creation time. Omit to leave unchanged; once set, the value cannot be cleared and `null` is rejected. Must be a complete RFC 3339 timestamp no more than 1 minute in the future. Legacy field, accepted only under the `user-profiles-2026-08-18` beta header; without a legacy header, send `external_user_details.onboarded_at`.
+     */
+    #[Optional('external_user_onboarded_at')]
+    public ?\DateTimeInterface $externalUserOnboardedAt;
 
     /**
      * Key-value pairs to merge into the stored metadata. Keys provided overwrite existing values. To remove a key, set its value to an empty string. Keys not provided are left unchanged. Maximum 16 keys, with keys up to 64 characters and values up to 512 characters.
@@ -42,12 +72,26 @@ final class UserProfileUpdateParams implements BaseModel
     public ?array $metadata;
 
     /**
+     * If present, replaces the stored name. Omit to leave unchanged. Maximum 255 characters.
+     */
+    #[Optional(nullable: true)]
+    public ?string $name;
+
+    /**
      * Optional header to specify the beta version(s) you want to use.
      *
      * @var list<string|value-of<AnthropicBeta>>|null $betas
      */
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
 
     public function __construct()
     {
@@ -59,30 +103,81 @@ final class UserProfileUpdateParams implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
+     * @param AccessType|value-of<AccessType>|null $accessType
+     * @param BetaUserProfileExternalUserDetailsParams|BetaUserProfileExternalUserDetailsParamsShape|null $externalUserDetails
      * @param array<string,string>|null $metadata
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>>|null $betas
      */
     public static function with(
+        AccessType|string|null $accessType = null,
         ?string $externalID = null,
+        BetaUserProfileExternalUserDetailsParams|array|null $externalUserDetails = null,
+        ?\DateTimeInterface $externalUserOnboardedAt = null,
         ?array $metadata = null,
-        ?array $betas = null
+        ?string $name = null,
+        ?array $betas = null,
+        ?string $workspaceID = null,
     ): self {
         $self = new self;
 
+        null !== $accessType && $self['accessType'] = $accessType;
         null !== $externalID && $self['externalID'] = $externalID;
+        null !== $externalUserDetails && $self['externalUserDetails'] = $externalUserDetails;
+        null !== $externalUserOnboardedAt && $self['externalUserOnboardedAt'] = $externalUserOnboardedAt;
         null !== $metadata && $self['metadata'] = $metadata;
+        null !== $name && $self['name'] = $name;
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
 
     /**
-     * If present, replaces the stored external_id. Omit to leave unchanged. Maximum 255 characters.
+     * If present, replaces the stored access type. Omit to leave unchanged.
+     *
+     * @param AccessType|value-of<AccessType>|null $accessType
+     */
+    public function withAccessType(AccessType|string|null $accessType): self
+    {
+        $self = clone $this;
+        $self['accessType'] = $accessType;
+
+        return $self;
+    }
+
+    /**
+     * If present, replaces the stored external_id. Omit to leave unchanged. Maximum 255 characters. Legacy field, accepted only under the `user-profiles-2026-03-24` and `user-profiles-2026-08-18` beta headers; without one of them, send `external_user_details.reference_id`.
      */
     public function withExternalID(?string $externalID): self
     {
         $self = clone $this;
         $self['externalID'] = $externalID;
+
+        return $self;
+    }
+
+    /**
+     * Details about the entity this profile represents, as the platform states them. Each field sent replaces the stored value; omit a field to leave it unchanged. Once set, a value cannot be cleared and `null` is rejected. Not accepted under the legacy `user-profiles-2026-03-24` and `user-profiles-2026-08-18` beta headers.
+     *
+     * @param BetaUserProfileExternalUserDetailsParams|BetaUserProfileExternalUserDetailsParamsShape $externalUserDetails
+     */
+    public function withExternalUserDetails(
+        BetaUserProfileExternalUserDetailsParams|array $externalUserDetails
+    ): self {
+        $self = clone $this;
+        $self['externalUserDetails'] = $externalUserDetails;
+
+        return $self;
+    }
+
+    /**
+     * If present, replaces the stored account creation time. Omit to leave unchanged; once set, the value cannot be cleared and `null` is rejected. Must be a complete RFC 3339 timestamp no more than 1 minute in the future. Legacy field, accepted only under the `user-profiles-2026-08-18` beta header; without a legacy header, send `external_user_details.onboarded_at`.
+     */
+    public function withExternalUserOnboardedAt(
+        \DateTimeInterface $externalUserOnboardedAt
+    ): self {
+        $self = clone $this;
+        $self['externalUserOnboardedAt'] = $externalUserOnboardedAt;
 
         return $self;
     }
@@ -101,6 +196,17 @@ final class UserProfileUpdateParams implements BaseModel
     }
 
     /**
+     * If present, replaces the stored name. Omit to leave unchanged. Maximum 255 characters.
+     */
+    public function withName(?string $name): self
+    {
+        $self = clone $this;
+        $self['name'] = $name;
+
+        return $self;
+    }
+
+    /**
      * Optional header to specify the beta version(s) you want to use.
      *
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas
@@ -109,6 +215,19 @@ final class UserProfileUpdateParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

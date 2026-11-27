@@ -12,7 +12,7 @@ use Anthropic\Core\Contracts\BaseModel;
 use Anthropic\Core\Conversion\MapOf;
 
 /**
- * UpdateMemoryStore.
+ * Update a Memory Store
  *
  * @see Anthropic\Services\Beta\MemoryStoresService::update()
  *
@@ -21,6 +21,7 @@ use Anthropic\Core\Conversion\MapOf;
  *   metadata?: array<string,string|null>|null,
  *   name?: string|null,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class MemoryStoreUpdateParams implements BaseModel
@@ -29,27 +30,45 @@ final class MemoryStoreUpdateParams implements BaseModel
     use SdkModel;
     use SdkParams;
 
+    /**
+     * New description for the store, up to 1,024 characters. Pass an empty string to clear it.
+     */
     #[Optional(nullable: true)]
     public ?string $description;
 
     /**
-     * Metadata patch. Set a key to a string to upsert it, or to null to delete it. Omit the field to preserve. The stored bag is limited to 16 keys (up to 64 chars each) with values up to 512 chars.
+     * Changes to apply to the memory store's metadata. Keys you leave out keep their values.
+     *
+     * Set a key to a string to add or replace it, or to `null` to remove it. After the change, the metadata can hold at most 16 key-value pairs. Keys are 1 to 64 characters long and values at most 512 characters.
      *
      * @var array<string,string|null>|null $metadata
      */
     #[Optional(type: new MapOf('string', nullable: true), nullable: true)]
     public ?array $metadata;
 
+    /**
+     * The new name of the memory store, 1 to 255 characters long, without control characters.
+     *
+     * Sessions created after the change use the new name for the store's directory under `/mnt/memory/`.
+     */
     #[Optional(nullable: true)]
     public ?string $name;
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `agent-memory-2026-07-22` or `managed-agents-2026-04-01` in this header.
      *
      * @var list<string|value-of<AnthropicBeta>>|null $betas
      */
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
 
     public function __construct()
     {
@@ -69,6 +88,7 @@ final class MemoryStoreUpdateParams implements BaseModel
         ?array $metadata = null,
         ?string $name = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
     ): self {
         $self = new self;
 
@@ -76,10 +96,14 @@ final class MemoryStoreUpdateParams implements BaseModel
         null !== $metadata && $self['metadata'] = $metadata;
         null !== $name && $self['name'] = $name;
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
 
+    /**
+     * New description for the store, up to 1,024 characters. Pass an empty string to clear it.
+     */
     public function withDescription(?string $description): self
     {
         $self = clone $this;
@@ -89,7 +113,9 @@ final class MemoryStoreUpdateParams implements BaseModel
     }
 
     /**
-     * Metadata patch. Set a key to a string to upsert it, or to null to delete it. Omit the field to preserve. The stored bag is limited to 16 keys (up to 64 chars each) with values up to 512 chars.
+     * Changes to apply to the memory store's metadata. Keys you leave out keep their values.
+     *
+     * Set a key to a string to add or replace it, or to `null` to remove it. After the change, the metadata can hold at most 16 key-value pairs. Keys are 1 to 64 characters long and values at most 512 characters.
      *
      * @param array<string,string|null>|null $metadata
      */
@@ -101,6 +127,11 @@ final class MemoryStoreUpdateParams implements BaseModel
         return $self;
     }
 
+    /**
+     * The new name of the memory store, 1 to 255 characters long, without control characters.
+     *
+     * Sessions created after the change use the new name for the store's directory under `/mnt/memory/`.
+     */
     public function withName(?string $name): self
     {
         $self = clone $this;
@@ -110,7 +141,7 @@ final class MemoryStoreUpdateParams implements BaseModel
     }
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `agent-memory-2026-07-22` or `managed-agents-2026-04-01` in this header.
      *
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas
      */
@@ -118,6 +149,19 @@ final class MemoryStoreUpdateParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

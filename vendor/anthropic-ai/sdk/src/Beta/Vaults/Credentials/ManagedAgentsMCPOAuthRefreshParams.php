@@ -13,8 +13,8 @@ use Anthropic\Core\Contracts\BaseModel;
 /**
  * OAuth refresh token parameters for creating a credential with refresh support.
  *
- * @phpstan-import-type TokenEndpointAuthVariants from \Anthropic\Beta\Vaults\Credentials\ManagedAgentsMCPOAuthRefreshParams\TokenEndpointAuth
  * @phpstan-import-type TokenEndpointAuthShape from \Anthropic\Beta\Vaults\Credentials\ManagedAgentsMCPOAuthRefreshParams\TokenEndpointAuth
+ * @phpstan-import-type TokenEndpointAuthVariants from \Anthropic\Beta\Vaults\Credentials\ManagedAgentsMCPOAuthRefreshParams\TokenEndpointAuth
  *
  * @phpstan-type ManagedAgentsMCPOAuthRefreshParamsShape = array{
  *   clientID: string,
@@ -31,13 +31,13 @@ final class ManagedAgentsMCPOAuthRefreshParams implements BaseModel
     use SdkModel;
 
     /**
-     * OAuth client ID.
+     * The OAuth client ID to use when refreshing the access token. It can't be changed after the credential is created.
      */
     #[Required('client_id')]
     public string $clientID;
 
     /**
-     * OAuth refresh token.
+     * The OAuth refresh token that the API uses to get a new access token when the current one expires.
      */
     #[Required('refresh_token')]
     public string $refreshToken;
@@ -48,11 +48,7 @@ final class ManagedAgentsMCPOAuthRefreshParams implements BaseModel
     #[Required('token_endpoint')]
     public string $tokenEndpoint;
 
-    /**
-     * Token endpoint requires no client authentication.
-     *
-     * @var TokenEndpointAuthVariants $tokenEndpointAuth
-     */
+    /** @var TokenEndpointAuthVariants $tokenEndpointAuth */
     #[Required('token_endpoint_auth', union: TokenEndpointAuth::class)]
     public ManagedAgentsTokenEndpointAuthNoneParam|ManagedAgentsTokenEndpointAuthBasicParam|ManagedAgentsTokenEndpointAuthPostParam $tokenEndpointAuth;
 
@@ -81,7 +77,7 @@ final class ManagedAgentsMCPOAuthRefreshParams implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ManagedAgentsMCPOAuthRefreshParams)
+     * (new ManagedAgentsMCPOAuthRefreshParams())
      *   ->withClientID(...)
      *   ->withRefreshToken(...)
      *   ->withTokenEndpoint(...)
@@ -122,7 +118,7 @@ final class ManagedAgentsMCPOAuthRefreshParams implements BaseModel
     }
 
     /**
-     * OAuth client ID.
+     * The OAuth client ID to use when refreshing the access token. It can't be changed after the credential is created.
      */
     public function withClientID(string $clientID): self
     {
@@ -133,7 +129,7 @@ final class ManagedAgentsMCPOAuthRefreshParams implements BaseModel
     }
 
     /**
-     * OAuth refresh token.
+     * The OAuth refresh token that the API uses to get a new access token when the current one expires.
      */
     public function withRefreshToken(string $refreshToken): self
     {
@@ -155,8 +151,6 @@ final class ManagedAgentsMCPOAuthRefreshParams implements BaseModel
     }
 
     /**
-     * Token endpoint requires no client authentication.
-     *
      * @param TokenEndpointAuthShape $tokenEndpointAuth
      */
     public function withTokenEndpointAuth(

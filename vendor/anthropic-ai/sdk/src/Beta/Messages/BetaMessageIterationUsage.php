@@ -7,6 +7,8 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
+use Anthropic\Messages\Model;
 
 /**
  * Token usage for a sampling iteration.
@@ -18,6 +20,7 @@ use Anthropic\Core\Contracts\BaseModel;
  *   cacheCreationInputTokens: int,
  *   cacheReadInputTokens: int,
  *   inputTokens: int,
+ *   model: string|null|Model|value-of<Model>,
  *   outputTokens: int,
  *   type: 'message',
  * }
@@ -28,15 +31,15 @@ final class BetaMessageIterationUsage implements BaseModel
     use SdkModel;
 
     /**
-     * Usage for a sampling iteration.
+     * Usage for a sampling iteration
      *
      * @var 'message' $type
      */
-    #[Required]
+    #[Required(type: new ConstantOf('message'))]
     public string $type = 'message';
 
     /**
-     * Breakdown of cached tokens by TTL.
+     * Breakdown of cached tokens by TTL
      */
     #[Required('cache_creation')]
     public ?BetaCacheCreation $cacheCreation;
@@ -60,6 +63,16 @@ final class BetaMessageIterationUsage implements BaseModel
     public int $inputTokens;
 
     /**
+     * The model that will complete your prompt.
+     *
+     * See [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
+     *
+     * @var string|value-of<Model>|null $model
+     */
+    #[Required(enum: Model::class)]
+    public ?string $model;
+
+    /**
      * The number of output tokens which were used.
      */
     #[Required('output_tokens')]
@@ -75,6 +88,7 @@ final class BetaMessageIterationUsage implements BaseModel
      *   cacheCreationInputTokens: ...,
      *   cacheReadInputTokens: ...,
      *   inputTokens: ...,
+     *   model: ...,
      *   outputTokens: ...,
      * )
      * ```
@@ -82,11 +96,12 @@ final class BetaMessageIterationUsage implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaMessageIterationUsage)
+     * (new BetaMessageIterationUsage())
      *   ->withCacheCreation(...)
      *   ->withCacheCreationInputTokens(...)
      *   ->withCacheReadInputTokens(...)
      *   ->withInputTokens(...)
+     *   ->withModel(...)
      *   ->withOutputTokens(...)
      * ```
      */
@@ -101,10 +116,12 @@ final class BetaMessageIterationUsage implements BaseModel
      * You must use named parameters to construct any parameters with a default value.
      *
      * @param BetaCacheCreation|BetaCacheCreationShape|null $cacheCreation
+     * @param string|Model|value-of<Model>|null $model
      */
     public static function with(
         BetaCacheCreation|array|null $cacheCreation,
         int $inputTokens,
+        Model|string|null $model,
         int $outputTokens,
         int $cacheCreationInputTokens = 0,
         int $cacheReadInputTokens = 0,
@@ -115,13 +132,14 @@ final class BetaMessageIterationUsage implements BaseModel
         $self['cacheCreationInputTokens'] = $cacheCreationInputTokens;
         $self['cacheReadInputTokens'] = $cacheReadInputTokens;
         $self['inputTokens'] = $inputTokens;
+        $self['model'] = $model;
         $self['outputTokens'] = $outputTokens;
 
         return $self;
     }
 
     /**
-     * Breakdown of cached tokens by TTL.
+     * Breakdown of cached tokens by TTL
      *
      * @param BetaCacheCreation|BetaCacheCreationShape|null $cacheCreation
      */
@@ -169,6 +187,21 @@ final class BetaMessageIterationUsage implements BaseModel
     }
 
     /**
+     * The model that will complete your prompt.
+     *
+     * See [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
+     *
+     * @param string|Model|value-of<Model>|null $model
+     */
+    public function withModel(Model|string|null $model): self
+    {
+        $self = clone $this;
+        $self['model'] = $model;
+
+        return $self;
+    }
+
+    /**
      * The number of output tokens which were used.
      */
     public function withOutputTokens(int $outputTokens): self
@@ -180,7 +213,7 @@ final class BetaMessageIterationUsage implements BaseModel
     }
 
     /**
-     * Usage for a sampling iteration.
+     * Usage for a sampling iteration
      *
      * @param 'message' $type
      */

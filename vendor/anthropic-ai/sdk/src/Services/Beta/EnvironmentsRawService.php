@@ -5,26 +5,34 @@ declare(strict_types=1);
 namespace Anthropic\Services\Beta;
 
 use Anthropic\Beta\AnthropicBeta;
-use Anthropic\Beta\Environments\BetaCloudConfigParams;
 use Anthropic\Beta\Environments\BetaEnvironment;
+use Anthropic\Beta\Environments\BetaEnvironmentArchivedException;
+use Anthropic\Beta\Environments\BetaEnvironmentCreateDisabledException;
 use Anthropic\Beta\Environments\BetaEnvironmentDeleteResponse;
+use Anthropic\Beta\Environments\BetaEnvironmentUpdateDisabledException;
+use Anthropic\Beta\Environments\BetaInvalidConfigTypeChangeException;
 use Anthropic\Beta\Environments\EnvironmentArchiveParams;
 use Anthropic\Beta\Environments\EnvironmentCreateParams;
+use Anthropic\Beta\Environments\EnvironmentCreateParams\Scope;
 use Anthropic\Beta\Environments\EnvironmentDeleteParams;
 use Anthropic\Beta\Environments\EnvironmentListParams;
 use Anthropic\Beta\Environments\EnvironmentRetrieveParams;
 use Anthropic\Beta\Environments\EnvironmentUpdateParams;
+use Anthropic\ClaudeCodeKeyCreatorNotMemberException;
 use Anthropic\Client;
 use Anthropic\Core\Contracts\BaseResponse;
 use Anthropic\Core\Exceptions\APIException;
+use Anthropic\Core\Implementation\ApiCallInfo;
 use Anthropic\Core\Util;
+use Anthropic\OrganizationOnHoldException;
 use Anthropic\PageCursor;
 use Anthropic\RequestOptions;
 use Anthropic\ServiceContracts\Beta\EnvironmentsRawContract;
 
 /**
- * @phpstan-import-type BetaCloudConfigParamsShape from \Anthropic\Beta\Environments\BetaCloudConfigParams
+ * @phpstan-import-type ConfigShape from \Anthropic\Beta\Environments\EnvironmentCreateParams\Config
  * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ * @phpstan-import-type ConfigShape from \Anthropic\Beta\Environments\EnvironmentUpdateParams\Config as ConfigShape1
  */
 final class EnvironmentsRawService implements EnvironmentsRawContract
 {
@@ -41,15 +49,20 @@ final class EnvironmentsRawService implements EnvironmentsRawContract
      *
      * @param array{
      *   name: string,
-     *   config?: BetaCloudConfigParams|BetaCloudConfigParamsShape|null,
+     *   config?: ConfigShape|null,
      *   description?: string|null,
      *   metadata?: array<string,string>,
+     *   scope?: Scope|value-of<Scope>|null,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|EnvironmentCreateParams $params
      * @param RequestOpts|null $requestOptions
      *
      * @return BaseResponse<BetaEnvironment>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
+     * @throws BetaEnvironmentCreateDisabledException
      * @throws APIException
      */
     public function create(
@@ -60,12 +73,14 @@ final class EnvironmentsRawService implements EnvironmentsRawContract
             $params,
             $requestOptions,
         );
-        $header_params = ['betas' => 'anthropic-beta'];
+        $header_params = [
+            'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+        ];
 
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: 'v1/environments?beta=true',
+            path: 'v1/environments',
             headers: Util::array_transform_keys(
                 array_intersect_key($parsed, array_flip(array_keys($header_params))),
                 $header_params,
@@ -77,7 +92,11 @@ final class EnvironmentsRawService implements EnvironmentsRawContract
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.environments.create',
+                route: '/v1/environments',
+                createdId: 'anthropic.environment.id',
+            )),
             convert: BetaEnvironment::class,
         );
     }
@@ -88,12 +107,15 @@ final class EnvironmentsRawService implements EnvironmentsRawContract
      * Retrieve a specific environment by ID.
      *
      * @param array{
-     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|EnvironmentRetrieveParams $params
      * @param RequestOpts|null $requestOptions
      *
      * @return BaseResponse<BetaEnvironment>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function retrieve(
@@ -109,15 +131,21 @@ final class EnvironmentsRawService implements EnvironmentsRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: ['v1/environments/%1$s?beta=true', $environmentID],
+            path: ['v1/environments/%1$s', $environmentID],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.environments.retrieve',
+                route: '/v1/environments/{environment_id}',
+                attributes: ['anthropic.environment.id' => $environmentID],
+            )),
             convert: BetaEnvironment::class,
         );
     }
@@ -129,16 +157,23 @@ final class EnvironmentsRawService implements EnvironmentsRawContract
      *
      * @param string $environmentID Path param
      * @param array{
-     *   config?: BetaCloudConfigParams|BetaCloudConfigParamsShape|null,
+     *   config?: ConfigShape1|null,
      *   description?: string|null,
      *   metadata?: array<string,string|null>,
      *   name?: string|null,
+     *   scope?: EnvironmentUpdateParams\Scope|value-of<EnvironmentUpdateParams\Scope>|null,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|EnvironmentUpdateParams $params
      * @param RequestOpts|null $requestOptions
      *
      * @return BaseResponse<BetaEnvironment>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws BetaEnvironmentArchivedException
+     * @throws BetaInvalidConfigTypeChangeException
+     * @throws OrganizationOnHoldException
+     * @throws BetaEnvironmentUpdateDisabledException
      * @throws APIException
      */
     public function update(
@@ -150,12 +185,14 @@ final class EnvironmentsRawService implements EnvironmentsRawContract
             $params,
             $requestOptions,
         );
-        $header_params = ['betas' => 'anthropic-beta'];
+        $header_params = [
+            'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+        ];
 
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: ['v1/environments/%1$s?beta=true', $environmentID],
+            path: ['v1/environments/%1$s', $environmentID],
             headers: Util::array_transform_keys(
                 array_intersect_key($parsed, array_flip(array_keys($header_params))),
                 $header_params,
@@ -167,7 +204,11 @@ final class EnvironmentsRawService implements EnvironmentsRawContract
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.environments.update',
+                route: '/v1/environments/{environment_id}',
+                attributes: ['anthropic.environment.id' => $environmentID],
+            )),
             convert: BetaEnvironment::class,
         );
     }
@@ -182,11 +223,14 @@ final class EnvironmentsRawService implements EnvironmentsRawContract
      *   limit?: int,
      *   page?: string|null,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|EnvironmentListParams $params
      * @param RequestOpts|null $requestOptions
      *
      * @return BaseResponse<PageCursor<BetaEnvironment>>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function list(
@@ -205,19 +249,25 @@ final class EnvironmentsRawService implements EnvironmentsRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: 'v1/environments?beta=true',
+            path: 'v1/environments',
             query: Util::array_transform_keys(
                 array_intersect_key($parsed, $query_params),
                 ['includeArchived' => 'include_archived'],
             ),
             headers: Util::array_transform_keys(
                 $header_params,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.environments.list',
+                route: '/v1/environments',
+                query: ['include_archived', 'limit', 'page'],
+            )),
             convert: BetaEnvironment::class,
             page: PageCursor::class,
         );
@@ -229,12 +279,15 @@ final class EnvironmentsRawService implements EnvironmentsRawContract
      * Delete an environment by ID. Returns a confirmation of the deletion.
      *
      * @param array{
-     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|EnvironmentDeleteParams $params
      * @param RequestOpts|null $requestOptions
      *
      * @return BaseResponse<BetaEnvironmentDeleteResponse>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function delete(
@@ -250,15 +303,21 @@ final class EnvironmentsRawService implements EnvironmentsRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'delete',
-            path: ['v1/environments/%1$s?beta=true', $environmentID],
+            path: ['v1/environments/%1$s', $environmentID],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.environments.delete',
+                route: '/v1/environments/{environment_id}',
+                attributes: ['anthropic.environment.id' => $environmentID],
+            )),
             convert: BetaEnvironmentDeleteResponse::class,
         );
     }
@@ -269,12 +328,15 @@ final class EnvironmentsRawService implements EnvironmentsRawContract
      * Archive an environment by ID. Archived environments cannot be used to create new sessions.
      *
      * @param array{
-     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|EnvironmentArchiveParams $params
      * @param RequestOpts|null $requestOptions
      *
      * @return BaseResponse<BetaEnvironment>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function archive(
@@ -290,15 +352,21 @@ final class EnvironmentsRawService implements EnvironmentsRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: ['v1/environments/%1$s/archive?beta=true', $environmentID],
+            path: ['v1/environments/%1$s/archive', $environmentID],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.environments.archive',
+                route: '/v1/environments/{environment_id}/archive',
+                attributes: ['anthropic.environment.id' => $environmentID],
+            )),
             convert: BetaEnvironment::class,
         );
     }

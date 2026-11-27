@@ -4,15 +4,37 @@ declare(strict_types=1);
 
 namespace Anthropic\Services;
 
+use Anthropic\ClaudeCodeKeyCreatorNotMemberException;
+use Anthropic\ClaudeCodeVersionTooOldException;
 use Anthropic\Client;
+use Anthropic\CMEKKeyDisabledException;
+use Anthropic\CMEKKeyNetworkBlockedException;
+use Anthropic\CMEKKeyUnreachableException;
+use Anthropic\ContractSpendLimitReachedException;
 use Anthropic\Core\Contracts\BaseStream;
 use Anthropic\Core\Exceptions\APIException;
 use Anthropic\Lib\Helpers\StructuredOutput;
 use Anthropic\Core\Util;
+use Anthropic\EnforcedSpendLimitReachedException;
+use Anthropic\LinkedOrganizationBillingUnavailableException;
+use Anthropic\LinkedOrganizationSpendLimitReachedException;
+use Anthropic\Messages\AvailableToolsLimitExceededException;
 use Anthropic\Messages\CacheControlEphemeral;
+use Anthropic\Messages\CompactionBlockAmbiguousException;
+use Anthropic\Messages\CompactionBlockMisplacedException;
+use Anthropic\Messages\CompactionContentMismatchException;
+use Anthropic\Messages\CompactionIncompleteTurnException;
+use Anthropic\Messages\CompactionNothingToSummarizeException;
+use Anthropic\Messages\CompactionSignatureInvalidException;
+use Anthropic\Messages\CompactionToolChangesMismatchException;
+use Anthropic\Messages\CompactionTooManyToolReferencesException;
+use Anthropic\Messages\CompactionUnavailableException;
+use Anthropic\Messages\ContainerParams;
+use Anthropic\Messages\DiagnosticsParam;
+use Anthropic\Messages\ImageDimensionsTooLargeException;
 use Anthropic\Messages\Message;
 use Anthropic\Messages\MessageCreateParams\ServiceTier;
-use Anthropic\Messages\MessageParam;
+use Anthropic\Messages\MessageCreateParams\Speed;
 use Anthropic\Messages\MessageTokensCount;
 use Anthropic\Messages\Metadata;
 use Anthropic\Messages\Model;
@@ -25,28 +47,47 @@ use Anthropic\Messages\RawMessageStartEvent;
 use Anthropic\Messages\RawMessageStopEvent;
 use Anthropic\Messages\ThinkingConfigAdaptive;
 use Anthropic\Messages\TextBlock;
+use Anthropic\Messages\ThinkingConfigBetweenTools;
 use Anthropic\Messages\ThinkingConfigDisabled;
 use Anthropic\Messages\ThinkingConfigEnabled;
+use Anthropic\Messages\ThreadAlreadyContinuedException;
+use Anthropic\Messages\ThreadContinueInFlightException;
+use Anthropic\Messages\ThreadFingerprintMismatchException;
+use Anthropic\Messages\ThreadNotFoundException;
+use Anthropic\Messages\ThreadUnsupportedRequestException;
 use Anthropic\Messages\ToolChoiceAny;
 use Anthropic\Messages\ToolChoiceAuto;
 use Anthropic\Messages\ToolChoiceNone;
 use Anthropic\Messages\ToolChoiceTool;
+use Anthropic\Messages\ToolNameConflictException;
+use Anthropic\Messages\ToolReferenceUnresolvedException;
+use Anthropic\OrganizationOnHoldException;
+use Anthropic\RampLimitExceededException;
+use Anthropic\RequestBodyEncodingInvalidException;
+use Anthropic\RequestBodyEncodingUnsupportedException;
+use Anthropic\RequestBodyTooLargeAfterDecodingException;
 use Anthropic\RequestOptions;
 use Anthropic\ServiceContracts\MessagesContract;
 use Anthropic\Services\Messages\BatchesService;
+use Anthropic\Skills\SkillReadBlockedUndecryptableException;
+use Anthropic\UserProfiles\UserProfileBillingNotAuthorizedException;
+use Anthropic\UserProfiles\UserProfileNotBillableException;
+use Anthropic\UserProfiles\UserProfileRequiredException;
 
 /**
- * @phpstan-import-type SystemShape from \Anthropic\Messages\MessageCountTokensParams\System
- * @phpstan-import-type MessageCountTokensToolShape from \Anthropic\Messages\MessageCountTokensTool
  * @phpstan-import-type MessageParamShape from \Anthropic\Messages\MessageParam
  * @phpstan-import-type CacheControlEphemeralShape from \Anthropic\Messages\CacheControlEphemeral
+ * @phpstan-import-type MessageCreateParamsContainerShape from \Anthropic\Messages\MessageCreateParamsContainer
+ * @phpstan-import-type DiagnosticsParamShape from \Anthropic\Messages\DiagnosticsParam
  * @phpstan-import-type MetadataShape from \Anthropic\Messages\Metadata
  * @phpstan-import-type OutputConfigShape from \Anthropic\Messages\OutputConfig
- * @phpstan-import-type SystemShape from \Anthropic\Messages\MessageCreateParams\System as SystemShape1
+ * @phpstan-import-type SystemShape from \Anthropic\Messages\MessageCreateParams\System
  * @phpstan-import-type ThinkingConfigParamShape from \Anthropic\Messages\ThinkingConfigParam
  * @phpstan-import-type ToolChoiceShape from \Anthropic\Messages\ToolChoice
  * @phpstan-import-type ToolUnionShape from \Anthropic\Messages\ToolUnion
  * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ * @phpstan-import-type SystemShape from \Anthropic\Messages\MessageCountTokensParams\System as SystemShape1
+ * @phpstan-import-type MessageCountTokensToolShape from \Anthropic\Messages\MessageCountTokensTool
  */
 final class MessagesService implements MessagesContract
 {
@@ -76,20 +117,22 @@ final class MessagesService implements MessagesContract
      *
      * The Messages API can be used for either single queries or stateless multi-turn conversations.
      *
-     * Learn more about the Messages API in our [user guide](https://docs.claude.com/en/docs/initial-setup)
+     * Learn more about the Messages API in our [user guide](https://platform.claude.com/docs/en/get-started)
      *
-     * @param int $maxTokens The maximum number of tokens to generate before stopping.
+     * @param int $maxTokens Body param: The maximum number of tokens to generate before stopping.
      *
      * Note that our models may stop _before_ reaching this maximum. This parameter only specifies the absolute maximum number of tokens to generate.
      *
-     * Different models have different maximum values for this parameter.  See [models](https://docs.claude.com/en/docs/models-overview) for details.
-     * @param list<MessageParam|MessageParamShape> $messages Input messages.
+     * Set to `0` to populate the [prompt cache](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#pre-warming-the-cache) without generating a response.
+     *
+     * Different models have different maximum values for this parameter.  See [models](https://platform.claude.com/docs/en/about-claude/models/overview) for details.
+     * @param list<MessageParamShape> $messages Body param: Input messages.
      *
      * Our models are trained to operate on alternating `user` and `assistant` conversational turns. When creating a new `Message`, you specify the prior conversational turns with the `messages` parameter, and the model then generates the next `Message` in the conversation. Consecutive `user` or `assistant` turns in your request will be combined into a single turn.
      *
      * Each input message must be an object with a `role` and `content`. You can specify a single `user`-role message, or you can include multiple `user` and `assistant` messages.
      *
-     * If the final message uses the `assistant` role, the response content will continue immediately from the content in that message. This can be used to constrain part of the model's response.
+     * If the final message uses the `assistant` role, the response content will continue immediately from the content in that message. This can be used to constrain part of the model's response. This is called prefill. On models that don't support prefill, creating a message that ends with a partial `assistant` response returns a 400 error. See [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
      *
      * Example with a single `user` message:
      *
@@ -107,7 +150,7 @@ final class MessagesService implements MessagesContract
      * ]
      * ```
      *
-     * Example with a partially-filled response from Claude:
+     * Example with a partially-filled response from Claude, for models that support prefill:
      *
      * ```json
      * [
@@ -126,44 +169,45 @@ final class MessagesService implements MessagesContract
      * {"role": "user", "content": [{"type": "text", "text": "Hello, Claude"}]}
      * ```
      *
-     * See [input examples](https://docs.claude.com/en/api/messages-examples).
+     * See [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).
      *
-     * Note that if you want to include a [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the top-level `system` parameter — there is no `"system"` role for input messages in the Messages API.
+     * Note that if you want to include a [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role), you can use the top-level `system` parameter.
      *
      * There is a limit of 100,000 messages in a single request.
-     * @param string|Model|value-of<Model> $model The model that will complete your prompt.\n\nSee [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
-     * @param CacheControlEphemeral|CacheControlEphemeralShape|null $cacheControl top-level cache control automatically applies a cache_control marker to the last cacheable block in the request
-     * @param string|null $container container identifier for reuse across requests
-     * @param string|null $inferenceGeo Specifies the geographic region for inference processing. If not specified, the workspace's `default_inference_geo` is used.
-     * @param Metadata|MetadataShape $metadata an object describing metadata about the request
-     * @param OutputConfig|OutputConfigShape $outputConfig configuration options for the model's output, such as the output format
-     * @param ServiceTier|value-of<ServiceTier> $serviceTier Determines whether to use priority capacity (if available) or standard capacity for this request.
+     * @param string|Model|value-of<Model> $model Body param: The model that will complete your prompt.
      *
-     * Anthropic offers different levels of service for your API requests. See [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
-     * @param list<string> $stopSequences Custom text sequences that will cause the model to stop generating.
+     * See [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
+     * @param CacheControlEphemeral|CacheControlEphemeralShape|null $cacheControl Body param: Top-level cache control automatically applies a cache_control marker to the last cacheable block in the request.
+     * @param MessageCreateParamsContainerShape|null $container Body param: Container identifier for reuse across requests.
+     * @param DiagnosticsParam|DiagnosticsParamShape|null $diagnostics Body param: Request-level diagnostics. Supply `previous_message_id` to have the response include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence from that prior request.
+     * @param string|null $inferenceGeo Body param: Specifies the geographic region for inference processing. If not specified, the workspace's `default_inference_geo` is used.
+     * @param Metadata|MetadataShape $metadata Body param: An object describing metadata about the request.
+     * @param OutputConfig|OutputConfigShape $outputConfig Body param: Configuration options for the model's output, such as the output format.
+     * @param ServiceTier|value-of<ServiceTier> $serviceTier Body param: Determines whether to use priority capacity (if available) or standard capacity for this request.
+     *
+     * Anthropic offers different levels of service for your API requests. See [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for details.
+     * @param Speed|value-of<Speed>|null $speed Body param: The inference speed mode for this request. `"fast"` enables high output-tokens-per-second inference.
+     *
+     * Some models require the `fast-mode-2026-02-01` beta header for any `speed` value. See [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for which models.
+     * @param list<string> $stopSequences Body param: Custom text sequences that will cause the model to stop generating.
      *
      * Our models will normally stop when they have naturally completed their turn, which will result in a response `stop_reason` of `"end_turn"`.
      *
      * If you want the model to stop generating when it encounters custom strings of text, you can use the `stop_sequences` parameter. If the model encounters one of the custom sequences, the response `stop_reason` value will be `"stop_sequence"` and the response `stop_sequence` value will contain the matched stop sequence.
-     * @param SystemShape1 $system System prompt.
+     * @param SystemShape $system Body param: System prompt.
      *
-     * A system prompt is a way of providing context and instructions to Claude, such as specifying a particular goal or role. See our [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
-     * @param float $temperature Amount of randomness injected into the response.
+     * A system prompt is a way of providing context and instructions to Claude, such as specifying a particular goal or role. See our [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
+     * @param ThinkingConfigParamShape $thinking Body param: Configuration for Claude's thinking.
      *
-     * Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0` for analytical / multiple choice, and closer to `1.0` for creative and generative tasks.
+     * With `{"type": "adaptive"}`, Claude decides when and how much to think. With `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of at least 1,024. Thinking tokens count toward your `max_tokens` limit.
      *
-     * Note that even with `temperature` of `0.0`, the results will not be fully deterministic.
-     * @param ThinkingConfigParamShape $thinking Configuration for enabling Claude's extended thinking.
-     *
-     * When enabled, responses include `thinking` content blocks showing Claude's thinking process before the final answer. Requires a minimum budget of 1,024 tokens and counts towards your `max_tokens` limit.
-     *
-     * See [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking) for details.
-     * @param ToolChoiceShape $toolChoice How the model should use the provided tools. The model can use a specific tool, any available tool, decide by itself, or not use tools at all.
-     * @param list<ToolUnionShape> $tools Definitions of tools that the model may use.
+     * Which `type` values are accepted, and what happens when you omit `thinking`, depend on the model. See [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking) for each model's behavior.
+     * @param ToolChoiceShape $toolChoice Body param: How the model should use the provided tools. The model can use a specific tool, any available tool, decide by itself, or not use tools at all.
+     * @param list<ToolUnionShape> $tools Body param: Definitions of tools that the model may use.
      *
      * If you include `tools` in your API request, the model may return `tool_use` content blocks that represent the model's use of those tools. You can then run those tools using the tool input generated by the model and then optionally return results back to the model using `tool_result` content blocks.
      *
-     * There are two types of tools: **client tools** and **server tools**. The behavior described below applies to client tools. For [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview\#server-tools), see their individual documentation as each has its own behavior (e.g., the [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+     * There are two types of tools: **client tools** and **server tools**. The behavior described below applies to client tools. For [server tools](https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools), see their individual documentation as each has its own behavior (e.g., the [web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool)).
      *
      * Each tool definition includes:
      *
@@ -219,19 +263,49 @@ final class MessagesService implements MessagesContract
      *
      * Tools can be used for workflows that include running client-side tools and functions, or more generally whenever you want the model to produce a particular JSON structure of output.
      *
-     * See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
-     * @param int $topK Only sample from the top K options for each subsequent token.
+     * See our [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview) for more details.
+     * @param string $userProfileID Header param: The user profile ID to attribute this request to. Use when acting on behalf of a party other than your organization.
+     * @param string $workspaceID Header param: Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
      *
-     * Used to remove "long tail" low probability responses. [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
-     *
-     * Recommended for advanced use cases only.
-     * @param float $topP Use nucleus sampling.
-     *
-     * In nucleus sampling, we compute the cumulative distribution over all the options for each subsequent token in decreasing probability order and cut it off once it reaches a particular probability specified by `top_p`.
-     *
-     * Recommended for advanced use cases only.
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
+     * @throws AvailableToolsLimitExceededException
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws ClaudeCodeVersionTooOldException
+     * @throws CMEKKeyDisabledException
+     * @throws CMEKKeyNetworkBlockedException
+     * @throws CompactionBlockAmbiguousException
+     * @throws CompactionBlockMisplacedException
+     * @throws CompactionContentMismatchException
+     * @throws CompactionIncompleteTurnException
+     * @throws CompactionNothingToSummarizeException
+     * @throws CompactionSignatureInvalidException
+     * @throws CompactionTooManyToolReferencesException
+     * @throws CompactionToolChangesMismatchException
+     * @throws ImageDimensionsTooLargeException
+     * @throws OrganizationOnHoldException
+     * @throws RequestBodyEncodingInvalidException
+     * @throws RequestBodyEncodingUnsupportedException
+     * @throws ThreadAlreadyContinuedException
+     * @throws ThreadContinueInFlightException
+     * @throws ThreadFingerprintMismatchException
+     * @throws ThreadUnsupportedRequestException
+     * @throws ToolNameConflictException
+     * @throws ToolReferenceUnresolvedException
+     * @throws UserProfileRequiredException
+     * @throws LinkedOrganizationBillingUnavailableException
+     * @throws LinkedOrganizationSpendLimitReachedException
+     * @throws UserProfileBillingNotAuthorizedException
+     * @throws UserProfileNotBillableException
+     * @throws ThreadNotFoundException
+     * @throws SkillReadBlockedUndecryptableException
+     * @throws RequestBodyTooLargeAfterDecodingException
+     * @throws ContractSpendLimitReachedException
+     * @throws EnforcedSpendLimitReachedException
+     * @throws RampLimitExceededException
+     * @throws CMEKKeyUnreachableException
+     * @throws CompactionUnavailableException
      * @throws APIException
      */
     public function create(
@@ -239,19 +313,20 @@ final class MessagesService implements MessagesContract
         array $messages,
         Model|string $model,
         CacheControlEphemeral|array|null $cacheControl = null,
-        ?string $container = null,
+        string|ContainerParams|array|null $container = null,
+        DiagnosticsParam|array|null $diagnostics = null,
         ?string $inferenceGeo = null,
         Metadata|array|null $metadata = null,
         OutputConfig|array|null $outputConfig = null,
         ServiceTier|string|null $serviceTier = null,
+        Speed|string|null $speed = null,
         ?array $stopSequences = null,
         string|array|null $system = null,
-        ?float $temperature = null,
-        ThinkingConfigEnabled|array|ThinkingConfigDisabled|ThinkingConfigAdaptive|null $thinking = null,
+        ThinkingConfigEnabled|array|ThinkingConfigDisabled|ThinkingConfigBetweenTools|ThinkingConfigAdaptive|null $thinking = null,
         ToolChoiceAuto|array|ToolChoiceAny|ToolChoiceTool|ToolChoiceNone|null $toolChoice = null,
         ?array $tools = null,
-        ?int $topK = null,
-        ?float $topP = null,
+        ?string $userProfileID = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): Message {
         self::warnIfDeprecatedThinkingConfig($model, $thinking);
@@ -264,18 +339,19 @@ final class MessagesService implements MessagesContract
                 'model' => $model,
                 'cacheControl' => $cacheControl,
                 'container' => $container,
+                'diagnostics' => $diagnostics,
                 'inferenceGeo' => $inferenceGeo,
                 'metadata' => $metadata,
                 'outputConfig' => $outputConfig,
                 'serviceTier' => $serviceTier,
+                'speed' => $speed,
                 'stopSequences' => $stopSequences,
                 'system' => $system,
-                'temperature' => $temperature,
                 'thinking' => $thinking,
                 'toolChoice' => $toolChoice,
                 'tools' => $tools,
-                'topK' => $topK,
-                'topP' => $topP,
+                'userProfileID' => $userProfileID,
+                'workspaceID' => $workspaceID,
             ],
         );
 
@@ -315,18 +391,20 @@ final class MessagesService implements MessagesContract
     /**
      * @api
      *
-     * @param int $maxTokens The maximum number of tokens to generate before stopping.
+     * @param int $maxTokens Body param: The maximum number of tokens to generate before stopping.
      *
      * Note that our models may stop _before_ reaching this maximum. This parameter only specifies the absolute maximum number of tokens to generate.
      *
-     * Different models have different maximum values for this parameter.  See [models](https://docs.claude.com/en/docs/models-overview) for details.
-     * @param list<MessageParam|MessageParamShape> $messages Input messages.
+     * Set to `0` to populate the [prompt cache](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#pre-warming-the-cache) without generating a response.
+     *
+     * Different models have different maximum values for this parameter.  See [models](https://platform.claude.com/docs/en/about-claude/models/overview) for details.
+     * @param list<MessageParamShape> $messages Body param: Input messages.
      *
      * Our models are trained to operate on alternating `user` and `assistant` conversational turns. When creating a new `Message`, you specify the prior conversational turns with the `messages` parameter, and the model then generates the next `Message` in the conversation. Consecutive `user` or `assistant` turns in your request will be combined into a single turn.
      *
      * Each input message must be an object with a `role` and `content`. You can specify a single `user`-role message, or you can include multiple `user` and `assistant` messages.
      *
-     * If the final message uses the `assistant` role, the response content will continue immediately from the content in that message. This can be used to constrain part of the model's response.
+     * If the final message uses the `assistant` role, the response content will continue immediately from the content in that message. This can be used to constrain part of the model's response. This is called prefill. On models that don't support prefill, creating a message that ends with a partial `assistant` response returns a 400 error. See [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
      *
      * Example with a single `user` message:
      *
@@ -344,7 +422,7 @@ final class MessagesService implements MessagesContract
      * ]
      * ```
      *
-     * Example with a partially-filled response from Claude:
+     * Example with a partially-filled response from Claude, for models that support prefill:
      *
      * ```json
      * [
@@ -363,44 +441,45 @@ final class MessagesService implements MessagesContract
      * {"role": "user", "content": [{"type": "text", "text": "Hello, Claude"}]}
      * ```
      *
-     * See [input examples](https://docs.claude.com/en/api/messages-examples).
+     * See [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).
      *
-     * Note that if you want to include a [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the top-level `system` parameter — there is no `"system"` role for input messages in the Messages API.
+     * Note that if you want to include a [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role), you can use the top-level `system` parameter.
      *
      * There is a limit of 100,000 messages in a single request.
-     * @param string|Model|value-of<Model> $model The model that will complete your prompt.\n\nSee [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
-     * @param CacheControlEphemeral|CacheControlEphemeralShape|null $cacheControl top-level cache control automatically applies a cache_control marker to the last cacheable block in the request
-     * @param string|null $container container identifier for reuse across requests
-     * @param string|null $inferenceGeo Specifies the geographic region for inference processing. If not specified, the workspace's `default_inference_geo` is used.
-     * @param Metadata|MetadataShape $metadata an object describing metadata about the request
-     * @param OutputConfig|OutputConfigShape $outputConfig configuration options for the model's output, such as the output format
-     * @param ServiceTier|value-of<ServiceTier> $serviceTier Determines whether to use priority capacity (if available) or standard capacity for this request.
+     * @param string|Model|value-of<Model> $model Body param: The model that will complete your prompt.
      *
-     * Anthropic offers different levels of service for your API requests. See [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
-     * @param list<string> $stopSequences Custom text sequences that will cause the model to stop generating.
+     * See [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
+     * @param CacheControlEphemeral|CacheControlEphemeralShape|null $cacheControl Body param: Top-level cache control automatically applies a cache_control marker to the last cacheable block in the request.
+     * @param MessageCreateParamsContainerShape|null $container Body param: Container identifier for reuse across requests.
+     * @param DiagnosticsParam|DiagnosticsParamShape|null $diagnostics Body param: Request-level diagnostics. Supply `previous_message_id` to have the response include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence from that prior request.
+     * @param string|null $inferenceGeo Body param: Specifies the geographic region for inference processing. If not specified, the workspace's `default_inference_geo` is used.
+     * @param Metadata|MetadataShape $metadata Body param: An object describing metadata about the request.
+     * @param OutputConfig|OutputConfigShape $outputConfig Body param: Configuration options for the model's output, such as the output format.
+     * @param ServiceTier|value-of<ServiceTier> $serviceTier Body param: Determines whether to use priority capacity (if available) or standard capacity for this request.
+     *
+     * Anthropic offers different levels of service for your API requests. See [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for details.
+     * @param Speed|value-of<Speed>|null $speed Body param: The inference speed mode for this request. `"fast"` enables high output-tokens-per-second inference.
+     *
+     * Some models require the `fast-mode-2026-02-01` beta header for any `speed` value. See [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for which models.
+     * @param list<string> $stopSequences Body param: Custom text sequences that will cause the model to stop generating.
      *
      * Our models will normally stop when they have naturally completed their turn, which will result in a response `stop_reason` of `"end_turn"`.
      *
      * If you want the model to stop generating when it encounters custom strings of text, you can use the `stop_sequences` parameter. If the model encounters one of the custom sequences, the response `stop_reason` value will be `"stop_sequence"` and the response `stop_sequence` value will contain the matched stop sequence.
-     * @param SystemShape1 $system System prompt.
+     * @param SystemShape $system Body param: System prompt.
      *
-     * A system prompt is a way of providing context and instructions to Claude, such as specifying a particular goal or role. See our [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
-     * @param float $temperature Amount of randomness injected into the response.
+     * A system prompt is a way of providing context and instructions to Claude, such as specifying a particular goal or role. See our [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
+     * @param ThinkingConfigParamShape $thinking Body param: Configuration for Claude's thinking.
      *
-     * Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0` for analytical / multiple choice, and closer to `1.0` for creative and generative tasks.
+     * With `{"type": "adaptive"}`, Claude decides when and how much to think. With `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of at least 1,024. Thinking tokens count toward your `max_tokens` limit.
      *
-     * Note that even with `temperature` of `0.0`, the results will not be fully deterministic.
-     * @param ThinkingConfigParamShape $thinking Configuration for enabling Claude's extended thinking.
-     *
-     * When enabled, responses include `thinking` content blocks showing Claude's thinking process before the final answer. Requires a minimum budget of 1,024 tokens and counts towards your `max_tokens` limit.
-     *
-     * See [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking) for details.
-     * @param ToolChoiceShape $toolChoice How the model should use the provided tools. The model can use a specific tool, any available tool, decide by itself, or not use tools at all.
-     * @param list<ToolUnionShape> $tools Definitions of tools that the model may use.
+     * Which `type` values are accepted, and what happens when you omit `thinking`, depend on the model. See [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking) for each model's behavior.
+     * @param ToolChoiceShape $toolChoice Body param: How the model should use the provided tools. The model can use a specific tool, any available tool, decide by itself, or not use tools at all.
+     * @param list<ToolUnionShape> $tools Body param: Definitions of tools that the model may use.
      *
      * If you include `tools` in your API request, the model may return `tool_use` content blocks that represent the model's use of those tools. You can then run those tools using the tool input generated by the model and then optionally return results back to the model using `tool_result` content blocks.
      *
-     * There are two types of tools: **client tools** and **server tools**. The behavior described below applies to client tools. For [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview\#server-tools), see their individual documentation as each has its own behavior (e.g., the [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+     * There are two types of tools: **client tools** and **server tools**. The behavior described below applies to client tools. For [server tools](https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools), see their individual documentation as each has its own behavior (e.g., the [web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool)).
      *
      * Each tool definition includes:
      *
@@ -456,21 +535,51 @@ final class MessagesService implements MessagesContract
      *
      * Tools can be used for workflows that include running client-side tools and functions, or more generally whenever you want the model to produce a particular JSON structure of output.
      *
-     * See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
-     * @param int $topK Only sample from the top K options for each subsequent token.
+     * See our [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview) for more details.
+     * @param string $userProfileID Header param: The user profile ID to attribute this request to. Use when acting on behalf of a party other than your organization.
+     * @param string $workspaceID Header param: Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
      *
-     * Used to remove "long tail" low probability responses. [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
-     *
-     * Recommended for advanced use cases only.
-     * @param float $topP Use nucleus sampling.
-     *
-     * In nucleus sampling, we compute the cumulative distribution over all the options for each subsequent token in decreasing probability order and cut it off once it reaches a particular probability specified by `top_p`.
-     *
-     * Recommended for advanced use cases only.
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseStream<RawMessageStartEvent|RawMessageDeltaEvent|RawMessageStopEvent|RawContentBlockStartEvent|RawContentBlockDeltaEvent|RawContentBlockStopEvent,>
+     * @return BaseStream<RawMessageStartEvent|RawMessageDeltaEvent|RawMessageStopEvent|RawContentBlockStartEvent|RawContentBlockDeltaEvent|RawContentBlockStopEvent>
      *
+     * @throws AvailableToolsLimitExceededException
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws ClaudeCodeVersionTooOldException
+     * @throws CMEKKeyDisabledException
+     * @throws CMEKKeyNetworkBlockedException
+     * @throws CompactionBlockAmbiguousException
+     * @throws CompactionBlockMisplacedException
+     * @throws CompactionContentMismatchException
+     * @throws CompactionIncompleteTurnException
+     * @throws CompactionNothingToSummarizeException
+     * @throws CompactionSignatureInvalidException
+     * @throws CompactionTooManyToolReferencesException
+     * @throws CompactionToolChangesMismatchException
+     * @throws ImageDimensionsTooLargeException
+     * @throws OrganizationOnHoldException
+     * @throws RequestBodyEncodingInvalidException
+     * @throws RequestBodyEncodingUnsupportedException
+     * @throws ThreadAlreadyContinuedException
+     * @throws ThreadContinueInFlightException
+     * @throws ThreadFingerprintMismatchException
+     * @throws ThreadUnsupportedRequestException
+     * @throws ToolNameConflictException
+     * @throws ToolReferenceUnresolvedException
+     * @throws UserProfileRequiredException
+     * @throws LinkedOrganizationBillingUnavailableException
+     * @throws LinkedOrganizationSpendLimitReachedException
+     * @throws UserProfileBillingNotAuthorizedException
+     * @throws UserProfileNotBillableException
+     * @throws ThreadNotFoundException
+     * @throws SkillReadBlockedUndecryptableException
+     * @throws RequestBodyTooLargeAfterDecodingException
+     * @throws ContractSpendLimitReachedException
+     * @throws EnforcedSpendLimitReachedException
+     * @throws RampLimitExceededException
+     * @throws CMEKKeyUnreachableException
+     * @throws CompactionUnavailableException
      * @throws APIException
      */
     public function createStream(
@@ -478,19 +587,20 @@ final class MessagesService implements MessagesContract
         array $messages,
         Model|string $model,
         CacheControlEphemeral|array|null $cacheControl = null,
-        ?string $container = null,
+        string|ContainerParams|array|null $container = null,
+        DiagnosticsParam|array|null $diagnostics = null,
         ?string $inferenceGeo = null,
         Metadata|array|null $metadata = null,
         OutputConfig|array|null $outputConfig = null,
         ServiceTier|string|null $serviceTier = null,
+        Speed|string|null $speed = null,
         ?array $stopSequences = null,
         string|array|null $system = null,
-        ?float $temperature = null,
-        ThinkingConfigEnabled|array|ThinkingConfigDisabled|ThinkingConfigAdaptive|null $thinking = null,
+        ThinkingConfigEnabled|array|ThinkingConfigDisabled|ThinkingConfigBetweenTools|ThinkingConfigAdaptive|null $thinking = null,
         ToolChoiceAuto|array|ToolChoiceAny|ToolChoiceTool|ToolChoiceNone|null $toolChoice = null,
         ?array $tools = null,
-        ?int $topK = null,
-        ?float $topP = null,
+        ?string $userProfileID = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): BaseStream {
         self::warnIfDeprecatedThinkingConfig($model, $thinking);
@@ -503,18 +613,19 @@ final class MessagesService implements MessagesContract
                 'model' => $model,
                 'cacheControl' => $cacheControl,
                 'container' => $container,
+                'diagnostics' => $diagnostics,
                 'inferenceGeo' => $inferenceGeo,
                 'metadata' => $metadata,
                 'outputConfig' => $outputConfig,
                 'serviceTier' => $serviceTier,
+                'speed' => $speed,
                 'stopSequences' => $stopSequences,
                 'system' => $system,
-                'temperature' => $temperature,
                 'thinking' => $thinking,
                 'toolChoice' => $toolChoice,
                 'tools' => $tools,
-                'topK' => $topK,
-                'topP' => $topP,
+                'userProfileID' => $userProfileID,
+                'workspaceID' => $workspaceID,
             ],
         );
 
@@ -534,15 +645,15 @@ final class MessagesService implements MessagesContract
      *
      * The Token Count API can be used to count the number of tokens in a Message, including tools, images, and documents, without creating it.
      *
-     * Learn more about token counting in our [user guide](https://docs.claude.com/en/docs/build-with-claude/token-counting)
+     * Learn more about token counting in our [user guide](https://platform.claude.com/docs/en/build-with-claude/token-counting)
      *
-     * @param list<MessageParam|MessageParamShape> $messages Input messages.
+     * @param list<MessageParamShape> $messages Body param: Input messages.
      *
      * Our models are trained to operate on alternating `user` and `assistant` conversational turns. When creating a new `Message`, you specify the prior conversational turns with the `messages` parameter, and the model then generates the next `Message` in the conversation. Consecutive `user` or `assistant` turns in your request will be combined into a single turn.
      *
      * Each input message must be an object with a `role` and `content`. You can specify a single `user`-role message, or you can include multiple `user` and `assistant` messages.
      *
-     * If the final message uses the `assistant` role, the response content will continue immediately from the content in that message. This can be used to constrain part of the model's response.
+     * If the final message uses the `assistant` role, the response content will continue immediately from the content in that message. This can be used to constrain part of the model's response. This is called prefill. On models that don't support prefill, creating a message that ends with a partial `assistant` response returns a 400 error. See [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
      *
      * Example with a single `user` message:
      *
@@ -560,7 +671,7 @@ final class MessagesService implements MessagesContract
      * ]
      * ```
      *
-     * Example with a partially-filled response from Claude:
+     * Example with a partially-filled response from Claude, for models that support prefill:
      *
      * ```json
      * [
@@ -579,28 +690,33 @@ final class MessagesService implements MessagesContract
      * {"role": "user", "content": [{"type": "text", "text": "Hello, Claude"}]}
      * ```
      *
-     * See [input examples](https://docs.claude.com/en/api/messages-examples).
+     * See [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).
      *
-     * Note that if you want to include a [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the top-level `system` parameter — there is no `"system"` role for input messages in the Messages API.
+     * Note that if you want to include a [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role), you can use the top-level `system` parameter.
      *
      * There is a limit of 100,000 messages in a single request.
-     * @param string|Model|value-of<Model> $model The model that will complete your prompt.\n\nSee [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
-     * @param CacheControlEphemeral|CacheControlEphemeralShape|null $cacheControl top-level cache control automatically applies a cache_control marker to the last cacheable block in the request
-     * @param OutputConfig|OutputConfigShape $outputConfig configuration options for the model's output, such as the output format
-     * @param SystemShape $system System prompt.
+     * @param string|Model|value-of<Model> $model Body param: The model that will complete your prompt.
      *
-     * A system prompt is a way of providing context and instructions to Claude, such as specifying a particular goal or role. See our [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
-     * @param ThinkingConfigParamShape $thinking Configuration for enabling Claude's extended thinking.
+     * See [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
+     * @param CacheControlEphemeral|CacheControlEphemeralShape|null $cacheControl Body param: Top-level cache control automatically applies a cache_control marker to the last cacheable block in the request.
+     * @param OutputConfig|OutputConfigShape $outputConfig Body param: Configuration options for the model's output, such as the output format.
+     * @param \Anthropic\Messages\MessageCountTokensParams\Speed|value-of<\Anthropic\Messages\MessageCountTokensParams\Speed>|null $speed Body param: The inference speed mode for this request. `"fast"` enables high output-tokens-per-second inference.
      *
-     * When enabled, responses include `thinking` content blocks showing Claude's thinking process before the final answer. Requires a minimum budget of 1,024 tokens and counts towards your `max_tokens` limit.
+     * Some models require the `fast-mode-2026-02-01` beta header for any `speed` value. See [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for which models.
+     * @param SystemShape1 $system Body param: System prompt.
      *
-     * See [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking) for details.
-     * @param ToolChoiceShape $toolChoice How the model should use the provided tools. The model can use a specific tool, any available tool, decide by itself, or not use tools at all.
-     * @param list<MessageCountTokensToolShape> $tools Definitions of tools that the model may use.
+     * A system prompt is a way of providing context and instructions to Claude, such as specifying a particular goal or role. See our [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
+     * @param ThinkingConfigParamShape $thinking Body param: Configuration for Claude's thinking.
+     *
+     * With `{"type": "adaptive"}`, Claude decides when and how much to think. With `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of at least 1,024. Thinking tokens count toward your `max_tokens` limit.
+     *
+     * Which `type` values are accepted, and what happens when you omit `thinking`, depend on the model. See [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking) for each model's behavior.
+     * @param ToolChoiceShape $toolChoice Body param: How the model should use the provided tools. The model can use a specific tool, any available tool, decide by itself, or not use tools at all.
+     * @param list<MessageCountTokensToolShape> $tools Body param: Definitions of tools that the model may use.
      *
      * If you include `tools` in your API request, the model may return `tool_use` content blocks that represent the model's use of those tools. You can then run those tools using the tool input generated by the model and then optionally return results back to the model using `tool_result` content blocks.
      *
-     * There are two types of tools: **client tools** and **server tools**. The behavior described below applies to client tools. For [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview\#server-tools), see their individual documentation as each has its own behavior (e.g., the [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+     * There are two types of tools: **client tools** and **server tools**. The behavior described below applies to client tools. For [server tools](https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools), see their individual documentation as each has its own behavior (e.g., the [web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool)).
      *
      * Each tool definition includes:
      *
@@ -656,9 +772,29 @@ final class MessagesService implements MessagesContract
      *
      * Tools can be used for workflows that include running client-side tools and functions, or more generally whenever you want the model to produce a particular JSON structure of output.
      *
-     * See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
+     * See our [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview) for more details.
+     * @param string $userProfileID Header param: The user profile ID to attribute this request to. Use when acting on behalf of a party other than your organization.
+     * @param string $workspaceID Header param: Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
+     * @throws AvailableToolsLimitExceededException
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CompactionBlockAmbiguousException
+     * @throws CompactionBlockMisplacedException
+     * @throws CompactionContentMismatchException
+     * @throws CompactionNothingToSummarizeException
+     * @throws CompactionSignatureInvalidException
+     * @throws CompactionToolChangesMismatchException
+     * @throws OrganizationOnHoldException
+     * @throws RequestBodyEncodingInvalidException
+     * @throws RequestBodyEncodingUnsupportedException
+     * @throws ToolNameConflictException
+     * @throws ToolReferenceUnresolvedException
+     * @throws RequestBodyTooLargeAfterDecodingException
+     * @throws EnforcedSpendLimitReachedException
+     * @throws CompactionUnavailableException
      * @throws APIException
      */
     public function countTokens(
@@ -666,10 +802,13 @@ final class MessagesService implements MessagesContract
         Model|string $model,
         CacheControlEphemeral|array|null $cacheControl = null,
         OutputConfig|array|null $outputConfig = null,
+        \Anthropic\Messages\MessageCountTokensParams\Speed|string|null $speed = null,
         string|array|null $system = null,
-        ThinkingConfigEnabled|array|ThinkingConfigDisabled|ThinkingConfigAdaptive|null $thinking = null,
+        ThinkingConfigEnabled|array|ThinkingConfigDisabled|ThinkingConfigBetweenTools|ThinkingConfigAdaptive|null $thinking = null,
         ToolChoiceAuto|array|ToolChoiceAny|ToolChoiceTool|ToolChoiceNone|null $toolChoice = null,
         ?array $tools = null,
+        ?string $userProfileID = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): MessageTokensCount {
         self::warnIfDeprecatedThinkingConfig($model, $thinking);
@@ -681,10 +820,13 @@ final class MessagesService implements MessagesContract
                 'model' => $model,
                 'cacheControl' => $cacheControl,
                 'outputConfig' => $outputConfig,
+                'speed' => $speed,
                 'system' => $system,
                 'thinking' => $thinking,
                 'toolChoice' => $toolChoice,
                 'tools' => $tools,
+                'userProfileID' => $userProfileID,
+                'workspaceID' => $workspaceID,
             ],
         );
 
@@ -706,7 +848,7 @@ final class MessagesService implements MessagesContract
      */
     private static function warnIfDeprecatedThinkingConfig(
         Model|string $model,
-        ThinkingConfigEnabled|array|ThinkingConfigDisabled|ThinkingConfigAdaptive|null $thinking,
+        object|array|null $thinking,
     ): void {
         // Check if model is in the list of models that should warn on thinking.type=enabled
         $modelString = $model instanceof Model ? $model->value : $model;

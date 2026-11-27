@@ -9,14 +9,12 @@ use Anthropic\Core\Conversion\Contracts\Converter;
 use Anthropic\Core\Conversion\Contracts\ConverterSource;
 
 /**
- * Code execution result with encrypted stdout for PFC + web_search results.
- *
- * @phpstan-import-type CodeExecutionToolResultErrorShape from \Anthropic\Messages\CodeExecutionToolResultError
+ * @phpstan-import-type CodeExecutionToolResultErrorObjectShape from \Anthropic\Messages\CodeExecutionToolResultErrorObject
  * @phpstan-import-type CodeExecutionResultBlockShape from \Anthropic\Messages\CodeExecutionResultBlock
  * @phpstan-import-type EncryptedCodeExecutionResultBlockShape from \Anthropic\Messages\EncryptedCodeExecutionResultBlock
  *
- * @phpstan-type CodeExecutionToolResultBlockContentVariants = CodeExecutionToolResultError|CodeExecutionResultBlock|EncryptedCodeExecutionResultBlock
- * @phpstan-type CodeExecutionToolResultBlockContentShape = CodeExecutionToolResultBlockContentVariants|CodeExecutionToolResultErrorShape|CodeExecutionResultBlockShape|EncryptedCodeExecutionResultBlockShape
+ * @phpstan-type CodeExecutionToolResultBlockContentVariants = CodeExecutionToolResultErrorObject|CodeExecutionResultBlock|EncryptedCodeExecutionResultBlock
+ * @phpstan-type CodeExecutionToolResultBlockContentShape = CodeExecutionToolResultBlockContentVariants|CodeExecutionToolResultErrorObjectShape|CodeExecutionResultBlockShape|EncryptedCodeExecutionResultBlockShape
  */
 final class CodeExecutionToolResultBlockContent implements ConverterSource
 {
@@ -28,7 +26,7 @@ final class CodeExecutionToolResultBlockContent implements ConverterSource
     public static function variants(): array
     {
         return [
-            CodeExecutionToolResultError::class,
+            CodeExecutionToolResultErrorObject::class,
             CodeExecutionResultBlock::class,
             EncryptedCodeExecutionResultBlock::class,
         ];

@@ -6,34 +6,41 @@ namespace Anthropic\Beta\Agents;
 
 use Anthropic\Beta\Agents\BetaManagedAgentsAgent\Skill;
 use Anthropic\Beta\Agents\BetaManagedAgentsAgent\Tool;
-use Anthropic\Beta\Agents\BetaManagedAgentsAgent\Type;
+use Anthropic\Beta\Sessions\BetaManagedAgentsMultiagent;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * A Managed Agents `agent`.
  *
- * @phpstan-import-type SkillVariants from \Anthropic\Beta\Agents\BetaManagedAgentsAgent\Skill
- * @phpstan-import-type ToolVariants from \Anthropic\Beta\Agents\BetaManagedAgentsAgent\Tool
+ * @phpstan-import-type BetaManagedAgentsExecutionIdentityShape from \Anthropic\Beta\Agents\BetaManagedAgentsExecutionIdentity
  * @phpstan-import-type BetaManagedAgentsMCPServerURLDefinitionShape from \Anthropic\Beta\Agents\BetaManagedAgentsMCPServerURLDefinition
  * @phpstan-import-type BetaManagedAgentsModelConfigShape from \Anthropic\Beta\Agents\BetaManagedAgentsModelConfig
+ * @phpstan-import-type BetaManagedAgentsMultiagentShape from \Anthropic\Beta\Sessions\BetaManagedAgentsMultiagent
  * @phpstan-import-type SkillShape from \Anthropic\Beta\Agents\BetaManagedAgentsAgent\Skill
  * @phpstan-import-type ToolShape from \Anthropic\Beta\Agents\BetaManagedAgentsAgent\Tool
+ * @phpstan-import-type BetaManagedAgentsExecutionIdentityVariants from \Anthropic\Beta\Agents\BetaManagedAgentsExecutionIdentity
+ * @phpstan-import-type BetaManagedAgentsMultiagentVariants from \Anthropic\Beta\Sessions\BetaManagedAgentsMultiagent
+ * @phpstan-import-type SkillVariants from \Anthropic\Beta\Agents\BetaManagedAgentsAgent\Skill
+ * @phpstan-import-type ToolVariants from \Anthropic\Beta\Agents\BetaManagedAgentsAgent\Tool
  *
  * @phpstan-type BetaManagedAgentsAgentShape = array{
  *   id: string,
  *   archivedAt: \DateTimeInterface|null,
  *   createdAt: \DateTimeInterface,
  *   description: string|null,
+ *   executionIdentity: BetaManagedAgentsExecutionIdentityShape,
  *   mcpServers: list<BetaManagedAgentsMCPServerURLDefinition|BetaManagedAgentsMCPServerURLDefinitionShape>,
  *   metadata: array<string,string>,
  *   model: BetaManagedAgentsModelConfig|BetaManagedAgentsModelConfigShape,
+ *   multiagent: BetaManagedAgentsMultiagentShape|null,
  *   name: string,
  *   skills: list<SkillShape>,
  *   system: string|null,
  *   tools: list<ToolShape>,
- *   type: Type|value-of<Type>,
+ *   type: 'agent',
  *   updatedAt: \DateTimeInterface,
  *   version: int,
  * }
@@ -43,23 +50,38 @@ final class BetaManagedAgentsAgent implements BaseModel
     /** @use SdkModel<BetaManagedAgentsAgentShape> */
     use SdkModel;
 
+    /** @var 'agent' $type */
+    #[Required(type: new ConstantOf('agent'))]
+    public string $type = 'agent';
+
     #[Required]
     public string $id;
 
     /**
-     * A timestamp in RFC 3339 format.
+     * When the agent was archived. Null if not archived.
      */
     #[Required('archived_at')]
     public ?\DateTimeInterface $archivedAt;
 
     /**
-     * A timestamp in RFC 3339 format.
+     * A timestamp in RFC 3339 format
      */
     #[Required('created_at')]
     public \DateTimeInterface $createdAt;
 
     #[Required]
     public ?string $description;
+
+    /**
+     * Execution principal for runs of this agent. Always present; `{"type": "service_account"}` when runs carry no customer-named principal.
+     *
+     * @var BetaManagedAgentsExecutionIdentityVariants $executionIdentity
+     */
+    #[Required(
+        'execution_identity',
+        union: BetaManagedAgentsExecutionIdentity::class
+    )]
+    public BetaManagedAgentsAWSRoleExecutionIdentity|BetaManagedAgentsServiceAccountExecutionIdentity $executionIdentity;
 
     /** @var list<BetaManagedAgentsMCPServerURLDefinition> $mcpServers */
     #[Required(
@@ -78,6 +100,14 @@ final class BetaManagedAgentsAgent implements BaseModel
     #[Required]
     public BetaManagedAgentsModelConfig $model;
 
+    /**
+     * Multiagent orchestration configuration. Null when the agent is single-threaded.
+     *
+     * @var BetaManagedAgentsMultiagentVariants|null $multiagent
+     */
+    #[Required(union: BetaManagedAgentsMultiagent::class)]
+    public BetaManagedAgentsMultiagentCoordinator|BetaManagedAgentsMultiagent20261001|null $multiagent;
+
     #[Required]
     public string $name;
 
@@ -92,12 +122,8 @@ final class BetaManagedAgentsAgent implements BaseModel
     #[Required(list: Tool::class)]
     public array $tools;
 
-    /** @var value-of<Type> $type */
-    #[Required(enum: Type::class)]
-    public string $type;
-
     /**
-     * A timestamp in RFC 3339 format.
+     * A timestamp in RFC 3339 format
      */
     #[Required('updated_at')]
     public \DateTimeInterface $updatedAt;
@@ -118,14 +144,15 @@ final class BetaManagedAgentsAgent implements BaseModel
      *   archivedAt: ...,
      *   createdAt: ...,
      *   description: ...,
+     *   executionIdentity: ...,
      *   mcpServers: ...,
      *   metadata: ...,
      *   model: ...,
+     *   multiagent: ...,
      *   name: ...,
      *   skills: ...,
      *   system: ...,
      *   tools: ...,
-     *   type: ...,
      *   updatedAt: ...,
      *   version: ...,
      * )
@@ -134,19 +161,20 @@ final class BetaManagedAgentsAgent implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaManagedAgentsAgent)
+     * (new BetaManagedAgentsAgent())
      *   ->withID(...)
      *   ->withArchivedAt(...)
      *   ->withCreatedAt(...)
      *   ->withDescription(...)
+     *   ->withExecutionIdentity(...)
      *   ->withMCPServers(...)
      *   ->withMetadata(...)
      *   ->withModel(...)
+     *   ->withMultiagent(...)
      *   ->withName(...)
      *   ->withSkills(...)
      *   ->withSystem(...)
      *   ->withTools(...)
-     *   ->withType(...)
      *   ->withUpdatedAt(...)
      *   ->withVersion(...)
      * ```
@@ -161,26 +189,28 @@ final class BetaManagedAgentsAgent implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
+     * @param BetaManagedAgentsExecutionIdentityShape $executionIdentity
      * @param list<BetaManagedAgentsMCPServerURLDefinition|BetaManagedAgentsMCPServerURLDefinitionShape> $mcpServers
      * @param array<string,string> $metadata
      * @param BetaManagedAgentsModelConfig|BetaManagedAgentsModelConfigShape $model
+     * @param BetaManagedAgentsMultiagentShape|null $multiagent
      * @param list<SkillShape> $skills
      * @param list<ToolShape> $tools
-     * @param Type|value-of<Type> $type
      */
     public static function with(
         string $id,
         ?\DateTimeInterface $archivedAt,
         \DateTimeInterface $createdAt,
         ?string $description,
+        BetaManagedAgentsAWSRoleExecutionIdentity|array|BetaManagedAgentsServiceAccountExecutionIdentity $executionIdentity,
         array $mcpServers,
         array $metadata,
         BetaManagedAgentsModelConfig|array $model,
+        BetaManagedAgentsMultiagentCoordinator|array|BetaManagedAgentsMultiagent20261001|null $multiagent,
         string $name,
         array $skills,
         ?string $system,
         array $tools,
-        Type|string $type,
         \DateTimeInterface $updatedAt,
         int $version,
     ): self {
@@ -190,14 +220,15 @@ final class BetaManagedAgentsAgent implements BaseModel
         $self['archivedAt'] = $archivedAt;
         $self['createdAt'] = $createdAt;
         $self['description'] = $description;
+        $self['executionIdentity'] = $executionIdentity;
         $self['mcpServers'] = $mcpServers;
         $self['metadata'] = $metadata;
         $self['model'] = $model;
+        $self['multiagent'] = $multiagent;
         $self['name'] = $name;
         $self['skills'] = $skills;
         $self['system'] = $system;
         $self['tools'] = $tools;
-        $self['type'] = $type;
         $self['updatedAt'] = $updatedAt;
         $self['version'] = $version;
 
@@ -213,7 +244,7 @@ final class BetaManagedAgentsAgent implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * When the agent was archived. Null if not archived.
      */
     public function withArchivedAt(?\DateTimeInterface $archivedAt): self
     {
@@ -224,7 +255,7 @@ final class BetaManagedAgentsAgent implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * A timestamp in RFC 3339 format
      */
     public function withCreatedAt(\DateTimeInterface $createdAt): self
     {
@@ -238,6 +269,20 @@ final class BetaManagedAgentsAgent implements BaseModel
     {
         $self = clone $this;
         $self['description'] = $description;
+
+        return $self;
+    }
+
+    /**
+     * Execution principal for runs of this agent. Always present; `{"type": "service_account"}` when runs carry no customer-named principal.
+     *
+     * @param BetaManagedAgentsExecutionIdentityShape $executionIdentity
+     */
+    public function withExecutionIdentity(
+        BetaManagedAgentsAWSRoleExecutionIdentity|array|BetaManagedAgentsServiceAccountExecutionIdentity $executionIdentity,
+    ): self {
+        $self = clone $this;
+        $self['executionIdentity'] = $executionIdentity;
 
         return $self;
     }
@@ -273,6 +318,20 @@ final class BetaManagedAgentsAgent implements BaseModel
     {
         $self = clone $this;
         $self['model'] = $model;
+
+        return $self;
+    }
+
+    /**
+     * Multiagent orchestration configuration. Null when the agent is single-threaded.
+     *
+     * @param BetaManagedAgentsMultiagentShape|null $multiagent
+     */
+    public function withMultiagent(
+        BetaManagedAgentsMultiagentCoordinator|array|BetaManagedAgentsMultiagent20261001|null $multiagent,
+    ): self {
+        $self = clone $this;
+        $self['multiagent'] = $multiagent;
 
         return $self;
     }
@@ -316,9 +375,9 @@ final class BetaManagedAgentsAgent implements BaseModel
     }
 
     /**
-     * @param Type|value-of<Type> $type
+     * @param 'agent' $type
      */
-    public function withType(Type|string $type): self
+    public function withType(string $type): self
     {
         $self = clone $this;
         $self['type'] = $type;
@@ -327,7 +386,7 @@ final class BetaManagedAgentsAgent implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * A timestamp in RFC 3339 format
      */
     public function withUpdatedAt(\DateTimeInterface $updatedAt): self
     {

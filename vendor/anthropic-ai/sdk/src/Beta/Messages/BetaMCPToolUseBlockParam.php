@@ -8,6 +8,7 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-import-type BetaCacheControlEphemeralShape from \Anthropic\Beta\Messages\BetaCacheControlEphemeral
@@ -27,7 +28,7 @@ final class BetaMCPToolUseBlockParam implements BaseModel
     use SdkModel;
 
     /** @var 'mcp_tool_use' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('mcp_tool_use'))]
     public string $type = 'mcp_tool_use';
 
     #[Required]
@@ -41,7 +42,7 @@ final class BetaMCPToolUseBlockParam implements BaseModel
     public string $name;
 
     /**
-     * The name of the MCP server.
+     * The name of the MCP server
      */
     #[Required('server_name')]
     public string $serverName;
@@ -63,7 +64,7 @@ final class BetaMCPToolUseBlockParam implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaMCPToolUseBlockParam)
+     * (new BetaMCPToolUseBlockParam())
      *   ->withID(...)
      *   ->withInput(...)
      *   ->withName(...)
@@ -130,7 +131,7 @@ final class BetaMCPToolUseBlockParam implements BaseModel
     }
 
     /**
-     * The name of the MCP server.
+     * The name of the MCP server
      */
     public function withServerName(string $serverName): self
     {

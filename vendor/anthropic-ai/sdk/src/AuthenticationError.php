@@ -4,76 +4,14 @@ declare(strict_types=1);
 
 namespace Anthropic;
 
-use Anthropic\Core\Attributes\Required;
-use Anthropic\Core\Concerns\SdkModel;
-use Anthropic\Core\Contracts\BaseModel;
+// Loading the class registers this name as its alias.
+class_exists(AuthenticationErrorObject::class);
 
-/**
- * @phpstan-type AuthenticationErrorShape = array{
- *   message: string, type: 'authentication_error'
- * }
- */
-final class AuthenticationError implements BaseModel
-{
-    /** @use SdkModel<AuthenticationErrorShape> */
-    use SdkModel;
-
-    /** @var 'authentication_error' $type */
-    #[Required]
-    public string $type = 'authentication_error';
-
-    #[Required]
-    public string $message;
-
+// This block never runs. It declares the name for IDEs and static analyzers.
+// @phpstan-ignore if.alwaysFalse
+if (false) {
     /**
-     * `new AuthenticationError()` is missing required properties by the API.
-     *
-     * To enforce required parameters use
-     * ```
-     * AuthenticationError::with(message: ...)
-     * ```
-     *
-     * Otherwise ensure the following setters are called
-     *
-     * ```
-     * (new AuthenticationError)->withMessage(...)
-     * ```
+     * @deprecated AuthenticationError has been renamed to AuthenticationErrorObject
      */
-    public function __construct()
-    {
-        $this->initialize();
-    }
-
-    /**
-     * Construct an instance from the required parameters.
-     *
-     * You must use named parameters to construct any parameters with a default value.
-     */
-    public static function with(string $message = 'Authentication error'): self
-    {
-        $self = new self;
-
-        $self['message'] = $message;
-
-        return $self;
-    }
-
-    public function withMessage(string $message): self
-    {
-        $self = clone $this;
-        $self['message'] = $message;
-
-        return $self;
-    }
-
-    /**
-     * @param 'authentication_error' $type
-     */
-    public function withType(string $type): self
-    {
-        $self = clone $this;
-        $self['type'] = $type;
-
-        return $self;
-    }
+    class AuthenticationError extends AuthenticationErrorObject {}
 }

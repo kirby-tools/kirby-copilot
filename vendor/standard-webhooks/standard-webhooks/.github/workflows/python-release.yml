@@ -1,0 +1,23 @@
+name: Python Release
+on:
+  push:
+    tags:
+      - "v*"
+permissions:
+  id-token: write
+jobs:
+  build:
+    name: Build source distribution
+    runs-on: ubuntu-latest
+    environment: Release
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          python-version: "3.14"
+      - name: Build sdist and wheel
+        run: uv build
+        working-directory: libraries/python
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: libraries/python/dist

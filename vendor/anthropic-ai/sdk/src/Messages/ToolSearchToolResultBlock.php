@@ -7,10 +7,11 @@ namespace Anthropic\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type ContentVariants from \Anthropic\Messages\ToolSearchToolResultBlock\Content
  * @phpstan-import-type ContentShape from \Anthropic\Messages\ToolSearchToolResultBlock\Content
+ * @phpstan-import-type ContentVariants from \Anthropic\Messages\ToolSearchToolResultBlock\Content
  *
  * @phpstan-type ToolSearchToolResultBlockShape = array{
  *   content: ContentShape, toolUseID: string, type: 'tool_search_tool_result'
@@ -22,12 +23,12 @@ final class ToolSearchToolResultBlock implements BaseModel
     use SdkModel;
 
     /** @var 'tool_search_tool_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('tool_search_tool_result'))]
     public string $type = 'tool_search_tool_result';
 
     /** @var ContentVariants $content */
     #[Required]
-    public ToolSearchToolResultError|ToolSearchToolSearchResultBlock $content;
+    public ToolSearchToolResultErrorObject|ToolSearchToolSearchResultBlock $content;
 
     #[Required('tool_use_id')]
     public string $toolUseID;
@@ -43,7 +44,7 @@ final class ToolSearchToolResultBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ToolSearchToolResultBlock)->withContent(...)->withToolUseID(...)
+     * (new ToolSearchToolResultBlock())->withContent(...)->withToolUseID(...)
      * ```
      */
     public function __construct()
@@ -59,7 +60,7 @@ final class ToolSearchToolResultBlock implements BaseModel
      * @param ContentShape $content
      */
     public static function with(
-        ToolSearchToolResultError|array|ToolSearchToolSearchResultBlock $content,
+        ToolSearchToolResultErrorObject|array|ToolSearchToolSearchResultBlock $content,
         string $toolUseID,
     ): self {
         $self = new self;
@@ -74,7 +75,7 @@ final class ToolSearchToolResultBlock implements BaseModel
      * @param ContentShape $content
      */
     public function withContent(
-        ToolSearchToolResultError|array|ToolSearchToolSearchResultBlock $content
+        ToolSearchToolResultErrorObject|array|ToolSearchToolSearchResultBlock $content,
     ): self {
         $self = clone $this;
         $self['content'] = $content;

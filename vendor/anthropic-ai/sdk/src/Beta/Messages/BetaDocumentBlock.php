@@ -8,11 +8,12 @@ use Anthropic\Beta\Messages\BetaDocumentBlock\Source;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type SourceVariants from \Anthropic\Beta\Messages\BetaDocumentBlock\Source
  * @phpstan-import-type BetaCitationConfigShape from \Anthropic\Beta\Messages\BetaCitationConfig
  * @phpstan-import-type SourceShape from \Anthropic\Beta\Messages\BetaDocumentBlock\Source
+ * @phpstan-import-type SourceVariants from \Anthropic\Beta\Messages\BetaDocumentBlock\Source
  *
  * @phpstan-type BetaDocumentBlockShape = array{
  *   citations: null|BetaCitationConfig|BetaCitationConfigShape,
@@ -27,11 +28,11 @@ final class BetaDocumentBlock implements BaseModel
     use SdkModel;
 
     /** @var 'document' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('document'))]
     public string $type = 'document';
 
     /**
-     * Citation configuration for the document.
+     * Citation configuration for the document
      */
     #[Required]
     public ?BetaCitationConfig $citations;
@@ -41,7 +42,7 @@ final class BetaDocumentBlock implements BaseModel
     public BetaBase64PDFSource|BetaPlainTextSource $source;
 
     /**
-     * The title of the document.
+     * The title of the document
      */
     #[Required]
     public ?string $title;
@@ -57,7 +58,7 @@ final class BetaDocumentBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaDocumentBlock)->withCitations(...)->withSource(...)->withTitle(...)
+     * (new BetaDocumentBlock())->withCitations(...)->withSource(...)->withTitle(...)
      * ```
      */
     public function __construct()
@@ -88,7 +89,7 @@ final class BetaDocumentBlock implements BaseModel
     }
 
     /**
-     * Citation configuration for the document.
+     * Citation configuration for the document
      *
      * @param BetaCitationConfig|BetaCitationConfigShape|null $citations
      */
@@ -114,7 +115,7 @@ final class BetaDocumentBlock implements BaseModel
     }
 
     /**
-     * The title of the document.
+     * The title of the document
      */
     public function withTitle(?string $title): self
     {

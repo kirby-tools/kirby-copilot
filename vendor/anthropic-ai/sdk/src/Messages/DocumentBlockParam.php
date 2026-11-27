@@ -8,13 +8,14 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\DocumentBlockParam\Source;
 
 /**
- * @phpstan-import-type SourceVariants from \Anthropic\Messages\DocumentBlockParam\Source
  * @phpstan-import-type SourceShape from \Anthropic\Messages\DocumentBlockParam\Source
  * @phpstan-import-type CacheControlEphemeralShape from \Anthropic\Messages\CacheControlEphemeral
  * @phpstan-import-type CitationsConfigParamShape from \Anthropic\Messages\CitationsConfigParam
+ * @phpstan-import-type SourceVariants from \Anthropic\Messages\DocumentBlockParam\Source
  *
  * @phpstan-type DocumentBlockParamShape = array{
  *   source: SourceShape,
@@ -31,12 +32,12 @@ final class DocumentBlockParam implements BaseModel
     use SdkModel;
 
     /** @var 'document' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('document'))]
     public string $type = 'document';
 
     /** @var SourceVariants $source */
     #[Required(union: Source::class)]
-    public Base64PDFSource|PlainTextSource|ContentBlockSource|URLPDFSource $source;
+    public Base64PDFSource|PlainTextSource|ContentBlockSource|URLPDFSource|FileDocumentSource $source;
 
     /**
      * Create a cache control breakpoint at this content block.
@@ -64,7 +65,7 @@ final class DocumentBlockParam implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new DocumentBlockParam)->withSource(...)
+     * (new DocumentBlockParam())->withSource(...)
      * ```
      */
     public function __construct()
@@ -82,7 +83,7 @@ final class DocumentBlockParam implements BaseModel
      * @param CitationsConfigParam|CitationsConfigParamShape|null $citations
      */
     public static function with(
-        Base64PDFSource|array|PlainTextSource|ContentBlockSource|URLPDFSource $source,
+        Base64PDFSource|array|PlainTextSource|ContentBlockSource|URLPDFSource|FileDocumentSource $source,
         CacheControlEphemeral|array|null $cacheControl = null,
         CitationsConfigParam|array|null $citations = null,
         ?string $context = null,
@@ -104,7 +105,7 @@ final class DocumentBlockParam implements BaseModel
      * @param SourceShape $source
      */
     public function withSource(
-        Base64PDFSource|array|PlainTextSource|ContentBlockSource|URLPDFSource $source,
+        Base64PDFSource|array|PlainTextSource|ContentBlockSource|URLPDFSource|FileDocumentSource $source,
     ): self {
         $self = clone $this;
         $self['source'] = $source;

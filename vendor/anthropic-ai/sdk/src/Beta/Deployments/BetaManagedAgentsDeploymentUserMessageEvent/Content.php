@@ -1,0 +1,47 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Beta\Deployments\BetaManagedAgentsDeploymentUserMessageEvent;
+
+use Anthropic\Beta\Sessions\Events\ManagedAgentsDocumentBlock;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsImageBlock;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsRedactedBlock;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsTextBlock;
+use Anthropic\Core\Concerns\SdkUnion;
+use Anthropic\Core\Conversion\Contracts\Converter;
+use Anthropic\Core\Conversion\Contracts\ConverterSource;
+
+/**
+ * Content block in a user message. Can be `text`, `image`, or `document`.
+ *
+ * @phpstan-import-type ManagedAgentsTextBlockShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsTextBlock
+ * @phpstan-import-type ManagedAgentsImageBlockShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsImageBlock
+ * @phpstan-import-type ManagedAgentsDocumentBlockShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsDocumentBlock
+ * @phpstan-import-type ManagedAgentsRedactedBlockShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsRedactedBlock
+ *
+ * @phpstan-type ContentVariants = ManagedAgentsTextBlock|ManagedAgentsImageBlock|ManagedAgentsDocumentBlock|ManagedAgentsRedactedBlock
+ * @phpstan-type ContentShape = ContentVariants|ManagedAgentsTextBlockShape|ManagedAgentsImageBlockShape|ManagedAgentsDocumentBlockShape|ManagedAgentsRedactedBlockShape
+ */
+final class Content implements ConverterSource
+{
+    use SdkUnion;
+
+    public static function discriminator(): string
+    {
+        return 'type';
+    }
+
+    /**
+     * @return list<string|Converter|ConverterSource>|array<string,string|Converter|ConverterSource>
+     */
+    public static function variants(): array
+    {
+        return [
+            'text' => ManagedAgentsTextBlock::class,
+            'image' => ManagedAgentsImageBlock::class,
+            'document' => ManagedAgentsDocumentBlock::class,
+            'redacted' => ManagedAgentsRedactedBlock::class,
+        ];
+    }
+}

@@ -12,18 +12,22 @@ use Anthropic\Core\Contracts\BaseModel;
  * Model capability information.
  *
  * @phpstan-import-type BetaCapabilitySupportShape from \Anthropic\Beta\Models\BetaCapabilitySupport
+ * @phpstan-import-type BetaCompactionCapabilityShape from \Anthropic\Beta\Models\BetaCompactionCapability
  * @phpstan-import-type BetaContextManagementCapabilityShape from \Anthropic\Beta\Models\BetaContextManagementCapability
  * @phpstan-import-type BetaEffortCapabilityShape from \Anthropic\Beta\Models\BetaEffortCapability
+ * @phpstan-import-type BetaServerToolsCapabilityShape from \Anthropic\Beta\Models\BetaServerToolsCapability
  * @phpstan-import-type BetaThinkingCapabilityShape from \Anthropic\Beta\Models\BetaThinkingCapability
  *
  * @phpstan-type BetaModelCapabilitiesShape = array{
  *   batch: BetaCapabilitySupport|BetaCapabilitySupportShape,
  *   citations: BetaCapabilitySupport|BetaCapabilitySupportShape,
  *   codeExecution: BetaCapabilitySupport|BetaCapabilitySupportShape,
+ *   compaction: null|BetaCompactionCapability|BetaCompactionCapabilityShape,
  *   contextManagement: BetaContextManagementCapability|BetaContextManagementCapabilityShape,
  *   effort: BetaEffortCapability|BetaEffortCapabilityShape,
  *   imageInput: BetaCapabilitySupport|BetaCapabilitySupportShape,
  *   pdfInput: BetaCapabilitySupport|BetaCapabilitySupportShape,
+ *   serverTools: BetaServerToolsCapability|BetaServerToolsCapabilityShape,
  *   structuredOutputs: BetaCapabilitySupport|BetaCapabilitySupportShape,
  *   thinking: BetaThinkingCapability|BetaThinkingCapabilityShape,
  * }
@@ -46,10 +50,16 @@ final class BetaModelCapabilities implements BaseModel
     public BetaCapabilitySupport $citations;
 
     /**
-     * Whether the model supports code execution tools.
+     * Whether code that the model runs in the code execution tool can call the request's other tools, as in programmatic tool calling and dynamic filtering for web search and web fetch. Support for the code execution tool itself is in `server_tools.code_execution`.
      */
     #[Required('code_execution')]
     public BetaCapabilitySupport $codeExecution;
+
+    /**
+     * Server-side compaction support (the top-level `compaction` parameter) and the accepted `compaction.type` values.
+     */
+    #[Required]
+    public ?BetaCompactionCapability $compaction;
 
     /**
      * Context management support and available strategies.
@@ -76,6 +86,12 @@ final class BetaModelCapabilities implements BaseModel
     public BetaCapabilitySupport $pdfInput;
 
     /**
+     * Whether this model supports the web search and code execution server tools. `supported` is true when the model supports at least one of the tools. A supported tool can still be rejected for your organization, for example when an admin has turned web search off.
+     */
+    #[Required('server_tools')]
+    public BetaServerToolsCapability $serverTools;
+
+    /**
      * Whether the model supports structured output / JSON mode / strict tool schemas.
      */
     #[Required('structured_outputs')]
@@ -96,10 +112,12 @@ final class BetaModelCapabilities implements BaseModel
      *   batch: ...,
      *   citations: ...,
      *   codeExecution: ...,
+     *   compaction: ...,
      *   contextManagement: ...,
      *   effort: ...,
      *   imageInput: ...,
      *   pdfInput: ...,
+     *   serverTools: ...,
      *   structuredOutputs: ...,
      *   thinking: ...,
      * )
@@ -108,14 +126,16 @@ final class BetaModelCapabilities implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaModelCapabilities)
+     * (new BetaModelCapabilities())
      *   ->withBatch(...)
      *   ->withCitations(...)
      *   ->withCodeExecution(...)
+     *   ->withCompaction(...)
      *   ->withContextManagement(...)
      *   ->withEffort(...)
      *   ->withImageInput(...)
      *   ->withPDFInput(...)
+     *   ->withServerTools(...)
      *   ->withStructuredOutputs(...)
      *   ->withThinking(...)
      * ```
@@ -133,10 +153,12 @@ final class BetaModelCapabilities implements BaseModel
      * @param BetaCapabilitySupport|BetaCapabilitySupportShape $batch
      * @param BetaCapabilitySupport|BetaCapabilitySupportShape $citations
      * @param BetaCapabilitySupport|BetaCapabilitySupportShape $codeExecution
+     * @param BetaCompactionCapability|BetaCompactionCapabilityShape|null $compaction
      * @param BetaContextManagementCapability|BetaContextManagementCapabilityShape $contextManagement
      * @param BetaEffortCapability|BetaEffortCapabilityShape $effort
      * @param BetaCapabilitySupport|BetaCapabilitySupportShape $imageInput
      * @param BetaCapabilitySupport|BetaCapabilitySupportShape $pdfInput
+     * @param BetaServerToolsCapability|BetaServerToolsCapabilityShape $serverTools
      * @param BetaCapabilitySupport|BetaCapabilitySupportShape $structuredOutputs
      * @param BetaThinkingCapability|BetaThinkingCapabilityShape $thinking
      */
@@ -144,10 +166,12 @@ final class BetaModelCapabilities implements BaseModel
         BetaCapabilitySupport|array $batch,
         BetaCapabilitySupport|array $citations,
         BetaCapabilitySupport|array $codeExecution,
+        BetaCompactionCapability|array|null $compaction,
         BetaContextManagementCapability|array $contextManagement,
         BetaEffortCapability|array $effort,
         BetaCapabilitySupport|array $imageInput,
         BetaCapabilitySupport|array $pdfInput,
+        BetaServerToolsCapability|array $serverTools,
         BetaCapabilitySupport|array $structuredOutputs,
         BetaThinkingCapability|array $thinking,
     ): self {
@@ -156,10 +180,12 @@ final class BetaModelCapabilities implements BaseModel
         $self['batch'] = $batch;
         $self['citations'] = $citations;
         $self['codeExecution'] = $codeExecution;
+        $self['compaction'] = $compaction;
         $self['contextManagement'] = $contextManagement;
         $self['effort'] = $effort;
         $self['imageInput'] = $imageInput;
         $self['pdfInput'] = $pdfInput;
+        $self['serverTools'] = $serverTools;
         $self['structuredOutputs'] = $structuredOutputs;
         $self['thinking'] = $thinking;
 
@@ -193,7 +219,7 @@ final class BetaModelCapabilities implements BaseModel
     }
 
     /**
-     * Whether the model supports code execution tools.
+     * Whether code that the model runs in the code execution tool can call the request's other tools, as in programmatic tool calling and dynamic filtering for web search and web fetch. Support for the code execution tool itself is in `server_tools.code_execution`.
      *
      * @param BetaCapabilitySupport|BetaCapabilitySupportShape $codeExecution
      */
@@ -202,6 +228,20 @@ final class BetaModelCapabilities implements BaseModel
     ): self {
         $self = clone $this;
         $self['codeExecution'] = $codeExecution;
+
+        return $self;
+    }
+
+    /**
+     * Server-side compaction support (the top-level `compaction` parameter) and the accepted `compaction.type` values.
+     *
+     * @param BetaCompactionCapability|BetaCompactionCapabilityShape|null $compaction
+     */
+    public function withCompaction(
+        BetaCompactionCapability|array|null $compaction
+    ): self {
+        $self = clone $this;
+        $self['compaction'] = $compaction;
 
         return $self;
     }
@@ -256,6 +296,20 @@ final class BetaModelCapabilities implements BaseModel
     {
         $self = clone $this;
         $self['pdfInput'] = $pdfInput;
+
+        return $self;
+    }
+
+    /**
+     * Whether this model supports the web search and code execution server tools. `supported` is true when the model supports at least one of the tools. A supported tool can still be rejected for your organization, for example when an admin has turned web search off.
+     *
+     * @param BetaServerToolsCapability|BetaServerToolsCapabilityShape $serverTools
+     */
+    public function withServerTools(
+        BetaServerToolsCapability|array $serverTools
+    ): self {
+        $self = clone $this;
+        $self['serverTools'] = $serverTools;
 
         return $self;
     }

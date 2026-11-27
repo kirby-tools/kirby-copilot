@@ -7,13 +7,14 @@ namespace Anthropic\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\WebSearchToolResultBlock\Caller;
 
 /**
- * @phpstan-import-type CallerVariants from \Anthropic\Messages\WebSearchToolResultBlock\Caller
- * @phpstan-import-type WebSearchToolResultBlockContentVariants from \Anthropic\Messages\WebSearchToolResultBlockContent
  * @phpstan-import-type CallerShape from \Anthropic\Messages\WebSearchToolResultBlock\Caller
  * @phpstan-import-type WebSearchToolResultBlockContentShape from \Anthropic\Messages\WebSearchToolResultBlockContent
+ * @phpstan-import-type CallerVariants from \Anthropic\Messages\WebSearchToolResultBlock\Caller
+ * @phpstan-import-type WebSearchToolResultBlockContentVariants from \Anthropic\Messages\WebSearchToolResultBlockContent
  *
  * @phpstan-type WebSearchToolResultBlockShape = array{
  *   caller: CallerShape,
@@ -28,20 +29,16 @@ final class WebSearchToolResultBlock implements BaseModel
     use SdkModel;
 
     /** @var 'web_search_tool_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('web_search_tool_result'))]
     public string $type = 'web_search_tool_result';
 
-    /**
-     * Tool invocation directly from the model.
-     *
-     * @var CallerVariants $caller
-     */
+    /** @var CallerVariants $caller */
     #[Required(union: Caller::class)]
     public DirectCaller|ServerToolCaller|ServerToolCaller20260120 $caller;
 
     /** @var WebSearchToolResultBlockContentVariants $content */
     #[Required(union: WebSearchToolResultBlockContent::class)]
-    public WebSearchToolResultError|array $content;
+    public WebSearchToolResultErrorObject|array $content;
 
     #[Required('tool_use_id')]
     public string $toolUseID;
@@ -57,7 +54,7 @@ final class WebSearchToolResultBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new WebSearchToolResultBlock)
+     * (new WebSearchToolResultBlock())
      *   ->withCaller(...)
      *   ->withContent(...)
      *   ->withToolUseID(...)
@@ -77,7 +74,7 @@ final class WebSearchToolResultBlock implements BaseModel
      * @param CallerShape $caller
      */
     public static function with(
-        WebSearchToolResultError|array $content,
+        WebSearchToolResultErrorObject|array $content,
         string $toolUseID,
         DirectCaller|array|ServerToolCaller|ServerToolCaller20260120 $caller = [
             'type' => 'direct',
@@ -93,8 +90,6 @@ final class WebSearchToolResultBlock implements BaseModel
     }
 
     /**
-     * Tool invocation directly from the model.
-     *
      * @param CallerShape $caller
      */
     public function withCaller(
@@ -109,8 +104,9 @@ final class WebSearchToolResultBlock implements BaseModel
     /**
      * @param WebSearchToolResultBlockContentShape $content
      */
-    public function withContent(WebSearchToolResultError|array $content): self
-    {
+    public function withContent(
+        WebSearchToolResultErrorObject|array $content
+    ): self {
         $self = clone $this;
         $self['content'] = $content;
 

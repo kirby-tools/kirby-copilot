@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Anthropic\Beta\Sessions;
 
 use Anthropic\Beta\AnthropicBeta;
+use Anthropic\Beta\Sessions\SessionCreateParams\InitialEvent;
 use Anthropic\Beta\Sessions\SessionCreateParams\Resource;
 use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
@@ -13,23 +14,29 @@ use Anthropic\Core\Concerns\SdkParams;
 use Anthropic\Core\Contracts\BaseModel;
 
 /**
- * Create Session.
+ * Create Session
  *
  * @see Anthropic\Services\Beta\SessionsService::create()
  *
- * @phpstan-import-type AgentVariants from \Anthropic\Beta\Sessions\SessionCreateParams\Agent
- * @phpstan-import-type ResourceVariants from \Anthropic\Beta\Sessions\SessionCreateParams\Resource
  * @phpstan-import-type AgentShape from \Anthropic\Beta\Sessions\SessionCreateParams\Agent
+ * @phpstan-import-type BetaManagedAgentsBudgetLimitShape from \Anthropic\Beta\Sessions\BetaManagedAgentsBudgetLimit
+ * @phpstan-import-type InitialEventShape from \Anthropic\Beta\Sessions\SessionCreateParams\InitialEvent
  * @phpstan-import-type ResourceShape from \Anthropic\Beta\Sessions\SessionCreateParams\Resource
+ * @phpstan-import-type AgentVariants from \Anthropic\Beta\Sessions\SessionCreateParams\Agent
+ * @phpstan-import-type InitialEventVariants from \Anthropic\Beta\Sessions\SessionCreateParams\InitialEvent
+ * @phpstan-import-type ResourceVariants from \Anthropic\Beta\Sessions\SessionCreateParams\Resource
  *
  * @phpstan-type SessionCreateParamsShape = array{
  *   agent: AgentShape,
  *   environmentID: string,
+ *   budget?: null|BetaManagedAgentsBudgetLimit|BetaManagedAgentsBudgetLimitShape,
+ *   initialEvents?: list<InitialEventShape>|null,
  *   metadata?: array<string,string>|null,
  *   resources?: list<ResourceShape>|null,
  *   title?: string|null,
  *   vaultIDs?: list<string>|null,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class SessionCreateParams implements BaseModel
@@ -44,13 +51,27 @@ final class SessionCreateParams implements BaseModel
      * @var AgentVariants $agent
      */
     #[Required]
-    public string|BetaManagedAgentsAgentParams $agent;
+    public string|BetaManagedAgentsAgentParams|BetaManagedAgentsAgentWithOverridesParams $agent;
 
     /**
      * ID of the `environment` defining the container configuration for this session.
      */
     #[Required('environment_id')]
     public string $environmentID;
+
+    /**
+     * Enforced spend ceiling for the session. Omit to create an uncapped session. Every model the session can run — the agent's model and each callable agent's model — must have a public list price, or the request is rejected with reason `model_not_budgetable`.
+     */
+    #[Optional]
+    public ?BetaManagedAgentsBudgetLimit $budget;
+
+    /**
+     * Initial events to send to the `session` at creation, processed in order. Supports `user.message` and `user.define_outcome` events. Maximum 50 events.
+     *
+     * @var list<InitialEventVariants>|null $initialEvents
+     */
+    #[Optional('initial_events', list: InitialEvent::class)]
+    public ?array $initialEvents;
 
     /**
      * Arbitrary key-value metadata attached to the session. Maximum 16 pairs, keys up to 64 chars, values up to 512 chars.
@@ -83,12 +104,20 @@ final class SessionCreateParams implements BaseModel
     public ?array $vaultIDs;
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this header.
      *
      * @var list<string|value-of<AnthropicBeta>>|null $betas
      */
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
 
     /**
      * `new SessionCreateParams()` is missing required properties by the API.
@@ -101,7 +130,7 @@ final class SessionCreateParams implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new SessionCreateParams)->withAgent(...)->withEnvironmentID(...)
+     * (new SessionCreateParams())->withAgent(...)->withEnvironmentID(...)
      * ```
      */
     public function __construct()
@@ -115,30 +144,38 @@ final class SessionCreateParams implements BaseModel
      * You must use named parameters to construct any parameters with a default value.
      *
      * @param AgentShape $agent
+     * @param BetaManagedAgentsBudgetLimit|BetaManagedAgentsBudgetLimitShape|null $budget
+     * @param list<InitialEventShape>|null $initialEvents
      * @param array<string,string>|null $metadata
      * @param list<ResourceShape>|null $resources
      * @param list<string>|null $vaultIDs
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>>|null $betas
      */
     public static function with(
-        string|BetaManagedAgentsAgentParams|array $agent,
+        string|BetaManagedAgentsAgentParams|array|BetaManagedAgentsAgentWithOverridesParams $agent,
         string $environmentID,
+        BetaManagedAgentsBudgetLimit|array|null $budget = null,
+        ?array $initialEvents = null,
         ?array $metadata = null,
         ?array $resources = null,
         ?string $title = null,
         ?array $vaultIDs = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
     ): self {
         $self = new self;
 
         $self['agent'] = $agent;
         $self['environmentID'] = $environmentID;
 
+        null !== $budget && $self['budget'] = $budget;
+        null !== $initialEvents && $self['initialEvents'] = $initialEvents;
         null !== $metadata && $self['metadata'] = $metadata;
         null !== $resources && $self['resources'] = $resources;
         null !== $title && $self['title'] = $title;
         null !== $vaultIDs && $self['vaultIDs'] = $vaultIDs;
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
@@ -149,7 +186,7 @@ final class SessionCreateParams implements BaseModel
      * @param AgentShape $agent
      */
     public function withAgent(
-        string|BetaManagedAgentsAgentParams|array $agent
+        string|BetaManagedAgentsAgentParams|array|BetaManagedAgentsAgentWithOverridesParams $agent,
     ): self {
         $self = clone $this;
         $self['agent'] = $agent;
@@ -164,6 +201,32 @@ final class SessionCreateParams implements BaseModel
     {
         $self = clone $this;
         $self['environmentID'] = $environmentID;
+
+        return $self;
+    }
+
+    /**
+     * Enforced spend ceiling for the session. Omit to create an uncapped session. Every model the session can run — the agent's model and each callable agent's model — must have a public list price, or the request is rejected with reason `model_not_budgetable`.
+     *
+     * @param BetaManagedAgentsBudgetLimit|BetaManagedAgentsBudgetLimitShape $budget
+     */
+    public function withBudget(BetaManagedAgentsBudgetLimit|array $budget): self
+    {
+        $self = clone $this;
+        $self['budget'] = $budget;
+
+        return $self;
+    }
+
+    /**
+     * Initial events to send to the `session` at creation, processed in order. Supports `user.message` and `user.define_outcome` events. Maximum 50 events.
+     *
+     * @param list<InitialEventShape> $initialEvents
+     */
+    public function withInitialEvents(array $initialEvents): self
+    {
+        $self = clone $this;
+        $self['initialEvents'] = $initialEvents;
 
         return $self;
     }
@@ -219,7 +282,7 @@ final class SessionCreateParams implements BaseModel
     }
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this header.
      *
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas
      */
@@ -227,6 +290,19 @@ final class SessionCreateParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

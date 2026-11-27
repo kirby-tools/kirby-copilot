@@ -5,22 +5,22 @@ declare(strict_types=1);
 namespace Anthropic\Beta\Sessions\Events;
 
 use Anthropic\Beta\Sessions\Events\ManagedAgentsSessionErrorEvent\Error;
-use Anthropic\Beta\Sessions\Events\ManagedAgentsSessionErrorEvent\Type;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * An error event indicating a problem occurred during session execution.
  *
- * @phpstan-import-type ErrorVariants from \Anthropic\Beta\Sessions\Events\ManagedAgentsSessionErrorEvent\Error
  * @phpstan-import-type ErrorShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsSessionErrorEvent\Error
+ * @phpstan-import-type ErrorVariants from \Anthropic\Beta\Sessions\Events\ManagedAgentsSessionErrorEvent\Error
  *
  * @phpstan-type ManagedAgentsSessionErrorEventShape = array{
  *   id: string,
  *   error: ErrorShape,
  *   processedAt: \DateTimeInterface,
- *   type: Type|value-of<Type>,
+ *   type: 'session.error',
  * }
  */
 final class ManagedAgentsSessionErrorEvent implements BaseModel
@@ -28,48 +28,41 @@ final class ManagedAgentsSessionErrorEvent implements BaseModel
     /** @use SdkModel<ManagedAgentsSessionErrorEventShape> */
     use SdkModel;
 
+    /** @var 'session.error' $type */
+    #[Required(type: new ConstantOf('session.error'))]
+    public string $type = 'session.error';
+
     /**
      * Unique identifier for this event.
      */
     #[Required]
     public string $id;
 
-    /**
-     * An unknown or unexpected error occurred during session execution. A fallback variant; clients that don't recognize a new error code can match on `retry_status` and `message` alone.
-     *
-     * @var ErrorVariants $error
-     */
+    /** @var ErrorVariants $error */
     #[Required(union: Error::class)]
-    public ManagedAgentsUnknownError|ManagedAgentsModelOverloadedError|ManagedAgentsModelRateLimitedError|ManagedAgentsModelRequestFailedError|ManagedAgentsMCPConnectionFailedError|ManagedAgentsMCPAuthenticationFailedError|ManagedAgentsBillingError $error;
+    public ManagedAgentsUnknownErrorObject|ManagedAgentsModelOverloadedErrorObject|ManagedAgentsModelRateLimitedErrorObject|ManagedAgentsModelRequestFailedErrorObject|ManagedAgentsMCPConnectionFailedErrorObject|ManagedAgentsMCPAuthenticationFailedErrorObject|ManagedAgentsBillingErrorObject|ManagedAgentsCredentialHostUnreachableErrorObject|ManagedAgentsToolUseLimitReachedErrorObject|ManagedAgentsCompactionLimitReachedErrorObject|ManagedAgentsRepositoryAuthenticationErrorObject|ManagedAgentsRepositoryForbiddenErrorObject|ManagedAgentsRepositoryNotFoundErrorObject|ManagedAgentsRepositoryCheckoutErrorObject|ManagedAgentsRepositoryCloneErrorObject $error;
 
     /**
-     * A timestamp in RFC 3339 format.
+     * Timestamp when the error occurred.
      */
     #[Required('processed_at')]
     public \DateTimeInterface $processedAt;
-
-    /** @var value-of<Type> $type */
-    #[Required(enum: Type::class)]
-    public string $type;
 
     /**
      * `new ManagedAgentsSessionErrorEvent()` is missing required properties by the API.
      *
      * To enforce required parameters use
      * ```
-     * ManagedAgentsSessionErrorEvent::with(
-     *   id: ..., error: ..., processedAt: ..., type: ...
-     * )
+     * ManagedAgentsSessionErrorEvent::with(id: ..., error: ..., processedAt: ...)
      * ```
      *
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ManagedAgentsSessionErrorEvent)
+     * (new ManagedAgentsSessionErrorEvent())
      *   ->withID(...)
      *   ->withError(...)
      *   ->withProcessedAt(...)
-     *   ->withType(...)
      * ```
      */
     public function __construct()
@@ -83,20 +76,17 @@ final class ManagedAgentsSessionErrorEvent implements BaseModel
      * You must use named parameters to construct any parameters with a default value.
      *
      * @param ErrorShape $error
-     * @param Type|value-of<Type> $type
      */
     public static function with(
         string $id,
-        ManagedAgentsUnknownError|array|ManagedAgentsModelOverloadedError|ManagedAgentsModelRateLimitedError|ManagedAgentsModelRequestFailedError|ManagedAgentsMCPConnectionFailedError|ManagedAgentsMCPAuthenticationFailedError|ManagedAgentsBillingError $error,
+        ManagedAgentsUnknownErrorObject|array|ManagedAgentsModelOverloadedErrorObject|ManagedAgentsModelRateLimitedErrorObject|ManagedAgentsModelRequestFailedErrorObject|ManagedAgentsMCPConnectionFailedErrorObject|ManagedAgentsMCPAuthenticationFailedErrorObject|ManagedAgentsBillingErrorObject|ManagedAgentsCredentialHostUnreachableErrorObject|ManagedAgentsToolUseLimitReachedErrorObject|ManagedAgentsCompactionLimitReachedErrorObject|ManagedAgentsRepositoryAuthenticationErrorObject|ManagedAgentsRepositoryForbiddenErrorObject|ManagedAgentsRepositoryNotFoundErrorObject|ManagedAgentsRepositoryCheckoutErrorObject|ManagedAgentsRepositoryCloneErrorObject $error,
         \DateTimeInterface $processedAt,
-        Type|string $type,
     ): self {
         $self = new self;
 
         $self['id'] = $id;
         $self['error'] = $error;
         $self['processedAt'] = $processedAt;
-        $self['type'] = $type;
 
         return $self;
     }
@@ -113,12 +103,10 @@ final class ManagedAgentsSessionErrorEvent implements BaseModel
     }
 
     /**
-     * An unknown or unexpected error occurred during session execution. A fallback variant; clients that don't recognize a new error code can match on `retry_status` and `message` alone.
-     *
      * @param ErrorShape $error
      */
     public function withError(
-        ManagedAgentsUnknownError|array|ManagedAgentsModelOverloadedError|ManagedAgentsModelRateLimitedError|ManagedAgentsModelRequestFailedError|ManagedAgentsMCPConnectionFailedError|ManagedAgentsMCPAuthenticationFailedError|ManagedAgentsBillingError $error,
+        ManagedAgentsUnknownErrorObject|array|ManagedAgentsModelOverloadedErrorObject|ManagedAgentsModelRateLimitedErrorObject|ManagedAgentsModelRequestFailedErrorObject|ManagedAgentsMCPConnectionFailedErrorObject|ManagedAgentsMCPAuthenticationFailedErrorObject|ManagedAgentsBillingErrorObject|ManagedAgentsCredentialHostUnreachableErrorObject|ManagedAgentsToolUseLimitReachedErrorObject|ManagedAgentsCompactionLimitReachedErrorObject|ManagedAgentsRepositoryAuthenticationErrorObject|ManagedAgentsRepositoryForbiddenErrorObject|ManagedAgentsRepositoryNotFoundErrorObject|ManagedAgentsRepositoryCheckoutErrorObject|ManagedAgentsRepositoryCloneErrorObject $error,
     ): self {
         $self = clone $this;
         $self['error'] = $error;
@@ -127,7 +115,7 @@ final class ManagedAgentsSessionErrorEvent implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * Timestamp when the error occurred.
      */
     public function withProcessedAt(\DateTimeInterface $processedAt): self
     {
@@ -138,9 +126,9 @@ final class ManagedAgentsSessionErrorEvent implements BaseModel
     }
 
     /**
-     * @param Type|value-of<Type> $type
+     * @param 'session.error' $type
      */
-    public function withType(Type|string $type): self
+    public function withType(string $type): self
     {
         $self = clone $this;
         $self['type'] = $type;

@@ -161,7 +161,9 @@ final class LicensePanel
                                 'email' => [
                                     'label' => I18n::translate('kirby-tools.license.activate.email'),
                                     'type' => 'email',
-                                    'required' => true
+                                    'required' => true,
+                                    // Kirby's own dialog autofocus skips a dialog that replaces an open one.
+                                    'autofocus' => true
                                 ],
                                 'licenseKey' => [
                                     'label' => I18n::translate('kirby-tools.license.activate.licenseKey'),

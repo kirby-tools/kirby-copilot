@@ -8,6 +8,10 @@ use Anthropic\Core\BaseClient;
 use Anthropic\Core\Util;
 use Anthropic\Foundry\Services\MessagesService;
 use Anthropic\RequestOptions;
+use Anthropic\Services\FilesService;
+use Anthropic\Services\SkillsService;
+use Anthropic\Services\UserProfilesService;
+use Http\Discovery\Exception\NotFoundException;
 use Http\Discovery\Psr17FactoryDiscovery;
 use Http\Discovery\Psr18ClientDiscovery;
 
@@ -16,6 +20,7 @@ use const Anthropic\VERSION;
 /**
  * @phpstan-import-type NormalizedRequest from \Anthropic\Core\BaseClient
  * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ * @phpstan-import-type OpenTelemetryOptions from \Anthropic\Core\BaseClient
  */
 final class Client extends BaseClient
 {
@@ -29,45 +34,78 @@ final class Client extends BaseClient
     public MessagesService $messages;
 
     /**
+     * @api
+     */
+    public FilesService $files;
+
+    /**
+     * @api
+     */
+    public SkillsService $skills;
+
+    /**
+     * @api
+     */
+    public UserProfilesService $userProfiles;
+
+    /**
      * @param RequestOpts|null $requestOptions
+     * @param OpenTelemetryOptions|null $openTelemetry
      */
     private function __construct(
         string $baseUrl,
         string $apiKey,
         ?string $authToken,
         RequestOptions|array|null $requestOptions = null,
+        array|false|null $openTelemetry = null,
     ) {
         $this->apiKey = $apiKey;
         $this->authToken = $authToken;
 
-        $options = RequestOptions::parse(
-            RequestOptions::with(
-                uriFactory: Psr17FactoryDiscovery::findUriFactory(),
-                streamFactory: Psr17FactoryDiscovery::findStreamFactory(),
-                requestFactory: Psr17FactoryDiscovery::findRequestFactory(),
-                transporter: Psr18ClientDiscovery::find(),
-            ),
-            $requestOptions,
-        );
+        try {
+            $options = RequestOptions::parse(
+                RequestOptions::with(
+                    uriFactory: Psr17FactoryDiscovery::findUriFactory(),
+                    streamFactory: Psr17FactoryDiscovery::findStreamFactory(),
+                    requestFactory: Psr17FactoryDiscovery::findRequestFactory(),
+                    transporter: Psr18ClientDiscovery::find(),
+                ),
+                $requestOptions,
+            );
+        } catch (NotFoundException $e) {
+            throw new NotFoundException("No PSR-18 HTTP client or PSR-17 factory found. If you don't have one in your project, run `composer require guzzlehttp/guzzle`.", previous: $e);
+        }
 
         parent::__construct(
             headers: [
-                'anthropic-version' => '2023-06-01',
+                'anthropic-version' => \Anthropic\Client::ANTHROPIC_API_VERSION,
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
                 'User-Agent' => sprintf('anthropic/PHP %s', VERSION),
                 'X-Stainless-Lang' => 'php',
-                'X-Stainless-Package-Version' => '0.0.1',
+                'X-Stainless-Package-Version' => VERSION,
                 'X-Stainless-Arch' => Util::machtype(),
                 'X-Stainless-OS' => Util::ostype(),
                 'X-Stainless-Runtime' => php_sapi_name(),
                 'X-Stainless-Runtime-Version' => phpversion(),
             ],
             baseUrl: $baseUrl,
-            options: $options
+            options: $options,
+            openTelemetry: $openTelemetry,
         );
 
         $this->messages = new MessagesService($this);
+
+        $serviceClient = new ServiceClient(
+            headers: $this->headers,
+            baseUrl: $baseUrl,
+            options: $options,
+            authHeaders: $this->authHeaders(...),
+            openTelemetry: $openTelemetry,
+        );
+        $this->files = new FilesService($serviceClient);
+        $this->skills = new SkillsService($serviceClient);
+        $this->userProfiles = new UserProfilesService($serviceClient);
     }
 
     /**
@@ -79,11 +117,13 @@ final class Client extends BaseClient
      * - ANTHROPIC_FOUNDRY_RESOURCE
      *
      * @param RequestOpts|null $requestOptions
+     * @param OpenTelemetryOptions|null $openTelemetry
      */
     public static function fromEnvironment(
         ?string $baseUrl = null,
         ?string $resource = null,
         RequestOptions|array|null $requestOptions = null,
+        array|false|null $openTelemetry = null,
     ): self {
         $baseUrl ??= Util::getenv('ANTHROPIC_FOUNDRY_BASE_URL');
         $resource ??= Util::getenv('ANTHROPIC_FOUNDRY_RESOURCE');
@@ -95,6 +135,7 @@ final class Client extends BaseClient
             baseUrl: $baseUrl,
             resource: $resource,
             requestOptions: $requestOptions,
+            openTelemetry: $openTelemetry,
         );
     }
 
@@ -102,6 +143,7 @@ final class Client extends BaseClient
      * Create a Foundry client using explicit credentials.
      *
      * @param RequestOpts|null $requestOptions
+     * @param OpenTelemetryOptions|null $openTelemetry
      */
     public static function withCredentials(
         ?string $apiKey = null,
@@ -109,6 +151,7 @@ final class Client extends BaseClient
         ?string $baseUrl = null,
         ?string $resource = null,
         RequestOptions|array|null $requestOptions = null,
+        array|false|null $openTelemetry = null,
     ): self {
         $baseUrl ??= Util::getenv('ANTHROPIC_FOUNDRY_BASE_URL');
         $resource ??= Util::getenv('ANTHROPIC_FOUNDRY_RESOURCE');
@@ -119,6 +162,7 @@ final class Client extends BaseClient
             baseUrl: $baseUrl,
             resource: $resource,
             requestOptions: $requestOptions,
+            openTelemetry: $openTelemetry,
         );
     }
 
@@ -150,7 +194,7 @@ final class Client extends BaseClient
      * @param array<string,string|int|list<string|int>|null> $headers
      * @param RequestOpts|null $opts
      *
-     * @return array{NormalizedRequest, RequestOptions}
+     * @return array{NormalizedRequest, RequestOptions, string}
      */
     protected function buildRequest(
         string $method,
@@ -172,6 +216,7 @@ final class Client extends BaseClient
 
     /**
      * @param RequestOpts|null $requestOptions
+     * @param OpenTelemetryOptions|null $openTelemetry
      */
     private static function build(
         ?string $apiKey,
@@ -179,6 +224,7 @@ final class Client extends BaseClient
         ?string $baseUrl,
         ?string $resource,
         RequestOptions|array|null $requestOptions,
+        array|false|null $openTelemetry,
     ): self {
         $apiKey = (string) ($apiKey ?? '');
         if ('' === $authToken) {
@@ -204,6 +250,7 @@ final class Client extends BaseClient
             apiKey: $apiKey,
             authToken: $authToken,
             requestOptions: $requestOptions,
+            openTelemetry: $openTelemetry,
         );
     }
 

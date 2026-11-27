@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace Anthropic\Beta\Vaults\Credentials;
 
 use Anthropic\Beta\Vaults\Credentials\ManagedAgentsCredential\Auth;
-use Anthropic\Beta\Vaults\Credentials\ManagedAgentsCredential\Type;
 use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * A credential stored in a vault. Sensitive fields are never returned in responses.
  *
- * @phpstan-import-type AuthVariants from \Anthropic\Beta\Vaults\Credentials\ManagedAgentsCredential\Auth
  * @phpstan-import-type AuthShape from \Anthropic\Beta\Vaults\Credentials\ManagedAgentsCredential\Auth
+ * @phpstan-import-type AuthVariants from \Anthropic\Beta\Vaults\Credentials\ManagedAgentsCredential\Auth
  *
  * @phpstan-type ManagedAgentsCredentialShape = array{
  *   id: string,
@@ -23,7 +23,7 @@ use Anthropic\Core\Contracts\BaseModel;
  *   auth: AuthShape,
  *   createdAt: \DateTimeInterface,
  *   metadata: array<string,string>,
- *   type: Type|value-of<Type>,
+ *   type: 'vault_credential',
  *   updatedAt: \DateTimeInterface,
  *   vaultID: string,
  *   displayName?: string|null,
@@ -34,28 +34,32 @@ final class ManagedAgentsCredential implements BaseModel
     /** @use SdkModel<ManagedAgentsCredentialShape> */
     use SdkModel;
 
+    /** @var 'vault_credential' $type */
+    #[Required(type: new ConstantOf('vault_credential'))]
+    public string $type = 'vault_credential';
+
     /**
-     * Unique identifier for the credential.
+     * The unique ID of the credential (`vcrd_...`).
      */
     #[Required]
     public string $id;
 
     /**
-     * A timestamp in RFC 3339 format.
+     * When the credential was archived. Null if not archived.
      */
     #[Required('archived_at')]
     public ?\DateTimeInterface $archivedAt;
 
     /**
-     * Authentication details for a credential.
+     * Authentication configuration for this credential.
      *
      * @var AuthVariants $auth
      */
     #[Required(union: Auth::class)]
-    public ManagedAgentsMCPOAuthAuthResponse|ManagedAgentsStaticBearerAuthResponse $auth;
+    public ManagedAgentsMCPOAuthAuthResponse|ManagedAgentsStaticBearerAuthResponse|ManagedAgentsEnvironmentVariableAuthResponse $auth;
 
     /**
-     * A timestamp in RFC 3339 format.
+     * A timestamp in RFC 3339 format
      */
     #[Required('created_at')]
     public \DateTimeInterface $createdAt;
@@ -68,12 +72,8 @@ final class ManagedAgentsCredential implements BaseModel
     #[Required(map: 'string')]
     public array $metadata;
 
-    /** @var value-of<Type> $type */
-    #[Required(enum: Type::class)]
-    public string $type;
-
     /**
-     * A timestamp in RFC 3339 format.
+     * A timestamp in RFC 3339 format
      */
     #[Required('updated_at')]
     public \DateTimeInterface $updatedAt;
@@ -101,7 +101,6 @@ final class ManagedAgentsCredential implements BaseModel
      *   auth: ...,
      *   createdAt: ...,
      *   metadata: ...,
-     *   type: ...,
      *   updatedAt: ...,
      *   vaultID: ...,
      * )
@@ -110,13 +109,12 @@ final class ManagedAgentsCredential implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ManagedAgentsCredential)
+     * (new ManagedAgentsCredential())
      *   ->withID(...)
      *   ->withArchivedAt(...)
      *   ->withAuth(...)
      *   ->withCreatedAt(...)
      *   ->withMetadata(...)
-     *   ->withType(...)
      *   ->withUpdatedAt(...)
      *   ->withVaultID(...)
      * ```
@@ -133,15 +131,13 @@ final class ManagedAgentsCredential implements BaseModel
      *
      * @param AuthShape $auth
      * @param array<string,string> $metadata
-     * @param Type|value-of<Type> $type
      */
     public static function with(
         string $id,
         ?\DateTimeInterface $archivedAt,
-        ManagedAgentsMCPOAuthAuthResponse|array|ManagedAgentsStaticBearerAuthResponse $auth,
+        ManagedAgentsMCPOAuthAuthResponse|array|ManagedAgentsStaticBearerAuthResponse|ManagedAgentsEnvironmentVariableAuthResponse $auth,
         \DateTimeInterface $createdAt,
         array $metadata,
-        Type|string $type,
         \DateTimeInterface $updatedAt,
         string $vaultID,
         ?string $displayName = null,
@@ -153,7 +149,6 @@ final class ManagedAgentsCredential implements BaseModel
         $self['auth'] = $auth;
         $self['createdAt'] = $createdAt;
         $self['metadata'] = $metadata;
-        $self['type'] = $type;
         $self['updatedAt'] = $updatedAt;
         $self['vaultID'] = $vaultID;
 
@@ -163,7 +158,7 @@ final class ManagedAgentsCredential implements BaseModel
     }
 
     /**
-     * Unique identifier for the credential.
+     * The unique ID of the credential (`vcrd_...`).
      */
     public function withID(string $id): self
     {
@@ -174,7 +169,7 @@ final class ManagedAgentsCredential implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * When the credential was archived. Null if not archived.
      */
     public function withArchivedAt(?\DateTimeInterface $archivedAt): self
     {
@@ -185,12 +180,12 @@ final class ManagedAgentsCredential implements BaseModel
     }
 
     /**
-     * Authentication details for a credential.
+     * Authentication configuration for this credential.
      *
      * @param AuthShape $auth
      */
     public function withAuth(
-        ManagedAgentsMCPOAuthAuthResponse|array|ManagedAgentsStaticBearerAuthResponse $auth,
+        ManagedAgentsMCPOAuthAuthResponse|array|ManagedAgentsStaticBearerAuthResponse|ManagedAgentsEnvironmentVariableAuthResponse $auth,
     ): self {
         $self = clone $this;
         $self['auth'] = $auth;
@@ -199,7 +194,7 @@ final class ManagedAgentsCredential implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * A timestamp in RFC 3339 format
      */
     public function withCreatedAt(\DateTimeInterface $createdAt): self
     {
@@ -223,9 +218,9 @@ final class ManagedAgentsCredential implements BaseModel
     }
 
     /**
-     * @param Type|value-of<Type> $type
+     * @param 'vault_credential' $type
      */
-    public function withType(Type|string $type): self
+    public function withType(string $type): self
     {
         $self = clone $this;
         $self['type'] = $type;
@@ -234,7 +229,7 @@ final class ManagedAgentsCredential implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * A timestamp in RFC 3339 format
      */
     public function withUpdatedAt(\DateTimeInterface $updatedAt): self
     {

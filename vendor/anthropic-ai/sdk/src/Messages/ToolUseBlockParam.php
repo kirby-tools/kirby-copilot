@@ -8,12 +8,13 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\ToolUseBlockParam\Caller;
 
 /**
- * @phpstan-import-type CallerVariants from \Anthropic\Messages\ToolUseBlockParam\Caller
  * @phpstan-import-type CacheControlEphemeralShape from \Anthropic\Messages\CacheControlEphemeral
  * @phpstan-import-type CallerShape from \Anthropic\Messages\ToolUseBlockParam\Caller
+ * @phpstan-import-type CallerVariants from \Anthropic\Messages\ToolUseBlockParam\Caller
  *
  * @phpstan-type ToolUseBlockParamShape = array{
  *   id: string,
@@ -22,6 +23,7 @@ use Anthropic\Messages\ToolUseBlockParam\Caller;
  *   type: 'tool_use',
  *   cacheControl?: null|CacheControlEphemeral|CacheControlEphemeralShape,
  *   caller?: CallerShape|null,
+ *   toolsetName?: string|null,
  * }
  */
 final class ToolUseBlockParam implements BaseModel
@@ -30,7 +32,7 @@ final class ToolUseBlockParam implements BaseModel
     use SdkModel;
 
     /** @var 'tool_use' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('tool_use'))]
     public string $type = 'tool_use';
 
     #[Required]
@@ -49,13 +51,15 @@ final class ToolUseBlockParam implements BaseModel
     #[Optional('cache_control', nullable: true)]
     public ?CacheControlEphemeral $cacheControl;
 
-    /**
-     * Tool invocation directly from the model.
-     *
-     * @var CallerVariants|null $caller
-     */
+    /** @var CallerVariants|null $caller */
     #[Optional(union: Caller::class)]
     public DirectCaller|ServerToolCaller|ServerToolCaller20260120|null $caller;
+
+    /**
+     * For a toolset member tool_use, the toolset family this member belongs to.
+     */
+    #[Optional('toolset_name', nullable: true)]
+    public ?string $toolsetName;
 
     /**
      * `new ToolUseBlockParam()` is missing required properties by the API.
@@ -68,7 +72,7 @@ final class ToolUseBlockParam implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ToolUseBlockParam)->withID(...)->withInput(...)->withName(...)
+     * (new ToolUseBlockParam())->withID(...)->withInput(...)->withName(...)
      * ```
      */
     public function __construct()
@@ -91,6 +95,7 @@ final class ToolUseBlockParam implements BaseModel
         string $name,
         CacheControlEphemeral|array|null $cacheControl = null,
         DirectCaller|array|ServerToolCaller|ServerToolCaller20260120|null $caller = null,
+        ?string $toolsetName = null,
     ): self {
         $self = new self;
 
@@ -100,6 +105,7 @@ final class ToolUseBlockParam implements BaseModel
 
         null !== $cacheControl && $self['cacheControl'] = $cacheControl;
         null !== $caller && $self['caller'] = $caller;
+        null !== $toolsetName && $self['toolsetName'] = $toolsetName;
 
         return $self;
     }
@@ -157,8 +163,6 @@ final class ToolUseBlockParam implements BaseModel
     }
 
     /**
-     * Tool invocation directly from the model.
-     *
      * @param CallerShape $caller
      */
     public function withCaller(
@@ -166,6 +170,17 @@ final class ToolUseBlockParam implements BaseModel
     ): self {
         $self = clone $this;
         $self['caller'] = $caller;
+
+        return $self;
+    }
+
+    /**
+     * For a toolset member tool_use, the toolset family this member belongs to.
+     */
+    public function withToolsetName(?string $toolsetName): self
+    {
+        $self = clone $this;
+        $self['toolsetName'] = $toolsetName;
 
         return $self;
     }

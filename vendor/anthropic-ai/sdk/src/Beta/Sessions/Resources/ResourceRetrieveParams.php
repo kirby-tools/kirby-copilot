@@ -12,13 +12,14 @@ use Anthropic\Core\Concerns\SdkParams;
 use Anthropic\Core\Contracts\BaseModel;
 
 /**
- * Get Session Resource.
+ * Get Session Resource
  *
  * @see Anthropic\Services\Beta\Sessions\ResourcesService::retrieve()
  *
  * @phpstan-type ResourceRetrieveParamsShape = array{
  *   sessionID: string,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class ResourceRetrieveParams implements BaseModel
@@ -31,12 +32,20 @@ final class ResourceRetrieveParams implements BaseModel
     public string $sessionID;
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this header.
      *
      * @var list<string|value-of<AnthropicBeta>>|null $betas
      */
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
 
     /**
      * `new ResourceRetrieveParams()` is missing required properties by the API.
@@ -49,7 +58,7 @@ final class ResourceRetrieveParams implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ResourceRetrieveParams)->withSessionID(...)
+     * (new ResourceRetrieveParams())->withSessionID(...)
      * ```
      */
     public function __construct()
@@ -64,13 +73,17 @@ final class ResourceRetrieveParams implements BaseModel
      *
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>>|null $betas
      */
-    public static function with(string $sessionID, ?array $betas = null): self
-    {
+    public static function with(
+        string $sessionID,
+        ?array $betas = null,
+        ?string $workspaceID = null
+    ): self {
         $self = new self;
 
         $self['sessionID'] = $sessionID;
 
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
@@ -84,7 +97,7 @@ final class ResourceRetrieveParams implements BaseModel
     }
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this header.
      *
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas
      */
@@ -92,6 +105,19 @@ final class ResourceRetrieveParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

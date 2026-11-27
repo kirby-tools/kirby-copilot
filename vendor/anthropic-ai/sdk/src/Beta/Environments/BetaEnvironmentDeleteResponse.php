@@ -7,6 +7,7 @@ namespace Anthropic\Beta\Environments;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * Response after deleting an environment.
@@ -21,15 +22,15 @@ final class BetaEnvironmentDeleteResponse implements BaseModel
     use SdkModel;
 
     /**
-     * The type of response.
+     * The type of response
      *
      * @var 'environment_deleted' $type
      */
-    #[Required]
+    #[Required(type: new ConstantOf('environment_deleted'))]
     public string $type = 'environment_deleted';
 
     /**
-     * Environment identifier.
+     * Environment identifier
      */
     #[Required]
     public string $id;
@@ -45,7 +46,7 @@ final class BetaEnvironmentDeleteResponse implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaEnvironmentDeleteResponse)->withID(...)
+     * (new BetaEnvironmentDeleteResponse())->withID(...)
      * ```
      */
     public function __construct()
@@ -68,7 +69,7 @@ final class BetaEnvironmentDeleteResponse implements BaseModel
     }
 
     /**
-     * Environment identifier.
+     * Environment identifier
      */
     public function withID(string $id): self
     {
@@ -79,7 +80,7 @@ final class BetaEnvironmentDeleteResponse implements BaseModel
     }
 
     /**
-     * The type of response.
+     * The type of response
      *
      * @param 'environment_deleted' $type
      */

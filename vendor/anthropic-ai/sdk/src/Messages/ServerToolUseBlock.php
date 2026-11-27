@@ -7,12 +7,13 @@ namespace Anthropic\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\ServerToolUseBlock\Caller;
 use Anthropic\Messages\ServerToolUseBlock\Name;
 
 /**
- * @phpstan-import-type CallerVariants from \Anthropic\Messages\ServerToolUseBlock\Caller
  * @phpstan-import-type CallerShape from \Anthropic\Messages\ServerToolUseBlock\Caller
+ * @phpstan-import-type CallerVariants from \Anthropic\Messages\ServerToolUseBlock\Caller
  *
  * @phpstan-type ServerToolUseBlockShape = array{
  *   id: string,
@@ -28,17 +29,13 @@ final class ServerToolUseBlock implements BaseModel
     use SdkModel;
 
     /** @var 'server_tool_use' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('server_tool_use'))]
     public string $type = 'server_tool_use';
 
     #[Required]
     public string $id;
 
-    /**
-     * Tool invocation directly from the model.
-     *
-     * @var CallerVariants $caller
-     */
+    /** @var CallerVariants $caller */
     #[Required(union: Caller::class)]
     public DirectCaller|ServerToolCaller|ServerToolCaller20260120 $caller;
 
@@ -61,7 +58,7 @@ final class ServerToolUseBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ServerToolUseBlock)
+     * (new ServerToolUseBlock())
      *   ->withID(...)
      *   ->withCaller(...)
      *   ->withInput(...)
@@ -109,8 +106,6 @@ final class ServerToolUseBlock implements BaseModel
     }
 
     /**
-     * Tool invocation directly from the model.
-     *
      * @param CallerShape $caller
      */
     public function withCaller(

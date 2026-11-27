@@ -10,6 +10,7 @@ use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Concerns\SdkParams;
 use Anthropic\Core\Contracts\BaseModel;
 use Anthropic\Messages\MessageCreateParams\ServiceTier;
+use Anthropic\Messages\MessageCreateParams\Speed;
 use Anthropic\Messages\MessageCreateParams\System;
 
 /**
@@ -17,41 +18,46 @@ use Anthropic\Messages\MessageCreateParams\System;
  *
  * The Messages API can be used for either single queries or stateless multi-turn conversations.
  *
- * Learn more about the Messages API in our [user guide](https://docs.claude.com/en/docs/initial-setup)
+ * Learn more about the Messages API in our [user guide](https://platform.claude.com/docs/en/get-started)
  *
  * @see Anthropic\Services\MessagesService::create()
  *
- * @phpstan-import-type SystemVariants from \Anthropic\Messages\MessageCreateParams\System
- * @phpstan-import-type ThinkingConfigParamVariants from \Anthropic\Messages\ThinkingConfigParam
- * @phpstan-import-type ToolChoiceVariants from \Anthropic\Messages\ToolChoice
- * @phpstan-import-type ToolUnionVariants from \Anthropic\Messages\ToolUnion
  * @phpstan-import-type MessageParamShape from \Anthropic\Messages\MessageParam
  * @phpstan-import-type CacheControlEphemeralShape from \Anthropic\Messages\CacheControlEphemeral
+ * @phpstan-import-type MessageCreateParamsContainerShape from \Anthropic\Messages\MessageCreateParamsContainer
+ * @phpstan-import-type DiagnosticsParamShape from \Anthropic\Messages\DiagnosticsParam
  * @phpstan-import-type MetadataShape from \Anthropic\Messages\Metadata
  * @phpstan-import-type OutputConfigShape from \Anthropic\Messages\OutputConfig
  * @phpstan-import-type SystemShape from \Anthropic\Messages\MessageCreateParams\System
  * @phpstan-import-type ThinkingConfigParamShape from \Anthropic\Messages\ThinkingConfigParam
  * @phpstan-import-type ToolChoiceShape from \Anthropic\Messages\ToolChoice
  * @phpstan-import-type ToolUnionShape from \Anthropic\Messages\ToolUnion
+ * @phpstan-import-type MessageParamVariants from \Anthropic\Messages\MessageParam
+ * @phpstan-import-type MessageCreateParamsContainerVariants from \Anthropic\Messages\MessageCreateParamsContainer
+ * @phpstan-import-type SystemVariants from \Anthropic\Messages\MessageCreateParams\System
+ * @phpstan-import-type ThinkingConfigParamVariants from \Anthropic\Messages\ThinkingConfigParam
+ * @phpstan-import-type ToolChoiceVariants from \Anthropic\Messages\ToolChoice
+ * @phpstan-import-type ToolUnionVariants from \Anthropic\Messages\ToolUnion
  *
  * @phpstan-type MessageCreateParamsShape = array{
  *   maxTokens: int,
- *   messages: list<MessageParam|MessageParamShape>,
+ *   messages: list<MessageParamShape>,
  *   model: string|Model|value-of<Model>,
  *   cacheControl?: null|CacheControlEphemeral|CacheControlEphemeralShape,
- *   container?: string|null,
+ *   container?: MessageCreateParamsContainerShape|null,
+ *   diagnostics?: null|DiagnosticsParam|DiagnosticsParamShape,
  *   inferenceGeo?: string|null,
  *   metadata?: null|Metadata|MetadataShape,
  *   outputConfig?: null|OutputConfig|OutputConfigShape,
  *   serviceTier?: null|ServiceTier|value-of<ServiceTier>,
+ *   speed?: null|Speed|value-of<Speed>,
  *   stopSequences?: list<string>|null,
  *   system?: SystemShape|null,
- *   temperature?: float|null,
  *   thinking?: ThinkingConfigParamShape|null,
  *   toolChoice?: ToolChoiceShape|null,
  *   tools?: list<ToolUnionShape>|null,
- *   topK?: int|null,
- *   topP?: float|null,
+ *   userProfileID?: string|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class MessageCreateParams implements BaseModel
@@ -65,7 +71,9 @@ final class MessageCreateParams implements BaseModel
      *
      * Note that our models may stop _before_ reaching this maximum. This parameter only specifies the absolute maximum number of tokens to generate.
      *
-     * Different models have different maximum values for this parameter.  See [models](https://docs.claude.com/en/docs/models-overview) for details.
+     * Set to `0` to populate the [prompt cache](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#pre-warming-the-cache) without generating a response.
+     *
+     * Different models have different maximum values for this parameter.  See [models](https://platform.claude.com/docs/en/about-claude/models/overview) for details.
      */
     #[Required('max_tokens')]
     public int $maxTokens;
@@ -77,7 +85,7 @@ final class MessageCreateParams implements BaseModel
      *
      * Each input message must be an object with a `role` and `content`. You can specify a single `user`-role message, or you can include multiple `user` and `assistant` messages.
      *
-     * If the final message uses the `assistant` role, the response content will continue immediately from the content in that message. This can be used to constrain part of the model's response.
+     * If the final message uses the `assistant` role, the response content will continue immediately from the content in that message. This can be used to constrain part of the model's response. This is called prefill. On models that don't support prefill, creating a message that ends with a partial `assistant` response returns a 400 error. See [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
      *
      * Example with a single `user` message:
      *
@@ -95,7 +103,7 @@ final class MessageCreateParams implements BaseModel
      * ]
      * ```
      *
-     * Example with a partially-filled response from Claude:
+     * Example with a partially-filled response from Claude, for models that support prefill:
      *
      * ```json
      * [
@@ -114,19 +122,21 @@ final class MessageCreateParams implements BaseModel
      * {"role": "user", "content": [{"type": "text", "text": "Hello, Claude"}]}
      * ```
      *
-     * See [input examples](https://docs.claude.com/en/api/messages-examples).
+     * See [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).
      *
-     * Note that if you want to include a [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the top-level `system` parameter — there is no `"system"` role for input messages in the Messages API.
+     * Note that if you want to include a [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role), you can use the top-level `system` parameter.
      *
      * There is a limit of 100,000 messages in a single request.
      *
-     * @var list<MessageParam> $messages
+     * @var list<MessageParamVariants> $messages
      */
     #[Required(list: MessageParam::class)]
     public array $messages;
 
     /**
-     * The model that will complete your prompt.\n\nSee [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
+     * The model that will complete your prompt.
+     *
+     * See [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
      *
      * @var string|value-of<Model> $model
      */
@@ -141,9 +151,17 @@ final class MessageCreateParams implements BaseModel
 
     /**
      * Container identifier for reuse across requests.
+     *
+     * @var MessageCreateParamsContainerVariants|null $container
      */
     #[Optional(nullable: true)]
-    public ?string $container;
+    public string|ContainerParams|null $container;
+
+    /**
+     * Request-level diagnostics. Supply `previous_message_id` to have the response include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence from that prior request.
+     */
+    #[Optional(nullable: true)]
+    public ?DiagnosticsParam $diagnostics;
 
     /**
      * Specifies the geographic region for inference processing. If not specified, the workspace's `default_inference_geo` is used.
@@ -166,12 +184,22 @@ final class MessageCreateParams implements BaseModel
     /**
      * Determines whether to use priority capacity (if available) or standard capacity for this request.
      *
-     * Anthropic offers different levels of service for your API requests. See [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
+     * Anthropic offers different levels of service for your API requests. See [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for details.
      *
      * @var value-of<ServiceTier>|null $serviceTier
      */
     #[Optional('service_tier', enum: ServiceTier::class)]
     public ?string $serviceTier;
+
+    /**
+     * The inference speed mode for this request. `"fast"` enables high output-tokens-per-second inference.
+     *
+     * Some models require the `fast-mode-2026-02-01` beta header for any `speed` value. See [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for which models.
+     *
+     * @var value-of<Speed>|null $speed
+     */
+    #[Optional(enum: Speed::class, nullable: true)]
+    public ?string $speed;
 
     /**
      * Custom text sequences that will cause the model to stop generating.
@@ -188,7 +216,7 @@ final class MessageCreateParams implements BaseModel
     /**
      * System prompt.
      *
-     * A system prompt is a way of providing context and instructions to Claude, such as specifying a particular goal or role. See our [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
+     * A system prompt is a way of providing context and instructions to Claude, such as specifying a particular goal or role. See our [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
      *
      * @var SystemVariants|null $system
      */
@@ -196,28 +224,16 @@ final class MessageCreateParams implements BaseModel
     public string|array|null $system;
 
     /**
-     * @deprecated Deprecated. Models released after Claude Opus 4.6 do not support setting temperature. A value of 1.0 of will be accepted for backwards compatibility, all other values will be rejected with a 400 error.
+     * Configuration for Claude's thinking.
      *
-     * Amount of randomness injected into the response.
+     * With `{"type": "adaptive"}`, Claude decides when and how much to think. With `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of at least 1,024. Thinking tokens count toward your `max_tokens` limit.
      *
-     * Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0` for analytical / multiple choice, and closer to `1.0` for creative and generative tasks.
-     *
-     * Note that even with `temperature` of `0.0`, the results will not be fully deterministic.
-     */
-    #[Optional]
-    public ?float $temperature;
-
-    /**
-     * Configuration for enabling Claude's extended thinking.
-     *
-     * When enabled, responses include `thinking` content blocks showing Claude's thinking process before the final answer. Requires a minimum budget of 1,024 tokens and counts towards your `max_tokens` limit.
-     *
-     * See [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking) for details.
+     * Which `type` values are accepted, and what happens when you omit `thinking`, depend on the model. See [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking) for each model's behavior.
      *
      * @var ThinkingConfigParamVariants|null $thinking
      */
     #[Optional(union: ThinkingConfigParam::class)]
-    public ThinkingConfigEnabled|ThinkingConfigDisabled|ThinkingConfigAdaptive|null $thinking;
+    public ThinkingConfigEnabled|ThinkingConfigDisabled|ThinkingConfigBetweenTools|ThinkingConfigAdaptive|null $thinking;
 
     /**
      * How the model should use the provided tools. The model can use a specific tool, any available tool, decide by itself, or not use tools at all.
@@ -232,7 +248,7 @@ final class MessageCreateParams implements BaseModel
      *
      * If you include `tools` in your API request, the model may return `tool_use` content blocks that represent the model's use of those tools. You can then run those tools using the tool input generated by the model and then optionally return results back to the model using `tool_result` content blocks.
      *
-     * There are two types of tools: **client tools** and **server tools**. The behavior described below applies to client tools. For [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview\#server-tools), see their individual documentation as each has its own behavior (e.g., the [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+     * There are two types of tools: **client tools** and **server tools**. The behavior described below applies to client tools. For [server tools](https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools), see their individual documentation as each has its own behavior (e.g., the [web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool)).
      *
      * Each tool definition includes:
      *
@@ -288,7 +304,7 @@ final class MessageCreateParams implements BaseModel
      *
      * Tools can be used for workflows that include running client-side tools and functions, or more generally whenever you want the model to produce a particular JSON structure of output.
      *
-     * See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
+     * See our [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview) for more details.
      *
      * @var list<ToolUnionVariants>|null $tools
      */
@@ -296,28 +312,18 @@ final class MessageCreateParams implements BaseModel
     public ?array $tools;
 
     /**
-     * @deprecated Deprecated. Models released after Claude Opus 4.6 do not accept top_k; any value will be rejected with a 400 error.
-     *
-     * Only sample from the top K options for each subsequent token.
-     *
-     * Used to remove "long tail" low probability responses. [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
-     *
-     * Recommended for advanced use cases only.
+     * The user profile ID to attribute this request to. Use when acting on behalf of a party other than your organization.
      */
-    #[Optional('top_k')]
-    public ?int $topK;
+    #[Optional]
+    public ?string $userProfileID;
 
     /**
-     * @deprecated Deprecated. Models released after Claude Opus 4.6 do not support setting top_p. A value >= 0.99 will be accepted for backwards compatibility, all other values will be rejected with a 400 error.
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
      *
-     * Use nucleus sampling.
-     *
-     * In nucleus sampling, we compute the cumulative distribution over all the options for each subsequent token in decreasing probability order and cut it off once it reaches a particular probability specified by `top_p`.
-     *
-     * Recommended for advanced use cases only.
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      */
-    #[Optional('top_p')]
-    public ?float $topP;
+    #[Optional]
+    public ?string $workspaceID;
 
     /**
      * `new MessageCreateParams()` is missing required properties by the API.
@@ -330,7 +336,10 @@ final class MessageCreateParams implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new MessageCreateParams)->withMaxTokens(...)->withMessages(...)->withModel(...)
+     * (new MessageCreateParams())
+     *   ->withMaxTokens(...)
+     *   ->withMessages(...)
+     *   ->withModel(...)
      * ```
      */
     public function __construct()
@@ -343,12 +352,15 @@ final class MessageCreateParams implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
-     * @param list<MessageParam|MessageParamShape> $messages
+     * @param list<MessageParamShape> $messages
      * @param string|Model|value-of<Model> $model
      * @param CacheControlEphemeral|CacheControlEphemeralShape|null $cacheControl
+     * @param MessageCreateParamsContainerShape|null $container
+     * @param DiagnosticsParam|DiagnosticsParamShape|null $diagnostics
      * @param Metadata|MetadataShape|null $metadata
      * @param OutputConfig|OutputConfigShape|null $outputConfig
      * @param ServiceTier|value-of<ServiceTier>|null $serviceTier
+     * @param Speed|value-of<Speed>|null $speed
      * @param list<string>|null $stopSequences
      * @param SystemShape|null $system
      * @param ThinkingConfigParamShape|null $thinking
@@ -360,19 +372,20 @@ final class MessageCreateParams implements BaseModel
         array $messages,
         Model|string $model,
         CacheControlEphemeral|array|null $cacheControl = null,
-        ?string $container = null,
+        string|ContainerParams|array|null $container = null,
+        DiagnosticsParam|array|null $diagnostics = null,
         ?string $inferenceGeo = null,
         Metadata|array|null $metadata = null,
         OutputConfig|array|null $outputConfig = null,
         ServiceTier|string|null $serviceTier = null,
+        Speed|string|null $speed = null,
         ?array $stopSequences = null,
         string|array|null $system = null,
-        ?float $temperature = null,
-        ThinkingConfigEnabled|array|ThinkingConfigDisabled|ThinkingConfigAdaptive|null $thinking = null,
+        ThinkingConfigEnabled|array|ThinkingConfigDisabled|ThinkingConfigBetweenTools|ThinkingConfigAdaptive|null $thinking = null,
         ToolChoiceAuto|array|ToolChoiceAny|ToolChoiceTool|ToolChoiceNone|null $toolChoice = null,
         ?array $tools = null,
-        ?int $topK = null,
-        ?float $topP = null,
+        ?string $userProfileID = null,
+        ?string $workspaceID = null,
     ): self {
         $self = new self;
 
@@ -382,18 +395,19 @@ final class MessageCreateParams implements BaseModel
 
         null !== $cacheControl && $self['cacheControl'] = $cacheControl;
         null !== $container && $self['container'] = $container;
+        null !== $diagnostics && $self['diagnostics'] = $diagnostics;
         null !== $inferenceGeo && $self['inferenceGeo'] = $inferenceGeo;
         null !== $metadata && $self['metadata'] = $metadata;
         null !== $outputConfig && $self['outputConfig'] = $outputConfig;
         null !== $serviceTier && $self['serviceTier'] = $serviceTier;
+        null !== $speed && $self['speed'] = $speed;
         null !== $stopSequences && $self['stopSequences'] = $stopSequences;
         null !== $system && $self['system'] = $system;
-        null !== $temperature && $self['temperature'] = $temperature;
         null !== $thinking && $self['thinking'] = $thinking;
         null !== $toolChoice && $self['toolChoice'] = $toolChoice;
         null !== $tools && $self['tools'] = $tools;
-        null !== $topK && $self['topK'] = $topK;
-        null !== $topP && $self['topP'] = $topP;
+        null !== $userProfileID && $self['userProfileID'] = $userProfileID;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
@@ -403,7 +417,9 @@ final class MessageCreateParams implements BaseModel
      *
      * Note that our models may stop _before_ reaching this maximum. This parameter only specifies the absolute maximum number of tokens to generate.
      *
-     * Different models have different maximum values for this parameter.  See [models](https://docs.claude.com/en/docs/models-overview) for details.
+     * Set to `0` to populate the [prompt cache](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#pre-warming-the-cache) without generating a response.
+     *
+     * Different models have different maximum values for this parameter.  See [models](https://platform.claude.com/docs/en/about-claude/models/overview) for details.
      */
     public function withMaxTokens(int $maxTokens): self
     {
@@ -420,7 +436,7 @@ final class MessageCreateParams implements BaseModel
      *
      * Each input message must be an object with a `role` and `content`. You can specify a single `user`-role message, or you can include multiple `user` and `assistant` messages.
      *
-     * If the final message uses the `assistant` role, the response content will continue immediately from the content in that message. This can be used to constrain part of the model's response.
+     * If the final message uses the `assistant` role, the response content will continue immediately from the content in that message. This can be used to constrain part of the model's response. This is called prefill. On models that don't support prefill, creating a message that ends with a partial `assistant` response returns a 400 error. See [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
      *
      * Example with a single `user` message:
      *
@@ -438,7 +454,7 @@ final class MessageCreateParams implements BaseModel
      * ]
      * ```
      *
-     * Example with a partially-filled response from Claude:
+     * Example with a partially-filled response from Claude, for models that support prefill:
      *
      * ```json
      * [
@@ -457,13 +473,13 @@ final class MessageCreateParams implements BaseModel
      * {"role": "user", "content": [{"type": "text", "text": "Hello, Claude"}]}
      * ```
      *
-     * See [input examples](https://docs.claude.com/en/api/messages-examples).
+     * See [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).
      *
-     * Note that if you want to include a [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the top-level `system` parameter — there is no `"system"` role for input messages in the Messages API.
+     * Note that if you want to include a [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role), you can use the top-level `system` parameter.
      *
      * There is a limit of 100,000 messages in a single request.
      *
-     * @param list<MessageParam|MessageParamShape> $messages
+     * @param list<MessageParamShape> $messages
      */
     public function withMessages(array $messages): self
     {
@@ -474,7 +490,9 @@ final class MessageCreateParams implements BaseModel
     }
 
     /**
-     * The model that will complete your prompt.\n\nSee [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
+     * The model that will complete your prompt.
+     *
+     * See [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
      *
      * @param string|Model|value-of<Model> $model
      */
@@ -502,11 +520,28 @@ final class MessageCreateParams implements BaseModel
 
     /**
      * Container identifier for reuse across requests.
+     *
+     * @param MessageCreateParamsContainerShape|null $container
      */
-    public function withContainer(?string $container): self
-    {
+    public function withContainer(
+        string|ContainerParams|array|null $container
+    ): self {
         $self = clone $this;
         $self['container'] = $container;
+
+        return $self;
+    }
+
+    /**
+     * Request-level diagnostics. Supply `previous_message_id` to have the response include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence from that prior request.
+     *
+     * @param DiagnosticsParam|DiagnosticsParamShape|null $diagnostics
+     */
+    public function withDiagnostics(
+        DiagnosticsParam|array|null $diagnostics
+    ): self {
+        $self = clone $this;
+        $self['diagnostics'] = $diagnostics;
 
         return $self;
     }
@@ -551,7 +586,7 @@ final class MessageCreateParams implements BaseModel
     /**
      * Determines whether to use priority capacity (if available) or standard capacity for this request.
      *
-     * Anthropic offers different levels of service for your API requests. See [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
+     * Anthropic offers different levels of service for your API requests. See [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for details.
      *
      * @param ServiceTier|value-of<ServiceTier> $serviceTier
      */
@@ -559,6 +594,21 @@ final class MessageCreateParams implements BaseModel
     {
         $self = clone $this;
         $self['serviceTier'] = $serviceTier;
+
+        return $self;
+    }
+
+    /**
+     * The inference speed mode for this request. `"fast"` enables high output-tokens-per-second inference.
+     *
+     * Some models require the `fast-mode-2026-02-01` beta header for any `speed` value. See [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for which models.
+     *
+     * @param Speed|value-of<Speed>|null $speed
+     */
+    public function withSpeed(Speed|string|null $speed): self
+    {
+        $self = clone $this;
+        $self['speed'] = $speed;
 
         return $self;
     }
@@ -583,7 +633,7 @@ final class MessageCreateParams implements BaseModel
     /**
      * System prompt.
      *
-     * A system prompt is a way of providing context and instructions to Claude, such as specifying a particular goal or role. See our [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
+     * A system prompt is a way of providing context and instructions to Claude, such as specifying a particular goal or role. See our [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
      *
      * @param SystemShape $system
      */
@@ -596,31 +646,16 @@ final class MessageCreateParams implements BaseModel
     }
 
     /**
-     * Amount of randomness injected into the response.
+     * Configuration for Claude's thinking.
      *
-     * Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0` for analytical / multiple choice, and closer to `1.0` for creative and generative tasks.
+     * With `{"type": "adaptive"}`, Claude decides when and how much to think. With `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of at least 1,024. Thinking tokens count toward your `max_tokens` limit.
      *
-     * Note that even with `temperature` of `0.0`, the results will not be fully deterministic.
-     */
-    public function withTemperature(float $temperature): self
-    {
-        $self = clone $this;
-        $self['temperature'] = $temperature;
-
-        return $self;
-    }
-
-    /**
-     * Configuration for enabling Claude's extended thinking.
-     *
-     * When enabled, responses include `thinking` content blocks showing Claude's thinking process before the final answer. Requires a minimum budget of 1,024 tokens and counts towards your `max_tokens` limit.
-     *
-     * See [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking) for details.
+     * Which `type` values are accepted, and what happens when you omit `thinking`, depend on the model. See [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking) for each model's behavior.
      *
      * @param ThinkingConfigParamShape $thinking
      */
     public function withThinking(
-        ThinkingConfigEnabled|array|ThinkingConfigDisabled|ThinkingConfigAdaptive $thinking,
+        ThinkingConfigEnabled|array|ThinkingConfigDisabled|ThinkingConfigBetweenTools|ThinkingConfigAdaptive $thinking,
     ): self {
         $self = clone $this;
         $self['thinking'] = $thinking;
@@ -647,7 +682,7 @@ final class MessageCreateParams implements BaseModel
      *
      * If you include `tools` in your API request, the model may return `tool_use` content blocks that represent the model's use of those tools. You can then run those tools using the tool input generated by the model and then optionally return results back to the model using `tool_result` content blocks.
      *
-     * There are two types of tools: **client tools** and **server tools**. The behavior described below applies to client tools. For [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview\#server-tools), see their individual documentation as each has its own behavior (e.g., the [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+     * There are two types of tools: **client tools** and **server tools**. The behavior described below applies to client tools. For [server tools](https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools), see their individual documentation as each has its own behavior (e.g., the [web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool)).
      *
      * Each tool definition includes:
      *
@@ -703,7 +738,7 @@ final class MessageCreateParams implements BaseModel
      *
      * Tools can be used for workflows that include running client-side tools and functions, or more generally whenever you want the model to produce a particular JSON structure of output.
      *
-     * See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
+     * See our [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview) for more details.
      *
      * @param list<ToolUnionShape> $tools
      */
@@ -716,31 +751,25 @@ final class MessageCreateParams implements BaseModel
     }
 
     /**
-     * Only sample from the top K options for each subsequent token.
-     *
-     * Used to remove "long tail" low probability responses. [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
-     *
-     * Recommended for advanced use cases only.
+     * The user profile ID to attribute this request to. Use when acting on behalf of a party other than your organization.
      */
-    public function withTopK(int $topK): self
+    public function withUserProfileID(string $userProfileID): self
     {
         $self = clone $this;
-        $self['topK'] = $topK;
+        $self['userProfileID'] = $userProfileID;
 
         return $self;
     }
 
     /**
-     * Use nucleus sampling.
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
      *
-     * In nucleus sampling, we compute the cumulative distribution over all the options for each subsequent token in decreasing probability order and cut it off once it reaches a particular probability specified by `top_p`.
-     *
-     * Recommended for advanced use cases only.
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      */
-    public function withTopP(float $topP): self
+    public function withWorkspaceID(string $workspaceID): self
     {
         $self = clone $this;
-        $self['topP'] = $topP;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

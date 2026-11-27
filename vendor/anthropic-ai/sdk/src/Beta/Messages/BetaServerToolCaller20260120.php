@@ -7,6 +7,7 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type BetaServerToolCaller20260120Shape = array{
@@ -19,7 +20,7 @@ final class BetaServerToolCaller20260120 implements BaseModel
     use SdkModel;
 
     /** @var 'code_execution_20260120' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('code_execution_20260120'))]
     public string $type = 'code_execution_20260120';
 
     #[Required('tool_id')]
@@ -36,7 +37,7 @@ final class BetaServerToolCaller20260120 implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaServerToolCaller20260120)->withToolID(...)
+     * (new BetaServerToolCaller20260120())->withToolID(...)
      * ```
      */
     public function __construct()

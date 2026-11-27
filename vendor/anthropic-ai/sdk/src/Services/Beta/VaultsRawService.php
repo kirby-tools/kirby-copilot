@@ -16,6 +16,7 @@ use Anthropic\Beta\Vaults\VaultUpdateParams;
 use Anthropic\Client;
 use Anthropic\Core\Contracts\BaseResponse;
 use Anthropic\Core\Exceptions\APIException;
+use Anthropic\Core\Implementation\ApiCallInfo;
 use Anthropic\Core\Util;
 use Anthropic\PageCursor;
 use Anthropic\RequestOptions;
@@ -35,12 +36,13 @@ final class VaultsRawService implements VaultsRawContract
     /**
      * @api
      *
-     * Create Vault
+     * Create a Vault
      *
      * @param array{
      *   displayName: string,
      *   metadata?: array<string,string>,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|VaultCreateParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -56,12 +58,14 @@ final class VaultsRawService implements VaultsRawContract
             $params,
             $requestOptions,
         );
-        $header_params = ['betas' => 'anthropic-beta'];
+        $header_params = [
+            'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+        ];
 
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: 'v1/vaults?beta=true',
+            path: 'v1/vaults',
             headers: Util::array_transform_keys(
                 array_intersect_key($parsed, array_flip(array_keys($header_params))),
                 $header_params,
@@ -73,7 +77,11 @@ final class VaultsRawService implements VaultsRawContract
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.vaults.create',
+                route: '/v1/vaults',
+                createdId: 'anthropic.vault.id',
+            )),
             convert: BetaManagedAgentsVault::class,
         );
     }
@@ -81,11 +89,12 @@ final class VaultsRawService implements VaultsRawContract
     /**
      * @api
      *
-     * Get Vault
+     * Retrieve a Vault
      *
-     * @param string $vaultID Path parameter vault_id
+     * @param string $vaultID Unique identifier of the vault to retrieve.
      * @param array{
-     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|VaultRetrieveParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -106,15 +115,21 @@ final class VaultsRawService implements VaultsRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: ['v1/vaults/%1$s?beta=true', $vaultID],
+            path: ['v1/vaults/%1$s', $vaultID],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.vaults.retrieve',
+                route: '/v1/vaults/{vault_id}',
+                attributes: ['anthropic.vault.id' => $vaultID],
+            )),
             convert: BetaManagedAgentsVault::class,
         );
     }
@@ -122,13 +137,14 @@ final class VaultsRawService implements VaultsRawContract
     /**
      * @api
      *
-     * Update Vault
+     * Update a Vault
      *
-     * @param string $vaultID Path param: Path parameter vault_id
+     * @param string $vaultID Path param: Unique identifier of the vault to update.
      * @param array{
      *   displayName?: string|null,
      *   metadata?: array<string,string|null>|null,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|VaultUpdateParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -145,12 +161,14 @@ final class VaultsRawService implements VaultsRawContract
             $params,
             $requestOptions,
         );
-        $header_params = ['betas' => 'anthropic-beta'];
+        $header_params = [
+            'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+        ];
 
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: ['v1/vaults/%1$s?beta=true', $vaultID],
+            path: ['v1/vaults/%1$s', $vaultID],
             headers: Util::array_transform_keys(
                 array_intersect_key($parsed, array_flip(array_keys($header_params))),
                 $header_params,
@@ -162,7 +180,11 @@ final class VaultsRawService implements VaultsRawContract
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.vaults.update',
+                route: '/v1/vaults/{vault_id}',
+                attributes: ['anthropic.vault.id' => $vaultID],
+            )),
             convert: BetaManagedAgentsVault::class,
         );
     }
@@ -177,6 +199,7 @@ final class VaultsRawService implements VaultsRawContract
      *   limit?: int,
      *   page?: string,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|VaultListParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -200,19 +223,25 @@ final class VaultsRawService implements VaultsRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: 'v1/vaults?beta=true',
+            path: 'v1/vaults',
             query: Util::array_transform_keys(
                 array_intersect_key($parsed, $query_params),
                 ['includeArchived' => 'include_archived'],
             ),
             headers: Util::array_transform_keys(
                 $header_params,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.vaults.list',
+                route: '/v1/vaults',
+                query: ['include_archived', 'limit', 'page'],
+            )),
             convert: BetaManagedAgentsVault::class,
             page: PageCursor::class,
         );
@@ -221,11 +250,12 @@ final class VaultsRawService implements VaultsRawContract
     /**
      * @api
      *
-     * Delete Vault
+     * Delete a Vault
      *
-     * @param string $vaultID Path parameter vault_id
+     * @param string $vaultID Unique identifier of the vault to delete.
      * @param array{
-     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|VaultDeleteParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -246,15 +276,21 @@ final class VaultsRawService implements VaultsRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'delete',
-            path: ['v1/vaults/%1$s?beta=true', $vaultID],
+            path: ['v1/vaults/%1$s', $vaultID],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.vaults.delete',
+                route: '/v1/vaults/{vault_id}',
+                attributes: ['anthropic.vault.id' => $vaultID],
+            )),
             convert: BetaManagedAgentsDeletedVault::class,
         );
     }
@@ -262,11 +298,12 @@ final class VaultsRawService implements VaultsRawContract
     /**
      * @api
      *
-     * Archive Vault
+     * Archive a Vault
      *
-     * @param string $vaultID Path parameter vault_id
+     * @param string $vaultID Unique identifier of the vault to archive.
      * @param array{
-     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|VaultArchiveParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -287,15 +324,21 @@ final class VaultsRawService implements VaultsRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: ['v1/vaults/%1$s/archive?beta=true', $vaultID],
+            path: ['v1/vaults/%1$s/archive', $vaultID],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.vaults.archive',
+                route: '/v1/vaults/{vault_id}/archive',
+                attributes: ['anthropic.vault.id' => $vaultID],
+            )),
             convert: BetaManagedAgentsVault::class,
         );
     }

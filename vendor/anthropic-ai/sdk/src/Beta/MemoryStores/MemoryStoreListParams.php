@@ -11,7 +11,7 @@ use Anthropic\Core\Concerns\SdkParams;
 use Anthropic\Core\Contracts\BaseModel;
 
 /**
- * ListMemoryStores.
+ * List Memory Stores
  *
  * @see Anthropic\Services\Beta\MemoryStoresService::list()
  *
@@ -22,6 +22,7 @@ use Anthropic\Core\Contracts\BaseModel;
  *   limit?: int|null,
  *   page?: string|null,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class MemoryStoreListParams implements BaseModel
@@ -31,42 +32,50 @@ final class MemoryStoreListParams implements BaseModel
     use SdkParams;
 
     /**
-     * Return stores created at or after this time (inclusive).
+     * Return only memory stores created at or after this time (inclusive).
      */
     #[Optional]
     public ?\DateTimeInterface $createdAtGte;
 
     /**
-     * Return stores created at or before this time (inclusive).
+     * Return only memory stores created at or before this time (inclusive).
      */
     #[Optional]
     public ?\DateTimeInterface $createdAtLte;
 
     /**
-     * Query parameter for include_archived.
+     * When `true`, archived stores are included in the results. Defaults to `false` (archived stores are excluded).
      */
     #[Optional]
     public ?bool $includeArchived;
 
     /**
-     * Query parameter for limit.
+     * Maximum number of stores to return per page. Must be between 1 and 100. Defaults to 20 when omitted.
      */
     #[Optional]
     public ?int $limit;
 
     /**
-     * Query parameter for page.
+     * The `next_page` value from a previous response, to get the next page. Omit it to get the first page.
      */
     #[Optional]
     public ?string $page;
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `agent-memory-2026-07-22` or `managed-agents-2026-04-01` in this header.
      *
      * @var list<string|value-of<AnthropicBeta>>|null $betas
      */
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
 
     public function __construct()
     {
@@ -87,6 +96,7 @@ final class MemoryStoreListParams implements BaseModel
         ?int $limit = null,
         ?string $page = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
     ): self {
         $self = new self;
 
@@ -96,12 +106,13 @@ final class MemoryStoreListParams implements BaseModel
         null !== $limit && $self['limit'] = $limit;
         null !== $page && $self['page'] = $page;
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
 
     /**
-     * Return stores created at or after this time (inclusive).
+     * Return only memory stores created at or after this time (inclusive).
      */
     public function withCreatedAtGte(\DateTimeInterface $createdAtGte): self
     {
@@ -112,7 +123,7 @@ final class MemoryStoreListParams implements BaseModel
     }
 
     /**
-     * Return stores created at or before this time (inclusive).
+     * Return only memory stores created at or before this time (inclusive).
      */
     public function withCreatedAtLte(\DateTimeInterface $createdAtLte): self
     {
@@ -123,7 +134,7 @@ final class MemoryStoreListParams implements BaseModel
     }
 
     /**
-     * Query parameter for include_archived.
+     * When `true`, archived stores are included in the results. Defaults to `false` (archived stores are excluded).
      */
     public function withIncludeArchived(bool $includeArchived): self
     {
@@ -134,7 +145,7 @@ final class MemoryStoreListParams implements BaseModel
     }
 
     /**
-     * Query parameter for limit.
+     * Maximum number of stores to return per page. Must be between 1 and 100. Defaults to 20 when omitted.
      */
     public function withLimit(int $limit): self
     {
@@ -145,7 +156,7 @@ final class MemoryStoreListParams implements BaseModel
     }
 
     /**
-     * Query parameter for page.
+     * The `next_page` value from a previous response, to get the next page. Omit it to get the first page.
      */
     public function withPage(string $page): self
     {
@@ -156,7 +167,7 @@ final class MemoryStoreListParams implements BaseModel
     }
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `agent-memory-2026-07-22` or `managed-agents-2026-04-01` in this header.
      *
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas
      */
@@ -164,6 +175,19 @@ final class MemoryStoreListParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

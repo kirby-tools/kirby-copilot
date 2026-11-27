@@ -9,13 +9,16 @@ use Anthropic\Beta\Vaults\Credentials\CredentialArchiveParams;
 use Anthropic\Beta\Vaults\Credentials\CredentialCreateParams;
 use Anthropic\Beta\Vaults\Credentials\CredentialDeleteParams;
 use Anthropic\Beta\Vaults\Credentials\CredentialListParams;
+use Anthropic\Beta\Vaults\Credentials\CredentialMCPOAuthValidateParams;
 use Anthropic\Beta\Vaults\Credentials\CredentialRetrieveParams;
 use Anthropic\Beta\Vaults\Credentials\CredentialUpdateParams;
 use Anthropic\Beta\Vaults\Credentials\ManagedAgentsCredential;
+use Anthropic\Beta\Vaults\Credentials\ManagedAgentsCredentialValidation;
 use Anthropic\Beta\Vaults\Credentials\ManagedAgentsDeletedCredential;
 use Anthropic\Client;
 use Anthropic\Core\Contracts\BaseResponse;
 use Anthropic\Core\Exceptions\APIException;
+use Anthropic\Core\Implementation\ApiCallInfo;
 use Anthropic\Core\Util;
 use Anthropic\PageCursor;
 use Anthropic\RequestOptions;
@@ -23,8 +26,8 @@ use Anthropic\ServiceContracts\Beta\Vaults\CredentialsRawContract;
 
 /**
  * @phpstan-import-type AuthShape from \Anthropic\Beta\Vaults\Credentials\CredentialCreateParams\Auth
- * @phpstan-import-type AuthShape from \Anthropic\Beta\Vaults\Credentials\CredentialUpdateParams\Auth as AuthShape1
  * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ * @phpstan-import-type AuthShape from \Anthropic\Beta\Vaults\Credentials\CredentialUpdateParams\Auth as AuthShape1
  */
 final class CredentialsRawService implements CredentialsRawContract
 {
@@ -37,14 +40,15 @@ final class CredentialsRawService implements CredentialsRawContract
     /**
      * @api
      *
-     * Create Credential
+     * Create a Credential
      *
-     * @param string $vaultID Path param: Path parameter vault_id
+     * @param string $vaultID Path param: Identifier of the vault to create the credential in.
      * @param array{
      *   auth: AuthShape,
      *   displayName?: string|null,
      *   metadata?: array<string,string>,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|CredentialCreateParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -61,12 +65,14 @@ final class CredentialsRawService implements CredentialsRawContract
             $params,
             $requestOptions,
         );
-        $header_params = ['betas' => 'anthropic-beta'];
+        $header_params = [
+            'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+        ];
 
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: ['v1/vaults/%1$s/credentials?beta=true', $vaultID],
+            path: ['v1/vaults/%1$s/credentials', $vaultID],
             headers: Util::array_transform_keys(
                 array_intersect_key($parsed, array_flip(array_keys($header_params))),
                 $header_params,
@@ -78,7 +84,12 @@ final class CredentialsRawService implements CredentialsRawContract
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.vaults.credentials.create',
+                route: '/v1/vaults/{vault_id}/credentials',
+                attributes: ['anthropic.vault.id' => $vaultID],
+                createdId: 'anthropic.vault.credential.id',
+            )),
             convert: ManagedAgentsCredential::class,
         );
     }
@@ -86,11 +97,13 @@ final class CredentialsRawService implements CredentialsRawContract
     /**
      * @api
      *
-     * Get Credential
+     * Retrieve a Credential
      *
-     * @param string $credentialID Path param: Path parameter credential_id
+     * @param string $credentialID Path param: Unique identifier of the credential to retrieve.
      * @param array{
-     *   vaultID: string, betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   vaultID: string,
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|CredentialRetrieveParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -113,17 +126,24 @@ final class CredentialsRawService implements CredentialsRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: [
-                'v1/vaults/%1$s/credentials/%2$s?beta=true', $vaultID, $credentialID,
-            ],
+            path: ['v1/vaults/%1$s/credentials/%2$s', $vaultID, $credentialID],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.vaults.credentials.retrieve',
+                route: '/v1/vaults/{vault_id}/credentials/{credential_id}',
+                attributes: [
+                    'anthropic.vault.id' => $vaultID,
+                    'anthropic.vault.credential.id' => $credentialID,
+                ],
+            )),
             convert: ManagedAgentsCredential::class,
         );
     }
@@ -131,15 +151,16 @@ final class CredentialsRawService implements CredentialsRawContract
     /**
      * @api
      *
-     * Update Credential
+     * Update a Credential
      *
-     * @param string $credentialID Path param: Path parameter credential_id
+     * @param string $credentialID Path param: Unique identifier of the credential to update.
      * @param array{
      *   vaultID: string,
      *   auth?: AuthShape1,
      *   displayName?: string|null,
      *   metadata?: array<string,string|null>|null,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|CredentialUpdateParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -158,14 +179,14 @@ final class CredentialsRawService implements CredentialsRawContract
         );
         $vaultID = $parsed['vaultID'];
         unset($parsed['vaultID']);
-        $header_params = ['betas' => 'anthropic-beta'];
+        $header_params = [
+            'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+        ];
 
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: [
-                'v1/vaults/%1$s/credentials/%2$s?beta=true', $vaultID, $credentialID,
-            ],
+            path: ['v1/vaults/%1$s/credentials/%2$s', $vaultID, $credentialID],
             headers: Util::array_transform_keys(
                 array_intersect_key($parsed, array_flip(array_keys($header_params))),
                 $header_params,
@@ -177,7 +198,14 @@ final class CredentialsRawService implements CredentialsRawContract
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.vaults.credentials.update',
+                route: '/v1/vaults/{vault_id}/credentials/{credential_id}',
+                attributes: [
+                    'anthropic.vault.id' => $vaultID,
+                    'anthropic.vault.credential.id' => $credentialID,
+                ],
+            )),
             convert: ManagedAgentsCredential::class,
         );
     }
@@ -187,12 +215,13 @@ final class CredentialsRawService implements CredentialsRawContract
      *
      * List Credentials
      *
-     * @param string $vaultID Path param: Path parameter vault_id
+     * @param string $vaultID Path param: Identifier of the vault to list credentials for.
      * @param array{
      *   includeArchived?: bool,
      *   limit?: int,
      *   page?: string,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|CredentialListParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -217,19 +246,26 @@ final class CredentialsRawService implements CredentialsRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: ['v1/vaults/%1$s/credentials?beta=true', $vaultID],
+            path: ['v1/vaults/%1$s/credentials', $vaultID],
             query: Util::array_transform_keys(
                 array_intersect_key($parsed, $query_params),
                 ['includeArchived' => 'include_archived'],
             ),
             headers: Util::array_transform_keys(
                 $header_params,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.vaults.credentials.list',
+                route: '/v1/vaults/{vault_id}/credentials',
+                query: ['include_archived', 'limit', 'page'],
+                attributes: ['anthropic.vault.id' => $vaultID],
+            )),
             convert: ManagedAgentsCredential::class,
             page: PageCursor::class,
         );
@@ -238,11 +274,13 @@ final class CredentialsRawService implements CredentialsRawContract
     /**
      * @api
      *
-     * Delete Credential
+     * Delete a Credential
      *
-     * @param string $credentialID Path param: Path parameter credential_id
+     * @param string $credentialID Path param: Unique identifier of the credential to delete.
      * @param array{
-     *   vaultID: string, betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   vaultID: string,
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|CredentialDeleteParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -265,17 +303,24 @@ final class CredentialsRawService implements CredentialsRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'delete',
-            path: [
-                'v1/vaults/%1$s/credentials/%2$s?beta=true', $vaultID, $credentialID,
-            ],
+            path: ['v1/vaults/%1$s/credentials/%2$s', $vaultID, $credentialID],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.vaults.credentials.delete',
+                route: '/v1/vaults/{vault_id}/credentials/{credential_id}',
+                attributes: [
+                    'anthropic.vault.id' => $vaultID,
+                    'anthropic.vault.credential.id' => $credentialID,
+                ],
+            )),
             convert: ManagedAgentsDeletedCredential::class,
         );
     }
@@ -283,11 +328,13 @@ final class CredentialsRawService implements CredentialsRawContract
     /**
      * @api
      *
-     * Archive Credential
+     * Archive a Credential
      *
-     * @param string $credentialID Path param: Path parameter credential_id
+     * @param string $credentialID Path param: Unique identifier of the credential to archive.
      * @param array{
-     *   vaultID: string, betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   vaultID: string,
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|CredentialArchiveParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -311,19 +358,84 @@ final class CredentialsRawService implements CredentialsRawContract
         return $this->client->request(
             method: 'post',
             path: [
-                'v1/vaults/%1$s/credentials/%2$s/archive?beta=true',
+                'v1/vaults/%1$s/credentials/%2$s/archive', $vaultID, $credentialID,
+            ],
+            headers: Util::array_transform_keys(
+                $parsed,
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
+            ),
+            options: RequestOptions::parse(
+                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                $options,
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.vaults.credentials.archive',
+                route: '/v1/vaults/{vault_id}/credentials/{credential_id}/archive',
+                attributes: [
+                    'anthropic.vault.id' => $vaultID,
+                    'anthropic.vault.credential.id' => $credentialID,
+                ],
+            )),
+            convert: ManagedAgentsCredential::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * Validate an MCP OAuth Credential
+     *
+     * @param string $credentialID Path param: Unique identifier of the credential to validate.
+     * @param array{
+     *   vaultID: string,
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
+     * }|CredentialMCPOAuthValidateParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<ManagedAgentsCredentialValidation>
+     *
+     * @throws APIException
+     */
+    public function mcpOAuthValidate(
+        string $credentialID,
+        array|CredentialMCPOAuthValidateParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = CredentialMCPOAuthValidateParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+        $vaultID = $parsed['vaultID'];
+        unset($parsed['vaultID']);
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'post',
+            path: [
+                'v1/vaults/%1$s/credentials/%2$s/mcp_oauth_validate',
                 $vaultID,
                 $credentialID,
             ],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
                 ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
                 $options,
-            ),
-            convert: ManagedAgentsCredential::class,
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.vaults.credentials.mcp_oauth_validate',
+                route: '/v1/vaults/{vault_id}/credentials/{credential_id}/mcp_oauth_validate',
+                attributes: [
+                    'anthropic.vault.id' => $vaultID,
+                    'anthropic.vault.credential.id' => $credentialID,
+                ],
+            )),
+            convert: ManagedAgentsCredentialValidation::class,
         );
     }
 }

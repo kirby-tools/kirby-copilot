@@ -5,14 +5,19 @@ declare(strict_types=1);
 namespace Anthropic\ServiceContracts\Beta;
 
 use Anthropic\Beta\AnthropicBeta;
+use Anthropic\Beta\UserProfiles\BetaDeletedUserProfile;
 use Anthropic\Beta\UserProfiles\BetaUserProfile;
 use Anthropic\Beta\UserProfiles\BetaUserProfileEnrollmentURL;
+use Anthropic\Beta\UserProfiles\BetaUserProfileExternalUserDetailsParams;
+use Anthropic\Beta\UserProfiles\UserProfileCreateParams\AccessType;
 use Anthropic\Beta\UserProfiles\UserProfileListParams\Order;
+use Anthropic\Beta\UserProfiles\UserProfileListParams\OrderBy;
 use Anthropic\Core\Exceptions\APIException;
 use Anthropic\PageCursor;
 use Anthropic\RequestOptions;
 
 /**
+ * @phpstan-import-type BetaUserProfileExternalUserDetailsParamsShape from \Anthropic\Beta\UserProfiles\BetaUserProfileExternalUserDetailsParams
  * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
  */
 interface UserProfilesContract
@@ -20,25 +25,40 @@ interface UserProfilesContract
     /**
      * @api
      *
-     * @param string|null $externalID Body param: Platform's own identifier for this user. Not enforced unique. Maximum 255 characters.
+     * @param AccessType|value-of<AccessType> $accessType Body param: How the platform uses the API for this entity. `application` (default): the profile represents an individual end-user of the platform's product. `passthrough`: the profile identifies a company the platform resells Claude access to.
+     * @param string|null $externalID Body param: Platform's own identifier for this user. Not enforced unique. Maximum 255 characters. Legacy field, accepted only under the `user-profiles-2026-03-24` and `user-profiles-2026-08-18` beta headers; without one of them, send `external_user_details.reference_id`.
+     * @param BetaUserProfileExternalUserDetailsParams|BetaUserProfileExternalUserDetailsParamsShape $externalUserDetails Body param: Details about the entity this profile represents, as the platform states them. Every field is optional. Not accepted under the legacy `user-profiles-2026-03-24` and `user-profiles-2026-08-18` beta headers, which take the top-level `external_id` (and, under `user-profiles-2026-08-18`, `external_user_onboarded_at`) instead.
+     * @param \DateTimeInterface $externalUserOnboardedAt Body param: When the entity this profile represents opened its account with the platform, in RFC 3339 format: for an `application` profile, when the end-user signed up; for a `passthrough` profile, when the company became the platform's customer. Must be a complete timestamp no more than 1 minute in the future. Optional. Legacy field, accepted only under the `user-profiles-2026-08-18` beta header; without a legacy header, send `external_user_details.onboarded_at`.
      * @param array<string,string> $metadata Body param: Free-form key-value data to attach to this user profile. Maximum 16 keys, with keys up to 64 characters and values up to 512 characters. Values must be non-empty strings.
-     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas header param: Optional header to specify the beta version(s) you want to use
+     * @param string|null $name Body param: Optional for all profiles. Real-world name of the entity this profile represents (company or individual); for a company the platform resells Claude access to (`access_type` `passthrough`), that company's name where known. Maximum 255 characters.
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Header param: Optional header to specify the beta version(s) you want to use.
+     * @param string $workspaceID Header param: Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
      * @throws APIException
      */
     public function create(
+        AccessType|string|null $accessType = null,
         ?string $externalID = null,
+        BetaUserProfileExternalUserDetailsParams|array|null $externalUserDetails = null,
+        ?\DateTimeInterface $externalUserOnboardedAt = null,
         ?array $metadata = null,
+        ?string $name = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): BetaUserProfile;
 
     /**
      * @api
      *
-     * @param string $userProfileID Path parameter user_profile_id
-     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas optional header to specify the beta version(s) you want to use
+     * @param string $userProfileID The ID of the user profile to get (`uprof_...`).
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Optional header to specify the beta version(s) you want to use.
+     * @param string $workspaceID Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
      * @throws APIException
@@ -46,35 +66,54 @@ interface UserProfilesContract
     public function retrieve(
         string $userProfileID,
         ?array $betas = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): BetaUserProfile;
 
     /**
      * @api
      *
-     * @param string $userProfileID Path param: Path parameter user_profile_id
-     * @param string|null $externalID Body param: If present, replaces the stored external_id. Omit to leave unchanged. Maximum 255 characters.
+     * @param string $userProfileID Path param: The ID of the user profile to update (`uprof_...`).
+     * @param \Anthropic\Beta\UserProfiles\UserProfileUpdateParams\AccessType|value-of<\Anthropic\Beta\UserProfiles\UserProfileUpdateParams\AccessType>|null $accessType Body param: If present, replaces the stored access type. Omit to leave unchanged.
+     * @param string|null $externalID Body param: If present, replaces the stored external_id. Omit to leave unchanged. Maximum 255 characters. Legacy field, accepted only under the `user-profiles-2026-03-24` and `user-profiles-2026-08-18` beta headers; without one of them, send `external_user_details.reference_id`.
+     * @param BetaUserProfileExternalUserDetailsParams|BetaUserProfileExternalUserDetailsParamsShape $externalUserDetails Body param: Details about the entity this profile represents, as the platform states them. Each field sent replaces the stored value; omit a field to leave it unchanged. Once set, a value cannot be cleared and `null` is rejected. Not accepted under the legacy `user-profiles-2026-03-24` and `user-profiles-2026-08-18` beta headers.
+     * @param \DateTimeInterface $externalUserOnboardedAt Body param: If present, replaces the stored account creation time. Omit to leave unchanged; once set, the value cannot be cleared and `null` is rejected. Must be a complete RFC 3339 timestamp no more than 1 minute in the future. Legacy field, accepted only under the `user-profiles-2026-08-18` beta header; without a legacy header, send `external_user_details.onboarded_at`.
      * @param array<string,string> $metadata Body param: Key-value pairs to merge into the stored metadata. Keys provided overwrite existing values. To remove a key, set its value to an empty string. Keys not provided are left unchanged. Maximum 16 keys, with keys up to 64 characters and values up to 512 characters.
-     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas header param: Optional header to specify the beta version(s) you want to use
+     * @param string|null $name Body param: If present, replaces the stored name. Omit to leave unchanged. Maximum 255 characters.
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Header param: Optional header to specify the beta version(s) you want to use.
+     * @param string $workspaceID Header param: Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
      * @throws APIException
      */
     public function update(
         string $userProfileID,
+        \Anthropic\Beta\UserProfiles\UserProfileUpdateParams\AccessType|string|null $accessType = null,
         ?string $externalID = null,
+        BetaUserProfileExternalUserDetailsParams|array|null $externalUserDetails = null,
+        ?\DateTimeInterface $externalUserOnboardedAt = null,
         ?array $metadata = null,
+        ?string $name = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): BetaUserProfile;
 
     /**
      * @api
      *
-     * @param int $limit Query param: Query parameter for limit
-     * @param Order|value-of<Order> $order Query param: Query parameter for order
-     * @param string $page Query param: Query parameter for page
-     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas header param: Optional header to specify the beta version(s) you want to use
+     * @param int $limit Query param: The maximum number of user profiles to return, from 1 to 100. Defaults to 20.
+     * @param Order|value-of<Order> $order Query param: The sort direction, applied to the field that `order_by` selects. Defaults to `desc`.
+     * @param OrderBy|value-of<OrderBy> $orderBy Query param: The field to sort user profiles by, in the direction that `order` sets. Defaults to `created_at`.
+     * @param string $page Query param: The cursor for the page to return, taken from `next_page` in a previous response.
+     *
+     * Leave it out to get the first page.
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Header param: Optional header to specify the beta version(s) you want to use.
+     * @param string $workspaceID Header param: Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
      * @return PageCursor<BetaUserProfile>
@@ -84,16 +123,40 @@ interface UserProfilesContract
     public function list(
         ?int $limit = null,
         Order|string|null $order = null,
+        OrderBy|string|null $orderBy = null,
         ?string $page = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): PageCursor;
 
     /**
      * @api
      *
-     * @param string $userProfileID Path parameter user_profile_id
-     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas optional header to specify the beta version(s) you want to use
+     * @param string $userProfileID The ID of the user profile to delete (`uprof_...`).
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Optional header to specify the beta version(s) you want to use.
+     * @param string $workspaceID Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @throws APIException
+     */
+    public function delete(
+        string $userProfileID,
+        ?array $betas = null,
+        ?string $workspaceID = null,
+        RequestOptions|array|null $requestOptions = null,
+    ): BetaDeletedUserProfile;
+
+    /**
+     * @api
+     *
+     * @param string $userProfileID The ID of the user profile to create an enrollment URL for (`uprof_...`).
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Optional header to specify the beta version(s) you want to use.
+     * @param string $workspaceID Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
      * @throws APIException
@@ -101,6 +164,7 @@ interface UserProfilesContract
     public function createEnrollmentURL(
         string $userProfileID,
         ?array $betas = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): BetaUserProfileEnrollmentURL;
 }

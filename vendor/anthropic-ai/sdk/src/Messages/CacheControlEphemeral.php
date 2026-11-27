@@ -8,6 +8,7 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\CacheControlEphemeral\TTL;
 
 /**
@@ -21,7 +22,7 @@ final class CacheControlEphemeral implements BaseModel
     use SdkModel;
 
     /** @var 'ephemeral' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('ephemeral'))]
     public string $type = 'ephemeral';
 
     /**
@@ -31,7 +32,7 @@ final class CacheControlEphemeral implements BaseModel
      * - `5m`: 5 minutes
      * - `1h`: 1 hour
      *
-     * Defaults to `5m`.
+     * Defaults to `5m`. See [prompt caching pricing](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) for details.
      *
      * @var value-of<TTL>|null $ttl
      */
@@ -77,7 +78,7 @@ final class CacheControlEphemeral implements BaseModel
      * - `5m`: 5 minutes
      * - `1h`: 1 hour
      *
-     * Defaults to `5m`.
+     * Defaults to `5m`. See [prompt caching pricing](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) for details.
      *
      * @param TTL|value-of<TTL> $ttl
      */

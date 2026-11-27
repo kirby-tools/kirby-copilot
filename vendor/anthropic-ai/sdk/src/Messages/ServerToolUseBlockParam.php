@@ -8,13 +8,14 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\ServerToolUseBlockParam\Caller;
 use Anthropic\Messages\ServerToolUseBlockParam\Name;
 
 /**
- * @phpstan-import-type CallerVariants from \Anthropic\Messages\ServerToolUseBlockParam\Caller
  * @phpstan-import-type CacheControlEphemeralShape from \Anthropic\Messages\CacheControlEphemeral
  * @phpstan-import-type CallerShape from \Anthropic\Messages\ServerToolUseBlockParam\Caller
+ * @phpstan-import-type CallerVariants from \Anthropic\Messages\ServerToolUseBlockParam\Caller
  *
  * @phpstan-type ServerToolUseBlockParamShape = array{
  *   id: string,
@@ -31,7 +32,7 @@ final class ServerToolUseBlockParam implements BaseModel
     use SdkModel;
 
     /** @var 'server_tool_use' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('server_tool_use'))]
     public string $type = 'server_tool_use';
 
     #[Required]
@@ -51,11 +52,7 @@ final class ServerToolUseBlockParam implements BaseModel
     #[Optional('cache_control', nullable: true)]
     public ?CacheControlEphemeral $cacheControl;
 
-    /**
-     * Tool invocation directly from the model.
-     *
-     * @var CallerVariants|null $caller
-     */
+    /** @var CallerVariants|null $caller */
     #[Optional(union: Caller::class)]
     public DirectCaller|ServerToolCaller|ServerToolCaller20260120|null $caller;
 
@@ -70,7 +67,7 @@ final class ServerToolUseBlockParam implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ServerToolUseBlockParam)->withID(...)->withInput(...)->withName(...)
+     * (new ServerToolUseBlockParam())->withID(...)->withInput(...)->withName(...)
      * ```
      */
     public function __construct()
@@ -163,8 +160,6 @@ final class ServerToolUseBlockParam implements BaseModel
     }
 
     /**
-     * Tool invocation directly from the model.
-     *
      * @param CallerShape $caller
      */
     public function withCaller(

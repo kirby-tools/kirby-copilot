@@ -7,6 +7,7 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type BetaFileDocumentSourceShape = array{fileID: string, type: 'file'}
@@ -17,7 +18,7 @@ final class BetaFileDocumentSource implements BaseModel
     use SdkModel;
 
     /** @var 'file' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('file'))]
     public string $type = 'file';
 
     #[Required('file_id')]
@@ -34,7 +35,7 @@ final class BetaFileDocumentSource implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaFileDocumentSource)->withFileID(...)
+     * (new BetaFileDocumentSource())->withFileID(...)
      * ```
      */
     public function __construct()

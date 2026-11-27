@@ -8,6 +8,7 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Core\Conversion\MapOf;
 use Anthropic\Messages\ToolTextEditor20250728\AllowedCaller;
 
@@ -37,11 +38,11 @@ final class ToolTextEditor20250728 implements BaseModel
      *
      * @var 'str_replace_based_edit_tool' $name
      */
-    #[Required]
+    #[Required(type: new ConstantOf('str_replace_based_edit_tool'))]
     public string $name = 'str_replace_based_edit_tool';
 
     /** @var 'text_editor_20250728' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('text_editor_20250728'))]
     public string $type = 'text_editor_20250728';
 
     /** @var list<value-of<AllowedCaller>>|null $allowedCallers */
@@ -71,7 +72,7 @@ final class ToolTextEditor20250728 implements BaseModel
     public ?int $maxCharacters;
 
     /**
-     * When true, guarantees schema validation on tool names and inputs.
+     * When true, guarantees schema validation on tool names and inputs
      */
     #[Optional]
     public ?bool $strict;
@@ -195,7 +196,7 @@ final class ToolTextEditor20250728 implements BaseModel
     }
 
     /**
-     * When true, guarantees schema validation on tool names and inputs.
+     * When true, guarantees schema validation on tool names and inputs
      */
     public function withStrict(bool $strict): self
     {

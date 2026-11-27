@@ -8,6 +8,7 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\ThinkingConfigAdaptive\Display;
 
 /**
@@ -21,11 +22,11 @@ final class ThinkingConfigAdaptive implements BaseModel
     use SdkModel;
 
     /** @var 'adaptive' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('adaptive'))]
     public string $type = 'adaptive';
 
     /**
-     * Controls how thinking content appears in the response. When set to `summarized`, thinking is returned normally. When set to `omitted`, thinking content is redacted but a signature is returned for multi-turn continuity. Defaults to `summarized`.
+     * Controls how thinking content appears in the response. When set to `summarized`, thinking is returned normally. When set to `omitted`, thinking content is redacted but a signature is returned for multi-turn continuity. The default depends on the model; see [Controlling thinking display](https://platform.claude.com/docs/en/build-with-claude/thinking#controlling-thinking-display).
      *
      * @var value-of<Display>|null $display
      */
@@ -65,7 +66,7 @@ final class ThinkingConfigAdaptive implements BaseModel
     }
 
     /**
-     * Controls how thinking content appears in the response. When set to `summarized`, thinking is returned normally. When set to `omitted`, thinking content is redacted but a signature is returned for multi-turn continuity. Defaults to `summarized`.
+     * Controls how thinking content appears in the response. When set to `summarized`, thinking is returned normally. When set to `omitted`, thinking content is redacted but a signature is returned for multi-turn continuity. The default depends on the model; see [Controlling thinking display](https://platform.claude.com/docs/en/build-with-claude/thinking#controlling-thinking-display).
      *
      * @param Display|value-of<Display>|null $display
      */

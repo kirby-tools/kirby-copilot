@@ -7,14 +7,23 @@ namespace Anthropic\ServiceContracts\Beta;
 use Anthropic\Beta\AnthropicBeta;
 use Anthropic\Beta\Environments\BetaCloudConfigParams;
 use Anthropic\Beta\Environments\BetaEnvironment;
+use Anthropic\Beta\Environments\BetaEnvironmentArchivedException;
+use Anthropic\Beta\Environments\BetaEnvironmentCreateDisabledException;
 use Anthropic\Beta\Environments\BetaEnvironmentDeleteResponse;
+use Anthropic\Beta\Environments\BetaEnvironmentUpdateDisabledException;
+use Anthropic\Beta\Environments\BetaInvalidConfigTypeChangeException;
+use Anthropic\Beta\Environments\BetaSelfHostedConfigParams;
+use Anthropic\Beta\Environments\EnvironmentCreateParams\Scope;
+use Anthropic\ClaudeCodeKeyCreatorNotMemberException;
 use Anthropic\Core\Exceptions\APIException;
+use Anthropic\OrganizationOnHoldException;
 use Anthropic\PageCursor;
 use Anthropic\RequestOptions;
 
 /**
- * @phpstan-import-type BetaCloudConfigParamsShape from \Anthropic\Beta\Environments\BetaCloudConfigParams
+ * @phpstan-import-type ConfigShape from \Anthropic\Beta\Environments\EnvironmentCreateParams\Config
  * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ * @phpstan-import-type ConfigShape from \Anthropic\Beta\Environments\EnvironmentUpdateParams\Config as ConfigShape1
  */
 interface EnvironmentsContract
 {
@@ -22,37 +31,49 @@ interface EnvironmentsContract
      * @api
      *
      * @param string $name Body param: Human-readable name for the environment
-     * @param BetaCloudConfigParams|BetaCloudConfigParamsShape|null $config Body param: Request params for `cloud` environment configuration.
-     *
-     * Fields default to null; on update, omitted fields preserve the
-     * existing value.
+     * @param ConfigShape|null $config Body param: Environment configuration
      * @param string|null $description Body param: Optional description of the environment
      * @param array<string,string> $metadata Body param: User-provided metadata key-value pairs
-     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas header param: Optional header to specify the beta version(s) you want to use
+     * @param Scope|value-of<Scope>|null $scope Body param: The visibility scope for this environment. 'organization' makes the environment visible to all accounts. 'account' restricts visibility to the owning account only. API organizations support only 'organization'; 'account' is rejected. If not specified, defaults based on organization type.
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Header param: Optional header to specify the beta version(s) you want to use.
+     * @param string $workspaceID Header param: Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
+     * @throws BetaEnvironmentCreateDisabledException
      * @throws APIException
      */
     public function create(
         string $name,
-        BetaCloudConfigParams|array|null $config = null,
+        BetaCloudConfigParams|array|BetaSelfHostedConfigParams|null $config = null,
         ?string $description = null,
         ?array $metadata = null,
+        Scope|string|null $scope = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): BetaEnvironment;
 
     /**
      * @api
      *
-     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas optional header to specify the beta version(s) you want to use
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Optional header to specify the beta version(s) you want to use.
+     * @param string $workspaceID Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function retrieve(
         string $environmentID,
         ?array $betas = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): BetaEnvironment;
 
@@ -60,25 +81,33 @@ interface EnvironmentsContract
      * @api
      *
      * @param string $environmentID Path param
-     * @param BetaCloudConfigParams|BetaCloudConfigParamsShape|null $config Body param: Request params for `cloud` environment configuration.
-     *
-     * Fields default to null; on update, omitted fields preserve the
-     * existing value.
-     * @param string|null $description Body param: Updated description of the environment
+     * @param ConfigShape1|null $config Body param: Updated environment configuration
+     * @param string|null $description Body param: Updated description of the environment. Omit to preserve; null clears to null; an empty string is stored as an empty string.
      * @param array<string,string|null> $metadata Body param: User-provided metadata key-value pairs. Set a value to null or empty string to delete the key.
      * @param string|null $name Body param: Updated name for the environment
-     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas header param: Optional header to specify the beta version(s) you want to use
+     * @param \Anthropic\Beta\Environments\EnvironmentUpdateParams\Scope|value-of<\Anthropic\Beta\Environments\EnvironmentUpdateParams\Scope>|null $scope Body param: The visibility scope for this environment. 'organization' makes the environment visible to all accounts. 'account' restricts visibility to the owning account only.
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Header param: Optional header to specify the beta version(s) you want to use.
+     * @param string $workspaceID Header param: Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws BetaEnvironmentArchivedException
+     * @throws BetaInvalidConfigTypeChangeException
+     * @throws OrganizationOnHoldException
+     * @throws BetaEnvironmentUpdateDisabledException
      * @throws APIException
      */
     public function update(
         string $environmentID,
-        BetaCloudConfigParams|array|null $config = null,
+        BetaCloudConfigParams|array|BetaSelfHostedConfigParams|null $config = null,
         ?string $description = null,
         ?array $metadata = null,
         ?string $name = null,
+        \Anthropic\Beta\Environments\EnvironmentUpdateParams\Scope|string|null $scope = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): BetaEnvironment;
 
@@ -88,46 +117,64 @@ interface EnvironmentsContract
      * @param bool $includeArchived Query param: Include archived environments in the response
      * @param int $limit Query param: Maximum number of environments to return
      * @param string|null $page Query param: Opaque cursor from previous response for pagination. Pass the `next_page` value from the previous response.
-     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas header param: Optional header to specify the beta version(s) you want to use
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Header param: Optional header to specify the beta version(s) you want to use.
+     * @param string $workspaceID Header param: Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
      * @return PageCursor<BetaEnvironment>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function list(
-        bool $includeArchived = false,
-        int $limit = 20,
+        ?bool $includeArchived = null,
+        ?int $limit = null,
         ?string $page = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): PageCursor;
 
     /**
      * @api
      *
-     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas optional header to specify the beta version(s) you want to use
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Optional header to specify the beta version(s) you want to use.
+     * @param string $workspaceID Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function delete(
         string $environmentID,
         ?array $betas = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): BetaEnvironmentDeleteResponse;
 
     /**
      * @api
      *
-     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas optional header to specify the beta version(s) you want to use
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Optional header to specify the beta version(s) you want to use.
+     * @param string $workspaceID Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function archive(
         string $environmentID,
         ?array $betas = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): BetaEnvironment;
 }

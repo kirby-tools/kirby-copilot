@@ -12,8 +12,8 @@ use Anthropic\Core\Contracts\BaseModel;
 /**
  * Default configuration for all tools from an MCP server.
  *
- * @phpstan-import-type PermissionPolicyVariants from \Anthropic\Beta\Agents\BetaManagedAgentsMCPToolsetDefaultConfigParams\PermissionPolicy
  * @phpstan-import-type PermissionPolicyShape from \Anthropic\Beta\Agents\BetaManagedAgentsMCPToolsetDefaultConfigParams\PermissionPolicy
+ * @phpstan-import-type PermissionPolicyVariants from \Anthropic\Beta\Agents\BetaManagedAgentsMCPToolsetDefaultConfigParams\PermissionPolicy
  *
  * @phpstan-type BetaManagedAgentsMCPToolsetDefaultConfigParamsShape = array{
  *   enabled?: bool|null, permissionPolicy?: PermissionPolicyShape|null
@@ -31,7 +31,7 @@ final class BetaManagedAgentsMCPToolsetDefaultConfigParams implements BaseModel
     public ?bool $enabled;
 
     /**
-     * Permission policy for tool execution.
+     * Default permission policy for tools from this server.
      *
      * @var PermissionPolicyVariants|null $permissionPolicy
      */
@@ -40,7 +40,7 @@ final class BetaManagedAgentsMCPToolsetDefaultConfigParams implements BaseModel
         union: PermissionPolicy::class,
         nullable: true
     )]
-    public BetaManagedAgentsAlwaysAllowPolicy|BetaManagedAgentsAlwaysAskPolicy|null $permissionPolicy;
+    public BetaManagedAgentsAlwaysAllowPolicy|BetaManagedAgentsAlwaysAskPolicy|BetaManagedAgentsAutoPolicy|null $permissionPolicy;
 
     public function __construct()
     {
@@ -56,7 +56,7 @@ final class BetaManagedAgentsMCPToolsetDefaultConfigParams implements BaseModel
      */
     public static function with(
         ?bool $enabled = null,
-        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy|null $permissionPolicy = null,
+        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy|BetaManagedAgentsAutoPolicy|null $permissionPolicy = null,
     ): self {
         $self = new self;
 
@@ -78,12 +78,12 @@ final class BetaManagedAgentsMCPToolsetDefaultConfigParams implements BaseModel
     }
 
     /**
-     * Permission policy for tool execution.
+     * Default permission policy for tools from this server.
      *
      * @param PermissionPolicyShape|null $permissionPolicy
      */
     public function withPermissionPolicy(
-        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy|null $permissionPolicy,
+        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy|BetaManagedAgentsAutoPolicy|null $permissionPolicy,
     ): self {
         $self = clone $this;
         $self['permissionPolicy'] = $permissionPolicy;

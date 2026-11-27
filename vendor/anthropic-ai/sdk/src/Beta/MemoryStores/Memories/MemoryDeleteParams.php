@@ -12,7 +12,7 @@ use Anthropic\Core\Concerns\SdkParams;
 use Anthropic\Core\Contracts\BaseModel;
 
 /**
- * DeleteMemory.
+ * Delete a Memory
  *
  * @see Anthropic\Services\Beta\MemoryStores\MemoriesService::delete()
  *
@@ -20,6 +20,7 @@ use Anthropic\Core\Contracts\BaseModel;
  *   memoryStoreID: string,
  *   expectedContentSha256?: string|null,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class MemoryDeleteParams implements BaseModel
@@ -28,22 +29,35 @@ final class MemoryDeleteParams implements BaseModel
     use SdkModel;
     use SdkParams;
 
+    /**
+     * The ID of the memory store that holds the memory (`memstore_...`).
+     */
     #[Required]
     public string $memoryStoreID;
 
     /**
-     * Query parameter for expected_content_sha256.
+     * Delete the memory only if its current `content_sha256` equals this value, given as 64 lowercase hexadecimal characters. Omit it to delete unconditionally.
+     *
+     * If the hashes differ, the request fails with HTTP status 409 and nothing is deleted.
      */
     #[Optional]
     public ?string $expectedContentSha256;
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `agent-memory-2026-07-22` or `managed-agents-2026-04-01` in this header.
      *
      * @var list<string|value-of<AnthropicBeta>>|null $betas
      */
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
 
     /**
      * `new MemoryDeleteParams()` is missing required properties by the API.
@@ -56,7 +70,7 @@ final class MemoryDeleteParams implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new MemoryDeleteParams)->withMemoryStoreID(...)
+     * (new MemoryDeleteParams())->withMemoryStoreID(...)
      * ```
      */
     public function __construct()
@@ -75,6 +89,7 @@ final class MemoryDeleteParams implements BaseModel
         string $memoryStoreID,
         ?string $expectedContentSha256 = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
     ): self {
         $self = new self;
 
@@ -82,10 +97,14 @@ final class MemoryDeleteParams implements BaseModel
 
         null !== $expectedContentSha256 && $self['expectedContentSha256'] = $expectedContentSha256;
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
 
+    /**
+     * The ID of the memory store that holds the memory (`memstore_...`).
+     */
     public function withMemoryStoreID(string $memoryStoreID): self
     {
         $self = clone $this;
@@ -95,7 +114,9 @@ final class MemoryDeleteParams implements BaseModel
     }
 
     /**
-     * Query parameter for expected_content_sha256.
+     * Delete the memory only if its current `content_sha256` equals this value, given as 64 lowercase hexadecimal characters. Omit it to delete unconditionally.
+     *
+     * If the hashes differ, the request fails with HTTP status 409 and nothing is deleted.
      */
     public function withExpectedContentSha256(
         string $expectedContentSha256
@@ -107,7 +128,7 @@ final class MemoryDeleteParams implements BaseModel
     }
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `agent-memory-2026-07-22` or `managed-agents-2026-04-01` in this header.
      *
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas
      */
@@ -115,6 +136,19 @@ final class MemoryDeleteParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

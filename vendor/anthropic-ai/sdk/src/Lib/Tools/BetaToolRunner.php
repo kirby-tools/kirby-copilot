@@ -4,12 +4,22 @@ declare(strict_types=1);
 
 namespace Anthropic\Lib\Tools;
 
+use Anthropic\Beta\Messages\BetaCompactionConfig;
 use Anthropic\Beta\Messages\BetaMessage;
 use Anthropic\Beta\Messages\BetaMessageParam;
+use Anthropic\Beta\Messages\BetaStopReason;
 use Anthropic\Beta\Messages\BetaToolUseBlock;
 use Anthropic\Client;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion;
+use Anthropic\Lib\Helpers\StainlessHelperHeader;
+use Anthropic\Lib\Threads\BetaMessageThread;
+use Anthropic\Lib\Threads\UnsupportedRequestBehavior;
+use Anthropic\Lib\Tracing\Tracing;
 use Anthropic\Messages\Model;
+use Anthropic\RequestOptions;
+use OpenTelemetry\API\Trace\StatusCode;
+use OpenTelemetry\Context\Context;
 
 /**
  * Handles the automatic conversation loop between the assistant and tools.
@@ -18,12 +28,33 @@ use Anthropic\Messages\Model;
  * the tool execution loop. The loop continues until the model stops requesting
  * tools or max_iterations is reached.
  *
+ * The runner keeps the conversation in a message thread, so each request after the
+ * first carries only the messages that are new, and `system` and `tools` are fixed
+ * once the first request was answered. A history that setMessagesParams() or
+ * pushMessages() leaves without the last reply is sent whole. Pass `thread: false` to
+ * send the whole history with every request instead, as the runner always does on the
+ * Amazon Bedrock and Vertex AI clients.
+ *
+ * @phpstan-import-type BetaMessageParamVariants from \Anthropic\Beta\Messages\BetaMessageParam
  * @phpstan-import-type BetaToolUnionShape from \Anthropic\Beta\Messages\BetaToolUnion
+ * @phpstan-import-type BetaCompactionConfigShape from \Anthropic\Beta\Messages\BetaCompactionConfig
  *
  * @implements \IteratorAggregate<int, BetaMessage>
  */
 final class BetaToolRunner implements \IteratorAggregate
 {
+    /** Execute the turn's client tool calls, answer with their results, and continue; with none, stop. */
+    private const STEP_RUN_TOOLS = 'run_tools';
+
+    /** The turn is unfinished: send it back unchanged, executing nothing, so the server continues it. */
+    private const STEP_RESUME = 'resume';
+
+    /** The turn is final: the loop ends on it and its tool_use blocks are not executed. */
+    private const STEP_STOP = 'stop';
+
+    private const MESSAGES_LOCKED = "Message params can't be changed while the conversation is being compacted, "
+        .'because the compaction response replaces them. Make the change on the next iteration.';
+
     private bool $consumed = false;
 
     /**
@@ -47,10 +78,31 @@ final class BetaToolRunner implements \IteratorAggregate
 
     private string $model;
 
+    /** @var list<array<string, mixed>> The tool_addition / tool_removal blocks of the next system message, in call order */
+    private array $pendingToolChanges = [];
+
+    /** @var BetaCompactionConfig|BetaCompactionConfigShape|null */
+    private BetaCompactionConfig|array|null $pendingCompaction = null;
+
+    /** True while the caller is handling a yielded compaction response. */
+    private bool $compacting = false;
+
+    /** @var array<string, BetaRunnableTool> Runnable tools the history had removed when the compaction request was sent */
+    private array $removedByHistory = [];
+
+    /** When set, it holds the history and the request fields, and the runner's own are not sent. */
+    private ?BetaMessageThread $thread = null;
+
+    /** @var list<array<string, mixed>|BaseModel>|null The caller's history, which leaves out the reply. Set while the thread sends a request and the caller handles its reply. */
+    private ?array $messagesWithoutReply = null;
+
     /**
      * @param list<BetaRunnableTool|BetaToolUnionShape> $tools Mix of runnable tools and plain tool definitions
      * @param list<array<string, mixed>> $messages Initial messages
      * @param array<string, mixed> $extraParams Additional params forwarded to every messages.create() call
+     * @param array<string, mixed>|false|null $thread `false` sends the whole history with every request, without a message thread
+     *
+     * @throws \InvalidArgumentException if `$thread` is an array or `$extraParams` holds a `thread`, because the runner sets `thread` for each request itself
      */
     public function __construct(
         private Client $client,
@@ -60,11 +112,37 @@ final class BetaToolRunner implements \IteratorAggregate
         array $tools = [],
         private ?int $maxIterations = null,
         private array $extraParams = [],
+        array|false|null $thread = null,
     ) {
+        self::rejectCompactionParam($extraParams);
+        self::rejectThreadParam(is_array($thread) ? ['thread' => $thread] : $extraParams);
         $this->model = $model instanceof Model ? $model->value : $model;
         $this->messages = $messages;
         $this->tools = $tools;
         $this->processTools($tools);
+
+        if (false !== $thread && $client->supportsMessageThreads()) {
+            $this->thread = new BetaMessageThread(
+                $client,
+                array_diff_key($this->getParams(), ['maxIterations' => true]),
+                unsupportedRequestBehavior: UnsupportedRequestBehavior::CONTINUE_UNTHREADED,
+            );
+        }
+    }
+
+    /**
+     * @internal use `BetaMessageThread::toolRunner()`
+     */
+    public static function overThread(Client $client, BetaMessageThread $thread, ?int $maxIterations = null): self
+    {
+        $params = $thread->params();
+        self::rejectCompactionParam($params);
+
+        // @phpstan-ignore argument.type
+        $runner = new self($client, 0, [], '', $params['tools'] ?? [], $maxIterations, thread: false);
+        $runner->thread = $thread;
+
+        return $runner;
     }
 
     /**
@@ -76,7 +154,7 @@ final class BetaToolRunner implements \IteratorAggregate
      */
     public function getIterator(): \Generator
     {
-        return $this->doIterate();
+        return $this->iterateUnderToolRunnerSpan($this->doIterate());
     }
 
     /**
@@ -104,18 +182,47 @@ final class BetaToolRunner implements \IteratorAggregate
      * Accepts either a full replacement array or a mutator callable that receives
      * the current params and returns new params. Recognized keys match the named
      * parameters of MessagesService::create() (camelCase), plus `maxIterations`.
+     * Passing a different `tools` list also resets which tools the runner will
+     * run to that list, dropping changes made with addTools() / removeTools(),
+     * sent or not.
      *
      * Calling this during iteration signals that the caller is managing message
      * history manually; the runner will skip auto-appending the current assistant
      * message for that turn.
      *
+     * On a message thread `system` and `tools` cannot change during a run. To change
+     * one, create the runner with `thread: false`.
+     *
      * @param array<string, mixed>|callable(array<string, mixed>): array<string, mixed> $paramsOrMutator
+     *
+     * @throws \InvalidArgumentException if the params hold a `thread`, because the runner sets `thread` for each request itself
      */
     public function setMessagesParams(array|callable $paramsOrMutator): void
     {
         $new = is_array($paramsOrMutator)
             ? $paramsOrMutator
             : $paramsOrMutator($this->getParams());
+
+        self::rejectCompactionParam($new);
+        self::rejectThreadParam($new);
+        if ($this->compacting && is_array($new['messages'] ?? null) && $new['messages'] !== $this->history()) {
+            throw new \LogicException(self::MESSAGES_LOCKED);
+        }
+        if (null !== $this->pendingCompaction || $this->compacting) {
+            self::assertNoCompactionEdit($new['contextManagement'] ?? null);
+        }
+
+        // @phpstan-ignore argument.type
+        $this->thread?->update(array_diff_key($new, ['maxIterations' => true, 'messages' => true]));
+        if (is_array($new['messages'] ?? null)) {
+            if (null === $this->messagesWithoutReply) {
+                // @phpstan-ignore argument.type
+                $this->thread?->setMessages(array_values($new['messages']));
+            } else {
+                // @phpstan-ignore assign.propertyType
+                $this->messagesWithoutReply = array_values($new['messages']);
+            }
+        }
 
         if (is_int($new['maxTokens'] ?? null)) {
             $this->maxTokens = $new['maxTokens'];
@@ -138,12 +245,15 @@ final class BetaToolRunner implements \IteratorAggregate
             $this->messages = $messages;
         }
 
-        if (is_array($new['tools'] ?? null)) {
+        // A mutator hands back `tools` untouched; rebuilding the dispatch map then would undo addTools() / removeTools().
+        if (is_array($new['tools'] ?? null) && $new['tools'] !== $this->tools) {
             /** @var list<BetaRunnableTool|BetaToolUnionShape> $tools */
             $tools = $new['tools'];
             $this->tools = $tools;
             $this->runnableToolsByName = [];
             $this->toolDefinitions = [];
+            $this->pendingToolChanges = [];
+            $this->removedByHistory = [];
             $this->processTools($tools);
         }
 
@@ -164,10 +274,20 @@ final class BetaToolRunner implements \IteratorAggregate
      * Like setMessagesParams(), calling this during iteration signals manual
      * history management for that turn.
      *
-     * @param array<string, mixed>|BetaMessageParam|BetaMessage ...$messages
+     * @param array<string, mixed>|BetaMessageParamVariants|BetaMessage ...$messages
      */
     public function pushMessages(array|BaseModel ...$messages): void
     {
+        if ($this->compacting) {
+            throw new \LogicException(self::MESSAGES_LOCKED);
+        }
+
+        if (null === $this->messagesWithoutReply) {
+            $this->thread?->append(...array_values($messages));
+        } else {
+            array_push($this->messagesWithoutReply, ...array_values($messages));
+        }
+
         /** @var list<array<string, mixed>> $normalized */
         $normalized = array_map(
             fn ($msg) => $msg instanceof BaseModel ? $msg->jsonSerialize() : $msg,
@@ -175,6 +295,82 @@ final class BetaToolRunner implements \IteratorAggregate
         );
         array_push($this->messages, ...$normalized);
         $this->mutated = true;
+    }
+
+    /**
+     * Give the model more tools without changing `tools`, which would miss the prompt cache.
+     *
+     * A runnable tool is run under its name at once, even for a call in the message being handled; its
+     * definition goes out with the next request. A plain definition (a server tool, say) is sent as given
+     * and never run, and drops a runnable tool of the same name.
+     * Pass the `inline-tools-2026-09-15` beta in `betas`; the runner does not add it.
+     *
+     * In the rare case where a compaction response comes back without `tool_changes` even though the
+     * summarized messages added or removed tools, the model goes back to the tools in `tools` and the
+     * runner does not detect it. Call addTools() / removeTools() again after that compaction if you
+     * need the change restored.
+     *
+     * @param BetaRunnableTool|BetaToolUnionShape ...$tools
+     */
+    public function addTools(BetaRunnableTool|BaseModel|array ...$tools): void
+    {
+        foreach ($tools as $tool) {
+            if ($tool instanceof BetaRunnableTool) {
+                $this->runnableToolsByName[$tool->name()] = $tool;
+                // Added while a compaction response is handled, it is no longer a tool the summarized history took away.
+                unset($this->removedByHistory[$tool->name()]);
+            } elseif (is_string($tool['name'] ?? null)) {
+                unset($this->runnableToolsByName[$tool['name']]);
+            }
+            $this->pendingToolChanges[] = [
+                'type' => 'tool_addition',
+                'tool' => [
+                    'type' => 'tool_definition',
+                    'definition' => self::toArray($tool instanceof BetaRunnableTool ? $tool->definition : $tool),
+                ],
+            ];
+        }
+    }
+
+    /**
+     * Take tools away from the model without changing `tools`, which would miss the prompt cache.
+     *
+     * The tools stop being run at once, even for a call in the message being handled; addTools() brings
+     * one back. Pass the `inline-tools-2026-09-15` beta in `betas`; the runner does not add it.
+     *
+     * @param BetaRunnableTool|string ...$tools The tools to remove, or their names
+     */
+    public function removeTools(BetaRunnableTool|string ...$tools): void
+    {
+        foreach ($tools as $tool) {
+            $name = $tool instanceof BetaRunnableTool ? $tool->name() : $tool;
+            unset($this->runnableToolsByName[$name]);
+            $this->pendingToolChanges[] = ['type' => 'tool_removal', 'tool' => ['type' => 'tool_reference', 'name' => $name]];
+        }
+    }
+
+    /**
+     * Compact the conversation before the model's next turn. Requires the `compact-2026-09-04` beta.
+     *
+     * This only schedules the compaction. Once the current turn has finished,
+     * including any tool calls, the runner requests a summary and replaces the
+     * message history with the response. On the last turn it compacts and then
+     * stops, unless that turn was cut off with tool calls that were never run.
+     *
+     * The compaction response is yielded with a `compaction` stop reason and does
+     * not count towards `maxIterations`. Calling this while handling it does
+     * nothing, so a token threshold does not compact twice.
+     *
+     * @param BetaCompactionConfig|BetaCompactionConfigShape|null $compaction The same config create() takes as `compaction`. Defaults to `['type' => 'summarize']`.
+     */
+    public function compactBeforeNextTurn(BetaCompactionConfig|array|null $compaction = null): void
+    {
+        if ($this->compacting) {
+            return;
+        }
+
+        self::assertNoCompactionEdit($this->getParams()['contextManagement'] ?? null);
+        $this->pendingCompaction = $compaction ?? ['type' => 'summarize'];
     }
 
     /**
@@ -186,6 +382,13 @@ final class BetaToolRunner implements \IteratorAggregate
      */
     public function getParams(): array
     {
+        if (null !== $this->thread) {
+            return array_filter(
+                [...array_diff_key($this->thread->params(), ['unsupportedRequestBehavior' => true]), 'messages' => $this->history(), 'maxIterations' => $this->maxIterations],
+                fn ($v) => null !== $v,
+            );
+        }
+
         return array_filter(
             array_merge(
                 [
@@ -215,48 +418,558 @@ final class BetaToolRunner implements \IteratorAggregate
         $this->consumed = true;
 
         $iterationCount = 0;
+        $turnPaused = false;
+        $finalMessage = null;
 
         while (true) {
             if (null !== $this->maxIterations && $iterationCount >= $this->maxIterations) {
                 break;
             }
 
+            // Before the compaction check, so that a compaction due now summarizes the tool changes too.
+            $this->sendPendingToolChanges($turnPaused);
+
+            // The API cannot compact a conversation that ends mid-turn, so a paused turn is resumed first.
+            if (null !== $this->pendingCompaction && !$turnPaused) {
+                $summarized = count($this->history());
+                $compacted = $this->requestCompaction($this->pendingCompaction);
+                $this->compacting = true;
+
+                try {
+                    yield $compacted;
+                } finally {
+                    $this->compacting = false;
+                }
+
+                $this->registerCompactionResponse($compacted, $summarized);
+
+                continue;
+            }
+
             $this->mutated = false;
             ++$iterationCount;
 
-            $params = array_filter(
-                array_merge(
-                    [
-                        'maxTokens' => $this->maxTokens,
-                        'messages' => $this->messages,
-                        'model' => $this->model,
-                        'tools' => $this->toolDefinitions ?: null,
-                    ],
-                    $this->extraParams,
-                ),
-                fn ($v) => null !== $v,
-            );
-
+            $this->messagesWithoutReply = $this->thread?->messages();
             // @phpstan-ignore argument.type
-            $message = $this->client->beta->messages->create(...$params);
+            $message = $this->thread?->send(requestOptions: $this->requestOptionsWithHelperHeader()) ?? $this->client->beta->messages->create(...$this->requestParams());
 
             yield $message;
+
+            $callerMessages = $this->history();
+            $this->messagesWithoutReply = null;
+            $nextStep = self::determineNextStepFromStopReason($message->stopReason);
+            $turnPaused = self::STEP_RESUME === $nextStep;
+
+            // The caller can hold the thread, and can have set `compaction` on it while handling the reply.
+            self::rejectCompactionParam($this->thread?->params() ?? []);
+
+            // The thread holds the reply already, so the run goes on for as long as there is something to send.
+            // @phpstan-ignore booleanNot.alwaysTrue
+            if (null !== $this->thread && !$this->mutated) {
+                if ((self::STEP_RUN_TOOLS === $nextStep && $this->answerOnThread($this->thread)) || $turnPaused) {
+                    continue;
+                }
+                $finalMessage = $message;
+
+                break;
+            }
 
             // If the caller mutated params during this yield, skip auto-appending
             // the assistant message — they are managing history manually this turn.
             // @phpstan-ignore booleanNot.alwaysTrue
             if (!$this->mutated) {
                 $this->messages[] = ['role' => 'assistant', 'content' => $message->content];
+                $this->extraParams = BetaMessageThread::withContainerOf($this->extraParams, $message);
+
+                if (self::STEP_STOP === $nextStep) {
+                    $finalMessage = $message;
+
+                    break;
+                }
+
+                if (self::STEP_RESUME === $nextStep) {
+                    continue;
+                }
             }
 
-            $toolResults = $this->buildToolResults($this->messages[array_key_last($this->messages)]);
+            // Checked first: a history that drops the reply starts a new thread, which would take another `system` or `tools`.
+            $this->thread?->assertNextTurnCanBeSent();
+            $this->thread?->setMessages($callerMessages);
+
+            $history = $this->history();
+
+            /** @var array<string, mixed>|false $lastMessage */
+            $lastMessage = self::toArray(end($history));
+            $toolResults = false === $lastMessage ? null : $this->buildToolResults($lastMessage);
 
             if (null !== $toolResults) {
                 $this->messages[] = ['role' => 'user', 'content' => $toolResults];
+                $this->thread?->append(['role' => 'user', 'content' => $toolResults]);
             } elseif (!$this->mutated) {
+                $finalMessage = $message;
+
                 break;
             }
         }
+
+        $compaction = null === $finalMessage ? null : $this->pendingCompactionAfter($finalMessage);
+        if (null !== $compaction) {
+            $summarized = count($this->history());
+            $compacted = $this->requestCompaction($compaction);
+            $this->compacting = true;
+
+            try {
+                yield $compacted;
+            } finally {
+                $this->compacting = false;
+            }
+
+            $this->registerCompactionResponse($compacted, $summarized);
+        }
+    }
+
+    /**
+     * Runs the tool calls of the last assistant message and stages the results directly after
+     * it, ahead of the messages that the caller added since.
+     *
+     * @return bool whether there was a tool call to run
+     *
+     * @throws \LogicException if the thread would refuse the request that carries the results
+     */
+    private function answerOnThread(BetaMessageThread $thread): bool
+    {
+        $thread->assertNextTurnCanBeSent();
+
+        $messages = $thread->messages();
+        $next = count($messages);
+        while ($next > 0 && 'assistant' !== ($messages[$next - 1]['role'] ?? null)) {
+            --$next;
+        }
+        $assistantMessage = $messages[$next - 1] ?? null;
+        $toolResults = is_array($assistantMessage) ? $this->buildToolResults($assistantMessage) : null;
+        if (null === $toolResults) {
+            return false;
+        }
+
+        // Read again, because a tool can append to the thread while it runs.
+        $messages = $thread->messages();
+        array_splice($messages, $next, 0, [['role' => 'user', 'content' => $toolResults]]);
+        $thread->setMessages($messages);
+
+        return true;
+    }
+
+    /**
+     * @return list<array<string, mixed>|BaseModel>
+     */
+    private function history(): array
+    {
+        return $this->messagesWithoutReply ?? $this->thread?->messages() ?? $this->messages;
+    }
+
+    /**
+     * @return array<string, mixed> Named arguments for messages->create()
+     */
+    private function requestParams(): array
+    {
+        $params = array_filter(
+            array_merge(
+                [
+                    'maxTokens' => $this->maxTokens,
+                    'messages' => $this->messages,
+                    'model' => $this->model,
+                    'tools' => $this->toolDefinitions ?: null,
+                ],
+                $this->extraParams,
+            ),
+            fn ($v) => null !== $v,
+        );
+
+        $params['requestOptions'] = $this->requestOptionsWithHelperHeader();
+
+        return $params;
+    }
+
+    /**
+     * @param array<array-key, mixed> $params
+     */
+    private static function rejectCompactionParam(array $params): void
+    {
+        if (null !== ($params['compaction'] ?? null)) {
+            throw new \InvalidArgumentException(
+                '`compaction` cannot be set on a tool runner: every request in the loop would compact again. '
+                .'Call compactBeforeNextTurn() when the conversation should be compacted instead.'
+            );
+        }
+    }
+
+    /**
+     * @param array<array-key, mixed> $params
+     */
+    private static function rejectThreadParam(array $params): void
+    {
+        if (null !== ($params['thread'] ?? null)) {
+            throw new \InvalidArgumentException(
+                '`thread` cannot be set on a tool runner: the runner sets it for each request itself. '
+                .'To run without a message thread, pass `thread: false` to toolRunner(). '
+                .'To run tools on a thread of your own, create it with `$client->beta->messages->thread(...)` and call its toolRunner().'
+            );
+        }
+    }
+
+    private static function assertNoCompactionEdit(mixed $contextManagement): void
+    {
+        // The compaction request is sent without `contextManagement`, so the API cannot reject this
+        // combination there: it would run and bill the compaction, then reject the next request, where
+        // the compaction response and the compaction edit meet.
+        $contextManagement = self::toArray($contextManagement);
+        if (!is_array($contextManagement)) {
+            return;
+        }
+
+        $edits = $contextManagement['edits'] ?? null;
+        if (!is_array($edits)) {
+            return;
+        }
+
+        foreach ($edits as $edit) {
+            $edit = self::toArray($edit);
+            if (is_array($edit) && is_string($edit['type'] ?? null) && str_starts_with($edit['type'], 'compact_')) {
+                throw new \LogicException(
+                    'compactBeforeNextTurn() cannot be used while `contextManagement` has a compaction edit, '
+                    .'because the API does not accept a compaction block together with one. Remove the edit first.'
+                );
+            }
+        }
+    }
+
+    /**
+     * @param BetaCompactionConfig|BetaCompactionConfigShape $compaction
+     */
+    private function requestCompaction(BetaCompactionConfig|array $compaction): BetaMessage
+    {
+        // Checked again here because `contextManagement` can be a model the caller still holds and edits in place.
+        self::assertNoCompactionEdit($this->getParams()['contextManagement'] ?? null);
+        $this->pendingCompaction = null;
+        $this->removedByHistory = array_diff_key($this->runnableToolsByName, $this->availableToolNames());
+
+        if (null !== $this->thread) {
+            return $this->requestCompactionOnThread($this->thread, $compaction);
+        }
+
+        $params = self::withoutCompactionIncompatibleParams($this->requestParams());
+        $params['compaction'] = $compaction;
+
+        // @phpstan-ignore argument.type
+        return $this->client->beta->messages->create(...$params);
+    }
+
+    /**
+     * Sends the request on a fork, because the summary replaces the history that the thread holds.
+     *
+     * @param BetaCompactionConfig|BetaCompactionConfigShape $compaction
+     */
+    private function requestCompactionOnThread(BetaMessageThread $thread, BetaCompactionConfig|array $compaction): BetaMessage
+    {
+        $params = array_diff_key($this->getParams(), ['maxIterations' => true]);
+        $fork = $thread->fork();
+        $compacted = $fork->send(
+            params: ['compaction' => $compaction] + self::withoutCompactionIncompatibleParams($params) + array_fill_keys(array_keys($params), null),
+            requestOptions: $this->requestOptionsWithHelperHeader(),
+        );
+
+        // The API refused the fork a thread, and would refuse one for the history that the compaction leaves too.
+        if (!$fork->isThreading()) {
+            $thread->stopThreading();
+        }
+
+        return $compacted;
+    }
+
+    /**
+     * A compaction request returns only the compaction block, never a reply, so the API rejects the params that
+     * only shape a reply. The runner's later requests keep them.
+     *
+     * @param array<string, mixed> $params Named arguments for messages->create()
+     *
+     * @return array<string, mixed> A copy of `$params` without them
+     */
+    private static function withoutCompactionIncompatibleParams(array $params): array
+    {
+        unset($params['contextManagement'], $params['stopSequences'], $params['outputFormat']);
+
+        $toolChoice = self::toArray($params['toolChoice'] ?? null);
+        if (is_array($toolChoice) && in_array($toolChoice['type'] ?? null, ['any', 'tool'], true)) {
+            unset($params['toolChoice']);
+        }
+
+        if (isset($params['outputConfig'])) {
+            $params['outputConfig'] = self::without($params['outputConfig'], 'format');
+        }
+
+        if (is_array($params['fallbacks'] ?? null)) {
+            $params['fallbacks'] = array_map(
+                static fn (mixed $fallback): mixed => self::without($fallback, 'outputConfig', 'format'),
+                $params['fallbacks'],
+            );
+        }
+
+        return $params;
+    }
+
+    /**
+     * @return mixed `$value` without the key the path ends on; a model on the way is copied, never changed
+     */
+    private static function without(mixed $value, string $key, string ...$path): mixed
+    {
+        if ($value instanceof BaseModel) {
+            $value = clone $value;
+        } elseif (!is_array($value)) {
+            return $value;
+        }
+
+        if ([] === $path) {
+            unset($value[$key]);
+        } elseif (isset($value[$key])) {
+            $value[$key] = self::without($value[$key], ...$path);
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param int $summarized how many messages the history held when the compaction request was sent
+     */
+    private function registerCompactionResponse(BetaMessage $message, int $summarized): void
+    {
+        foreach ($message->content as $block) {
+            // By type, not class: a block type this SDK version does not model is parsed into another block's class.
+            if ('compaction' !== ($block['type'] ?? null)) {
+                continue;
+            }
+
+            $summary = $block['content'] ?? null;
+            if (null === $summary || '' === $summary) {
+                continue;
+            }
+
+            // The history's tool_removal blocks go with it, so what they took away leaves the dispatch map first.
+            // Worked out before the yield, so a `tools` list the caller sets while handling the response stays whole.
+            $this->runnableToolsByName = array_diff_key($this->runnableToolsByName, $this->removedByHistory);
+
+            // The response has to be sent back as it came, first, replacing the messages it summarizes.
+            $response = ['role' => 'assistant', 'content' => $message->content];
+            // Messages appended since the request was sent are not in the summary, so they follow it.
+            // A copy of the response among them is left out, like a reply that is appended again.
+            $appended = array_filter(array_slice($this->history(), $summarized), static fn ($other) => !BetaMessageThread::sameMessage($other, $response));
+            $this->thread?->setMessages([$response, ...$appended]);
+
+            /** @var list<array<string, mixed>> $messages */
+            $messages = [$response, ...array_map(self::toArray(...), $appended)];
+            $this->messages = $messages;
+
+            return;
+        }
+
+        trigger_error('Compaction produced no summary; keeping the conversation as it is.', E_USER_WARNING);
+    }
+
+    /**
+     * @return BetaCompactionConfig|BetaCompactionConfigShape|null The compaction to send now that the run has ended on this message
+     */
+    private function pendingCompactionAfter(BetaMessage $finalMessage): BetaCompactionConfig|array|null
+    {
+        if (null === $this->pendingCompaction) {
+            return null;
+        }
+
+        foreach ($finalMessage->content as $block) {
+            if ('tool_use' !== ($block['type'] ?? null)) {
+                continue;
+            }
+
+            // A turn that was cut short can end with tool calls that are never run, and the API
+            // cannot compact a conversation whose last turn has an unanswered tool call.
+            $this->pendingCompaction = null;
+            trigger_error(
+                "The pending compaction was skipped because the last turn (stop reason: {$finalMessage->stopReason}) "
+                .'ended with tool calls that were not run. '
+                .'Call compactBeforeNextTurn() again if you continue the conversation.',
+                E_USER_WARNING,
+            );
+
+            return null;
+        }
+
+        return $this->pendingCompaction;
+    }
+
+    private function sendPendingToolChanges(bool $turnPaused): void
+    {
+        // A paused turn goes back unchanged to be continued, so the changes wait for the request after it.
+        if ([] === $this->pendingToolChanges || $turnPaused) {
+            return;
+        }
+
+        // Not pushMessages(): that marks the history as caller-edited, so the runner would not append this turn.
+        $this->messages[] = ['role' => 'system', 'content' => $this->pendingToolChanges];
+        $this->thread?->append(['role' => 'system', 'content' => $this->pendingToolChanges]);
+        $this->pendingToolChanges = [];
+    }
+
+    /**
+     * Runs `$steps`, the loop of {@see self::doIterate()}, as one `anthropic.messages.tool_runner` span. A step is
+     * what the loop does between two messages it hands to the application: it sends a request, or runs the tools and
+     * sends the next one.
+     *
+     * @param \Generator<int, BetaMessage> $steps
+     *
+     * @return \Generator<int, BetaMessage>
+     */
+    private function iterateUnderToolRunnerSpan(\Generator $steps): \Generator
+    {
+        $params = $this->getParams();
+        $model = $params['model'] ?? null;
+        // A consumed runner throws before its loop starts, so it has no tool runner span.
+        $toolRunnerSpan = $this->consumed ? null : Tracing::startToolRunnerSpan(
+            $this->client,
+            $model instanceof Model ? $model->value : (is_string($model) ? $model : ''),
+            $this->conversationId(),
+            Tracing::setsJsonOutputFormat(['output_config' => $params['outputConfig'] ?? null, 'output_format' => $params['outputFormat'] ?? null]),
+        );
+        // The application may resume the loop from another trace. Every step runs in the context the loop started
+        // in, with the tool runner span current.
+        $toolRunnerOtelContext = self::ignoringErrors(static fn () => $toolRunnerSpan?->storeInContext(Context::getCurrent()));
+        $started = false;
+
+        try {
+            while (true) {
+                $scope = self::ignoringErrors(static fn () => $toolRunnerOtelContext?->activate());
+
+                try {
+                    if ($started) {
+                        $steps->next();
+                    } else {
+                        $steps->rewind();
+                        $started = true;
+                    }
+                    if (!$steps->valid()) {
+                        break;
+                    }
+                    $message = $steps->current();
+                } catch (\Throwable $e) {
+                    if (null !== $toolRunnerSpan) {
+                        self::ignoringErrors(static fn () => Tracing::setErrorStatus($toolRunnerSpan, $e));
+                    }
+
+                    throw $e;
+                } finally {
+                    // The application's code between two steps does not run under the tool runner span.
+                    self::ignoringErrors(static fn () => $scope?->detach());
+                }
+
+                yield $message;
+            }
+            self::ignoringErrors(static fn () => $toolRunnerSpan?->setStatus(StatusCode::STATUS_OK));
+        } finally {
+            // The status stays unset when the application stops the loop early.
+            self::ignoringErrors(static fn () => $toolRunnerSpan?->end());
+        }
+    }
+
+    /**
+     * Runs `$telemetry`, a call on a span or on its context, and returns what it returns, or null when it throws: a
+     * span processor or a context storage that throws must not change what the loop does, returns or throws.
+     *
+     * @template T
+     *
+     * @param \Closure(): T $telemetry
+     *
+     * @return T|null
+     */
+    private static function ignoringErrors(\Closure $telemetry): mixed
+    {
+        try {
+            return $telemetry();
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * The `requestOptions` the application passed among the extra params, if any. On a message thread they follow
+     * the thread's own, because the request options of a turn replace the thread's.
+     *
+     * @return RequestOptions|array<mixed>|null
+     */
+    private function requestOptions(): RequestOptions|array|null
+    {
+        $options = $this->extraParams['requestOptions'] ?? null;
+        $options = $options instanceof RequestOptions || is_array($options) ? $options : null;
+
+        // @phpstan-ignore argument.type
+        return null === $this->thread ? $options : RequestOptions::parse($this->thread->requestOptions(), $options);
+    }
+
+    /**
+     * The conversation ID of the runner's own spans: the one of the application's `requestOptions`, or else of the
+     * client's own request options, as it is on the spans of the runner's requests.
+     */
+    private function conversationId(): ?string
+    {
+        // @phpstan-ignore argument.type
+        return Tracing::conversationId($this->client->mergedOptions($this->requestOptions()));
+    }
+
+    /**
+     * The application's `requestOptions` with the tool runner's helper tag appended to their `x-stainless-helper`
+     * extra header.
+     */
+    private function requestOptionsWithHelperHeader(): RequestOptions
+    {
+        $options = $this->requestOptions();
+        $given = $options instanceof RequestOptions ? ($options->extraHeaders ?? null) : ($options['extraHeaders'] ?? null);
+
+        /** @var array<string, string|int|list<string|int>|null> $extraHeaders */
+        $extraHeaders = is_array($given) ? $given : [];
+        // Appended to a helper tag the application set, under one canonical key: a second, differently-cased
+        // key would send the header twice.
+        $helper = StainlessHelperHeader::mergedValue($extraHeaders, StainlessHelperHeader::BETA_TOOL_RUNNER);
+        foreach (array_keys($extraHeaders) as $name) {
+            if (0 === strcasecmp((string) $name, StainlessHelperHeader::HEADER)) {
+                unset($extraHeaders[$name]);
+            }
+        }
+        $extraHeaders[StainlessHelperHeader::HEADER] = $helper;
+
+        // @phpstan-ignore argument.type
+        return RequestOptions::parse($options, ['extraHeaders' => $extraHeaders]);
+    }
+
+    /**
+     * Decides how the loop treats a finished request from its stop reason.
+     *
+     * @return self::STEP_* one of three outcomes; unknown values from a newer API stop the loop
+     */
+    private static function determineNextStepFromStopReason(?string $stopReason): string
+    {
+        $reason = null === $stopReason ? null : BetaStopReason::tryFrom($stopReason);
+        if (null === $reason) {
+            return self::STEP_STOP;
+        }
+
+        // No default arm: PHPStan rejects a non-exhaustive match, so every new case must be classified here.
+        return match ($reason) {
+            BetaStopReason::TOOL_USE => self::STEP_RUN_TOOLS,
+            // pause_after_compaction hands the turn back before the model answers; sending it back unchanged continues it.
+            BetaStopReason::COMPACTION,
+            BetaStopReason::PAUSE_TURN => self::STEP_RESUME,
+            BetaStopReason::END_TURN,
+            BetaStopReason::STOP_SEQUENCE,
+            BetaStopReason::MAX_TOKENS,
+            BetaStopReason::MODEL_CONTEXT_WINDOW_EXCEEDED,
+            BetaStopReason::REFUSAL => self::STEP_STOP,
+        };
     }
 
     /**
@@ -284,16 +997,171 @@ final class BetaToolRunner implements \IteratorAggregate
             return null;
         }
 
-        return array_map(fn ($toolUse) => $this->executeToolUse($toolUse), $toolUseBlocks);
+        $available = $this->availableToolNames();
+
+        return array_map(
+            fn ($toolUse) => $this->executeToolUse(
+                $toolUse,
+                isset($available[$toolUse->name]) ? ($this->runnableToolsByName[$toolUse->name] ?? null) : null,
+            ),
+            $toolUseBlocks,
+        );
     }
 
     /**
+     * Names of the tools the model may currently call, as a set.
+     *
+     * Folds tool_removal / tool_addition blocks over the runner's runnable
+     * tool names. They arrive in role "system" messages, and in the
+     * tool_changes of a compaction block, which stands in for the system
+     * messages of the turns it summarized. Removal is only a hint to the
+     * model, which can still emit a tool_use for a removed tool — such a call
+     * must behave exactly like a call to a tool that was never defined.
+     * Changes queued by addTools() / removeTools() fold in last, as the
+     * system message they will be sent in.
+     *
+     * @return array<string, true>
+     */
+    private function availableToolNames(): array
+    {
+        $available = array_fill_keys(array_keys($this->runnableToolsByName), true);
+
+        foreach ([...$this->history(), ['role' => 'system', 'content' => $this->pendingToolChanges]] as $message) {
+            $message = Conversion::dump(BetaMessageParam::class, value: $message);
+            if (!is_array($message)) {
+                continue;
+            }
+
+            $content = $message['content'] ?? null;
+            if (!is_array($content)) {
+                continue;
+            }
+
+            $role = $message['role'] ?? null;
+            foreach ($content as $block) {
+                $block = self::toArray($block);
+                if ('system' === $role) {
+                    $this->applyToolChange($block, $available);
+                } elseif ('assistant' === $role && is_array($block) && 'compaction' === ($block['type'] ?? null)) {
+                    // A hand-written array block may spell the key the way the SDK's array shapes do.
+                    foreach ((array) ($block['tool_changes'] ?? $block['toolChanges'] ?? []) as $change) {
+                        self::applyToolReferenceChange(self::toArray($change), $available);
+                    }
+                }
+            }
+        }
+
+        return $available;
+    }
+
+    /**
+     * @param array<string, true> $available
+     */
+    private function applyToolChange(mixed $block, array &$available): void
+    {
+        if (!is_array($block)) {
+            return;
+        }
+
+        switch ($block['type'] ?? null) {
+            case 'tool_removal':
+            case 'tool_addition':
+                self::applyToolReferenceChange($block, $available);
+
+                break;
+
+            case 'mid_conv_system':
+                // The API schema limits mid_conv_system content to text /
+                // tool_addition / tool_removal, so exactly one level is walked:
+                // only its tool_addition / tool_removal inner blocks fold in,
+                // and any other inner type is a no-op — no recursion.
+                foreach ((array) ($block['content'] ?? []) as $inner) {
+                    self::applyToolReferenceChange(self::toArray($inner), $available);
+                }
+
+                break;
+
+            default:
+                // Other and unknown/newer block types leave the set untouched
+                // (forward compatibility) — never raise.
+                break;
+        }
+    }
+
+    /**
+     * Folds one tool_removal / tool_addition block over the available set;
+     * any other block type leaves the set untouched.
+     *
+     * @param array<string, true> $available
+     */
+    private static function applyToolReferenceChange(mixed $block, array &$available): void
+    {
+        if (!is_array($block)) {
+            return;
+        }
+
+        switch ($block['type'] ?? null) {
+            case 'tool_removal':
+                if (null !== ($name = self::changedToolName($block['tool'] ?? null))) {
+                    unset($available[$name]);
+                }
+
+                break;
+
+            case 'tool_addition':
+                if (null !== ($name = self::changedToolName($block['tool'] ?? null))) {
+                    $available[$name] = true;
+                }
+
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    /**
+     * tool_reference names a locally runnable tool directly and tool_definition
+     * carries one by value; MCP references are executed server-side and
+     * unknown/newer types are ignored.
+     */
+    private static function changedToolName(mixed $tool): ?string
+    {
+        $tool = self::toArray($tool);
+        if (!is_array($tool)) {
+            return null;
+        }
+
+        switch ($tool['type'] ?? null) {
+            case 'tool_reference':
+                return is_string($tool['name'] ?? null) ? $tool['name'] : null;
+
+            case 'tool_definition':
+                // Not every tools[] entry has a name (e.g. mcp_toolset); those are never locally runnable.
+                $definition = self::toArray($tool['definition'] ?? null);
+
+                return is_array($definition) && is_string($definition['name'] ?? null) ? $definition['name'] : null;
+
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * History may hold typed SDK params/models as well as plain arrays; normalize to the API shape.
+     */
+    private static function toArray(mixed $value): mixed
+    {
+        return $value instanceof \JsonSerializable ? $value->jsonSerialize() : $value;
+    }
+
+    /**
+     * @param BetaRunnableTool|null $tool The currently-available tool matching the call, if any
+     *
      * @return array<string, mixed>
      */
-    private function executeToolUse(BetaToolUseBlock $toolUse): array
+    private function executeToolUse(BetaToolUseBlock $toolUse, ?BetaRunnableTool $tool): array
     {
-        $tool = $this->runnableToolsByName[$toolUse->name] ?? null;
-
         if (null === $tool) {
             return [
                 'type' => 'tool_result',
@@ -303,20 +1171,31 @@ final class BetaToolRunner implements \IteratorAggregate
             ];
         }
 
+        $spanName = $tool->isMcpTool() ? 'anthropic.mcp_tool_use' : 'anthropic.custom_tool_use';
+        $toolUseSpan = Tracing::startToolUseSpan($this->client, $spanName, $toolUse->id, $toolUse->name, $tool->definition['description'] ?? null, $this->conversationId(), $toolUse['toolsetName'] ?? null);
+        $scope = self::ignoringErrors(static fn () => $toolUseSpan?->activate());
+
         try {
-            return [
+            $result = [
                 'type' => 'tool_result',
                 'tool_use_id' => $toolUse->id,
                 'content' => $tool->run($toolUse->input),
             ];
         } catch (\Throwable $e) {
-            return [
+            $result = [
                 'type' => 'tool_result',
                 'tool_use_id' => $toolUse->id,
                 'content' => 'Error: '.$e->getMessage(),
                 'is_error' => true,
             ];
+        } finally {
+            self::ignoringErrors(static fn () => $scope?->detach());
         }
+        if (null !== $toolUseSpan) {
+            Tracing::endToolUseSpan($this->client, $toolUseSpan, $toolUse->input, $result);
+        }
+
+        return $result;
     }
 
     /**

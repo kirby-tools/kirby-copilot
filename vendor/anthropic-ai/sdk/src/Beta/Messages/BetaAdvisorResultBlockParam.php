@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace Anthropic\Beta\Messages;
 
+use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type BetaAdvisorResultBlockParamShape = array{
- *   text: string, type: 'advisor_result'
+ *   text: string, type: 'advisor_result', stopReason?: string|null
  * }
  */
 final class BetaAdvisorResultBlockParam implements BaseModel
@@ -19,11 +21,14 @@ final class BetaAdvisorResultBlockParam implements BaseModel
     use SdkModel;
 
     /** @var 'advisor_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('advisor_result'))]
     public string $type = 'advisor_result';
 
     #[Required]
     public string $text;
+
+    #[Optional('stop_reason', nullable: true)]
+    public ?string $stopReason;
 
     /**
      * `new BetaAdvisorResultBlockParam()` is missing required properties by the API.
@@ -36,7 +41,7 @@ final class BetaAdvisorResultBlockParam implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaAdvisorResultBlockParam)->withText(...)
+     * (new BetaAdvisorResultBlockParam())->withText(...)
      * ```
      */
     public function __construct()
@@ -49,11 +54,13 @@ final class BetaAdvisorResultBlockParam implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      */
-    public static function with(string $text): self
+    public static function with(string $text, ?string $stopReason = null): self
     {
         $self = new self;
 
         $self['text'] = $text;
+
+        null !== $stopReason && $self['stopReason'] = $stopReason;
 
         return $self;
     }
@@ -73,6 +80,14 @@ final class BetaAdvisorResultBlockParam implements BaseModel
     {
         $self = clone $this;
         $self['type'] = $type;
+
+        return $self;
+    }
+
+    public function withStopReason(?string $stopReason): self
+    {
+        $self = clone $this;
+        $self['stopReason'] = $stopReason;
 
         return $self;
     }

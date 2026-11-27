@@ -4,25 +4,31 @@ declare(strict_types=1);
 
 namespace Anthropic\Beta\Environments;
 
+use Anthropic\Beta\Environments\BetaEnvironment\Config;
+use Anthropic\Beta\Environments\BetaEnvironment\Scope;
+use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * Unified Environment resource for both cloud and BYOC environments.
+ * Unified Environment resource for both cloud and self-hosted environments.
  *
- * @phpstan-import-type BetaCloudConfigShape from \Anthropic\Beta\Environments\BetaCloudConfig
+ * @phpstan-import-type ConfigShape from \Anthropic\Beta\Environments\BetaEnvironment\Config
+ * @phpstan-import-type ConfigVariants from \Anthropic\Beta\Environments\BetaEnvironment\Config
  *
  * @phpstan-type BetaEnvironmentShape = array{
  *   id: string,
  *   archivedAt: string|null,
- *   config: BetaCloudConfig|BetaCloudConfigShape,
+ *   config: ConfigShape,
  *   createdAt: string,
- *   description: string,
+ *   description: string|null,
  *   metadata: array<string,string>,
  *   name: string,
  *   type: 'environment',
  *   updatedAt: string,
+ *   scope?: null|Scope|value-of<Scope>,
  * }
  */
 final class BetaEnvironment implements BaseModel
@@ -31,45 +37,47 @@ final class BetaEnvironment implements BaseModel
     use SdkModel;
 
     /**
-     * The type of object (always 'environment').
+     * The type of object (always 'environment')
      *
      * @var 'environment' $type
      */
-    #[Required]
+    #[Required(type: new ConstantOf('environment'))]
     public string $type = 'environment';
 
     /**
-     * Environment identifier (e.g., 'env_...').
+     * Environment identifier (e.g., 'env_...')
      */
     #[Required]
     public string $id;
 
     /**
-     * RFC 3339 timestamp when environment was archived, or null if not archived.
+     * RFC 3339 timestamp when environment was archived, or null if not archived
      */
     #[Required('archived_at')]
     public ?string $archivedAt;
 
     /**
-     * `cloud` environment configuration.
+     * Environment configuration (either Anthropic Cloud or self-hosted)
+     *
+     * @var ConfigVariants $config
      */
-    #[Required]
-    public BetaCloudConfig $config;
+    #[Required(union: Config::class)]
+    public BetaCloudConfig|BetaSelfHostedConfig $config;
 
     /**
-     * RFC 3339 timestamp when environment was created.
+     * RFC 3339 timestamp when environment was created
      */
     #[Required('created_at')]
     public string $createdAt;
 
     /**
-     * User-provided description for the environment.
+     * User-provided description for the environment; null when unset
      */
     #[Required]
-    public string $description;
+    public ?string $description;
 
     /**
-     * User-provided metadata key-value pairs.
+     * User-provided metadata key-value pairs
      *
      * @var array<string,string> $metadata
      */
@@ -77,16 +85,24 @@ final class BetaEnvironment implements BaseModel
     public array $metadata;
 
     /**
-     * Human-readable name for the environment.
+     * Human-readable name for the environment
      */
     #[Required]
     public string $name;
 
     /**
-     * RFC 3339 timestamp when environment was last updated.
+     * RFC 3339 timestamp when environment was last updated
      */
     #[Required('updated_at')]
     public string $updatedAt;
+
+    /**
+     * The visibility scope for this environment. 'organization' means visible to all accounts. 'account' means visible only to the owning account.
+     *
+     * @var value-of<Scope>|null $scope
+     */
+    #[Optional(enum: Scope::class)]
+    public ?string $scope;
 
     /**
      * `new BetaEnvironment()` is missing required properties by the API.
@@ -108,7 +124,7 @@ final class BetaEnvironment implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaEnvironment)
+     * (new BetaEnvironment())
      *   ->withID(...)
      *   ->withArchivedAt(...)
      *   ->withConfig(...)
@@ -129,18 +145,20 @@ final class BetaEnvironment implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
-     * @param BetaCloudConfig|BetaCloudConfigShape $config
+     * @param ConfigShape $config
      * @param array<string,string> $metadata
+     * @param Scope|value-of<Scope>|null $scope
      */
     public static function with(
         string $id,
         ?string $archivedAt,
-        BetaCloudConfig|array $config,
+        BetaCloudConfig|array|BetaSelfHostedConfig $config,
         string $createdAt,
-        string $description,
+        ?string $description,
         array $metadata,
         string $name,
         string $updatedAt,
+        Scope|string|null $scope = null,
     ): self {
         $self = new self;
 
@@ -153,11 +171,13 @@ final class BetaEnvironment implements BaseModel
         $self['name'] = $name;
         $self['updatedAt'] = $updatedAt;
 
+        null !== $scope && $self['scope'] = $scope;
+
         return $self;
     }
 
     /**
-     * Environment identifier (e.g., 'env_...').
+     * Environment identifier (e.g., 'env_...')
      */
     public function withID(string $id): self
     {
@@ -168,7 +188,7 @@ final class BetaEnvironment implements BaseModel
     }
 
     /**
-     * RFC 3339 timestamp when environment was archived, or null if not archived.
+     * RFC 3339 timestamp when environment was archived, or null if not archived
      */
     public function withArchivedAt(?string $archivedAt): self
     {
@@ -179,12 +199,13 @@ final class BetaEnvironment implements BaseModel
     }
 
     /**
-     * `cloud` environment configuration.
+     * Environment configuration (either Anthropic Cloud or self-hosted)
      *
-     * @param BetaCloudConfig|BetaCloudConfigShape $config
+     * @param ConfigShape $config
      */
-    public function withConfig(BetaCloudConfig|array $config): self
-    {
+    public function withConfig(
+        BetaCloudConfig|array|BetaSelfHostedConfig $config
+    ): self {
         $self = clone $this;
         $self['config'] = $config;
 
@@ -192,7 +213,7 @@ final class BetaEnvironment implements BaseModel
     }
 
     /**
-     * RFC 3339 timestamp when environment was created.
+     * RFC 3339 timestamp when environment was created
      */
     public function withCreatedAt(string $createdAt): self
     {
@@ -203,9 +224,9 @@ final class BetaEnvironment implements BaseModel
     }
 
     /**
-     * User-provided description for the environment.
+     * User-provided description for the environment; null when unset
      */
-    public function withDescription(string $description): self
+    public function withDescription(?string $description): self
     {
         $self = clone $this;
         $self['description'] = $description;
@@ -214,7 +235,7 @@ final class BetaEnvironment implements BaseModel
     }
 
     /**
-     * User-provided metadata key-value pairs.
+     * User-provided metadata key-value pairs
      *
      * @param array<string,string> $metadata
      */
@@ -227,7 +248,7 @@ final class BetaEnvironment implements BaseModel
     }
 
     /**
-     * Human-readable name for the environment.
+     * Human-readable name for the environment
      */
     public function withName(string $name): self
     {
@@ -238,7 +259,7 @@ final class BetaEnvironment implements BaseModel
     }
 
     /**
-     * The type of object (always 'environment').
+     * The type of object (always 'environment')
      *
      * @param 'environment' $type
      */
@@ -251,12 +272,25 @@ final class BetaEnvironment implements BaseModel
     }
 
     /**
-     * RFC 3339 timestamp when environment was last updated.
+     * RFC 3339 timestamp when environment was last updated
      */
     public function withUpdatedAt(string $updatedAt): self
     {
         $self = clone $this;
         $self['updatedAt'] = $updatedAt;
+
+        return $self;
+    }
+
+    /**
+     * The visibility scope for this environment. 'organization' means visible to all accounts. 'account' means visible only to the owning account.
+     *
+     * @param Scope|value-of<Scope> $scope
+     */
+    public function withScope(Scope|string $scope): self
+    {
+        $self = clone $this;
+        $self['scope'] = $scope;
 
         return $self;
     }

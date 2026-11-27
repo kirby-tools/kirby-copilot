@@ -13,8 +13,8 @@ use Anthropic\Core\Contracts\BaseModel;
 /**
  * Configuration override for a specific MCP tool.
  *
- * @phpstan-import-type PermissionPolicyVariants from \Anthropic\Beta\Agents\BetaManagedAgentsMCPToolConfigParams\PermissionPolicy
  * @phpstan-import-type PermissionPolicyShape from \Anthropic\Beta\Agents\BetaManagedAgentsMCPToolConfigParams\PermissionPolicy
+ * @phpstan-import-type PermissionPolicyVariants from \Anthropic\Beta\Agents\BetaManagedAgentsMCPToolConfigParams\PermissionPolicy
  *
  * @phpstan-type BetaManagedAgentsMCPToolConfigParamsShape = array{
  *   name: string,
@@ -40,7 +40,7 @@ final class BetaManagedAgentsMCPToolConfigParams implements BaseModel
     public ?bool $enabled;
 
     /**
-     * Permission policy for tool execution.
+     * Permission policy for this tool. Overrides the `default_config` setting.
      *
      * @var PermissionPolicyVariants|null $permissionPolicy
      */
@@ -49,7 +49,7 @@ final class BetaManagedAgentsMCPToolConfigParams implements BaseModel
         union: PermissionPolicy::class,
         nullable: true
     )]
-    public BetaManagedAgentsAlwaysAllowPolicy|BetaManagedAgentsAlwaysAskPolicy|null $permissionPolicy;
+    public BetaManagedAgentsAlwaysAllowPolicy|BetaManagedAgentsAlwaysAskPolicy|BetaManagedAgentsAutoPolicy|null $permissionPolicy;
 
     /**
      * `new BetaManagedAgentsMCPToolConfigParams()` is missing required properties by the API.
@@ -62,7 +62,7 @@ final class BetaManagedAgentsMCPToolConfigParams implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaManagedAgentsMCPToolConfigParams)->withName(...)
+     * (new BetaManagedAgentsMCPToolConfigParams())->withName(...)
      * ```
      */
     public function __construct()
@@ -80,7 +80,7 @@ final class BetaManagedAgentsMCPToolConfigParams implements BaseModel
     public static function with(
         string $name,
         ?bool $enabled = null,
-        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy|null $permissionPolicy = null,
+        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy|BetaManagedAgentsAutoPolicy|null $permissionPolicy = null,
     ): self {
         $self = new self;
 
@@ -115,12 +115,12 @@ final class BetaManagedAgentsMCPToolConfigParams implements BaseModel
     }
 
     /**
-     * Permission policy for tool execution.
+     * Permission policy for this tool. Overrides the `default_config` setting.
      *
      * @param PermissionPolicyShape|null $permissionPolicy
      */
     public function withPermissionPolicy(
-        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy|null $permissionPolicy,
+        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy|BetaManagedAgentsAutoPolicy|null $permissionPolicy,
     ): self {
         $self = clone $this;
         $self['permissionPolicy'] = $permissionPolicy;

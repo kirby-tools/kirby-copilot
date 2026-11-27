@@ -7,6 +7,7 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type BetaCompactionContentBlockDeltaShape = array{
@@ -19,14 +20,14 @@ final class BetaCompactionContentBlockDelta implements BaseModel
     use SdkModel;
 
     /** @var 'compaction_delta' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('compaction_delta'))]
     public string $type = 'compaction_delta';
 
     #[Required]
     public ?string $content;
 
     /**
-     * Opaque metadata from prior compaction, to be round-tripped verbatim.
+     * Opaque metadata from prior compaction, to be round-tripped verbatim
      */
     #[Required('encrypted_content')]
     public ?string $encryptedContent;
@@ -42,7 +43,7 @@ final class BetaCompactionContentBlockDelta implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaCompactionContentBlockDelta)
+     * (new BetaCompactionContentBlockDelta())
      *   ->withContent(...)
      *   ->withEncryptedContent(...)
      * ```
@@ -78,7 +79,7 @@ final class BetaCompactionContentBlockDelta implements BaseModel
     }
 
     /**
-     * Opaque metadata from prior compaction, to be round-tripped verbatim.
+     * Opaque metadata from prior compaction, to be round-tripped verbatim
      */
     public function withEncryptedContent(?string $encryptedContent): self
     {

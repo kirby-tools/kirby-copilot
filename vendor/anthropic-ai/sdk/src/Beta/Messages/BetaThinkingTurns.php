@@ -7,6 +7,7 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type BetaThinkingTurnsShape = array{type: 'thinking_turns', value: int}
@@ -17,7 +18,7 @@ final class BetaThinkingTurns implements BaseModel
     use SdkModel;
 
     /** @var 'thinking_turns' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('thinking_turns'))]
     public string $type = 'thinking_turns';
 
     #[Required]
@@ -34,7 +35,7 @@ final class BetaThinkingTurns implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaThinkingTurns)->withValue(...)
+     * (new BetaThinkingTurns())->withValue(...)
      * ```
      */
     public function __construct()

@@ -4,25 +4,31 @@ declare(strict_types=1);
 
 namespace Anthropic\Beta\Messages;
 
+use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Lib\Contracts\StructuredOutputModel;
 use Anthropic\Messages\Model;
 
 /**
- * @phpstan-import-type BetaContentBlockVariants from \Anthropic\Beta\Messages\BetaContentBlock
  * @phpstan-import-type BetaContainerShape from \Anthropic\Beta\Messages\BetaContainer
  * @phpstan-import-type BetaContentBlockShape from \Anthropic\Beta\Messages\BetaContentBlock
  * @phpstan-import-type BetaContextManagementResponseShape from \Anthropic\Beta\Messages\BetaContextManagementResponse
+ * @phpstan-import-type BetaDiagnosticsShape from \Anthropic\Beta\Messages\BetaDiagnostics
  * @phpstan-import-type BetaRefusalStopDetailsShape from \Anthropic\Beta\Messages\BetaRefusalStopDetails
  * @phpstan-import-type BetaUsageShape from \Anthropic\Beta\Messages\BetaUsage
+ * @phpstan-import-type BetaInputTransformationShape from \Anthropic\Beta\Messages\BetaInputTransformation
+ * @phpstan-import-type BetaContentBlockVariants from \Anthropic\Beta\Messages\BetaContentBlock
+ * @phpstan-import-type BetaInputTransformationVariants from \Anthropic\Beta\Messages\BetaInputTransformation
  *
  * @phpstan-type BetaMessageShape = array{
  *   id: string,
  *   container: null|BetaContainer|BetaContainerShape,
  *   content: list<BetaContentBlockShape>,
  *   contextManagement: null|BetaContextManagementResponse|BetaContextManagementResponseShape,
+ *   diagnostics: null|BetaDiagnostics|BetaDiagnosticsShape,
  *   model: string|Model|value-of<Model>,
  *   role: 'assistant',
  *   stopDetails: null|BetaRefusalStopDetails|BetaRefusalStopDetailsShape,
@@ -30,6 +36,7 @@ use Anthropic\Messages\Model;
  *   stopSequence: string|null,
  *   type: 'message',
  *   usage: BetaUsage|BetaUsageShape,
+ *   inputTransformations?: list<BetaInputTransformationShape>|null,
  * }
  */
 final class BetaMessage implements BaseModel
@@ -44,7 +51,7 @@ final class BetaMessage implements BaseModel
      *
      * @var 'assistant' $role
      */
-    #[Required]
+    #[Required(type: new ConstantOf('assistant'))]
     public string $role = 'assistant';
 
     /**
@@ -54,7 +61,7 @@ final class BetaMessage implements BaseModel
      *
      * @var 'message' $type
      */
-    #[Required]
+    #[Required(type: new ConstantOf('message'))]
     public string $type = 'message';
 
     /**
@@ -66,7 +73,9 @@ final class BetaMessage implements BaseModel
     public string $id;
 
     /**
-     * Information about the container used in the request (for the code execution tool).
+     * Information about the container used in this request.
+     *
+     * This will be non-null if a container tool (e.g. code execution) was used.
      */
     #[Required]
     public ?BetaContainer $container;
@@ -112,7 +121,15 @@ final class BetaMessage implements BaseModel
     public ?BetaContextManagementResponse $contextManagement;
 
     /**
-     * The model that will complete your prompt.\n\nSee [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
+     * Request-level diagnostics. `null` when the request did not supply `diagnostics`, or when it did and no prompt-cache divergence was detected.
+     */
+    #[Required]
+    public ?BetaDiagnostics $diagnostics;
+
+    /**
+     * The model that will complete your prompt.
+     *
+     * See [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
      *
      * @var string|value-of<Model> $model
      */
@@ -120,7 +137,9 @@ final class BetaMessage implements BaseModel
     public string $model;
 
     /**
-     * Structured information about a refusal.
+     * Structured information about why model output stopped.
+     *
+     * This is `null` when the `stop_reason` has no additional detail to report.
      */
     #[Required('stop_details')]
     public ?BetaRefusalStopDetails $stopDetails;
@@ -135,6 +154,7 @@ final class BetaMessage implements BaseModel
      * * `"tool_use"`: the model invoked one or more tools
      * * `"pause_turn"`: we paused a long-running turn. You may provide the response back as-is in a subsequent request to let the model continue.
      * * `"refusal"`: when streaming classifiers intervene to handle potential policy violations
+     * * `"model_context_window_exceeded"`: we exceeded the model's context window
      *
      * In non-streaming mode this value is always non-null. In streaming mode, it is null in the `message_start` event and non-null otherwise.
      *
@@ -166,6 +186,38 @@ final class BetaMessage implements BaseModel
     public BetaUsage $usage;
 
     /**
+     * Changes the API made to the request's input before showing it to the model,
+     * and blocks that failed a binding check but were left unchanged: one entry per
+     * block, in request order. Two entry types today. `thinking_dropped` — a
+     * `thinking`, `redacted_thinking` or `connector_text` block from the request's
+     * `messages` that was removed from the prompt instead of being shown to the
+     * model because it failed a binding check. `thinking_mismatch_allowed` — a
+     * `thinking` or `redacted_thinking` block that failed the conversation check
+     * (the conversation before it differs from the one it was created in, or it
+     * carries no record of one on a model that requires it) and was shown to the
+     * model all the same, because that check is not enforced for this request.
+     * More entry types may be added over time; ignore types you do not recognize.
+     *
+     * Requires `anthropic-beta: thinking-binding-controls-2026-08-01`. Present on
+     * every such response from a model that supports extended thinking, as `[]`
+     * when there is no entry to report; without the beta, blocks are removed or
+     * left in place all the same but nothing is reported. Removed blocks contribute
+     * nothing to `usage.input_tokens`; blocks left in place count as sent. When
+     * streaming, the array is final in `message_start`; the final `message_delta`
+     * event carries it only when a server-side model fallback happened mid-stream,
+     * in which case it holds the serving model's entries and replaces the one in
+     * `message_start`.
+     *
+     * @var list<BetaInputTransformationVariants>|null $inputTransformations
+     */
+    #[Optional(
+        'input_transformations',
+        list: BetaInputTransformation::class,
+        nullable: true,
+    )]
+    public ?array $inputTransformations;
+
+    /**
      * `new BetaMessage()` is missing required properties by the API.
      *
      * To enforce required parameters use
@@ -175,6 +227,7 @@ final class BetaMessage implements BaseModel
      *   container: ...,
      *   content: ...,
      *   contextManagement: ...,
+     *   diagnostics: ...,
      *   model: ...,
      *   stopDetails: ...,
      *   stopReason: ...,
@@ -186,11 +239,12 @@ final class BetaMessage implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaMessage)
+     * (new BetaMessage())
      *   ->withID(...)
      *   ->withContainer(...)
      *   ->withContent(...)
      *   ->withContextManagement(...)
+     *   ->withDiagnostics(...)
      *   ->withModel(...)
      *   ->withStopDetails(...)
      *   ->withStopReason(...)
@@ -231,21 +285,25 @@ final class BetaMessage implements BaseModel
      * @param BetaContainer|BetaContainerShape|null $container
      * @param list<BetaContentBlockShape> $content
      * @param BetaContextManagementResponse|BetaContextManagementResponseShape|null $contextManagement
+     * @param BetaDiagnostics|BetaDiagnosticsShape|null $diagnostics
      * @param string|Model|value-of<Model> $model
      * @param BetaRefusalStopDetails|BetaRefusalStopDetailsShape|null $stopDetails
      * @param BetaStopReason|value-of<BetaStopReason>|null $stopReason
      * @param BetaUsage|BetaUsageShape $usage
+     * @param list<BetaInputTransformationShape>|null $inputTransformations
      */
     public static function with(
         string $id,
         BetaContainer|array|null $container,
         array $content,
         BetaContextManagementResponse|array|null $contextManagement,
+        BetaDiagnostics|array|null $diagnostics,
         Model|string $model,
         BetaRefusalStopDetails|array|null $stopDetails,
         BetaStopReason|string|null $stopReason,
         ?string $stopSequence,
         BetaUsage|array $usage,
+        ?array $inputTransformations = null,
     ): self {
         $self = new self;
 
@@ -253,11 +311,14 @@ final class BetaMessage implements BaseModel
         $self['container'] = $container;
         $self['content'] = $content;
         $self['contextManagement'] = $contextManagement;
+        $self['diagnostics'] = $diagnostics;
         $self['model'] = $model;
         $self['stopDetails'] = $stopDetails;
         $self['stopReason'] = $stopReason;
         $self['stopSequence'] = $stopSequence;
         $self['usage'] = $usage;
+
+        null !== $inputTransformations && $self['inputTransformations'] = $inputTransformations;
 
         return $self;
     }
@@ -276,7 +337,9 @@ final class BetaMessage implements BaseModel
     }
 
     /**
-     * Information about the container used in the request (for the code execution tool).
+     * Information about the container used in this request.
+     *
+     * This will be non-null if a container tool (e.g. code execution) was used.
      *
      * @param BetaContainer|BetaContainerShape|null $container
      */
@@ -342,7 +405,23 @@ final class BetaMessage implements BaseModel
     }
 
     /**
-     * The model that will complete your prompt.\n\nSee [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
+     * Request-level diagnostics. `null` when the request did not supply `diagnostics`, or when it did and no prompt-cache divergence was detected.
+     *
+     * @param BetaDiagnostics|BetaDiagnosticsShape|null $diagnostics
+     */
+    public function withDiagnostics(
+        BetaDiagnostics|array|null $diagnostics
+    ): self {
+        $self = clone $this;
+        $self['diagnostics'] = $diagnostics;
+
+        return $self;
+    }
+
+    /**
+     * The model that will complete your prompt.
+     *
+     * See [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
      *
      * @param string|Model|value-of<Model> $model
      */
@@ -370,7 +449,9 @@ final class BetaMessage implements BaseModel
     }
 
     /**
-     * Structured information about a refusal.
+     * Structured information about why model output stopped.
+     *
+     * This is `null` when the `stop_reason` has no additional detail to report.
      *
      * @param BetaRefusalStopDetails|BetaRefusalStopDetailsShape|null $stopDetails
      */
@@ -393,6 +474,7 @@ final class BetaMessage implements BaseModel
      * * `"tool_use"`: the model invoked one or more tools
      * * `"pause_turn"`: we paused a long-running turn. You may provide the response back as-is in a subsequent request to let the model continue.
      * * `"refusal"`: when streaming classifiers intervene to handle potential policy violations
+     * * `"model_context_window_exceeded"`: we exceeded the model's context window
      *
      * In non-streaming mode this value is always non-null. In streaming mode, it is null in the `message_start` event and non-null otherwise.
      *
@@ -451,6 +533,39 @@ final class BetaMessage implements BaseModel
     {
         $self = clone $this;
         $self['usage'] = $usage;
+
+        return $self;
+    }
+
+    /**
+     * Changes the API made to the request's input before showing it to the model,
+     * and blocks that failed a binding check but were left unchanged: one entry per
+     * block, in request order. Two entry types today. `thinking_dropped` — a
+     * `thinking`, `redacted_thinking` or `connector_text` block from the request's
+     * `messages` that was removed from the prompt instead of being shown to the
+     * model because it failed a binding check. `thinking_mismatch_allowed` — a
+     * `thinking` or `redacted_thinking` block that failed the conversation check
+     * (the conversation before it differs from the one it was created in, or it
+     * carries no record of one on a model that requires it) and was shown to the
+     * model all the same, because that check is not enforced for this request.
+     * More entry types may be added over time; ignore types you do not recognize.
+     *
+     * Requires `anthropic-beta: thinking-binding-controls-2026-08-01`. Present on
+     * every such response from a model that supports extended thinking, as `[]`
+     * when there is no entry to report; without the beta, blocks are removed or
+     * left in place all the same but nothing is reported. Removed blocks contribute
+     * nothing to `usage.input_tokens`; blocks left in place count as sent. When
+     * streaming, the array is final in `message_start`; the final `message_delta`
+     * event carries it only when a server-side model fallback happened mid-stream,
+     * in which case it holds the serving model's entries and replaces the one in
+     * `message_start`.
+     *
+     * @param list<BetaInputTransformationShape>|null $inputTransformations
+     */
+    public function withInputTransformations(?array $inputTransformations): self
+    {
+        $self = clone $this;
+        $self['inputTransformations'] = $inputTransformations;
 
         return $self;
     }

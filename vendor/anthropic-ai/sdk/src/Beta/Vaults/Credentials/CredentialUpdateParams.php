@@ -14,12 +14,12 @@ use Anthropic\Core\Contracts\BaseModel;
 use Anthropic\Core\Conversion\MapOf;
 
 /**
- * Update Credential.
+ * Update a Credential
  *
  * @see Anthropic\Services\Beta\Vaults\CredentialsService::update()
  *
- * @phpstan-import-type AuthVariants from \Anthropic\Beta\Vaults\Credentials\CredentialUpdateParams\Auth
  * @phpstan-import-type AuthShape from \Anthropic\Beta\Vaults\Credentials\CredentialUpdateParams\Auth
+ * @phpstan-import-type AuthVariants from \Anthropic\Beta\Vaults\Credentials\CredentialUpdateParams\Auth
  *
  * @phpstan-type CredentialUpdateParamsShape = array{
  *   vaultID: string,
@@ -27,6 +27,7 @@ use Anthropic\Core\Conversion\MapOf;
  *   displayName?: string|null,
  *   metadata?: array<string,string|null>|null,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class CredentialUpdateParams implements BaseModel
@@ -35,16 +36,19 @@ final class CredentialUpdateParams implements BaseModel
     use SdkModel;
     use SdkParams;
 
+    /**
+     * Identifier of the vault containing the credential.
+     */
     #[Required]
     public string $vaultID;
 
     /**
-     * Updated authentication details for a credential.
+     * New authentication settings for the credential. The `type` must match the credential's current type, which can't be changed.
      *
      * @var AuthVariants|null $auth
      */
     #[Optional(union: Auth::class)]
-    public ManagedAgentsMCPOAuthUpdateParams|ManagedAgentsStaticBearerUpdateParams|null $auth;
+    public ManagedAgentsMCPOAuthUpdateParams|ManagedAgentsStaticBearerUpdateParams|ManagedAgentsEnvironmentVariableUpdateParams|null $auth;
 
     /**
      * Updated human-readable name for the credential. 1-255 characters.
@@ -61,12 +65,20 @@ final class CredentialUpdateParams implements BaseModel
     public ?array $metadata;
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this header.
      *
      * @var list<string|value-of<AnthropicBeta>>|null $betas
      */
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
 
     /**
      * `new CredentialUpdateParams()` is missing required properties by the API.
@@ -79,7 +91,7 @@ final class CredentialUpdateParams implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new CredentialUpdateParams)->withVaultID(...)
+     * (new CredentialUpdateParams())->withVaultID(...)
      * ```
      */
     public function __construct()
@@ -98,10 +110,11 @@ final class CredentialUpdateParams implements BaseModel
      */
     public static function with(
         string $vaultID,
-        ManagedAgentsMCPOAuthUpdateParams|array|ManagedAgentsStaticBearerUpdateParams|null $auth = null,
+        ManagedAgentsMCPOAuthUpdateParams|array|ManagedAgentsStaticBearerUpdateParams|ManagedAgentsEnvironmentVariableUpdateParams|null $auth = null,
         ?string $displayName = null,
         ?array $metadata = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
     ): self {
         $self = new self;
 
@@ -111,10 +124,14 @@ final class CredentialUpdateParams implements BaseModel
         null !== $displayName && $self['displayName'] = $displayName;
         null !== $metadata && $self['metadata'] = $metadata;
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
 
+    /**
+     * Identifier of the vault containing the credential.
+     */
     public function withVaultID(string $vaultID): self
     {
         $self = clone $this;
@@ -124,12 +141,12 @@ final class CredentialUpdateParams implements BaseModel
     }
 
     /**
-     * Updated authentication details for a credential.
+     * New authentication settings for the credential. The `type` must match the credential's current type, which can't be changed.
      *
      * @param AuthShape $auth
      */
     public function withAuth(
-        ManagedAgentsMCPOAuthUpdateParams|array|ManagedAgentsStaticBearerUpdateParams $auth,
+        ManagedAgentsMCPOAuthUpdateParams|array|ManagedAgentsStaticBearerUpdateParams|ManagedAgentsEnvironmentVariableUpdateParams $auth,
     ): self {
         $self = clone $this;
         $self['auth'] = $auth;
@@ -162,7 +179,7 @@ final class CredentialUpdateParams implements BaseModel
     }
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this header.
      *
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas
      */
@@ -170,6 +187,19 @@ final class CredentialUpdateParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

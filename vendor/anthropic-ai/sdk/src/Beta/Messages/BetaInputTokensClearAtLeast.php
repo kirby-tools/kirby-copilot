@@ -7,6 +7,7 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type BetaInputTokensClearAtLeastShape = array{
@@ -19,7 +20,7 @@ final class BetaInputTokensClearAtLeast implements BaseModel
     use SdkModel;
 
     /** @var 'input_tokens' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('input_tokens'))]
     public string $type = 'input_tokens';
 
     #[Required]
@@ -36,7 +37,7 @@ final class BetaInputTokensClearAtLeast implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaInputTokensClearAtLeast)->withValue(...)
+     * (new BetaInputTokensClearAtLeast())->withValue(...)
      * ```
      */
     public function __construct()

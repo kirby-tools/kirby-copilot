@@ -1,0 +1,178 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Services\Organization;
+
+use Anthropic\Client;
+use Anthropic\Core\Contracts\BaseResponse;
+use Anthropic\Core\Exceptions\APIException;
+use Anthropic\Core\Implementation\ApiCallInfo;
+use Anthropic\Core\Util;
+use Anthropic\Organization\ConcurrentMembershipChangeException;
+use Anthropic\Organization\Users\CannotRemoveLastMemberException;
+use Anthropic\Organization\Users\OrganizationUser;
+use Anthropic\Organization\Users\UserListParams;
+use Anthropic\Organization\Users\UserRemoveResponse;
+use Anthropic\Organization\Users\UserUpdateParams;
+use Anthropic\Organization\Users\UserUpdateParams\Role;
+use Anthropic\Page;
+use Anthropic\RequestOptions;
+use Anthropic\SandboxEgressRestrictedException;
+use Anthropic\ServiceContracts\Organization\UsersRawContract;
+
+/**
+ * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ */
+final class UsersRawService implements UsersRawContract
+{
+    // @phpstan-ignore-next-line
+    /**
+     * @internal
+     */
+    public function __construct(private Client $client) {}
+
+    /**
+     * @api
+     *
+     * Retrieve a member of the organization by user ID.
+     *
+     * @param string $userID ID of the User.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<OrganizationUser>
+     *
+     * @throws APIException
+     */
+    public function retrieve(
+        string $userID,
+        RequestOptions|array|null $requestOptions = null
+    ): BaseResponse {
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'get',
+            path: ['v1/organizations/users/%1$s', $userID],
+            options: RequestOptions::parse($requestOptions)->withApiCall(new ApiCallInfo(
+                name: 'anthropic.organization.users.retrieve',
+                route: '/v1/organizations/users/{user_id}',
+                attributes: ['anthropic.organization.user.id' => $userID],
+            )),
+            convert: OrganizationUser::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * Update a member's organization role.
+     *
+     * @param string $userID ID of the User.
+     * @param array{role: Role|value-of<Role>}|UserUpdateParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<OrganizationUser>
+     *
+     * @throws SandboxEgressRestrictedException
+     * @throws APIException
+     */
+    public function update(
+        string $userID,
+        array|UserUpdateParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = UserUpdateParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'post',
+            path: ['v1/organizations/users/%1$s', $userID],
+            body: (object) $parsed,
+            options: $options->withApiCall(new ApiCallInfo(
+                name: 'anthropic.organization.users.update',
+                route: '/v1/organizations/users/{user_id}',
+                attributes: ['anthropic.organization.user.id' => $userID],
+            )),
+            convert: OrganizationUser::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * List the organization's members.
+     *
+     * @param array{
+     *   afterID?: string,
+     *   beforeID?: string,
+     *   email?: string,
+     *   limit?: int,
+     *   roles?: list<string>,
+     * }|UserListParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<Page<OrganizationUser>>
+     *
+     * @throws APIException
+     */
+    public function list(
+        array|UserListParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = UserListParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'get',
+            path: 'v1/organizations/users',
+            query: Util::array_transform_keys(
+                $parsed,
+                ['afterID' => 'after_id', 'beforeID' => 'before_id']
+            ),
+            options: $options->withApiCall(new ApiCallInfo(
+                name: 'anthropic.organization.users.list',
+                route: '/v1/organizations/users',
+                query: ['after_id', 'before_id', 'email', 'limit', 'roles'],
+            )),
+            convert: OrganizationUser::class,
+            page: Page::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * Remove a member from the organization.
+     *
+     * @param string $userID ID of the User.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<UserRemoveResponse>
+     *
+     * @throws CannotRemoveLastMemberException
+     * @throws SandboxEgressRestrictedException
+     * @throws ConcurrentMembershipChangeException
+     * @throws APIException
+     */
+    public function remove(
+        string $userID,
+        RequestOptions|array|null $requestOptions = null
+    ): BaseResponse {
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'delete',
+            path: ['v1/organizations/users/%1$s', $userID],
+            options: RequestOptions::parse($requestOptions)->withApiCall(new ApiCallInfo(
+                name: 'anthropic.organization.users.remove',
+                route: '/v1/organizations/users/{user_id}',
+                attributes: ['anthropic.organization.user.id' => $userID],
+            )),
+            convert: UserRemoveResponse::class,
+        );
+    }
+}

@@ -8,6 +8,7 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-import-type DocumentBlockParamShape from \Anthropic\Messages\DocumentBlockParam
@@ -25,20 +26,20 @@ final class WebFetchBlockParam implements BaseModel
     use SdkModel;
 
     /** @var 'web_fetch_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('web_fetch_result'))]
     public string $type = 'web_fetch_result';
 
     #[Required]
     public DocumentBlockParam $content;
 
     /**
-     * Fetched content URL.
+     * Fetched content URL
      */
     #[Required]
     public string $url;
 
     /**
-     * ISO 8601 timestamp when the content was retrieved.
+     * ISO 8601 timestamp when the content was retrieved
      */
     #[Optional('retrieved_at', nullable: true)]
     public ?string $retrievedAt;
@@ -54,7 +55,7 @@ final class WebFetchBlockParam implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new WebFetchBlockParam)->withContent(...)->withURL(...)
+     * (new WebFetchBlockParam())->withContent(...)->withURL(...)
      * ```
      */
     public function __construct()
@@ -107,7 +108,7 @@ final class WebFetchBlockParam implements BaseModel
     }
 
     /**
-     * Fetched content URL.
+     * Fetched content URL
      */
     public function withURL(string $url): self
     {
@@ -118,7 +119,7 @@ final class WebFetchBlockParam implements BaseModel
     }
 
     /**
-     * ISO 8601 timestamp when the content was retrieved.
+     * ISO 8601 timestamp when the content was retrieved
      */
     public function withRetrievedAt(?string $retrievedAt): self
     {

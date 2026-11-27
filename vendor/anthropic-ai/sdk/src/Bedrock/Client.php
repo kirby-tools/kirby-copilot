@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Anthropic\Bedrock;
 
-use Anthropic\Bedrock\Services\MessagesService;
-use Anthropic\Core\BaseClient;
 use Anthropic\Core\Util;
+use Anthropic\Lib\Tracing\Tracing;
 use Anthropic\RequestOptions;
 use Aws\Configuration\ConfigurationResolver;
 use Aws\Credentials\CredentialProvider;
@@ -15,27 +14,26 @@ use Aws\Credentials\CredentialsInterface;
 use Aws\Sdk;
 use Aws\Signature\SignatureInterface;
 use Aws\Signature\SignatureProvider;
-use Http\Discovery\Psr17FactoryDiscovery;
-use Http\Discovery\Psr18ClientDiscovery;
 use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\UriInterface;
 
 /**
  * Note: This client is not thread-safe; avoid sharing instances across parallel requests.
  *
- * @phpstan-import-type NormalizedRequest from \Anthropic\Core\BaseClient
+ * Supported on Bedrock: `$messages` (create / createStream / countTokens) and
+ * `$beta->messages`. Other resources inherited from {@see \Anthropic\Client}
+ * (batches, files, models, agents, user profiles) are not available via Bedrock and throw an
+ * {@see \Anthropic\Core\Exceptions\AnthropicException} before any request is
+ * sent — use `new \Anthropic\Client()` for those.
+ *
  * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ * @phpstan-import-type OpenTelemetryOptions from \Anthropic\Core\BaseClient
  */
-final class Client extends BaseClient
+final class Client extends \Anthropic\Client
 {
     /**
      * @var non-empty-string
      */
     private const DEFAULT_REGION = 'us-east-1';
-
-    public MessagesService $messages;
-
-    public string $apiKey;
 
     private ?CredentialsInterface $credentials = null;
 
@@ -43,18 +41,20 @@ final class Client extends BaseClient
 
     /**
      * @param non-empty-string $region
+     * @param non-empty-string|null $baseUrl
      * @param RequestOpts|null $requestOptions
+     * @param OpenTelemetryOptions|null $openTelemetry
      */
     private function __construct(
         private ?\Closure $signatureProvider,
         private ?\Closure $credentialProvider,
         private string $region,
         ?string $apiKey = null,
+        ?string $baseUrl = null,
         RequestOptions|array|null $requestOptions = null,
+        array|false|null $openTelemetry = null,
     ) {
-        $this->apiKey = $apiKey ?? '';
-
-        $hasApiKey = '' !== $this->apiKey;
+        $hasApiKey = null !== $apiKey && '' !== $apiKey;
         $hasSignatureProvider = null !== $signatureProvider;
         $hasCredentialProvider = null !== $credentialProvider;
 
@@ -70,30 +70,37 @@ final class Client extends BaseClient
             );
         }
 
-        $options = RequestOptions::parse(
-            RequestOptions::with(
-                uriFactory: Psr17FactoryDiscovery::findUriFactory(),
-                streamFactory: Psr17FactoryDiscovery::findStreamFactory(),
-                requestFactory: Psr17FactoryDiscovery::findRequestFactory(),
-                transporter: Psr18ClientDiscovery::find(),
-            ),
-            $requestOptions,
-        );
+        $baseUrl ??= Util::getenv('ANTHROPIC_BEDROCK_BASE_URL') ?: 'https://bedrock-runtime.'.$region.'.amazonaws.com';
 
+        // Pass '' for apiKey to suppress ANTHROPIC_API_KEY and
+        // ANTHROPIC_AUTH_TOKEN env lookups; Bedrock auth is handled entirely
+        // by the $authorize closure in backendMiddleware().
         parent::__construct(
-            headers: [],
-            baseUrl: '',
-            options: $options
+            apiKey: '',
+            baseUrl: $baseUrl,
+            requestOptions: $requestOptions,
+            openTelemetry: $openTelemetry,
         );
 
-        $this->messages = new MessagesService($this);
+        // Restore the Bedrock bearer token so backendMiddleware() can use it.
+        $this->apiKey = $apiKey ?? '';
     }
 
     /**
-     * @param RequestOpts|null $requestOptions
-     * @param non-empty-string|null $region
+     * @internal
      */
-    public static function fromEnvironment(?string $region = null, RequestOptions|array|null $requestOptions = null): self
+    public function supportsMessageThreads(): bool
+    {
+        return false;
+    }
+
+    /**
+     * @param non-empty-string|null $region
+     * @param non-empty-string|null $baseUrl
+     * @param RequestOpts|null $requestOptions
+     * @param OpenTelemetryOptions|null $openTelemetry
+     */
+    public static function fromEnvironment(?string $region = null, ?string $baseUrl = null, RequestOptions|array|null $requestOptions = null, array|false|null $openTelemetry = null): self
     {
         $region = self::resolveRegion($region);
         $apiKey = Util::getenv('AWS_BEARER_TOKEN_BEDROCK');
@@ -104,7 +111,9 @@ final class Client extends BaseClient
                 credentialProvider: null,
                 region: $region,
                 apiKey: $apiKey,
+                baseUrl: $baseUrl,
                 requestOptions: $requestOptions,
+                openTelemetry: $openTelemetry,
             );
         }
 
@@ -114,7 +123,7 @@ final class Client extends BaseClient
         $signatureProvider = SignatureProvider::defaultProvider()(...);
 
         // @phpstan-ignore-next-line argument.type
-        return new self($signatureProvider, $credentialProvider, $region, requestOptions: $requestOptions);
+        return new self($signatureProvider, $credentialProvider, $region, baseUrl: $baseUrl, requestOptions: $requestOptions, openTelemetry: $openTelemetry);
     }
 
     /**
@@ -122,16 +131,19 @@ final class Client extends BaseClient
      * @param non-empty-string $secretAccessKey
      * @param non-empty-string|null $region
      * @param non-empty-string|null $securityToken
+     * @param non-empty-string|null $baseUrl
      * @param RequestOpts|null $requestOptions
+     * @param OpenTelemetryOptions|null $openTelemetry
      */
     public static function withCredentials(
         string $accessKeyId,
         string $secretAccessKey,
         ?string $region = null,
         ?string $securityToken = null,
+        ?string $baseUrl = null,
         RequestOptions|array|null $requestOptions = null,
-    ): self
-    {
+        array|false|null $openTelemetry = null,
+    ): self {
         self::ensureAwsSdkIsInstalled();
 
         $region = self::resolveRegion($region);
@@ -140,15 +152,17 @@ final class Client extends BaseClient
         $signatureProvider = SignatureProvider::defaultProvider()(...);
 
         // @phpstan-ignore-next-line argument.type
-        return new self($signatureProvider, $credentialProvider, $region, requestOptions: $requestOptions);
+        return new self($signatureProvider, $credentialProvider, $region, baseUrl: $baseUrl, requestOptions: $requestOptions, openTelemetry: $openTelemetry);
     }
 
     /**
      * @param non-empty-string $apiKey
      * @param non-empty-string|null $region
+     * @param non-empty-string|null $baseUrl
      * @param RequestOpts|null $requestOptions
+     * @param OpenTelemetryOptions|null $openTelemetry
      */
-    public static function withApiKey(string $apiKey, ?string $region = null, RequestOptions|array|null $requestOptions = null): self
+    public static function withApiKey(string $apiKey, ?string $region = null, ?string $baseUrl = null, RequestOptions|array|null $requestOptions = null, array|false|null $openTelemetry = null): self
     {
         $region = self::resolveRegion($region);
 
@@ -157,26 +171,38 @@ final class Client extends BaseClient
             credentialProvider: null,
             region: $region,
             apiKey: $apiKey,
+            baseUrl: $baseUrl,
             requestOptions: $requestOptions,
+            openTelemetry: $openTelemetry,
         );
     }
 
-    protected function getBaseUrl(): UriInterface
+    /** @return array<string,string> */
+    protected function authHeaders(): array
     {
-        assert(!is_null($this->options->uriFactory));
-
-        return $this->options->uriFactory->createUri(
-            'https://bedrock-runtime.'.$this->region.'.amazonaws.com'
-        );
+        return [];
     }
 
     protected function transformRequest(RequestInterface $request): RequestInterface
     {
-        if ('' !== $this->apiKey) {
-            return $request;
-        }
+        return $request;
+    }
 
-        // Refresh credentials if not set or expired.
+    protected function backendMiddleware(): array
+    {
+        assert(null !== $this->options->streamFactory);
+
+        $authorize = '' !== $this->apiKey
+            ? fn (RequestInterface $request): RequestInterface => $request->hasHeader('Authorization')
+                ? $request
+                : $request->withHeader('Authorization', 'Bearer '.$this->apiKey)
+            : $this->sign(...);
+
+        return [new BedrockMiddleware($this->options->streamFactory, $authorize)];
+    }
+
+    private function sign(RequestInterface $request): RequestInterface
+    {
         if (null === $this->credentials || $this->areCredentialsExpired($this->credentials)) {
             assert(null !== $this->credentialProvider);
             // @phpstan-ignore-next-line method.nonObject
@@ -184,9 +210,7 @@ final class Client extends BaseClient
         }
         assert(null !== $this->credentials);
 
-        $signer = $this->signer;
-
-        if (null === $signer) {
+        if (null === $this->signer) {
             assert(null !== $this->signatureProvider);
             $resolvedSigner = ($this->signatureProvider)('v4', 'bedrock', $this->region);
 
@@ -195,44 +219,12 @@ final class Client extends BaseClient
             }
 
             $this->signer = $resolvedSigner;
-            $signer = $resolvedSigner;
         }
 
-        return $signer->signRequest($request, $this->credentials);
-    }
+        $signer = $this->signer;
+        $credentials = $this->credentials;
 
-    /** @return array<string,string> */
-    protected function bearerAuth(): array
-    {
-        return '' !== $this->apiKey ? ['Authorization' => "Bearer {$this->apiKey}"] : [];
-    }
-
-    /**
-     * @internal
-     *
-     * @param string|list<string> $path
-     * @param array<string,mixed> $query
-     * @param array<string,string|int|list<string|int>|null> $headers
-     * @param RequestOpts|null $opts
-     *
-     * @return array{NormalizedRequest, RequestOptions}
-     */
-    protected function buildRequest(
-        string $method,
-        string|array $path,
-        array $query,
-        array $headers,
-        mixed $body,
-        RequestOptions|array|null $opts,
-    ): array {
-        return parent::buildRequest(
-            method: $method,
-            path: $path,
-            query: $query,
-            headers: [...$this->bearerAuth(), ...$headers],
-            body: $body,
-            opts: $opts,
-        );
+        return Tracing::signWithoutTraceContext($request, static fn (RequestInterface $request): RequestInterface => $signer->signRequest($request, $credentials));
     }
 
     /**

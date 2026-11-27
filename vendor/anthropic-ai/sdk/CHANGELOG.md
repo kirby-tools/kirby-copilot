@@ -1,5 +1,1303 @@
 # Changelog
 
+## [1.14.0](https://github.com/anthropics/anthropic-sdk-php/compare/v1.13.0...v1.14.0) (2026-11-24)
+
+### Features
+
+* **api:** add Google-managed data controls for Google Cloud projects
+* **api:** add Google-managed data controls for user profiles
+* **api:** add support for compliance review cases, notices, and items
+
+
+### Bug Fixes
+
+* **client:** keep fractional seconds when serializing date-times
+
+
+### Chores
+
+* **docs:** name both causes of the tool use limit error
+* **docs:** update example workspace and API key IDs
+
+## [1.13.0](https://github.com/anthropics/anthropic-sdk-php/compare/v1.12.0...v1.13.0) (2026-11-23)
+
+### Features
+
+* **api:** add an error code to Message Batches creation
+* **api:** add External Storage to the Admin API beta
+* **api:** add webhook events for external storage failure and recovery
+
+
+### Bug Fixes
+
+* **client:** read streamed responses in whole chunks on Guzzle 8.3 and later
+* **client:** send a web search result's content as a list
+
+  A web search with no results was sent back as `{}`, and results given as an array kept the SDK's property names.
+
+
+### Chores
+
+* **api:** mark Claude Opus 4.5 as deprecated (end-of-life January 22, 2027)
+* **client:** deprecate the Bedrock and Vertex Claude Opus 4.5 model ids
+* **docs:** clarify when plugin archive downloads are recorded and who gave a share
+* **docs:** correct organization-type notes in usage and cost reports
+* **docs:** describe the user profile endpoints and link to the guide
+* **docs:** use realistic example values in more request bodies
+
+
+### Documentation
+
+* **api:** shorten the human_review description
+
+## [1.12.0](https://github.com/anthropics/anthropic-sdk-php/compare/v1.11.0...v1.12.0) (2026-11-20)
+
+### Features
+
+* **api:** add the image_dimensions_too_large error code
+
+
+### Bug Fixes
+
+* **bedrock:** send the user profile ID in the request body
+
+  Amazon Bedrock reads `user_profile_id` from the request body and ignores the `anthropic-user-profile-id` header. `Anthropic\Bedrock\Client` dropped the header, so a profile ID given to it was not applied. `Anthropic\Bedrock\Client` now sends it in the body of Messages requests. Token counting requests still leave it out. A `user_profile_id` already in the body takes priority over the header.
+
+  Some models on Bedrock do not support user profiles. A request to one of them with a profile ID now fails with a 400 error; before, the ID was ignored. Leave the ID off requests to those models.
+
+* **client:** do not retry a dropped response body when x-should-retry is false
+
+
+### Chores
+
+* **docs:** clarify billing_policy in batches and two billing errors
+
+## [1.11.0](https://github.com/anthropics/anthropic-sdk-php/compare/v1.10.0...v1.11.0) (2026-11-19)
+
+### Features
+
+* **api:** add Claude Code managed settings to the Admin API
+* **api:** add the sandbox_egress_restricted error to Admin API plugin methods
+
+
+### Bug Fixes
+
+* **client:** return the bytes of downloaded JSON and JSONL files
+* **credentials:** look for saved logins in %APPDATA%\Anthropic on Windows
+
+
+### Chores
+
+* **docs:** explain how the input-token rate limit types differ
+* **docs:** name Claude Security in the usage and cost report descriptions
+* **docs:** note that a Google Cloud external key's provider and key_name can't be changed
+
+## [1.10.0](https://github.com/anthropics/anthropic-sdk-php/compare/v1.9.0...v1.10.0) (2026-11-17)
+
+### Features
+
+* **api:** add beta support for the billing_policy request parameter
+* **api:** add contract_spend_limit_reached error code to messages
+* **api:** add error codes for linked billing refusals
+* **api:** add the user_profile_billing_not_authorized error code
+* **api:** add webhook events for external key failure and recovery
+
+
+### Bug Fixes
+
+* **client:** send a null inside an array wherever the API takes one
+
+  If your code puts `null` in an array to mean "not given", leave that key out instead. Where the API takes a `null`, it is now sent, and on an update it clears the field. A required argument that takes `null`, such as `amount` of `beta->organization->spendLimits->set`, now sends it too.
+
+  Arrays keyed by the API's names, such as `input_schema`, are now converted the same way as arrays keyed by the SDK's names.
+
+* **client:** send an array's API property names when one of its values is null
+* **types:** keep deprecated model aliases and the types nested under them working
+
+
+### Chores
+
+* **api:** rename error data models, deprecating the old names
+* **docs:** clarify which AWS KMS keys a workspace can use on Claude Platform on AWS
+* **docs:** clarify which credential work get, update and list accept
+* **docs:** clarify which uploads a plugin pin holds back
+* **docs:** note that a plugin scan's reason also covers errored scans
+
+  `content_scan.reason` on an errored scan now says why there is no verdict. It is not a security finding, so code that treats any `reason` as a concern should also check `status`.
+
+
+### Documentation
+
+* name each SDK's own types in rename deprecations
+
+## [1.9.0](https://github.com/anthropics/anthropic-sdk-php/compare/v1.8.0...v1.9.0) (2026-11-16)
+
+### Features
+
+* **api:** add source and error codes to the RBAC Role read endpoints
+* **api:** add Update Bundle, which sets a Claude Tag Bundle's instructions, and return instructions on Bundle
+
+
+### Bug Fixes
+
+* **vertex,google-cloud:** refresh Google access tokens that only report expires_in
+
+
+### Chores
+
+* **api:** deprecate old beta header values
+
+  The API still accepts these values, but a later release removes them from the SDKs. Delete `prompt-caching-2024-07-31`, `pdfs-2024-09-25`, `token-counting-2024-11-01`, `token-efficient-tools-2025-02-19`, `extended-cache-ttl-2025-04-11`, `cache-diagnosis-2026-04-07` and `ce-user-management-2026-07-13` from your requests. `files-api-2025-04-14` and `skills-2025-10-02` select the beta response shapes, so follow the Files API and Skills migration guides before you delete them.
+
+  In C#, the `AnthropicBeta` enum's members have new numbers, so code compiled against an earlier SDK version sends a different beta value, with no error, until you rebuild it.
+
+* **api:** stop sending an old beta header on batch requests
+
+  `beta.messages.batches` no longer sends `message-batches-2024-09-24`, which the API doesn't need. If your client sets a default `anthropic-beta` header, these requests now send it, where in some SDKs the old value replaced it. The API still accepts the old value. If you set it yourself, delete it: a later release removes it from the SDKs.
+
+* **docs:** add an example value for the workspace name
+* **docs:** clarify when the auto permission policy denies a tool call
+* **docs:** clarify which workspaces an external key can be attached to
+* **docs:** recommend multiagent_20261001 over the coordinator type
+* **docs:** say when organization_id is required on plugin reads
+
+## [1.8.0](https://github.com/anthropics/anthropic-sdk-php/compare/v1.7.0...v1.8.0) (2026-11-10)
+
+### Features
+
+* **api:** add Claude Tag metrics to the analytics summaries and users reports
+* **api:** add reply_mode to Claude Tag Slack channel settings
+
+
+### Bug Fixes
+
+* **bedrock:** throw when the model has nothing, "." or ".." before its first ";", and send any other ";" in the model as ";" instead of "%3B"
+* **vertex:** throw when the model has nothing, "." or ".." before its first ";"
+
+
+### Chores
+
+* **docs:** clarify display_name for RBAC Roles created by Anthropic
+* **docs:** clarify plugin delete and skill name conflict descriptions
+* **docs:** clarify when to omit user_profile_id on external keys
+* **docs:** note that Claude Tag settings accept self-hosted runner pools
+* **docs:** update model descriptions
+
+
+### Documentation
+
+* **examples:** show multiagent when creating a Managed Agents agent
+
+## [1.7.0](https://github.com/anthropics/anthropic-sdk-php/compare/v1.6.0...v1.7.0) (2026-11-09)
+
+### Features
+
+* **api:** accept user_profile.program_status_updated on organization webhook endpoints
+* **api:** add claude-fable-5-2 and claude-mythos-5-2
+* **api:** add parent organization filtering and grouping to the usage and cost reports
+* **api:** add the sandbox_egress_restricted error to Admin API write methods
+* **api:** add the user_profile.program_status_updated webhook event
+
+
+### Chores
+
+* **api:** remove some error detail types and update descriptions
+* **client:** stop recording sampling parameters on OpenTelemetry spans
+* **docs:** say when a work heartbeat does not compare its value
+* **docs:** update model descriptions
+* **tests:** check a Bedrock stream error's body instead of its message text
+
+## [1.6.0](https://github.com/anthropics/anthropic-sdk-php/compare/v1.5.0...v1.6.0) (2026-11-05)
+
+### Features
+
+* **api:** add error code for ramp limit errors
+* **api:** add error codes for External Key validation failures
+* **api:** add support for signing organization members out everywhere
+
+
+### Bug Fixes
+
+* **client:** choose the error details class by its error code
+* **streaming:** print an error event once in the exception message
+
+
+### Chores
+
+* **docs:** describe the type and message of API errors
+* **internal:** tell contributors when a runtime type check belongs
+
+
+### Documentation
+
+* **client:** describe the type, message, code and details of API errors
+* **client:** list each method's errors without their descriptions
+
+## [1.5.0](https://github.com/anthropics/anthropic-sdk-php/compare/v1.4.0...v1.5.0) (2026-11-04)
+
+### Features
+
+* **api:** add error details types and new error type values
+* **api:** add ids filter to list workspaces
+* **client:** add exception classes for HTTP statuses and API error codes, and getType(), getAPIMessage(), getErrorCode() and getDetails() on APIStatusException
+* **foundry:** add files and skills to the Foundry client
+
+
+### Bug Fixes
+
+* **api:** capitalize CMEK in error details type names
+* **api:** move some error details types to the resource they describe
+* **bedrock:** throw when the model is "." or "..", which would send the request to a different URL
+* **client:** send ; unescaped in path params, reject "..;x" and ";x"
+* **client:** stop escaping : @ + & and similar characters in path params
+* **google-cloud:** percent-encode the project, location and workspace ID in the base URL, and throw when one is ".", ".." or empty
+* **helpers:** count structured output string length limits in characters, not bytes
+* **vertex:** percent-encode the project ID and region in the request path, and throw when one is ".", ".." or empty
+
+
+### Chores
+
+* **api:** update example values for pattern-constrained string fields
+* **docs:** clarify plugin reach values
+* **docs:** clarify plugin version description and plugin reach
+* **docs:** clarify plugin version description length
+* **docs:** clarify some API field descriptions
+* **docs:** clarify three error descriptions
+* **docs:** clarify which blocks to send back around a fallback block
+* **docs:** correct Claude Tag direct message notes in usage reports
+* **docs:** reword Dream and RBAC role permission descriptions
+* **docs:** update the telemetry destination headers description
+* **docs:** use the Claude Platform name in analytics filter docs
+* **internal:** accept changelog entry files in the changelog check
+* **internal:** ignore changelog entry files
+* **tests:** check that a null path param is rejected
+* **tests:** stop a Bedrock stream test from depending on the AWS SDK version
+
+
+### Documentation
+
+* **api:** show each field's own description for `speed`
+
+## [1.4.0](https://github.com/anthropics/anthropic-sdk-php/compare/v1.3.0...v1.4.0) (2026-11-02)
+
+### Features
+
+* **api:** add GA methods for analytics, spend limits and RBAC
+* **api:** add named beta types for unified metrics and RBAC delete responses
+* **api:** add shared analytics order and increase request actor types
+* **api:** add tool_use_limit_reached_error and compaction_limit_reached_error session error types
+* **api:** add types for analytics group_by and spend limit period filters
+* **api:** add user_profile_id to External Keys and Workspaces
+
+### Bug Fixes
+
+* **api:** make spend_limit nullable in the spend limit increase request approve response
+* **api:** require always-sent analytics fields and drop the unused project product field
+
+
+### Chores
+
+* **docs:** clarify the Slack channel id description
+* **docs:** clarify what disabling the Compliance API stops
+* **docs:** clarify what the capability_access_all role action grants
+* **docs:** link Dreams model fields to the supported models section
+* **docs:** update example user ID in Admin API examples
+* **internal:** add a section for each repository's own review rules
+* **internal:** forward scripts/test arguments and ignore .stdy.log
+* **internal:** simplify the doc comments of enum cases, generic types and page classes
+
+
+### Documentation
+
+* add a description to the AnthropicBeta type
+* **examples:** use current model IDs
+* keep descriptions in docblocks as the API's spec has them
+* **readme:** point to the docs site for documentation
+
+## [1.3.0](https://github.com/anthropics/anthropic-sdk-php/compare/v1.2.0...v1.3.0) (2026-10-23)
+
+### Features
+
+* **api:** add Claude Tag endpoints for Claude Enterprise organizations
+
+
+### Bug Fixes
+
+* **client:** stop raising a notice when reading an unset key from a model
+* **google-cloud:** send user profiles requests to the organization endpoint
+
+
+### Chores
+
+* **client:** stop sending query params hardcoded in endpoint paths
+* **docs:** improve the descriptions of the code execution tool and its encrypted results
+* **docs:** reword work queue, skill and external key descriptions
+* **docs:** update descriptions of the per-user usage and cost reports
+* **internal:** carry endpoint path query params to the request layer
+* **internal:** check the repository by owner and public name in workflows
+* **internal:** read the beta route qualifier instead of the beta=true query
+* **internal:** stop expecting the beta query param in tests
+
+
+### Documentation
+
+* **google-cloud:** update the product name
+* update the README and the example request
+
+## [1.2.0](https://github.com/anthropics/anthropic-sdk-php/compare/v1.1.0...v1.2.0) (2026-10-23)
+
+### Features
+
+* **api:** add support for message threads
+* **api:** add usage and cost reports by dimension, mark older reports legacy
+
+
+### Bug Fixes
+
+* **client:** stop including model data in unknown property errors
+* **foundry,bedrock:** send workspaceID as the anthropic-workspace-id header on Messages
+* **tools:** restore the released tool runner behavior when the caller changes its messages or params while handling a reply
+
+
+### Chores
+
+* **api:** document the api key header on the environments list endpoint
+* **docs:** clarify plugin content scan and validation descriptions
+* **docs:** clarify plugin served_version_pinned and updated_at
+* **docs:** fix usage and cost report examples and ending_at docs
+* **docs:** rate limit model lists vary by organization and workspace
+* **internal:** rename the version manifest to .version-manifest.json
+
+## [1.1.0](https://github.com/anthropics/anthropic-sdk-php/compare/v1.0.0...v1.1.0) (2026-10-21)
+
+### Features
+
+* **api:** add enforcement status, actions and filter to user profiles
+
+## [1.0.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.61.0...v1.0.0) (2026-10-21)
+
+### ⚠ BREAKING CHANGES
+
+* **api:** add support for new API version 2026-10-21
+
+### Features
+
+* **api:** add a workspace_id filter and the usage_tier scope type to list spend limits
+* **api:** add support for new API version 2026-10-21
+
+
+### Documentation
+
+* **api:** remove outdated system role note from messages description
+
+## [0.61.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.60.0...v0.61.0) (2026-10-20)
+
+### Features
+
+* **api:** add org webhook endpoints and user profile enforcement events
+
+
+### Chores
+
+* **ci:** run the changelog check on a standard runner
+* **docs:** remove the repeated autoloading note from the README
+
+## [0.60.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.59.0...v0.60.0) (2026-10-20)
+
+### Features
+
+* **api:** add data_refreshed_at and has_more to analytics report pages
+* **api:** add workspace rate-limit updates to the Admin API
+* **api:** make User Profiles generally available
+* **client:** yield server-sent events with unrecognized event names
+* **google-cloud:** use the v1 endpoints and add the organization endpoint
+
+
+### Bug Fixes
+
+* **client:** accept webhook header names in any case
+* **client:** fix a crash and an unclosed body when closing a stream
+* **client:** stop escaping slashes in error messages and model strings
+* **client:** treat x-amz-security-token as a sensitive header
+
+
+### Chores
+
+* **ci:** skip the changelog check on draft pull requests
+* **docs:** add credential expiry descriptions to the Managed Agents API reference
+* **docs:** add Messages API request descriptions
+* **docs:** correct plugin manifest_version and reach descriptions
+* **docs:** improve Managed Agents memory store descriptions
+* **docs:** improve Managed Agents vault and credential descriptions
+* **tests:** cover trace context propagation and dropped raw responses
+
+## [0.59.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.58.0...v0.59.0) (2026-10-15)
+
+### Features
+
+* **api:** add between_tools to thinking types in model capabilities
+* **api:** add the speed parameter and usage.speed to Messages
+* **api:** return a Console organization's usage-tier spend cap as a read-only spend limit
+
+
+### Chores
+
+* **ci:** speed up breaking change detection
+* **docs:** describe headers on Managed Agents and telemetry endpoints
+* **tests:** cover enum cases given to models and unions
+
+
+### Documentation
+
+* **api:** note that some models need a beta header to use speed
+
+## [0.58.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.57.0...v0.58.0) (2026-10-14)
+
+### Features
+
+* **api:** add execution_identity to Managed Agents agents
+* **api:** add organization_type_not_supported error to spend limit lists
+* **api:** add telemetry destination test endpoint
+* **api:** add telemetry destinations to the Admin API
+* **client:** add native support for OpenTelemetry tracing
+
+  If your app registers a global tracer provider, the SDK will create spans with it after upgrading, and they'll be exported with the rest of your traces. Requests will also get trace context headers from the global propagator. To disable, pass `openTelemetry: false` to the client or set `ANTHROPIC_OPEN_TELEMETRY=false`. Learn more in the [documentation](https://platform.claude.com/docs/en/manage-claude/opentelemetry/sdk).
+
+
+### Bug Fixes
+
+* **api:** rename telemetry destination test response model
+* **client:** accept backed enums as union discriminators in array params
+* **client:** treat proxy-authorization as a sensitive header
+
+
+### Bug Fixes
+
+* **streaming:** ignore events before message_start in MessageAccumulator
+
+
+### Chores
+
+* **docs:** correct prefill, thinking, fallback and model descriptions
+* **docs:** document the scope required to assign the managed role
+* **docs:** update model examples
+* **internal:** add a script that formats only the given files
+* **internal:** narrow the tripwire test rule in the contributor guides
+
+
+### Documentation
+
+* **api:** clarify when custom tool results can be sent
+* **api:** say is_enabled is always true for user spend limits
+
+## [0.57.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.56.0...v0.57.0) (2026-10-09)
+
+### Features
+
+* **api:** add types for the Chat and Cowork unified analytics metrics
+* **api:** add workflows, multiagent configuration and thread status filtering to Managed Agents
+
+
+### Bug Fixes
+
+* **client:** throw before sending a request with an empty path parameter
+
+
+### Chores
+
+* **docs:** note that listing Claude Console spend limits is in early access
+* **internal:** name the default API version header value
+
+## [0.56.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.55.0...v0.56.0) (2026-10-07)
+
+### Features
+
+* **api:** add claude-haiku-5-5 and typed computer and browser toolset tool calls
+* **api:** add lifecycle stage fields and filter to /v1/models
+
+
+### Bug Fixes
+
+* **client:** refuse path parameters that form a "." or ".." path segment
+
+
+### Chores
+
+* **api:** update spend limit schemas
+* **docs:** describe a federation rule's target by its type
+* **docs:** fix example IDs in sessions, agents and vault credentials
+* **docs:** update Managed Agents multiagent and thread descriptions
+* **docs:** update the activity summaries endpoint description
+* **internal:** add REVIEW.md with review instructions
+* **internal:** bump phpstan to 2.2.13
+* **internal:** remove unused release configuration
+
+## [0.55.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.54.0...v0.55.0) (2026-10-06)
+
+### Features
+
+* **api:** add disabled to thinking types in model capabilities
+* **api:** add display_name to RBAC roles and deprecate name
+* **api:** add include_default parameter to list workspaces
+* **api:** add line to model objects
+* **api:** add url_sources to the Managed Agents web_fetch tool config
+* **api:** add web search and code execution support to model capabilities
+
+
+### Bug Fixes
+
+* **api:** send the beta header by default when listing spend limits
+* **client:** drop the AWS session token on cross-origin redirects (#256)
+* **client:** send array header params as a single comma-separated header
+* **pagination:** continue auto-paging past the first page
+
+
+### Chores
+
+* **api:** mark the Text Completions API as deprecated
+* **ci:** check that pull requests update the changelog
+* **ci:** compare breaking change detection against the last release
+* **docs:** correct example groups in rate limit list description
+* **docs:** correct when usage and cost report data becomes final
+* **docs:** update the description of the Model line field
+* **internal:** list imported phpstan types in order of first use
+* **internal:** tidy the doc comments of model constructors and of the SSE stream
+* **tests:** run tests skipped for a query param bug that is now fixed
+* **tests:** run tests that an older mock server could not serve
+
+
+### Documentation
+
+* **api:** state the agent tools limit as 256
+* fix the structured output example in the README
+* match buildRequest return type in Foundry and Mantle clients
+* **php:** remove a repeated comment from the file upload example in the README
+* **php:** use the PHP names of the request options in the README
+
+## 0.54.0 (2026-09-30)
+
+Full Changelog: [v0.53.0...v0.54.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.53.0...v0.54.0)
+
+### Features
+
+* **api:** add list spend limits endpoint ([1794c87](https://github.com/anthropics/anthropic-sdk-php/commit/1794c87374c014e943d56c817c0ca021e61772ce))
+
+
+### Chores
+
+* **api:** mark Claude Sonnet 4.5 as deprecated (end-of-life November 30, 2026) ([70cd75d](https://github.com/anthropics/anthropic-sdk-php/commit/70cd75d81df895e8cfbf208b5a12d77f1e238a79))
+* **client:** deprecate sonnet 4.5 on bedrock / vertex ([ba17fb4](https://github.com/anthropics/anthropic-sdk-php/commit/ba17fb4a82a87448ff1613cb803c75881570bb3a))
+* **internal:** make generated code pass newer phpstan versions ([70cd75d](https://github.com/anthropics/anthropic-sdk-php/commit/70cd75d81df895e8cfbf208b5a12d77f1e238a79))
+
+## 0.53.0 (2026-09-30)
+
+Full Changelog: [v0.52.0...v0.53.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.52.0...v0.53.0)
+
+### Features
+
+* **api:** add a refusal stop reason and stop_details to Managed Agents session idle events ([dbe2a7a](https://github.com/anthropics/anthropic-sdk-php/commit/dbe2a7afb0a74d3b8deee566d749bd7a614ec081))
+* **api:** add Claude Enterprise analytics, spend limits, and RBAC groups and roles to the Admin API ([d6814d0](https://github.com/anthropics/anthropic-sdk-php/commit/d6814d0496b48e7b697986e762ece1a27e403137))
+* **api:** add per-user usage and cost reports to the Admin API analytics ([a04d8f3](https://github.com/anthropics/anthropic-sdk-php/commit/a04d8f3a429385f90c6847cf03358962e62470ce))
+* **api:** add Plugins and Plugin Marketplaces to the Admin API ([3f22e51](https://github.com/anthropics/anthropic-sdk-php/commit/3f22e51282141d677f2db6cf38919fc5aed30b4f))
+* **api:** add repository error types to Managed Agents session errors ([e60e647](https://github.com/anthropics/anthropic-sdk-php/commit/e60e647a219718a82ccc4008fe6f80187114a8c0))
+* **api:** allow removing a plugin's org-wide installation setting ([3b6398b](https://github.com/anthropics/anthropic-sdk-php/commit/3b6398bde9ce3f7e25b79f887979e9ca81db1484))
+* **api:** MCP tunnels beta: add read-only `transport` object to Tunnel and return the one-time relay `token` in the create response ([3c9236e](https://github.com/anthropics/anthropic-sdk-php/commit/3c9236ebacd14c0085c66c4a28c37d9bcd1446d3))
+* **api:** Organization API endpoints are now GA ([0611b83](https://github.com/anthropics/anthropic-sdk-php/commit/0611b83a254e7dd6db4aa4826c1f4429f525f260))
+
+
+### Bug Fixes
+
+* **api:** make memory store description, metadata, archived_at required ([ebcc8b5](https://github.com/anthropics/anthropic-sdk-php/commit/ebcc8b5330bf9e3557789b9887ba2449970c0b73))
+* **api:** type admin plugin preference and marketplace fields as enums ([8739e6d](https://github.com/anthropics/anthropic-sdk-php/commit/8739e6db2a1b7e82570deda1bdafc5445b3a0f88))
+* **pagination:** auto-paging continues past an empty page while next_page is set ([4d6c47f](https://github.com/anthropics/anthropic-sdk-php/commit/4d6c47fa959a7e0cf53f0480044b916138ce0b0f))
+
+
+### Chores
+
+* **api:** update MCP Tunnels types and descriptions ([45168f1](https://github.com/anthropics/anthropic-sdk-php/commit/45168f1273608c8098b567a0266f4e130ec6e4d4))
+* **docs:** remove placeholder enum descriptions ([d4aaed3](https://github.com/anthropics/anthropic-sdk-php/commit/d4aaed33186dca5a422915b8fa6c4ca6c422512b))
+
+
+### Documentation
+
+* **examples:** stop reading session events on any idle that needs no action ([#250](https://github.com/anthropics/anthropic-sdk-php/issues/250)) ([7302b11](https://github.com/anthropics/anthropic-sdk-php/commit/7302b11fa63ab32f624814470bd1da97c1bb4b38))
+
+## 0.52.0 (2026-09-28)
+
+Full Changelog: [v0.51.0...v0.52.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.51.0...v0.52.0)
+
+### Features
+
+* **api:** add between_tools thinking type ([4bf61e7](https://github.com/anthropics/anthropic-sdk-php/commit/4bf61e7e2115f69e374a4fa814ea3f971b6a25e8))
+* **api:** add claude-sonnet-5-5 ([0e38168](https://github.com/anthropics/anthropic-sdk-php/commit/0e38168374f7ab3318fa4a1612ed0b0b420faa79))
+* **api:** add include_inherited and source to workspace rate limits ([6bfd72b](https://github.com/anthropics/anthropic-sdk-php/commit/6bfd72b9373b5fe70371b134094e24c58643e061))
+* **api:** add typed event type values to the Managed Agents events list filter ([fd60f4d](https://github.com/anthropics/anthropic-sdk-php/commit/fd60f4d725cae324769cdd7ede5ad2a367be5990))
+* **api:** cache diagnostics GA — diagnostics on Message / MessageCreateParams ([be20d8a](https://github.com/anthropics/anthropic-sdk-php/commit/be20d8ac95190cac9884e73bf8bf38b20bc111fc))
+* **vertex:** accept region, deprecate location ([0502828](https://github.com/anthropics/anthropic-sdk-php/commit/0502828330eea01989d6d9dcc6fb0eebc3db192b))
+
+
+### Bug Fixes
+
+* **bedrock,foundry:** follow the messages contract in restricted message services ([#239](https://github.com/anthropics/anthropic-sdk-php/issues/239)) ([ff90d1f](https://github.com/anthropics/anthropic-sdk-php/commit/ff90d1f544ff432ad5180ad0d2f42c9c890800c3))
+* **client:** keep `request` paths that start with `/` on the base URL ([30cab70](https://github.com/anthropics/anthropic-sdk-php/commit/30cab70601a039c91de98c43f328e33e91e2635e))
+* **client:** send no placeholder filename for unnamed file uploads ([ddac599](https://github.com/anthropics/anthropic-sdk-php/commit/ddac5994ce674003dc3edb2f8d2675c1d7d371c1))
+* **helpers:** degrade between_tools thinking to disabled on fallback hops ([#244](https://github.com/anthropics/anthropic-sdk-php/issues/244)) ([980bcdf](https://github.com/anthropics/anthropic-sdk-php/commit/980bcdfbc53e384609fdebea6e3a4115b3b4ea3c))
+* **streaming:** deliver events as they arrive with the Guzzle client ([760d6f2](https://github.com/anthropics/anthropic-sdk-php/commit/760d6f28e72ac4b052df118c21635bb1a2b54508))
+
+
+### Chores
+
+* **api:** deprecate the betas param on GA models and completions methods ([962dfba](https://github.com/anthropics/anthropic-sdk-php/commit/962dfba49d497106cccc181cbdaa99a1f59a6a35))
+* **ci:** choose the CI runner by repository ([3dbe93a](https://github.com/anthropics/anthropic-sdk-php/commit/3dbe93a62f9576b399d6ebbd8bb2cb55c897174c))
+* **docs:** clarify that stream: true returns the raw event stream ([8bd22ba](https://github.com/anthropics/anthropic-sdk-php/commit/8bd22ba8cf24ae54a3c683c4758feefbf8a9a82e))
+* **docs:** make Managed Agents actor descriptions resource-neutral ([84cb9a0](https://github.com/anthropics/anthropic-sdk-php/commit/84cb9a0195ff14383c37e8ab3bc5d6e8964cb406))
+* **docs:** restore the research-preview notice on the Dream type ([a243dee](https://github.com/anthropics/anthropic-sdk-php/commit/a243dee6e7f86c3ea97fccbd7ca4ae1514bae2b6))
+
+
+### Documentation
+
+* **api:** prefer each field's own description over its shared type's ([ec95056](https://github.com/anthropics/anthropic-sdk-php/commit/ec95056c347253050a875948e0dd2671b00850e2))
+
+## 0.51.0 (2026-09-22)
+
+Full Changelog: [v0.50.0...v0.51.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.50.0...v0.51.0)
+
+### Features
+
+* **api:** add support for claude-opus-5-5, inline tool definitions and MCP tool-list pinning (beta) ([0d6ea88](https://github.com/anthropics/anthropic-sdk-php/commit/0d6ea88faa7e266c486945ca0be14d0a5a0f695f))
+* **php:** add static with() constructors to discriminated unions ([ca8fa1f](https://github.com/anthropics/anthropic-sdk-php/commit/ca8fa1fdff9e6052c3a8d543791f3c3b166a1e2b))
+* **tools:** add compactBeforeNextTurn() to the tool runner ([#228](https://github.com/anthropics/anthropic-sdk-php/issues/228)) ([1501659](https://github.com/anthropics/anthropic-sdk-php/commit/1501659eab57e96259f4c90b12397cda4eee8b43))
+
+
+### Bug Fixes
+
+* **api:** share one evaluated_permission enum across Managed Agents events ([dc060c1](https://github.com/anthropics/anthropic-sdk-php/commit/dc060c175f217ab875da292d78021c396a1f26c7))
+* **client:** read tool definitions into the class their type names ([761c22d](https://github.com/anthropics/anthropic-sdk-php/commit/761c22deb220e5a70c69b55bef6d31a0b593f6b4))
+* **php:** limit static with() constructors to unions used in request params ([d826535](https://github.com/anthropics/anthropic-sdk-php/commit/d8265355fe869698ddf06f5533032bd3b1f77a0d))
+* **tools:** addTools() takes effect straight away ([#235](https://github.com/anthropics/anthropic-sdk-php/issues/235)) ([e277760](https://github.com/anthropics/anthropic-sdk-php/commit/e27776030c12c0c7bd302d5ea70248e8cb5b4157))
+* **tools:** leave reply-only params off the tool runner's compaction request ([#234](https://github.com/anthropics/anthropic-sdk-php/issues/234)) ([a65dec2](https://github.com/anthropics/anthropic-sdk-php/commit/a65dec2d956e39e1bbcf8332d7878286ffde3fce))
+
+
+### Chores
+
+* **docs:** add descriptions to the Dreams API reference ([a3fa7d2](https://github.com/anthropics/anthropic-sdk-php/commit/a3fa7d241ab72daab196787fe766b5fc3121ae22))
+* **docs:** add descriptions to the User Profiles API reference ([a3fa7d2](https://github.com/anthropics/anthropic-sdk-php/commit/a3fa7d241ab72daab196787fe766b5fc3121ae22))
+* **docs:** add memory store descriptions to the Managed Agents API reference ([a3fa7d2](https://github.com/anthropics/anthropic-sdk-php/commit/a3fa7d241ab72daab196787fe766b5fc3121ae22))
+* **docs:** improve descriptions in the Dreams API reference ([ee3a9c9](https://github.com/anthropics/anthropic-sdk-php/commit/ee3a9c9a8e3951ca4ee741500287d40cff7defbb))
+* **docs:** remove placeholder parameter descriptions ([8d16eb8](https://github.com/anthropics/anthropic-sdk-php/commit/8d16eb8d1f4f4bbe1700610cb69ae1107f3f3fbb))
+* **docs:** simplify the session thread agent type description ([35d8451](https://github.com/anthropics/anthropic-sdk-php/commit/35d8451d283fbe9526f4fa589fe1ba333295ae16))
+* **docs:** update diagnostics field descriptions on beta messages ([35c8916](https://github.com/anthropics/anthropic-sdk-php/commit/35c89160c7abba287c20388eeac946eee5f6bf77))
+
+
+### Documentation
+
+* add path and header parameter descriptions ([801a12b](https://github.com/anthropics/anthropic-sdk-php/commit/801a12bbf0786c35a5418bb265f2307ba745cf73))
+
+## 0.50.0 (2026-09-18)
+
+Full Changelog: [v0.49.0...v0.50.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.49.0...v0.50.0)
+
+### Features
+
+* **api:** add group with display_name to rate limits, deprecate group_type ([936b187](https://github.com/anthropics/anthropic-sdk-php/commit/936b18742ec84d1e64c3dbc180fb4ee8b48b4f67))
+
+
+### Bug Fixes
+
+* **bedrock:** report AWS EventStream exception and error frames by name ([#226](https://github.com/anthropics/anthropic-sdk-php/issues/226)) ([e8c5aaa](https://github.com/anthropics/anthropic-sdk-php/commit/e8c5aaa3c4235d91cc48c9cc632329cbfdadf7b1))
+* **client:** join multiple anthropic-beta values with a comma and no space ([#227](https://github.com/anthropics/anthropic-sdk-php/issues/227)) ([096c510](https://github.com/anthropics/anthropic-sdk-php/commit/096c5109123d0303873f4634162abdaf60df2fba))
+
+
+### Chores
+
+* **docs:** add descriptions for enum values and path parameters ([3faa184](https://github.com/anthropics/anthropic-sdk-php/commit/3faa18455541e9973297eb9a72b162e6c0ab64f4))
+* **docs:** clarify the compaction tool_changes and tool change descriptions ([1482980](https://github.com/anthropics/anthropic-sdk-php/commit/14829806dd9f31508fb787c59f503091b91bc348))
+
+## 0.49.0 (2026-09-15)
+
+Full Changelog: [v0.48.0...v0.49.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.48.0...v0.49.0)
+
+### Features
+
+* **api:** add compaction parameter and signed compaction blocks (beta) ([a6569e1](https://github.com/anthropics/anthropic-sdk-php/commit/a6569e1ab21bd566a16ae3a340a3d97f0ad87a6b))
+* **api:** add enum types for workspace data-residency geo fields ([ae759fa](https://github.com/anthropics/anthropic-sdk-php/commit/ae759faaf273d0bd3f316ac99205fb8d9736f272))
+* **api:** add thinking_mismatch_allowed entries to input_transformations (beta) ([7f51166](https://github.com/anthropics/anthropic-sdk-php/commit/7f51166684cef5766330f5523a42c235cba7b3a6))
+* **api:** add url_sources to the web fetch tool ([a1c309f](https://github.com/anthropics/anthropic-sdk-php/commit/a1c309f6952bf8ec5659d118acc12e63b918a6ec))
+* **api:** add workspace_id parameter to user profiles methods ([e0a3141](https://github.com/anthropics/anthropic-sdk-php/commit/e0a31413876db4e546b69558c48be6fe80f1c8ba))
+
+
+### Bug Fixes
+
+* **api:** mark usage iteration model as nullable ([f61a249](https://github.com/anthropics/anthropic-sdk-php/commit/f61a24977cda6ba00973c2662bae292e8db20239))
+* **api:** use one input transformation type for message and delta event ([a4b1807](https://github.com/anthropics/anthropic-sdk-php/commit/a4b1807c23f2af7f80e76fed5ef6d6df1bb2c08f))
+* **client:** decode timestamps as dates in unions with a string variant ([e4ab631](https://github.com/anthropics/anthropic-sdk-php/commit/e4ab631f45b47516499d67460a5a6d90ab38e686))
+* **client:** send uploads from non-seekable streams once instead of failing on retry ([b412f0b](https://github.com/anthropics/anthropic-sdk-php/commit/b412f0bf4c9bd3ef5e6f318b08a745de5e5cd968))
+
+
+### Chores
+
+* **docs:** clarify that session_thread_id on tool use events is informational ([29f1895](https://github.com/anthropics/anthropic-sdk-php/commit/29f18952f7539bcf7eb6af032a3d6c7190d25561))
+* **docs:** correct the compaction beta's parameter descriptions ([2672f33](https://github.com/anthropics/anthropic-sdk-php/commit/2672f33eaab2a1b24647237c73c82c0cec0bbfb7))
+* **tests:** stop the mock server without failing a passing test run ([8be1b0b](https://github.com/anthropics/anthropic-sdk-php/commit/8be1b0b8e32ecd3de93fedabdb2d2870e031167e))
+
+
+### Documentation
+
+* **api:** clarify usage.iterations entry typing under server-side fallback ([14fa132](https://github.com/anthropics/anthropic-sdk-php/commit/14fa1329e3266cfcbae1333dc0d4886d662d9722))
+* **api:** fix typo in temperature deprecation message ([466e602](https://github.com/anthropics/anthropic-sdk-php/commit/466e602251a5f9f3d298cf9ae451668726790fb0))
+* stop documenting unions with their first variant's description ([4c18bd8](https://github.com/anthropics/anthropic-sdk-php/commit/4c18bd8fb4a9507693380d6f46d8d4951beb8a46))
+
+## 0.48.0 (2026-09-10)
+
+Full Changelog: [v0.47.0...v0.48.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.47.0...v0.48.0)
+
+### Features
+
+* **api:** add auto mode tool permissions for Managed Agents ([f9f9434](https://github.com/anthropics/anthropic-sdk-php/commit/f9f9434726a54f548eec2da86b9bcaea6bd44b2d))
+* **api:** add content_too_large web_fetch tool error code ([bcb781b](https://github.com/anthropics/anthropic-sdk-php/commit/bcb781baa3b8dd10495d4b3a91f320e3d79876b4))
+* **api:** add the user-profiles-2026-09-04 beta value and external_user_details to user profiles ([33d3ed1](https://github.com/anthropics/anthropic-sdk-php/commit/33d3ed108b6e889ae4ca299813bce2865a47a3c4))
+* **api:** support mounting public GitHub repositories without an authorization_token in Managed Agents sessions ([b65b29e](https://github.com/anthropics/anthropic-sdk-php/commit/b65b29ef37bb4e8918ad8c1d69320e9567c7cc99))
+
+
+### Chores
+
+* **docs:** correct the environment scope field description ([3549c57](https://github.com/anthropics/anthropic-sdk-php/commit/3549c57fbb8715d160e938d673060e1a94892522))
+* **internal:** restore package version ([#216](https://github.com/anthropics/anthropic-sdk-php/issues/216)) ([127ca6a](https://github.com/anthropics/anthropic-sdk-php/commit/127ca6a053d6816d780bf9763ccd0c26af9b194d))
+* **internal:** restore package version ([#217](https://github.com/anthropics/anthropic-sdk-php/issues/217)) ([0a28b14](https://github.com/anthropics/anthropic-sdk-php/commit/0a28b14b5c33e6dc9084cca5a2ca402ec59bd604))
+* **internal:** stop stamping the package version into generated files ([c5a95ae](https://github.com/anthropics/anthropic-sdk-php/commit/c5a95aec8f0bce96fe2839f15dc2cb11f4ebabbe))
+
+## 0.47.0 (2026-09-04)
+
+Full Changelog: [v0.46.0...v0.47.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.46.0...v0.47.0)
+
+### Features
+
+* **api:** add Claude Tag category and user breakdowns to usage reports ([a6f4b54](https://github.com/anthropics/anthropic-sdk-php/commit/a6f4b545ff43f83b4f7d68391ccdf57e70dcbbe8))
+* **api:** add named types for organization compliance settings state ([faa3716](https://github.com/anthropics/anthropic-sdk-php/commit/faa3716f4802248557adebf321a2daa634c8ad91))
+* **api:** add workspace_id request option for multi-workspace credentials ([9fca8fc](https://github.com/anthropics/anthropic-sdk-php/commit/9fca8fceb02ffeefb662b84ce2eef7787ef42171))
+* **api:** raise Managed Agents vault refresh token limit to 8192 chars ([2824211](https://github.com/anthropics/anthropic-sdk-php/commit/28242111d254f9245e402bb8ed0df53c9dddc72d))
+* **client:** keep vault credential secrets out of Terraform state with write-only arguments ([956e0fc](https://github.com/anthropics/anthropic-sdk-php/commit/956e0fc6eac7a7563df0a1012013c8ad3941335d))
+
+
+### Bug Fixes
+
+* **api:** remove response text block maxLength constraint ([4a4289a](https://github.com/anthropics/anthropic-sdk-php/commit/4a4289aec9e95bdc916096f1245cd4740d147795))
+* **client:** keep empty JSON objects when Bedrock and Vertex rewrite the request body ([#210](https://github.com/anthropics/anthropic-sdk-php/issues/210)) ([6231378](https://github.com/anthropics/anthropic-sdk-php/commit/6231378c5012d32b02b984fd33b40ffe9e746d15))
+* **client:** raise a clear error when an httpx object is passed instead of an httpx2 one ([03266f2](https://github.com/anthropics/anthropic-sdk-php/commit/03266f2dd0ac92969beb182391f7352111c29224))
+* **client:** say which package to install when no HTTP client is found ([37aa520](https://github.com/anthropics/anthropic-sdk-php/commit/37aa52041f6dbeafe02d9348ee41c575eff5cbdd))
+* **errors:** keep non-JSON error bodies in APIStatusException ([5b72b0d](https://github.com/anthropics/anthropic-sdk-php/commit/5b72b0da8e50d509455212b17690f6e47fbf9caa))
+* **models:** json_encode an empty model as {} instead of a TypeError ([4400c3d](https://github.com/anthropics/anthropic-sdk-php/commit/4400c3d667faf2cb0bc13d7ce3630a6c818d0f6b))
+
+
+### Chores
+
+* **api:** accept anthropic-version on Claude Enterprise admin endpoints ([893c6d6](https://github.com/anthropics/anthropic-sdk-php/commit/893c6d6d2ac05da713a035e0001f55fc45977f2e))
+* **api:** declare specific error statuses instead of a generic 4XX response ([79018ea](https://github.com/anthropics/anthropic-sdk-php/commit/79018ea9cba68867b50c82b0e528db9570af8a1e))
+* **api:** update authentication parameters on spend limit create and delete ([77a39fd](https://github.com/anthropics/anthropic-sdk-php/commit/77a39fd3d6a5367c0e205e0a57c84c062fdb9b95))
+* **ci:** cache Go build output in the build job ([97f6eff](https://github.com/anthropics/anthropic-sdk-php/commit/97f6effa2ca1f9747d6e8ba0b930801488698e05))
+* **docs:** fix broken session link in memory version descriptions ([3796f8a](https://github.com/anthropics/anthropic-sdk-php/commit/3796f8a7ff8e6c8d6f01ce2c83ee6bc827a741de))
+* **docs:** note that value object arguments must be set by name ([0dd790c](https://github.com/anthropics/anthropic-sdk-php/commit/0dd790ce85b2610a1449dee902352aa27ef4d35a))
+* **examples:** refresh platform model IDs ([#198](https://github.com/anthropics/anthropic-sdk-php/issues/198)) ([902bb9e](https://github.com/anthropics/anthropic-sdk-php/commit/902bb9e90964f0dbe0186e4555d0683949cc6ce4))
+* **internal:** fix spec repo README link and drop its mock script ([956e0fc](https://github.com/anthropics/anthropic-sdk-php/commit/956e0fc6eac7a7563df0a1012013c8ad3941335d))
+* **internal:** read formatter versions from one place ([9fca8fc](https://github.com/anthropics/anthropic-sdk-php/commit/9fca8fceb02ffeefb662b84ce2eef7787ef42171))
+* **internal:** remove redundant type comments in request body handling ([2de0a83](https://github.com/anthropics/anthropic-sdk-php/commit/2de0a83e93bc1715c957234c0aa79dc34b978f53))
+* **internal:** update CODEOWNERS ([e10f3a0](https://github.com/anthropics/anthropic-sdk-php/commit/e10f3a0414041bf1c07cde86c156445aec43f679))
+* **internal:** update CODEOWNERS ([956e0fc](https://github.com/anthropics/anthropic-sdk-php/commit/956e0fc6eac7a7563df0a1012013c8ad3941335d))
+* **refactor:** split the client tests ([61b721d](https://github.com/anthropics/anthropic-sdk-php/commit/61b721d51a9c097430e015a37e4bdb14b3a54e79))
+* **tests:** narrow the serialized tool definition before indexing it ([#214](https://github.com/anthropics/anthropic-sdk-php/issues/214)) ([f12bad7](https://github.com/anthropics/anthropic-sdk-php/commit/f12bad773a8ad931381fff75764e0c6b176d462e))
+* **tests:** reword the skip reason on the path-level query param tests ([c1f04a7](https://github.com/anthropics/anthropic-sdk-php/commit/c1f04a7f9f9754298c14b7419c8f2ffb3acbbdf9))
+
+
+### Documentation
+
+* **api:** add HTTP reference for the remaining Admin API endpoints ([03266f2](https://github.com/anthropics/anthropic-sdk-php/commit/03266f2dd0ac92969beb182391f7352111c29224))
+
+## 0.46.0 (2026-09-01)
+
+Full Changelog: [v0.45.0...v0.46.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.45.0...v0.46.0)
+
+### Features
+
+* **api:** add support for claude-fable-5-1 and claude-mythos-5-1 ([cad1be2](https://github.com/anthropics/anthropic-sdk-php/commit/cad1be26910fa8276e08b9d402312283cd2671e9))
+
+
+### Bug Fixes
+
+* **api:** remove unsupported allowed_callers from the toolset entries ([608b335](https://github.com/anthropics/anthropic-sdk-php/commit/608b335c9ed43745e5a32034444602804db4bcf9))
+
+
+### Chores
+
+* **docs:** clarify disallowed characters in memory paths ([0530f91](https://github.com/anthropics/anthropic-sdk-php/commit/0530f915b53a1f0f577fc39e4a1824f28a2e0958))
+
+
+### Documentation
+
+* **api:** describe external_key_id and compartment_id behavior on Claude Platform on AWS ([f013779](https://github.com/anthropics/anthropic-sdk-php/commit/f013779f0d5b8a03f93d69ea94f8be00021a15d6))
+* **changelog:** detail the beta files/skills GA-shape change ([232ecef](https://github.com/anthropics/anthropic-sdk-php/commit/232ecef3ed179f7c123ea571ed1bf1073e1c850e))
+* **changelog:** use this SDK's names in the beta files/skills entry ([b9bcd90](https://github.com/anthropics/anthropic-sdk-php/commit/b9bcd905171dcc37e6232ada2a678b28d04c863e))
+
+## 0.45.0 (2026-08-31)
+
+Full Changelog: [v0.44.0...v0.45.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.44.0...v0.45.0)
+
+### Features
+
+* **api:** add beta webhooks parse_unverified; unwrap now verifies signatures ([eb701fa](https://github.com/anthropics/anthropic-sdk-php/commit/eb701fa971b8174a96fe142447c582588ec1e42d))
+* **api:** add support for organization compliance settings in the Admin API ([42c09e2](https://github.com/anthropics/anthropic-sdk-php/commit/42c09e25c50f5283d2daf999f04a73e89aee19af))
+* **api:** beta files/skills namespaces use GA shapes; drop dated beta header pins ([e221c18](https://github.com/anthropics/anthropic-sdk-php/commit/e221c18b92aaeda6c9b3ad4955e88f316a833b8b))
+
+  The beta Files and Skills services (`$client->beta->files`, `$client->beta->skills`) no longer send the `files-api-2025-04-14` / `skills-2025-10-02` headers and return the same shapes as `$client->files` / `$client->skills` (as `Anthropic\Beta\…` classes). Requests that still send those headers on raw HTTP keep receiving the beta shapes.
+
+  Changes in the beta services:
+  - `$client->beta->skills->delete($skillID)` now deletes a Skill together with all of its versions (previously refused while any version existed). It returns `Anthropic\Beta\Skills\BetaDeletedSkill` (was `SkillDeleteResponse`).
+  - Beta Messages class `Anthropic\Beta\Messages\BetaSkill` (container skill reference with `skillID`, `type`, `version`) is renamed `BetaContainerSkill`. `Anthropic\Beta\Skills\BetaSkill` now names the Skill object returned by `create()` / `retrieve()` / `list()` (replacing `SkillNewResponse` / `SkillGetResponse` / `SkillListResponse`), and skill versions are `Anthropic\Beta\Skills\Versions\SkillVersion` / `DeletedSkillVersion` (replacing `Version*Response`).
+  - `$client->beta->files->list()` returns an `Anthropic\PageCursor` (with `data` / `nextPage`) and paginates with `page` / `ids` (was an `Anthropic\Page` with `data`, `hasMore`, `firstID`, `lastID` and `beforeID` / `afterID`); `pagingEachItem()` is unchanged. `BetaSkill` uses `displayName` (was `displayTitle`, also the `create()` parameter) and `latestVersionID` (was `latestVersion`), and `SkillVersion` is addressed by its `skver_…` `id` (the Unix-timestamp `version` property is gone).
+
+  Migration guides: [Migrate from `files-api-2025-04-14`](https://platform.claude.com/docs/en/build-with-claude/files#migrate-from-files-api-2025-04-14) · [Migrate from `skills-2025-10-02`](https://platform.claude.com/docs/en/build-with-claude/skills-guide#migrate-from-skills-2025-10-02)
+* **user_profiles:** sort the user profile list by name with order_by=name ([48bf551](https://github.com/anthropics/anthropic-sdk-php/commit/48bf5516647f34b36b56179bd3c05176ce57f481))
+
+
+### Bug Fixes
+
+* **api:** mark the beta header required on Admin API Tunnel operations ([cba198a](https://github.com/anthropics/anthropic-sdk-php/commit/cba198a3bd129181b0c52be411ab7f9037780bd0))
+* **pagination:** follow the requested paging direction past page 1 ([101257d](https://github.com/anthropics/anthropic-sdk-php/commit/101257d947d7194a897a3b57477b9f71e0a5e611))
+* **pagination:** page backward with before_id and stop on has_more false or an empty page ([101257d](https://github.com/anthropics/anthropic-sdk-php/commit/101257d947d7194a897a3b57477b9f71e0a5e611))
+* **pagination:** request the next page only with items, has_more, and the cursor for the request's direction ([101257d](https://github.com/anthropics/anthropic-sdk-php/commit/101257d947d7194a897a3b57477b9f71e0a5e611))
+
+
+### Chores
+
+* **api:** remove unreleased thinking prefix_mismatched_behavior param ([a714a2b](https://github.com/anthropics/anthropic-sdk-php/commit/a714a2bddcc6c1cb48212a63f83981e59e834384))
+* **api:** remove user profile relationship in favor of access_type ([a714a2b](https://github.com/anthropics/anthropic-sdk-php/commit/a714a2bddcc6c1cb48212a63f83981e59e834384))
+* **internal:** add UnionDiscriminator marker for response unions ([61b81cc](https://github.com/anthropics/anthropic-sdk-php/commit/61b81cc9f6875561f452edb7effef76965a1ebcb))
+* **internal:** remove discriminator support from PropertyInfo ([42c09e2](https://github.com/anthropics/anthropic-sdk-php/commit/42c09e25c50f5283d2daf999f04a73e89aee19af))
+
+
+### Documentation
+
+* **api:** backtick identifiers in managed-agents API descriptions ([93e8aec](https://github.com/anthropics/anthropic-sdk-php/commit/93e8aec5f1f1e4ffb24b2842bccaa0c468485453))
+
+## 0.44.0 (2026-08-26)
+
+Full Changelog: [v0.43.0...v0.44.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.43.0...v0.44.0)
+
+### Features
+
+* **api:** add missing public beta values to the AnthropicBeta enum ([fbfd3fa](https://github.com/anthropics/anthropic-sdk-php/commit/fbfd3fa9531fd29e7e17104c30c1f278e2115a1b))
+* **api:** add SessionThreadAgentEntry type for a session thread's agent ([4c3b632](https://github.com/anthropics/anthropic-sdk-php/commit/4c3b63275d5bf1f52b1a4a4ef3bcd345f62a48af))
+* **api:** add the Admin API organization resources under client.beta.organization ([c43ac6b](https://github.com/anthropics/anthropic-sdk-php/commit/c43ac6becf614709fbd2cbba3c22b97fb774b047))
+* **api:** add thinking-display-updates beta ([20124c2](https://github.com/anthropics/anthropic-sdk-php/commit/20124c222ce191d3bdf37aaaffeb501bb9ceff29))
+
+
+### Bug Fixes
+
+* **client:** honor profile base_url from the config store ([#175](https://github.com/anthropics/anthropic-sdk-php/issues/175)) ([936b35b](https://github.com/anthropics/anthropic-sdk-php/commit/936b35bfc6a111ef2cf8773b6d0b4e1e7a674eb5))
+* **client:** read omitted response properties as null instead of throwing ([b713422](https://github.com/anthropics/anthropic-sdk-php/commit/b713422c2dae35477760a303e48aeb66899e2619))
+* **client:** reuse stored user_oauth access token and re-read credentials before refreshing ([#176](https://github.com/anthropics/anthropic-sdk-php/issues/176)) ([96b2cb9](https://github.com/anthropics/anthropic-sdk-php/commit/96b2cb907cb77549a2a8c69a7e631267a8bf66e5))
+
+
+### Chores
+
+* **ci:** cancel the CI run of an older push when a newer one arrives ([dc85d4c](https://github.com/anthropics/anthropic-sdk-php/commit/dc85d4c8f0695a5588887344b0d76b6bab670ad8))
+* **docs:** clarify how long memory versions are retained ([a8d1b04](https://github.com/anthropics/anthropic-sdk-php/commit/a8d1b04798613c475631bad74caf21d83f9e63cc))
+* **docs:** clarify that skill-version delete and download don't accept 'latest' ([51dbe2f](https://github.com/anthropics/anthropic-sdk-php/commit/51dbe2f8f16b9ef69c8c4407bf7506b79f1fdc16))
+* **docs:** note allow_package_managers requirement for packages ([affd04d](https://github.com/anthropics/anthropic-sdk-php/commit/affd04db38b3d01850e5c38bce937fa0be9a0b41))
+* **internal:** move embedded mock-server spec to a sidecar file ([51dbe2f](https://github.com/anthropics/anthropic-sdk-php/commit/51dbe2f8f16b9ef69c8c4407bf7506b79f1fdc16))
+
+## 0.43.0 (2026-08-20)
+
+Full Changelog: [v0.42.0...v0.43.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.42.0...v0.43.0)
+
+### Features
+
+* **api:** add input_transformations to beta message responses; default to the user-profiles-2026-08-18 beta ([dc61a98](https://github.com/anthropics/anthropic-sdk-php/commit/dc61a981be1f53a3d90d5114f991d9642ce3931e))
+* **api:** add support for message threads (beta) ([9b3febc](https://github.com/anthropics/anthropic-sdk-php/commit/9b3febc79c808811d64b95148cd21a5a1ebe4b63))
+* **api:** add tool configuration for Managed Agents toolsets ([a163631](https://github.com/anthropics/anthropic-sdk-php/commit/a163631b2ec0bbf2e01d028b005e5f2b5de8cf16))
+* **api:** additions to files and memory stores ([c84d91b](https://github.com/anthropics/anthropic-sdk-php/commit/c84d91b9856de3afdec3d14fc4496c6544ff2e98))
+* **api:** Files and Skills APIs are now GA; add computer use and browser use toolsets ([eccbd6c](https://github.com/anthropics/anthropic-sdk-php/commit/eccbd6ce690bad29be7b66acad7cea01ff2f9be3))
+
+
+### Bug Fixes
+
+* **api:** remove unsupported mid_conv_system content block ([d0940d2](https://github.com/anthropics/anthropic-sdk-php/commit/d0940d24b94c87c9bd76b3b98ac623fc176880c9))
+* **bedrock,foundry:** follow MessageCreateParamsContainer rename in restricted services ([#170](https://github.com/anthropics/anthropic-sdk-php/issues/170)) ([#188](https://github.com/anthropics/anthropic-sdk-php/issues/188)) ([e2d278b](https://github.com/anthropics/anthropic-sdk-php/commit/e2d278bd4378fd9a5ca153fcbe7dd3b55e3d270b))
+* **bedrock,vertex:** preserve encoded query params ([#178](https://github.com/anthropics/anthropic-sdk-php/issues/178)) ([#187](https://github.com/anthropics/anthropic-sdk-php/issues/187)) ([8623ab9](https://github.com/anthropics/anthropic-sdk-php/commit/8623ab9bec94acd5fdbf705e4b85637884a1e018))
+* **client:** do not send schema defaults for omitted optional params ([070d76b](https://github.com/anthropics/anthropic-sdk-php/commit/070d76bb507e6da7606141691aeafa1a48c0fdfd))
+* **tool-runner:** forward the server-assigned container on follow-up requests ([#160](https://github.com/anthropics/anthropic-sdk-php/issues/160)) ([0a9497c](https://github.com/anthropics/anthropic-sdk-php/commit/0a9497c97accfd759dd108e419ac08b5861dc2b9))
+* **tool-runner:** stop on refusal instead of executing tools ([#144](https://github.com/anthropics/anthropic-sdk-php/issues/144)) ([70040a2](https://github.com/anthropics/anthropic-sdk-php/commit/70040a2a2bad16102fb9e369ba4efdd1bb532018))
+
+
+### Chores
+
+* **api:** expose Managed Agents per-tool config types at top level ([2a50464](https://github.com/anthropics/anthropic-sdk-php/commit/2a504648c76eec308d5d1e39f1ac8b11e5085c29))
+* **api:** share the computer use and browser use toolset config models ([dc61a98](https://github.com/anthropics/anthropic-sdk-php/commit/dc61a981be1f53a3d90d5114f991d9642ce3931e))
+* **deps:** bump mcp/sdk dev dependency ([f436e41](https://github.com/anthropics/anthropic-sdk-php/commit/f436e41041e1eedf50d48f837b145de577aa1925))
+* use model enum constants in generated examples and tests ([e72da8b](https://github.com/anthropics/anthropic-sdk-php/commit/e72da8b975a791024182339c18fb7a5e66ff4446))
+
+
+### Documentation
+
+* **api:** describe what a resolved skill reference's version carries ([3bb98d9](https://github.com/anthropics/anthropic-sdk-php/commit/3bb98d9f06526730a54ce335861630d924b62cab))
+* **examples:** use GA files resource in agents file example ([#169](https://github.com/anthropics/anthropic-sdk-php/issues/169)) ([#186](https://github.com/anthropics/anthropic-sdk-php/issues/186)) ([0d111a2](https://github.com/anthropics/anthropic-sdk-php/commit/0d111a2a24ce82b9b131cae970993abed82df5f8))
+
+## 0.42.0 (2026-08-13)
+
+Full Changelog: [v0.41.0...v0.42.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.41.0...v0.42.0)
+
+### Features
+
+* **api:** add output_behavior to dream creation (create a new memory store or update the input store in place) ([3def5a2](https://github.com/anthropics/anthropic-sdk-php/commit/3def5a2bd9d41c2972833a4309c06d569947c502))
+
+
+### Bug Fixes
+
+* **client:** add models ([2a6eebf](https://github.com/anthropics/anthropic-sdk-php/commit/2a6eebfc0ea136a263c18744576d26efff9e83b3))
+* **streaming:** apply all message_delta fields when accumulating streamed messages ([#140](https://github.com/anthropics/anthropic-sdk-php/issues/140)) ([4fff7e7](https://github.com/anthropics/anthropic-sdk-php/commit/4fff7e786eb71209aa5f245776c785fd1c59d958))
+
+
+### Documentation
+
+* **api:** clarify that user profile name is optional for resold profiles ([87420c9](https://github.com/anthropics/anthropic-sdk-php/commit/87420c9ffe8e1fd263bb93c4526e59e378708f21))
+
+## 0.41.0 (2026-08-06)
+
+Full Changelog: [v0.40.0...v0.41.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.40.0...v0.41.0)
+
+### Features
+
+* **api:** add `mid-conversation-tool-changes-2026-07-01` beta ([6cdad3e](https://github.com/anthropics/anthropic-sdk-php/commit/6cdad3ee73de292dc6b5770fa7a53146da48cc79))
+* **api:** add support for session budgets, advisor tool, pinned inference location and skills auto-loading from GitHub ([37531b2](https://github.com/anthropics/anthropic-sdk-php/commit/37531b2d4f3d777cd24041f8bcb5d57393097695))
+
+
+### Bug Fixes
+
+* **client:** improve http-discovery error message ([3be4d22](https://github.com/anthropics/anthropic-sdk-php/commit/3be4d22c0ab056f5e430ca2522b1e8c7e3d326b6))
+
+
+### Chores
+
+* **api:** remove retired Claude Opus 4.1 models ([625f364](https://github.com/anthropics/anthropic-sdk-php/commit/625f364a5fae71724fb3525c47ef9695ccaac3f0))
+* **docs:** small updates to descriptions ([a2c07ea](https://github.com/anthropics/anthropic-sdk-php/commit/a2c07ea7e44d72f1ecbed408e5b21bd064fd6281))
+* **docs:** updates to a few documentation strings ([e497b81](https://github.com/anthropics/anthropic-sdk-php/commit/e497b81baa693d39596db41c9ab2832a480619ea))
+
+## 0.40.0 (2026-07-24)
+
+Full Changelog: [v0.39.0...v0.40.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.39.0...v0.40.0)
+
+### Features
+
+* **api:** add claude-opus-5 model ([950d91f](https://github.com/anthropics/anthropic-sdk-php/commit/950d91f2857f85facb6a81c19164be46f7735195))
+* **api:** add tool addition/removal blocks and tool_change events ([950d91f](https://github.com/anthropics/anthropic-sdk-php/commit/950d91f2857f85facb6a81c19164be46f7735195))
+* **api:** expand client-side fallback credit token types and add server-side fallbacks default option ([950d91f](https://github.com/anthropics/anthropic-sdk-php/commit/950d91f2857f85facb6a81c19164be46f7735195))
+
+## 0.39.0 (2026-07-23)
+
+Full Changelog: [v0.38.0...v0.39.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.38.0...v0.39.0)
+
+### Features
+
+* **api:** add new stop reason 'model_context_window_exceeded' ([2b0fedf](https://github.com/anthropics/anthropic-sdk-php/commit/2b0fedf6d3c3c211d4ad3cf9cbf883e6035c6c5e))
+
+## 0.38.0 (2026-07-22)
+
+Full Changelog: [v0.37.1...v0.38.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.37.1...v0.38.0)
+
+### Features
+
+* **api:** add support for Managed Agents model effort, initial session events, and threads delta streaming ([c39866c](https://github.com/anthropics/anthropic-sdk-php/commit/c39866c59f38cf18659c66588308431e8758acb9))
+
+## 0.37.1 (2026-07-21)
+
+Full Changelog: [v0.37.0...v0.37.1](https://github.com/anthropics/anthropic-sdk-php/compare/v0.37.0...v0.37.1)
+
+### Chores
+
+* **api:** add support for new refusal category ([0003be7](https://github.com/anthropics/anthropic-sdk-php/commit/0003be74d0b5fca590ea12565e04a7e14a5357c6))
+* **docs:** small updates ([8859a51](https://github.com/anthropics/anthropic-sdk-php/commit/8859a511e17898b871fdfb89d3a30cd4c279cc4f))
+* **docs:** small updates ([af82356](https://github.com/anthropics/anthropic-sdk-php/commit/af823561779316f99d87df0e11ed02717716cdec))
+* **internal:** codegen related update ([8d14139](https://github.com/anthropics/anthropic-sdk-php/commit/8d14139433a8c56645b6913f088c513b0bf186d1))
+
+## 0.37.0 (2026-07-16)
+
+Full Changelog: [v0.36.0...v0.37.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.36.0...v0.37.0)
+
+### Features
+
+* **api:** add support for dreaming ([68645d3](https://github.com/anthropics/anthropic-sdk-php/commit/68645d341b2197dd3fdb2c230b649be3a9a7889c))
+* **api:** add support for MCP Tunnels ([2214a96](https://github.com/anthropics/anthropic-sdk-php/commit/2214a9610d8d25b000e5fbbe3a6e10487fed8ed8))
+* **helpers:** add session delta accumulator for agent.message previews ([#94](https://github.com/anthropics/anthropic-sdk-php/issues/94)) ([52a6a82](https://github.com/anthropics/anthropic-sdk-php/commit/52a6a82c3a7d660dc3dc25edf80b4189240070f9))
+
+
+### Chores
+
+* **docs:** small updates to field descriptions ([3a331f9](https://github.com/anthropics/anthropic-sdk-php/commit/3a331f9e164ed54d1b160cc146c531823622ca6d))
+* **docs:** update model example ([1768ac3](https://github.com/anthropics/anthropic-sdk-php/commit/1768ac381dc9f2eba531a99e513f95a330bf417e))
+* **docs:** updates to descriptions and examples ([9f43c7c](https://github.com/anthropics/anthropic-sdk-php/commit/9f43c7c75ce9ef97e70e16d0d6f4ddb8ff5bda5c))
+
+## 0.36.0 (2026-07-02)
+
+Full Changelog: [v0.35.1...v0.36.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.35.1...v0.36.0)
+
+### Features
+
+* **api:** add agent-memory-2026-07-22 beta header ([96ec8ca](https://github.com/anthropics/anthropic-sdk-php/commit/96ec8ca5dbacc91ff1123f44593a6439fd6a4be1))
+
+## 0.35.1 (2026-07-01)
+
+Full Changelog: [v0.35.0...v0.35.1](https://github.com/anthropics/anthropic-sdk-php/compare/v0.35.0...v0.35.1)
+
+### Chores
+
+* **api:** remove some nonfunctional types from the SDKs ([3750760](https://github.com/anthropics/anthropic-sdk-php/commit/3750760ea1a628d04db04eb9880a8941c4cdd5a8))
+
+## 0.35.0 (2026-07-01)
+
+Full Changelog: [v0.34.0...v0.35.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.34.0...v0.35.0)
+
+### Features
+
+* **client:** add client-side fallbacks middleware for API providers that do not support server-side fallbacks ([#54](https://github.com/anthropics/anthropic-sdk-php/issues/54)) ([bd05781](https://github.com/anthropics/anthropic-sdk-php/commit/bd05781e193c3a900fe4e6d7e8f4014d5a1b7dd7))
+* **client:** optionally pass the attempt's RequestOptions to middleware ([#97](https://github.com/anthropics/anthropic-sdk-php/issues/97)) ([64de73e](https://github.com/anthropics/anthropic-sdk-php/commit/64de73e39808ab6e00116e6a11a6c82253a06250))
+
+## 0.34.0 (2026-06-30)
+
+Full Changelog: [v0.33.0...v0.34.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.33.0...v0.34.0)
+
+### Features
+
+* **api:** add support for Managed Agents event delta streaming, agent overrides, reverse pagination, vault credential injection scoping, and agent and deployment webhook events ([a0e1ba3](https://github.com/anthropics/anthropic-sdk-php/commit/a0e1ba3a8ce813c630877856887eb203008e8be3))
+* **api:** api update ([#90](https://github.com/anthropics/anthropic-sdk-php/issues/90)) ([17348ea](https://github.com/anthropics/anthropic-sdk-php/commit/17348ea838874b12e79cd542e103149c045634f4))
+
+## 0.33.0 (2026-06-30)
+
+Full Changelog: [v0.32.0...v0.33.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.32.0...v0.33.0)
+
+### Features
+
+* **api:** add support for claude-sonnet-5 ([e86ff3c](https://github.com/anthropics/anthropic-sdk-php/commit/e86ff3c25c412a81f6bdfedde651c84606a8cc5a))
+
+## 0.32.0 (2026-06-29)
+
+Full Changelog: [v0.31.0...v0.32.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.31.0...v0.32.0)
+
+### Features
+
+* **api:** add support for 20260318 web fetch and support tools ([7656043](https://github.com/anthropics/anthropic-sdk-php/commit/76560439368b96c2e302f711a01d3112f87c49b3))
+
+
+### Bug Fixes
+
+* **bedrock,vertex:** run provider rewrites as middleware (reapply) ([#77](https://github.com/anthropics/anthropic-sdk-php/issues/77)) ([0961a4d](https://github.com/anthropics/anthropic-sdk-php/commit/0961a4d9f1571ecde9b7799cefcfc406050258a8))
+
+
+### Chores
+
+* **api:** accept user profile ID's when counting tokens ([12154bd](https://github.com/anthropics/anthropic-sdk-php/commit/12154bd893bbd1790d5e087ddeb2b313f6007cb4))
+* **docs:** updates to descriptions and example values ([a0b6eb7](https://github.com/anthropics/anthropic-sdk-php/commit/a0b6eb764bfb2559fd6a7ece33e591ca51b41d49))
+
+## 0.31.0 (2026-06-24)
+
+Full Changelog: [v0.30.0...v0.31.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.30.0...v0.31.0)
+
+### Features
+
+* **client:** add support for system.message streaming events ([a665f06](https://github.com/anthropics/anthropic-sdk-php/commit/a665f0670243dd55ad185d53f01f4b75cecb4a94))
+* **helpers:** single source for x-stainless-helper + tag the BetaToolRunner ([#63](https://github.com/anthropics/anthropic-sdk-php/issues/63)) ([ba6ce02](https://github.com/anthropics/anthropic-sdk-php/commit/ba6ce026435ae7b8752fd73cf5c235299142bae5))
+
+
+### Bug Fixes
+
+* **bedrock,vertex:** run provider rewrites as middleware ([#60](https://github.com/anthropics/anthropic-sdk-php/issues/60)) ([2343067](https://github.com/anthropics/anthropic-sdk-php/commit/234306763d39d11771b3f48180b39b1708b25ff6))
+
+
+### Chores
+
+* **api:** add support for new refusal category ([ae875c2](https://github.com/anthropics/anthropic-sdk-php/commit/ae875c2283a50a23ed9543b286ac1643bce8df5f))
+* **api:** add support for sending User Profile ID in request headers ([521f220](https://github.com/anthropics/anthropic-sdk-php/commit/521f2203adfd1e555f631997df1e1d6909d69488))
+
+## 0.30.0 (2026-06-18)
+
+Full Changelog: [v0.29.2...v0.30.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.29.2...v0.30.0)
+
+### Features
+
+* **api:** add support for new code_execution_20260120 tool ([08d80b7](https://github.com/anthropics/anthropic-sdk-php/commit/08d80b7944f88390941c3b525a9230a8866bc3e5))
+* **client:** request middleware ([#35](https://github.com/anthropics/anthropic-sdk-php/issues/35)) ([0a05e5c](https://github.com/anthropics/anthropic-sdk-php/commit/0a05e5ce9af640c46a7fd0b38a1f6dcc72bea228))
+
+
+### Bug Fixes
+
+* **client:** merge extraBodyParams into the request body ([#53](https://github.com/anthropics/anthropic-sdk-php/issues/53)) ([08035a9](https://github.com/anthropics/anthropic-sdk-php/commit/08035a973e9b2964338891701f04be5933ab191a))
+* **client:** preserve client-level options over request-level defaults ([a8c61c4](https://github.com/anthropics/anthropic-sdk-php/commit/a8c61c4cac345c7f59ea6bb480145a48e4049ba1))
+* Merge extraBodyParams into the body with the same precedence as extraHeaders (extras win on collision). Lives in Util::mergeBody because the body at that layer is one of four shapes (assoc array, stdClass, list, null) and only map-shaped bodies are merged into; lists and scalars pass through. Five unit tests pin the shape matrix. ([08035a9](https://github.com/anthropics/anthropic-sdk-php/commit/08035a973e9b2964338891701f04be5933ab191a))
+* **streaming:** return error statuses instead of throwing ([4e1d617](https://github.com/anthropics/anthropic-sdk-php/commit/4e1d61729f94a152498bb31f2118bf03c10953f3))
+* **vertex:** do not send stream: false ([c38340e](https://github.com/anthropics/anthropic-sdk-php/commit/c38340ee19b4cab3d024b0c811ab5905955b8f27))
+
+
+### Chores
+
+* **client:** add early return when no extraBody is specified ([d79eb94](https://github.com/anthropics/anthropic-sdk-php/commit/d79eb9428c6fc0cb64268155549253e2b7cf18bb))
+
+## 0.29.2 (2026-06-15)
+
+Full Changelog: [v0.29.1...v0.29.2](https://github.com/anthropics/anthropic-sdk-php/compare/v0.29.1...v0.29.2)
+
+### Chores
+
+* **api:** remove retired models from API and SDKs ([01459e8](https://github.com/anthropics/anthropic-sdk-php/commit/01459e8891aa9468539506f3e455c7f6861953b0))
+
+## 0.29.1 (2026-06-09)
+
+Full Changelog: [v0.29.0...v0.29.1](https://github.com/anthropics/anthropic-sdk-php/compare/v0.29.0...v0.29.1)
+
+### Bug Fixes
+
+* **api:** add `frontier_llm` refusal category ([3c8293f](https://github.com/anthropics/anthropic-sdk-php/commit/3c8293fd15dfe3f7dc6c3b4321e54ba28b5ab327))
+
+## 0.29.0 (2026-06-09)
+
+Full Changelog: [v0.28.0...v0.29.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.28.0...v0.29.0)
+
+### Features
+
+* **api:** add support for Managed Agents deployments and environment variable credentials ([211a580](https://github.com/anthropics/anthropic-sdk-php/commit/211a5804ca046ecf0c873749a965c15151908bd1))
+
+## 0.28.0 (2026-06-09)
+
+Full Changelog: [v0.27.0...v0.28.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.27.0...v0.28.0)
+
+### Features
+
+* **api:** add support for claude-mythos-5 and claude-fable-5, with support for server-side fallbacks on refusal ([e10ba6f](https://github.com/anthropics/anthropic-sdk-php/commit/e10ba6fa5b35db6d2fcf16ad929f2d65847a09ae))
+
+## 0.27.0 (2026-06-06)
+
+Full Changelog: [v0.26.0...v0.27.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.26.0...v0.27.0)
+
+### Features
+
+* **api:** small updates to Managed Agents types ([b4e74d4](https://github.com/anthropics/anthropic-sdk-php/commit/b4e74d4e4493b288a1f75e8b67ff07c55b2e3f34))
+
+## 0.26.0 (2026-06-05)
+
+Full Changelog: [v0.25.0...v0.26.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.25.0...v0.26.0)
+
+### Features
+
+* **api:** mark Claude Opus 4.1 as deprecated ([a9ddf0b](https://github.com/anthropics/anthropic-sdk-php/commit/a9ddf0b4337b90739de960555160079b74224cf5))
+
+
+### Chores
+
+* **internal:** update private repo name ([02d07c0](https://github.com/anthropics/anthropic-sdk-php/commit/02d07c0e6e8b4ced873cb303b711cef1eac023d5))
+* pin phpstan to 2.2.1 ([#16](https://github.com/anthropics/anthropic-sdk-php/issues/16)) ([f99bcb4](https://github.com/anthropics/anthropic-sdk-php/commit/f99bcb4cfc39dc9490511357d8ec3eaffc93313d))
+
+
+### Documentation
+
+* point security reports to Anthropic's HackerOne program ([#7](https://github.com/anthropics/anthropic-sdk-php/issues/7)) ([d219722](https://github.com/anthropics/anthropic-sdk-php/commit/d219722dd63b2c29cf107426eaa3b6ba540547ee))
+
+## 0.25.0 (2026-05-28)
+
+Full Changelog: [v0.24.0...v0.25.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.24.0...v0.25.0)
+
+### Features
+
+* **api:** Add support for claude-opus-4-8, mid-conversation system blocks, and usage.output_tokens_details ([80e5ce5](https://github.com/anthropics/anthropic-sdk-php/commit/80e5ce5239e77824b1922762e6b650c84672a03c))
+
+
+### Documentation
+
+* replace literal newlines ([6a98894](https://github.com/anthropics/anthropic-sdk-php/commit/6a9889475f07b6f07f942831d8b1757d98e61c33))
+
+## 0.24.0 (2026-05-21)
+
+Full Changelog: [v0.23.0...v0.24.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.23.0...v0.24.0)
+
+### Features
+
+* **api:** Add support for thinking-token-count beta for estimated tokens in thinking block deltas when streaming ([2bbd614](https://github.com/anthropics/anthropic-sdk-php/commit/2bbd6142b1a90081f0a3efa5811bd4ea440ceca4))
+
+## 0.23.0 (2026-05-19)
+
+Full Changelog: [v0.22.0...v0.23.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.22.0...v0.23.0)
+
+### Features
+
+* **client:** Add support for self-hosted sandboxes in CMA with sandbox helpers ([974eb58](https://github.com/anthropics/anthropic-sdk-php/commit/974eb58ae937e14136bea48c5f8d3e0e93b5854c))
+
+## 0.22.0 (2026-05-13)
+
+Full Changelog: [v0.21.0...v0.22.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.21.0...v0.22.0)
+
+### Features
+
+* **api:** Add BetaManagedAgentsSearchResultBlock types ([f29c016](https://github.com/anthropics/anthropic-sdk-php/commit/f29c016d6817abd6d9c43367ad839f4f914e88cb))
+* **api:** Add support for cache diagnostics beta ([c47486d](https://github.com/anthropics/anthropic-sdk-php/commit/c47486d4b5cd3040d6cce98903172e4967dd15ea))
+
+
+### Bug Fixes
+
+* guzzle requires special handling to enable streaming ([248a5aa](https://github.com/anthropics/anthropic-sdk-php/commit/248a5aa64c5510efd96c9e8d009b9f59474f46f0))
+
+
+### Chores
+
+* **api:** spec updates ([32638ec](https://github.com/anthropics/anthropic-sdk-php/commit/32638ec297fcad831f31b5d2d4f8ae0498bffd1f))
+* **ci:** resolve pin conflict from stainless[#18197](https://github.com/anthropics/anthropic-sdk-php/issues/18197) ([#626](https://github.com/anthropics/anthropic-sdk-php/issues/626)) ([550410c](https://github.com/anthropics/anthropic-sdk-php/commit/550410cc7e6e9d102b70d26c535ca0914dcf58d8))
+
+## 0.21.0 (2026-05-11)
+
+Full Changelog: [v0.20.0...v0.21.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.20.0...v0.21.0)
+
+### Features
+
+* **aws:** Add AWS client for Claude Platform on AWS ([c56e7ad](https://github.com/anthropics/anthropic-sdk-php/commit/c56e7ad2ec0e477fbf4d2f185f8720b109605729))
+
+
+### Bug Fixes
+
+* **client:** address bug with PageCursor not advancing past first page ([#613](https://github.com/anthropics/anthropic-sdk-php/issues/613)) ([6e9982f](https://github.com/anthropics/anthropic-sdk-php/commit/6e9982f3ef0d833be0db9875a95f4e31d7cb2740))
+* **client:** prevent betas request param being silently overridden by per-endpoint extraHeaders default ([#615](https://github.com/anthropics/anthropic-sdk-php/issues/615)) ([cacb6da](https://github.com/anthropics/anthropic-sdk-php/commit/cacb6daa78b62d8f04c08efc4ba3e33c6cf4c194))
+
+
+### Chores
+
+* **ci:** Pin GitHub Actions to commit SHAs ([#37](https://github.com/anthropics/anthropic-sdk-php/issues/37)) ([0d232d4](https://github.com/anthropics/anthropic-sdk-php/commit/0d232d43cd6ee75ca301b8e3c3492e0db0153a6e))
+
+## 0.20.0 (2026-05-06)
+
+Full Changelog: [v0.19.0...v0.20.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.19.0...v0.20.0)
+
+### Features
+
+* **api:** add support for Managed Agents multiagents and outcomes, webhooks, vault validation ([99047bc](https://github.com/anthropics/anthropic-sdk-php/commit/99047bcfcc45231702c5786cdd84f4de0d906028))
+
+
+### Bug Fixes
+
+* **api:** Adjust webhook configuration ([9b0bd4f](https://github.com/anthropics/anthropic-sdk-php/commit/9b0bd4f37a8e0abfc254f00fe760f818c28efdf8))
+
+## 0.19.0 (2026-05-05)
+
+Full Changelog: [v0.18.0...v0.19.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.18.0...v0.19.0)
+
+### Features
+
+* **client:** allow targeting a workspace for OIDC federation token exchange ([77eaa4d](https://github.com/anthropics/anthropic-sdk-php/commit/77eaa4d8502ff95aa439c319041781b0f082c810))
+
+## 0.18.0 (2026-05-04)
+
+Full Changelog: [v0.17.1...v0.18.0](https://github.com/anthropics/anthropic-sdk-php/compare/v0.17.1...v0.18.0)
+
+### Features
+
+* **api:** improve Managed Agents APIs ([56c1d24](https://github.com/anthropics/anthropic-sdk-php/commit/56c1d2448258882e1c1d8bcbb8ce1194b70657a8))
+* **client:** add Workload Identity Federation, interactive OAuth, and auth profiles ([2bc875e](https://github.com/anthropics/anthropic-sdk-php/commit/2bc875eb50fee9b418b6992e06763cf2d1422a82))
+* **mcp:** add mcp tool helpers ([#561](https://github.com/anthropics/anthropic-sdk-php/issues/561)) ([d5176bf](https://github.com/anthropics/anthropic-sdk-php/commit/d5176bfa9c95804e2adb0e6b599ca38a3785025a))
+* support setting headers via env ([51490da](https://github.com/anthropics/anthropic-sdk-php/commit/51490dae8bea7a1efbb48e82cbaf50921363c915))
+
 ## 0.17.1 (2026-04-27)
 
 Full Changelog: [v0.17.0...v0.17.1](https://github.com/anthropics/anthropic-sdk-php/compare/v0.17.0...v0.17.1)

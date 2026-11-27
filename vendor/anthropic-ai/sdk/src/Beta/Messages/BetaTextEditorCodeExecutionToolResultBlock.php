@@ -7,10 +7,11 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type ContentVariants from \Anthropic\Beta\Messages\BetaTextEditorCodeExecutionToolResultBlock\Content
  * @phpstan-import-type ContentShape from \Anthropic\Beta\Messages\BetaTextEditorCodeExecutionToolResultBlock\Content
+ * @phpstan-import-type ContentVariants from \Anthropic\Beta\Messages\BetaTextEditorCodeExecutionToolResultBlock\Content
  *
  * @phpstan-type BetaTextEditorCodeExecutionToolResultBlockShape = array{
  *   content: ContentShape,
@@ -24,12 +25,12 @@ final class BetaTextEditorCodeExecutionToolResultBlock implements BaseModel
     use SdkModel;
 
     /** @var 'text_editor_code_execution_tool_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('text_editor_code_execution_tool_result'))]
     public string $type = 'text_editor_code_execution_tool_result';
 
     /** @var ContentVariants $content */
     #[Required]
-    public BetaTextEditorCodeExecutionToolResultError|BetaTextEditorCodeExecutionViewResultBlock|BetaTextEditorCodeExecutionCreateResultBlock|BetaTextEditorCodeExecutionStrReplaceResultBlock $content;
+    public BetaTextEditorCodeExecutionToolResultErrorObject|BetaTextEditorCodeExecutionViewResultBlock|BetaTextEditorCodeExecutionCreateResultBlock|BetaTextEditorCodeExecutionStrReplaceResultBlock $content;
 
     #[Required('tool_use_id')]
     public string $toolUseID;
@@ -45,7 +46,7 @@ final class BetaTextEditorCodeExecutionToolResultBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaTextEditorCodeExecutionToolResultBlock)
+     * (new BetaTextEditorCodeExecutionToolResultBlock())
      *   ->withContent(...)
      *   ->withToolUseID(...)
      * ```
@@ -63,7 +64,7 @@ final class BetaTextEditorCodeExecutionToolResultBlock implements BaseModel
      * @param ContentShape $content
      */
     public static function with(
-        BetaTextEditorCodeExecutionToolResultError|array|BetaTextEditorCodeExecutionViewResultBlock|BetaTextEditorCodeExecutionCreateResultBlock|BetaTextEditorCodeExecutionStrReplaceResultBlock $content,
+        BetaTextEditorCodeExecutionToolResultErrorObject|array|BetaTextEditorCodeExecutionViewResultBlock|BetaTextEditorCodeExecutionCreateResultBlock|BetaTextEditorCodeExecutionStrReplaceResultBlock $content,
         string $toolUseID,
     ): self {
         $self = new self;
@@ -78,7 +79,7 @@ final class BetaTextEditorCodeExecutionToolResultBlock implements BaseModel
      * @param ContentShape $content
      */
     public function withContent(
-        BetaTextEditorCodeExecutionToolResultError|array|BetaTextEditorCodeExecutionViewResultBlock|BetaTextEditorCodeExecutionCreateResultBlock|BetaTextEditorCodeExecutionStrReplaceResultBlock $content,
+        BetaTextEditorCodeExecutionToolResultErrorObject|array|BetaTextEditorCodeExecutionViewResultBlock|BetaTextEditorCodeExecutionCreateResultBlock|BetaTextEditorCodeExecutionStrReplaceResultBlock $content,
     ): self {
         $self = clone $this;
         $self['content'] = $content;

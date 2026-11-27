@@ -12,13 +12,14 @@ use Anthropic\Core\Concerns\SdkParams;
 use Anthropic\Core\Contracts\BaseModel;
 
 /**
- * Archive Credential.
+ * Archive a Credential
  *
  * @see Anthropic\Services\Beta\Vaults\CredentialsService::archive()
  *
  * @phpstan-type CredentialArchiveParamsShape = array{
  *   vaultID: string,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class CredentialArchiveParams implements BaseModel
@@ -27,16 +28,27 @@ final class CredentialArchiveParams implements BaseModel
     use SdkModel;
     use SdkParams;
 
+    /**
+     * Identifier of the vault containing the credential.
+     */
     #[Required]
     public string $vaultID;
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this header.
      *
      * @var list<string|value-of<AnthropicBeta>>|null $betas
      */
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
 
     /**
      * `new CredentialArchiveParams()` is missing required properties by the API.
@@ -49,7 +61,7 @@ final class CredentialArchiveParams implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new CredentialArchiveParams)->withVaultID(...)
+     * (new CredentialArchiveParams())->withVaultID(...)
      * ```
      */
     public function __construct()
@@ -64,17 +76,24 @@ final class CredentialArchiveParams implements BaseModel
      *
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>>|null $betas
      */
-    public static function with(string $vaultID, ?array $betas = null): self
-    {
+    public static function with(
+        string $vaultID,
+        ?array $betas = null,
+        ?string $workspaceID = null
+    ): self {
         $self = new self;
 
         $self['vaultID'] = $vaultID;
 
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
 
+    /**
+     * Identifier of the vault containing the credential.
+     */
     public function withVaultID(string $vaultID): self
     {
         $self = clone $this;
@@ -84,7 +103,7 @@ final class CredentialArchiveParams implements BaseModel
     }
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this header.
      *
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas
      */
@@ -92,6 +111,19 @@ final class CredentialArchiveParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

@@ -1,0 +1,346 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Services\Beta\Organization;
+
+use Anthropic\Beta\AnthropicBeta;
+use Anthropic\Beta\BetaUnsupportedCharsetException;
+use Anthropic\Beta\Organization\Plugins\DeletedPlugin;
+use Anthropic\Beta\Organization\Plugins\Plugin;
+use Anthropic\Beta\Organization\Plugins\PluginListParams\OwnerType;
+use Anthropic\Beta\Organization\Plugins\PluginNameTakenException;
+use Anthropic\Beta\Organization\Plugins\RegistrationPendingException;
+use Anthropic\Beta\Organization\Plugins\ScanFailedException;
+use Anthropic\Beta\Organization\Plugins\ScanPendingException;
+use Anthropic\Beta\Organization\Plugins\SkillNameTakenException;
+use Anthropic\Client;
+use Anthropic\CMEKKeyDisabledException;
+use Anthropic\CMEKKeyNetworkBlockedException;
+use Anthropic\Core\Exceptions\APIException;
+use Anthropic\Core\FileParam;
+use Anthropic\Core\Util;
+use Anthropic\PageCursor;
+use Anthropic\RequestOptions;
+use Anthropic\SandboxEgressRestrictedException;
+use Anthropic\ServiceContracts\Beta\Organization\PluginsContract;
+use Anthropic\Services\Beta\Organization\Plugins\InstallationSettingsService;
+use Anthropic\Services\Beta\Organization\Plugins\SharesService;
+use Anthropic\Services\Beta\Organization\Plugins\VersionsService;
+
+/**
+ * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ */
+final class PluginsService implements PluginsContract
+{
+    /**
+     * @api
+     */
+    public PluginsRawService $raw;
+
+    /**
+     * @api
+     */
+    public VersionsService $versions;
+
+    /**
+     * @api
+     */
+    public InstallationSettingsService $installationSettings;
+
+    /**
+     * @api
+     */
+    public SharesService $shares;
+
+    /**
+     * @internal
+     */
+    public function __construct(private Client $client)
+    {
+        $this->raw = new PluginsRawService($client);
+        $this->versions = new VersionsService($client);
+        $this->installationSettings = new InstallationSettingsService($client);
+        $this->shares = new SharesService($client);
+    }
+
+    /**
+     * @api
+     *
+     * Create an organization-owned Plugin and its first version by uploading the
+     * version's files.
+     *
+     * The upload is `multipart/form-data`: the version's files (`files`, each part sent
+     * as `files[]`), with an optional `marketplace_id` and `release_notes`. The manifest's `name` becomes the
+     * Plugin's `name`, and `display_name`, `description` and `manifest_version` come
+     * from the manifest too.
+     *
+     * `name` may contain lowercase letters (from any alphabet), digits, and hyphens, up
+     * to 64 characters. Uppercase letters, spaces, underscores, and other punctuation are
+     * rejected.
+     *
+     * The `name` must be unique within the marketplace: a name already taken
+     * returns a 409 with `error_code` `plugin_name_taken` and, when a Plugin holds it,
+     * that Plugin's ID in `details.plugin_id`. A Plugin going into the organization's
+     * library marketplace is also refused with a 409 when one of its skills has the name of
+     * an organization skill that this API does not list: `error_code`
+     * `skill_name_taken`, with that name in `details.skill_name`; rename the skill, or
+     * remove the organization skill in claude.ai. A 503 with `error_code`
+     * `registration_pending` means the Plugin and its version were stored (their IDs are
+     * in `details`) but are not yet usable in claude.ai: do not retry the create (the
+     * retry would return `plugin_name_taken`); create a version on the stored Plugin
+     * instead, which completes it.
+     *
+     * For a worked example, see [Create a plugin](/docs/en/manage-claude/plugins-api#create-a-plugin)
+     * in the Plugins API guide.
+     *
+     * **Accepted credentials:** an Admin API key with the `write:plugins` scope.
+     *
+     * Every request must include the beta header `anthropic-beta: ce-plugins-2026-09-01`. A request without it returns `404`, exactly as if the endpoint did not exist. The Plugins API is in beta and is available to Claude Enterprise organizations only. It is not available to Claude Platform (Claude Console) organizations, or to organizations with HIPAA readiness enabled.
+     *
+     * @param list<string|FileParam> $files Body param: The version's files: one part per file, the part's filename being the file's path within the Plugin (for example `skills/review-pr/SKILL.md`), or a single `.zip` or `.plugin` archive holding them all. On the wire each part is named `files[]`, and a part named plain `files` is not read; with cURL, `-F 'files[]=@SKILL.md;filename=skills/review-pr/SKILL.md'`. The files must include the manifest, `.claude-plugin/plugin.json`.
+     * @param string $marketplaceID Body param: ID of the organization-owned plugin marketplace to create the Plugin in (prefixed `marketplace_`). It must be a `manual` marketplace, one whose Plugins are uploaded rather than synchronized from a repository. When omitted, the Plugin is created in the organization's library marketplace, an organization-owned `manual` marketplace created on first use.
+     * @param string $releaseNotes Body param: Release notes stored with the version and shown in its version history in claude.ai; up to 5,000 characters.
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Header param: This endpoint is in beta: requests must send `ce-plugins-2026-09-01` in this header.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @throws CMEKKeyDisabledException
+     * @throws CMEKKeyNetworkBlockedException
+     * @throws BetaUnsupportedCharsetException
+     * @throws SandboxEgressRestrictedException
+     * @throws PluginNameTakenException
+     * @throws SkillNameTakenException
+     * @throws RegistrationPendingException
+     * @throws APIException
+     */
+    public function create(
+        array $files,
+        ?string $marketplaceID = null,
+        ?string $releaseNotes = null,
+        ?array $betas = null,
+        RequestOptions|array|null $requestOptions = null,
+    ): Plugin {
+        $params = Util::removeNulls(
+            [
+                'files' => $files,
+                'marketplaceID' => $marketplaceID,
+                'releaseNotes' => $releaseNotes,
+                'betas' => $betas,
+            ],
+        );
+
+        // @phpstan-ignore-next-line argument.type
+        $response = $this->raw->create(params: $params, requestOptions: $requestOptions);
+
+        return $response->parse();
+    }
+
+    /**
+     * @api
+     *
+     * Retrieve a Plugin by ID.
+     *
+     * **Accepted credentials:** an Admin API key with the `read:plugins` or `read:org_audit` scope, or a Compliance Access Key with the `read:compliance_org_data` scope.
+     *
+     * Every request must include the beta header `anthropic-beta: ce-plugins-2026-09-01`. A request without it returns `404`, exactly as if the endpoint did not exist. The Plugins API is in beta and is available to Claude Enterprise organizations only. It is not available to Claude Platform (Claude Console) organizations, or to organizations with HIPAA readiness enabled.
+     *
+     * @param string $pluginID Path param: ID of the Plugin (prefixed `plugin_`).
+     * @param string|null $organizationID Query param: For a `read:org_audit` or `read:compliance_org_data` key created for all of a parent organization's linked organizations: a child organization of that parent to read instead of the organization the key was created in, given as the organization's UUID or its `org_`-prefixed ID. A value that is neither returns a 400; an organization that is not a child of the key's parent, or where the Plugins API is not available, returns a 404. Any other key may pass only its own organization's ID here; another organization returns a 404. A key with no organization of its own must always pass `organization_id`.
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Header param: This endpoint is in beta: requests must send `ce-plugins-2026-09-01` in this header.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @throws APIException
+     */
+    public function retrieve(
+        string $pluginID,
+        ?string $organizationID = null,
+        ?array $betas = null,
+        RequestOptions|array|null $requestOptions = null,
+    ): Plugin {
+        $params = Util::removeNulls(
+            ['organizationID' => $organizationID, 'betas' => $betas]
+        );
+
+        // @phpstan-ignore-next-line argument.type
+        $response = $this->raw->retrieve($pluginID, params: $params, requestOptions: $requestOptions);
+
+        return $response->parse();
+    }
+
+    /**
+     * @api
+     *
+     * Change which stored version of an organization-owned Plugin is served to members,
+     * for example to roll back to an earlier one. This pins the served version: later
+     * uploads through this API are stored but no longer change what is served, and pinning
+     * cannot currently be undone, here or in claude.ai.
+     *
+     * A version from claude.ai might still change what is served: see [Versions and the served version](/docs/en/manage-claude/plugins-api#versions-and-the-served-version)
+     * in the Plugins API guide.
+     *
+     * Pass the version as `served_version_id`: an earlier one to roll back, a later one to
+     * start serving a version that was stored without being served, or the one already
+     * served to pin it without changing what is served. No new version is created.
+     *
+     * When the organization has content scanning enabled, a version whose
+     * `content_scan.status` is `processing` is refused with a 409 (`error_code`
+     * `scan_pending`; retry once the scan finishes). A version whose `content_scan.status`
+     * is `errored`, or whose `content_scan.assessment` is `fail` or `unknown`, is refused
+     * with a 400 (`error_code` `scan_failed`); a `warn` is accepted. If the scan outcome
+     * cannot be read at that moment, the request fails with a retryable 503 instead.
+     * When the Plugin is in the organization's
+     * library marketplace, a version other than the one served is also refused with a 409
+     * when an organization skill that this API does not list has since taken the name of
+     * one of its skills: `error_code` `skill_name_taken`, with that name in
+     * `details.skill_name`. A member-owned Plugin cannot be updated here (403).
+     *
+     * This endpoint does not write installation settings; they are written at
+     * `/v1/organizations/plugins/{plugin_id}/installation_settings/{target}`.
+     *
+     * **Accepted credentials:** an Admin API key with the `write:plugins` scope.
+     *
+     * Every request must include the beta header `anthropic-beta: ce-plugins-2026-09-01`. A request without it returns `404`, exactly as if the endpoint did not exist. The Plugins API is in beta and is available to Claude Enterprise organizations only. It is not available to Claude Platform (Claude Console) organizations, or to organizations with HIPAA readiness enabled.
+     *
+     * @param string $pluginID Path param: ID of the Plugin (prefixed `plugin_`).
+     * @param string $servedVersionID Body param: Serve this version of the Plugin (prefixed `pluginver_`) and pin the served version to it; `latest` is not accepted.
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Header param: This endpoint is in beta: requests must send `ce-plugins-2026-09-01` in this header.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @throws CMEKKeyDisabledException
+     * @throws CMEKKeyNetworkBlockedException
+     * @throws ScanFailedException
+     * @throws SandboxEgressRestrictedException
+     * @throws ScanPendingException
+     * @throws SkillNameTakenException
+     * @throws APIException
+     */
+    public function update(
+        string $pluginID,
+        string $servedVersionID,
+        ?array $betas = null,
+        RequestOptions|array|null $requestOptions = null,
+    ): Plugin {
+        $params = Util::removeNulls(
+            ['servedVersionID' => $servedVersionID, 'betas' => $betas]
+        );
+
+        // @phpstan-ignore-next-line argument.type
+        $response = $this->raw->update($pluginID, params: $params, requestOptions: $requestOptions);
+
+        return $response->parse();
+    }
+
+    /**
+     * @api
+     *
+     * List the Plugins created under the organization, newest first: those in the
+     * organization's own plugin marketplaces and those in members' personal plugin
+     * marketplaces.
+     *
+     * Plugins in members' personal marketplaces are listed with the same detail as the
+     * organization's own, and their files can be downloaded through the version archive
+     * endpoint. Those downloads can be recorded on the Compliance API activity feed; the
+     * version archive endpoint says when.
+     *
+     * **Accepted credentials:** an Admin API key with the `read:plugins` or `read:org_audit` scope, or a Compliance Access Key with the `read:compliance_org_data` scope.
+     *
+     * Every request must include the beta header `anthropic-beta: ce-plugins-2026-09-01`. A request without it returns `404`, exactly as if the endpoint did not exist. The Plugins API is in beta and is available to Claude Enterprise organizations only. It is not available to Claude Platform (Claude Console) organizations, or to organizations with HIPAA readiness enabled.
+     *
+     * @param \DateTimeInterface|null $createdAtGt Query param: RFC 3339 timestamp bound; combine [gte], [gt], [lte], [lt].
+     * @param \DateTimeInterface|null $createdAtGte Query param: RFC 3339 timestamp bound; combine [gte], [gt], [lte], [lt].
+     * @param \DateTimeInterface|null $createdAtLt Query param: RFC 3339 timestamp bound; combine [gte], [gt], [lte], [lt].
+     * @param \DateTimeInterface|null $createdAtLte Query param: RFC 3339 timestamp bound; combine [gte], [gt], [lte], [lt].
+     * @param int $limit Query param: Number of items to return per page.
+     *
+     * Defaults to `20`. Ranges from `1` to `100`.
+     * @param string|null $marketplaceID Query param: Only Plugins in this plugin marketplace (prefixed `marketplace_`).
+     * @param string|null $organizationID Query param: For a `read:org_audit` or `read:compliance_org_data` key created for all of a parent organization's linked organizations: a child organization of that parent to read instead of the organization the key was created in, given as the organization's UUID or its `org_`-prefixed ID. A value that is neither returns a 400; an organization that is not a child of the key's parent, or where the Plugins API is not available, returns a 404. Any other key may pass only its own organization's ID here; another organization returns a 404. A key with no organization of its own must always pass `organization_id`.
+     * @param OwnerType|value-of<OwnerType>|null $ownerType Query param: `organization` for Plugins in the organization's plugin marketplaces, `user` for Plugins in members' personal plugin marketplaces.
+     * @param string|null $ownerUserID Query param: Only Plugins in this member's personal plugin marketplaces (prefixed `user_`); a removed member's ID is accepted.
+     * @param string|null $page Query param: Optionally set to the `next_page` token from the previous response.
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Header param: This endpoint is in beta: requests must send `ce-plugins-2026-09-01` in this header.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return PageCursor<Plugin>
+     *
+     * @throws APIException
+     */
+    public function list(
+        ?\DateTimeInterface $createdAtGt = null,
+        ?\DateTimeInterface $createdAtGte = null,
+        ?\DateTimeInterface $createdAtLt = null,
+        ?\DateTimeInterface $createdAtLte = null,
+        ?int $limit = null,
+        ?string $marketplaceID = null,
+        ?string $organizationID = null,
+        OwnerType|string|null $ownerType = null,
+        ?string $ownerUserID = null,
+        ?string $page = null,
+        ?array $betas = null,
+        RequestOptions|array|null $requestOptions = null,
+    ): PageCursor {
+        $params = Util::removeNulls(
+            [
+                'createdAtGt' => $createdAtGt,
+                'createdAtGte' => $createdAtGte,
+                'createdAtLt' => $createdAtLt,
+                'createdAtLte' => $createdAtLte,
+                'limit' => $limit,
+                'marketplaceID' => $marketplaceID,
+                'organizationID' => $organizationID,
+                'ownerType' => $ownerType,
+                'ownerUserID' => $ownerUserID,
+                'page' => $page,
+                'betas' => $betas,
+            ],
+        );
+
+        // @phpstan-ignore-next-line argument.type
+        $response = $this->raw->list(params: $params, requestOptions: $requestOptions);
+
+        return $response->parse();
+    }
+
+    /**
+     * @api
+     *
+     * Permanently delete a Plugin and every version it holds, exactly as when an
+     * administrator deletes it in claude.ai. The Plugin may belong to the organization or
+     * to a member, including a member who has since left the organization. Do not delete a
+     * Plugin only because your pipeline did not create it: a member or an administrator
+     * might have added it in claude.ai.
+     *
+     * An organization-owned Plugin's installation settings go with it; a member-owned
+     * Plugin's shares are withdrawn and its owner no longer has it.
+     *
+     * To take an organization-owned Plugin out of use reversibly, set its
+     * organization-wide installation setting to `not_available` instead (and
+     * remove or change any group settings, which override it for their members). Only a
+     * Plugin in a `manual` marketplace can be deleted here; one synchronized from a
+     * repository is removed by removing it from the repository (400).
+     *
+     * **Accepted credentials:** an Admin API key with the `write:plugins` scope.
+     *
+     * Every request must include the beta header `anthropic-beta: ce-plugins-2026-09-01`. A request without it returns `404`, exactly as if the endpoint did not exist. The Plugins API is in beta and is available to Claude Enterprise organizations only. It is not available to Claude Platform (Claude Console) organizations, or to organizations with HIPAA readiness enabled.
+     *
+     * @param string $pluginID ID of the Plugin (prefixed `plugin_`).
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas This endpoint is in beta: requests must send `ce-plugins-2026-09-01` in this header.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @throws CMEKKeyDisabledException
+     * @throws SandboxEgressRestrictedException
+     * @throws APIException
+     */
+    public function delete(
+        string $pluginID,
+        ?array $betas = null,
+        RequestOptions|array|null $requestOptions = null,
+    ): DeletedPlugin {
+        $params = Util::removeNulls(['betas' => $betas]);
+
+        // @phpstan-ignore-next-line argument.type
+        $response = $this->raw->delete($pluginID, params: $params, requestOptions: $requestOptions);
+
+        return $response->parse();
+    }
+}

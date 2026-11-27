@@ -8,6 +8,7 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\ToolSearchToolBm25_20251119\AllowedCaller;
 use Anthropic\Messages\ToolSearchToolBm25_20251119\Type;
 
@@ -35,7 +36,7 @@ final class ToolSearchToolBm25_20251119 implements BaseModel
      *
      * @var 'tool_search_tool_bm25' $name
      */
-    #[Required]
+    #[Required(type: new ConstantOf('tool_search_tool_bm25'))]
     public string $name = 'tool_search_tool_bm25';
 
     /** @var value-of<Type> $type */
@@ -59,7 +60,7 @@ final class ToolSearchToolBm25_20251119 implements BaseModel
     public ?bool $deferLoading;
 
     /**
-     * When true, guarantees schema validation on tool names and inputs.
+     * When true, guarantees schema validation on tool names and inputs
      */
     #[Optional]
     public ?bool $strict;
@@ -75,7 +76,7 @@ final class ToolSearchToolBm25_20251119 implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ToolSearchToolBm25_20251119)->withType(...)
+     * (new ToolSearchToolBm25_20251119())->withType(...)
      * ```
      */
     public function __construct()
@@ -174,7 +175,7 @@ final class ToolSearchToolBm25_20251119 implements BaseModel
     }
 
     /**
-     * When true, guarantees schema validation on tool names and inputs.
+     * When true, guarantees schema validation on tool names and inputs
      */
     public function withStrict(bool $strict): self
     {

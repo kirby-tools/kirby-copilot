@@ -6,9 +6,14 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Symfony\\Polyfill\\Php82\\' => array($vendorDir . '/symfony/polyfill-php82'),
     'Symfony\\Polyfill\\Php80\\' => array($vendorDir . '/symfony/polyfill-php80'),
+    'StandardWebhooks\\' => array($vendorDir . '/standard-webhooks/standard-webhooks/libraries/php/src'),
+    'Psr\\Log\\' => array($vendorDir . '/psr/log/src'),
     'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-factory/src', $vendorDir . '/psr/http-message/src'),
     'Psr\\Http\\Client\\' => array($vendorDir . '/psr/http-client/src'),
+    'OpenTelemetry\\Context\\' => array($vendorDir . '/open-telemetry/context'),
+    'OpenTelemetry\\API\\' => array($vendorDir . '/open-telemetry/api'),
     'OpenAI\\' => array($vendorDir . '/openai-php/client/src'),
     'Kirby\\' => array($vendorDir . '/getkirby/composer-installer/src'),
     'KirbyTools\\Utils\\' => array($vendorDir . '/johannschopplich/kirby-tools-utils/src'),

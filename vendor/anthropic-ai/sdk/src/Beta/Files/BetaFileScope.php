@@ -7,6 +7,7 @@ namespace Anthropic\Beta\Files;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type BetaFileScopeShape = array{id: string, type: 'session'}
@@ -21,7 +22,7 @@ final class BetaFileScope implements BaseModel
      *
      * @var 'session' $type
      */
-    #[Required]
+    #[Required(type: new ConstantOf('session'))]
     public string $type = 'session';
 
     /**
@@ -41,7 +42,7 @@ final class BetaFileScope implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaFileScope)->withID(...)
+     * (new BetaFileScope())->withID(...)
      * ```
      */
     public function __construct()

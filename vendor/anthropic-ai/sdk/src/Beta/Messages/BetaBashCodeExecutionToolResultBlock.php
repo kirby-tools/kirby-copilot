@@ -7,10 +7,11 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type ContentVariants from \Anthropic\Beta\Messages\BetaBashCodeExecutionToolResultBlock\Content
  * @phpstan-import-type ContentShape from \Anthropic\Beta\Messages\BetaBashCodeExecutionToolResultBlock\Content
+ * @phpstan-import-type ContentVariants from \Anthropic\Beta\Messages\BetaBashCodeExecutionToolResultBlock\Content
  *
  * @phpstan-type BetaBashCodeExecutionToolResultBlockShape = array{
  *   content: ContentShape,
@@ -24,12 +25,12 @@ final class BetaBashCodeExecutionToolResultBlock implements BaseModel
     use SdkModel;
 
     /** @var 'bash_code_execution_tool_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('bash_code_execution_tool_result'))]
     public string $type = 'bash_code_execution_tool_result';
 
     /** @var ContentVariants $content */
     #[Required]
-    public BetaBashCodeExecutionToolResultError|BetaBashCodeExecutionResultBlock $content;
+    public BetaBashCodeExecutionToolResultErrorObject|BetaBashCodeExecutionResultBlock $content;
 
     #[Required('tool_use_id')]
     public string $toolUseID;
@@ -45,7 +46,9 @@ final class BetaBashCodeExecutionToolResultBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaBashCodeExecutionToolResultBlock)->withContent(...)->withToolUseID(...)
+     * (new BetaBashCodeExecutionToolResultBlock())
+     *   ->withContent(...)
+     *   ->withToolUseID(...)
      * ```
      */
     public function __construct()
@@ -61,7 +64,7 @@ final class BetaBashCodeExecutionToolResultBlock implements BaseModel
      * @param ContentShape $content
      */
     public static function with(
-        BetaBashCodeExecutionToolResultError|array|BetaBashCodeExecutionResultBlock $content,
+        BetaBashCodeExecutionToolResultErrorObject|array|BetaBashCodeExecutionResultBlock $content,
         string $toolUseID,
     ): self {
         $self = new self;
@@ -76,7 +79,7 @@ final class BetaBashCodeExecutionToolResultBlock implements BaseModel
      * @param ContentShape $content
      */
     public function withContent(
-        BetaBashCodeExecutionToolResultError|array|BetaBashCodeExecutionResultBlock $content,
+        BetaBashCodeExecutionToolResultErrorObject|array|BetaBashCodeExecutionResultBlock $content,
     ): self {
         $self = clone $this;
         $self['content'] = $content;

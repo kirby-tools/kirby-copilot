@@ -8,6 +8,7 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * Limited network request params.
@@ -28,11 +29,11 @@ final class BetaLimitedNetworkParams implements BaseModel
     use SdkModel;
 
     /**
-     * Network policy type.
+     * Network policy type
      *
      * @var 'limited' $type
      */
-    #[Required]
+    #[Required(type: new ConstantOf('limited'))]
     public string $type = 'limited';
 
     /**
@@ -42,7 +43,7 @@ final class BetaLimitedNetworkParams implements BaseModel
     public ?bool $allowMCPServers;
 
     /**
-     * Permits outbound access to public package registries (PyPI, npm, etc.) beyond those listed in the `allowed_hosts` array. Defaults to `false`.
+     * Permits outbound access to public package registries (PyPI, npm, etc.) beyond those listed in the `allowed_hosts` array. Defaults to `false` on creation. Must be `true` when `packages` are specified.
      */
     #[Optional('allow_package_managers', nullable: true)]
     public ?bool $allowPackageManagers;
@@ -82,7 +83,7 @@ final class BetaLimitedNetworkParams implements BaseModel
     }
 
     /**
-     * Network policy type.
+     * Network policy type
      *
      * @param 'limited' $type
      */
@@ -106,7 +107,7 @@ final class BetaLimitedNetworkParams implements BaseModel
     }
 
     /**
-     * Permits outbound access to public package registries (PyPI, npm, etc.) beyond those listed in the `allowed_hosts` array. Defaults to `false`.
+     * Permits outbound access to public package registries (PyPI, npm, etc.) beyond those listed in the `allowed_hosts` array. Defaults to `false` on creation. Must be `true` when `packages` are specified.
      */
     public function withAllowPackageManagers(?bool $allowPackageManagers): self
     {

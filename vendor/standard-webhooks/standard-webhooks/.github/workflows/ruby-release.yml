@@ -1,0 +1,41 @@
+name: Ruby Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  build:
+    name: Ruby Release
+    runs-on: ubuntu-latest
+    environment: Release
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          working-directory: libraries/ruby
+
+      - name: Install dependencies
+        run: |
+          bundler install
+        working-directory: libraries/ruby
+
+      - name: Build
+        run: |
+          bundler exec rake build
+        working-directory: libraries/ruby
+
+      - name: Configure trusted publishing credentials
+        uses: rubygems/configure-rubygems-credentials@v1.0.0
+
+      - name: Release
+        run: gem push pkg/*.gem
+        working-directory: libraries/ruby

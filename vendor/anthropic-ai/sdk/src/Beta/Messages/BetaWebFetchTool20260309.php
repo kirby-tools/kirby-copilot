@@ -9,12 +9,14 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * Web fetch tool with use_cache parameter for bypassing cached content.
  *
  * @phpstan-import-type BetaCacheControlEphemeralShape from \Anthropic\Beta\Messages\BetaCacheControlEphemeral
  * @phpstan-import-type BetaCitationsConfigParamShape from \Anthropic\Beta\Messages\BetaCitationsConfigParam
+ * @phpstan-import-type BetaWebFetchURLSourcesShape from \Anthropic\Beta\Messages\BetaWebFetchURLSources
  *
  * @phpstan-type BetaWebFetchTool20260309Shape = array{
  *   name: 'web_fetch',
@@ -28,6 +30,7 @@ use Anthropic\Core\Contracts\BaseModel;
  *   maxContentTokens?: int|null,
  *   maxUses?: int|null,
  *   strict?: bool|null,
+ *   urlSources?: null|BetaWebFetchURLSources|BetaWebFetchURLSourcesShape,
  *   useCache?: bool|null,
  * }
  */
@@ -43,11 +46,11 @@ final class BetaWebFetchTool20260309 implements BaseModel
      *
      * @var 'web_fetch' $name
      */
-    #[Required]
+    #[Required(type: new ConstantOf('web_fetch'))]
     public string $name = 'web_fetch';
 
     /** @var 'web_fetch_20260309' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('web_fetch_20260309'))]
     public string $type = 'web_fetch_20260309';
 
     /** @var list<value-of<AllowedCaller>>|null $allowedCallers */
@@ -55,7 +58,7 @@ final class BetaWebFetchTool20260309 implements BaseModel
     public ?array $allowedCallers;
 
     /**
-     * List of domains to allow fetching from.
+     * List of domains to allow fetching from
      *
      * @var list<string>|null $allowedDomains
      */
@@ -63,7 +66,7 @@ final class BetaWebFetchTool20260309 implements BaseModel
     public ?array $allowedDomains;
 
     /**
-     * List of domains to block fetching from.
+     * List of domains to block fetching from
      *
      * @var list<string>|null $blockedDomains
      */
@@ -101,10 +104,16 @@ final class BetaWebFetchTool20260309 implements BaseModel
     public ?int $maxUses;
 
     /**
-     * When true, guarantees schema validation on tool names and inputs.
+     * When true, guarantees schema validation on tool names and inputs
      */
     #[Optional]
     public ?bool $strict;
+
+    /**
+     * Which sources contribute to the set of URLs the tool may fetch. Omitted means every source.
+     */
+    #[Optional('url_sources', nullable: true)]
+    public ?BetaWebFetchURLSources $urlSources;
 
     /**
      * Whether to use cached content. Set to false to bypass the cache and fetch fresh content. Only set to false when the user explicitly requests fresh content or when fetching rapidly-changing sources.
@@ -127,6 +136,7 @@ final class BetaWebFetchTool20260309 implements BaseModel
      * @param list<string>|null $blockedDomains
      * @param BetaCacheControlEphemeral|BetaCacheControlEphemeralShape|null $cacheControl
      * @param BetaCitationsConfigParam|BetaCitationsConfigParamShape|null $citations
+     * @param BetaWebFetchURLSources|BetaWebFetchURLSourcesShape|null $urlSources
      */
     public static function with(
         ?array $allowedCallers = null,
@@ -138,6 +148,7 @@ final class BetaWebFetchTool20260309 implements BaseModel
         ?int $maxContentTokens = null,
         ?int $maxUses = null,
         ?bool $strict = null,
+        BetaWebFetchURLSources|array|null $urlSources = null,
         ?bool $useCache = null,
     ): self {
         $self = new self;
@@ -151,6 +162,7 @@ final class BetaWebFetchTool20260309 implements BaseModel
         null !== $maxContentTokens && $self['maxContentTokens'] = $maxContentTokens;
         null !== $maxUses && $self['maxUses'] = $maxUses;
         null !== $strict && $self['strict'] = $strict;
+        null !== $urlSources && $self['urlSources'] = $urlSources;
         null !== $useCache && $self['useCache'] = $useCache;
 
         return $self;
@@ -194,7 +206,7 @@ final class BetaWebFetchTool20260309 implements BaseModel
     }
 
     /**
-     * List of domains to allow fetching from.
+     * List of domains to allow fetching from
      *
      * @param list<string>|null $allowedDomains
      */
@@ -207,7 +219,7 @@ final class BetaWebFetchTool20260309 implements BaseModel
     }
 
     /**
-     * List of domains to block fetching from.
+     * List of domains to block fetching from
      *
      * @param list<string>|null $blockedDomains
      */
@@ -281,12 +293,26 @@ final class BetaWebFetchTool20260309 implements BaseModel
     }
 
     /**
-     * When true, guarantees schema validation on tool names and inputs.
+     * When true, guarantees schema validation on tool names and inputs
      */
     public function withStrict(bool $strict): self
     {
         $self = clone $this;
         $self['strict'] = $strict;
+
+        return $self;
+    }
+
+    /**
+     * Which sources contribute to the set of URLs the tool may fetch. Omitted means every source.
+     *
+     * @param BetaWebFetchURLSources|BetaWebFetchURLSourcesShape|null $urlSources
+     */
+    public function withURLSources(
+        BetaWebFetchURLSources|array|null $urlSources
+    ): self {
+        $self = clone $this;
+        $self['urlSources'] = $urlSources;
 
         return $self;
     }

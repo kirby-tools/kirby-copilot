@@ -7,6 +7,7 @@ namespace Anthropic\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type Base64PDFSourceShape = array{
@@ -19,11 +20,11 @@ final class Base64PDFSource implements BaseModel
     use SdkModel;
 
     /** @var 'application/pdf' $mediaType */
-    #[Required('media_type')]
+    #[Required('media_type', type: new ConstantOf('application/pdf'))]
     public string $mediaType = 'application/pdf';
 
     /** @var 'base64' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('base64'))]
     public string $type = 'base64';
 
     #[Required]
@@ -40,7 +41,7 @@ final class Base64PDFSource implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new Base64PDFSource)->withData(...)
+     * (new Base64PDFSource())->withData(...)
      * ```
      */
     public function __construct()

@@ -1,0 +1,219 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Services\Organization;
+
+use Anthropic\Client;
+use Anthropic\Core\Exceptions\APIException;
+use Anthropic\Core\Util;
+use Anthropic\Organization\ExternalKeys\AWSExternalKeyConfig;
+use Anthropic\Organization\ExternalKeys\AzureExternalKeyConfigParam;
+use Anthropic\Organization\ExternalKeys\ExternalKey;
+use Anthropic\Organization\ExternalKeys\ExternalKeyCreateParams\Geo;
+use Anthropic\Organization\ExternalKeys\ExternalKeyDeleteResponse;
+use Anthropic\Organization\ExternalKeys\ExternalKeyInWorkspacePolicyException;
+use Anthropic\Organization\ExternalKeys\ExternalKeyValidateResponse;
+use Anthropic\Organization\ExternalKeys\GCPExternalKeyConfig;
+use Anthropic\PageCursor;
+use Anthropic\RequestOptions;
+use Anthropic\SandboxEgressRestrictedException;
+use Anthropic\ServiceContracts\Organization\ExternalKeysContract;
+use Anthropic\UserProfiles\UserProfileNotFoundException;
+
+/**
+ * @phpstan-import-type ProviderConfigShape from \Anthropic\Organization\ExternalKeys\ExternalKeyCreateParams\ProviderConfig
+ * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ * @phpstan-import-type ProviderConfigShape from \Anthropic\Organization\ExternalKeys\ExternalKeyUpdateParams\ProviderConfig as ProviderConfigShape1
+ */
+final class ExternalKeysService implements ExternalKeysContract
+{
+    /**
+     * @api
+     */
+    public ExternalKeysRawService $raw;
+
+    /**
+     * @internal
+     */
+    public function __construct(private Client $client)
+    {
+        $this->raw = new ExternalKeysRawService($client);
+    }
+
+    /**
+     * @api
+     *
+     * Create an external key config owned by the caller's organization.
+     *
+     * @param ProviderConfigShape $providerConfig KMS provider identity and auth coordinates.
+     * @param string|null $displayName Human-friendly display name.
+     * @param Geo|value-of<Geo> $geo Data residency geo. Only `us` is supported.
+     * @param string|null $userProfileID ID of a user profile to bind the key to. A user profile represents one of your customers: bind a customer's key to that customer's user profile. A key bound to a user profile can only be attached to a Workspace that has the same user profile, and the binding cannot be changed later. Omit this field only for your organization's own key, never a customer's. A key created without a user profile ID can't be attached to a Workspace that has a user profile, and you can't add one to the key later.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @throws UserProfileNotFoundException
+     * @throws SandboxEgressRestrictedException
+     * @throws APIException
+     */
+    public function create(
+        AWSExternalKeyConfig|array|GCPExternalKeyConfig|AzureExternalKeyConfigParam $providerConfig,
+        ?string $displayName = null,
+        Geo|string|null $geo = null,
+        ?string $userProfileID = null,
+        RequestOptions|array|null $requestOptions = null,
+    ): ExternalKey {
+        $params = Util::removeNulls(
+            [
+                'providerConfig' => $providerConfig,
+                'displayName' => $displayName,
+                'geo' => $geo,
+                'userProfileID' => $userProfileID,
+            ],
+        );
+
+        // @phpstan-ignore-next-line argument.type
+        $response = $this->raw->create(params: $params, requestOptions: $requestOptions);
+
+        return $response->parse();
+    }
+
+    /**
+     * @api
+     *
+     * Retrieve a single external key config in the caller's organization by ID.
+     *
+     * @param string $externalKeyID ID of the External Key.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @throws APIException
+     */
+    public function retrieve(
+        string $externalKeyID,
+        RequestOptions|array|null $requestOptions = null
+    ): ExternalKey {
+        // @phpstan-ignore-next-line argument.type
+        $response = $this->raw->retrieve($externalKeyID, requestOptions: $requestOptions);
+
+        return $response->parse();
+    }
+
+    /**
+     * @api
+     *
+     * Partially update an external key config. Omitted fields are left unchanged.
+     *
+     * `display_name` is always editable. `geo` and `provider_config` cannot
+     * be changed once any workspace references this config, and a Google Cloud
+     * key's provider and `key_name` cannot be changed at all.
+     *
+     * @param string $externalKeyID ID of the External Key.
+     * @param string|null $displayName Human-friendly display name.
+     * @param \Anthropic\Organization\ExternalKeys\ExternalKeyUpdateParams\Geo|value-of<\Anthropic\Organization\ExternalKeys\ExternalKeyUpdateParams\Geo>|null $geo Data residency geo. Only `us` is supported.
+     * @param ProviderConfigShape1|null $providerConfig KMS provider identity and auth coordinates.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @throws ExternalKeyInWorkspacePolicyException
+     * @throws SandboxEgressRestrictedException
+     * @throws APIException
+     */
+    public function update(
+        string $externalKeyID,
+        ?string $displayName = null,
+        \Anthropic\Organization\ExternalKeys\ExternalKeyUpdateParams\Geo|string|null $geo = null,
+        AWSExternalKeyConfig|array|GCPExternalKeyConfig|AzureExternalKeyConfigParam|null $providerConfig = null,
+        RequestOptions|array|null $requestOptions = null,
+    ): ExternalKey {
+        $params = Util::removeNulls(
+            [
+                'displayName' => $displayName,
+                'geo' => $geo,
+                'providerConfig' => $providerConfig,
+            ],
+        );
+
+        // @phpstan-ignore-next-line argument.type
+        $response = $this->raw->update($externalKeyID, params: $params, requestOptions: $requestOptions);
+
+        return $response->parse();
+    }
+
+    /**
+     * @api
+     *
+     * List external key configs in the caller's organization.
+     *
+     * Results are ordered by creation time (newest first). Use the
+     * `next_page` cursor from the response to fetch subsequent pages.
+     *
+     * @param int $limit Number of results per page.
+     * @param string|null $page Opaque cursor from a previous response's `next_page`.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return PageCursor<ExternalKey>
+     *
+     * @throws APIException
+     */
+    public function list(
+        ?int $limit = null,
+        ?string $page = null,
+        RequestOptions|array|null $requestOptions = null,
+    ): PageCursor {
+        $params = Util::removeNulls(['limit' => $limit, 'page' => $page]);
+
+        // @phpstan-ignore-next-line argument.type
+        $response = $this->raw->list(params: $params, requestOptions: $requestOptions);
+
+        return $response->parse();
+    }
+
+    /**
+     * @api
+     *
+     * Delete an external key config.
+     *
+     * The request is rejected if any workspace still references this config.
+     *
+     * @param string $externalKeyID ID of the External Key.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @throws ExternalKeyInWorkspacePolicyException
+     * @throws SandboxEgressRestrictedException
+     * @throws APIException
+     */
+    public function delete(
+        string $externalKeyID,
+        RequestOptions|array|null $requestOptions = null
+    ): ExternalKeyDeleteResponse {
+        // @phpstan-ignore-next-line argument.type
+        $response = $this->raw->delete($externalKeyID, requestOptions: $requestOptions);
+
+        return $response->parse();
+    }
+
+    /**
+     * @api
+     *
+     * Validate an external key config against the customer's KMS.
+     *
+     * Anthropic performs an encrypt/decrypt roundtrip against the configured
+     * KMS key and waits up to 30 seconds for the result. The response status is
+     * `success` if the roundtrip succeeded, or `failure` with an error
+     * message if it failed or timed out.
+     *
+     * @param string $externalKeyID ID of the External Key.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @throws SandboxEgressRestrictedException
+     * @throws APIException
+     */
+    public function validate(
+        string $externalKeyID,
+        RequestOptions|array|null $requestOptions = null
+    ): ExternalKeyValidateResponse {
+        // @phpstan-ignore-next-line argument.type
+        $response = $this->raw->validate($externalKeyID, requestOptions: $requestOptions);
+
+        return $response->parse();
+    }
+}

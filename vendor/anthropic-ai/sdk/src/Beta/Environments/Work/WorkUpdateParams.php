@@ -1,0 +1,152 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Beta\Environments\Work;
+
+use Anthropic\Beta\AnthropicBeta;
+use Anthropic\Core\Attributes\Optional;
+use Anthropic\Core\Attributes\Required;
+use Anthropic\Core\Concerns\SdkModel;
+use Anthropic\Core\Concerns\SdkParams;
+use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\MapOf;
+
+/**
+ * Update work item metadata with merge semantics.
+ *
+ * This endpoint accepts a Claude API key. It rejects the environment key and the work item's `secret`. On [Claude Platform on AWS](https://platform.claude.com/docs/en/build-with-claude/claude-platform-on-aws) or [Claude Models on Google Cloud (Anthropic managed)](https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/anthropic-managed), use that platform's credentials instead.
+ *
+ * @see Anthropic\Services\Beta\Environments\WorkService::update()
+ *
+ * @phpstan-type WorkUpdateParamsShape = array{
+ *   environmentID: string,
+ *   metadata: array<string,string|null>,
+ *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
+ * }
+ */
+final class WorkUpdateParams implements BaseModel
+{
+    /** @use SdkModel<WorkUpdateParamsShape> */
+    use SdkModel;
+    use SdkParams;
+
+    #[Required]
+    public string $environmentID;
+
+    /**
+     * Metadata patch. Set a key to a string to upsert it, or to null to delete it. Omit the field to preserve existing metadata.
+     *
+     * @var array<string,string|null> $metadata
+     */
+    #[Required(type: new MapOf('string', nullable: true))]
+    public array $metadata;
+
+    /**
+     * Optional header to specify the beta version(s) you want to use.
+     *
+     * @var list<string|value-of<AnthropicBeta>>|null $betas
+     */
+    #[Optional(list: AnthropicBeta::class)]
+    public ?array $betas;
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
+
+    /**
+     * `new WorkUpdateParams()` is missing required properties by the API.
+     *
+     * To enforce required parameters use
+     * ```
+     * WorkUpdateParams::with(environmentID: ..., metadata: ...)
+     * ```
+     *
+     * Otherwise ensure the following setters are called
+     *
+     * ```
+     * (new WorkUpdateParams())->withEnvironmentID(...)->withMetadata(...)
+     * ```
+     */
+    public function __construct()
+    {
+        $this->initialize();
+    }
+
+    /**
+     * Construct an instance from the required parameters.
+     *
+     * You must use named parameters to construct any parameters with a default value.
+     *
+     * @param array<string,string|null> $metadata
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>>|null $betas
+     */
+    public static function with(
+        string $environmentID,
+        array $metadata,
+        ?array $betas = null,
+        ?string $workspaceID = null,
+    ): self {
+        $self = new self;
+
+        $self['environmentID'] = $environmentID;
+        $self['metadata'] = $metadata;
+
+        null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
+
+        return $self;
+    }
+
+    public function withEnvironmentID(string $environmentID): self
+    {
+        $self = clone $this;
+        $self['environmentID'] = $environmentID;
+
+        return $self;
+    }
+
+    /**
+     * Metadata patch. Set a key to a string to upsert it, or to null to delete it. Omit the field to preserve existing metadata.
+     *
+     * @param array<string,string|null> $metadata
+     */
+    public function withMetadata(array $metadata): self
+    {
+        $self = clone $this;
+        $self['metadata'] = $metadata;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to specify the beta version(s) you want to use.
+     *
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas
+     */
+    public function withBetas(array $betas): self
+    {
+        $self = clone $this;
+        $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
+
+        return $self;
+    }
+}

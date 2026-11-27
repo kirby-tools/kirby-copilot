@@ -7,6 +7,7 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type BetaMemoryTool20250818CreateCommandShape = array{
@@ -19,21 +20,21 @@ final class BetaMemoryTool20250818CreateCommand implements BaseModel
     use SdkModel;
 
     /**
-     * Command type identifier.
+     * Command type identifier
      *
      * @var 'create' $command
      */
-    #[Required]
+    #[Required(type: new ConstantOf('create'))]
     public string $command = 'create';
 
     /**
-     * Content to write to the file.
+     * Content to write to the file
      */
     #[Required('file_text')]
     public string $fileText;
 
     /**
-     * Path where the file should be created.
+     * Path where the file should be created
      */
     #[Required]
     public string $path;
@@ -49,7 +50,7 @@ final class BetaMemoryTool20250818CreateCommand implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaMemoryTool20250818CreateCommand)->withFileText(...)->withPath(...)
+     * (new BetaMemoryTool20250818CreateCommand())->withFileText(...)->withPath(...)
      * ```
      */
     public function __construct()
@@ -73,7 +74,7 @@ final class BetaMemoryTool20250818CreateCommand implements BaseModel
     }
 
     /**
-     * Command type identifier.
+     * Command type identifier
      *
      * @param 'create' $command
      */
@@ -86,7 +87,7 @@ final class BetaMemoryTool20250818CreateCommand implements BaseModel
     }
 
     /**
-     * Content to write to the file.
+     * Content to write to the file
      */
     public function withFileText(string $fileText): self
     {
@@ -97,7 +98,7 @@ final class BetaMemoryTool20250818CreateCommand implements BaseModel
     }
 
     /**
-     * Path where the file should be created.
+     * Path where the file should be created
      */
     public function withPath(string $path): self
     {

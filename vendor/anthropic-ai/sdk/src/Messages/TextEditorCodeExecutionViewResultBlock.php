@@ -7,6 +7,7 @@ namespace Anthropic\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\TextEditorCodeExecutionViewResultBlock\FileType;
 
 /**
@@ -25,7 +26,7 @@ final class TextEditorCodeExecutionViewResultBlock implements BaseModel
     use SdkModel;
 
     /** @var 'text_editor_code_execution_view_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('text_editor_code_execution_view_result'))]
     public string $type = 'text_editor_code_execution_view_result';
 
     #[Required]
@@ -57,7 +58,7 @@ final class TextEditorCodeExecutionViewResultBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new TextEditorCodeExecutionViewResultBlock)
+     * (new TextEditorCodeExecutionViewResultBlock())
      *   ->withContent(...)
      *   ->withFileType(...)
      *   ->withNumLines(...)

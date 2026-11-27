@@ -7,6 +7,7 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type BetaURLImageSourceShape = array{type: 'url', url: string}
@@ -17,7 +18,7 @@ final class BetaURLImageSource implements BaseModel
     use SdkModel;
 
     /** @var 'url' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('url'))]
     public string $type = 'url';
 
     #[Required]
@@ -34,7 +35,7 @@ final class BetaURLImageSource implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaURLImageSource)->withURL(...)
+     * (new BetaURLImageSource())->withURL(...)
      * ```
      */
     public function __construct()

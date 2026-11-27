@@ -8,9 +8,11 @@ use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
 use Anthropic\Messages\Usage\ServiceTier;
+use Anthropic\Messages\Usage\Speed;
 
 /**
  * @phpstan-import-type CacheCreationShape from \Anthropic\Messages\CacheCreation
+ * @phpstan-import-type OutputTokensDetailsShape from \Anthropic\Messages\OutputTokensDetails
  * @phpstan-import-type ServerToolUsageShape from \Anthropic\Messages\ServerToolUsage
  *
  * @phpstan-type UsageShape = array{
@@ -20,8 +22,10 @@ use Anthropic\Messages\Usage\ServiceTier;
  *   inferenceGeo: string|null,
  *   inputTokens: int,
  *   outputTokens: int,
+ *   outputTokensDetails: null|OutputTokensDetails|OutputTokensDetailsShape,
  *   serverToolUse: null|ServerToolUsage|ServerToolUsageShape,
  *   serviceTier: null|ServiceTier|value-of<ServiceTier>,
+ *   speed: null|Speed|value-of<Speed>,
  * }
  */
 final class Usage implements BaseModel
@@ -30,7 +34,7 @@ final class Usage implements BaseModel
     use SdkModel;
 
     /**
-     * Breakdown of cached tokens by TTL.
+     * Breakdown of cached tokens by TTL
      */
     #[Required('cache_creation')]
     public ?CacheCreation $cacheCreation;
@@ -66,6 +70,17 @@ final class Usage implements BaseModel
     public int $outputTokens;
 
     /**
+     * Breakdown of output tokens by category.
+     *
+     * `output_tokens` remains the inclusive, authoritative total used for billing.
+     * This object provides a read-only decomposition for observability — for example,
+     * how many of the billed output tokens were spent on internal reasoning that may
+     * have been summarized before being returned to you.
+     */
+    #[Required('output_tokens_details')]
+    public ?OutputTokensDetails $outputTokensDetails;
+
+    /**
      * The number of server tool requests.
      */
     #[Required('server_tool_use')]
@@ -80,6 +95,14 @@ final class Usage implements BaseModel
     public ?string $serviceTier;
 
     /**
+     * The inference speed mode used for this request.
+     *
+     * @var value-of<Speed>|null $speed
+     */
+    #[Required(enum: Speed::class)]
+    public ?string $speed;
+
+    /**
      * `new Usage()` is missing required properties by the API.
      *
      * To enforce required parameters use
@@ -91,23 +114,27 @@ final class Usage implements BaseModel
      *   inferenceGeo: ...,
      *   inputTokens: ...,
      *   outputTokens: ...,
+     *   outputTokensDetails: ...,
      *   serverToolUse: ...,
      *   serviceTier: ...,
+     *   speed: ...,
      * )
      * ```
      *
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new Usage)
+     * (new Usage())
      *   ->withCacheCreation(...)
      *   ->withCacheCreationInputTokens(...)
      *   ->withCacheReadInputTokens(...)
      *   ->withInferenceGeo(...)
      *   ->withInputTokens(...)
      *   ->withOutputTokens(...)
+     *   ->withOutputTokensDetails(...)
      *   ->withServerToolUse(...)
      *   ->withServiceTier(...)
+     *   ->withSpeed(...)
      * ```
      */
     public function __construct()
@@ -121,8 +148,10 @@ final class Usage implements BaseModel
      * You must use named parameters to construct any parameters with a default value.
      *
      * @param CacheCreation|CacheCreationShape|null $cacheCreation
+     * @param OutputTokensDetails|OutputTokensDetailsShape|null $outputTokensDetails
      * @param ServerToolUsage|ServerToolUsageShape|null $serverToolUse
      * @param ServiceTier|value-of<ServiceTier>|null $serviceTier
+     * @param Speed|value-of<Speed>|null $speed
      */
     public static function with(
         CacheCreation|array|null $cacheCreation,
@@ -131,8 +160,10 @@ final class Usage implements BaseModel
         ?string $inferenceGeo,
         int $inputTokens,
         int $outputTokens,
+        OutputTokensDetails|array|null $outputTokensDetails,
         ServerToolUsage|array|null $serverToolUse,
         ServiceTier|string|null $serviceTier,
+        Speed|string|null $speed,
     ): self {
         $self = new self;
 
@@ -142,14 +173,16 @@ final class Usage implements BaseModel
         $self['inferenceGeo'] = $inferenceGeo;
         $self['inputTokens'] = $inputTokens;
         $self['outputTokens'] = $outputTokens;
+        $self['outputTokensDetails'] = $outputTokensDetails;
         $self['serverToolUse'] = $serverToolUse;
         $self['serviceTier'] = $serviceTier;
+        $self['speed'] = $speed;
 
         return $self;
     }
 
     /**
-     * Breakdown of cached tokens by TTL.
+     * Breakdown of cached tokens by TTL
      *
      * @param CacheCreation|CacheCreationShape|null $cacheCreation
      */
@@ -219,6 +252,25 @@ final class Usage implements BaseModel
     }
 
     /**
+     * Breakdown of output tokens by category.
+     *
+     * `output_tokens` remains the inclusive, authoritative total used for billing.
+     * This object provides a read-only decomposition for observability — for example,
+     * how many of the billed output tokens were spent on internal reasoning that may
+     * have been summarized before being returned to you.
+     *
+     * @param OutputTokensDetails|OutputTokensDetailsShape|null $outputTokensDetails
+     */
+    public function withOutputTokensDetails(
+        OutputTokensDetails|array|null $outputTokensDetails
+    ): self {
+        $self = clone $this;
+        $self['outputTokensDetails'] = $outputTokensDetails;
+
+        return $self;
+    }
+
+    /**
      * The number of server tool requests.
      *
      * @param ServerToolUsage|ServerToolUsageShape|null $serverToolUse
@@ -241,6 +293,19 @@ final class Usage implements BaseModel
     {
         $self = clone $this;
         $self['serviceTier'] = $serviceTier;
+
+        return $self;
+    }
+
+    /**
+     * The inference speed mode used for this request.
+     *
+     * @param Speed|value-of<Speed>|null $speed
+     */
+    public function withSpeed(Speed|string|null $speed): self
+    {
+        $self = clone $this;
+        $self['speed'] = $speed;
 
         return $self;
     }

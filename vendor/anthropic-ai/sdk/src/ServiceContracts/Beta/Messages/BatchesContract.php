@@ -9,10 +9,15 @@ use Anthropic\Beta\Messages\Batches\BatchCreateParams\Request;
 use Anthropic\Beta\Messages\Batches\DeletedMessageBatch;
 use Anthropic\Beta\Messages\Batches\MessageBatch;
 use Anthropic\Beta\Messages\Batches\MessageBatchIndividualResponse;
+use Anthropic\ClaudeCodeKeyCreatorNotMemberException;
+use Anthropic\CMEKKeyDisabledException;
 use Anthropic\Core\Contracts\BaseStream;
 use Anthropic\Core\Exceptions\APIException;
+use Anthropic\EnforcedSpendLimitReachedException;
+use Anthropic\OrganizationOnHoldException;
 use Anthropic\Page;
 use Anthropic\RequestOptions;
+use Anthropic\WorkspaceHumanReviewDisabledException;
 
 /**
  * @phpstan-import-type RequestShape from \Anthropic\Beta\Messages\Batches\BatchCreateParams\Request
@@ -24,29 +29,46 @@ interface BatchesContract
      * @api
      *
      * @param list<Request|RequestShape> $requests Body param: List of requests for prompt completion. Each is an individual request to create a Message.
-     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas header param: Optional header to specify the beta version(s) you want to use
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Header param: Optional header to specify the beta version(s) you want to use.
+     * @param string $userProfileID Header param: The user profile ID to attribute the requests in this batch to. Use when acting on behalf of a party other than your organization. Applies to every request in the batch; an individual request whose `user_profile_id` body field conflicts with this header is errored.
+     * @param string $workspaceID Header param: Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CMEKKeyDisabledException
+     * @throws OrganizationOnHoldException
+     * @throws WorkspaceHumanReviewDisabledException
+     * @throws EnforcedSpendLimitReachedException
      * @throws APIException
      */
     public function create(
         array $requests,
         ?array $betas = null,
+        ?string $userProfileID = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): MessageBatch;
 
     /**
      * @api
      *
-     * @param string $messageBatchID ID of the Message Batch
-     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas optional header to specify the beta version(s) you want to use
+     * @param string $messageBatchID ID of the Message Batch.
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Optional header to specify the beta version(s) you want to use.
+     * @param string $workspaceID Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function retrieve(
         string $messageBatchID,
         ?array $betas = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): MessageBatch;
 
@@ -58,65 +80,90 @@ interface BatchesContract
      * @param int $limit Query param: Number of items to return per page.
      *
      * Defaults to `20`. Ranges from `1` to `1000`.
-     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas header param: Optional header to specify the beta version(s) you want to use
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Header param: Optional header to specify the beta version(s) you want to use.
+     * @param string $workspaceID Header param: Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
      * @return Page<MessageBatch>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function list(
         ?string $afterID = null,
         ?string $beforeID = null,
-        int $limit = 20,
+        ?int $limit = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): Page;
 
     /**
      * @api
      *
-     * @param string $messageBatchID ID of the Message Batch
-     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas optional header to specify the beta version(s) you want to use
+     * @param string $messageBatchID ID of the Message Batch.
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Optional header to specify the beta version(s) you want to use.
+     * @param string $workspaceID Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function delete(
         string $messageBatchID,
         ?array $betas = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): DeletedMessageBatch;
 
     /**
      * @api
      *
-     * @param string $messageBatchID ID of the Message Batch
-     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas optional header to specify the beta version(s) you want to use
+     * @param string $messageBatchID ID of the Message Batch.
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Optional header to specify the beta version(s) you want to use.
+     * @param string $workspaceID Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function cancel(
         string $messageBatchID,
         ?array $betas = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): MessageBatch;
 
     /**
      * @api
      *
-     * @param string $messageBatchID ID of the Message Batch
-     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas optional header to specify the beta version(s) you want to use
+     * @param string $messageBatchID ID of the Message Batch.
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas Optional header to specify the beta version(s) you want to use.
+     * @param string $workspaceID Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
      * @param RequestOpts|null $requestOptions
      *
      * @return BaseStream<MessageBatchIndividualResponse>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CMEKKeyDisabledException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function resultsStream(
         string $messageBatchID,
         ?array $betas = null,
+        ?string $workspaceID = null,
         RequestOptions|array|null $requestOptions = null,
     ): BaseStream;
 }

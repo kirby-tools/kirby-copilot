@@ -12,8 +12,8 @@ use Anthropic\Core\Contracts\BaseModel;
 /**
  * Parameters for updating OAuth refresh token configuration.
  *
- * @phpstan-import-type TokenEndpointAuthVariants from \Anthropic\Beta\Vaults\Credentials\ManagedAgentsMCPOAuthRefreshUpdateParams\TokenEndpointAuth
  * @phpstan-import-type TokenEndpointAuthShape from \Anthropic\Beta\Vaults\Credentials\ManagedAgentsMCPOAuthRefreshUpdateParams\TokenEndpointAuth
+ * @phpstan-import-type TokenEndpointAuthVariants from \Anthropic\Beta\Vaults\Credentials\ManagedAgentsMCPOAuthRefreshUpdateParams\TokenEndpointAuth
  *
  * @phpstan-type ManagedAgentsMCPOAuthRefreshUpdateParamsShape = array{
  *   refreshToken?: string|null,
@@ -27,22 +27,18 @@ final class ManagedAgentsMCPOAuthRefreshUpdateParams implements BaseModel
     use SdkModel;
 
     /**
-     * Updated OAuth refresh token.
+     * The new OAuth refresh token to replace the stored one.
      */
     #[Optional('refresh_token', nullable: true)]
     public ?string $refreshToken;
 
     /**
-     * Updated OAuth scope for the refresh request.
+     * The new OAuth scope for refresh requests. Send an empty string to clear the stored scope.
      */
     #[Optional(nullable: true)]
     public ?string $scope;
 
-    /**
-     * Updated HTTP Basic authentication parameters for the token endpoint.
-     *
-     * @var TokenEndpointAuthVariants|null $tokenEndpointAuth
-     */
+    /** @var TokenEndpointAuthVariants|null $tokenEndpointAuth */
     #[Optional('token_endpoint_auth', union: TokenEndpointAuth::class)]
     public ManagedAgentsTokenEndpointAuthBasicUpdateParam|ManagedAgentsTokenEndpointAuthPostUpdateParam|null $tokenEndpointAuth;
 
@@ -73,7 +69,7 @@ final class ManagedAgentsMCPOAuthRefreshUpdateParams implements BaseModel
     }
 
     /**
-     * Updated OAuth refresh token.
+     * The new OAuth refresh token to replace the stored one.
      */
     public function withRefreshToken(?string $refreshToken): self
     {
@@ -84,7 +80,7 @@ final class ManagedAgentsMCPOAuthRefreshUpdateParams implements BaseModel
     }
 
     /**
-     * Updated OAuth scope for the refresh request.
+     * The new OAuth scope for refresh requests. Send an empty string to clear the stored scope.
      */
     public function withScope(?string $scope): self
     {
@@ -95,8 +91,6 @@ final class ManagedAgentsMCPOAuthRefreshUpdateParams implements BaseModel
     }
 
     /**
-     * Updated HTTP Basic authentication parameters for the token endpoint.
-     *
      * @param TokenEndpointAuthShape $tokenEndpointAuth
      */
     public function withTokenEndpointAuth(

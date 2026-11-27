@@ -6,18 +6,21 @@ namespace Anthropic\Beta\Agents\BetaManagedAgentsMCPToolsetDefaultConfigParams;
 
 use Anthropic\Beta\Agents\BetaManagedAgentsAlwaysAllowPolicy;
 use Anthropic\Beta\Agents\BetaManagedAgentsAlwaysAskPolicy;
+use Anthropic\Beta\Agents\BetaManagedAgentsAutoPolicy;
+use Anthropic\Beta\Agents\BetaManagedAgentsMCPToolsetDefaultConfigParams\PermissionPolicy\Type;
 use Anthropic\Core\Concerns\SdkUnion;
 use Anthropic\Core\Conversion\Contracts\Converter;
 use Anthropic\Core\Conversion\Contracts\ConverterSource;
 
 /**
- * Permission policy for tool execution.
+ * Default permission policy for tools from this server.
  *
  * @phpstan-import-type BetaManagedAgentsAlwaysAllowPolicyShape from \Anthropic\Beta\Agents\BetaManagedAgentsAlwaysAllowPolicy
  * @phpstan-import-type BetaManagedAgentsAlwaysAskPolicyShape from \Anthropic\Beta\Agents\BetaManagedAgentsAlwaysAskPolicy
+ * @phpstan-import-type BetaManagedAgentsAutoPolicyShape from \Anthropic\Beta\Agents\BetaManagedAgentsAutoPolicy
  *
- * @phpstan-type PermissionPolicyVariants = BetaManagedAgentsAlwaysAllowPolicy|BetaManagedAgentsAlwaysAskPolicy
- * @phpstan-type PermissionPolicyShape = PermissionPolicyVariants|BetaManagedAgentsAlwaysAllowPolicyShape|BetaManagedAgentsAlwaysAskPolicyShape
+ * @phpstan-type PermissionPolicyVariants = BetaManagedAgentsAlwaysAllowPolicy|BetaManagedAgentsAlwaysAskPolicy|BetaManagedAgentsAutoPolicy
+ * @phpstan-type PermissionPolicyShape = PermissionPolicyVariants|BetaManagedAgentsAlwaysAllowPolicyShape|BetaManagedAgentsAlwaysAskPolicyShape|BetaManagedAgentsAutoPolicyShape
  */
 final class PermissionPolicy implements ConverterSource
 {
@@ -36,6 +39,27 @@ final class PermissionPolicy implements ConverterSource
         return [
             'always_allow' => BetaManagedAgentsAlwaysAllowPolicy::class,
             'always_ask' => BetaManagedAgentsAlwaysAskPolicy::class,
+            'auto' => BetaManagedAgentsAutoPolicy::class,
         ];
+    }
+
+    /**
+     * Constructs the variant whose `type` matches the given value, forwarding the remaining arguments to its own `with()`.
+     *
+     * @return ($type is Type::ALWAYS_ALLOW|'always_allow' ? BetaManagedAgentsAlwaysAllowPolicy : ($type is Type::ALWAYS_ASK|'always_ask' ? BetaManagedAgentsAlwaysAskPolicy : ($type is Type::AUTO|'auto' ? BetaManagedAgentsAutoPolicy : BetaManagedAgentsAlwaysAllowPolicy|BetaManagedAgentsAlwaysAskPolicy|BetaManagedAgentsAutoPolicy)))
+     *
+     * @throws \UnhandledMatchError
+     */
+    public static function with(
+        Type|string $type
+    ): BetaManagedAgentsAlwaysAllowPolicy|BetaManagedAgentsAlwaysAskPolicy|BetaManagedAgentsAutoPolicy {
+        return match ($type) {
+            Type::ALWAYS_ALLOW, 'always_allow' => BetaManagedAgentsAlwaysAllowPolicy::with(
+            ),
+            Type::ALWAYS_ASK, 'always_ask' => BetaManagedAgentsAlwaysAskPolicy::with(
+            ),
+            Type::AUTO, 'auto' => BetaManagedAgentsAutoPolicy::with(),
+            default => throw new \UnhandledMatchError(sprintf('Unhandled match case %s', var_export($type, true)))
+        };
     }
 }

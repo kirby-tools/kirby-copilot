@@ -7,6 +7,7 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type BetaJSONOutputFormatShape = array{
@@ -19,11 +20,11 @@ final class BetaJSONOutputFormat implements BaseModel
     use SdkModel;
 
     /** @var 'json_schema' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('json_schema'))]
     public string $type = 'json_schema';
 
     /**
-     * The JSON schema of the format.
+     * The JSON schema of the format
      *
      * @var array<string,mixed> $schema
      */
@@ -41,7 +42,7 @@ final class BetaJSONOutputFormat implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaJSONOutputFormat)->withSchema(...)
+     * (new BetaJSONOutputFormat())->withSchema(...)
      * ```
      */
     public function __construct()
@@ -66,7 +67,7 @@ final class BetaJSONOutputFormat implements BaseModel
     }
 
     /**
-     * The JSON schema of the format.
+     * The JSON schema of the format
      *
      * @param array<string,mixed> $schema
      */

@@ -26,19 +26,19 @@ final class BetaContextManagementCapability implements BaseModel
     use SdkModel;
 
     /**
-     * Indicates whether a capability is supported.
+     * Whether the clear_thinking_20251015 strategy is supported.
      */
     #[Required('clear_thinking_20251015')]
     public ?BetaCapabilitySupport $clearThinking20251015;
 
     /**
-     * Indicates whether a capability is supported.
+     * Whether the clear_tool_uses_20250919 strategy is supported.
      */
     #[Required('clear_tool_uses_20250919')]
     public ?BetaCapabilitySupport $clearToolUses20250919;
 
     /**
-     * Indicates whether a capability is supported.
+     * Whether the compact_20260112 strategy is supported.
      */
     #[Required('compact_20260112')]
     public ?BetaCapabilitySupport $compact20260112;
@@ -65,7 +65,7 @@ final class BetaContextManagementCapability implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaContextManagementCapability)
+     * (new BetaContextManagementCapability())
      *   ->withClearThinking20251015(...)
      *   ->withClearToolUses20250919(...)
      *   ->withCompact20260112(...)
@@ -103,7 +103,7 @@ final class BetaContextManagementCapability implements BaseModel
     }
 
     /**
-     * Indicates whether a capability is supported.
+     * Whether the clear_thinking_20251015 strategy is supported.
      *
      * @param BetaCapabilitySupport|BetaCapabilitySupportShape|null $clearThinking20251015
      */
@@ -117,7 +117,7 @@ final class BetaContextManagementCapability implements BaseModel
     }
 
     /**
-     * Indicates whether a capability is supported.
+     * Whether the clear_tool_uses_20250919 strategy is supported.
      *
      * @param BetaCapabilitySupport|BetaCapabilitySupportShape|null $clearToolUses20250919
      */
@@ -131,7 +131,7 @@ final class BetaContextManagementCapability implements BaseModel
     }
 
     /**
-     * Indicates whether a capability is supported.
+     * Whether the compact_20260112 strategy is supported.
      *
      * @param BetaCapabilitySupport|BetaCapabilitySupportShape|null $compact20260112
      */

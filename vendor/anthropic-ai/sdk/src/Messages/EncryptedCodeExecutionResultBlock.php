@@ -7,9 +7,14 @@ namespace Anthropic\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * Code execution result with encrypted stdout for PFC + web_search results.
+ * The output and exit code of Python code that Claude ran with the code execution tool, with standard output in encrypted form.
+ *
+ * The API returns this block in place of `code_execution_result` when the code called the web search tool.
+ *
+ * See the [programmatic tool calling guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/programmatic-tool-calling) to learn more about programmatic tool calling.
  *
  * @phpstan-import-type CodeExecutionOutputBlockShape from \Anthropic\Messages\CodeExecutionOutputBlock
  *
@@ -27,7 +32,7 @@ final class EncryptedCodeExecutionResultBlock implements BaseModel
     use SdkModel;
 
     /** @var 'encrypted_code_execution_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('encrypted_code_execution_result'))]
     public string $type = 'encrypted_code_execution_result';
 
     /** @var list<CodeExecutionOutputBlock> $content */
@@ -56,7 +61,7 @@ final class EncryptedCodeExecutionResultBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new EncryptedCodeExecutionResultBlock)
+     * (new EncryptedCodeExecutionResultBlock())
      *   ->withContent(...)
      *   ->withEncryptedStdout(...)
      *   ->withReturnCode(...)

@@ -1,0 +1,156 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Beta\Sessions\Events;
+
+use Anthropic\Core\Attributes\Required;
+use Anthropic\Core\Concerns\SdkModel;
+use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
+
+/**
+ * Periodic heartbeat emitted while an outcome evaluation cycle is in progress. Distinguishes 'evaluation is actively running' from 'evaluation is stuck' between the corresponding `span.outcome_evaluation_start` and `span.outcome_evaluation_end` events.
+ *
+ * @phpstan-type ManagedAgentsSpanOutcomeEvaluationOngoingEventShape = array{
+ *   id: string,
+ *   iteration: int,
+ *   outcomeID: string,
+ *   processedAt: \DateTimeInterface,
+ *   type: 'span.outcome_evaluation_ongoing',
+ * }
+ */
+final class ManagedAgentsSpanOutcomeEvaluationOngoingEvent implements BaseModel
+{
+    /** @use SdkModel<ManagedAgentsSpanOutcomeEvaluationOngoingEventShape> */
+    use SdkModel;
+
+    /** @var 'span.outcome_evaluation_ongoing' $type */
+    #[Required(type: new ConstantOf('span.outcome_evaluation_ongoing'))]
+    public string $type = 'span.outcome_evaluation_ongoing';
+
+    /**
+     * Unique identifier for this event.
+     */
+    #[Required]
+    public string $id;
+
+    /**
+     * 0-indexed revision cycle, matching the corresponding `span.outcome_evaluation_start`.
+     */
+    #[Required]
+    public int $iteration;
+
+    /**
+     * The `outc_` ID of the outcome being evaluated.
+     */
+    #[Required('outcome_id')]
+    public string $outcomeID;
+
+    /**
+     * Timestamp when this heartbeat was emitted.
+     */
+    #[Required('processed_at')]
+    public \DateTimeInterface $processedAt;
+
+    /**
+     * `new ManagedAgentsSpanOutcomeEvaluationOngoingEvent()` is missing required properties by the API.
+     *
+     * To enforce required parameters use
+     * ```
+     * ManagedAgentsSpanOutcomeEvaluationOngoingEvent::with(
+     *   id: ..., iteration: ..., outcomeID: ..., processedAt: ...
+     * )
+     * ```
+     *
+     * Otherwise ensure the following setters are called
+     *
+     * ```
+     * (new ManagedAgentsSpanOutcomeEvaluationOngoingEvent())
+     *   ->withID(...)
+     *   ->withIteration(...)
+     *   ->withOutcomeID(...)
+     *   ->withProcessedAt(...)
+     * ```
+     */
+    public function __construct()
+    {
+        $this->initialize();
+    }
+
+    /**
+     * Construct an instance from the required parameters.
+     *
+     * You must use named parameters to construct any parameters with a default value.
+     */
+    public static function with(
+        string $id,
+        int $iteration,
+        string $outcomeID,
+        \DateTimeInterface $processedAt,
+    ): self {
+        $self = new self;
+
+        $self['id'] = $id;
+        $self['iteration'] = $iteration;
+        $self['outcomeID'] = $outcomeID;
+        $self['processedAt'] = $processedAt;
+
+        return $self;
+    }
+
+    /**
+     * Unique identifier for this event.
+     */
+    public function withID(string $id): self
+    {
+        $self = clone $this;
+        $self['id'] = $id;
+
+        return $self;
+    }
+
+    /**
+     * 0-indexed revision cycle, matching the corresponding `span.outcome_evaluation_start`.
+     */
+    public function withIteration(int $iteration): self
+    {
+        $self = clone $this;
+        $self['iteration'] = $iteration;
+
+        return $self;
+    }
+
+    /**
+     * The `outc_` ID of the outcome being evaluated.
+     */
+    public function withOutcomeID(string $outcomeID): self
+    {
+        $self = clone $this;
+        $self['outcomeID'] = $outcomeID;
+
+        return $self;
+    }
+
+    /**
+     * Timestamp when this heartbeat was emitted.
+     */
+    public function withProcessedAt(\DateTimeInterface $processedAt): self
+    {
+        $self = clone $this;
+        $self['processedAt'] = $processedAt;
+
+        return $self;
+    }
+
+    /**
+     * @param 'span.outcome_evaluation_ongoing' $type
+     */
+    public function withType(string $type): self
+    {
+        $self = clone $this;
+        $self['type'] = $type;
+
+        return $self;
+    }
+}

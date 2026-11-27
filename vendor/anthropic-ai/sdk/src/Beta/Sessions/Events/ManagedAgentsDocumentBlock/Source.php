@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Anthropic\Beta\Sessions\Events\ManagedAgentsDocumentBlock;
 
 use Anthropic\Beta\Sessions\Events\ManagedAgentsBase64DocumentSource;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsDocumentBlock\Source\Type;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsFileDocumentSource;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsPlainTextDocumentSource;
 use Anthropic\Beta\Sessions\Events\ManagedAgentsURLDocumentSource;
@@ -13,7 +14,7 @@ use Anthropic\Core\Conversion\Contracts\Converter;
 use Anthropic\Core\Conversion\Contracts\ConverterSource;
 
 /**
- * Union type for document source variants.
+ * The source of the document data.
  *
  * @phpstan-import-type ManagedAgentsBase64DocumentSourceShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsBase64DocumentSource
  * @phpstan-import-type ManagedAgentsPlainTextDocumentSourceShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsPlainTextDocumentSource
@@ -43,5 +44,37 @@ final class Source implements ConverterSource
             'url' => ManagedAgentsURLDocumentSource::class,
             'file' => ManagedAgentsFileDocumentSource::class,
         ];
+    }
+
+    /**
+     * Constructs the variant whose `type` matches the given value, forwarding the remaining arguments to its own `with()`.
+     *
+     * @return ($type is Type::BASE64|'base64' ? ManagedAgentsBase64DocumentSource : ($type is Type::TEXT|'text' ? ManagedAgentsPlainTextDocumentSource : ($type is Type::URL|'url' ? ManagedAgentsURLDocumentSource : ($type is Type::FILE|'file' ? ManagedAgentsFileDocumentSource : ManagedAgentsBase64DocumentSource|ManagedAgentsPlainTextDocumentSource|ManagedAgentsURLDocumentSource|ManagedAgentsFileDocumentSource))))
+     *
+     * @throws \UnhandledMatchError
+     */
+    public static function with(
+        Type|string $type,
+        ?string $data = null,
+        ?string $mediaType = null,
+        ?string $url = null,
+        ?string $fileID = null,
+    ): ManagedAgentsBase64DocumentSource|ManagedAgentsPlainTextDocumentSource|ManagedAgentsURLDocumentSource|ManagedAgentsFileDocumentSource {
+        return match ($type) {
+            Type::BASE64, 'base64' => ManagedAgentsBase64DocumentSource::with(
+                data: $data ?? throw new \ArgumentCountError('$data is required'),
+                mediaType: $mediaType ?? throw new \ArgumentCountError('$mediaType is required'),
+            ),
+            Type::TEXT, 'text' => ManagedAgentsPlainTextDocumentSource::with(
+                data: $data ?? throw new \ArgumentCountError('$data is required')
+            ),
+            Type::URL, 'url' => ManagedAgentsURLDocumentSource::with(
+                url: $url ?? throw new \ArgumentCountError('$url is required')
+            ),
+            Type::FILE, 'file' => ManagedAgentsFileDocumentSource::with(
+                fileID: $fileID ?? throw new \ArgumentCountError('$fileID is required'),
+            ),
+            default => throw new \UnhandledMatchError(sprintf('Unhandled match case %s', var_export($type, true)))
+        };
     }
 }

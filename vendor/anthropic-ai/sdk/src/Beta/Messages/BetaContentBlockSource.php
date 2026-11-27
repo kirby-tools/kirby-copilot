@@ -8,10 +8,11 @@ use Anthropic\Beta\Messages\BetaContentBlockSource\Content;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type ContentVariants from \Anthropic\Beta\Messages\BetaContentBlockSource\Content
  * @phpstan-import-type ContentShape from \Anthropic\Beta\Messages\BetaContentBlockSource\Content
+ * @phpstan-import-type ContentVariants from \Anthropic\Beta\Messages\BetaContentBlockSource\Content
  *
  * @phpstan-type BetaContentBlockSourceShape = array{
  *   content: ContentShape, type: 'content'
@@ -23,7 +24,7 @@ final class BetaContentBlockSource implements BaseModel
     use SdkModel;
 
     /** @var 'content' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('content'))]
     public string $type = 'content';
 
     /** @var ContentVariants $content */
@@ -41,7 +42,7 @@ final class BetaContentBlockSource implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaContentBlockSource)->withContent(...)
+     * (new BetaContentBlockSource())->withContent(...)
      * ```
      */
     public function __construct()

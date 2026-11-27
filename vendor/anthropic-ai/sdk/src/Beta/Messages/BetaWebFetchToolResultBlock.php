@@ -9,12 +9,13 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type ContentVariants from \Anthropic\Beta\Messages\BetaWebFetchToolResultBlock\Content
- * @phpstan-import-type CallerVariants from \Anthropic\Beta\Messages\BetaWebFetchToolResultBlock\Caller
  * @phpstan-import-type ContentShape from \Anthropic\Beta\Messages\BetaWebFetchToolResultBlock\Content
  * @phpstan-import-type CallerShape from \Anthropic\Beta\Messages\BetaWebFetchToolResultBlock\Caller
+ * @phpstan-import-type ContentVariants from \Anthropic\Beta\Messages\BetaWebFetchToolResultBlock\Content
+ * @phpstan-import-type CallerVariants from \Anthropic\Beta\Messages\BetaWebFetchToolResultBlock\Caller
  *
  * @phpstan-type BetaWebFetchToolResultBlockShape = array{
  *   content: ContentShape,
@@ -29,7 +30,7 @@ final class BetaWebFetchToolResultBlock implements BaseModel
     use SdkModel;
 
     /** @var 'web_fetch_tool_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('web_fetch_tool_result'))]
     public string $type = 'web_fetch_tool_result';
 
     /** @var ContentVariants $content */
@@ -39,11 +40,7 @@ final class BetaWebFetchToolResultBlock implements BaseModel
     #[Required('tool_use_id')]
     public string $toolUseID;
 
-    /**
-     * Tool invocation directly from the model.
-     *
-     * @var CallerVariants|null $caller
-     */
+    /** @var CallerVariants|null $caller */
     #[Optional(union: Caller::class)]
     public BetaDirectCaller|BetaServerToolCaller|BetaServerToolCaller20260120|null $caller;
 
@@ -58,7 +55,7 @@ final class BetaWebFetchToolResultBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaWebFetchToolResultBlock)->withContent(...)->withToolUseID(...)
+     * (new BetaWebFetchToolResultBlock())->withContent(...)->withToolUseID(...)
      * ```
      */
     public function __construct()
@@ -121,8 +118,6 @@ final class BetaWebFetchToolResultBlock implements BaseModel
     }
 
     /**
-     * Tool invocation directly from the model.
-     *
      * @param CallerShape $caller
      */
     public function withCaller(

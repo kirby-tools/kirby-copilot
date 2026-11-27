@@ -7,10 +7,11 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type ContentVariants from \Anthropic\Beta\Messages\BetaToolSearchToolResultBlock\Content
  * @phpstan-import-type ContentShape from \Anthropic\Beta\Messages\BetaToolSearchToolResultBlock\Content
+ * @phpstan-import-type ContentVariants from \Anthropic\Beta\Messages\BetaToolSearchToolResultBlock\Content
  *
  * @phpstan-type BetaToolSearchToolResultBlockShape = array{
  *   content: ContentShape, toolUseID: string, type: 'tool_search_tool_result'
@@ -22,12 +23,12 @@ final class BetaToolSearchToolResultBlock implements BaseModel
     use SdkModel;
 
     /** @var 'tool_search_tool_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('tool_search_tool_result'))]
     public string $type = 'tool_search_tool_result';
 
     /** @var ContentVariants $content */
     #[Required]
-    public BetaToolSearchToolResultError|BetaToolSearchToolSearchResultBlock $content;
+    public BetaToolSearchToolResultErrorObject|BetaToolSearchToolSearchResultBlock $content;
 
     #[Required('tool_use_id')]
     public string $toolUseID;
@@ -43,7 +44,7 @@ final class BetaToolSearchToolResultBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaToolSearchToolResultBlock)->withContent(...)->withToolUseID(...)
+     * (new BetaToolSearchToolResultBlock())->withContent(...)->withToolUseID(...)
      * ```
      */
     public function __construct()
@@ -59,7 +60,7 @@ final class BetaToolSearchToolResultBlock implements BaseModel
      * @param ContentShape $content
      */
     public static function with(
-        BetaToolSearchToolResultError|array|BetaToolSearchToolSearchResultBlock $content,
+        BetaToolSearchToolResultErrorObject|array|BetaToolSearchToolSearchResultBlock $content,
         string $toolUseID,
     ): self {
         $self = new self;
@@ -74,7 +75,7 @@ final class BetaToolSearchToolResultBlock implements BaseModel
      * @param ContentShape $content
      */
     public function withContent(
-        BetaToolSearchToolResultError|array|BetaToolSearchToolSearchResultBlock $content,
+        BetaToolSearchToolResultErrorObject|array|BetaToolSearchToolSearchResultBlock $content,
     ): self {
         $self = clone $this;
         $self['content'] = $content;

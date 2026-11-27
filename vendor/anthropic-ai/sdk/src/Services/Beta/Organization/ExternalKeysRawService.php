@@ -1,0 +1,282 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Services\Beta\Organization;
+
+use Anthropic\Beta\Organization\ExternalKeys\ExternalKey;
+use Anthropic\Beta\Organization\ExternalKeys\ExternalKeyCreateParams;
+use Anthropic\Beta\Organization\ExternalKeys\ExternalKeyCreateParams\Geo;
+use Anthropic\Beta\Organization\ExternalKeys\ExternalKeyDeleteResponse;
+use Anthropic\Beta\Organization\ExternalKeys\ExternalKeyListParams;
+use Anthropic\Beta\Organization\ExternalKeys\ExternalKeyUpdateParams;
+use Anthropic\Beta\Organization\ExternalKeys\ExternalKeyValidateResponse;
+use Anthropic\Client;
+use Anthropic\Core\Contracts\BaseResponse;
+use Anthropic\Core\Exceptions\APIException;
+use Anthropic\Core\Implementation\ApiCallInfo;
+use Anthropic\Organization\ExternalKeys\ExternalKeyInWorkspacePolicyException;
+use Anthropic\PageCursor;
+use Anthropic\RequestOptions;
+use Anthropic\SandboxEgressRestrictedException;
+use Anthropic\ServiceContracts\Beta\Organization\ExternalKeysRawContract;
+use Anthropic\UserProfiles\UserProfileNotFoundException;
+
+/**
+ * @phpstan-import-type ProviderConfigShape from \Anthropic\Beta\Organization\ExternalKeys\ExternalKeyCreateParams\ProviderConfig
+ * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ * @phpstan-import-type ProviderConfigShape from \Anthropic\Beta\Organization\ExternalKeys\ExternalKeyUpdateParams\ProviderConfig as ProviderConfigShape1
+ */
+final class ExternalKeysRawService implements ExternalKeysRawContract
+{
+    // @phpstan-ignore-next-line
+    /**
+     * @internal
+     */
+    public function __construct(private Client $client) {}
+
+    /**
+     * @api
+     *
+     * Create an external key config owned by the caller's organization.
+     *
+     * @param array{
+     *   providerConfig: ProviderConfigShape,
+     *   displayName?: string|null,
+     *   geo?: Geo|value-of<Geo>,
+     *   userProfileID?: string|null,
+     * }|ExternalKeyCreateParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<ExternalKey>
+     *
+     * @throws UserProfileNotFoundException
+     * @throws SandboxEgressRestrictedException
+     * @throws APIException
+     */
+    public function create(
+        array|ExternalKeyCreateParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = ExternalKeyCreateParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'post',
+            path: 'v1/organizations/external_keys',
+            body: (object) $parsed,
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.organization.external_keys.create',
+                route: '/v1/organizations/external_keys',
+                createdId: 'anthropic.organization.external_key.id',
+            )),
+            convert: ExternalKey::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * Retrieve a single external key config in the caller's organization by ID.
+     *
+     * @param string $externalKeyID ID of the External Key.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<ExternalKey>
+     *
+     * @throws APIException
+     */
+    public function retrieve(
+        string $externalKeyID,
+        RequestOptions|array|null $requestOptions = null
+    ): BaseResponse {
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'get',
+            path: ['v1/organizations/external_keys/%1$s', $externalKeyID],
+            options: RequestOptions::parse($requestOptions)->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.organization.external_keys.retrieve',
+                route: '/v1/organizations/external_keys/{external_key_id}',
+                attributes: [
+                    'anthropic.organization.external_key.id' => $externalKeyID,
+                ],
+            )),
+            convert: ExternalKey::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * Partially update an external key config. Omitted fields are left unchanged.
+     *
+     * `display_name` is always editable. `geo` and `provider_config` cannot
+     * be changed once any workspace references this config, and a Google Cloud
+     * key's provider and `key_name` cannot be changed at all.
+     *
+     * @param string $externalKeyID ID of the External Key.
+     * @param array{
+     *   displayName?: string|null,
+     *   geo?: ExternalKeyUpdateParams\Geo|value-of<ExternalKeyUpdateParams\Geo>|null,
+     *   providerConfig?: ProviderConfigShape1|null,
+     * }|ExternalKeyUpdateParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<ExternalKey>
+     *
+     * @throws ExternalKeyInWorkspacePolicyException
+     * @throws SandboxEgressRestrictedException
+     * @throws APIException
+     */
+    public function update(
+        string $externalKeyID,
+        array|ExternalKeyUpdateParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = ExternalKeyUpdateParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'post',
+            path: ['v1/organizations/external_keys/%1$s', $externalKeyID],
+            body: (object) $parsed,
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.organization.external_keys.update',
+                route: '/v1/organizations/external_keys/{external_key_id}',
+                attributes: [
+                    'anthropic.organization.external_key.id' => $externalKeyID,
+                ],
+            )),
+            convert: ExternalKey::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * List external key configs in the caller's organization.
+     *
+     * Results are ordered by creation time (newest first). Use the
+     * `next_page` cursor from the response to fetch subsequent pages.
+     *
+     * @param array{limit?: int, page?: string|null}|ExternalKeyListParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<PageCursor<ExternalKey>>
+     *
+     * @throws APIException
+     */
+    public function list(
+        array|ExternalKeyListParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = ExternalKeyListParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'get',
+            path: 'v1/organizations/external_keys',
+            query: $parsed,
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.organization.external_keys.list',
+                route: '/v1/organizations/external_keys',
+                query: ['limit', 'page'],
+            )),
+            convert: ExternalKey::class,
+            page: PageCursor::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * Delete an external key config.
+     *
+     * The request is rejected if any workspace still references this config.
+     *
+     * @param string $externalKeyID ID of the External Key.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<ExternalKeyDeleteResponse>
+     *
+     * @throws ExternalKeyInWorkspacePolicyException
+     * @throws SandboxEgressRestrictedException
+     * @throws APIException
+     */
+    public function delete(
+        string $externalKeyID,
+        RequestOptions|array|null $requestOptions = null
+    ): BaseResponse {
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'delete',
+            path: ['v1/organizations/external_keys/%1$s', $externalKeyID],
+            options: RequestOptions::parse($requestOptions)->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.organization.external_keys.delete',
+                route: '/v1/organizations/external_keys/{external_key_id}',
+                attributes: [
+                    'anthropic.organization.external_key.id' => $externalKeyID,
+                ],
+            )),
+            convert: ExternalKeyDeleteResponse::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * Validate an external key config against the customer's KMS.
+     *
+     * Anthropic performs an encrypt/decrypt roundtrip against the configured
+     * KMS key and waits up to 30 seconds for the result. The response status is
+     * `success` if the roundtrip succeeded, or `failure` with an error
+     * message if it failed or timed out.
+     *
+     * @param string $externalKeyID ID of the External Key.
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<ExternalKeyValidateResponse>
+     *
+     * @throws SandboxEgressRestrictedException
+     * @throws APIException
+     */
+    public function validate(
+        string $externalKeyID,
+        RequestOptions|array|null $requestOptions = null
+    ): BaseResponse {
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'post',
+            path: ['v1/organizations/external_keys/%1$s/validate', $externalKeyID],
+            options: RequestOptions::parse($requestOptions)->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.organization.external_keys.validate',
+                route: '/v1/organizations/external_keys/{external_key_id}/validate',
+                attributes: [
+                    'anthropic.organization.external_key.id' => $externalKeyID,
+                ],
+            )),
+            convert: ExternalKeyValidateResponse::class,
+        );
+    }
+}

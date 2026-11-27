@@ -7,10 +7,11 @@ namespace Anthropic\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type ContentVariants from \Anthropic\Messages\TextEditorCodeExecutionToolResultBlock\Content
  * @phpstan-import-type ContentShape from \Anthropic\Messages\TextEditorCodeExecutionToolResultBlock\Content
+ * @phpstan-import-type ContentVariants from \Anthropic\Messages\TextEditorCodeExecutionToolResultBlock\Content
  *
  * @phpstan-type TextEditorCodeExecutionToolResultBlockShape = array{
  *   content: ContentShape,
@@ -24,12 +25,12 @@ final class TextEditorCodeExecutionToolResultBlock implements BaseModel
     use SdkModel;
 
     /** @var 'text_editor_code_execution_tool_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('text_editor_code_execution_tool_result'))]
     public string $type = 'text_editor_code_execution_tool_result';
 
     /** @var ContentVariants $content */
     #[Required]
-    public TextEditorCodeExecutionToolResultError|TextEditorCodeExecutionViewResultBlock|TextEditorCodeExecutionCreateResultBlock|TextEditorCodeExecutionStrReplaceResultBlock $content;
+    public TextEditorCodeExecutionToolResultErrorObject|TextEditorCodeExecutionViewResultBlock|TextEditorCodeExecutionCreateResultBlock|TextEditorCodeExecutionStrReplaceResultBlock $content;
 
     #[Required('tool_use_id')]
     public string $toolUseID;
@@ -45,7 +46,7 @@ final class TextEditorCodeExecutionToolResultBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new TextEditorCodeExecutionToolResultBlock)
+     * (new TextEditorCodeExecutionToolResultBlock())
      *   ->withContent(...)
      *   ->withToolUseID(...)
      * ```
@@ -63,7 +64,7 @@ final class TextEditorCodeExecutionToolResultBlock implements BaseModel
      * @param ContentShape $content
      */
     public static function with(
-        TextEditorCodeExecutionToolResultError|array|TextEditorCodeExecutionViewResultBlock|TextEditorCodeExecutionCreateResultBlock|TextEditorCodeExecutionStrReplaceResultBlock $content,
+        TextEditorCodeExecutionToolResultErrorObject|array|TextEditorCodeExecutionViewResultBlock|TextEditorCodeExecutionCreateResultBlock|TextEditorCodeExecutionStrReplaceResultBlock $content,
         string $toolUseID,
     ): self {
         $self = new self;
@@ -78,7 +79,7 @@ final class TextEditorCodeExecutionToolResultBlock implements BaseModel
      * @param ContentShape $content
      */
     public function withContent(
-        TextEditorCodeExecutionToolResultError|array|TextEditorCodeExecutionViewResultBlock|TextEditorCodeExecutionCreateResultBlock|TextEditorCodeExecutionStrReplaceResultBlock $content,
+        TextEditorCodeExecutionToolResultErrorObject|array|TextEditorCodeExecutionViewResultBlock|TextEditorCodeExecutionCreateResultBlock|TextEditorCodeExecutionStrReplaceResultBlock $content,
     ): self {
         $self = clone $this;
         $self['content'] = $content;

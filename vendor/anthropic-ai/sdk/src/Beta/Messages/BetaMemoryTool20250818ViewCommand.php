@@ -8,6 +8,7 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type BetaMemoryTool20250818ViewCommandShape = array{
@@ -20,21 +21,21 @@ final class BetaMemoryTool20250818ViewCommand implements BaseModel
     use SdkModel;
 
     /**
-     * Command type identifier.
+     * Command type identifier
      *
      * @var 'view' $command
      */
-    #[Required]
+    #[Required(type: new ConstantOf('view'))]
     public string $command = 'view';
 
     /**
-     * Path to directory or file to view.
+     * Path to directory or file to view
      */
     #[Required]
     public string $path;
 
     /**
-     * Optional line range for viewing specific lines.
+     * Optional line range for viewing specific lines
      *
      * @var list<int>|null $viewRange
      */
@@ -52,7 +53,7 @@ final class BetaMemoryTool20250818ViewCommand implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaMemoryTool20250818ViewCommand)->withPath(...)
+     * (new BetaMemoryTool20250818ViewCommand())->withPath(...)
      * ```
      */
     public function __construct()
@@ -79,7 +80,7 @@ final class BetaMemoryTool20250818ViewCommand implements BaseModel
     }
 
     /**
-     * Command type identifier.
+     * Command type identifier
      *
      * @param 'view' $command
      */
@@ -92,7 +93,7 @@ final class BetaMemoryTool20250818ViewCommand implements BaseModel
     }
 
     /**
-     * Path to directory or file to view.
+     * Path to directory or file to view
      */
     public function withPath(string $path): self
     {
@@ -103,7 +104,7 @@ final class BetaMemoryTool20250818ViewCommand implements BaseModel
     }
 
     /**
-     * Optional line range for viewing specific lines.
+     * Optional line range for viewing specific lines
      *
      * @param list<int> $viewRange
      */

@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace Anthropic\ServiceContracts\Beta\Skills;
 
+use Anthropic\Beta\Skills\Versions\DeletedSkillVersion;
+use Anthropic\Beta\Skills\Versions\SkillVersion;
 use Anthropic\Beta\Skills\Versions\VersionCreateParams;
 use Anthropic\Beta\Skills\Versions\VersionDeleteParams;
-use Anthropic\Beta\Skills\Versions\VersionDeleteResponse;
-use Anthropic\Beta\Skills\Versions\VersionGetResponse;
+use Anthropic\Beta\Skills\Versions\VersionDownloadParams;
 use Anthropic\Beta\Skills\Versions\VersionListParams;
-use Anthropic\Beta\Skills\Versions\VersionListResponse;
-use Anthropic\Beta\Skills\Versions\VersionNewResponse;
 use Anthropic\Beta\Skills\Versions\VersionRetrieveParams;
+use Anthropic\ClaudeCodeKeyCreatorNotMemberException;
+use Anthropic\CMEKContextUnavailableException;
+use Anthropic\CMEKKeyDisabledException;
+use Anthropic\CMEKKeyNetworkBlockedException;
 use Anthropic\Core\Contracts\BaseResponse;
 use Anthropic\Core\Exceptions\APIException;
+use Anthropic\OrganizationOnHoldException;
 use Anthropic\PageCursor;
 use Anthropic\RequestOptions;
 
@@ -31,8 +35,13 @@ interface VersionsRawContract
      * @param array<string,mixed>|VersionCreateParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<VersionNewResponse>
+     * @return BaseResponse<SkillVersion>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CMEKKeyDisabledException
+     * @throws CMEKKeyNetworkBlockedException
+     * @throws OrganizationOnHoldException
+     * @throws CMEKContextUnavailableException
      * @throws APIException
      */
     public function create(
@@ -44,14 +53,16 @@ interface VersionsRawContract
     /**
      * @api
      *
-     * @param string $version Path param: Version identifier for the skill.
+     * @param string $version Path param: Identifies the skill version: a version ID, or the literal `latest` for the skill's most recent version.
      *
-     * Each version is identified by a Unix epoch timestamp (e.g., "1759178010641129").
+     * Requests carrying the `skills-2025-10-02` beta header address versions by their Unix epoch timestamp instead (e.g., "1759178010641129").
      * @param array<string,mixed>|VersionRetrieveParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<VersionGetResponse>
+     * @return BaseResponse<SkillVersion>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function retrieve(
@@ -69,8 +80,10 @@ interface VersionsRawContract
      * @param array<string,mixed>|VersionListParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<PageCursor<VersionListResponse>>
+     * @return BaseResponse<PageCursor<SkillVersion>>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function list(
@@ -82,19 +95,40 @@ interface VersionsRawContract
     /**
      * @api
      *
-     * @param string $version Path param: Version identifier for the skill.
+     * @param string $version Path param: Identifies the skill version by its version ID.
      *
-     * Each version is identified by a Unix epoch timestamp (e.g., "1759178010641129").
+     * Requests carrying the `skills-2025-10-02` beta header address versions by their Unix epoch timestamp instead (e.g., "1759178010641129").
      * @param array<string,mixed>|VersionDeleteParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<VersionDeleteResponse>
+     * @return BaseResponse<DeletedSkillVersion>
      *
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws OrganizationOnHoldException
      * @throws APIException
      */
     public function delete(
         string $version,
         array|VersionDeleteParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse;
+
+    /**
+     * @api
+     *
+     * @param string $version Path param: Identifies the skill version by its version ID.
+     *
+     * Requests carrying the `skills-2025-10-02` beta header address versions by their Unix epoch timestamp instead (e.g., "1759178010641129").
+     * @param array<string,mixed>|VersionDownloadParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<string>
+     *
+     * @throws APIException
+     */
+    public function download(
+        string $version,
+        array|VersionDownloadParams $params,
         RequestOptions|array|null $requestOptions = null,
     ): BaseResponse;
 }

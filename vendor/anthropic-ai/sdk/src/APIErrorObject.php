@@ -7,6 +7,7 @@ namespace Anthropic;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type APIErrorObjectShape = array{message: string, type: 'api_error'}
@@ -16,10 +17,17 @@ final class APIErrorObject implements BaseModel
     /** @use SdkModel<APIErrorObjectShape> */
     use SdkModel;
 
-    /** @var 'api_error' $type */
-    #[Required]
+    /**
+     * The broad category of the error.
+     *
+     * @var 'api_error' $type
+     */
+    #[Required(type: new ConstantOf('api_error'))]
     public string $type = 'api_error';
 
+    /**
+     * A human-readable explanation of the error. Its wording can change, so don't match on it.
+     */
     #[Required]
     public string $message;
 
@@ -34,7 +42,7 @@ final class APIErrorObject implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new APIErrorObject)->withMessage(...)
+     * (new APIErrorObject())->withMessage(...)
      * ```
      */
     public function __construct()
@@ -56,6 +64,9 @@ final class APIErrorObject implements BaseModel
         return $self;
     }
 
+    /**
+     * A human-readable explanation of the error. Its wording can change, so don't match on it.
+     */
     public function withMessage(string $message): self
     {
         $self = clone $this;
@@ -65,6 +76,8 @@ final class APIErrorObject implements BaseModel
     }
 
     /**
+     * The broad category of the error.
+     *
      * @param 'api_error' $type
      */
     public function withType(string $type): self

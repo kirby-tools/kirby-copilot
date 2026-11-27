@@ -5,42 +5,52 @@ declare(strict_types=1);
 namespace Anthropic\Beta\Sessions;
 
 use Anthropic\Beta\Sessions\BetaManagedAgentsSession\Status;
-use Anthropic\Beta\Sessions\BetaManagedAgentsSession\Type;
 use Anthropic\Beta\Sessions\Resources\ManagedAgentsSessionResource;
+use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * A Managed Agents `session`.
  *
- * @phpstan-import-type ManagedAgentsSessionResourceVariants from \Anthropic\Beta\Sessions\Resources\ManagedAgentsSessionResource
  * @phpstan-import-type BetaManagedAgentsSessionAgentShape from \Anthropic\Beta\Sessions\BetaManagedAgentsSessionAgent
+ * @phpstan-import-type BetaManagedAgentsBudgetLimitShape from \Anthropic\Beta\Sessions\BetaManagedAgentsBudgetLimit
+ * @phpstan-import-type BetaManagedAgentsOutcomeEvaluationResourceShape from \Anthropic\Beta\Sessions\BetaManagedAgentsOutcomeEvaluationResource
  * @phpstan-import-type ManagedAgentsSessionResourceShape from \Anthropic\Beta\Sessions\Resources\ManagedAgentsSessionResource
  * @phpstan-import-type BetaManagedAgentsSessionStatsShape from \Anthropic\Beta\Sessions\BetaManagedAgentsSessionStats
  * @phpstan-import-type BetaManagedAgentsSessionUsageShape from \Anthropic\Beta\Sessions\BetaManagedAgentsSessionUsage
+ * @phpstan-import-type ManagedAgentsSessionResourceVariants from \Anthropic\Beta\Sessions\Resources\ManagedAgentsSessionResource
  *
  * @phpstan-type BetaManagedAgentsSessionShape = array{
  *   id: string,
  *   agent: BetaManagedAgentsSessionAgent|BetaManagedAgentsSessionAgentShape,
  *   archivedAt: \DateTimeInterface|null,
+ *   budget: null|BetaManagedAgentsBudgetLimit|BetaManagedAgentsBudgetLimitShape,
  *   createdAt: \DateTimeInterface,
  *   environmentID: string,
  *   metadata: array<string,string>,
+ *   outcomeEvaluations: list<BetaManagedAgentsOutcomeEvaluationResource|BetaManagedAgentsOutcomeEvaluationResourceShape>,
  *   resources: list<ManagedAgentsSessionResourceShape>,
  *   stats: BetaManagedAgentsSessionStats|BetaManagedAgentsSessionStatsShape,
  *   status: Status|value-of<Status>,
  *   title: string|null,
- *   type: Type|value-of<Type>,
+ *   type: 'session',
  *   updatedAt: \DateTimeInterface,
  *   usage: BetaManagedAgentsSessionUsage|BetaManagedAgentsSessionUsageShape,
  *   vaultIDs: list<string>,
+ *   deploymentID?: string|null,
  * }
  */
 final class BetaManagedAgentsSession implements BaseModel
 {
     /** @use SdkModel<BetaManagedAgentsSessionShape> */
     use SdkModel;
+
+    /** @var 'session' $type */
+    #[Required(type: new ConstantOf('session'))]
+    public string $type = 'session';
 
     #[Required]
     public string $id;
@@ -52,13 +62,19 @@ final class BetaManagedAgentsSession implements BaseModel
     public BetaManagedAgentsSessionAgent $agent;
 
     /**
-     * A timestamp in RFC 3339 format.
+     * When the session was archived. Null if not archived.
      */
     #[Required('archived_at')]
     public ?\DateTimeInterface $archivedAt;
 
     /**
-     * A timestamp in RFC 3339 format.
+     * The session's enforced spend ceiling, or null when no budget is set.
+     */
+    #[Required]
+    public ?BetaManagedAgentsBudgetLimit $budget;
+
+    /**
+     * A timestamp in RFC 3339 format
      */
     #[Required('created_at')]
     public \DateTimeInterface $createdAt;
@@ -70,39 +86,42 @@ final class BetaManagedAgentsSession implements BaseModel
     #[Required(map: 'string')]
     public array $metadata;
 
+    /**
+     * Per-outcome evaluation state. One entry per `define_outcome` event sent to the session.
+     *
+     * @var list<BetaManagedAgentsOutcomeEvaluationResource> $outcomeEvaluations
+     */
+    #[Required(
+        'outcome_evaluations',
+        list: BetaManagedAgentsOutcomeEvaluationResource::class,
+    )]
+    public array $outcomeEvaluations;
+
     /** @var list<ManagedAgentsSessionResourceVariants> $resources */
     #[Required(list: ManagedAgentsSessionResource::class)]
     public array $resources;
 
     /**
-     * Timing statistics for a session.
+     * Timing statistics for the session.
      */
     #[Required]
     public BetaManagedAgentsSessionStats $stats;
 
-    /**
-     * SessionStatus enum.
-     *
-     * @var value-of<Status> $status
-     */
+    /** @var value-of<Status> $status */
     #[Required(enum: Status::class)]
     public string $status;
 
     #[Required]
     public ?string $title;
 
-    /** @var value-of<Type> $type */
-    #[Required(enum: Type::class)]
-    public string $type;
-
     /**
-     * A timestamp in RFC 3339 format.
+     * A timestamp in RFC 3339 format
      */
     #[Required('updated_at')]
     public \DateTimeInterface $updatedAt;
 
     /**
-     * Cumulative token usage for a session across all turns.
+     * Cumulative token usage for the session.
      */
     #[Required]
     public BetaManagedAgentsSessionUsage $usage;
@@ -116,6 +135,12 @@ final class BetaManagedAgentsSession implements BaseModel
     public array $vaultIDs;
 
     /**
+     * Deployment ID when the session was created from a deployment reference. Null otherwise.
+     */
+    #[Optional('deployment_id', nullable: true)]
+    public ?string $deploymentID;
+
+    /**
      * `new BetaManagedAgentsSession()` is missing required properties by the API.
      *
      * To enforce required parameters use
@@ -124,14 +149,15 @@ final class BetaManagedAgentsSession implements BaseModel
      *   id: ...,
      *   agent: ...,
      *   archivedAt: ...,
+     *   budget: ...,
      *   createdAt: ...,
      *   environmentID: ...,
      *   metadata: ...,
+     *   outcomeEvaluations: ...,
      *   resources: ...,
      *   stats: ...,
      *   status: ...,
      *   title: ...,
-     *   type: ...,
      *   updatedAt: ...,
      *   usage: ...,
      *   vaultIDs: ...,
@@ -141,18 +167,19 @@ final class BetaManagedAgentsSession implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaManagedAgentsSession)
+     * (new BetaManagedAgentsSession())
      *   ->withID(...)
      *   ->withAgent(...)
      *   ->withArchivedAt(...)
+     *   ->withBudget(...)
      *   ->withCreatedAt(...)
      *   ->withEnvironmentID(...)
      *   ->withMetadata(...)
+     *   ->withOutcomeEvaluations(...)
      *   ->withResources(...)
      *   ->withStats(...)
      *   ->withStatus(...)
      *   ->withTitle(...)
-     *   ->withType(...)
      *   ->withUpdatedAt(...)
      *   ->withUsage(...)
      *   ->withVaultIDs(...)
@@ -169,11 +196,12 @@ final class BetaManagedAgentsSession implements BaseModel
      * You must use named parameters to construct any parameters with a default value.
      *
      * @param BetaManagedAgentsSessionAgent|BetaManagedAgentsSessionAgentShape $agent
+     * @param BetaManagedAgentsBudgetLimit|BetaManagedAgentsBudgetLimitShape|null $budget
      * @param array<string,string> $metadata
+     * @param list<BetaManagedAgentsOutcomeEvaluationResource|BetaManagedAgentsOutcomeEvaluationResourceShape> $outcomeEvaluations
      * @param list<ManagedAgentsSessionResourceShape> $resources
      * @param BetaManagedAgentsSessionStats|BetaManagedAgentsSessionStatsShape $stats
      * @param Status|value-of<Status> $status
-     * @param Type|value-of<Type> $type
      * @param BetaManagedAgentsSessionUsage|BetaManagedAgentsSessionUsageShape $usage
      * @param list<string> $vaultIDs
      */
@@ -181,34 +209,39 @@ final class BetaManagedAgentsSession implements BaseModel
         string $id,
         BetaManagedAgentsSessionAgent|array $agent,
         ?\DateTimeInterface $archivedAt,
+        BetaManagedAgentsBudgetLimit|array|null $budget,
         \DateTimeInterface $createdAt,
         string $environmentID,
         array $metadata,
+        array $outcomeEvaluations,
         array $resources,
         BetaManagedAgentsSessionStats|array $stats,
         Status|string $status,
         ?string $title,
-        Type|string $type,
         \DateTimeInterface $updatedAt,
         BetaManagedAgentsSessionUsage|array $usage,
         array $vaultIDs,
+        ?string $deploymentID = null,
     ): self {
         $self = new self;
 
         $self['id'] = $id;
         $self['agent'] = $agent;
         $self['archivedAt'] = $archivedAt;
+        $self['budget'] = $budget;
         $self['createdAt'] = $createdAt;
         $self['environmentID'] = $environmentID;
         $self['metadata'] = $metadata;
+        $self['outcomeEvaluations'] = $outcomeEvaluations;
         $self['resources'] = $resources;
         $self['stats'] = $stats;
         $self['status'] = $status;
         $self['title'] = $title;
-        $self['type'] = $type;
         $self['updatedAt'] = $updatedAt;
         $self['usage'] = $usage;
         $self['vaultIDs'] = $vaultIDs;
+
+        null !== $deploymentID && $self['deploymentID'] = $deploymentID;
 
         return $self;
     }
@@ -235,7 +268,7 @@ final class BetaManagedAgentsSession implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * When the session was archived. Null if not archived.
      */
     public function withArchivedAt(?\DateTimeInterface $archivedAt): self
     {
@@ -246,7 +279,21 @@ final class BetaManagedAgentsSession implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * The session's enforced spend ceiling, or null when no budget is set.
+     *
+     * @param BetaManagedAgentsBudgetLimit|BetaManagedAgentsBudgetLimitShape|null $budget
+     */
+    public function withBudget(
+        BetaManagedAgentsBudgetLimit|array|null $budget
+    ): self {
+        $self = clone $this;
+        $self['budget'] = $budget;
+
+        return $self;
+    }
+
+    /**
+     * A timestamp in RFC 3339 format
      */
     public function withCreatedAt(\DateTimeInterface $createdAt): self
     {
@@ -276,6 +323,19 @@ final class BetaManagedAgentsSession implements BaseModel
     }
 
     /**
+     * Per-outcome evaluation state. One entry per `define_outcome` event sent to the session.
+     *
+     * @param list<BetaManagedAgentsOutcomeEvaluationResource|BetaManagedAgentsOutcomeEvaluationResourceShape> $outcomeEvaluations
+     */
+    public function withOutcomeEvaluations(array $outcomeEvaluations): self
+    {
+        $self = clone $this;
+        $self['outcomeEvaluations'] = $outcomeEvaluations;
+
+        return $self;
+    }
+
+    /**
      * @param list<ManagedAgentsSessionResourceShape> $resources
      */
     public function withResources(array $resources): self
@@ -287,7 +347,7 @@ final class BetaManagedAgentsSession implements BaseModel
     }
 
     /**
-     * Timing statistics for a session.
+     * Timing statistics for the session.
      *
      * @param BetaManagedAgentsSessionStats|BetaManagedAgentsSessionStatsShape $stats
      */
@@ -300,8 +360,6 @@ final class BetaManagedAgentsSession implements BaseModel
     }
 
     /**
-     * SessionStatus enum.
-     *
      * @param Status|value-of<Status> $status
      */
     public function withStatus(Status|string $status): self
@@ -321,9 +379,9 @@ final class BetaManagedAgentsSession implements BaseModel
     }
 
     /**
-     * @param Type|value-of<Type> $type
+     * @param 'session' $type
      */
-    public function withType(Type|string $type): self
+    public function withType(string $type): self
     {
         $self = clone $this;
         $self['type'] = $type;
@@ -332,7 +390,7 @@ final class BetaManagedAgentsSession implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * A timestamp in RFC 3339 format
      */
     public function withUpdatedAt(\DateTimeInterface $updatedAt): self
     {
@@ -343,7 +401,7 @@ final class BetaManagedAgentsSession implements BaseModel
     }
 
     /**
-     * Cumulative token usage for a session across all turns.
+     * Cumulative token usage for the session.
      *
      * @param BetaManagedAgentsSessionUsage|BetaManagedAgentsSessionUsageShape $usage
      */
@@ -364,6 +422,17 @@ final class BetaManagedAgentsSession implements BaseModel
     {
         $self = clone $this;
         $self['vaultIDs'] = $vaultIDs;
+
+        return $self;
+    }
+
+    /**
+     * Deployment ID when the session was created from a deployment reference. Null otherwise.
+     */
+    public function withDeploymentID(?string $deploymentID): self
+    {
+        $self = clone $this;
+        $self['deploymentID'] = $deploymentID;
 
         return $self;
     }

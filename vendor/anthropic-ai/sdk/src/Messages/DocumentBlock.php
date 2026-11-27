@@ -7,12 +7,13 @@ namespace Anthropic\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\DocumentBlock\Source;
 
 /**
- * @phpstan-import-type SourceVariants from \Anthropic\Messages\DocumentBlock\Source
  * @phpstan-import-type CitationsConfigShape from \Anthropic\Messages\CitationsConfig
  * @phpstan-import-type SourceShape from \Anthropic\Messages\DocumentBlock\Source
+ * @phpstan-import-type SourceVariants from \Anthropic\Messages\DocumentBlock\Source
  *
  * @phpstan-type DocumentBlockShape = array{
  *   citations: null|CitationsConfig|CitationsConfigShape,
@@ -27,11 +28,11 @@ final class DocumentBlock implements BaseModel
     use SdkModel;
 
     /** @var 'document' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('document'))]
     public string $type = 'document';
 
     /**
-     * Citation configuration for the document.
+     * Citation configuration for the document
      */
     #[Required]
     public ?CitationsConfig $citations;
@@ -41,7 +42,7 @@ final class DocumentBlock implements BaseModel
     public Base64PDFSource|PlainTextSource $source;
 
     /**
-     * The title of the document.
+     * The title of the document
      */
     #[Required]
     public ?string $title;
@@ -57,7 +58,7 @@ final class DocumentBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new DocumentBlock)->withCitations(...)->withSource(...)->withTitle(...)
+     * (new DocumentBlock())->withCitations(...)->withSource(...)->withTitle(...)
      * ```
      */
     public function __construct()
@@ -88,7 +89,7 @@ final class DocumentBlock implements BaseModel
     }
 
     /**
-     * Citation configuration for the document.
+     * Citation configuration for the document
      *
      * @param CitationsConfig|CitationsConfigShape|null $citations
      */
@@ -113,7 +114,7 @@ final class DocumentBlock implements BaseModel
     }
 
     /**
-     * The title of the document.
+     * The title of the document
      */
     public function withTitle(?string $title): self
     {

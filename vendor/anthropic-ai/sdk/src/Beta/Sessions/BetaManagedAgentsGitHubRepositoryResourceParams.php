@@ -5,22 +5,22 @@ declare(strict_types=1);
 namespace Anthropic\Beta\Sessions;
 
 use Anthropic\Beta\Sessions\BetaManagedAgentsGitHubRepositoryResourceParams\Checkout;
-use Anthropic\Beta\Sessions\BetaManagedAgentsGitHubRepositoryResourceParams\Type;
 use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * Mount a GitHub repository into the session's container.
  *
- * @phpstan-import-type CheckoutVariants from \Anthropic\Beta\Sessions\BetaManagedAgentsGitHubRepositoryResourceParams\Checkout
  * @phpstan-import-type CheckoutShape from \Anthropic\Beta\Sessions\BetaManagedAgentsGitHubRepositoryResourceParams\Checkout
+ * @phpstan-import-type CheckoutVariants from \Anthropic\Beta\Sessions\BetaManagedAgentsGitHubRepositoryResourceParams\Checkout
  *
  * @phpstan-type BetaManagedAgentsGitHubRepositoryResourceParamsShape = array{
- *   authorizationToken: string,
- *   type: Type|value-of<Type>,
+ *   type: 'github_repository',
  *   url: string,
+ *   authorizationToken?: string|null,
  *   checkout?: CheckoutShape|null,
  *   mountPath?: string|null,
  * }
@@ -30,21 +30,21 @@ final class BetaManagedAgentsGitHubRepositoryResourceParams implements BaseModel
     /** @use SdkModel<BetaManagedAgentsGitHubRepositoryResourceParamsShape> */
     use SdkModel;
 
-    /**
-     * GitHub authorization token used to clone the repository.
-     */
-    #[Required('authorization_token')]
-    public string $authorizationToken;
-
-    /** @var value-of<Type> $type */
-    #[Required(enum: Type::class)]
-    public string $type;
+    /** @var 'github_repository' $type */
+    #[Required(type: new ConstantOf('github_repository'))]
+    public string $type = 'github_repository';
 
     /**
-     * Github URL of the repository.
+     * Github URL of the repository
      */
     #[Required]
     public string $url;
+
+    /**
+     * GitHub authorization token used to clone the repository. Required for private repositories; optional for public ones.
+     */
+    #[Optional('authorization_token')]
+    public ?string $authorizationToken;
 
     /**
      * Branch or commit to check out. Defaults to the repository's default branch.
@@ -65,18 +65,13 @@ final class BetaManagedAgentsGitHubRepositoryResourceParams implements BaseModel
      *
      * To enforce required parameters use
      * ```
-     * BetaManagedAgentsGitHubRepositoryResourceParams::with(
-     *   authorizationToken: ..., type: ..., url: ...
-     * )
+     * BetaManagedAgentsGitHubRepositoryResourceParams::with(url: ...)
      * ```
      *
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaManagedAgentsGitHubRepositoryResourceParams)
-     *   ->withAuthorizationToken(...)
-     *   ->withType(...)
-     *   ->withURL(...)
+     * (new BetaManagedAgentsGitHubRepositoryResourceParams())->withURL(...)
      * ```
      */
     public function __construct()
@@ -89,22 +84,19 @@ final class BetaManagedAgentsGitHubRepositoryResourceParams implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
-     * @param Type|value-of<Type> $type
      * @param CheckoutShape|null $checkout
      */
     public static function with(
-        string $authorizationToken,
-        Type|string $type,
         string $url,
+        ?string $authorizationToken = null,
         BetaManagedAgentsBranchCheckout|array|BetaManagedAgentsCommitCheckout|null $checkout = null,
         ?string $mountPath = null,
     ): self {
         $self = new self;
 
-        $self['authorizationToken'] = $authorizationToken;
-        $self['type'] = $type;
         $self['url'] = $url;
 
+        null !== $authorizationToken && $self['authorizationToken'] = $authorizationToken;
         null !== $checkout && $self['checkout'] = $checkout;
         null !== $mountPath && $self['mountPath'] = $mountPath;
 
@@ -112,20 +104,9 @@ final class BetaManagedAgentsGitHubRepositoryResourceParams implements BaseModel
     }
 
     /**
-     * GitHub authorization token used to clone the repository.
+     * @param 'github_repository' $type
      */
-    public function withAuthorizationToken(string $authorizationToken): self
-    {
-        $self = clone $this;
-        $self['authorizationToken'] = $authorizationToken;
-
-        return $self;
-    }
-
-    /**
-     * @param Type|value-of<Type> $type
-     */
-    public function withType(Type|string $type): self
+    public function withType(string $type): self
     {
         $self = clone $this;
         $self['type'] = $type;
@@ -134,12 +115,23 @@ final class BetaManagedAgentsGitHubRepositoryResourceParams implements BaseModel
     }
 
     /**
-     * Github URL of the repository.
+     * Github URL of the repository
      */
     public function withURL(string $url): self
     {
         $self = clone $this;
         $self['url'] = $url;
+
+        return $self;
+    }
+
+    /**
+     * GitHub authorization token used to clone the repository. Required for private repositories; optional for public ones.
+     */
+    public function withAuthorizationToken(string $authorizationToken): self
+    {
+        $self = clone $this;
+        $self['authorizationToken'] = $authorizationToken;
 
         return $self;
     }

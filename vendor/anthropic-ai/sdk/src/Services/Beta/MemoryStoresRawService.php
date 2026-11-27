@@ -16,6 +16,7 @@ use Anthropic\Beta\MemoryStores\MemoryStoreUpdateParams;
 use Anthropic\Client;
 use Anthropic\Core\Contracts\BaseResponse;
 use Anthropic\Core\Exceptions\APIException;
+use Anthropic\Core\Implementation\ApiCallInfo;
 use Anthropic\Core\Util;
 use Anthropic\PageCursor;
 use Anthropic\RequestOptions;
@@ -35,13 +36,14 @@ final class MemoryStoresRawService implements MemoryStoresRawContract
     /**
      * @api
      *
-     * CreateMemoryStore
+     * Create a Memory Store
      *
      * @param array{
      *   name: string,
      *   description?: string,
      *   metadata?: array<string,string>,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|MemoryStoreCreateParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -57,12 +59,14 @@ final class MemoryStoresRawService implements MemoryStoresRawContract
             $params,
             $requestOptions,
         );
-        $header_params = ['betas' => 'anthropic-beta'];
+        $header_params = [
+            'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+        ];
 
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: 'v1/memory_stores?beta=true',
+            path: 'v1/memory_stores',
             headers: Util::array_transform_keys(
                 array_intersect_key($parsed, array_flip(array_keys($header_params))),
                 $header_params,
@@ -72,9 +76,13 @@ final class MemoryStoresRawService implements MemoryStoresRawContract
                 array_flip(array_keys($header_params))
             ),
             options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                ['extraHeaders' => ['anthropic-beta' => 'agent-memory-2026-07-22']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.memory_stores.create',
+                route: '/v1/memory_stores',
+                createdId: 'gen_ai.memory.store.id',
+            )),
             convert: BetaManagedAgentsMemoryStore::class,
         );
     }
@@ -82,11 +90,12 @@ final class MemoryStoresRawService implements MemoryStoresRawContract
     /**
      * @api
      *
-     * GetMemoryStore
+     * Retrieve a Memory Store
      *
-     * @param string $memoryStoreID Path parameter memory_store_id
+     * @param string $memoryStoreID The ID of the memory store to retrieve (`memstore_...`).
      * @param array{
-     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|MemoryStoreRetrieveParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -107,15 +116,21 @@ final class MemoryStoresRawService implements MemoryStoresRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: ['v1/memory_stores/%1$s?beta=true', $memoryStoreID],
+            path: ['v1/memory_stores/%1$s', $memoryStoreID],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                ['extraHeaders' => ['anthropic-beta' => 'agent-memory-2026-07-22']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.memory_stores.retrieve',
+                route: '/v1/memory_stores/{memory_store_id}',
+                attributes: ['gen_ai.memory.store.id' => $memoryStoreID],
+            )),
             convert: BetaManagedAgentsMemoryStore::class,
         );
     }
@@ -123,14 +138,17 @@ final class MemoryStoresRawService implements MemoryStoresRawContract
     /**
      * @api
      *
-     * UpdateMemoryStore
+     * Update a Memory Store
      *
-     * @param string $memoryStoreID Path param: Path parameter memory_store_id
+     * @param string $memoryStoreID Path param: The ID of the memory store to update (`memstore_...`).
+     *
+     * The request fails with HTTP status 400 if the store is archived.
      * @param array{
      *   description?: string|null,
      *   metadata?: array<string,string|null>|null,
      *   name?: string|null,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|MemoryStoreUpdateParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -147,12 +165,14 @@ final class MemoryStoresRawService implements MemoryStoresRawContract
             $params,
             $requestOptions,
         );
-        $header_params = ['betas' => 'anthropic-beta'];
+        $header_params = [
+            'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+        ];
 
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: ['v1/memory_stores/%1$s?beta=true', $memoryStoreID],
+            path: ['v1/memory_stores/%1$s', $memoryStoreID],
             headers: Util::array_transform_keys(
                 array_intersect_key($parsed, array_flip(array_keys($header_params))),
                 $header_params,
@@ -162,9 +182,13 @@ final class MemoryStoresRawService implements MemoryStoresRawContract
                 array_flip(array_keys($header_params))
             ),
             options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                ['extraHeaders' => ['anthropic-beta' => 'agent-memory-2026-07-22']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.memory_stores.update',
+                route: '/v1/memory_stores/{memory_store_id}',
+                attributes: ['gen_ai.memory.store.id' => $memoryStoreID],
+            )),
             convert: BetaManagedAgentsMemoryStore::class,
         );
     }
@@ -172,7 +196,7 @@ final class MemoryStoresRawService implements MemoryStoresRawContract
     /**
      * @api
      *
-     * ListMemoryStores
+     * List Memory Stores
      *
      * @param array{
      *   createdAtGte?: \DateTimeInterface,
@@ -181,6 +205,7 @@ final class MemoryStoresRawService implements MemoryStoresRawContract
      *   limit?: int,
      *   page?: string,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|MemoryStoreListParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -206,7 +231,7 @@ final class MemoryStoresRawService implements MemoryStoresRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: 'v1/memory_stores?beta=true',
+            path: 'v1/memory_stores',
             query: Util::array_transform_keys(
                 array_intersect_key($parsed, $query_params),
                 [
@@ -217,12 +242,24 @@ final class MemoryStoresRawService implements MemoryStoresRawContract
             ),
             headers: Util::array_transform_keys(
                 $header_params,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                ['extraHeaders' => ['anthropic-beta' => 'agent-memory-2026-07-22']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.memory_stores.list',
+                route: '/v1/memory_stores',
+                query: [
+                    'created_at[gte]',
+                    'created_at[lte]',
+                    'include_archived',
+                    'limit',
+                    'page',
+                ],
+            )),
             convert: BetaManagedAgentsMemoryStore::class,
             page: PageCursor::class,
         );
@@ -231,11 +268,14 @@ final class MemoryStoresRawService implements MemoryStoresRawContract
     /**
      * @api
      *
-     * DeleteMemoryStore
+     * Delete a Memory Store
      *
-     * @param string $memoryStoreID Path parameter memory_store_id
+     * @param string $memoryStoreID The ID of the memory store to delete (`memstore_...`).
+     *
+     * Deleting a store also deletes all its memories and memory versions. It can't be undone.
      * @param array{
-     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|MemoryStoreDeleteParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -256,15 +296,21 @@ final class MemoryStoresRawService implements MemoryStoresRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'delete',
-            path: ['v1/memory_stores/%1$s?beta=true', $memoryStoreID],
+            path: ['v1/memory_stores/%1$s', $memoryStoreID],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                ['extraHeaders' => ['anthropic-beta' => 'agent-memory-2026-07-22']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.memory_stores.delete',
+                route: '/v1/memory_stores/{memory_store_id}',
+                attributes: ['gen_ai.memory.store.id' => $memoryStoreID],
+            )),
             convert: BetaManagedAgentsDeletedMemoryStore::class,
         );
     }
@@ -272,11 +318,14 @@ final class MemoryStoresRawService implements MemoryStoresRawContract
     /**
      * @api
      *
-     * ArchiveMemoryStore
+     * Archive a Memory Store
      *
-     * @param string $memoryStoreID Path parameter memory_store_id
+     * @param string $memoryStoreID The ID of the memory store to archive (`memstore_...`).
+     *
+     * Archiving can't be undone. Archiving a store that is already archived returns it unchanged.
      * @param array{
-     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|MemoryStoreArchiveParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -297,15 +346,21 @@ final class MemoryStoresRawService implements MemoryStoresRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: ['v1/memory_stores/%1$s/archive?beta=true', $memoryStoreID],
+            path: ['v1/memory_stores/%1$s/archive', $memoryStoreID],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                ['extraHeaders' => ['anthropic-beta' => 'agent-memory-2026-07-22']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.memory_stores.archive',
+                route: '/v1/memory_stores/{memory_store_id}/archive',
+                attributes: ['gen_ai.memory.store.id' => $memoryStoreID],
+            )),
             convert: BetaManagedAgentsMemoryStore::class,
         );
     }

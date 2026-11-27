@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Anthropic\Services\Beta;
 
 use Anthropic\Beta\AnthropicBeta;
+use Anthropic\Beta\Messages\BetaBillingPolicy;
 use Anthropic\Beta\Messages\BetaCacheControlEphemeral;
+use Anthropic\Beta\Messages\BetaCompactionConfig;
 use Anthropic\Beta\Messages\BetaContextManagementConfig;
+use Anthropic\Beta\Messages\BetaDiagnosticsParam;
 use Anthropic\Beta\Messages\BetaJSONOutputFormat;
 use Anthropic\Beta\Messages\BetaMessage;
-use Anthropic\Beta\Messages\BetaMessageParam;
 use Anthropic\Beta\Messages\BetaMessageTokensCount;
 use Anthropic\Beta\Messages\BetaMetadata;
 use Anthropic\Beta\Messages\BetaOutputConfig;
@@ -25,32 +27,77 @@ use Anthropic\Beta\Messages\MessageCountTokensParams;
 use Anthropic\Beta\Messages\MessageCreateParams;
 use Anthropic\Beta\Messages\MessageCreateParams\ServiceTier;
 use Anthropic\Beta\Messages\MessageCreateParams\Speed;
+use Anthropic\ClaudeCodeKeyCreatorNotMemberException;
+use Anthropic\ClaudeCodeVersionTooOldException;
 use Anthropic\Client;
+use Anthropic\CMEKKeyDisabledException;
+use Anthropic\CMEKKeyNetworkBlockedException;
+use Anthropic\CMEKKeyUnreachableException;
+use Anthropic\ContractSpendLimitReachedException;
 use Anthropic\Core\Contracts\BaseResponse;
 use Anthropic\Core\Contracts\BaseStream;
 use Anthropic\Core\Exceptions\APIException;
+use Anthropic\Core\Implementation\ApiCallInfo;
+use Anthropic\Core\Implementation\RawResponse;
 use Anthropic\Core\Util;
+use Anthropic\EnforcedSpendLimitReachedException;
+use Anthropic\Lib\Tracing\Tracing;
+use Anthropic\LinkedOrganizationBillingUnavailableException;
+use Anthropic\LinkedOrganizationSpendLimitReachedException;
+use Anthropic\Messages\AvailableToolsLimitExceededException;
+use Anthropic\Messages\CompactionBlockAmbiguousException;
+use Anthropic\Messages\CompactionBlockMisplacedException;
+use Anthropic\Messages\CompactionContentMismatchException;
+use Anthropic\Messages\CompactionIncompleteTurnException;
+use Anthropic\Messages\CompactionNothingToSummarizeException;
+use Anthropic\Messages\CompactionSignatureInvalidException;
+use Anthropic\Messages\CompactionToolChangesMismatchException;
+use Anthropic\Messages\CompactionTooManyToolReferencesException;
+use Anthropic\Messages\CompactionUnavailableException;
+use Anthropic\Messages\ImageDimensionsTooLargeException;
 use Anthropic\Messages\Model;
+use Anthropic\Messages\ThreadAlreadyContinuedException;
+use Anthropic\Messages\ThreadContinueInFlightException;
+use Anthropic\Messages\ThreadFingerprintMismatchException;
+use Anthropic\Messages\ThreadNotFoundException;
+use Anthropic\Messages\ThreadUnsupportedRequestException;
+use Anthropic\Messages\ToolNameConflictException;
+use Anthropic\Messages\ToolReferenceUnresolvedException;
+use Anthropic\OrganizationOnHoldException;
+use Anthropic\RampLimitExceededException;
+use Anthropic\RequestBodyEncodingInvalidException;
+use Anthropic\RequestBodyEncodingUnsupportedException;
+use Anthropic\RequestBodyTooLargeAfterDecodingException;
 use Anthropic\RequestOptions;
 use Anthropic\ServiceContracts\Beta\MessagesRawContract;
+use Anthropic\Skills\SkillReadBlockedUndecryptableException;
 use Anthropic\SSEStream;
+use Anthropic\UserProfiles\UserProfileBillingNotAuthorizedException;
+use Anthropic\UserProfiles\UserProfileNotBillableException;
+use Anthropic\UserProfiles\UserProfileRequiredException;
 
 /**
- * @phpstan-import-type SystemShape from \Anthropic\Beta\Messages\MessageCountTokensParams\System
- * @phpstan-import-type ToolShape from \Anthropic\Beta\Messages\MessageCountTokensParams\Tool
  * @phpstan-import-type BetaMessageParamShape from \Anthropic\Beta\Messages\BetaMessageParam
+ * @phpstan-import-type BetaBillingPolicyShape from \Anthropic\Beta\Messages\BetaBillingPolicy
  * @phpstan-import-type BetaCacheControlEphemeralShape from \Anthropic\Beta\Messages\BetaCacheControlEphemeral
+ * @phpstan-import-type BetaCompactionConfigShape from \Anthropic\Beta\Messages\BetaCompactionConfig
  * @phpstan-import-type ContainerShape from \Anthropic\Beta\Messages\MessageCreateParams\Container
  * @phpstan-import-type BetaContextManagementConfigShape from \Anthropic\Beta\Messages\BetaContextManagementConfig
+ * @phpstan-import-type BetaDiagnosticsParamShape from \Anthropic\Beta\Messages\BetaDiagnosticsParam
+ * @phpstan-import-type FallbackCreditTokenShape from \Anthropic\Beta\Messages\MessageCreateParams\FallbackCreditToken
+ * @phpstan-import-type BetaFallbacksParamShape from \Anthropic\Beta\Messages\BetaFallbacksParam
  * @phpstan-import-type BetaRequestMCPServerURLDefinitionShape from \Anthropic\Beta\Messages\BetaRequestMCPServerURLDefinition
  * @phpstan-import-type BetaMetadataShape from \Anthropic\Beta\Messages\BetaMetadata
  * @phpstan-import-type BetaOutputConfigShape from \Anthropic\Beta\Messages\BetaOutputConfig
  * @phpstan-import-type BetaJSONOutputFormatShape from \Anthropic\Beta\Messages\BetaJSONOutputFormat
- * @phpstan-import-type SystemShape from \Anthropic\Beta\Messages\MessageCreateParams\System as SystemShape1
+ * @phpstan-import-type SystemShape from \Anthropic\Beta\Messages\MessageCreateParams\System
  * @phpstan-import-type BetaThinkingConfigParamShape from \Anthropic\Beta\Messages\BetaThinkingConfigParam
+ * @phpstan-import-type BetaMessageThreadParamShape from \Anthropic\Beta\Messages\BetaMessageThreadParam
  * @phpstan-import-type BetaToolChoiceShape from \Anthropic\Beta\Messages\BetaToolChoice
  * @phpstan-import-type BetaToolUnionShape from \Anthropic\Beta\Messages\BetaToolUnion
  * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ * @phpstan-import-type SystemShape from \Anthropic\Beta\Messages\MessageCountTokensParams\System as SystemShape1
+ * @phpstan-import-type ToolShape from \Anthropic\Beta\Messages\MessageCountTokensParams\Tool
  */
 final class MessagesRawService implements MessagesRawContract
 {
@@ -67,15 +114,20 @@ final class MessagesRawService implements MessagesRawContract
      *
      * The Messages API can be used for either single queries or stateless multi-turn conversations.
      *
-     * Learn more about the Messages API in our [user guide](https://docs.claude.com/en/docs/initial-setup)
+     * Learn more about the Messages API in our [user guide](https://platform.claude.com/docs/en/get-started)
      *
      * @param array{
      *   maxTokens: int,
-     *   messages: list<BetaMessageParam|BetaMessageParamShape>,
+     *   messages: list<BetaMessageParamShape>,
      *   model: string|Model|value-of<Model>,
+     *   billingPolicy?: BetaBillingPolicy|BetaBillingPolicyShape|null,
      *   cacheControl?: BetaCacheControlEphemeral|BetaCacheControlEphemeralShape|null,
+     *   compaction?: BetaCompactionConfig|BetaCompactionConfigShape|null,
      *   container?: ContainerShape|null,
      *   contextManagement?: BetaContextManagementConfig|BetaContextManagementConfigShape|null,
+     *   diagnostics?: BetaDiagnosticsParam|BetaDiagnosticsParamShape|null,
+     *   fallbackCreditToken?: FallbackCreditTokenShape|null,
+     *   fallbacks?: BetaFallbacksParamShape|null,
      *   inferenceGeo?: string|null,
      *   mcpServers?: list<BetaRequestMCPServerURLDefinition|BetaRequestMCPServerURLDefinitionShape>,
      *   metadata?: BetaMetadata|BetaMetadataShape,
@@ -84,20 +136,55 @@ final class MessagesRawService implements MessagesRawContract
      *   serviceTier?: ServiceTier|value-of<ServiceTier>,
      *   speed?: Speed|value-of<Speed>|null,
      *   stopSequences?: list<string>,
-     *   system?: SystemShape1,
-     *   temperature?: float,
+     *   system?: SystemShape,
      *   thinking?: BetaThinkingConfigParamShape,
+     *   thread?: BetaMessageThreadParamShape|null,
      *   toolChoice?: BetaToolChoiceShape,
      *   tools?: list<BetaToolUnionShape>,
-     *   topK?: int,
-     *   topP?: float,
-     *   userProfileID?: string|null,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   userProfileID?: string,
+     *   workspaceID?: string,
      * }|MessageCreateParams $params
      * @param RequestOpts|null $requestOptions
      *
      * @return BaseResponse<BetaMessage>
      *
+     * @throws AvailableToolsLimitExceededException
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws ClaudeCodeVersionTooOldException
+     * @throws CMEKKeyDisabledException
+     * @throws CMEKKeyNetworkBlockedException
+     * @throws CompactionBlockAmbiguousException
+     * @throws CompactionBlockMisplacedException
+     * @throws CompactionContentMismatchException
+     * @throws CompactionIncompleteTurnException
+     * @throws CompactionNothingToSummarizeException
+     * @throws CompactionSignatureInvalidException
+     * @throws CompactionTooManyToolReferencesException
+     * @throws CompactionToolChangesMismatchException
+     * @throws ImageDimensionsTooLargeException
+     * @throws OrganizationOnHoldException
+     * @throws RequestBodyEncodingInvalidException
+     * @throws RequestBodyEncodingUnsupportedException
+     * @throws ThreadAlreadyContinuedException
+     * @throws ThreadContinueInFlightException
+     * @throws ThreadFingerprintMismatchException
+     * @throws ThreadUnsupportedRequestException
+     * @throws ToolNameConflictException
+     * @throws ToolReferenceUnresolvedException
+     * @throws UserProfileRequiredException
+     * @throws LinkedOrganizationBillingUnavailableException
+     * @throws LinkedOrganizationSpendLimitReachedException
+     * @throws UserProfileBillingNotAuthorizedException
+     * @throws UserProfileNotBillableException
+     * @throws ThreadNotFoundException
+     * @throws SkillReadBlockedUndecryptableException
+     * @throws RequestBodyTooLargeAfterDecodingException
+     * @throws ContractSpendLimitReachedException
+     * @throws EnforcedSpendLimitReachedException
+     * @throws RampLimitExceededException
+     * @throws CMEKKeyUnreachableException
+     * @throws CompactionUnavailableException
      * @throws APIException
      */
     public function create(
@@ -108,12 +195,18 @@ final class MessagesRawService implements MessagesRawContract
             $params,
             $requestOptions,
         );
-        $header_params = ['betas' => 'anthropic-beta'];
+        $header_params = [
+            'betas' => 'anthropic-beta',
+            'userProfileID' => 'anthropic-user-profile-id',
+            'workspaceID' => 'anthropic-workspace-id',
+        ];
 
-        // @phpstan-ignore-next-line return.type
-        return $this->client->request(
+        $callSpan = Tracing::startCallSpan($this->client, 'anthropic.messages.create', '/v1/messages', $parsed, $options, $header_params);
+        Tracing::recordMessagesCreateRequest($this->client, $callSpan, $parsed);
+
+        $response = $this->client->request(
             method: 'post',
-            path: 'v1/messages?beta=true',
+            path: 'v1/messages',
             headers: Util::array_transform_keys(
                 array_intersect_key($parsed, array_flip(array_keys($header_params))),
                 $header_params,
@@ -122,9 +215,18 @@ final class MessagesRawService implements MessagesRawContract
                 $parsed,
                 array_flip(array_keys($header_params))
             ),
-            options: $options,
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: $callSpan?->name,
+                span: $callSpan?->span,
+            )),
             convert: BetaMessage::class,
         );
+
+        // Only the response that the SDK's own `request()` returns records on the span: any other is returned as it is.
+        // @phpstan-ignore-next-line return.type
+        return $response instanceof RawResponse ? $response->thenUnwrap(fn (mixed $message, mixed $decoded): mixed => Tracing::recordMessagesCreateResponse($this->client, $callSpan, $parsed, $message, $decoded)) : $response;
     }
 
     /**
@@ -132,11 +234,16 @@ final class MessagesRawService implements MessagesRawContract
      *
      * @param array{
      *   maxTokens: int,
-     *   messages: list<BetaMessageParam|BetaMessageParamShape>,
+     *   messages: list<BetaMessageParamShape>,
      *   model: string|Model|value-of<Model>,
+     *   billingPolicy?: BetaBillingPolicy|BetaBillingPolicyShape|null,
      *   cacheControl?: BetaCacheControlEphemeral|BetaCacheControlEphemeralShape|null,
+     *   compaction?: BetaCompactionConfig|BetaCompactionConfigShape|null,
      *   container?: ContainerShape|null,
      *   contextManagement?: BetaContextManagementConfig|BetaContextManagementConfigShape|null,
+     *   diagnostics?: BetaDiagnosticsParam|BetaDiagnosticsParamShape|null,
+     *   fallbackCreditToken?: FallbackCreditTokenShape|null,
+     *   fallbacks?: BetaFallbacksParamShape|null,
      *   inferenceGeo?: string|null,
      *   mcpServers?: list<BetaRequestMCPServerURLDefinition|BetaRequestMCPServerURLDefinitionShape>,
      *   metadata?: BetaMetadata|BetaMetadataShape,
@@ -145,20 +252,55 @@ final class MessagesRawService implements MessagesRawContract
      *   serviceTier?: ServiceTier|value-of<ServiceTier>,
      *   speed?: Speed|value-of<Speed>|null,
      *   stopSequences?: list<string>,
-     *   system?: SystemShape1,
-     *   temperature?: float,
+     *   system?: SystemShape,
      *   thinking?: BetaThinkingConfigParamShape,
+     *   thread?: BetaMessageThreadParamShape|null,
      *   toolChoice?: BetaToolChoiceShape,
      *   tools?: list<BetaToolUnionShape>,
-     *   topK?: int,
-     *   topP?: float,
-     *   userProfileID?: string|null,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   userProfileID?: string,
+     *   workspaceID?: string,
      * }|MessageCreateParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<BaseStream<BetaRawMessageStartEvent|BetaRawMessageDeltaEvent|BetaRawMessageStopEvent|BetaRawContentBlockStartEvent|BetaRawContentBlockDeltaEvent|BetaRawContentBlockStopEvent,>,>
+     * @return BaseResponse<BaseStream<BetaRawMessageStartEvent|BetaRawMessageDeltaEvent|BetaRawMessageStopEvent|BetaRawContentBlockStartEvent|BetaRawContentBlockDeltaEvent|BetaRawContentBlockStopEvent>>
      *
+     * @throws AvailableToolsLimitExceededException
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws ClaudeCodeVersionTooOldException
+     * @throws CMEKKeyDisabledException
+     * @throws CMEKKeyNetworkBlockedException
+     * @throws CompactionBlockAmbiguousException
+     * @throws CompactionBlockMisplacedException
+     * @throws CompactionContentMismatchException
+     * @throws CompactionIncompleteTurnException
+     * @throws CompactionNothingToSummarizeException
+     * @throws CompactionSignatureInvalidException
+     * @throws CompactionTooManyToolReferencesException
+     * @throws CompactionToolChangesMismatchException
+     * @throws ImageDimensionsTooLargeException
+     * @throws OrganizationOnHoldException
+     * @throws RequestBodyEncodingInvalidException
+     * @throws RequestBodyEncodingUnsupportedException
+     * @throws ThreadAlreadyContinuedException
+     * @throws ThreadContinueInFlightException
+     * @throws ThreadFingerprintMismatchException
+     * @throws ThreadUnsupportedRequestException
+     * @throws ToolNameConflictException
+     * @throws ToolReferenceUnresolvedException
+     * @throws UserProfileRequiredException
+     * @throws LinkedOrganizationBillingUnavailableException
+     * @throws LinkedOrganizationSpendLimitReachedException
+     * @throws UserProfileBillingNotAuthorizedException
+     * @throws UserProfileNotBillableException
+     * @throws ThreadNotFoundException
+     * @throws SkillReadBlockedUndecryptableException
+     * @throws RequestBodyTooLargeAfterDecodingException
+     * @throws ContractSpendLimitReachedException
+     * @throws EnforcedSpendLimitReachedException
+     * @throws RampLimitExceededException
+     * @throws CMEKKeyUnreachableException
+     * @throws CompactionUnavailableException
      * @throws APIException
      */
     public function createStream(
@@ -170,12 +312,19 @@ final class MessagesRawService implements MessagesRawContract
             $requestOptions,
         );
         $parsed['stream'] = true;
-        $header_params = ['betas' => 'anthropic-beta'];
+        $header_params = [
+            'betas' => 'anthropic-beta',
+            'userProfileID' => 'anthropic-user-profile-id',
+            'workspaceID' => 'anthropic-workspace-id',
+        ];
+
+        $callSpan = Tracing::startCallSpan($this->client, 'anthropic.messages.create', '/v1/messages', $parsed, $options, $header_params);
+        Tracing::recordMessagesCreateRequest($this->client, $callSpan, $parsed);
 
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: 'v1/messages?beta=true',
+            path: 'v1/messages',
             headers: Util::array_transform_keys(
                 [
                     'Accept' => 'text/event-stream',
@@ -190,7 +339,12 @@ final class MessagesRawService implements MessagesRawContract
                 $parsed,
                 array_flip(array_keys($header_params))
             ),
-            options: $options,
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: $callSpan?->name,
+                span: $callSpan?->span,
+            )),
             convert: BetaRawMessageStreamEvent::class,
             stream: SSEStream::class,
         );
@@ -203,27 +357,47 @@ final class MessagesRawService implements MessagesRawContract
      *
      * The Token Count API can be used to count the number of tokens in a Message, including tools, images, and documents, without creating it.
      *
-     * Learn more about token counting in our [user guide](https://docs.claude.com/en/docs/build-with-claude/token-counting)
+     * Learn more about token counting in our [user guide](https://platform.claude.com/docs/en/build-with-claude/token-counting)
      *
      * @param array{
-     *   messages: list<BetaMessageParam|BetaMessageParamShape>,
+     *   messages: list<BetaMessageParamShape>,
      *   model: string|Model|value-of<Model>,
+     *   billingPolicy?: BetaBillingPolicy|BetaBillingPolicyShape|null,
      *   cacheControl?: BetaCacheControlEphemeral|BetaCacheControlEphemeralShape|null,
+     *   compaction?: BetaCompactionConfig|BetaCompactionConfigShape|null,
      *   contextManagement?: BetaContextManagementConfig|BetaContextManagementConfigShape|null,
      *   mcpServers?: list<BetaRequestMCPServerURLDefinition|BetaRequestMCPServerURLDefinitionShape>,
      *   outputConfig?: BetaOutputConfig|BetaOutputConfigShape,
      *   outputFormat?: BetaJSONOutputFormat|BetaJSONOutputFormatShape|null,
      *   speed?: MessageCountTokensParams\Speed|value-of<MessageCountTokensParams\Speed>|null,
-     *   system?: SystemShape,
+     *   system?: SystemShape1,
      *   thinking?: BetaThinkingConfigParamShape,
      *   toolChoice?: BetaToolChoiceShape,
      *   tools?: list<ToolShape>,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   userProfileID?: string,
+     *   workspaceID?: string,
      * }|MessageCountTokensParams $params
      * @param RequestOpts|null $requestOptions
      *
      * @return BaseResponse<BetaMessageTokensCount>
      *
+     * @throws AvailableToolsLimitExceededException
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CompactionBlockAmbiguousException
+     * @throws CompactionBlockMisplacedException
+     * @throws CompactionContentMismatchException
+     * @throws CompactionNothingToSummarizeException
+     * @throws CompactionSignatureInvalidException
+     * @throws CompactionToolChangesMismatchException
+     * @throws OrganizationOnHoldException
+     * @throws RequestBodyEncodingInvalidException
+     * @throws RequestBodyEncodingUnsupportedException
+     * @throws ToolNameConflictException
+     * @throws ToolReferenceUnresolvedException
+     * @throws RequestBodyTooLargeAfterDecodingException
+     * @throws EnforcedSpendLimitReachedException
+     * @throws CompactionUnavailableException
      * @throws APIException
      */
     public function countTokens(
@@ -234,12 +408,18 @@ final class MessagesRawService implements MessagesRawContract
             $params,
             $requestOptions,
         );
-        $header_params = ['betas' => 'anthropic-beta'];
+        $header_params = [
+            'betas' => 'anthropic-beta',
+            'userProfileID' => 'anthropic-user-profile-id',
+            'workspaceID' => 'anthropic-workspace-id',
+        ];
+
+        $callSpan = Tracing::startCallSpan($this->client, 'anthropic.messages.count_tokens', '/v1/messages/count_tokens', $parsed, $options, $header_params);
 
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: 'v1/messages/count_tokens?beta=true',
+            path: 'v1/messages/count_tokens',
             headers: Util::array_transform_keys(
                 array_intersect_key($parsed, array_flip(array_keys($header_params))),
                 $header_params,
@@ -248,7 +428,12 @@ final class MessagesRawService implements MessagesRawContract
                 $parsed,
                 array_flip(array_keys($header_params))
             ),
-            options: $options,
+            options: $options->withQualifiers([
+                'beta' => 'true',
+            ])->withApiCall(new ApiCallInfo(
+                name: $callSpan?->name,
+                span: $callSpan?->span,
+            )),
             convert: BetaMessageTokensCount::class,
         );
     }

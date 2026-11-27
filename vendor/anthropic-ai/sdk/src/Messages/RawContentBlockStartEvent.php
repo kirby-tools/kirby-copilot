@@ -7,11 +7,12 @@ namespace Anthropic\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\RawContentBlockStartEvent\ContentBlock;
 
 /**
- * @phpstan-import-type ContentBlockVariants from \Anthropic\Messages\RawContentBlockStartEvent\ContentBlock
  * @phpstan-import-type ContentBlockShape from \Anthropic\Messages\RawContentBlockStartEvent\ContentBlock
+ * @phpstan-import-type ContentBlockVariants from \Anthropic\Messages\RawContentBlockStartEvent\ContentBlock
  *
  * @phpstan-type RawContentBlockStartEventShape = array{
  *   contentBlock: ContentBlockShape, index: int, type: 'content_block_start'
@@ -23,14 +24,10 @@ final class RawContentBlockStartEvent implements BaseModel
     use SdkModel;
 
     /** @var 'content_block_start' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('content_block_start'))]
     public string $type = 'content_block_start';
 
-    /**
-     * Response model for a file uploaded to the container.
-     *
-     * @var ContentBlockVariants $contentBlock
-     */
+    /** @var ContentBlockVariants $contentBlock */
     #[Required(
         'content_block',
         union: ContentBlock::class,
@@ -51,7 +48,7 @@ final class RawContentBlockStartEvent implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new RawContentBlockStartEvent)->withContentBlock(...)->withIndex(...)
+     * (new RawContentBlockStartEvent())->withContentBlock(...)->withIndex(...)
      * ```
      */
     public function __construct()
@@ -79,8 +76,6 @@ final class RawContentBlockStartEvent implements BaseModel
     }
 
     /**
-     * Response model for a file uploaded to the container.
-     *
      * @param ContentBlockShape $contentBlock
      */
     public function withContentBlock(

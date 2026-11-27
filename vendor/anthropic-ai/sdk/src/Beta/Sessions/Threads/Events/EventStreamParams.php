@@ -1,0 +1,150 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Beta\Sessions\Threads\Events;
+
+use Anthropic\Beta\AnthropicBeta;
+use Anthropic\Beta\Sessions\BetaManagedAgentsDeltaType;
+use Anthropic\Core\Attributes\Optional;
+use Anthropic\Core\Attributes\Required;
+use Anthropic\Core\Concerns\SdkModel;
+use Anthropic\Core\Concerns\SdkParams;
+use Anthropic\Core\Contracts\BaseModel;
+
+/**
+ * Stream Session Thread Events
+ *
+ * @see Anthropic\Services\Beta\Sessions\Threads\EventsService::streamStream()
+ *
+ * @phpstan-type EventStreamParamsShape = array{
+ *   sessionID: string,
+ *   eventDeltas?: list<BetaManagedAgentsDeltaType|value-of<BetaManagedAgentsDeltaType>>|null,
+ *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
+ * }
+ */
+final class EventStreamParams implements BaseModel
+{
+    /** @use SdkModel<EventStreamParamsShape> */
+    use SdkModel;
+    use SdkParams;
+
+    #[Required]
+    public string $sessionID;
+
+    /**
+     * When set, this connection also receives streaming deltas (`event_start`, `event_delta`) while an event is being produced, before the event itself arrives. Deltas are best-effort; when the final event is produced it carries the complete content. A model request that ends early (an error or interrupt) produces no final event — its terminal `span.model_request_end` closes the preview. Accepts one or more event types to preview and may be repeated: `agent.message` streams `content_delta` fragments; `agent.thinking` is start-only — a signal that the agent has begun extended thinking, concluded by the `agent.thinking` event itself. Only previews of the requested event types are sent.
+     *
+     * @var list<value-of<BetaManagedAgentsDeltaType>>|null $eventDeltas
+     */
+    #[Optional(list: BetaManagedAgentsDeltaType::class)]
+    public ?array $eventDeltas;
+
+    /**
+     * This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this header.
+     *
+     * @var list<string|value-of<AnthropicBeta>>|null $betas
+     */
+    #[Optional(list: AnthropicBeta::class)]
+    public ?array $betas;
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
+
+    /**
+     * `new EventStreamParams()` is missing required properties by the API.
+     *
+     * To enforce required parameters use
+     * ```
+     * EventStreamParams::with(sessionID: ...)
+     * ```
+     *
+     * Otherwise ensure the following setters are called
+     *
+     * ```
+     * (new EventStreamParams())->withSessionID(...)
+     * ```
+     */
+    public function __construct()
+    {
+        $this->initialize();
+    }
+
+    /**
+     * Construct an instance from the required parameters.
+     *
+     * You must use named parameters to construct any parameters with a default value.
+     *
+     * @param list<BetaManagedAgentsDeltaType|value-of<BetaManagedAgentsDeltaType>>|null $eventDeltas
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>>|null $betas
+     */
+    public static function with(
+        string $sessionID,
+        ?array $eventDeltas = null,
+        ?array $betas = null,
+        ?string $workspaceID = null,
+    ): self {
+        $self = new self;
+
+        $self['sessionID'] = $sessionID;
+
+        null !== $eventDeltas && $self['eventDeltas'] = $eventDeltas;
+        null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
+
+        return $self;
+    }
+
+    public function withSessionID(string $sessionID): self
+    {
+        $self = clone $this;
+        $self['sessionID'] = $sessionID;
+
+        return $self;
+    }
+
+    /**
+     * When set, this connection also receives streaming deltas (`event_start`, `event_delta`) while an event is being produced, before the event itself arrives. Deltas are best-effort; when the final event is produced it carries the complete content. A model request that ends early (an error or interrupt) produces no final event — its terminal `span.model_request_end` closes the preview. Accepts one or more event types to preview and may be repeated: `agent.message` streams `content_delta` fragments; `agent.thinking` is start-only — a signal that the agent has begun extended thinking, concluded by the `agent.thinking` event itself. Only previews of the requested event types are sent.
+     *
+     * @param list<BetaManagedAgentsDeltaType|value-of<BetaManagedAgentsDeltaType>> $eventDeltas
+     */
+    public function withEventDeltas(array $eventDeltas): self
+    {
+        $self = clone $this;
+        $self['eventDeltas'] = $eventDeltas;
+
+        return $self;
+    }
+
+    /**
+     * This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this header.
+     *
+     * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas
+     */
+    public function withBetas(array $betas): self
+    {
+        $self = clone $this;
+        $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
+
+        return $self;
+    }
+}

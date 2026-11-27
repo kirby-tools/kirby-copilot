@@ -7,6 +7,7 @@ namespace Anthropic\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\Base64ImageSource\MediaType;
 
 /**
@@ -20,7 +21,7 @@ final class Base64ImageSource implements BaseModel
     use SdkModel;
 
     /** @var 'base64' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('base64'))]
     public string $type = 'base64';
 
     #[Required]
@@ -41,7 +42,7 @@ final class Base64ImageSource implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new Base64ImageSource)->withData(...)->withMediaType(...)
+     * (new Base64ImageSource())->withData(...)->withMediaType(...)
      * ```
      */
     public function __construct()

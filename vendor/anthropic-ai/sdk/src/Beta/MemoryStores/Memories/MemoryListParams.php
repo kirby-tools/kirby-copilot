@@ -5,26 +5,24 @@ declare(strict_types=1);
 namespace Anthropic\Beta\MemoryStores\Memories;
 
 use Anthropic\Beta\AnthropicBeta;
-use Anthropic\Beta\MemoryStores\Memories\MemoryListParams\Order;
 use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Concerns\SdkParams;
 use Anthropic\Core\Contracts\BaseModel;
 
 /**
- * ListMemories.
+ * List Memories
  *
  * @see Anthropic\Services\Beta\MemoryStores\MemoriesService::list()
  *
  * @phpstan-type MemoryListParamsShape = array{
  *   depth?: int|null,
  *   limit?: int|null,
- *   order?: null|Order|value-of<Order>,
- *   orderBy?: string|null,
  *   page?: string|null,
  *   pathPrefix?: string|null,
  *   view?: null|ManagedAgentsMemoryView|value-of<ManagedAgentsMemoryView>,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class MemoryListParams implements BaseModel
@@ -34,45 +32,39 @@ final class MemoryListParams implements BaseModel
     use SdkParams;
 
     /**
-     * Query parameter for depth.
+     * How far below `path_prefix` to list. Defaults to `0`, which lists every memory below the prefix.
+     *
+     * Pass `1` to list only the direct children. Deeper memories are then grouped into `memory_prefix` items.
      */
     #[Optional]
     public ?int $depth;
 
     /**
-     * Query parameter for limit.
+     * The maximum number of items to return per page, from 1 to 100. Defaults to 20.
+     *
+     * With `view=full`, a page holds at most 20 items. `memory` and `memory_prefix` items both count toward the limit.
      */
     #[Optional]
     public ?int $limit;
 
     /**
-     * Query parameter for order.
-     *
-     * @var value-of<Order>|null $order
-     */
-    #[Optional(enum: Order::class)]
-    public ?string $order;
-
-    /**
-     * Query parameter for order_by.
-     */
-    #[Optional]
-    public ?string $orderBy;
-
-    /**
-     * Query parameter for page.
+     * The `next_page` value from a previous response, to get the next page. Omit it to get the first page.
      */
     #[Optional]
     public ?string $page;
 
     /**
-     * Optional path prefix filter (raw string-prefix match; include a trailing slash for directory-scoped lists). This value appears in request URLs. Do not include secrets or personally identifiable information.
+     * Return only memories whose path starts with this prefix, such as `/notes/`. This value appears in request URLs. Do not include secrets or personally identifiable information.
+     *
+     * Omit it to list the whole store. The prefix must end with `/` and matches whole segments, so `/notes/` matches `/notes/todo.md` but not `/notes-archive/todo.md`.
      */
     #[Optional]
     public ?string $pathPrefix;
 
     /**
-     * Query parameter for view.
+     * Whether each memory in the response includes `content`. Defaults to `basic`, which sets it to `null`.
+     *
+     * With `full`, a page holds at most 20 items.
      *
      * @var value-of<ManagedAgentsMemoryView>|null $view
      */
@@ -80,12 +72,20 @@ final class MemoryListParams implements BaseModel
     public ?string $view;
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `agent-memory-2026-07-22` or `managed-agents-2026-04-01` in this header.
      *
      * @var list<string|value-of<AnthropicBeta>>|null $betas
      */
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
 
     public function __construct()
     {
@@ -97,36 +97,35 @@ final class MemoryListParams implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
-     * @param Order|value-of<Order>|null $order
      * @param ManagedAgentsMemoryView|value-of<ManagedAgentsMemoryView>|null $view
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>>|null $betas
      */
     public static function with(
         ?int $depth = null,
         ?int $limit = null,
-        Order|string|null $order = null,
-        ?string $orderBy = null,
         ?string $page = null,
         ?string $pathPrefix = null,
         ManagedAgentsMemoryView|string|null $view = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
     ): self {
         $self = new self;
 
         null !== $depth && $self['depth'] = $depth;
         null !== $limit && $self['limit'] = $limit;
-        null !== $order && $self['order'] = $order;
-        null !== $orderBy && $self['orderBy'] = $orderBy;
         null !== $page && $self['page'] = $page;
         null !== $pathPrefix && $self['pathPrefix'] = $pathPrefix;
         null !== $view && $self['view'] = $view;
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
 
     /**
-     * Query parameter for depth.
+     * How far below `path_prefix` to list. Defaults to `0`, which lists every memory below the prefix.
+     *
+     * Pass `1` to list only the direct children. Deeper memories are then grouped into `memory_prefix` items.
      */
     public function withDepth(int $depth): self
     {
@@ -137,7 +136,9 @@ final class MemoryListParams implements BaseModel
     }
 
     /**
-     * Query parameter for limit.
+     * The maximum number of items to return per page, from 1 to 100. Defaults to 20.
+     *
+     * With `view=full`, a page holds at most 20 items. `memory` and `memory_prefix` items both count toward the limit.
      */
     public function withLimit(int $limit): self
     {
@@ -148,31 +149,7 @@ final class MemoryListParams implements BaseModel
     }
 
     /**
-     * Query parameter for order.
-     *
-     * @param Order|value-of<Order> $order
-     */
-    public function withOrder(Order|string $order): self
-    {
-        $self = clone $this;
-        $self['order'] = $order;
-
-        return $self;
-    }
-
-    /**
-     * Query parameter for order_by.
-     */
-    public function withOrderBy(string $orderBy): self
-    {
-        $self = clone $this;
-        $self['orderBy'] = $orderBy;
-
-        return $self;
-    }
-
-    /**
-     * Query parameter for page.
+     * The `next_page` value from a previous response, to get the next page. Omit it to get the first page.
      */
     public function withPage(string $page): self
     {
@@ -183,7 +160,9 @@ final class MemoryListParams implements BaseModel
     }
 
     /**
-     * Optional path prefix filter (raw string-prefix match; include a trailing slash for directory-scoped lists). This value appears in request URLs. Do not include secrets or personally identifiable information.
+     * Return only memories whose path starts with this prefix, such as `/notes/`. This value appears in request URLs. Do not include secrets or personally identifiable information.
+     *
+     * Omit it to list the whole store. The prefix must end with `/` and matches whole segments, so `/notes/` matches `/notes/todo.md` but not `/notes-archive/todo.md`.
      */
     public function withPathPrefix(string $pathPrefix): self
     {
@@ -194,7 +173,9 @@ final class MemoryListParams implements BaseModel
     }
 
     /**
-     * Query parameter for view.
+     * Whether each memory in the response includes `content`. Defaults to `basic`, which sets it to `null`.
+     *
+     * With `full`, a page holds at most 20 items.
      *
      * @param ManagedAgentsMemoryView|value-of<ManagedAgentsMemoryView> $view
      */
@@ -207,7 +188,7 @@ final class MemoryListParams implements BaseModel
     }
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `agent-memory-2026-07-22` or `managed-agents-2026-04-01` in this header.
      *
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas
      */
@@ -215,6 +196,19 @@ final class MemoryListParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

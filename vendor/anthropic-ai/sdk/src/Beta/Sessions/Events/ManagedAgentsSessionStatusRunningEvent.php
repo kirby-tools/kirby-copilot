@@ -4,22 +4,26 @@ declare(strict_types=1);
 
 namespace Anthropic\Beta\Sessions\Events;
 
-use Anthropic\Beta\Sessions\Events\ManagedAgentsSessionStatusRunningEvent\Type;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * Indicates the session is actively running and the agent is working.
  *
  * @phpstan-type ManagedAgentsSessionStatusRunningEventShape = array{
- *   id: string, processedAt: \DateTimeInterface, type: Type|value-of<Type>
+ *   id: string, processedAt: \DateTimeInterface, type: 'session.status_running'
  * }
  */
 final class ManagedAgentsSessionStatusRunningEvent implements BaseModel
 {
     /** @use SdkModel<ManagedAgentsSessionStatusRunningEventShape> */
     use SdkModel;
+
+    /** @var 'session.status_running' $type */
+    #[Required(type: new ConstantOf('session.status_running'))]
+    public string $type = 'session.status_running';
 
     /**
      * Unique identifier for this event.
@@ -28,32 +32,25 @@ final class ManagedAgentsSessionStatusRunningEvent implements BaseModel
     public string $id;
 
     /**
-     * A timestamp in RFC 3339 format.
+     * Timestamp of status change.
      */
     #[Required('processed_at')]
     public \DateTimeInterface $processedAt;
-
-    /** @var value-of<Type> $type */
-    #[Required(enum: Type::class)]
-    public string $type;
 
     /**
      * `new ManagedAgentsSessionStatusRunningEvent()` is missing required properties by the API.
      *
      * To enforce required parameters use
      * ```
-     * ManagedAgentsSessionStatusRunningEvent::with(
-     *   id: ..., processedAt: ..., type: ...
-     * )
+     * ManagedAgentsSessionStatusRunningEvent::with(id: ..., processedAt: ...)
      * ```
      *
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ManagedAgentsSessionStatusRunningEvent)
+     * (new ManagedAgentsSessionStatusRunningEvent())
      *   ->withID(...)
      *   ->withProcessedAt(...)
-     *   ->withType(...)
      * ```
      */
     public function __construct()
@@ -65,19 +62,15 @@ final class ManagedAgentsSessionStatusRunningEvent implements BaseModel
      * Construct an instance from the required parameters.
      *
      * You must use named parameters to construct any parameters with a default value.
-     *
-     * @param Type|value-of<Type> $type
      */
     public static function with(
         string $id,
-        \DateTimeInterface $processedAt,
-        Type|string $type
+        \DateTimeInterface $processedAt
     ): self {
         $self = new self;
 
         $self['id'] = $id;
         $self['processedAt'] = $processedAt;
-        $self['type'] = $type;
 
         return $self;
     }
@@ -94,7 +87,7 @@ final class ManagedAgentsSessionStatusRunningEvent implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * Timestamp of status change.
      */
     public function withProcessedAt(\DateTimeInterface $processedAt): self
     {
@@ -105,9 +98,9 @@ final class ManagedAgentsSessionStatusRunningEvent implements BaseModel
     }
 
     /**
-     * @param Type|value-of<Type> $type
+     * @param 'session.status_running' $type
      */
-    public function withType(Type|string $type): self
+    public function withType(string $type): self
     {
         $self = clone $this;
         $self['type'] = $type;

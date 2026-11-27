@@ -8,12 +8,13 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\ToolResultBlockParam\Content;
 
 /**
- * @phpstan-import-type ContentVariants from \Anthropic\Messages\ToolResultBlockParam\Content
  * @phpstan-import-type CacheControlEphemeralShape from \Anthropic\Messages\CacheControlEphemeral
  * @phpstan-import-type ContentShape from \Anthropic\Messages\ToolResultBlockParam\Content
+ * @phpstan-import-type ContentVariants from \Anthropic\Messages\ToolResultBlockParam\Content
  *
  * @phpstan-type ToolResultBlockParamShape = array{
  *   toolUseID: string,
@@ -21,6 +22,7 @@ use Anthropic\Messages\ToolResultBlockParam\Content;
  *   cacheControl?: null|CacheControlEphemeral|CacheControlEphemeralShape,
  *   content?: ContentShape|null,
  *   isError?: bool|null,
+ *   toolsetName?: string|null,
  * }
  */
 final class ToolResultBlockParam implements BaseModel
@@ -29,7 +31,7 @@ final class ToolResultBlockParam implements BaseModel
     use SdkModel;
 
     /** @var 'tool_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('tool_result'))]
     public string $type = 'tool_result';
 
     #[Required('tool_use_id')]
@@ -49,6 +51,12 @@ final class ToolResultBlockParam implements BaseModel
     public ?bool $isError;
 
     /**
+     * For a toolset member tool_result, the toolset family of the paired tool_use.
+     */
+    #[Optional('toolset_name', nullable: true)]
+    public ?string $toolsetName;
+
+    /**
      * `new ToolResultBlockParam()` is missing required properties by the API.
      *
      * To enforce required parameters use
@@ -59,7 +67,7 @@ final class ToolResultBlockParam implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ToolResultBlockParam)->withToolUseID(...)
+     * (new ToolResultBlockParam())->withToolUseID(...)
      * ```
      */
     public function __construct()
@@ -80,6 +88,7 @@ final class ToolResultBlockParam implements BaseModel
         CacheControlEphemeral|array|null $cacheControl = null,
         string|array|null $content = null,
         ?bool $isError = null,
+        ?string $toolsetName = null,
     ): self {
         $self = new self;
 
@@ -88,6 +97,7 @@ final class ToolResultBlockParam implements BaseModel
         null !== $cacheControl && $self['cacheControl'] = $cacheControl;
         null !== $content && $self['content'] = $content;
         null !== $isError && $self['isError'] = $isError;
+        null !== $toolsetName && $self['toolsetName'] = $toolsetName;
 
         return $self;
     }
@@ -140,6 +150,17 @@ final class ToolResultBlockParam implements BaseModel
     {
         $self = clone $this;
         $self['isError'] = $isError;
+
+        return $self;
+    }
+
+    /**
+     * For a toolset member tool_result, the toolset family of the paired tool_use.
+     */
+    public function withToolsetName(?string $toolsetName): self
+    {
+        $self = clone $this;
+        $self['toolsetName'] = $toolsetName;
 
         return $self;
     }

@@ -5,23 +5,23 @@ declare(strict_types=1);
 namespace Anthropic\Beta\Sessions\Events;
 
 use Anthropic\Beta\Sessions\Events\ManagedAgentsAgentMCPToolResultEvent\Content;
-use Anthropic\Beta\Sessions\Events\ManagedAgentsAgentMCPToolResultEvent\Type;
 use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * Event representing the result of an MCP tool execution.
  *
- * @phpstan-import-type ContentVariants from \Anthropic\Beta\Sessions\Events\ManagedAgentsAgentMCPToolResultEvent\Content
  * @phpstan-import-type ContentShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsAgentMCPToolResultEvent\Content
+ * @phpstan-import-type ContentVariants from \Anthropic\Beta\Sessions\Events\ManagedAgentsAgentMCPToolResultEvent\Content
  *
  * @phpstan-type ManagedAgentsAgentMCPToolResultEventShape = array{
  *   id: string,
  *   mcpToolUseID: string,
  *   processedAt: \DateTimeInterface,
- *   type: Type|value-of<Type>,
+ *   type: 'agent.mcp_tool_result',
  *   content?: list<ContentShape>|null,
  *   isError?: bool|null,
  * }
@@ -30,6 +30,10 @@ final class ManagedAgentsAgentMCPToolResultEvent implements BaseModel
 {
     /** @use SdkModel<ManagedAgentsAgentMCPToolResultEventShape> */
     use SdkModel;
+
+    /** @var 'agent.mcp_tool_result' $type */
+    #[Required(type: new ConstantOf('agent.mcp_tool_result'))]
+    public string $type = 'agent.mcp_tool_result';
 
     /**
      * Unique identifier for this event.
@@ -44,14 +48,10 @@ final class ManagedAgentsAgentMCPToolResultEvent implements BaseModel
     public string $mcpToolUseID;
 
     /**
-     * A timestamp in RFC 3339 format.
+     * Timestamp when this event was processed.
      */
     #[Required('processed_at')]
     public \DateTimeInterface $processedAt;
-
-    /** @var value-of<Type> $type */
-    #[Required(enum: Type::class)]
-    public string $type;
 
     /**
      * The result content returned by the tool.
@@ -73,18 +73,17 @@ final class ManagedAgentsAgentMCPToolResultEvent implements BaseModel
      * To enforce required parameters use
      * ```
      * ManagedAgentsAgentMCPToolResultEvent::with(
-     *   id: ..., mcpToolUseID: ..., processedAt: ..., type: ...
+     *   id: ..., mcpToolUseID: ..., processedAt: ...
      * )
      * ```
      *
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ManagedAgentsAgentMCPToolResultEvent)
+     * (new ManagedAgentsAgentMCPToolResultEvent())
      *   ->withID(...)
      *   ->withMCPToolUseID(...)
      *   ->withProcessedAt(...)
-     *   ->withType(...)
      * ```
      */
     public function __construct()
@@ -97,14 +96,12 @@ final class ManagedAgentsAgentMCPToolResultEvent implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
-     * @param Type|value-of<Type> $type
      * @param list<ContentShape>|null $content
      */
     public static function with(
         string $id,
         string $mcpToolUseID,
         \DateTimeInterface $processedAt,
-        Type|string $type,
         ?array $content = null,
         ?bool $isError = null,
     ): self {
@@ -113,7 +110,6 @@ final class ManagedAgentsAgentMCPToolResultEvent implements BaseModel
         $self['id'] = $id;
         $self['mcpToolUseID'] = $mcpToolUseID;
         $self['processedAt'] = $processedAt;
-        $self['type'] = $type;
 
         null !== $content && $self['content'] = $content;
         null !== $isError && $self['isError'] = $isError;
@@ -144,7 +140,7 @@ final class ManagedAgentsAgentMCPToolResultEvent implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * Timestamp when this event was processed.
      */
     public function withProcessedAt(\DateTimeInterface $processedAt): self
     {
@@ -155,9 +151,9 @@ final class ManagedAgentsAgentMCPToolResultEvent implements BaseModel
     }
 
     /**
-     * @param Type|value-of<Type> $type
+     * @param 'agent.mcp_tool_result' $type
      */
-    public function withType(Type|string $type): self
+    public function withType(string $type): self
     {
         $self = clone $this;
         $self['type'] = $type;

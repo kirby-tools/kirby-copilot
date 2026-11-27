@@ -12,7 +12,7 @@ use Anthropic\Core\Concerns\SdkParams;
 use Anthropic\Core\Contracts\BaseModel;
 
 /**
- * Update Session Resource.
+ * Update Session Resource
  *
  * @see Anthropic\Services\Beta\Sessions\ResourcesService::update()
  *
@@ -20,6 +20,7 @@ use Anthropic\Core\Contracts\BaseModel;
  *   sessionID: string,
  *   authorizationToken: string,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class ResourceUpdateParams implements BaseModel
@@ -38,12 +39,20 @@ final class ResourceUpdateParams implements BaseModel
     public string $authorizationToken;
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this header.
      *
      * @var list<string|value-of<AnthropicBeta>>|null $betas
      */
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
 
     /**
      * `new ResourceUpdateParams()` is missing required properties by the API.
@@ -56,7 +65,7 @@ final class ResourceUpdateParams implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ResourceUpdateParams)->withSessionID(...)->withAuthorizationToken(...)
+     * (new ResourceUpdateParams())->withSessionID(...)->withAuthorizationToken(...)
      * ```
      */
     public function __construct()
@@ -74,7 +83,8 @@ final class ResourceUpdateParams implements BaseModel
     public static function with(
         string $sessionID,
         string $authorizationToken,
-        ?array $betas = null
+        ?array $betas = null,
+        ?string $workspaceID = null,
     ): self {
         $self = new self;
 
@@ -82,6 +92,7 @@ final class ResourceUpdateParams implements BaseModel
         $self['authorizationToken'] = $authorizationToken;
 
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
@@ -106,7 +117,7 @@ final class ResourceUpdateParams implements BaseModel
     }
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this header.
      *
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas
      */
@@ -114,6 +125,19 @@ final class ResourceUpdateParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

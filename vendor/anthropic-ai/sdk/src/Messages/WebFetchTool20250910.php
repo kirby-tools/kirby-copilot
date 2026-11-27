@@ -8,11 +8,13 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\WebFetchTool20250910\AllowedCaller;
 
 /**
  * @phpstan-import-type CacheControlEphemeralShape from \Anthropic\Messages\CacheControlEphemeral
  * @phpstan-import-type CitationsConfigParamShape from \Anthropic\Messages\CitationsConfigParam
+ * @phpstan-import-type WebFetchURLSourcesShape from \Anthropic\Messages\WebFetchURLSources
  *
  * @phpstan-type WebFetchTool20250910Shape = array{
  *   name: 'web_fetch',
@@ -26,6 +28,7 @@ use Anthropic\Messages\WebFetchTool20250910\AllowedCaller;
  *   maxContentTokens?: int|null,
  *   maxUses?: int|null,
  *   strict?: bool|null,
+ *   urlSources?: null|WebFetchURLSources|WebFetchURLSourcesShape,
  * }
  */
 final class WebFetchTool20250910 implements BaseModel
@@ -40,11 +43,11 @@ final class WebFetchTool20250910 implements BaseModel
      *
      * @var 'web_fetch' $name
      */
-    #[Required]
+    #[Required(type: new ConstantOf('web_fetch'))]
     public string $name = 'web_fetch';
 
     /** @var 'web_fetch_20250910' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('web_fetch_20250910'))]
     public string $type = 'web_fetch_20250910';
 
     /** @var list<value-of<AllowedCaller>>|null $allowedCallers */
@@ -52,7 +55,7 @@ final class WebFetchTool20250910 implements BaseModel
     public ?array $allowedCallers;
 
     /**
-     * List of domains to allow fetching from.
+     * List of domains to allow fetching from
      *
      * @var list<string>|null $allowedDomains
      */
@@ -60,7 +63,7 @@ final class WebFetchTool20250910 implements BaseModel
     public ?array $allowedDomains;
 
     /**
-     * List of domains to block fetching from.
+     * List of domains to block fetching from
      *
      * @var list<string>|null $blockedDomains
      */
@@ -98,10 +101,16 @@ final class WebFetchTool20250910 implements BaseModel
     public ?int $maxUses;
 
     /**
-     * When true, guarantees schema validation on tool names and inputs.
+     * When true, guarantees schema validation on tool names and inputs
      */
     #[Optional]
     public ?bool $strict;
+
+    /**
+     * Which sources contribute to the set of URLs the tool may fetch. Omitted means every source.
+     */
+    #[Optional('url_sources', nullable: true)]
+    public ?WebFetchURLSources $urlSources;
 
     public function __construct()
     {
@@ -118,6 +127,7 @@ final class WebFetchTool20250910 implements BaseModel
      * @param list<string>|null $blockedDomains
      * @param CacheControlEphemeral|CacheControlEphemeralShape|null $cacheControl
      * @param CitationsConfigParam|CitationsConfigParamShape|null $citations
+     * @param WebFetchURLSources|WebFetchURLSourcesShape|null $urlSources
      */
     public static function with(
         ?array $allowedCallers = null,
@@ -129,6 +139,7 @@ final class WebFetchTool20250910 implements BaseModel
         ?int $maxContentTokens = null,
         ?int $maxUses = null,
         ?bool $strict = null,
+        WebFetchURLSources|array|null $urlSources = null,
     ): self {
         $self = new self;
 
@@ -141,6 +152,7 @@ final class WebFetchTool20250910 implements BaseModel
         null !== $maxContentTokens && $self['maxContentTokens'] = $maxContentTokens;
         null !== $maxUses && $self['maxUses'] = $maxUses;
         null !== $strict && $self['strict'] = $strict;
+        null !== $urlSources && $self['urlSources'] = $urlSources;
 
         return $self;
     }
@@ -183,7 +195,7 @@ final class WebFetchTool20250910 implements BaseModel
     }
 
     /**
-     * List of domains to allow fetching from.
+     * List of domains to allow fetching from
      *
      * @param list<string>|null $allowedDomains
      */
@@ -196,7 +208,7 @@ final class WebFetchTool20250910 implements BaseModel
     }
 
     /**
-     * List of domains to block fetching from.
+     * List of domains to block fetching from
      *
      * @param list<string>|null $blockedDomains
      */
@@ -270,12 +282,26 @@ final class WebFetchTool20250910 implements BaseModel
     }
 
     /**
-     * When true, guarantees schema validation on tool names and inputs.
+     * When true, guarantees schema validation on tool names and inputs
      */
     public function withStrict(bool $strict): self
     {
         $self = clone $this;
         $self['strict'] = $strict;
+
+        return $self;
+    }
+
+    /**
+     * Which sources contribute to the set of URLs the tool may fetch. Omitted means every source.
+     *
+     * @param WebFetchURLSources|WebFetchURLSourcesShape|null $urlSources
+     */
+    public function withURLSources(
+        WebFetchURLSources|array|null $urlSources
+    ): self {
+        $self = clone $this;
+        $self['urlSources'] = $urlSources;
 
         return $self;
     }

@@ -11,16 +11,17 @@ use Anthropic\Core\Concerns\SdkParams;
 use Anthropic\Core\Contracts\BaseModel;
 
 /**
- * List Files.
+ * List Files
  *
  * @see Anthropic\Services\Beta\FilesService::list()
  *
  * @phpstan-type FileListParamsShape = array{
- *   afterID?: string|null,
- *   beforeID?: string|null,
+ *   ids?: list<string>|null,
  *   limit?: int|null,
+ *   page?: string|null,
  *   scopeID?: string|null,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class FileListParams implements BaseModel
@@ -30,16 +31,12 @@ final class FileListParams implements BaseModel
     use SdkParams;
 
     /**
-     * ID of the object to use as a cursor for pagination. When provided, returns the page of results immediately after this object.
+     * Restrict the result set to Files whose `id` is in this list. At most 100 entries (after de-duplication). Mutually exclusive with `page` and `limit`. When supplied, the response is always a single page (`next_page` is null). IDs that do not resolve to a visible File — including deleted Files — are silently omitted.
+     *
+     * @var list<string>|null $ids
      */
-    #[Optional]
-    public ?string $afterID;
-
-    /**
-     * ID of the object to use as a cursor for pagination. When provided, returns the page of results immediately before this object.
-     */
-    #[Optional]
-    public ?string $beforeID;
+    #[Optional(list: 'string', nullable: true)]
+    public ?array $ids;
 
     /**
      * Number of items to return per page.
@@ -48,6 +45,12 @@ final class FileListParams implements BaseModel
      */
     #[Optional]
     public ?int $limit;
+
+    /**
+     * Opaque page cursor returned in a prior list response's `next_page`. Prefixed `page_`.
+     */
+    #[Optional(nullable: true)]
+    public ?string $page;
 
     /**
      * Filter by scope ID. Only returns files associated with the specified scope (e.g., a session ID).
@@ -63,6 +66,14 @@ final class FileListParams implements BaseModel
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
 
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
+
     public function __construct()
     {
         $this->initialize();
@@ -73,44 +84,38 @@ final class FileListParams implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
+     * @param list<string>|null $ids
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>>|null $betas
      */
     public static function with(
-        ?string $afterID = null,
-        ?string $beforeID = null,
+        ?array $ids = null,
         ?int $limit = null,
+        ?string $page = null,
         ?string $scopeID = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
     ): self {
         $self = new self;
 
-        null !== $afterID && $self['afterID'] = $afterID;
-        null !== $beforeID && $self['beforeID'] = $beforeID;
+        null !== $ids && $self['ids'] = $ids;
         null !== $limit && $self['limit'] = $limit;
+        null !== $page && $self['page'] = $page;
         null !== $scopeID && $self['scopeID'] = $scopeID;
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
 
     /**
-     * ID of the object to use as a cursor for pagination. When provided, returns the page of results immediately after this object.
+     * Restrict the result set to Files whose `id` is in this list. At most 100 entries (after de-duplication). Mutually exclusive with `page` and `limit`. When supplied, the response is always a single page (`next_page` is null). IDs that do not resolve to a visible File — including deleted Files — are silently omitted.
+     *
+     * @param list<string>|null $ids
      */
-    public function withAfterID(string $afterID): self
+    public function withIDs(?array $ids): self
     {
         $self = clone $this;
-        $self['afterID'] = $afterID;
-
-        return $self;
-    }
-
-    /**
-     * ID of the object to use as a cursor for pagination. When provided, returns the page of results immediately before this object.
-     */
-    public function withBeforeID(string $beforeID): self
-    {
-        $self = clone $this;
-        $self['beforeID'] = $beforeID;
+        $self['ids'] = $ids;
 
         return $self;
     }
@@ -124,6 +129,17 @@ final class FileListParams implements BaseModel
     {
         $self = clone $this;
         $self['limit'] = $limit;
+
+        return $self;
+    }
+
+    /**
+     * Opaque page cursor returned in a prior list response's `next_page`. Prefixed `page_`.
+     */
+    public function withPage(?string $page): self
+    {
+        $self = clone $this;
+        $self['page'] = $page;
 
         return $self;
     }
@@ -148,6 +164,19 @@ final class FileListParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

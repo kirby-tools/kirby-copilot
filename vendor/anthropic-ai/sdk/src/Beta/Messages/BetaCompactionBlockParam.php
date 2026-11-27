@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Anthropic\Beta\Messages;
 
+use Anthropic\Beta\Messages\BetaCompactionBlockParam\ToolChange;
 use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * A compaction block containing summary of previous context.
@@ -19,12 +21,16 @@ use Anthropic\Core\Contracts\BaseModel;
  * treats these as no-ops. Empty string content is not allowed.
  *
  * @phpstan-import-type BetaCacheControlEphemeralShape from \Anthropic\Beta\Messages\BetaCacheControlEphemeral
+ * @phpstan-import-type ToolChangeShape from \Anthropic\Beta\Messages\BetaCompactionBlockParam\ToolChange
+ * @phpstan-import-type ToolChangeVariants from \Anthropic\Beta\Messages\BetaCompactionBlockParam\ToolChange
  *
  * @phpstan-type BetaCompactionBlockParamShape = array{
- *   content: string|null,
  *   type: 'compaction',
  *   cacheControl?: null|BetaCacheControlEphemeral|BetaCacheControlEphemeralShape,
+ *   content?: string|null,
  *   encryptedContent?: string|null,
+ *   signature?: string|null,
+ *   toolChanges?: list<ToolChangeShape>|null,
  * }
  */
 final class BetaCompactionBlockParam implements BaseModel
@@ -33,14 +39,8 @@ final class BetaCompactionBlockParam implements BaseModel
     use SdkModel;
 
     /** @var 'compaction' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('compaction'))]
     public string $type = 'compaction';
-
-    /**
-     * Summary of previously compacted content, or null if compaction failed.
-     */
-    #[Required]
-    public ?string $content;
 
     /**
      * Create a cache control breakpoint at this content block.
@@ -49,25 +49,31 @@ final class BetaCompactionBlockParam implements BaseModel
     public ?BetaCacheControlEphemeral $cacheControl;
 
     /**
-     * Opaque metadata from prior compaction, to be round-tripped verbatim.
+     * Summary of previously compacted content, or null if compaction failed
+     */
+    #[Optional(nullable: true)]
+    public ?string $content;
+
+    /**
+     * Opaque metadata from prior compaction, to be round-tripped verbatim
      */
     #[Optional('encrypted_content', nullable: true)]
     public ?string $encryptedContent;
 
     /**
-     * `new BetaCompactionBlockParam()` is missing required properties by the API.
-     *
-     * To enforce required parameters use
-     * ```
-     * BetaCompactionBlockParam::with(content: ...)
-     * ```
-     *
-     * Otherwise ensure the following setters are called
-     *
-     * ```
-     * (new BetaCompactionBlockParam)->withContent(...)
-     * ```
+     * The block's signature as returned, to be sent back verbatim
      */
+    #[Optional(nullable: true)]
+    public ?string $signature;
+
+    /**
+     * The tool changes of the compacted range, as the server returned them on this block: the `tool_addition` and `tool_removal` entries that take the request's `tools` to the tool set in effect at the end of the range. Send them back unchanged with the block.
+     *
+     * @var list<ToolChangeVariants>|null $toolChanges
+     */
+    #[Optional('tool_changes', list: ToolChange::class, nullable: true)]
+    public ?array $toolChanges;
+
     public function __construct()
     {
         $this->initialize();
@@ -79,29 +85,22 @@ final class BetaCompactionBlockParam implements BaseModel
      * You must use named parameters to construct any parameters with a default value.
      *
      * @param BetaCacheControlEphemeral|BetaCacheControlEphemeralShape|null $cacheControl
+     * @param list<ToolChangeShape>|null $toolChanges
      */
     public static function with(
-        ?string $content,
         BetaCacheControlEphemeral|array|null $cacheControl = null,
+        ?string $content = null,
         ?string $encryptedContent = null,
+        ?string $signature = null,
+        ?array $toolChanges = null,
     ): self {
         $self = new self;
 
-        $self['content'] = $content;
-
         null !== $cacheControl && $self['cacheControl'] = $cacheControl;
+        null !== $content && $self['content'] = $content;
         null !== $encryptedContent && $self['encryptedContent'] = $encryptedContent;
-
-        return $self;
-    }
-
-    /**
-     * Summary of previously compacted content, or null if compaction failed.
-     */
-    public function withContent(?string $content): self
-    {
-        $self = clone $this;
-        $self['content'] = $content;
+        null !== $signature && $self['signature'] = $signature;
+        null !== $toolChanges && $self['toolChanges'] = $toolChanges;
 
         return $self;
     }
@@ -132,12 +131,47 @@ final class BetaCompactionBlockParam implements BaseModel
     }
 
     /**
-     * Opaque metadata from prior compaction, to be round-tripped verbatim.
+     * Summary of previously compacted content, or null if compaction failed
+     */
+    public function withContent(?string $content): self
+    {
+        $self = clone $this;
+        $self['content'] = $content;
+
+        return $self;
+    }
+
+    /**
+     * Opaque metadata from prior compaction, to be round-tripped verbatim
      */
     public function withEncryptedContent(?string $encryptedContent): self
     {
         $self = clone $this;
         $self['encryptedContent'] = $encryptedContent;
+
+        return $self;
+    }
+
+    /**
+     * The block's signature as returned, to be sent back verbatim
+     */
+    public function withSignature(?string $signature): self
+    {
+        $self = clone $this;
+        $self['signature'] = $signature;
+
+        return $self;
+    }
+
+    /**
+     * The tool changes of the compacted range, as the server returned them on this block: the `tool_addition` and `tool_removal` entries that take the request's `tools` to the tool set in effect at the end of the range. Send them back unchanged with the block.
+     *
+     * @param list<ToolChangeShape>|null $toolChanges
+     */
+    public function withToolChanges(?array $toolChanges): self
+    {
+        $self = clone $this;
+        $self['toolChanges'] = $toolChanges;
 
         return $self;
     }

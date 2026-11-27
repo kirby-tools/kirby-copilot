@@ -12,8 +12,8 @@ use Anthropic\Core\Contracts\BaseModel;
 /**
  * Resolved default configuration for agent tools.
  *
- * @phpstan-import-type PermissionPolicyVariants from \Anthropic\Beta\Agents\BetaManagedAgentsAgentToolsetDefaultConfig\PermissionPolicy
  * @phpstan-import-type PermissionPolicyShape from \Anthropic\Beta\Agents\BetaManagedAgentsAgentToolsetDefaultConfig\PermissionPolicy
+ * @phpstan-import-type PermissionPolicyVariants from \Anthropic\Beta\Agents\BetaManagedAgentsAgentToolsetDefaultConfig\PermissionPolicy
  *
  * @phpstan-type BetaManagedAgentsAgentToolsetDefaultConfigShape = array{
  *   enabled: bool, permissionPolicy: PermissionPolicyShape
@@ -33,7 +33,7 @@ final class BetaManagedAgentsAgentToolsetDefaultConfig implements BaseModel
      * @var PermissionPolicyVariants $permissionPolicy
      */
     #[Required('permission_policy', union: PermissionPolicy::class)]
-    public BetaManagedAgentsAlwaysAllowPolicy|BetaManagedAgentsAlwaysAskPolicy $permissionPolicy;
+    public BetaManagedAgentsAlwaysAllowPolicy|BetaManagedAgentsAlwaysAskPolicy|BetaManagedAgentsAutoPolicy $permissionPolicy;
 
     /**
      * `new BetaManagedAgentsAgentToolsetDefaultConfig()` is missing required properties by the API.
@@ -48,7 +48,7 @@ final class BetaManagedAgentsAgentToolsetDefaultConfig implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaManagedAgentsAgentToolsetDefaultConfig)
+     * (new BetaManagedAgentsAgentToolsetDefaultConfig())
      *   ->withEnabled(...)
      *   ->withPermissionPolicy(...)
      * ```
@@ -67,7 +67,7 @@ final class BetaManagedAgentsAgentToolsetDefaultConfig implements BaseModel
      */
     public static function with(
         bool $enabled,
-        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy $permissionPolicy,
+        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy|BetaManagedAgentsAutoPolicy $permissionPolicy,
     ): self {
         $self = new self;
 
@@ -91,7 +91,7 @@ final class BetaManagedAgentsAgentToolsetDefaultConfig implements BaseModel
      * @param PermissionPolicyShape $permissionPolicy
      */
     public function withPermissionPolicy(
-        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy $permissionPolicy,
+        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy|BetaManagedAgentsAutoPolicy $permissionPolicy,
     ): self {
         $self = clone $this;
         $self['permissionPolicy'] = $permissionPolicy;

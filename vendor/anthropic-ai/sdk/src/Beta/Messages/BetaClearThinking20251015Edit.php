@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace Anthropic\Beta\Messages;
 
+use Anthropic\Beta\Messages\BetaClearThinking20251015Edit\Keep;
 use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type KeepVariants from \Anthropic\Beta\Messages\BetaClearThinking20251015Edit\Keep
  * @phpstan-import-type KeepShape from \Anthropic\Beta\Messages\BetaClearThinking20251015Edit\Keep
+ * @phpstan-import-type KeepVariants from \Anthropic\Beta\Messages\BetaClearThinking20251015Edit\Keep
  *
  * @phpstan-type BetaClearThinking20251015EditShape = array{
  *   type: 'clear_thinking_20251015', keep?: KeepShape|null
@@ -23,7 +25,7 @@ final class BetaClearThinking20251015Edit implements BaseModel
     use SdkModel;
 
     /** @var 'clear_thinking_20251015' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('clear_thinking_20251015'))]
     public string $type = 'clear_thinking_20251015';
 
     /**
@@ -31,7 +33,7 @@ final class BetaClearThinking20251015Edit implements BaseModel
      *
      * @var KeepVariants|null $keep
      */
-    #[Optional]
+    #[Optional(union: Keep::class)]
     public string|BetaThinkingTurns|BetaAllThinkingTurns|null $keep;
 
     public function __construct()

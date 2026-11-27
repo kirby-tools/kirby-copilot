@@ -51,7 +51,7 @@ final class ManagedAgentsSpanModelUsage implements BaseModel
     public int $outputTokens;
 
     /**
-     * Inference speed mode. `fast` provides significantly faster output token generation at premium pricing. Not all models support `fast`; invalid combinations are rejected at create time.
+     * Inference speed tier this request actually ran at. Mirrors `usage.speed` on /v1/messages. Only present when the fast-mode beta is active.
      *
      * @var value-of<Speed>|null $speed
      */
@@ -74,7 +74,7 @@ final class ManagedAgentsSpanModelUsage implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ManagedAgentsSpanModelUsage)
+     * (new ManagedAgentsSpanModelUsage())
      *   ->withCacheCreationInputTokens(...)
      *   ->withCacheReadInputTokens(...)
      *   ->withInputTokens(...)
@@ -158,7 +158,7 @@ final class ManagedAgentsSpanModelUsage implements BaseModel
     }
 
     /**
-     * Inference speed mode. `fast` provides significantly faster output token generation at premium pricing. Not all models support `fast`; invalid combinations are rejected at create time.
+     * Inference speed tier this request actually ran at. Mirrors `usage.speed` on /v1/messages. Only present when the fast-mode beta is active.
      *
      * @param Speed|value-of<Speed>|null $speed
      */

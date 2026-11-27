@@ -9,14 +9,13 @@ use Anthropic\Core\Conversion\Contracts\Converter;
 use Anthropic\Core\Conversion\Contracts\ConverterSource;
 
 /**
- * Token usage for a sampling iteration.
- *
  * @phpstan-import-type BetaMessageIterationUsageShape from \Anthropic\Beta\Messages\BetaMessageIterationUsage
  * @phpstan-import-type BetaCompactionIterationUsageShape from \Anthropic\Beta\Messages\BetaCompactionIterationUsage
  * @phpstan-import-type BetaAdvisorMessageIterationUsageShape from \Anthropic\Beta\Messages\BetaAdvisorMessageIterationUsage
+ * @phpstan-import-type BetaFallbackMessageIterationUsageShape from \Anthropic\Beta\Messages\BetaFallbackMessageIterationUsage
  *
- * @phpstan-type BetaIterationsUsageItemVariants = BetaMessageIterationUsage|BetaCompactionIterationUsage|BetaAdvisorMessageIterationUsage
- * @phpstan-type BetaIterationsUsageItemShape = BetaIterationsUsageItemVariants|BetaMessageIterationUsageShape|BetaCompactionIterationUsageShape|BetaAdvisorMessageIterationUsageShape
+ * @phpstan-type BetaIterationsUsageItemVariants = BetaMessageIterationUsage|BetaCompactionIterationUsage|BetaAdvisorMessageIterationUsage|BetaFallbackMessageIterationUsage
+ * @phpstan-type BetaIterationsUsageItemShape = BetaIterationsUsageItemVariants|BetaMessageIterationUsageShape|BetaCompactionIterationUsageShape|BetaAdvisorMessageIterationUsageShape|BetaFallbackMessageIterationUsageShape
  */
 final class BetaIterationsUsageItem implements ConverterSource
 {
@@ -36,6 +35,7 @@ final class BetaIterationsUsageItem implements ConverterSource
             'message' => BetaMessageIterationUsage::class,
             'compaction' => BetaCompactionIterationUsage::class,
             'advisor_message' => BetaAdvisorMessageIterationUsage::class,
+            'fallback_message' => BetaFallbackMessageIterationUsage::class,
         ];
     }
 }

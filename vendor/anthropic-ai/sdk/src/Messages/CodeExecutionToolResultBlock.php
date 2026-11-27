@@ -7,10 +7,11 @@ namespace Anthropic\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type CodeExecutionToolResultBlockContentVariants from \Anthropic\Messages\CodeExecutionToolResultBlockContent
  * @phpstan-import-type CodeExecutionToolResultBlockContentShape from \Anthropic\Messages\CodeExecutionToolResultBlockContent
+ * @phpstan-import-type CodeExecutionToolResultBlockContentVariants from \Anthropic\Messages\CodeExecutionToolResultBlockContent
  *
  * @phpstan-type CodeExecutionToolResultBlockShape = array{
  *   content: CodeExecutionToolResultBlockContentShape,
@@ -24,16 +25,12 @@ final class CodeExecutionToolResultBlock implements BaseModel
     use SdkModel;
 
     /** @var 'code_execution_tool_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('code_execution_tool_result'))]
     public string $type = 'code_execution_tool_result';
 
-    /**
-     * Code execution result with encrypted stdout for PFC + web_search results.
-     *
-     * @var CodeExecutionToolResultBlockContentVariants $content
-     */
+    /** @var CodeExecutionToolResultBlockContentVariants $content */
     #[Required]
-    public CodeExecutionToolResultError|CodeExecutionResultBlock|EncryptedCodeExecutionResultBlock $content;
+    public CodeExecutionToolResultErrorObject|CodeExecutionResultBlock|EncryptedCodeExecutionResultBlock $content;
 
     #[Required('tool_use_id')]
     public string $toolUseID;
@@ -49,7 +46,7 @@ final class CodeExecutionToolResultBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new CodeExecutionToolResultBlock)->withContent(...)->withToolUseID(...)
+     * (new CodeExecutionToolResultBlock())->withContent(...)->withToolUseID(...)
      * ```
      */
     public function __construct()
@@ -65,7 +62,7 @@ final class CodeExecutionToolResultBlock implements BaseModel
      * @param CodeExecutionToolResultBlockContentShape $content
      */
     public static function with(
-        CodeExecutionToolResultError|array|CodeExecutionResultBlock|EncryptedCodeExecutionResultBlock $content,
+        CodeExecutionToolResultErrorObject|array|CodeExecutionResultBlock|EncryptedCodeExecutionResultBlock $content,
         string $toolUseID,
     ): self {
         $self = new self;
@@ -77,12 +74,10 @@ final class CodeExecutionToolResultBlock implements BaseModel
     }
 
     /**
-     * Code execution result with encrypted stdout for PFC + web_search results.
-     *
      * @param CodeExecutionToolResultBlockContentShape $content
      */
     public function withContent(
-        CodeExecutionToolResultError|array|CodeExecutionResultBlock|EncryptedCodeExecutionResultBlock $content,
+        CodeExecutionToolResultErrorObject|array|CodeExecutionResultBlock|EncryptedCodeExecutionResultBlock $content,
     ): self {
         $self = clone $this;
         $self['content'] = $content;

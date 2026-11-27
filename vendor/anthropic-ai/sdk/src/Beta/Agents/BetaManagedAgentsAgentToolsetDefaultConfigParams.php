@@ -12,8 +12,8 @@ use Anthropic\Core\Contracts\BaseModel;
 /**
  * Default configuration for all tools in a toolset.
  *
- * @phpstan-import-type PermissionPolicyVariants from \Anthropic\Beta\Agents\BetaManagedAgentsAgentToolsetDefaultConfigParams\PermissionPolicy
  * @phpstan-import-type PermissionPolicyShape from \Anthropic\Beta\Agents\BetaManagedAgentsAgentToolsetDefaultConfigParams\PermissionPolicy
+ * @phpstan-import-type PermissionPolicyVariants from \Anthropic\Beta\Agents\BetaManagedAgentsAgentToolsetDefaultConfigParams\PermissionPolicy
  *
  * @phpstan-type BetaManagedAgentsAgentToolsetDefaultConfigParamsShape = array{
  *   enabled?: bool|null, permissionPolicy?: PermissionPolicyShape|null
@@ -31,7 +31,7 @@ final class BetaManagedAgentsAgentToolsetDefaultConfigParams implements BaseMode
     public ?bool $enabled;
 
     /**
-     * Permission policy for tool execution.
+     * Default permission policy for tools. Controls whether tool calls are auto-approved or require confirmation.
      *
      * @var PermissionPolicyVariants|null $permissionPolicy
      */
@@ -40,7 +40,7 @@ final class BetaManagedAgentsAgentToolsetDefaultConfigParams implements BaseMode
         union: PermissionPolicy::class,
         nullable: true
     )]
-    public BetaManagedAgentsAlwaysAllowPolicy|BetaManagedAgentsAlwaysAskPolicy|null $permissionPolicy;
+    public BetaManagedAgentsAlwaysAllowPolicy|BetaManagedAgentsAlwaysAskPolicy|BetaManagedAgentsAutoPolicy|null $permissionPolicy;
 
     public function __construct()
     {
@@ -56,7 +56,7 @@ final class BetaManagedAgentsAgentToolsetDefaultConfigParams implements BaseMode
      */
     public static function with(
         ?bool $enabled = null,
-        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy|null $permissionPolicy = null,
+        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy|BetaManagedAgentsAutoPolicy|null $permissionPolicy = null,
     ): self {
         $self = new self;
 
@@ -78,12 +78,12 @@ final class BetaManagedAgentsAgentToolsetDefaultConfigParams implements BaseMode
     }
 
     /**
-     * Permission policy for tool execution.
+     * Default permission policy for tools. Controls whether tool calls are auto-approved or require confirmation.
      *
      * @param PermissionPolicyShape|null $permissionPolicy
      */
     public function withPermissionPolicy(
-        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy|null $permissionPolicy,
+        BetaManagedAgentsAlwaysAllowPolicy|array|BetaManagedAgentsAlwaysAskPolicy|BetaManagedAgentsAutoPolicy|null $permissionPolicy,
     ): self {
         $self = clone $this;
         $self['permissionPolicy'] = $permissionPolicy;

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Anthropic\Beta\Vaults\Credentials;
 
-use Anthropic\Beta\Vaults\Credentials\ManagedAgentsMCPOAuthUpdateParams\Type;
 use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * Parameters for updating an MCP OAuth credential. The `mcp_server_url` is immutable.
@@ -16,7 +16,7 @@ use Anthropic\Core\Contracts\BaseModel;
  * @phpstan-import-type ManagedAgentsMCPOAuthRefreshUpdateParamsShape from \Anthropic\Beta\Vaults\Credentials\ManagedAgentsMCPOAuthRefreshUpdateParams
  *
  * @phpstan-type ManagedAgentsMCPOAuthUpdateParamsShape = array{
- *   type: Type|value-of<Type>,
+ *   type: 'mcp_oauth',
  *   accessToken?: string|null,
  *   expiresAt?: \DateTimeInterface|null,
  *   refresh?: null|ManagedAgentsMCPOAuthRefreshUpdateParams|ManagedAgentsMCPOAuthRefreshUpdateParamsShape,
@@ -27,42 +27,32 @@ final class ManagedAgentsMCPOAuthUpdateParams implements BaseModel
     /** @use SdkModel<ManagedAgentsMCPOAuthUpdateParamsShape> */
     use SdkModel;
 
-    /** @var value-of<Type> $type */
-    #[Required(enum: Type::class)]
-    public string $type;
+    /** @var 'mcp_oauth' $type */
+    #[Required(type: new ConstantOf('mcp_oauth'))]
+    public string $type = 'mcp_oauth';
 
     /**
-     * Updated OAuth access token.
+     * The new OAuth access token to replace the stored one.
      */
     #[Optional('access_token', nullable: true)]
     public ?string $accessToken;
 
     /**
-     * A timestamp in RFC 3339 format.
+     * When the credential's access token expires, in RFC 3339. Leave it out to keep the stored expiry.
+     *
+     * If you send a new `access_token`, send its `expires_at` too, or the new token keeps the old expiry.
+     *
+     * Must be in the future.
      */
     #[Optional('expires_at', nullable: true)]
     public ?\DateTimeInterface $expiresAt;
 
     /**
-     * Parameters for updating OAuth refresh token configuration.
+     * Updated refresh token configuration.
      */
     #[Optional(nullable: true)]
     public ?ManagedAgentsMCPOAuthRefreshUpdateParams $refresh;
 
-    /**
-     * `new ManagedAgentsMCPOAuthUpdateParams()` is missing required properties by the API.
-     *
-     * To enforce required parameters use
-     * ```
-     * ManagedAgentsMCPOAuthUpdateParams::with(type: ...)
-     * ```
-     *
-     * Otherwise ensure the following setters are called
-     *
-     * ```
-     * (new ManagedAgentsMCPOAuthUpdateParams)->withType(...)
-     * ```
-     */
     public function __construct()
     {
         $this->initialize();
@@ -73,18 +63,14 @@ final class ManagedAgentsMCPOAuthUpdateParams implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
-     * @param Type|value-of<Type> $type
      * @param ManagedAgentsMCPOAuthRefreshUpdateParams|ManagedAgentsMCPOAuthRefreshUpdateParamsShape|null $refresh
      */
     public static function with(
-        Type|string $type,
         ?string $accessToken = null,
         ?\DateTimeInterface $expiresAt = null,
         ManagedAgentsMCPOAuthRefreshUpdateParams|array|null $refresh = null,
     ): self {
         $self = new self;
-
-        $self['type'] = $type;
 
         null !== $accessToken && $self['accessToken'] = $accessToken;
         null !== $expiresAt && $self['expiresAt'] = $expiresAt;
@@ -94,9 +80,9 @@ final class ManagedAgentsMCPOAuthUpdateParams implements BaseModel
     }
 
     /**
-     * @param Type|value-of<Type> $type
+     * @param 'mcp_oauth' $type
      */
-    public function withType(Type|string $type): self
+    public function withType(string $type): self
     {
         $self = clone $this;
         $self['type'] = $type;
@@ -105,7 +91,7 @@ final class ManagedAgentsMCPOAuthUpdateParams implements BaseModel
     }
 
     /**
-     * Updated OAuth access token.
+     * The new OAuth access token to replace the stored one.
      */
     public function withAccessToken(?string $accessToken): self
     {
@@ -116,7 +102,11 @@ final class ManagedAgentsMCPOAuthUpdateParams implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * When the credential's access token expires, in RFC 3339. Leave it out to keep the stored expiry.
+     *
+     * If you send a new `access_token`, send its `expires_at` too, or the new token keeps the old expiry.
+     *
+     * Must be in the future.
      */
     public function withExpiresAt(?\DateTimeInterface $expiresAt): self
     {
@@ -127,7 +117,7 @@ final class ManagedAgentsMCPOAuthUpdateParams implements BaseModel
     }
 
     /**
-     * Parameters for updating OAuth refresh token configuration.
+     * Updated refresh token configuration.
      *
      * @param ManagedAgentsMCPOAuthRefreshUpdateParams|ManagedAgentsMCPOAuthRefreshUpdateParamsShape|null $refresh
      */

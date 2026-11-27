@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Anthropic\Aws;
 
+use Anthropic\Core\Exceptions\AnthropicException;
 use Anthropic\Core\Util;
 use Anthropic\RequestOptions;
 use Psr\Http\Message\RequestInterface;
@@ -12,17 +13,22 @@ use Psr\Http\Message\RequestInterface;
  * Anthropic AWS gateway client.
  *
  * Connects to the Anthropic AWS gateway at https://aws-external-anthropic.{region}.api.aws
- * with support for x-api-key auth and AWS SigV4 signing.
+ * with support for API key auth and AWS SigV4 signing.
+ *
+ * The gateway serves user profiles but not their action URLs, so
+ * `$userProfiles->actionURLs` and `$beta->userProfiles->actionURLs` throw an
+ * {@see AnthropicException} before any request is sent.
  *
  * Auth is resolved by precedence:
  *  0. $skipAuth (no auth — skips all below)
- *  1. $apiKey arg (x-api-key header)
+ *  1. $apiKey arg (Authorization: Bearer header)
  *  2. $awsAccessKey + $awsSecretAccessKey args (SigV4)
  *  3. $awsProfile arg (SigV4 via named profile)
- *  4. ANTHROPIC_AWS_API_KEY env var (x-api-key header)
+ *  4. ANTHROPIC_AWS_API_KEY env var (Authorization: Bearer header)
  *  5. Default AWS credential chain (SigV4)
  *
  * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ * @phpstan-import-type OpenTelemetryOptions from \Anthropic\Core\BaseClient
  */
 class Client extends \Anthropic\Client
 {
@@ -32,6 +38,7 @@ class Client extends \Anthropic\Client
 
     /**
      * @param RequestOpts|null $requestOptions
+     * @param OpenTelemetryOptions|null $openTelemetry
      */
     public function __construct(
         ?string $apiKey = null,
@@ -44,6 +51,7 @@ class Client extends \Anthropic\Client
         ?string $baseUrl = null,
         bool $skipAuth = false,
         RequestOptions|array|null $requestOptions = null,
+        array|false|null $openTelemetry = null,
     ) {
         // WorkspaceID: arg > env, required (unless skipAuth)
         $this->resolvedWorkspaceId = $workspaceId ?? Util::getenv('ANTHROPIC_AWS_WORKSPACE_ID');
@@ -69,14 +77,14 @@ class Client extends \Anthropic\Client
             skipAuth: $skipAuth,
         );
 
-        // Pass '' for apiKey and authToken to suppress ANTHROPIC_API_KEY and
+        // Pass '' for apiKey to suppress ANTHROPIC_API_KEY and
         // ANTHROPIC_AUTH_TOKEN env var lookups. Auth is handled entirely by
         // AwsAuth in this class.
         parent::__construct(
             apiKey: '',
-            authToken: '',
             baseUrl: $this->auth->getBaseUrl(),
             requestOptions: $requestOptions,
+            openTelemetry: $openTelemetry,
         );
 
         // Restore the resolved API key so the public field matches what
@@ -91,12 +99,16 @@ class Client extends \Anthropic\Client
     }
 
     /**
-     * Applies workspace-id header (not overridable by user headers) and
-     * signs the request with SigV4 if configured.
+     * Applies the client workspace-id header unless the request already carries
+     * one (a per-request value wins), then signs the request with SigV4 if configured.
      */
     protected function transformRequest(RequestInterface $request): RequestInterface
     {
-        if (null !== $this->resolvedWorkspaceId) {
+        if (1 === preg_match('~/v1/user_profiles/[^/]+/action_urls$~', $request->getUri()->getPath())) {
+            throw new AnthropicException('User profile action URLs are not available via the AWS gateway — use new Anthropic\Client() for this resource.');
+        }
+
+        if (null !== $this->resolvedWorkspaceId && !$request->hasHeader('anthropic-workspace-id')) {
             $request = $request->withHeader('anthropic-workspace-id', $this->resolvedWorkspaceId);
         }
 

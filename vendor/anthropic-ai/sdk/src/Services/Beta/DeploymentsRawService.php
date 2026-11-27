@@ -1,0 +1,496 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Services\Beta;
+
+use Anthropic\Beta\AnthropicBeta;
+use Anthropic\Beta\DeploymentRuns\BetaManagedAgentsDeploymentRun;
+use Anthropic\Beta\Deployments\BetaManagedAgentsDeployment;
+use Anthropic\Beta\Deployments\BetaManagedAgentsDeploymentStatus;
+use Anthropic\Beta\Deployments\BetaManagedAgentsScheduleParams;
+use Anthropic\Beta\Deployments\DeploymentArchiveParams;
+use Anthropic\Beta\Deployments\DeploymentCreateParams;
+use Anthropic\Beta\Deployments\DeploymentListParams;
+use Anthropic\Beta\Deployments\DeploymentPauseParams;
+use Anthropic\Beta\Deployments\DeploymentRetrieveParams;
+use Anthropic\Beta\Deployments\DeploymentRunParams;
+use Anthropic\Beta\Deployments\DeploymentUnpauseParams;
+use Anthropic\Beta\Deployments\DeploymentUpdateParams;
+use Anthropic\Beta\Sessions\BetaManagedAgentsBudgetLimit;
+use Anthropic\Client;
+use Anthropic\Core\Contracts\BaseResponse;
+use Anthropic\Core\Exceptions\APIException;
+use Anthropic\Core\Implementation\ApiCallInfo;
+use Anthropic\Core\Util;
+use Anthropic\PageCursor;
+use Anthropic\RequestOptions;
+use Anthropic\ServiceContracts\Beta\DeploymentsRawContract;
+
+/**
+ * @phpstan-import-type AgentShape from \Anthropic\Beta\Deployments\DeploymentCreateParams\Agent
+ * @phpstan-import-type BetaManagedAgentsDeploymentInitialEventParamsShape from \Anthropic\Beta\Deployments\BetaManagedAgentsDeploymentInitialEventParams
+ * @phpstan-import-type BetaManagedAgentsBudgetLimitShape from \Anthropic\Beta\Sessions\BetaManagedAgentsBudgetLimit
+ * @phpstan-import-type ResourceShape from \Anthropic\Beta\Deployments\DeploymentCreateParams\Resource
+ * @phpstan-import-type BetaManagedAgentsScheduleParamsShape from \Anthropic\Beta\Deployments\BetaManagedAgentsScheduleParams
+ * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ * @phpstan-import-type AgentShape from \Anthropic\Beta\Deployments\DeploymentUpdateParams\Agent as AgentShape1
+ * @phpstan-import-type ResourceShape from \Anthropic\Beta\Deployments\DeploymentUpdateParams\Resource as ResourceShape1
+ */
+final class DeploymentsRawService implements DeploymentsRawContract
+{
+    // @phpstan-ignore-next-line
+    /**
+     * @internal
+     */
+    public function __construct(private Client $client) {}
+
+    /**
+     * @api
+     *
+     * Create Deployment
+     *
+     * @param array{
+     *   agent: AgentShape,
+     *   environmentID: string,
+     *   initialEvents: list<BetaManagedAgentsDeploymentInitialEventParamsShape>,
+     *   name: string,
+     *   budget?: BetaManagedAgentsBudgetLimit|BetaManagedAgentsBudgetLimitShape|null,
+     *   description?: string|null,
+     *   metadata?: array<string,string>,
+     *   resources?: list<ResourceShape>,
+     *   schedule?: BetaManagedAgentsScheduleParams|BetaManagedAgentsScheduleParamsShape|null,
+     *   vaultIDs?: list<string>,
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
+     * }|DeploymentCreateParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<BetaManagedAgentsDeployment>
+     *
+     * @throws APIException
+     */
+    public function create(
+        array|DeploymentCreateParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = DeploymentCreateParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+        $header_params = [
+            'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+        ];
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'post',
+            path: 'v1/deployments',
+            headers: Util::array_transform_keys(
+                array_intersect_key($parsed, array_flip(array_keys($header_params))),
+                $header_params,
+            ),
+            body: (object) array_diff_key(
+                $parsed,
+                array_flip(array_keys($header_params))
+            ),
+            options: RequestOptions::parse(
+                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                $options,
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.deployments.create',
+                route: '/v1/deployments',
+                createdId: 'anthropic.deployment.id',
+            )),
+            convert: BetaManagedAgentsDeployment::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * Get Deployment
+     *
+     * @param string $deploymentID Unique identifier of the deployment.
+     * @param array{
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
+     * }|DeploymentRetrieveParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<BetaManagedAgentsDeployment>
+     *
+     * @throws APIException
+     */
+    public function retrieve(
+        string $deploymentID,
+        array|DeploymentRetrieveParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = DeploymentRetrieveParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'get',
+            path: ['v1/deployments/%1$s', $deploymentID],
+            headers: Util::array_transform_keys(
+                $parsed,
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
+            ),
+            options: RequestOptions::parse(
+                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                $options,
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.deployments.retrieve',
+                route: '/v1/deployments/{deployment_id}',
+                attributes: ['anthropic.deployment.id' => $deploymentID],
+            )),
+            convert: BetaManagedAgentsDeployment::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * Update Deployment
+     *
+     * @param string $deploymentID Path param: Unique identifier of the deployment to update.
+     * @param array{
+     *   agent?: AgentShape1,
+     *   budget?: BetaManagedAgentsBudgetLimit|BetaManagedAgentsBudgetLimitShape|null,
+     *   description?: string|null,
+     *   environmentID?: string,
+     *   initialEvents?: list<BetaManagedAgentsDeploymentInitialEventParamsShape>,
+     *   metadata?: array<string,string|null>|null,
+     *   name?: string,
+     *   resources?: list<ResourceShape1>|null,
+     *   schedule?: BetaManagedAgentsScheduleParams|BetaManagedAgentsScheduleParamsShape|null,
+     *   vaultIDs?: list<string>|null,
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
+     * }|DeploymentUpdateParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<BetaManagedAgentsDeployment>
+     *
+     * @throws APIException
+     */
+    public function update(
+        string $deploymentID,
+        array|DeploymentUpdateParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = DeploymentUpdateParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+        $header_params = [
+            'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+        ];
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'post',
+            path: ['v1/deployments/%1$s', $deploymentID],
+            headers: Util::array_transform_keys(
+                array_intersect_key($parsed, array_flip(array_keys($header_params))),
+                $header_params,
+            ),
+            body: (object) array_diff_key(
+                $parsed,
+                array_flip(array_keys($header_params))
+            ),
+            options: RequestOptions::parse(
+                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                $options,
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.deployments.update',
+                route: '/v1/deployments/{deployment_id}',
+                attributes: ['anthropic.deployment.id' => $deploymentID],
+            )),
+            convert: BetaManagedAgentsDeployment::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * List Deployments
+     *
+     * @param array{
+     *   agentID?: string,
+     *   createdAtGte?: \DateTimeInterface,
+     *   createdAtLte?: \DateTimeInterface,
+     *   includeArchived?: bool,
+     *   limit?: int,
+     *   page?: string,
+     *   status?: BetaManagedAgentsDeploymentStatus|value-of<BetaManagedAgentsDeploymentStatus>,
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
+     * }|DeploymentListParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<PageCursor<BetaManagedAgentsDeployment>>
+     *
+     * @throws APIException
+     */
+    public function list(
+        array|DeploymentListParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = DeploymentListParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+        $query_params = array_flip(
+            [
+                'agentID',
+                'createdAtGte',
+                'createdAtLte',
+                'includeArchived',
+                'limit',
+                'page',
+                'status',
+            ],
+        );
+
+        /** @var array<string,string> */
+        $header_params = array_diff_key($parsed, $query_params);
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'get',
+            path: 'v1/deployments',
+            query: Util::array_transform_keys(
+                array_intersect_key($parsed, $query_params),
+                [
+                    'agentID' => 'agent_id',
+                    'createdAtGte' => 'created_at[gte]',
+                    'createdAtLte' => 'created_at[lte]',
+                    'includeArchived' => 'include_archived',
+                ],
+            ),
+            headers: Util::array_transform_keys(
+                $header_params,
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
+            ),
+            options: RequestOptions::parse(
+                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                $options,
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.deployments.list',
+                route: '/v1/deployments',
+                query: [
+                    'agent_id',
+                    'created_at[gte]',
+                    'created_at[lte]',
+                    'include_archived',
+                    'limit',
+                    'page',
+                    'status',
+                ],
+            )),
+            convert: BetaManagedAgentsDeployment::class,
+            page: PageCursor::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * Archive Deployment
+     *
+     * @param string $deploymentID Unique identifier of the deployment to archive.
+     * @param array{
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
+     * }|DeploymentArchiveParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<BetaManagedAgentsDeployment>
+     *
+     * @throws APIException
+     */
+    public function archive(
+        string $deploymentID,
+        array|DeploymentArchiveParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = DeploymentArchiveParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'post',
+            path: ['v1/deployments/%1$s/archive', $deploymentID],
+            headers: Util::array_transform_keys(
+                $parsed,
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
+            ),
+            options: RequestOptions::parse(
+                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                $options,
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.deployments.archive',
+                route: '/v1/deployments/{deployment_id}/archive',
+                attributes: ['anthropic.deployment.id' => $deploymentID],
+            )),
+            convert: BetaManagedAgentsDeployment::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * Pause Deployment
+     *
+     * @param string $deploymentID Unique identifier of the deployment to pause.
+     * @param array{
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
+     * }|DeploymentPauseParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<BetaManagedAgentsDeployment>
+     *
+     * @throws APIException
+     */
+    public function pause(
+        string $deploymentID,
+        array|DeploymentPauseParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = DeploymentPauseParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'post',
+            path: ['v1/deployments/%1$s/pause', $deploymentID],
+            headers: Util::array_transform_keys(
+                $parsed,
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
+            ),
+            options: RequestOptions::parse(
+                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                $options,
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.deployments.pause',
+                route: '/v1/deployments/{deployment_id}/pause',
+                attributes: ['anthropic.deployment.id' => $deploymentID],
+            )),
+            convert: BetaManagedAgentsDeployment::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * Run Deployment Now
+     *
+     * @param string $deploymentID Unique identifier of the deployment to run.
+     * @param array{
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
+     * }|DeploymentRunParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<BetaManagedAgentsDeploymentRun>
+     *
+     * @throws APIException
+     */
+    public function run(
+        string $deploymentID,
+        array|DeploymentRunParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = DeploymentRunParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'post',
+            path: ['v1/deployments/%1$s/run', $deploymentID],
+            headers: Util::array_transform_keys(
+                $parsed,
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
+            ),
+            options: RequestOptions::parse(
+                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                $options,
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.deployments.run',
+                route: '/v1/deployments/{deployment_id}/run',
+                attributes: ['anthropic.deployment.id' => $deploymentID],
+            )),
+            convert: BetaManagedAgentsDeploymentRun::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * Unpause Deployment
+     *
+     * @param string $deploymentID Unique identifier of the deployment to unpause.
+     * @param array{
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
+     * }|DeploymentUnpauseParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<BetaManagedAgentsDeployment>
+     *
+     * @throws APIException
+     */
+    public function unpause(
+        string $deploymentID,
+        array|DeploymentUnpauseParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = DeploymentUnpauseParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'post',
+            path: ['v1/deployments/%1$s/unpause', $deploymentID],
+            headers: Util::array_transform_keys(
+                $parsed,
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
+            ),
+            options: RequestOptions::parse(
+                ['extraHeaders' => ['anthropic-beta' => 'managed-agents-2026-04-01']],
+                $options,
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.deployments.unpause',
+                route: '/v1/deployments/{deployment_id}/unpause',
+                attributes: ['anthropic.deployment.id' => $deploymentID],
+            )),
+            convert: BetaManagedAgentsDeployment::class,
+        );
+    }
+}

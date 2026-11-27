@@ -35,7 +35,7 @@ final class Conversion
             }
 
             if (is_a($value, class: \DateTimeInterface::class)) {
-                return date_format($value, format: \DateTimeInterface::RFC3339);
+                return Util::strVal($value);
             }
 
             if (is_a($value, class: \JsonSerializable::class)) {
@@ -52,7 +52,7 @@ final class Conversion
 
     public static function coerce(Converter|ConverterSource|string $target, mixed $value, CoerceState $state = new CoerceState): mixed
     {
-        if ($value instanceof $target) {
+        if ($value instanceof $target && !$value instanceof \BackedEnum) {
             ++$state->yes;
 
             return $value;
@@ -96,6 +96,28 @@ final class Conversion
         self::tryConvert($target, value: $value, state: $state);
 
         return self::dump_unknown($value, state: $state);
+    }
+
+    /**
+     * The `\DateTime` constructors also accept strings that name no date, like "", "now" or "a", which a `string`
+     * variant should keep, as it should a bare date. Only a clean parse that yields a calendar date and a time is an
+     * exact match.
+     */
+    private static function tallyTimestamp(string $value, CoerceState|DumpState $state): void
+    {
+        $parsed = date_parse($value);
+        if (
+            0 === $parsed['error_count']
+            && 0 === $parsed['warning_count']
+            && false !== $parsed['year']
+            && false !== $parsed['month']
+            && false !== $parsed['day']
+            && false !== $parsed['hour']
+        ) {
+            ++$state->yes;
+        } else {
+            ++$state->maybe;
+        }
     }
 
     private static function tryConvert(Converter|ConverterSource|string $target, mixed $value, CoerceState|DumpState $state): mixed
@@ -168,6 +190,7 @@ final class Conversion
 
                 return $value;
 
+            case 'binary':
             case 'string':
                 if (is_string($value)) {
                     ++$state->yes;
@@ -196,11 +219,11 @@ final class Conversion
             case 'DateTimeImmutable':
                 if (is_string($value)) {
                     try {
-                        ++$state->maybe;
+                        $datetime = new \DateTimeImmutable($value);
+                        self::tallyTimestamp($value, state: $state);
 
-                        return new \DateTimeImmutable($value);
+                        return $datetime;
                     } catch (\Exception) {
-                        --$state->maybe;
                     }
                 }
 
@@ -211,11 +234,11 @@ final class Conversion
             case 'DateTime':
                 if (is_string($value)) {
                     try {
-                        ++$state->maybe;
+                        $datetime = new \DateTime($value);
+                        self::tallyTimestamp($value, state: $state);
 
-                        return new \DateTime($value);
+                        return $datetime;
                     } catch (\Exception) {
-                        --$state->maybe;
                     }
                 }
 

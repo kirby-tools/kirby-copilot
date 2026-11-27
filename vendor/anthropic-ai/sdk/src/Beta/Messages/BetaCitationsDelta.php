@@ -8,10 +8,11 @@ use Anthropic\Beta\Messages\BetaCitationsDelta\Citation;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type CitationVariants from \Anthropic\Beta\Messages\BetaCitationsDelta\Citation
  * @phpstan-import-type CitationShape from \Anthropic\Beta\Messages\BetaCitationsDelta\Citation
+ * @phpstan-import-type CitationVariants from \Anthropic\Beta\Messages\BetaCitationsDelta\Citation
  *
  * @phpstan-type BetaCitationsDeltaShape = array{
  *   citation: CitationShape, type: 'citations_delta'
@@ -23,7 +24,7 @@ final class BetaCitationsDelta implements BaseModel
     use SdkModel;
 
     /** @var 'citations_delta' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('citations_delta'))]
     public string $type = 'citations_delta';
 
     /** @var CitationVariants $citation */
@@ -41,7 +42,7 @@ final class BetaCitationsDelta implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaCitationsDelta)->withCitation(...)
+     * (new BetaCitationsDelta())->withCitation(...)
      * ```
      */
     public function __construct()

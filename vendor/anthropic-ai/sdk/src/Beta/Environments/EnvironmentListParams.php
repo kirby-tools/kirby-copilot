@@ -20,6 +20,7 @@ use Anthropic\Core\Contracts\BaseModel;
  *   limit?: int|null,
  *   page?: string|null,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class EnvironmentListParams implements BaseModel
@@ -29,13 +30,13 @@ final class EnvironmentListParams implements BaseModel
     use SdkParams;
 
     /**
-     * Include archived environments in the response.
+     * Include archived environments in the response
      */
     #[Optional]
     public ?bool $includeArchived;
 
     /**
-     * Maximum number of environments to return.
+     * Maximum number of environments to return
      */
     #[Optional]
     public ?int $limit;
@@ -54,6 +55,14 @@ final class EnvironmentListParams implements BaseModel
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
 
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
+
     public function __construct()
     {
         $this->initialize();
@@ -71,6 +80,7 @@ final class EnvironmentListParams implements BaseModel
         ?int $limit = null,
         ?string $page = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
     ): self {
         $self = new self;
 
@@ -78,12 +88,13 @@ final class EnvironmentListParams implements BaseModel
         null !== $limit && $self['limit'] = $limit;
         null !== $page && $self['page'] = $page;
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
 
     /**
-     * Include archived environments in the response.
+     * Include archived environments in the response
      */
     public function withIncludeArchived(bool $includeArchived): self
     {
@@ -94,7 +105,7 @@ final class EnvironmentListParams implements BaseModel
     }
 
     /**
-     * Maximum number of environments to return.
+     * Maximum number of environments to return
      */
     public function withLimit(int $limit): self
     {
@@ -124,6 +135,19 @@ final class EnvironmentListParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

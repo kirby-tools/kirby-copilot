@@ -4,26 +4,32 @@ declare(strict_types=1);
 
 namespace Anthropic\Beta\Sessions\Events;
 
-use Anthropic\Beta\Sessions\Events\ManagedAgentsAgentCustomToolUseEvent\Type;
+use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * Event emitted when the agent calls a custom tool. The session goes idle until the client sends a `user.custom_tool_result` event with the result.
+ * Event emitted when the agent calls a custom tool. The session goes idle until the client sends a `user.custom_tool_result` event with the result. The client can send it as soon as this event arrives, without waiting for `session.status_idle`.
  *
  * @phpstan-type ManagedAgentsAgentCustomToolUseEventShape = array{
  *   id: string,
  *   input: array<string,mixed>,
  *   name: string,
  *   processedAt: \DateTimeInterface,
- *   type: Type|value-of<Type>,
+ *   type: 'agent.custom_tool_use',
+ *   sessionThreadID?: string|null,
  * }
  */
 final class ManagedAgentsAgentCustomToolUseEvent implements BaseModel
 {
     /** @use SdkModel<ManagedAgentsAgentCustomToolUseEventShape> */
     use SdkModel;
+
+    /** @var 'agent.custom_tool_use' $type */
+    #[Required(type: new ConstantOf('agent.custom_tool_use'))]
+    public string $type = 'agent.custom_tool_use';
 
     /**
      * Unique identifier for this event.
@@ -46,14 +52,16 @@ final class ManagedAgentsAgentCustomToolUseEvent implements BaseModel
     public string $name;
 
     /**
-     * A timestamp in RFC 3339 format.
+     * Timestamp when this tool use was processed.
      */
     #[Required('processed_at')]
     public \DateTimeInterface $processedAt;
 
-    /** @var value-of<Type> $type */
-    #[Required(enum: Type::class)]
-    public string $type;
+    /**
+     * When set, this event was cross-posted from a subagent's thread to surface its custom tool use on the primary thread's stream. Empty on the thread's own events. Informational only: the server routes the matching `user.custom_tool_result` by `custom_tool_use_id`, so clients do not send it back.
+     */
+    #[Optional('session_thread_id', nullable: true)]
+    public ?string $sessionThreadID;
 
     /**
      * `new ManagedAgentsAgentCustomToolUseEvent()` is missing required properties by the API.
@@ -61,19 +69,18 @@ final class ManagedAgentsAgentCustomToolUseEvent implements BaseModel
      * To enforce required parameters use
      * ```
      * ManagedAgentsAgentCustomToolUseEvent::with(
-     *   id: ..., input: ..., name: ..., processedAt: ..., type: ...
+     *   id: ..., input: ..., name: ..., processedAt: ...
      * )
      * ```
      *
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ManagedAgentsAgentCustomToolUseEvent)
+     * (new ManagedAgentsAgentCustomToolUseEvent())
      *   ->withID(...)
      *   ->withInput(...)
      *   ->withName(...)
      *   ->withProcessedAt(...)
-     *   ->withType(...)
      * ```
      */
     public function __construct()
@@ -87,14 +94,13 @@ final class ManagedAgentsAgentCustomToolUseEvent implements BaseModel
      * You must use named parameters to construct any parameters with a default value.
      *
      * @param array<string,mixed> $input
-     * @param Type|value-of<Type> $type
      */
     public static function with(
         string $id,
         array $input,
         string $name,
         \DateTimeInterface $processedAt,
-        Type|string $type,
+        ?string $sessionThreadID = null,
     ): self {
         $self = new self;
 
@@ -102,7 +108,8 @@ final class ManagedAgentsAgentCustomToolUseEvent implements BaseModel
         $self['input'] = $input;
         $self['name'] = $name;
         $self['processedAt'] = $processedAt;
-        $self['type'] = $type;
+
+        null !== $sessionThreadID && $self['sessionThreadID'] = $sessionThreadID;
 
         return $self;
     }
@@ -143,7 +150,7 @@ final class ManagedAgentsAgentCustomToolUseEvent implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * Timestamp when this tool use was processed.
      */
     public function withProcessedAt(\DateTimeInterface $processedAt): self
     {
@@ -154,12 +161,23 @@ final class ManagedAgentsAgentCustomToolUseEvent implements BaseModel
     }
 
     /**
-     * @param Type|value-of<Type> $type
+     * @param 'agent.custom_tool_use' $type
      */
-    public function withType(Type|string $type): self
+    public function withType(string $type): self
     {
         $self = clone $this;
         $self['type'] = $type;
+
+        return $self;
+    }
+
+    /**
+     * When set, this event was cross-posted from a subagent's thread to surface its custom tool use on the primary thread's stream. Empty on the thread's own events. Informational only: the server routes the matching `user.custom_tool_result` by `custom_tool_use_id`, so clients do not send it back.
+     */
+    public function withSessionThreadID(?string $sessionThreadID): self
+    {
+        $self = clone $this;
+        $self['sessionThreadID'] = $sessionThreadID;
 
         return $self;
     }

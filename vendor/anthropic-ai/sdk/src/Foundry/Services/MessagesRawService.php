@@ -7,7 +7,11 @@ namespace Anthropic\Foundry\Services;
 use Anthropic\Core\Contracts\BaseResponse;
 use Anthropic\Core\Contracts\BaseStream;
 use Anthropic\Core\Exceptions\APIException;
+use Anthropic\Core\Implementation\ApiCallInfo;
+use Anthropic\Core\Implementation\RawResponse;
+use Anthropic\Core\Util;
 use Anthropic\Foundry\Client;
+use Anthropic\Lib\Tracing\Tracing;
 use Anthropic\Messages\Message;
 use Anthropic\Messages\MessageCountTokensParams;
 use Anthropic\Messages\MessageCreateParams;
@@ -28,6 +32,11 @@ use Anthropic\SSEStream;
  */
 final class MessagesRawService implements MessagesRawContract
 {
+    private const HEADER_PARAMS = [
+        'userProfileID' => 'anthropic-user-profile-id',
+        'workspaceID' => 'anthropic-workspace-id',
+    ];
+
     /**
      * @internal
      */
@@ -52,14 +61,27 @@ final class MessagesRawService implements MessagesRawContract
             $requestOptions,
         );
 
-        // @phpstan-ignore-next-line return.type
-        return $this->client->request(
+        $callSpan = Tracing::startCallSpan($this->client, 'anthropic.messages.create', '/v1/messages', $parsed, $options, self::HEADER_PARAMS);
+        Tracing::recordMessagesCreateRequest($this->client, $callSpan, $parsed);
+
+        $response = $this->client->request(
             method: 'post',
             path: 'v1/messages',
-            body: (object) $parsed,
-            options: $options,
+            headers: Util::array_transform_keys(
+                array_intersect_key($parsed, self::HEADER_PARAMS),
+                self::HEADER_PARAMS,
+            ),
+            body: (object) array_diff_key($parsed, self::HEADER_PARAMS),
+            options: $options->withApiCall(new ApiCallInfo(
+                name: $callSpan?->name,
+                span: $callSpan?->span,
+            )),
             convert: Message::class,
         );
+
+        // Only the response that the SDK's own `request()` returns records on the span: any other is returned as it is.
+        // @phpstan-ignore-next-line return.type
+        return $response instanceof RawResponse ? $response->thenUnwrap(fn (mixed $message, mixed $decoded): mixed => Tracing::recordMessagesCreateResponse($this->client, $callSpan, $parsed, $message, $decoded)) : $response;
     }
 
     /**
@@ -82,13 +104,25 @@ final class MessagesRawService implements MessagesRawContract
         );
         $parsed['stream'] = true;
 
+        $callSpan = Tracing::startCallSpan($this->client, 'anthropic.messages.create', '/v1/messages', $parsed, $options, self::HEADER_PARAMS);
+        Tracing::recordMessagesCreateRequest($this->client, $callSpan, $parsed);
+
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
             path: 'v1/messages',
-            headers: ['Accept' => 'text/event-stream'],
-            body: (object) $parsed,
-            options: $options,
+            headers: Util::array_transform_keys(
+                [
+                    'Accept' => 'text/event-stream',
+                    ...array_intersect_key($parsed, self::HEADER_PARAMS),
+                ],
+                self::HEADER_PARAMS,
+            ),
+            body: (object) array_diff_key($parsed, self::HEADER_PARAMS),
+            options: $options->withApiCall(new ApiCallInfo(
+                name: $callSpan?->name,
+                span: $callSpan?->span,
+            )),
             convert: RawMessageStreamEvent::class,
             stream: SSEStream::class,
         );
@@ -113,12 +147,21 @@ final class MessagesRawService implements MessagesRawContract
             $requestOptions,
         );
 
+        $callSpan = Tracing::startCallSpan($this->client, 'anthropic.messages.count_tokens', '/v1/messages/count_tokens', $parsed, $options, self::HEADER_PARAMS);
+
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
             path: 'v1/messages/count_tokens',
-            body: (object) $parsed,
-            options: $options,
+            headers: Util::array_transform_keys(
+                array_intersect_key($parsed, self::HEADER_PARAMS),
+                self::HEADER_PARAMS,
+            ),
+            body: (object) array_diff_key($parsed, self::HEADER_PARAMS),
+            options: $options->withApiCall(new ApiCallInfo(
+                name: $callSpan?->name,
+                span: $callSpan?->span,
+            )),
             convert: MessageTokensCount::class,
         );
     }

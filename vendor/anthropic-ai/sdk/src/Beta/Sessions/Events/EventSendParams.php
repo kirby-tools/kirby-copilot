@@ -12,16 +12,17 @@ use Anthropic\Core\Concerns\SdkParams;
 use Anthropic\Core\Contracts\BaseModel;
 
 /**
- * Send Events.
+ * Send Events
  *
  * @see Anthropic\Services\Beta\Sessions\EventsService::send()
  *
- * @phpstan-import-type ManagedAgentsEventParamsVariants from \Anthropic\Beta\Sessions\Events\ManagedAgentsEventParams
  * @phpstan-import-type ManagedAgentsEventParamsShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsEventParams
+ * @phpstan-import-type ManagedAgentsEventParamsVariants from \Anthropic\Beta\Sessions\Events\ManagedAgentsEventParams
  *
  * @phpstan-type EventSendParamsShape = array{
  *   events: list<ManagedAgentsEventParamsShape>,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class EventSendParams implements BaseModel
@@ -39,12 +40,20 @@ final class EventSendParams implements BaseModel
     public array $events;
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this header.
      *
      * @var list<string|value-of<AnthropicBeta>>|null $betas
      */
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
 
     /**
      * `new EventSendParams()` is missing required properties by the API.
@@ -57,7 +66,7 @@ final class EventSendParams implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new EventSendParams)->withEvents(...)
+     * (new EventSendParams())->withEvents(...)
      * ```
      */
     public function __construct()
@@ -73,13 +82,17 @@ final class EventSendParams implements BaseModel
      * @param list<ManagedAgentsEventParamsShape> $events
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>>|null $betas
      */
-    public static function with(array $events, ?array $betas = null): self
-    {
+    public static function with(
+        array $events,
+        ?array $betas = null,
+        ?string $workspaceID = null
+    ): self {
         $self = new self;
 
         $self['events'] = $events;
 
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
@@ -98,7 +111,7 @@ final class EventSendParams implements BaseModel
     }
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `managed-agents-2026-04-01` in this header.
      *
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas
      */
@@ -106,6 +119,19 @@ final class EventSendParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

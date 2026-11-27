@@ -6,20 +6,22 @@ namespace Anthropic\Beta\Skills;
 
 use Anthropic\Beta\AnthropicBeta;
 use Anthropic\Core\Attributes\Optional;
+use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Concerns\SdkParams;
 use Anthropic\Core\Contracts\BaseModel;
 use Anthropic\Core\FileParam;
 
 /**
- * Create Skill.
+ * Create Skill
  *
  * @see Anthropic\Services\Beta\SkillsService::create()
  *
  * @phpstan-type SkillCreateParamsShape = array{
- *   displayTitle?: string|null,
- *   files?: list<string|FileParam>|null,
+ *   files: list<string|FileParam>,
+ *   displayName?: string|null,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class SkillCreateParams implements BaseModel
@@ -29,22 +31,22 @@ final class SkillCreateParams implements BaseModel
     use SdkParams;
 
     /**
-     * Display title for the skill.
-     *
-     * This is a human-readable label that is not included in the prompt sent to the model.
-     */
-    #[Optional('display_title', nullable: true)]
-    public ?string $displayTitle;
-
-    /**
      * Files to upload for the skill.
      *
      * All files must be in the same top-level directory and must include a SKILL.md file at the root of that directory.
      *
-     * @var list<string>|null $files
+     * @var list<string> $files
      */
-    #[Optional(list: FileParam::class, nullable: true)]
-    public ?array $files;
+    #[Required(list: FileParam::class)]
+    public array $files;
+
+    /**
+     * Human-readable, single-line label for the Skill. Maximum 255 characters.
+     * Always set: derived from the SKILL.md frontmatter `name` when omitted at
+     * creation. Not unique.
+     */
+    #[Optional('display_name', nullable: true)]
+    public ?string $displayName;
 
     /**
      * Optional header to specify the beta version(s) you want to use.
@@ -54,6 +56,28 @@ final class SkillCreateParams implements BaseModel
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
 
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
+
+    /**
+     * `new SkillCreateParams()` is missing required properties by the API.
+     *
+     * To enforce required parameters use
+     * ```
+     * SkillCreateParams::with(files: ...)
+     * ```
+     *
+     * Otherwise ensure the following setters are called
+     *
+     * ```
+     * (new SkillCreateParams())->withFiles(...)
+     * ```
+     */
     public function __construct()
     {
         $this->initialize();
@@ -64,32 +88,22 @@ final class SkillCreateParams implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
-     * @param list<string|FileParam>|null $files
+     * @param list<string|FileParam> $files
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>>|null $betas
      */
     public static function with(
-        ?string $displayTitle = null,
-        ?array $files = null,
-        ?array $betas = null
+        array $files,
+        ?string $displayName = null,
+        ?array $betas = null,
+        ?string $workspaceID = null,
     ): self {
         $self = new self;
 
-        null !== $displayTitle && $self['displayTitle'] = $displayTitle;
-        null !== $files && $self['files'] = $files;
+        $self['files'] = $files;
+
+        null !== $displayName && $self['displayName'] = $displayName;
         null !== $betas && $self['betas'] = $betas;
-
-        return $self;
-    }
-
-    /**
-     * Display title for the skill.
-     *
-     * This is a human-readable label that is not included in the prompt sent to the model.
-     */
-    public function withDisplayTitle(?string $displayTitle): self
-    {
-        $self = clone $this;
-        $self['displayTitle'] = $displayTitle;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
@@ -99,12 +113,25 @@ final class SkillCreateParams implements BaseModel
      *
      * All files must be in the same top-level directory and must include a SKILL.md file at the root of that directory.
      *
-     * @param list<string|FileParam>|null $files
+     * @param list<string|FileParam> $files
      */
-    public function withFiles(?array $files): self
+    public function withFiles(array $files): self
     {
         $self = clone $this;
         $self['files'] = $files;
+
+        return $self;
+    }
+
+    /**
+     * Human-readable, single-line label for the Skill. Maximum 255 characters.
+     * Always set: derived from the SKILL.md frontmatter `name` when omitted at
+     * creation. Not unique.
+     */
+    public function withDisplayName(?string $displayName): self
+    {
+        $self = clone $this;
+        $self['displayName'] = $displayName;
 
         return $self;
     }
@@ -118,6 +145,19 @@ final class SkillCreateParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

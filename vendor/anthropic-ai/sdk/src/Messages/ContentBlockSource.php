@@ -7,11 +7,12 @@ namespace Anthropic\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\ContentBlockSource\Content;
 
 /**
- * @phpstan-import-type ContentVariants from \Anthropic\Messages\ContentBlockSource\Content
  * @phpstan-import-type ContentShape from \Anthropic\Messages\ContentBlockSource\Content
+ * @phpstan-import-type ContentVariants from \Anthropic\Messages\ContentBlockSource\Content
  *
  * @phpstan-type ContentBlockSourceShape = array{
  *   content: ContentShape, type: 'content'
@@ -23,7 +24,7 @@ final class ContentBlockSource implements BaseModel
     use SdkModel;
 
     /** @var 'content' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('content'))]
     public string $type = 'content';
 
     /** @var ContentVariants $content */
@@ -41,7 +42,7 @@ final class ContentBlockSource implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ContentBlockSource)->withContent(...)
+     * (new ContentBlockSource())->withContent(...)
      * ```
      */
     public function __construct()

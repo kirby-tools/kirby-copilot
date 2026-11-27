@@ -7,10 +7,11 @@ namespace Anthropic\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type RawContentBlockDeltaVariants from \Anthropic\Messages\RawContentBlockDelta
  * @phpstan-import-type RawContentBlockDeltaShape from \Anthropic\Messages\RawContentBlockDelta
+ * @phpstan-import-type RawContentBlockDeltaVariants from \Anthropic\Messages\RawContentBlockDelta
  *
  * @phpstan-type RawContentBlockDeltaEventShape = array{
  *   delta: RawContentBlockDeltaShape, index: int, type: 'content_block_delta'
@@ -22,7 +23,7 @@ final class RawContentBlockDeltaEvent implements BaseModel
     use SdkModel;
 
     /** @var 'content_block_delta' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('content_block_delta'))]
     public string $type = 'content_block_delta';
 
     /** @var RawContentBlockDeltaVariants $delta */
@@ -43,7 +44,7 @@ final class RawContentBlockDeltaEvent implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new RawContentBlockDeltaEvent)->withDelta(...)->withIndex(...)
+     * (new RawContentBlockDeltaEvent())->withDelta(...)->withIndex(...)
      * ```
      */
     public function __construct()

@@ -1,0 +1,198 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Beta\Sessions\Threads;
+
+use Anthropic\Beta\BetaMonetaryAmount;
+use Anthropic\Beta\Sessions\BetaManagedAgentsCacheCreationUsage;
+use Anthropic\Beta\Sessions\BetaManagedAgentsServerToolUsage;
+use Anthropic\Core\Attributes\Optional;
+use Anthropic\Core\Concerns\SdkModel;
+use Anthropic\Core\Contracts\BaseModel;
+
+/**
+ * Cumulative token usage for a session thread across all turns.
+ *
+ * @phpstan-import-type BetaManagedAgentsCacheCreationUsageShape from \Anthropic\Beta\Sessions\BetaManagedAgentsCacheCreationUsage
+ * @phpstan-import-type BetaMonetaryAmountShape from \Anthropic\Beta\BetaMonetaryAmount
+ * @phpstan-import-type BetaManagedAgentsServerToolUsageShape from \Anthropic\Beta\Sessions\BetaManagedAgentsServerToolUsage
+ *
+ * @phpstan-type ManagedAgentsSessionThreadUsageShape = array{
+ *   activeSeconds?: float|null,
+ *   cacheCreation?: null|BetaManagedAgentsCacheCreationUsage|BetaManagedAgentsCacheCreationUsageShape,
+ *   cacheReadInputTokens?: int|null,
+ *   inputTokens?: int|null,
+ *   listCost?: null|BetaMonetaryAmount|BetaMonetaryAmountShape,
+ *   outputTokens?: int|null,
+ *   serverToolUse?: null|BetaManagedAgentsServerToolUsage|BetaManagedAgentsServerToolUsageShape,
+ * }
+ */
+final class ManagedAgentsSessionThreadUsage implements BaseModel
+{
+    /** @use SdkModel<ManagedAgentsSessionThreadUsageShape> */
+    use SdkModel;
+
+    /**
+     * Cumulative time in seconds this thread spent in running status. Equal to `stats.active_seconds`; surfaced here so a thread's usage carries every quantity its cost is priced on.
+     */
+    #[Optional('active_seconds')]
+    public ?float $activeSeconds;
+
+    /**
+     * Tokens used to create prompt cache entries, broken down by cache TTL.
+     */
+    #[Optional('cache_creation')]
+    public ?BetaManagedAgentsCacheCreationUsage $cacheCreation;
+
+    /**
+     * Total tokens read from prompt cache.
+     */
+    #[Optional('cache_read_input_tokens')]
+    public ?int $cacheReadInputTokens;
+
+    /**
+     * Total input tokens consumed across all turns.
+     */
+    #[Optional('input_tokens')]
+    public ?int $inputTokens;
+
+    /**
+     * Cumulative list cost of this thread across all turns, priced at public list rates. Absent until cost tracking is available for the thread. Each figure is rounded to the nearest cent independently and the session's aggregate `usage.list_cost` additionally includes session runtime, so per-thread costs do not sum exactly to the session figure; the session figure is authoritative and is what a budget is enforced against.
+     */
+    #[Optional('list_cost', nullable: true)]
+    public ?BetaMonetaryAmount $listCost;
+
+    /**
+     * Total output tokens generated across all turns.
+     */
+    #[Optional('output_tokens')]
+    public ?int $outputTokens;
+
+    /**
+     * Cumulative server-executed tool usage across all turns of this thread. Absent until server-tool tracking is available for the thread.
+     */
+    #[Optional('server_tool_use', nullable: true)]
+    public ?BetaManagedAgentsServerToolUsage $serverToolUse;
+
+    public function __construct()
+    {
+        $this->initialize();
+    }
+
+    /**
+     * Construct an instance from the required parameters.
+     *
+     * You must use named parameters to construct any parameters with a default value.
+     *
+     * @param BetaManagedAgentsCacheCreationUsage|BetaManagedAgentsCacheCreationUsageShape|null $cacheCreation
+     * @param BetaMonetaryAmount|BetaMonetaryAmountShape|null $listCost
+     * @param BetaManagedAgentsServerToolUsage|BetaManagedAgentsServerToolUsageShape|null $serverToolUse
+     */
+    public static function with(
+        ?float $activeSeconds = null,
+        BetaManagedAgentsCacheCreationUsage|array|null $cacheCreation = null,
+        ?int $cacheReadInputTokens = null,
+        ?int $inputTokens = null,
+        BetaMonetaryAmount|array|null $listCost = null,
+        ?int $outputTokens = null,
+        BetaManagedAgentsServerToolUsage|array|null $serverToolUse = null,
+    ): self {
+        $self = new self;
+
+        null !== $activeSeconds && $self['activeSeconds'] = $activeSeconds;
+        null !== $cacheCreation && $self['cacheCreation'] = $cacheCreation;
+        null !== $cacheReadInputTokens && $self['cacheReadInputTokens'] = $cacheReadInputTokens;
+        null !== $inputTokens && $self['inputTokens'] = $inputTokens;
+        null !== $listCost && $self['listCost'] = $listCost;
+        null !== $outputTokens && $self['outputTokens'] = $outputTokens;
+        null !== $serverToolUse && $self['serverToolUse'] = $serverToolUse;
+
+        return $self;
+    }
+
+    /**
+     * Cumulative time in seconds this thread spent in running status. Equal to `stats.active_seconds`; surfaced here so a thread's usage carries every quantity its cost is priced on.
+     */
+    public function withActiveSeconds(float $activeSeconds): self
+    {
+        $self = clone $this;
+        $self['activeSeconds'] = $activeSeconds;
+
+        return $self;
+    }
+
+    /**
+     * Tokens used to create prompt cache entries, broken down by cache TTL.
+     *
+     * @param BetaManagedAgentsCacheCreationUsage|BetaManagedAgentsCacheCreationUsageShape $cacheCreation
+     */
+    public function withCacheCreation(
+        BetaManagedAgentsCacheCreationUsage|array $cacheCreation
+    ): self {
+        $self = clone $this;
+        $self['cacheCreation'] = $cacheCreation;
+
+        return $self;
+    }
+
+    /**
+     * Total tokens read from prompt cache.
+     */
+    public function withCacheReadInputTokens(int $cacheReadInputTokens): self
+    {
+        $self = clone $this;
+        $self['cacheReadInputTokens'] = $cacheReadInputTokens;
+
+        return $self;
+    }
+
+    /**
+     * Total input tokens consumed across all turns.
+     */
+    public function withInputTokens(int $inputTokens): self
+    {
+        $self = clone $this;
+        $self['inputTokens'] = $inputTokens;
+
+        return $self;
+    }
+
+    /**
+     * Cumulative list cost of this thread across all turns, priced at public list rates. Absent until cost tracking is available for the thread. Each figure is rounded to the nearest cent independently and the session's aggregate `usage.list_cost` additionally includes session runtime, so per-thread costs do not sum exactly to the session figure; the session figure is authoritative and is what a budget is enforced against.
+     *
+     * @param BetaMonetaryAmount|BetaMonetaryAmountShape|null $listCost
+     */
+    public function withListCost(BetaMonetaryAmount|array|null $listCost): self
+    {
+        $self = clone $this;
+        $self['listCost'] = $listCost;
+
+        return $self;
+    }
+
+    /**
+     * Total output tokens generated across all turns.
+     */
+    public function withOutputTokens(int $outputTokens): self
+    {
+        $self = clone $this;
+        $self['outputTokens'] = $outputTokens;
+
+        return $self;
+    }
+
+    /**
+     * Cumulative server-executed tool usage across all turns of this thread. Absent until server-tool tracking is available for the thread.
+     *
+     * @param BetaManagedAgentsServerToolUsage|BetaManagedAgentsServerToolUsageShape|null $serverToolUse
+     */
+    public function withServerToolUse(
+        BetaManagedAgentsServerToolUsage|array|null $serverToolUse
+    ): self {
+        $self = clone $this;
+        $self['serverToolUse'] = $serverToolUse;
+
+        return $self;
+    }
+}

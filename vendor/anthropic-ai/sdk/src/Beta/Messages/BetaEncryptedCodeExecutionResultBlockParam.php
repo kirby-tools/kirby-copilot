@@ -7,9 +7,10 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * Code execution result with encrypted stdout for PFC + web_search results.
+ * The output and exit code of Python code that Claude ran with the code execution tool, with standard output in encrypted form, sent back in a later request.
  *
  * @phpstan-import-type BetaCodeExecutionOutputBlockParamShape from \Anthropic\Beta\Messages\BetaCodeExecutionOutputBlockParam
  *
@@ -27,7 +28,7 @@ final class BetaEncryptedCodeExecutionResultBlockParam implements BaseModel
     use SdkModel;
 
     /** @var 'encrypted_code_execution_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('encrypted_code_execution_result'))]
     public string $type = 'encrypted_code_execution_result';
 
     /** @var list<BetaCodeExecutionOutputBlockParam> $content */
@@ -56,7 +57,7 @@ final class BetaEncryptedCodeExecutionResultBlockParam implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaEncryptedCodeExecutionResultBlockParam)
+     * (new BetaEncryptedCodeExecutionResultBlockParam())
      *   ->withContent(...)
      *   ->withEncryptedStdout(...)
      *   ->withReturnCode(...)

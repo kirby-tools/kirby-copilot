@@ -4,22 +4,25 @@ declare(strict_types=1);
 
 namespace Anthropic\Vertex;
 
-use Anthropic\Core\BaseClient;
 use Anthropic\Core\Util;
 use Anthropic\RequestOptions;
-use Anthropic\Vertex\Services\MessagesRawService;
-use Anthropic\Vertex\Services\MessagesService;
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\FetchAuthTokenInterface;
 use Google\Auth\ProjectIdProviderInterface;
-use Http\Discovery\Psr17FactoryDiscovery;
-use Http\Discovery\Psr18ClientDiscovery;
 use Psr\Http\Message\RequestInterface;
 
 /**
+ * Supported on Vertex: `$messages` (create / createStream / countTokens) and
+ * `$beta->messages`. Other resources inherited from {@see \Anthropic\Client}
+ * (batches, files, models, agents, user profiles) are not available via Vertex and throw an
+ * {@see \Anthropic\Core\Exceptions\AnthropicException} before any request is
+ * sent — use `new \Anthropic\Client()` for those.
+ *
  * @phpstan-type GoogleAuthTokenShape = array{access_token: non-empty-string, expires_at: positive-int|null}
+ * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ * @phpstan-import-type OpenTelemetryOptions from \Anthropic\Core\BaseClient
  */
-final class Client extends BaseClient
+final class Client extends \Anthropic\Client
 {
     private const TOKEN_REFRESH_BUFFER_SECONDS = 300;
     private const PROJECT_ID_ENV_VARS = [
@@ -27,8 +30,6 @@ final class Client extends BaseClient
         'GCLOUD_PROJECT',
         'GOOGLE_CLOUD_PROJECT_ID',
     ];
-
-    public MessagesService $messages;
 
     private ?FetchAuthTokenInterface $credentials = null;
 
@@ -41,90 +42,158 @@ final class Client extends BaseClient
      * @param \Closure(): FetchAuthTokenInterface $credentialsProvider
      * @param non-empty-string $location
      * @param non-empty-string|null $projectId
+     * @param non-empty-string|null $baseUrl
+     * @param RequestOpts|null $requestOptions
+     * @param OpenTelemetryOptions|null $openTelemetry
      */
     private function __construct(
         private \Closure $credentialsProvider,
         private string $location,
         private ?string $projectId,
+        ?string $baseUrl = null,
+        RequestOptions|array|null $requestOptions = null,
+        array|false|null $openTelemetry = null,
     ) {
-        $options = RequestOptions::with(
-            uriFactory: Psr17FactoryDiscovery::findUriFactory(),
-            streamFactory: Psr17FactoryDiscovery::findStreamFactory(),
-            requestFactory: Psr17FactoryDiscovery::findRequestFactory(),
-            transporter: Psr18ClientDiscovery::find(),
-        );
-
-        // @see https://docs.cloud.google.com/vertex-ai/docs/reference/rest#rest_endpoints
-        $baseUrl = match ($location) {
-            'global' => 'https://aiplatform.googleapis.com',
-            'us' => 'https://aiplatform.us.rep.googleapis.com',
-            'eu' => 'https://aiplatform.eu.rep.googleapis.com',
-            default => 'https://'.$location.'-aiplatform.googleapis.com',
+        $baseUrl ??= Util::getenv('ANTHROPIC_VERTEX_BASE_URL') ?: match ($location) {
+            'global' => 'https://aiplatform.googleapis.com/v1',
+            'us' => 'https://aiplatform.us.rep.googleapis.com/v1',
+            'eu' => 'https://aiplatform.eu.rep.googleapis.com/v1',
+            default => 'https://'.$location.'-aiplatform.googleapis.com/v1',
         };
 
+        // Pass '' for apiKey to suppress ANTHROPIC_API_KEY and
+        // ANTHROPIC_AUTH_TOKEN env lookups; Vertex auth is handled entirely
+        // by the $authorize closure in backendMiddleware().
         parent::__construct(
-            headers: [],
+            apiKey: '',
             baseUrl: $baseUrl,
-            options: $options
+            requestOptions: $requestOptions,
+            openTelemetry: $openTelemetry,
         );
-
-        $this->messages = new MessagesService(new MessagesRawService($this));
     }
 
     /**
-     * @param non-empty-string $location
-     * @param non-empty-string|null $projectId
+     * @internal
      */
-    public static function fromEnvironment(string $location, ?string $projectId = null): self
+    public function supportsMessageThreads(): bool
+    {
+        return false;
+    }
+
+    /**
+     * @param non-empty-string|null $region Google Cloud region, e.g. `us-east5` or `global`; required
+     * @param non-empty-string|null $projectId
+     * @param non-empty-string|null $baseUrl
+     * @param RequestOpts|null $requestOptions
+     * @param non-empty-string|null $location deprecated alias for `$region`; use `$region` instead
+     * @param OpenTelemetryOptions|null $openTelemetry
+     */
+    public static function fromEnvironment(?string $region = null, ?string $projectId = null, ?string $baseUrl = null, RequestOptions|array|null $requestOptions = null, ?string $location = null, array|false|null $openTelemetry = null): self
     {
         self::ensureGoogleAuthLibraryIsInstalled();
 
-        $credentialsProvider = function () {
-            return ApplicationDefaultCredentials::getCredentials(
-                scope: ['https://www.googleapis.com/auth/cloud-platform'],
-            );
-        };
-
         return new self(
-            credentialsProvider: $credentialsProvider,
-            location: $location,
+            credentialsProvider: static fn (): FetchAuthTokenInterface => ApplicationDefaultCredentials::getCredentials(
+                scope: ['https://www.googleapis.com/auth/cloud-platform'],
+            ),
+            location: self::resolveRegion($region, $location),
             projectId: $projectId,
+            baseUrl: $baseUrl,
+            requestOptions: $requestOptions,
+            openTelemetry: $openTelemetry,
         );
     }
 
-    public function getApiEndpoint(): string
+    /**
+     * @param non-empty-string|null $region Google Cloud region, e.g. `us-east5` or `global`; required
+     * @param non-empty-string|null $projectId
+     * @param non-empty-string|null $baseUrl
+     * @param RequestOpts|null $requestOptions
+     * @param non-empty-string|null $location deprecated alias for `$region`; use `$region` instead
+     * @param OpenTelemetryOptions|null $openTelemetry
+     */
+    public static function withCredentials(FetchAuthTokenInterface $credentials, ?string $region = null, ?string $projectId = null, ?string $baseUrl = null, RequestOptions|array|null $requestOptions = null, ?string $location = null, array|false|null $openTelemetry = null): self
     {
-        $projectId = $this->resolveProjectId();
+        return new self(
+            credentialsProvider: static fn (): FetchAuthTokenInterface => $credentials,
+            location: self::resolveRegion($region, $location),
+            projectId: $projectId,
+            baseUrl: $baseUrl,
+            requestOptions: $requestOptions,
+            openTelemetry: $openTelemetry,
+        );
+    }
 
-        return "/v1/projects/{$projectId}/locations/{$this->location}/publishers/anthropic/models";
+    /**
+     * @param non-empty-string $accessToken
+     * @param non-empty-string|null $region Google Cloud region, e.g. `us-east5` or `global`; required
+     * @param non-empty-string|null $projectId
+     * @param non-empty-string|null $baseUrl
+     * @param RequestOpts|null $requestOptions
+     * @param non-empty-string|null $location deprecated alias for `$region`; use `$region` instead
+     * @param OpenTelemetryOptions|null $openTelemetry
+     */
+    public static function withAccessToken(string $accessToken, ?string $region = null, ?string $projectId = null, ?string $baseUrl = null, RequestOptions|array|null $requestOptions = null, ?string $location = null, array|false|null $openTelemetry = null): self
+    {
+        return self::withCredentials(
+            new StaticAccessToken($accessToken),
+            region: $region,
+            location: $location,
+            projectId: $projectId,
+            baseUrl: $baseUrl,
+            requestOptions: $requestOptions,
+            openTelemetry: $openTelemetry,
+        );
+    }
+
+    /** @return array<string,string> */
+    protected function authHeaders(): array
+    {
+        return [];
     }
 
     protected function transformRequest(RequestInterface $request): RequestInterface
     {
-        return $request->withHeader('Authorization', 'Bearer '.$this->authToken()['access_token']);
+        return $request;
+    }
+
+    protected function backendMiddleware(): array
+    {
+        assert(null !== $this->options->streamFactory);
+
+        return [new VertexMiddleware(
+            $this->options->streamFactory,
+            $this->location,
+            $this->resolveProjectId(...),
+            fn (RequestInterface $request): RequestInterface => $request->hasHeader('Authorization')
+                ? $request
+                : $request->withHeader('Authorization', 'Bearer '.$this->authToken()['access_token']),
+        )];
+    }
+
+    /**
+     * @param non-empty-string|null $region
+     * @param non-empty-string|null $location
+     *
+     * @return non-empty-string
+     */
+    private static function resolveRegion(?string $region, ?string $location): string
+    {
+        if (null !== $region && null !== $location && $region !== $location) {
+            throw new \InvalidArgumentException(
+                'The `region` and `location` arguments conflict; pass only `region` (`location` is a deprecated alias for it).'
+            );
+        }
+
+        return $region ?? $location ?? throw new \InvalidArgumentException('The `region` argument is required.');
     }
 
     private function resolveCredentials(): FetchAuthTokenInterface
     {
-        if (null !== $this->credentials) {
-            return $this->credentials;
-        }
-
-        return $this->credentials = ($this->credentialsProvider)();
+        return $this->credentials ??= ($this->credentialsProvider)();
     }
 
     /**
-     * Resolve the project ID to be used for API requests.
-     *
-     * Project ID resolution precedence:
-     * 1. Explicit project ID provided to constructor
-     * 2. Environment variables (GOOGLE_CLOUD_PROJECT, GCLOUD_PROJECT, GOOGLE_CLOUD_PROJECT_ID)
-     * 3. Project ID from Google credentials provider
-     *
-     * This precedence ensures that explicit configuration takes priority over environment,
-     * and environment takes priority over credential discovery, allowing users to override
-     * the project ID when needed for testing or multi-project scenarios.
-     *
      * @return non-empty-string
      */
     private function resolveProjectId(): string
@@ -139,13 +208,9 @@ final class Client extends BaseClient
             }
         }
 
-        if (null === $this->credentials) {
-            $this->credentials = $this->resolveCredentials();
-        }
-
-        if ($this->credentials instanceof ProjectIdProviderInterface) {
-            $projectId = $this->credentials->getProjectId();
-
+        $credentials = $this->resolveCredentials();
+        if ($credentials instanceof ProjectIdProviderInterface) {
+            $projectId = $credentials->getProjectId();
             if (is_string($projectId) && '' !== $projectId) {
                 return $this->projectId = $projectId;
             }
@@ -190,6 +255,12 @@ final class Client extends BaseClient
 
         $accessToken = $token['access_token'] ?? null;
         $expiresAt = $token['expires_at'] ?? null;
+        $expiresIn = $token['expires_in'] ?? null;
+
+        // Service account and user credentials report a lifetime and no expiry time.
+        if (null === $expiresAt && is_numeric($expiresIn) && (int) $expiresIn > 0) {
+            $expiresAt = time() + (int) $expiresIn;
+        }
 
         if (is_string($accessToken) && '' !== $accessToken) {
             return [
@@ -208,5 +279,28 @@ final class Client extends BaseClient
                 'The Google Auth library is required to use Vertex. Please install `google/auth` via Composer.'
             );
         }
+    }
+}
+
+/** @internal */
+final class StaticAccessToken implements FetchAuthTokenInterface
+{
+    /** @param non-empty-string $token */
+    public function __construct(private string $token) {}
+
+    public function fetchAuthToken(?callable $httpHandler = null): array
+    {
+        return ['access_token' => $this->token];
+    }
+
+    public function getCacheKey(): ?string
+    {
+        return null;
+    }
+
+    /** @return array{access_token: string} */
+    public function getLastReceivedToken(): array
+    {
+        return ['access_token' => $this->token];
     }
 }

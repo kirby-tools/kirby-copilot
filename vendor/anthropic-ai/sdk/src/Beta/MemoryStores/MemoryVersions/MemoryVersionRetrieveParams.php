@@ -13,7 +13,7 @@ use Anthropic\Core\Concerns\SdkParams;
 use Anthropic\Core\Contracts\BaseModel;
 
 /**
- * GetMemoryVersion.
+ * Retrieve a Memory Version
  *
  * @see Anthropic\Services\Beta\MemoryStores\MemoryVersionsService::retrieve()
  *
@@ -21,6 +21,7 @@ use Anthropic\Core\Contracts\BaseModel;
  *   memoryStoreID: string,
  *   view?: null|ManagedAgentsMemoryView|value-of<ManagedAgentsMemoryView>,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class MemoryVersionRetrieveParams implements BaseModel
@@ -29,11 +30,16 @@ final class MemoryVersionRetrieveParams implements BaseModel
     use SdkModel;
     use SdkParams;
 
+    /**
+     * The ID of the memory store that holds the version (`memstore_...`).
+     */
     #[Required]
     public string $memoryStoreID;
 
     /**
-     * Query parameter for view.
+     * Whether a `memory` or `memory_version` in the response includes its `content`. Defaults to `full` on retrieve operations and to `basic` on list, create, and update operations.
+     *
+     * With `full`, list operations return at most 20 items per page.
      *
      * @var value-of<ManagedAgentsMemoryView>|null $view
      */
@@ -41,12 +47,20 @@ final class MemoryVersionRetrieveParams implements BaseModel
     public ?string $view;
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `agent-memory-2026-07-22` or `managed-agents-2026-04-01` in this header.
      *
      * @var list<string|value-of<AnthropicBeta>>|null $betas
      */
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
 
     /**
      * `new MemoryVersionRetrieveParams()` is missing required properties by the API.
@@ -59,7 +73,7 @@ final class MemoryVersionRetrieveParams implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new MemoryVersionRetrieveParams)->withMemoryStoreID(...)
+     * (new MemoryVersionRetrieveParams())->withMemoryStoreID(...)
      * ```
      */
     public function __construct()
@@ -79,6 +93,7 @@ final class MemoryVersionRetrieveParams implements BaseModel
         string $memoryStoreID,
         ManagedAgentsMemoryView|string|null $view = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
     ): self {
         $self = new self;
 
@@ -86,10 +101,14 @@ final class MemoryVersionRetrieveParams implements BaseModel
 
         null !== $view && $self['view'] = $view;
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
 
+    /**
+     * The ID of the memory store that holds the version (`memstore_...`).
+     */
     public function withMemoryStoreID(string $memoryStoreID): self
     {
         $self = clone $this;
@@ -99,7 +118,9 @@ final class MemoryVersionRetrieveParams implements BaseModel
     }
 
     /**
-     * Query parameter for view.
+     * Whether a `memory` or `memory_version` in the response includes its `content`. Defaults to `full` on retrieve operations and to `basic` on list, create, and update operations.
+     *
+     * With `full`, list operations return at most 20 items per page.
      *
      * @param ManagedAgentsMemoryView|value-of<ManagedAgentsMemoryView> $view
      */
@@ -112,7 +133,7 @@ final class MemoryVersionRetrieveParams implements BaseModel
     }
 
     /**
-     * Optional header to specify the beta version(s) you want to use.
+     * This endpoint is in beta: requests must send `agent-memory-2026-07-22` or `managed-agents-2026-04-01` in this header.
      *
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>> $betas
      */
@@ -120,6 +141,19 @@ final class MemoryVersionRetrieveParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

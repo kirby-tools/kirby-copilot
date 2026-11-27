@@ -5,23 +5,32 @@ declare(strict_types=1);
 namespace Anthropic\Services\Beta;
 
 use Anthropic\Beta\AnthropicBeta;
+use Anthropic\Beta\UserProfiles\BetaDeletedUserProfile;
 use Anthropic\Beta\UserProfiles\BetaUserProfile;
 use Anthropic\Beta\UserProfiles\BetaUserProfileEnrollmentURL;
+use Anthropic\Beta\UserProfiles\BetaUserProfileExternalUserDetailsParams;
 use Anthropic\Beta\UserProfiles\UserProfileCreateEnrollmentURLParams;
 use Anthropic\Beta\UserProfiles\UserProfileCreateParams;
+use Anthropic\Beta\UserProfiles\UserProfileCreateParams\AccessType;
+use Anthropic\Beta\UserProfiles\UserProfileDeleteParams;
 use Anthropic\Beta\UserProfiles\UserProfileListParams;
 use Anthropic\Beta\UserProfiles\UserProfileListParams\Order;
+use Anthropic\Beta\UserProfiles\UserProfileListParams\OrderBy;
 use Anthropic\Beta\UserProfiles\UserProfileRetrieveParams;
 use Anthropic\Beta\UserProfiles\UserProfileUpdateParams;
 use Anthropic\Client;
 use Anthropic\Core\Contracts\BaseResponse;
 use Anthropic\Core\Exceptions\APIException;
+use Anthropic\Core\Implementation\ApiCallInfo;
 use Anthropic\Core\Util;
 use Anthropic\PageCursor;
 use Anthropic\RequestOptions;
 use Anthropic\ServiceContracts\Beta\UserProfilesRawContract;
 
 /**
+ * Register the end customers that your platform serves, so each request can name who it's for. To get started, see the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles).
+ *
+ * @phpstan-import-type BetaUserProfileExternalUserDetailsParamsShape from \Anthropic\Beta\UserProfiles\BetaUserProfileExternalUserDetailsParams
  * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
  */
 final class UserProfilesRawService implements UserProfilesRawContract
@@ -35,12 +44,19 @@ final class UserProfilesRawService implements UserProfilesRawContract
     /**
      * @api
      *
-     * Create User Profile
+     * Register one of your end customers and get the ID to send on the requests you make for them.
+     *
+     * See the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles#create-a-profile-for-each-end-customer) for what to send.
      *
      * @param array{
+     *   accessType?: AccessType|value-of<AccessType>,
      *   externalID?: string|null,
+     *   externalUserDetails?: BetaUserProfileExternalUserDetailsParams|BetaUserProfileExternalUserDetailsParamsShape,
+     *   externalUserOnboardedAt?: \DateTimeInterface,
      *   metadata?: array<string,string>,
+     *   name?: string|null,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|UserProfileCreateParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -56,12 +72,14 @@ final class UserProfilesRawService implements UserProfilesRawContract
             $params,
             $requestOptions,
         );
-        $header_params = ['betas' => 'anthropic-beta'];
+        $header_params = [
+            'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+        ];
 
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: 'v1/user_profiles?beta=true',
+            path: 'v1/user_profiles',
             headers: Util::array_transform_keys(
                 array_intersect_key($parsed, array_flip(array_keys($header_params))),
                 $header_params,
@@ -71,9 +89,13 @@ final class UserProfilesRawService implements UserProfilesRawContract
                 array_flip(array_keys($header_params))
             ),
             options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'user-profiles-2026-03-24']],
+                ['extraHeaders' => ['anthropic-beta' => 'user-profiles-2026-08-18']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.user_profiles.create',
+                route: '/v1/user_profiles',
+                createdId: 'anthropic.user_profile.id',
+            )),
             convert: BetaUserProfile::class,
         );
     }
@@ -81,11 +103,14 @@ final class UserProfilesRawService implements UserProfilesRawContract
     /**
      * @api
      *
-     * Get User Profile
+     * Get a user profile by ID to check the details stored for it.
      *
-     * @param string $userProfileID Path parameter user_profile_id
+     * See the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles) for how to set up and manage profiles.
+     *
+     * @param string $userProfileID The ID of the user profile to get (`uprof_...`).
      * @param array{
-     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|UserProfileRetrieveParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -106,15 +131,21 @@ final class UserProfilesRawService implements UserProfilesRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: ['v1/user_profiles/%1$s?beta=true', $userProfileID],
+            path: ['v1/user_profiles/%1$s', $userProfileID],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'user-profiles-2026-03-24']],
+                ['extraHeaders' => ['anthropic-beta' => 'user-profiles-2026-08-18']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.user_profiles.retrieve',
+                route: '/v1/user_profiles/{user_profile_id}',
+                attributes: ['anthropic.user_profile.id' => $userProfileID],
+            )),
             convert: BetaUserProfile::class,
         );
     }
@@ -122,13 +153,20 @@ final class UserProfilesRawService implements UserProfilesRawContract
     /**
      * @api
      *
-     * Update User Profile
+     * Change the details of a user profile, leaving the fields that you don't send as they are.
      *
-     * @param string $userProfileID Path param: Path parameter user_profile_id
+     * See the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles#update-a-profile) for how each field is updated.
+     *
+     * @param string $userProfileID Path param: The ID of the user profile to update (`uprof_...`).
      * @param array{
+     *   accessType?: UserProfileUpdateParams\AccessType|value-of<UserProfileUpdateParams\AccessType>|null,
      *   externalID?: string|null,
+     *   externalUserDetails?: BetaUserProfileExternalUserDetailsParams|BetaUserProfileExternalUserDetailsParamsShape,
+     *   externalUserOnboardedAt?: \DateTimeInterface,
      *   metadata?: array<string,string>,
+     *   name?: string|null,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|UserProfileUpdateParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -145,12 +183,14 @@ final class UserProfilesRawService implements UserProfilesRawContract
             $params,
             $requestOptions,
         );
-        $header_params = ['betas' => 'anthropic-beta'];
+        $header_params = [
+            'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+        ];
 
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: ['v1/user_profiles/%1$s?beta=true', $userProfileID],
+            path: ['v1/user_profiles/%1$s', $userProfileID],
             headers: Util::array_transform_keys(
                 array_intersect_key($parsed, array_flip(array_keys($header_params))),
                 $header_params,
@@ -160,9 +200,13 @@ final class UserProfilesRawService implements UserProfilesRawContract
                 array_flip(array_keys($header_params))
             ),
             options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'user-profiles-2026-03-24']],
+                ['extraHeaders' => ['anthropic-beta' => 'user-profiles-2026-08-18']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.user_profiles.update',
+                route: '/v1/user_profiles/{user_profile_id}',
+                attributes: ['anthropic.user_profile.id' => $userProfileID],
+            )),
             convert: BetaUserProfile::class,
         );
     }
@@ -170,13 +214,17 @@ final class UserProfilesRawService implements UserProfilesRawContract
     /**
      * @api
      *
-     * List User Profiles
+     * List the user profiles in your organization, newest first by default.
+     *
+     * See the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles) for how to set up and manage profiles.
      *
      * @param array{
      *   limit?: int,
      *   order?: Order|value-of<Order>,
+     *   orderBy?: OrderBy|value-of<OrderBy>,
      *   page?: string,
      *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|UserProfileListParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -192,7 +240,7 @@ final class UserProfilesRawService implements UserProfilesRawContract
             $params,
             $requestOptions,
         );
-        $query_params = array_flip(['limit', 'order', 'page']);
+        $query_params = array_flip(['limit', 'order', 'orderBy', 'page']);
 
         /** @var array<string,string> */
         $header_params = array_diff_key($parsed, $query_params);
@@ -200,16 +248,25 @@ final class UserProfilesRawService implements UserProfilesRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'get',
-            path: 'v1/user_profiles?beta=true',
-            query: array_intersect_key($parsed, $query_params),
+            path: 'v1/user_profiles',
+            query: Util::array_transform_keys(
+                array_intersect_key($parsed, $query_params),
+                ['orderBy' => 'order_by']
+            ),
             headers: Util::array_transform_keys(
                 $header_params,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'user-profiles-2026-03-24']],
+                ['extraHeaders' => ['anthropic-beta' => 'user-profiles-2026-08-18']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.user_profiles.list',
+                route: '/v1/user_profiles',
+                query: ['limit', 'order', 'order_by', 'page'],
+            )),
             convert: BetaUserProfile::class,
             page: PageCursor::class,
         );
@@ -218,11 +275,64 @@ final class UserProfilesRawService implements UserProfilesRawContract
     /**
      * @api
      *
-     * Create Enrollment URL
+     * Delete a user profile, for example when the end customer closes their account.
      *
-     * @param string $userProfileID Path parameter user_profile_id
+     * Stop sending the profile's ID first. See the [User profiles guide](https://platform.claude.com/docs/en/manage-claude/user-profiles#delete-a-profile) for what happens after a delete.
+     *
+     * @param string $userProfileID The ID of the user profile to delete (`uprof_...`).
      * @param array{
-     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
+     * }|UserProfileDeleteParams $params
+     * @param RequestOpts|null $requestOptions
+     *
+     * @return BaseResponse<BetaDeletedUserProfile>
+     *
+     * @throws APIException
+     */
+    public function delete(
+        string $userProfileID,
+        array|UserProfileDeleteParams $params,
+        RequestOptions|array|null $requestOptions = null,
+    ): BaseResponse {
+        [$parsed, $options] = UserProfileDeleteParams::parseRequest(
+            $params,
+            $requestOptions,
+        );
+
+        // @phpstan-ignore-next-line return.type
+        return $this->client->request(
+            method: 'delete',
+            path: ['v1/user_profiles/%1$s', $userProfileID],
+            headers: Util::array_transform_keys(
+                $parsed,
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
+            ),
+            options: RequestOptions::parse(
+                ['extraHeaders' => ['anthropic-beta' => 'user-profiles-2026-08-18']],
+                $options,
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.user_profiles.delete',
+                route: '/v1/user_profiles/{user_profile_id}',
+                attributes: ['anthropic.user_profile.id' => $userProfileID],
+            )),
+            convert: BetaDeletedUserProfile::class,
+        );
+    }
+
+    /**
+     * @api
+     *
+     * Create a link that sends the profile's end customer to the Verification Portal from Claude Platform on AWS.
+     *
+     * On the Claude API, create an action URL instead. See [Send an end customer a link to the Verification Portal](https://platform.claude.com/docs/en/manage-claude/user-profiles-verification-portal) for when to create the link and what the end customer sees.
+     *
+     * @param string $userProfileID The ID of the user profile to create an enrollment URL for (`uprof_...`).
+     * @param array{
+     *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>,
+     *   workspaceID?: string,
      * }|UserProfileCreateEnrollmentURLParams $params
      * @param RequestOpts|null $requestOptions
      *
@@ -243,15 +353,21 @@ final class UserProfilesRawService implements UserProfilesRawContract
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
-            path: ['v1/user_profiles/%1$s/enrollment_url?beta=true', $userProfileID],
+            path: ['v1/user_profiles/%1$s/enrollment_url', $userProfileID],
             headers: Util::array_transform_keys(
                 $parsed,
-                ['betas' => 'anthropic-beta']
+                [
+                    'betas' => 'anthropic-beta', 'workspaceID' => 'anthropic-workspace-id',
+                ],
             ),
             options: RequestOptions::parse(
-                ['extraHeaders' => ['anthropic-beta' => 'user-profiles-2026-03-24']],
+                ['extraHeaders' => ['anthropic-beta' => 'user-profiles-2026-08-18']],
                 $options,
-            ),
+            )->withQualifiers(['beta' => 'true'])->withApiCall(new ApiCallInfo(
+                name: 'anthropic.user_profiles.create_enrollment_url',
+                route: '/v1/user_profiles/{user_profile_id}/enrollment_url',
+                attributes: ['anthropic.user_profile.id' => $userProfileID],
+            )),
             convert: BetaUserProfileEnrollmentURL::class,
         );
     }

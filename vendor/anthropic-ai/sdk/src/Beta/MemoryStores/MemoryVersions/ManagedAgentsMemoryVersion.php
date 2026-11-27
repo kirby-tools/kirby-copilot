@@ -4,13 +4,21 @@ declare(strict_types=1);
 
 namespace Anthropic\Beta\MemoryStores\MemoryVersions;
 
-use Anthropic\Beta\MemoryStores\MemoryVersions\ManagedAgentsMemoryVersion\Type;
 use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
+ * One entry in a memory's history, recording a single change and who made it.
+ *
+ * Every change to a memory adds one version. Only redaction can change a version after that. Versions belong to the memory store and stay after the memory is deleted. Each version is retained for at least the version retention period after it was written, unless the store itself is deleted.
+ *
+ * Retrieving a redacted version succeeds, with `content`, `path`, `content_size_bytes`, and `content_sha256` set to `null`. Check `redacted_at` to find out whether a version was redacted.
+ *
+ * See the [memory guide](https://platform.claude.com/docs/en/managed-agents/memory#audit-memory-changes) to learn more about memory versions.
+ *
  * @phpstan-import-type ManagedAgentsActorShape from \Anthropic\Beta\MemoryStores\MemoryVersions\ManagedAgentsActor
  * @phpstan-import-type ManagedAgentsActorVariants from \Anthropic\Beta\MemoryStores\MemoryVersions\ManagedAgentsActor
  *
@@ -20,7 +28,7 @@ use Anthropic\Core\Contracts\BaseModel;
  *   memoryID: string,
  *   memoryStoreID: string,
  *   operation: ManagedAgentsMemoryVersionOperation|value-of<ManagedAgentsMemoryVersionOperation>,
- *   type: Type|value-of<Type>,
+ *   type: 'memory_version',
  *   content?: string|null,
  *   contentSha256?: string|null,
  *   contentSizeBytes?: int|null,
@@ -35,58 +43,97 @@ final class ManagedAgentsMemoryVersion implements BaseModel
     /** @use SdkModel<ManagedAgentsMemoryVersionShape> */
     use SdkModel;
 
+    /** @var 'memory_version' $type */
+    #[Required(type: new ConstantOf('memory_version'))]
+    public string $type = 'memory_version';
+
+    /**
+     * Unique identifier for this version (a `memver_...` value).
+     */
     #[Required]
     public string $id;
 
     /**
-     * A timestamp in RFC 3339 format.
+     * When this version was written, in RFC 3339 format.
      */
     #[Required('created_at')]
     public \DateTimeInterface $createdAt;
 
+    /**
+     * The ID of the memory that this version belongs to (`mem_...`).
+     *
+     * The ID stays valid after the memory is deleted. Pass it as `memory_id` to [List Memory Versions](https://platform.claude.com/docs/en/api/beta/memory_stores/memory_versions/list) to get the memory's retained versions, including its `deleted` version while the lineage is retained.
+     */
     #[Required('memory_id')]
     public string $memoryID;
 
+    /**
+     * ID of the memory store this version belongs to (a `memstore_...` value).
+     */
     #[Required('memory_store_id')]
     public string $memoryStoreID;
 
     /**
-     * MemoryVersionOperation enum.
+     * The kind of mutation this version records: `created`, `modified`, or `deleted`.
      *
      * @var value-of<ManagedAgentsMemoryVersionOperation> $operation
      */
     #[Required(enum: ManagedAgentsMemoryVersionOperation::class)]
     public string $operation;
 
-    /** @var value-of<Type> $type */
-    #[Required(enum: Type::class)]
-    public string $type;
-
+    /**
+     * The memory's UTF-8 text content as of this version. `null` when `view=basic`, when `operation` is `deleted`, or when `redacted_at` is set.
+     */
     #[Optional(nullable: true)]
     public ?string $content;
 
+    /**
+     * Lowercase hex SHA-256 digest of `content` as of this version (64 characters). `null` when `redacted_at` is set or `operation` is `deleted`. Populated regardless of `view` otherwise.
+     */
     #[Optional('content_sha256', nullable: true)]
     public ?string $contentSha256;
 
+    /**
+     * Size of `content` in bytes as of this version. `null` when `redacted_at` is set or `operation` is `deleted`. Populated regardless of `view` otherwise.
+     */
     #[Optional('content_size_bytes', nullable: true)]
     public ?int $contentSizeBytes;
 
-    /** @var ManagedAgentsActorVariants|null $createdBy */
+    /**
+     * Who made this change to the memory, or `null` if the author wasn't recorded.
+     *
+     * Redacting the version doesn't change this field. A `session_actor` here is an agent that wrote through the store's mounted filesystem at `/mnt/memory/`. The version doesn't record the API key that created that session. So the author in `created_by` is who made the change, not who is ultimately responsible for it.
+     *
+     * You can [retrieve the session](https://platform.claude.com/docs/en/api/beta/sessions/retrieve) to learn more about where the change came from.
+     *
+     * @var ManagedAgentsActorVariants|null $createdBy
+     */
     #[Optional('created_by', union: ManagedAgentsActor::class)]
-    public ManagedAgentsSessionActor|ManagedAgentsAPIActor|ManagedAgentsUserActor|null $createdBy;
+    public ManagedAgentsSessionActor|ManagedAgentsAPIActor|ManagedAgentsUserActor|ManagedAgentsServiceAccountActor|null $createdBy;
 
+    /**
+     * The memory's path at the time of this write. `null` if and only if `redacted_at` is set.
+     */
     #[Optional(nullable: true)]
     public ?string $path;
 
     /**
-     * A timestamp in RFC 3339 format.
+     * When the version was redacted, in RFC 3339, or `null` if it hasn't been.
+     *
+     * When set, `content`, `path`, `content_size_bytes`, and `content_sha256` are `null`.
+     *
+     * See the [memory guide](https://platform.claude.com/docs/en/managed-agents/memory#redact-a-version) to learn more about redaction.
      */
     #[Optional('redacted_at', nullable: true)]
     public ?\DateTimeInterface $redactedAt;
 
-    /** @var ManagedAgentsActorVariants|null $redactedBy */
+    /**
+     * Who redacted this version, or `null` if it has not been redacted. In practice always an `api_actor`, `user_actor`, or `service_account_actor` (agents do not have a redact capability).
+     *
+     * @var ManagedAgentsActorVariants|null $redactedBy
+     */
     #[Optional('redacted_by', union: ManagedAgentsActor::class)]
-    public ManagedAgentsSessionActor|ManagedAgentsAPIActor|ManagedAgentsUserActor|null $redactedBy;
+    public ManagedAgentsSessionActor|ManagedAgentsAPIActor|ManagedAgentsUserActor|ManagedAgentsServiceAccountActor|null $redactedBy;
 
     /**
      * `new ManagedAgentsMemoryVersion()` is missing required properties by the API.
@@ -94,25 +141,19 @@ final class ManagedAgentsMemoryVersion implements BaseModel
      * To enforce required parameters use
      * ```
      * ManagedAgentsMemoryVersion::with(
-     *   id: ...,
-     *   createdAt: ...,
-     *   memoryID: ...,
-     *   memoryStoreID: ...,
-     *   operation: ...,
-     *   type: ...,
+     *   id: ..., createdAt: ..., memoryID: ..., memoryStoreID: ..., operation: ...
      * )
      * ```
      *
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ManagedAgentsMemoryVersion)
+     * (new ManagedAgentsMemoryVersion())
      *   ->withID(...)
      *   ->withCreatedAt(...)
      *   ->withMemoryID(...)
      *   ->withMemoryStoreID(...)
      *   ->withOperation(...)
-     *   ->withType(...)
      * ```
      */
     public function __construct()
@@ -126,7 +167,6 @@ final class ManagedAgentsMemoryVersion implements BaseModel
      * You must use named parameters to construct any parameters with a default value.
      *
      * @param ManagedAgentsMemoryVersionOperation|value-of<ManagedAgentsMemoryVersionOperation> $operation
-     * @param Type|value-of<Type> $type
      * @param ManagedAgentsActorShape|null $createdBy
      * @param ManagedAgentsActorShape|null $redactedBy
      */
@@ -136,14 +176,13 @@ final class ManagedAgentsMemoryVersion implements BaseModel
         string $memoryID,
         string $memoryStoreID,
         ManagedAgentsMemoryVersionOperation|string $operation,
-        Type|string $type,
         ?string $content = null,
         ?string $contentSha256 = null,
         ?int $contentSizeBytes = null,
-        ManagedAgentsSessionActor|array|ManagedAgentsAPIActor|ManagedAgentsUserActor|null $createdBy = null,
+        ManagedAgentsSessionActor|array|ManagedAgentsAPIActor|ManagedAgentsUserActor|ManagedAgentsServiceAccountActor|null $createdBy = null,
         ?string $path = null,
         ?\DateTimeInterface $redactedAt = null,
-        ManagedAgentsSessionActor|array|ManagedAgentsAPIActor|ManagedAgentsUserActor|null $redactedBy = null,
+        ManagedAgentsSessionActor|array|ManagedAgentsAPIActor|ManagedAgentsUserActor|ManagedAgentsServiceAccountActor|null $redactedBy = null,
     ): self {
         $self = new self;
 
@@ -152,7 +191,6 @@ final class ManagedAgentsMemoryVersion implements BaseModel
         $self['memoryID'] = $memoryID;
         $self['memoryStoreID'] = $memoryStoreID;
         $self['operation'] = $operation;
-        $self['type'] = $type;
 
         null !== $content && $self['content'] = $content;
         null !== $contentSha256 && $self['contentSha256'] = $contentSha256;
@@ -165,6 +203,9 @@ final class ManagedAgentsMemoryVersion implements BaseModel
         return $self;
     }
 
+    /**
+     * Unique identifier for this version (a `memver_...` value).
+     */
     public function withID(string $id): self
     {
         $self = clone $this;
@@ -174,7 +215,7 @@ final class ManagedAgentsMemoryVersion implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * When this version was written, in RFC 3339 format.
      */
     public function withCreatedAt(\DateTimeInterface $createdAt): self
     {
@@ -184,6 +225,11 @@ final class ManagedAgentsMemoryVersion implements BaseModel
         return $self;
     }
 
+    /**
+     * The ID of the memory that this version belongs to (`mem_...`).
+     *
+     * The ID stays valid after the memory is deleted. Pass it as `memory_id` to [List Memory Versions](https://platform.claude.com/docs/en/api/beta/memory_stores/memory_versions/list) to get the memory's retained versions, including its `deleted` version while the lineage is retained.
+     */
     public function withMemoryID(string $memoryID): self
     {
         $self = clone $this;
@@ -192,6 +238,9 @@ final class ManagedAgentsMemoryVersion implements BaseModel
         return $self;
     }
 
+    /**
+     * ID of the memory store this version belongs to (a `memstore_...` value).
+     */
     public function withMemoryStoreID(string $memoryStoreID): self
     {
         $self = clone $this;
@@ -201,7 +250,7 @@ final class ManagedAgentsMemoryVersion implements BaseModel
     }
 
     /**
-     * MemoryVersionOperation enum.
+     * The kind of mutation this version records: `created`, `modified`, or `deleted`.
      *
      * @param ManagedAgentsMemoryVersionOperation|value-of<ManagedAgentsMemoryVersionOperation> $operation
      */
@@ -215,9 +264,9 @@ final class ManagedAgentsMemoryVersion implements BaseModel
     }
 
     /**
-     * @param Type|value-of<Type> $type
+     * @param 'memory_version' $type
      */
-    public function withType(Type|string $type): self
+    public function withType(string $type): self
     {
         $self = clone $this;
         $self['type'] = $type;
@@ -225,6 +274,9 @@ final class ManagedAgentsMemoryVersion implements BaseModel
         return $self;
     }
 
+    /**
+     * The memory's UTF-8 text content as of this version. `null` when `view=basic`, when `operation` is `deleted`, or when `redacted_at` is set.
+     */
     public function withContent(?string $content): self
     {
         $self = clone $this;
@@ -233,6 +285,9 @@ final class ManagedAgentsMemoryVersion implements BaseModel
         return $self;
     }
 
+    /**
+     * Lowercase hex SHA-256 digest of `content` as of this version (64 characters). `null` when `redacted_at` is set or `operation` is `deleted`. Populated regardless of `view` otherwise.
+     */
     public function withContentSha256(?string $contentSha256): self
     {
         $self = clone $this;
@@ -241,6 +296,9 @@ final class ManagedAgentsMemoryVersion implements BaseModel
         return $self;
     }
 
+    /**
+     * Size of `content` in bytes as of this version. `null` when `redacted_at` is set or `operation` is `deleted`. Populated regardless of `view` otherwise.
+     */
     public function withContentSizeBytes(?int $contentSizeBytes): self
     {
         $self = clone $this;
@@ -250,10 +308,16 @@ final class ManagedAgentsMemoryVersion implements BaseModel
     }
 
     /**
+     * Who made this change to the memory, or `null` if the author wasn't recorded.
+     *
+     * Redacting the version doesn't change this field. A `session_actor` here is an agent that wrote through the store's mounted filesystem at `/mnt/memory/`. The version doesn't record the API key that created that session. So the author in `created_by` is who made the change, not who is ultimately responsible for it.
+     *
+     * You can [retrieve the session](https://platform.claude.com/docs/en/api/beta/sessions/retrieve) to learn more about where the change came from.
+     *
      * @param ManagedAgentsActorShape $createdBy
      */
     public function withCreatedBy(
-        ManagedAgentsSessionActor|array|ManagedAgentsAPIActor|ManagedAgentsUserActor $createdBy,
+        ManagedAgentsSessionActor|array|ManagedAgentsAPIActor|ManagedAgentsUserActor|ManagedAgentsServiceAccountActor $createdBy,
     ): self {
         $self = clone $this;
         $self['createdBy'] = $createdBy;
@@ -261,6 +325,9 @@ final class ManagedAgentsMemoryVersion implements BaseModel
         return $self;
     }
 
+    /**
+     * The memory's path at the time of this write. `null` if and only if `redacted_at` is set.
+     */
     public function withPath(?string $path): self
     {
         $self = clone $this;
@@ -270,7 +337,11 @@ final class ManagedAgentsMemoryVersion implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * When the version was redacted, in RFC 3339, or `null` if it hasn't been.
+     *
+     * When set, `content`, `path`, `content_size_bytes`, and `content_sha256` are `null`.
+     *
+     * See the [memory guide](https://platform.claude.com/docs/en/managed-agents/memory#redact-a-version) to learn more about redaction.
      */
     public function withRedactedAt(?\DateTimeInterface $redactedAt): self
     {
@@ -281,10 +352,12 @@ final class ManagedAgentsMemoryVersion implements BaseModel
     }
 
     /**
+     * Who redacted this version, or `null` if it has not been redacted. In practice always an `api_actor`, `user_actor`, or `service_account_actor` (agents do not have a redact capability).
+     *
      * @param ManagedAgentsActorShape $redactedBy
      */
     public function withRedactedBy(
-        ManagedAgentsSessionActor|array|ManagedAgentsAPIActor|ManagedAgentsUserActor $redactedBy,
+        ManagedAgentsSessionActor|array|ManagedAgentsAPIActor|ManagedAgentsUserActor|ManagedAgentsServiceAccountActor $redactedBy,
     ): self {
         $self = clone $this;
         $self['redactedBy'] = $redactedBy;

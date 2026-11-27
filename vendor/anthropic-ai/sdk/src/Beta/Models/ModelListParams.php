@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Anthropic\Beta\Models;
 
 use Anthropic\Beta\AnthropicBeta;
+use Anthropic\Beta\Models\ModelListParams\Lifecycle;
 use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Concerns\SdkParams;
@@ -20,8 +21,10 @@ use Anthropic\Core\Contracts\BaseModel;
  * @phpstan-type ModelListParamsShape = array{
  *   afterID?: string|null,
  *   beforeID?: string|null,
+ *   lifecycle?: list<Lifecycle|value-of<Lifecycle>>|null,
  *   limit?: int|null,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class ModelListParams implements BaseModel
@@ -43,6 +46,14 @@ final class ModelListParams implements BaseModel
     public ?string $beforeID;
 
     /**
+     * Filter the list to models in any of the given lifecycle stages (`active`, `deprecated`, or `retired`). Up to 3 values. When omitted, the list contains the `active` and `deprecated` models; `retired` models appear only when `retired` is requested explicitly.
+     *
+     * @var list<value-of<Lifecycle>>|null $lifecycle
+     */
+    #[Optional(list: Lifecycle::class)]
+    public ?array $lifecycle;
+
+    /**
      * Number of items to return per page.
      *
      * Defaults to `20`. Ranges from `1` to `1000`.
@@ -58,6 +69,14 @@ final class ModelListParams implements BaseModel
     #[Optional(list: AnthropicBeta::class)]
     public ?array $betas;
 
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
+
     public function __construct()
     {
         $this->initialize();
@@ -68,20 +87,25 @@ final class ModelListParams implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
+     * @param list<Lifecycle|value-of<Lifecycle>>|null $lifecycle
      * @param list<string|AnthropicBeta|value-of<AnthropicBeta>>|null $betas
      */
     public static function with(
         ?string $afterID = null,
         ?string $beforeID = null,
+        ?array $lifecycle = null,
         ?int $limit = null,
         ?array $betas = null,
+        ?string $workspaceID = null,
     ): self {
         $self = new self;
 
         null !== $afterID && $self['afterID'] = $afterID;
         null !== $beforeID && $self['beforeID'] = $beforeID;
+        null !== $lifecycle && $self['lifecycle'] = $lifecycle;
         null !== $limit && $self['limit'] = $limit;
         null !== $betas && $self['betas'] = $betas;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
@@ -109,6 +133,19 @@ final class ModelListParams implements BaseModel
     }
 
     /**
+     * Filter the list to models in any of the given lifecycle stages (`active`, `deprecated`, or `retired`). Up to 3 values. When omitted, the list contains the `active` and `deprecated` models; `retired` models appear only when `retired` is requested explicitly.
+     *
+     * @param list<Lifecycle|value-of<Lifecycle>> $lifecycle
+     */
+    public function withLifecycle(array $lifecycle): self
+    {
+        $self = clone $this;
+        $self['lifecycle'] = $lifecycle;
+
+        return $self;
+    }
+
+    /**
      * Number of items to return per page.
      *
      * Defaults to `20`. Ranges from `1` to `1000`.
@@ -130,6 +167,19 @@ final class ModelListParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

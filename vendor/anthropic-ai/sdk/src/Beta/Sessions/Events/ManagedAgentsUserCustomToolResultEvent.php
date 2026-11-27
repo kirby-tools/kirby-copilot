@@ -5,31 +5,36 @@ declare(strict_types=1);
 namespace Anthropic\Beta\Sessions\Events;
 
 use Anthropic\Beta\Sessions\Events\ManagedAgentsUserCustomToolResultEvent\Content;
-use Anthropic\Beta\Sessions\Events\ManagedAgentsUserCustomToolResultEvent\Type;
 use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * Event sent by the client providing the result of a custom tool execution.
  *
- * @phpstan-import-type ContentVariants from \Anthropic\Beta\Sessions\Events\ManagedAgentsUserCustomToolResultEvent\Content
  * @phpstan-import-type ContentShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsUserCustomToolResultEvent\Content
+ * @phpstan-import-type ContentVariants from \Anthropic\Beta\Sessions\Events\ManagedAgentsUserCustomToolResultEvent\Content
  *
  * @phpstan-type ManagedAgentsUserCustomToolResultEventShape = array{
  *   id: string,
  *   customToolUseID: string,
- *   type: Type|value-of<Type>,
+ *   type: 'user.custom_tool_result',
  *   content?: list<ContentShape>|null,
  *   isError?: bool|null,
  *   processedAt?: \DateTimeInterface|null,
+ *   sessionThreadID?: string|null,
  * }
  */
 final class ManagedAgentsUserCustomToolResultEvent implements BaseModel
 {
     /** @use SdkModel<ManagedAgentsUserCustomToolResultEventShape> */
     use SdkModel;
+
+    /** @var 'user.custom_tool_result' $type */
+    #[Required(type: new ConstantOf('user.custom_tool_result'))]
+    public string $type = 'user.custom_tool_result';
 
     /**
      * Unique identifier for this event.
@@ -38,14 +43,10 @@ final class ManagedAgentsUserCustomToolResultEvent implements BaseModel
     public string $id;
 
     /**
-     * The id of the `agent.custom_tool_use` event this result corresponds to, which can be found in the last `session.status_idle` [event's](https://platform.claude.com/docs/en/api/beta/sessions/events/list#beta_managed_agents_session_requires_action.event_ids) `stop_reason.event_ids` field.
+     * The id of the `agent.custom_tool_use` event this result corresponds to. It is also listed in the last `session.status_idle` [event's](https://platform.claude.com/docs/en/api/beta/sessions/events/list#beta_managed_agents_session_requires_action.event_ids) `stop_reason.event_ids` field.
      */
     #[Required('custom_tool_use_id')]
     public string $customToolUseID;
-
-    /** @var value-of<Type> $type */
-    #[Required(enum: Type::class)]
-    public string $type;
 
     /**
      * The result content returned by the tool.
@@ -62,28 +63,31 @@ final class ManagedAgentsUserCustomToolResultEvent implements BaseModel
     public ?bool $isError;
 
     /**
-     * A timestamp in RFC 3339 format.
+     * Timestamp when this result was processed.
      */
     #[Optional('processed_at', nullable: true)]
     public ?\DateTimeInterface $processedAt;
+
+    /**
+     * Set by the server to the subagent thread this result was routed to. Omitted when it was routed to the primary thread.
+     */
+    #[Optional('session_thread_id', nullable: true)]
+    public ?string $sessionThreadID;
 
     /**
      * `new ManagedAgentsUserCustomToolResultEvent()` is missing required properties by the API.
      *
      * To enforce required parameters use
      * ```
-     * ManagedAgentsUserCustomToolResultEvent::with(
-     *   id: ..., customToolUseID: ..., type: ...
-     * )
+     * ManagedAgentsUserCustomToolResultEvent::with(id: ..., customToolUseID: ...)
      * ```
      *
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ManagedAgentsUserCustomToolResultEvent)
+     * (new ManagedAgentsUserCustomToolResultEvent())
      *   ->withID(...)
      *   ->withCustomToolUseID(...)
-     *   ->withType(...)
      * ```
      */
     public function __construct()
@@ -96,26 +100,25 @@ final class ManagedAgentsUserCustomToolResultEvent implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
-     * @param Type|value-of<Type> $type
      * @param list<ContentShape>|null $content
      */
     public static function with(
         string $id,
         string $customToolUseID,
-        Type|string $type,
         ?array $content = null,
         ?bool $isError = null,
         ?\DateTimeInterface $processedAt = null,
+        ?string $sessionThreadID = null,
     ): self {
         $self = new self;
 
         $self['id'] = $id;
         $self['customToolUseID'] = $customToolUseID;
-        $self['type'] = $type;
 
         null !== $content && $self['content'] = $content;
         null !== $isError && $self['isError'] = $isError;
         null !== $processedAt && $self['processedAt'] = $processedAt;
+        null !== $sessionThreadID && $self['sessionThreadID'] = $sessionThreadID;
 
         return $self;
     }
@@ -132,7 +135,7 @@ final class ManagedAgentsUserCustomToolResultEvent implements BaseModel
     }
 
     /**
-     * The id of the `agent.custom_tool_use` event this result corresponds to, which can be found in the last `session.status_idle` [event's](https://platform.claude.com/docs/en/api/beta/sessions/events/list#beta_managed_agents_session_requires_action.event_ids) `stop_reason.event_ids` field.
+     * The id of the `agent.custom_tool_use` event this result corresponds to. It is also listed in the last `session.status_idle` [event's](https://platform.claude.com/docs/en/api/beta/sessions/events/list#beta_managed_agents_session_requires_action.event_ids) `stop_reason.event_ids` field.
      */
     public function withCustomToolUseID(string $customToolUseID): self
     {
@@ -143,9 +146,9 @@ final class ManagedAgentsUserCustomToolResultEvent implements BaseModel
     }
 
     /**
-     * @param Type|value-of<Type> $type
+     * @param 'user.custom_tool_result' $type
      */
-    public function withType(Type|string $type): self
+    public function withType(string $type): self
     {
         $self = clone $this;
         $self['type'] = $type;
@@ -178,12 +181,23 @@ final class ManagedAgentsUserCustomToolResultEvent implements BaseModel
     }
 
     /**
-     * A timestamp in RFC 3339 format.
+     * Timestamp when this result was processed.
      */
     public function withProcessedAt(?\DateTimeInterface $processedAt): self
     {
         $self = clone $this;
         $self['processedAt'] = $processedAt;
+
+        return $self;
+    }
+
+    /**
+     * Set by the server to the subagent thread this result was routed to. Omitted when it was routed to the primary thread.
+     */
+    public function withSessionThreadID(?string $sessionThreadID): self
+    {
+        $self = clone $this;
+        $self['sessionThreadID'] = $sessionThreadID;
 
         return $self;
     }

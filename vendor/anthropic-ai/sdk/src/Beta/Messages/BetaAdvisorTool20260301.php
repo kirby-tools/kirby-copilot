@@ -9,6 +9,7 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\Model;
 
 /**
@@ -22,6 +23,7 @@ use Anthropic\Messages\Model;
  *   cacheControl?: null|BetaCacheControlEphemeral|BetaCacheControlEphemeralShape,
  *   caching?: null|BetaCacheControlEphemeral|BetaCacheControlEphemeralShape,
  *   deferLoading?: bool|null,
+ *   maxTokens?: int|null,
  *   maxUses?: int|null,
  *   strict?: bool|null,
  * }
@@ -38,15 +40,17 @@ final class BetaAdvisorTool20260301 implements BaseModel
      *
      * @var 'advisor' $name
      */
-    #[Required]
+    #[Required(type: new ConstantOf('advisor'))]
     public string $name = 'advisor';
 
     /** @var 'advisor_20260301' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('advisor_20260301'))]
     public string $type = 'advisor_20260301';
 
     /**
-     * The model that will complete your prompt.\n\nSee [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
+     * The model that will complete your prompt.
+     *
+     * See [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
      *
      * @var string|value-of<Model> $model
      */
@@ -76,13 +80,19 @@ final class BetaAdvisorTool20260301 implements BaseModel
     public ?bool $deferLoading;
 
     /**
+     * Bounds the advisor's total output (thinking + text) per call. When the advisor hits this cap, the returned advisor_result or advisor_redacted_result block carries stop_reason='max_tokens', and a truncation note is appended to the advice text the worker model sees (inside the encrypted blob in redacted mode). When set, the API also passes the advisor its remaining-token budget, so the advisor shapes its output toward the cap. When omitted, the advisor model's default output cap applies and the API doesn't pass a budget.
+     */
+    #[Optional('max_tokens', nullable: true)]
+    public ?int $maxTokens;
+
+    /**
      * Maximum number of times the tool can be used in the API request.
      */
     #[Optional('max_uses', nullable: true)]
     public ?int $maxUses;
 
     /**
-     * When true, guarantees schema validation on tool names and inputs.
+     * When true, guarantees schema validation on tool names and inputs
      */
     #[Optional]
     public ?bool $strict;
@@ -98,7 +108,7 @@ final class BetaAdvisorTool20260301 implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaAdvisorTool20260301)->withModel(...)
+     * (new BetaAdvisorTool20260301())->withModel(...)
      * ```
      */
     public function __construct()
@@ -122,6 +132,7 @@ final class BetaAdvisorTool20260301 implements BaseModel
         BetaCacheControlEphemeral|array|null $cacheControl = null,
         BetaCacheControlEphemeral|array|null $caching = null,
         ?bool $deferLoading = null,
+        ?int $maxTokens = null,
         ?int $maxUses = null,
         ?bool $strict = null,
     ): self {
@@ -133,6 +144,7 @@ final class BetaAdvisorTool20260301 implements BaseModel
         null !== $cacheControl && $self['cacheControl'] = $cacheControl;
         null !== $caching && $self['caching'] = $caching;
         null !== $deferLoading && $self['deferLoading'] = $deferLoading;
+        null !== $maxTokens && $self['maxTokens'] = $maxTokens;
         null !== $maxUses && $self['maxUses'] = $maxUses;
         null !== $strict && $self['strict'] = $strict;
 
@@ -140,7 +152,9 @@ final class BetaAdvisorTool20260301 implements BaseModel
     }
 
     /**
-     * The model that will complete your prompt.\n\nSee [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
+     * The model that will complete your prompt.
+     *
+     * See [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
      *
      * @param string|Model|value-of<Model> $model
      */
@@ -229,6 +243,17 @@ final class BetaAdvisorTool20260301 implements BaseModel
     }
 
     /**
+     * Bounds the advisor's total output (thinking + text) per call. When the advisor hits this cap, the returned advisor_result or advisor_redacted_result block carries stop_reason='max_tokens', and a truncation note is appended to the advice text the worker model sees (inside the encrypted blob in redacted mode). When set, the API also passes the advisor its remaining-token budget, so the advisor shapes its output toward the cap. When omitted, the advisor model's default output cap applies and the API doesn't pass a budget.
+     */
+    public function withMaxTokens(?int $maxTokens): self
+    {
+        $self = clone $this;
+        $self['maxTokens'] = $maxTokens;
+
+        return $self;
+    }
+
+    /**
      * Maximum number of times the tool can be used in the API request.
      */
     public function withMaxUses(?int $maxUses): self
@@ -240,7 +265,7 @@ final class BetaAdvisorTool20260301 implements BaseModel
     }
 
     /**
-     * When true, guarantees schema validation on tool names and inputs.
+     * When true, guarantees schema validation on tool names and inputs
      */
     public function withStrict(bool $strict): self
     {

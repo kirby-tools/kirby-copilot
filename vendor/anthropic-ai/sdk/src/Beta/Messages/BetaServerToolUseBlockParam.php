@@ -10,11 +10,12 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
- * @phpstan-import-type CallerVariants from \Anthropic\Beta\Messages\BetaServerToolUseBlockParam\Caller
  * @phpstan-import-type BetaCacheControlEphemeralShape from \Anthropic\Beta\Messages\BetaCacheControlEphemeral
  * @phpstan-import-type CallerShape from \Anthropic\Beta\Messages\BetaServerToolUseBlockParam\Caller
+ * @phpstan-import-type CallerVariants from \Anthropic\Beta\Messages\BetaServerToolUseBlockParam\Caller
  *
  * @phpstan-type BetaServerToolUseBlockParamShape = array{
  *   id: string,
@@ -31,7 +32,7 @@ final class BetaServerToolUseBlockParam implements BaseModel
     use SdkModel;
 
     /** @var 'server_tool_use' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('server_tool_use'))]
     public string $type = 'server_tool_use';
 
     #[Required]
@@ -51,11 +52,7 @@ final class BetaServerToolUseBlockParam implements BaseModel
     #[Optional('cache_control', nullable: true)]
     public ?BetaCacheControlEphemeral $cacheControl;
 
-    /**
-     * Tool invocation directly from the model.
-     *
-     * @var CallerVariants|null $caller
-     */
+    /** @var CallerVariants|null $caller */
     #[Optional(union: Caller::class)]
     public BetaDirectCaller|BetaServerToolCaller|BetaServerToolCaller20260120|null $caller;
 
@@ -70,7 +67,7 @@ final class BetaServerToolUseBlockParam implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaServerToolUseBlockParam)->withID(...)->withInput(...)->withName(...)
+     * (new BetaServerToolUseBlockParam())->withID(...)->withInput(...)->withName(...)
      * ```
      */
     public function __construct()
@@ -163,8 +160,6 @@ final class BetaServerToolUseBlockParam implements BaseModel
     }
 
     /**
-     * Tool invocation directly from the model.
-     *
      * @param CallerShape $caller
      */
     public function withCaller(

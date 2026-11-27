@@ -20,16 +20,14 @@ use Anthropic\Messages\Model;
  *
  * The Token Count API can be used to count the number of tokens in a Message, including tools, images, and documents, without creating it.
  *
- * Learn more about token counting in our [user guide](https://docs.claude.com/en/docs/build-with-claude/token-counting)
+ * Learn more about token counting in our [user guide](https://platform.claude.com/docs/en/build-with-claude/token-counting)
  *
  * @see Anthropic\Services\Beta\MessagesService::countTokens()
  *
- * @phpstan-import-type SystemVariants from \Anthropic\Beta\Messages\MessageCountTokensParams\System
- * @phpstan-import-type BetaThinkingConfigParamVariants from \Anthropic\Beta\Messages\BetaThinkingConfigParam
- * @phpstan-import-type BetaToolChoiceVariants from \Anthropic\Beta\Messages\BetaToolChoice
- * @phpstan-import-type ToolVariants from \Anthropic\Beta\Messages\MessageCountTokensParams\Tool
  * @phpstan-import-type BetaMessageParamShape from \Anthropic\Beta\Messages\BetaMessageParam
+ * @phpstan-import-type BetaBillingPolicyShape from \Anthropic\Beta\Messages\BetaBillingPolicy
  * @phpstan-import-type BetaCacheControlEphemeralShape from \Anthropic\Beta\Messages\BetaCacheControlEphemeral
+ * @phpstan-import-type BetaCompactionConfigShape from \Anthropic\Beta\Messages\BetaCompactionConfig
  * @phpstan-import-type BetaContextManagementConfigShape from \Anthropic\Beta\Messages\BetaContextManagementConfig
  * @phpstan-import-type BetaRequestMCPServerURLDefinitionShape from \Anthropic\Beta\Messages\BetaRequestMCPServerURLDefinition
  * @phpstan-import-type BetaOutputConfigShape from \Anthropic\Beta\Messages\BetaOutputConfig
@@ -38,11 +36,18 @@ use Anthropic\Messages\Model;
  * @phpstan-import-type BetaThinkingConfigParamShape from \Anthropic\Beta\Messages\BetaThinkingConfigParam
  * @phpstan-import-type BetaToolChoiceShape from \Anthropic\Beta\Messages\BetaToolChoice
  * @phpstan-import-type ToolShape from \Anthropic\Beta\Messages\MessageCountTokensParams\Tool
+ * @phpstan-import-type BetaMessageParamVariants from \Anthropic\Beta\Messages\BetaMessageParam
+ * @phpstan-import-type SystemVariants from \Anthropic\Beta\Messages\MessageCountTokensParams\System
+ * @phpstan-import-type BetaThinkingConfigParamVariants from \Anthropic\Beta\Messages\BetaThinkingConfigParam
+ * @phpstan-import-type BetaToolChoiceVariants from \Anthropic\Beta\Messages\BetaToolChoice
+ * @phpstan-import-type ToolVariants from \Anthropic\Beta\Messages\MessageCountTokensParams\Tool
  *
  * @phpstan-type MessageCountTokensParamsShape = array{
- *   messages: list<BetaMessageParam|BetaMessageParamShape>,
+ *   messages: list<BetaMessageParamShape>,
  *   model: string|Model|value-of<Model>,
+ *   billingPolicy?: null|BetaBillingPolicy|BetaBillingPolicyShape,
  *   cacheControl?: null|BetaCacheControlEphemeral|BetaCacheControlEphemeralShape,
+ *   compaction?: null|BetaCompactionConfig|BetaCompactionConfigShape,
  *   contextManagement?: null|BetaContextManagementConfig|BetaContextManagementConfigShape,
  *   mcpServers?: list<BetaRequestMCPServerURLDefinition|BetaRequestMCPServerURLDefinitionShape>|null,
  *   outputConfig?: null|BetaOutputConfig|BetaOutputConfigShape,
@@ -53,6 +58,8 @@ use Anthropic\Messages\Model;
  *   toolChoice?: BetaToolChoiceShape|null,
  *   tools?: list<ToolShape>|null,
  *   betas?: list<string|AnthropicBeta|value-of<AnthropicBeta>>|null,
+ *   userProfileID?: string|null,
+ *   workspaceID?: string|null,
  * }
  */
 final class MessageCountTokensParams implements BaseModel
@@ -68,7 +75,7 @@ final class MessageCountTokensParams implements BaseModel
      *
      * Each input message must be an object with a `role` and `content`. You can specify a single `user`-role message, or you can include multiple `user` and `assistant` messages.
      *
-     * If the final message uses the `assistant` role, the response content will continue immediately from the content in that message. This can be used to constrain part of the model's response.
+     * If the final message uses the `assistant` role, the response content will continue immediately from the content in that message. This can be used to constrain part of the model's response. This is called prefill. On models that don't support prefill, creating a message that ends with a partial `assistant` response returns a 400 error. See [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
      *
      * Example with a single `user` message:
      *
@@ -86,7 +93,7 @@ final class MessageCountTokensParams implements BaseModel
      * ]
      * ```
      *
-     * Example with a partially-filled response from Claude:
+     * Example with a partially-filled response from Claude, for models that support prefill:
      *
      * ```json
      * [
@@ -105,19 +112,21 @@ final class MessageCountTokensParams implements BaseModel
      * {"role": "user", "content": [{"type": "text", "text": "Hello, Claude"}]}
      * ```
      *
-     * See [input examples](https://docs.claude.com/en/api/messages-examples).
+     * See [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).
      *
-     * Note that if you want to include a [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the top-level `system` parameter — there is no `"system"` role for input messages in the Messages API.
+     * Note that if you want to include a [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role), you can use the top-level `system` parameter.
      *
      * There is a limit of 100,000 messages in a single request.
      *
-     * @var list<BetaMessageParam> $messages
+     * @var list<BetaMessageParamVariants> $messages
      */
     #[Required(list: BetaMessageParam::class)]
     public array $messages;
 
     /**
-     * The model that will complete your prompt.\n\nSee [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
+     * The model that will complete your prompt.
+     *
+     * See [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
      *
      * @var string|value-of<Model> $model
      */
@@ -125,10 +134,24 @@ final class MessageCountTokensParams implements BaseModel
     public string $model;
 
     /**
+     * Declares which organization is billed when this body is sent to `/v1/messages`. Accepted here so that you can count the tokens of the exact body you will send, and otherwise ignored: counting tokens bills nobody, so no user profile is required.
+     */
+    #[Optional('billing_policy', nullable: true)]
+    public ?BetaBillingPolicy $billingPolicy;
+
+    /**
      * Top-level cache control automatically applies a cache_control marker to the last cacheable block in the request.
      */
     #[Optional('cache_control', nullable: true)]
     public ?BetaCacheControlEphemeral $cacheControl;
+
+    /**
+     * Compaction configuration.
+     *
+     * When set on `POST /v1/messages`, the request is a compaction request: the conversation in `messages` is summarized and the response holds only the resulting `compaction` block (`stop_reason` `"compaction"`), which later requests send first in `messages` in place of the messages it summarizes. `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the count it returns is for the conversation in `messages` as sent. Cannot be combined with `context_management`.
+     */
+    #[Optional(nullable: true)]
+    public ?BetaCompactionConfig $compaction;
 
     /**
      * Context management configuration.
@@ -139,7 +162,7 @@ final class MessageCountTokensParams implements BaseModel
     public ?BetaContextManagementConfig $contextManagement;
 
     /**
-     * MCP servers to be utilized in this request.
+     * MCP servers to be utilized in this request
      *
      * @var list<BetaRequestMCPServerURLDefinition>|null $mcpServers
      */
@@ -165,6 +188,8 @@ final class MessageCountTokensParams implements BaseModel
     /**
      * The inference speed mode for this request. `"fast"` enables high output-tokens-per-second inference.
      *
+     * Some models require the `fast-mode-2026-02-01` beta header for any `speed` value. See [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for which models.
+     *
      * @var value-of<Speed>|null $speed
      */
     #[Optional(enum: Speed::class, nullable: true)]
@@ -173,7 +198,7 @@ final class MessageCountTokensParams implements BaseModel
     /**
      * System prompt.
      *
-     * A system prompt is a way of providing context and instructions to Claude, such as specifying a particular goal or role. See our [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
+     * A system prompt is a way of providing context and instructions to Claude, such as specifying a particular goal or role. See our [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
      *
      * @var SystemVariants|null $system
      */
@@ -181,16 +206,16 @@ final class MessageCountTokensParams implements BaseModel
     public string|array|null $system;
 
     /**
-     * Configuration for enabling Claude's extended thinking.
+     * Configuration for Claude's thinking.
      *
-     * When enabled, responses include `thinking` content blocks showing Claude's thinking process before the final answer. Requires a minimum budget of 1,024 tokens and counts towards your `max_tokens` limit.
+     * With `{"type": "adaptive"}`, Claude decides when and how much to think. With `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of at least 1,024. Thinking tokens count toward your `max_tokens` limit.
      *
-     * See [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking) for details.
+     * Which `type` values are accepted, and what happens when you omit `thinking`, depend on the model. See [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking) for each model's behavior.
      *
      * @var BetaThinkingConfigParamVariants|null $thinking
      */
     #[Optional(union: BetaThinkingConfigParam::class)]
-    public BetaThinkingConfigEnabled|BetaThinkingConfigDisabled|BetaThinkingConfigAdaptive|null $thinking;
+    public BetaThinkingConfigEnabled|BetaThinkingConfigDisabled|BetaThinkingConfigBetweenTools|BetaThinkingConfigAdaptive|null $thinking;
 
     /**
      * How the model should use the provided tools. The model can use a specific tool, any available tool, decide by itself, or not use tools at all.
@@ -205,7 +230,7 @@ final class MessageCountTokensParams implements BaseModel
      *
      * If you include `tools` in your API request, the model may return `tool_use` content blocks that represent the model's use of those tools. You can then run those tools using the tool input generated by the model and then optionally return results back to the model using `tool_result` content blocks.
      *
-     * There are two types of tools: **client tools** and **server tools**. The behavior described below applies to client tools. For [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview\#server-tools), see their individual documentation as each has its own behavior (e.g., the [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+     * There are two types of tools: **client tools** and **server tools**. The behavior described below applies to client tools. For [server tools](https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools), see their individual documentation as each has its own behavior (e.g., the [web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool)).
      *
      * Each tool definition includes:
      *
@@ -261,7 +286,7 @@ final class MessageCountTokensParams implements BaseModel
      *
      * Tools can be used for workflows that include running client-side tools and functions, or more generally whenever you want the model to produce a particular JSON structure of output.
      *
-     * See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
+     * See our [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview) for more details.
      *
      * @var list<ToolVariants>|null $tools
      */
@@ -277,6 +302,20 @@ final class MessageCountTokensParams implements BaseModel
     public ?array $betas;
 
     /**
+     * The user profile ID to attribute this request to. Use when acting on behalf of a party other than your organization.
+     */
+    #[Optional]
+    public ?string $userProfileID;
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    #[Optional]
+    public ?string $workspaceID;
+
+    /**
      * `new MessageCountTokensParams()` is missing required properties by the API.
      *
      * To enforce required parameters use
@@ -287,7 +326,7 @@ final class MessageCountTokensParams implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new MessageCountTokensParams)->withMessages(...)->withModel(...)
+     * (new MessageCountTokensParams())->withMessages(...)->withModel(...)
      * ```
      */
     public function __construct()
@@ -300,9 +339,11 @@ final class MessageCountTokensParams implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
-     * @param list<BetaMessageParam|BetaMessageParamShape> $messages
+     * @param list<BetaMessageParamShape> $messages
      * @param string|Model|value-of<Model> $model
+     * @param BetaBillingPolicy|BetaBillingPolicyShape|null $billingPolicy
      * @param BetaCacheControlEphemeral|BetaCacheControlEphemeralShape|null $cacheControl
+     * @param BetaCompactionConfig|BetaCompactionConfigShape|null $compaction
      * @param BetaContextManagementConfig|BetaContextManagementConfigShape|null $contextManagement
      * @param list<BetaRequestMCPServerURLDefinition|BetaRequestMCPServerURLDefinitionShape>|null $mcpServers
      * @param BetaOutputConfig|BetaOutputConfigShape|null $outputConfig
@@ -317,24 +358,30 @@ final class MessageCountTokensParams implements BaseModel
     public static function with(
         array $messages,
         Model|string $model,
+        BetaBillingPolicy|array|null $billingPolicy = null,
         BetaCacheControlEphemeral|array|null $cacheControl = null,
+        BetaCompactionConfig|array|null $compaction = null,
         BetaContextManagementConfig|array|null $contextManagement = null,
         ?array $mcpServers = null,
         BetaOutputConfig|array|null $outputConfig = null,
         BetaJSONOutputFormat|array|null $outputFormat = null,
         Speed|string|null $speed = null,
         string|array|null $system = null,
-        BetaThinkingConfigEnabled|array|BetaThinkingConfigDisabled|BetaThinkingConfigAdaptive|null $thinking = null,
+        BetaThinkingConfigEnabled|array|BetaThinkingConfigDisabled|BetaThinkingConfigBetweenTools|BetaThinkingConfigAdaptive|null $thinking = null,
         BetaToolChoiceAuto|array|BetaToolChoiceAny|BetaToolChoiceTool|BetaToolChoiceNone|null $toolChoice = null,
         ?array $tools = null,
         ?array $betas = null,
+        ?string $userProfileID = null,
+        ?string $workspaceID = null,
     ): self {
         $self = new self;
 
         $self['messages'] = $messages;
         $self['model'] = $model;
 
+        null !== $billingPolicy && $self['billingPolicy'] = $billingPolicy;
         null !== $cacheControl && $self['cacheControl'] = $cacheControl;
+        null !== $compaction && $self['compaction'] = $compaction;
         null !== $contextManagement && $self['contextManagement'] = $contextManagement;
         null !== $mcpServers && $self['mcpServers'] = $mcpServers;
         null !== $outputConfig && $self['outputConfig'] = $outputConfig;
@@ -345,6 +392,8 @@ final class MessageCountTokensParams implements BaseModel
         null !== $toolChoice && $self['toolChoice'] = $toolChoice;
         null !== $tools && $self['tools'] = $tools;
         null !== $betas && $self['betas'] = $betas;
+        null !== $userProfileID && $self['userProfileID'] = $userProfileID;
+        null !== $workspaceID && $self['workspaceID'] = $workspaceID;
 
         return $self;
     }
@@ -356,7 +405,7 @@ final class MessageCountTokensParams implements BaseModel
      *
      * Each input message must be an object with a `role` and `content`. You can specify a single `user`-role message, or you can include multiple `user` and `assistant` messages.
      *
-     * If the final message uses the `assistant` role, the response content will continue immediately from the content in that message. This can be used to constrain part of the model's response.
+     * If the final message uses the `assistant` role, the response content will continue immediately from the content in that message. This can be used to constrain part of the model's response. This is called prefill. On models that don't support prefill, creating a message that ends with a partial `assistant` response returns a 400 error. See [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
      *
      * Example with a single `user` message:
      *
@@ -374,7 +423,7 @@ final class MessageCountTokensParams implements BaseModel
      * ]
      * ```
      *
-     * Example with a partially-filled response from Claude:
+     * Example with a partially-filled response from Claude, for models that support prefill:
      *
      * ```json
      * [
@@ -393,13 +442,13 @@ final class MessageCountTokensParams implements BaseModel
      * {"role": "user", "content": [{"type": "text", "text": "Hello, Claude"}]}
      * ```
      *
-     * See [input examples](https://docs.claude.com/en/api/messages-examples).
+     * See [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).
      *
-     * Note that if you want to include a [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the top-level `system` parameter — there is no `"system"` role for input messages in the Messages API.
+     * Note that if you want to include a [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role), you can use the top-level `system` parameter.
      *
      * There is a limit of 100,000 messages in a single request.
      *
-     * @param list<BetaMessageParam|BetaMessageParamShape> $messages
+     * @param list<BetaMessageParamShape> $messages
      */
     public function withMessages(array $messages): self
     {
@@ -410,7 +459,9 @@ final class MessageCountTokensParams implements BaseModel
     }
 
     /**
-     * The model that will complete your prompt.\n\nSee [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
+     * The model that will complete your prompt.
+     *
+     * See [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
      *
      * @param string|Model|value-of<Model> $model
      */
@@ -418,6 +469,20 @@ final class MessageCountTokensParams implements BaseModel
     {
         $self = clone $this;
         $self['model'] = $model;
+
+        return $self;
+    }
+
+    /**
+     * Declares which organization is billed when this body is sent to `/v1/messages`. Accepted here so that you can count the tokens of the exact body you will send, and otherwise ignored: counting tokens bills nobody, so no user profile is required.
+     *
+     * @param BetaBillingPolicy|BetaBillingPolicyShape|null $billingPolicy
+     */
+    public function withBillingPolicy(
+        BetaBillingPolicy|array|null $billingPolicy
+    ): self {
+        $self = clone $this;
+        $self['billingPolicy'] = $billingPolicy;
 
         return $self;
     }
@@ -432,6 +497,22 @@ final class MessageCountTokensParams implements BaseModel
     ): self {
         $self = clone $this;
         $self['cacheControl'] = $cacheControl;
+
+        return $self;
+    }
+
+    /**
+     * Compaction configuration.
+     *
+     * When set on `POST /v1/messages`, the request is a compaction request: the conversation in `messages` is summarized and the response holds only the resulting `compaction` block (`stop_reason` `"compaction"`), which later requests send first in `messages` in place of the messages it summarizes. `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the count it returns is for the conversation in `messages` as sent. Cannot be combined with `context_management`.
+     *
+     * @param BetaCompactionConfig|BetaCompactionConfigShape|null $compaction
+     */
+    public function withCompaction(
+        BetaCompactionConfig|array|null $compaction
+    ): self {
+        $self = clone $this;
+        $self['compaction'] = $compaction;
 
         return $self;
     }
@@ -453,7 +534,7 @@ final class MessageCountTokensParams implements BaseModel
     }
 
     /**
-     * MCP servers to be utilized in this request.
+     * MCP servers to be utilized in this request
      *
      * @param list<BetaRequestMCPServerURLDefinition|BetaRequestMCPServerURLDefinitionShape> $mcpServers
      */
@@ -479,7 +560,7 @@ final class MessageCountTokensParams implements BaseModel
     }
 
     /**
-     * Deprecated: Use `output_config.format` instead. See [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs).
+     * Deprecated: Use `output_config.format` instead. See [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
      *
      * A schema to specify Claude's output format in responses. This parameter will be removed in a future release.
      *
@@ -497,6 +578,8 @@ final class MessageCountTokensParams implements BaseModel
     /**
      * The inference speed mode for this request. `"fast"` enables high output-tokens-per-second inference.
      *
+     * Some models require the `fast-mode-2026-02-01` beta header for any `speed` value. See [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for which models.
+     *
      * @param Speed|value-of<Speed>|null $speed
      */
     public function withSpeed(Speed|string|null $speed): self
@@ -510,7 +593,7 @@ final class MessageCountTokensParams implements BaseModel
     /**
      * System prompt.
      *
-     * A system prompt is a way of providing context and instructions to Claude, such as specifying a particular goal or role. See our [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
+     * A system prompt is a way of providing context and instructions to Claude, such as specifying a particular goal or role. See our [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
      *
      * @param SystemShape $system
      */
@@ -523,16 +606,16 @@ final class MessageCountTokensParams implements BaseModel
     }
 
     /**
-     * Configuration for enabling Claude's extended thinking.
+     * Configuration for Claude's thinking.
      *
-     * When enabled, responses include `thinking` content blocks showing Claude's thinking process before the final answer. Requires a minimum budget of 1,024 tokens and counts towards your `max_tokens` limit.
+     * With `{"type": "adaptive"}`, Claude decides when and how much to think. With `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of at least 1,024. Thinking tokens count toward your `max_tokens` limit.
      *
-     * See [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking) for details.
+     * Which `type` values are accepted, and what happens when you omit `thinking`, depend on the model. See [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking) for each model's behavior.
      *
      * @param BetaThinkingConfigParamShape $thinking
      */
     public function withThinking(
-        BetaThinkingConfigEnabled|array|BetaThinkingConfigDisabled|BetaThinkingConfigAdaptive $thinking,
+        BetaThinkingConfigEnabled|array|BetaThinkingConfigDisabled|BetaThinkingConfigBetweenTools|BetaThinkingConfigAdaptive $thinking,
     ): self {
         $self = clone $this;
         $self['thinking'] = $thinking;
@@ -559,7 +642,7 @@ final class MessageCountTokensParams implements BaseModel
      *
      * If you include `tools` in your API request, the model may return `tool_use` content blocks that represent the model's use of those tools. You can then run those tools using the tool input generated by the model and then optionally return results back to the model using `tool_result` content blocks.
      *
-     * There are two types of tools: **client tools** and **server tools**. The behavior described below applies to client tools. For [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview\#server-tools), see their individual documentation as each has its own behavior (e.g., the [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+     * There are two types of tools: **client tools** and **server tools**. The behavior described below applies to client tools. For [server tools](https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools), see their individual documentation as each has its own behavior (e.g., the [web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool)).
      *
      * Each tool definition includes:
      *
@@ -615,7 +698,7 @@ final class MessageCountTokensParams implements BaseModel
      *
      * Tools can be used for workflows that include running client-side tools and functions, or more generally whenever you want the model to produce a particular JSON structure of output.
      *
-     * See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
+     * See our [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview) for more details.
      *
      * @param list<ToolShape> $tools
      */
@@ -636,6 +719,30 @@ final class MessageCountTokensParams implements BaseModel
     {
         $self = clone $this;
         $self['betas'] = $betas;
+
+        return $self;
+    }
+
+    /**
+     * The user profile ID to attribute this request to. Use when acting on behalf of a party other than your organization.
+     */
+    public function withUserProfileID(string $userProfileID): self
+    {
+        $self = clone $this;
+        $self['userProfileID'] = $userProfileID;
+
+        return $self;
+    }
+
+    /**
+     * Optional header to select the Workspace for this request. The value is a Workspace ID (for example, `wrkspc_011CZkZaBF1tNoB5wlCeusgy`).
+     *
+     * Only needed for credentials that can act on more than one Workspace. A credential that belongs to a specific Workspace may omit it; if sent, it must match that Workspace.
+     */
+    public function withWorkspaceID(string $workspaceID): self
+    {
+        $self = clone $this;
+        $self['workspaceID'] = $workspaceID;
 
         return $self;
     }

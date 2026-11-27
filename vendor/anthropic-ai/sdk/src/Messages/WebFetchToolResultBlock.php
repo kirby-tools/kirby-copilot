@@ -7,13 +7,14 @@ namespace Anthropic\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\WebFetchToolResultBlock\Caller;
 
 /**
- * @phpstan-import-type CallerVariants from \Anthropic\Messages\WebFetchToolResultBlock\Caller
- * @phpstan-import-type ContentVariants from \Anthropic\Messages\WebFetchToolResultBlock\Content
  * @phpstan-import-type CallerShape from \Anthropic\Messages\WebFetchToolResultBlock\Caller
  * @phpstan-import-type ContentShape from \Anthropic\Messages\WebFetchToolResultBlock\Content
+ * @phpstan-import-type CallerVariants from \Anthropic\Messages\WebFetchToolResultBlock\Caller
+ * @phpstan-import-type ContentVariants from \Anthropic\Messages\WebFetchToolResultBlock\Content
  *
  * @phpstan-type WebFetchToolResultBlockShape = array{
  *   caller: CallerShape,
@@ -28,14 +29,10 @@ final class WebFetchToolResultBlock implements BaseModel
     use SdkModel;
 
     /** @var 'web_fetch_tool_result' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('web_fetch_tool_result'))]
     public string $type = 'web_fetch_tool_result';
 
-    /**
-     * Tool invocation directly from the model.
-     *
-     * @var CallerVariants $caller
-     */
+    /** @var CallerVariants $caller */
     #[Required(union: Caller::class)]
     public DirectCaller|ServerToolCaller|ServerToolCaller20260120 $caller;
 
@@ -57,7 +54,7 @@ final class WebFetchToolResultBlock implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new WebFetchToolResultBlock)
+     * (new WebFetchToolResultBlock())
      *   ->withCaller(...)
      *   ->withContent(...)
      *   ->withToolUseID(...)
@@ -93,8 +90,6 @@ final class WebFetchToolResultBlock implements BaseModel
     }
 
     /**
-     * Tool invocation directly from the model.
-     *
      * @param CallerShape $caller
      */
     public function withCaller(

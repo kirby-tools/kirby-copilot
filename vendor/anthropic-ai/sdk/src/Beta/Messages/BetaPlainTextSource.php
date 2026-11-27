@@ -7,6 +7,7 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type BetaPlainTextSourceShape = array{
@@ -19,11 +20,11 @@ final class BetaPlainTextSource implements BaseModel
     use SdkModel;
 
     /** @var 'text/plain' $mediaType */
-    #[Required('media_type')]
+    #[Required('media_type', type: new ConstantOf('text/plain'))]
     public string $mediaType = 'text/plain';
 
     /** @var 'text' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('text'))]
     public string $type = 'text';
 
     #[Required]
@@ -40,7 +41,7 @@ final class BetaPlainTextSource implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaPlainTextSource)->withData(...)
+     * (new BetaPlainTextSource())->withData(...)
      * ```
      */
     public function __construct()

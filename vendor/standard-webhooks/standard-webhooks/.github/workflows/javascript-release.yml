@@ -1,0 +1,33 @@
+name: JavaScript Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  id-token: write
+
+jobs:
+  build:
+    name: JavaScript Release
+    runs-on: ubuntu-latest
+    environment: Release
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install modules
+        run: |
+          npm ci
+        working-directory: libraries/javascript
+
+      - name: Publish
+        run: |
+          npm publish --provenance
+        working-directory: libraries/javascript

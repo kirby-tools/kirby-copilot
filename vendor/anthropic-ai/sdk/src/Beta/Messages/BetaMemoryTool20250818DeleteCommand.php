@@ -7,6 +7,7 @@ namespace Anthropic\Beta\Messages;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 
 /**
  * @phpstan-type BetaMemoryTool20250818DeleteCommandShape = array{
@@ -19,15 +20,15 @@ final class BetaMemoryTool20250818DeleteCommand implements BaseModel
     use SdkModel;
 
     /**
-     * Command type identifier.
+     * Command type identifier
      *
      * @var 'delete' $command
      */
-    #[Required]
+    #[Required(type: new ConstantOf('delete'))]
     public string $command = 'delete';
 
     /**
-     * Path to the file or directory to delete.
+     * Path to the file or directory to delete
      */
     #[Required]
     public string $path;
@@ -43,7 +44,7 @@ final class BetaMemoryTool20250818DeleteCommand implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaMemoryTool20250818DeleteCommand)->withPath(...)
+     * (new BetaMemoryTool20250818DeleteCommand())->withPath(...)
      * ```
      */
     public function __construct()
@@ -66,7 +67,7 @@ final class BetaMemoryTool20250818DeleteCommand implements BaseModel
     }
 
     /**
-     * Command type identifier.
+     * Command type identifier
      *
      * @param 'delete' $command
      */
@@ -79,7 +80,7 @@ final class BetaMemoryTool20250818DeleteCommand implements BaseModel
     }
 
     /**
-     * Path to the file or directory to delete.
+     * Path to the file or directory to delete
      */
     public function withPath(string $path): self
     {

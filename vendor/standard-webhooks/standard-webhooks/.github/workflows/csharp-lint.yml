@@ -1,0 +1,30 @@
+name: C# Lint
+
+on:
+  pull_request:
+    paths:
+      - "libraries/csharp/**"
+      - ".github/workflows/csharp-lint.yml"
+
+jobs:
+  dotnet:
+    name: C# Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install dependencies
+        run: |
+          dotnet restore
+        working-directory: libraries/csharp
+
+      - name: Build
+        run: |
+          dotnet build --configuration Release StandardWebhooks --no-restore
+        working-directory: libraries/csharp

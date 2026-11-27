@@ -7,18 +7,27 @@ namespace Anthropic\Beta\Messages\Batches\BatchCreateParams\Request;
 use Anthropic\Beta\Messages\Batches\BatchCreateParams\Request\Params\ServiceTier;
 use Anthropic\Beta\Messages\Batches\BatchCreateParams\Request\Params\Speed;
 use Anthropic\Beta\Messages\Batches\BatchCreateParams\Request\Params\System;
+use Anthropic\Beta\Messages\BetaBillingPolicy;
 use Anthropic\Beta\Messages\BetaCacheControlEphemeral;
+use Anthropic\Beta\Messages\BetaCompactionConfig;
 use Anthropic\Beta\Messages\BetaContainerParams;
 use Anthropic\Beta\Messages\BetaContextManagementConfig;
+use Anthropic\Beta\Messages\BetaDiagnosticsParam;
+use Anthropic\Beta\Messages\BetaFallbackCreditTokenParam;
+use Anthropic\Beta\Messages\BetaFallbacksParam;
 use Anthropic\Beta\Messages\BetaJSONOutputFormat;
 use Anthropic\Beta\Messages\BetaMessageParam;
+use Anthropic\Beta\Messages\BetaMessageThreadParam;
 use Anthropic\Beta\Messages\BetaMetadata;
 use Anthropic\Beta\Messages\BetaOutputConfig;
 use Anthropic\Beta\Messages\BetaRequestMCPServerURLDefinition;
 use Anthropic\Beta\Messages\BetaThinkingConfigAdaptive;
+use Anthropic\Beta\Messages\BetaThinkingConfigBetweenTools;
 use Anthropic\Beta\Messages\BetaThinkingConfigDisabled;
 use Anthropic\Beta\Messages\BetaThinkingConfigEnabled;
 use Anthropic\Beta\Messages\BetaThinkingConfigParam;
+use Anthropic\Beta\Messages\BetaThreadContinueParams;
+use Anthropic\Beta\Messages\BetaThreadCreateParams;
 use Anthropic\Beta\Messages\BetaToolChoice;
 use Anthropic\Beta\Messages\BetaToolChoiceAny;
 use Anthropic\Beta\Messages\BetaToolChoiceAuto;
@@ -34,33 +43,48 @@ use Anthropic\Messages\Model;
 /**
  * Messages API creation parameters for the individual request.
  *
- * See the [Messages API reference](https://docs.claude.com/en/api/messages) for full documentation on available parameters.
+ * See the [Messages API reference](https://platform.claude.com/docs/en/api/messages) for full documentation on available parameters.
  *
- * @phpstan-import-type ContainerVariants from \Anthropic\Beta\Messages\Batches\BatchCreateParams\Request\Params\Container
- * @phpstan-import-type SystemVariants from \Anthropic\Beta\Messages\Batches\BatchCreateParams\Request\Params\System
- * @phpstan-import-type BetaThinkingConfigParamVariants from \Anthropic\Beta\Messages\BetaThinkingConfigParam
- * @phpstan-import-type BetaToolChoiceVariants from \Anthropic\Beta\Messages\BetaToolChoice
- * @phpstan-import-type BetaToolUnionVariants from \Anthropic\Beta\Messages\BetaToolUnion
  * @phpstan-import-type BetaMessageParamShape from \Anthropic\Beta\Messages\BetaMessageParam
+ * @phpstan-import-type BetaBillingPolicyShape from \Anthropic\Beta\Messages\BetaBillingPolicy
  * @phpstan-import-type BetaCacheControlEphemeralShape from \Anthropic\Beta\Messages\BetaCacheControlEphemeral
+ * @phpstan-import-type BetaCompactionConfigShape from \Anthropic\Beta\Messages\BetaCompactionConfig
  * @phpstan-import-type ContainerShape from \Anthropic\Beta\Messages\Batches\BatchCreateParams\Request\Params\Container
  * @phpstan-import-type BetaContextManagementConfigShape from \Anthropic\Beta\Messages\BetaContextManagementConfig
+ * @phpstan-import-type BetaDiagnosticsParamShape from \Anthropic\Beta\Messages\BetaDiagnosticsParam
+ * @phpstan-import-type FallbackCreditTokenShape from \Anthropic\Beta\Messages\Batches\BatchCreateParams\Request\Params\FallbackCreditToken
+ * @phpstan-import-type BetaFallbacksParamShape from \Anthropic\Beta\Messages\BetaFallbacksParam
  * @phpstan-import-type BetaRequestMCPServerURLDefinitionShape from \Anthropic\Beta\Messages\BetaRequestMCPServerURLDefinition
  * @phpstan-import-type BetaMetadataShape from \Anthropic\Beta\Messages\BetaMetadata
  * @phpstan-import-type BetaOutputConfigShape from \Anthropic\Beta\Messages\BetaOutputConfig
  * @phpstan-import-type BetaJSONOutputFormatShape from \Anthropic\Beta\Messages\BetaJSONOutputFormat
  * @phpstan-import-type SystemShape from \Anthropic\Beta\Messages\Batches\BatchCreateParams\Request\Params\System
  * @phpstan-import-type BetaThinkingConfigParamShape from \Anthropic\Beta\Messages\BetaThinkingConfigParam
+ * @phpstan-import-type BetaMessageThreadParamShape from \Anthropic\Beta\Messages\BetaMessageThreadParam
  * @phpstan-import-type BetaToolChoiceShape from \Anthropic\Beta\Messages\BetaToolChoice
  * @phpstan-import-type BetaToolUnionShape from \Anthropic\Beta\Messages\BetaToolUnion
+ * @phpstan-import-type BetaMessageParamVariants from \Anthropic\Beta\Messages\BetaMessageParam
+ * @phpstan-import-type ContainerVariants from \Anthropic\Beta\Messages\Batches\BatchCreateParams\Request\Params\Container
+ * @phpstan-import-type FallbackCreditTokenVariants from \Anthropic\Beta\Messages\Batches\BatchCreateParams\Request\Params\FallbackCreditToken
+ * @phpstan-import-type BetaFallbacksParamVariants from \Anthropic\Beta\Messages\BetaFallbacksParam
+ * @phpstan-import-type SystemVariants from \Anthropic\Beta\Messages\Batches\BatchCreateParams\Request\Params\System
+ * @phpstan-import-type BetaThinkingConfigParamVariants from \Anthropic\Beta\Messages\BetaThinkingConfigParam
+ * @phpstan-import-type BetaMessageThreadParamVariants from \Anthropic\Beta\Messages\BetaMessageThreadParam
+ * @phpstan-import-type BetaToolChoiceVariants from \Anthropic\Beta\Messages\BetaToolChoice
+ * @phpstan-import-type BetaToolUnionVariants from \Anthropic\Beta\Messages\BetaToolUnion
  *
  * @phpstan-type ParamsShape = array{
  *   maxTokens: int,
- *   messages: list<BetaMessageParam|BetaMessageParamShape>,
+ *   messages: list<BetaMessageParamShape>,
  *   model: string|Model|value-of<Model>,
+ *   billingPolicy?: null|BetaBillingPolicy|BetaBillingPolicyShape,
  *   cacheControl?: null|BetaCacheControlEphemeral|BetaCacheControlEphemeralShape,
+ *   compaction?: null|BetaCompactionConfig|BetaCompactionConfigShape,
  *   container?: ContainerShape|null,
  *   contextManagement?: null|BetaContextManagementConfig|BetaContextManagementConfigShape,
+ *   diagnostics?: null|BetaDiagnosticsParam|BetaDiagnosticsParamShape,
+ *   fallbackCreditToken?: FallbackCreditTokenShape|null,
+ *   fallbacks?: BetaFallbacksParamShape|null,
  *   inferenceGeo?: string|null,
  *   mcpServers?: list<BetaRequestMCPServerURLDefinition|BetaRequestMCPServerURLDefinitionShape>|null,
  *   metadata?: null|BetaMetadata|BetaMetadataShape,
@@ -71,13 +95,10 @@ use Anthropic\Messages\Model;
  *   stopSequences?: list<string>|null,
  *   stream?: bool|null,
  *   system?: SystemShape|null,
- *   temperature?: float|null,
  *   thinking?: BetaThinkingConfigParamShape|null,
+ *   thread?: BetaMessageThreadParamShape|null,
  *   toolChoice?: BetaToolChoiceShape|null,
  *   tools?: list<BetaToolUnionShape>|null,
- *   topK?: int|null,
- *   topP?: float|null,
- *   userProfileID?: string|null,
  * }
  */
 final class Params implements BaseModel
@@ -90,7 +111,9 @@ final class Params implements BaseModel
      *
      * Note that our models may stop _before_ reaching this maximum. This parameter only specifies the absolute maximum number of tokens to generate.
      *
-     * Different models have different maximum values for this parameter.  See [models](https://docs.claude.com/en/docs/models-overview) for details.
+     * Set to `0` to populate the [prompt cache](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#pre-warming-the-cache) without generating a response.
+     *
+     * Different models have different maximum values for this parameter.  See [models](https://platform.claude.com/docs/en/about-claude/models/overview) for details.
      */
     #[Required('max_tokens')]
     public int $maxTokens;
@@ -102,7 +125,7 @@ final class Params implements BaseModel
      *
      * Each input message must be an object with a `role` and `content`. You can specify a single `user`-role message, or you can include multiple `user` and `assistant` messages.
      *
-     * If the final message uses the `assistant` role, the response content will continue immediately from the content in that message. This can be used to constrain part of the model's response.
+     * If the final message uses the `assistant` role, the response content will continue immediately from the content in that message. This can be used to constrain part of the model's response. This is called prefill. On models that don't support prefill, creating a message that ends with a partial `assistant` response returns a 400 error. See [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
      *
      * Example with a single `user` message:
      *
@@ -120,7 +143,7 @@ final class Params implements BaseModel
      * ]
      * ```
      *
-     * Example with a partially-filled response from Claude:
+     * Example with a partially-filled response from Claude, for models that support prefill:
      *
      * ```json
      * [
@@ -139,19 +162,21 @@ final class Params implements BaseModel
      * {"role": "user", "content": [{"type": "text", "text": "Hello, Claude"}]}
      * ```
      *
-     * See [input examples](https://docs.claude.com/en/api/messages-examples).
+     * See [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).
      *
-     * Note that if you want to include a [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the top-level `system` parameter — there is no `"system"` role for input messages in the Messages API.
+     * Note that if you want to include a [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role), you can use the top-level `system` parameter.
      *
      * There is a limit of 100,000 messages in a single request.
      *
-     * @var list<BetaMessageParam> $messages
+     * @var list<BetaMessageParamVariants> $messages
      */
     #[Required(list: BetaMessageParam::class)]
     public array $messages;
 
     /**
-     * The model that will complete your prompt.\n\nSee [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
+     * The model that will complete your prompt.
+     *
+     * See [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
      *
      * @var string|value-of<Model> $model
      */
@@ -159,10 +184,26 @@ final class Params implements BaseModel
     public string $model;
 
     /**
+     * Declares which organization is billed for this request. `{"type": "billing_policy", "bill_to": "user_profile"}` bills the customer behind the user profile named in the `anthropic-user-profile-id` header, instead of your organization. If that customer has not linked an Anthropic organization to the profile, or has not allowed your organization to bill it, the request is rejected rather than billed to you. Omit the field, or send `"bill_to": "self"` (the default), to be billed as usual.
+     *
+     * Message Batches does not currently support billing the customer behind a user profile. In a batch, omit the field or send `"bill_to": "self"`. A request in a batch that sets `"bill_to": "user_profile"` gets an `errored` result with an `invalid_request_error`, nobody is billed for it, and the batch's other requests run as usual.
+     */
+    #[Optional('billing_policy', nullable: true)]
+    public ?BetaBillingPolicy $billingPolicy;
+
+    /**
      * Top-level cache control automatically applies a cache_control marker to the last cacheable block in the request.
      */
     #[Optional('cache_control', nullable: true)]
     public ?BetaCacheControlEphemeral $cacheControl;
+
+    /**
+     * Compaction configuration.
+     *
+     * When set on `POST /v1/messages`, the request is a compaction request: the conversation in `messages` is summarized and the response holds only the resulting `compaction` block (`stop_reason` `"compaction"`), which later requests send first in `messages` in place of the messages it summarizes. `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the count it returns is for the conversation in `messages` as sent. Cannot be combined with `context_management`.
+     */
+    #[Optional(nullable: true)]
+    public ?BetaCompactionConfig $compaction;
 
     /**
      * Container identifier for reuse across requests.
@@ -181,13 +222,54 @@ final class Params implements BaseModel
     public ?BetaContextManagementConfig $contextManagement;
 
     /**
+     * Request-level diagnostics. Supply `previous_message_id` to have the response include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence from that prior request.
+     */
+    #[Optional(nullable: true)]
+    public ?BetaDiagnosticsParam $diagnostics;
+
+    /**
+     * The `fallback_credit_token` from a prior refusal's `stop_details`.
+     *
+     * When a preceding request was refused and returned a `fallback_credit_token`,
+     * pass that code here on the retry to have the retry's cache-creation tokens
+     * for the prefix that was warm on the refused model billed at the cache-read
+     * rate. Must be redeemed by the same organization and workspace, with the same
+     * request body (optionally extended by one appended `assistant` message whose
+     * content is the partial text — with any trailing whitespace stripped from
+     * the final text block — and paired server-tool blocks streamed before the
+     * refusal; the appended-assistant form is not available for requests with
+     * `output_format` set or forced `tool_choice`), on an eligible fallback
+     * model, on the same platform,
+     * and within 5 minutes of the refusal; a mismatch is a 400. A token minted
+     * mid-server-tool-loop whose partial content was continuable may only be
+     * redeemed with the appended-assistant form — if an exact-body retry is
+     * rejected with a 400 saying the token must be redeemed by continuing the
+     * partial response, retry with the appended-assistant form instead.
+     *
+     * When the appended-assistant form is used on a model that otherwise disallows
+     * assistant-turn prefill, this token also authorizes that one prefill.
+     *
+     * @var FallbackCreditTokenVariants|null $fallbackCreditToken
+     */
+    #[Optional('fallback_credit_token', nullable: true)]
+    public string|BetaFallbackCreditTokenParam|null $fallbackCreditToken;
+
+    /**
+     * Opt-in server-side retry on one or more substitute models when the requested model declines for policy reasons. Tried in order: if the first entry also declines, the second is tried, and so on. Some models don't support fallbacks; on those models, a list of fallback models returns a 400 error. See [Server-side fallback](https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback#server-side-fallback). The string "default" requests the requested model's server-defined default fallback configuration. On a model that doesn't support fallbacks, the request runs on the requested model alone, so a declined request stays declined.
+     *
+     * @var BetaFallbacksParamVariants|null $fallbacks
+     */
+    #[Optional(union: BetaFallbacksParam::class, nullable: true)]
+    public string|array|null $fallbacks;
+
+    /**
      * Specifies the geographic region for inference processing. If not specified, the workspace's `default_inference_geo` is used.
      */
     #[Optional('inference_geo', nullable: true)]
     public ?string $inferenceGeo;
 
     /**
-     * MCP servers to be utilized in this request.
+     * MCP servers to be utilized in this request
      *
      * @var list<BetaRequestMCPServerURLDefinition>|null $mcpServers
      */
@@ -219,7 +301,7 @@ final class Params implements BaseModel
     /**
      * Determines whether to use priority capacity (if available) or standard capacity for this request.
      *
-     * Anthropic offers different levels of service for your API requests. See [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
+     * Anthropic offers different levels of service for your API requests. See [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for details.
      *
      * @var value-of<ServiceTier>|null $serviceTier
      */
@@ -228,6 +310,8 @@ final class Params implements BaseModel
 
     /**
      * The inference speed mode for this request. `"fast"` enables high output-tokens-per-second inference.
+     *
+     * Some models require the `fast-mode-2026-02-01` beta header for any `speed` value. See [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for which models.
      *
      * @var value-of<Speed>|null $speed
      */
@@ -247,9 +331,9 @@ final class Params implements BaseModel
     public ?array $stopSequences;
 
     /**
-     * Whether to incrementally stream the response using server-sent events.
+     * Whether to incrementally stream the response using server-sent events. When `true`, SDKs return a raw event stream.
      *
-     * See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+     * In the TypeScript, Python and Ruby SDKs, the recommended way to stream is `messages.stream()`. It sets `stream` for you and accumulates the events into the final message. See [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks) for an example in each language.
      */
     #[Optional]
     public ?bool $stream;
@@ -257,7 +341,7 @@ final class Params implements BaseModel
     /**
      * System prompt.
      *
-     * A system prompt is a way of providing context and instructions to Claude, such as specifying a particular goal or role. See our [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
+     * A system prompt is a way of providing context and instructions to Claude, such as specifying a particular goal or role. See our [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
      *
      * @var SystemVariants|null $system
      */
@@ -265,28 +349,24 @@ final class Params implements BaseModel
     public string|array|null $system;
 
     /**
-     * @deprecated Deprecated. Models released after Claude Opus 4.6 do not support setting temperature. A value of 1.0 of will be accepted for backwards compatibility, all other values will be rejected with a 400 error.
+     * Configuration for Claude's thinking.
      *
-     * Amount of randomness injected into the response.
+     * With `{"type": "adaptive"}`, Claude decides when and how much to think. With `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of at least 1,024. Thinking tokens count toward your `max_tokens` limit.
      *
-     * Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0` for analytical / multiple choice, and closer to `1.0` for creative and generative tasks.
-     *
-     * Note that even with `temperature` of `0.0`, the results will not be fully deterministic.
-     */
-    #[Optional]
-    public ?float $temperature;
-
-    /**
-     * Configuration for enabling Claude's extended thinking.
-     *
-     * When enabled, responses include `thinking` content blocks showing Claude's thinking process before the final answer. Requires a minimum budget of 1,024 tokens and counts towards your `max_tokens` limit.
-     *
-     * See [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking) for details.
+     * Which `type` values are accepted, and what happens when you omit `thinking`, depend on the model. See [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking) for each model's behavior.
      *
      * @var BetaThinkingConfigParamVariants|null $thinking
      */
     #[Optional(union: BetaThinkingConfigParam::class)]
-    public BetaThinkingConfigEnabled|BetaThinkingConfigDisabled|BetaThinkingConfigAdaptive|null $thinking;
+    public BetaThinkingConfigEnabled|BetaThinkingConfigDisabled|BetaThinkingConfigBetweenTools|BetaThinkingConfigAdaptive|null $thinking;
+
+    /**
+     * Server-held conversation state (a Thread). `{"type": "create"}` asks the server to hold this conversation's state under the response's `id`; `{"type": "continue", "previous_message_id": ...}` resumes from a previous response so only the new turn's messages are sent. The response shape is unchanged.
+     *
+     * @var BetaMessageThreadParamVariants|null $thread
+     */
+    #[Optional(union: BetaMessageThreadParam::class, nullable: true)]
+    public BetaThreadCreateParams|BetaThreadContinueParams|null $thread;
 
     /**
      * How the model should use the provided tools. The model can use a specific tool, any available tool, decide by itself, or not use tools at all.
@@ -301,7 +381,7 @@ final class Params implements BaseModel
      *
      * If you include `tools` in your API request, the model may return `tool_use` content blocks that represent the model's use of those tools. You can then run those tools using the tool input generated by the model and then optionally return results back to the model using `tool_result` content blocks.
      *
-     * There are two types of tools: **client tools** and **server tools**. The behavior described below applies to client tools. For [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview\#server-tools), see their individual documentation as each has its own behavior (e.g., the [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+     * There are two types of tools: **client tools** and **server tools**. The behavior described below applies to client tools. For [server tools](https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools), see their individual documentation as each has its own behavior (e.g., the [web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool)).
      *
      * Each tool definition includes:
      *
@@ -357,42 +437,12 @@ final class Params implements BaseModel
      *
      * Tools can be used for workflows that include running client-side tools and functions, or more generally whenever you want the model to produce a particular JSON structure of output.
      *
-     * See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
+     * See our [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview) for more details.
      *
      * @var list<BetaToolUnionVariants>|null $tools
      */
     #[Optional(list: BetaToolUnion::class)]
     public ?array $tools;
-
-    /**
-     * @deprecated Deprecated. Models released after Claude Opus 4.6 do not accept top_k; any value will be rejected with a 400 error.
-     *
-     * Only sample from the top K options for each subsequent token.
-     *
-     * Used to remove "long tail" low probability responses. [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
-     *
-     * Recommended for advanced use cases only.
-     */
-    #[Optional('top_k')]
-    public ?int $topK;
-
-    /**
-     * @deprecated Deprecated. Models released after Claude Opus 4.6 do not support setting top_p. A value >= 0.99 will be accepted for backwards compatibility, all other values will be rejected with a 400 error.
-     *
-     * Use nucleus sampling.
-     *
-     * In nucleus sampling, we compute the cumulative distribution over all the options for each subsequent token in decreasing probability order and cut it off once it reaches a particular probability specified by `top_p`.
-     *
-     * Recommended for advanced use cases only.
-     */
-    #[Optional('top_p')]
-    public ?float $topP;
-
-    /**
-     * The user profile ID to attribute this request to. Use when acting on behalf of a party other than your organization.
-     */
-    #[Optional('user_profile_id', nullable: true)]
-    public ?string $userProfileID;
 
     /**
      * `new Params()` is missing required properties by the API.
@@ -405,7 +455,7 @@ final class Params implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new Params)->withMaxTokens(...)->withMessages(...)->withModel(...)
+     * (new Params())->withMaxTokens(...)->withMessages(...)->withModel(...)
      * ```
      */
     public function __construct()
@@ -418,11 +468,16 @@ final class Params implements BaseModel
      *
      * You must use named parameters to construct any parameters with a default value.
      *
-     * @param list<BetaMessageParam|BetaMessageParamShape> $messages
+     * @param list<BetaMessageParamShape> $messages
      * @param string|Model|value-of<Model> $model
+     * @param BetaBillingPolicy|BetaBillingPolicyShape|null $billingPolicy
      * @param BetaCacheControlEphemeral|BetaCacheControlEphemeralShape|null $cacheControl
+     * @param BetaCompactionConfig|BetaCompactionConfigShape|null $compaction
      * @param ContainerShape|null $container
      * @param BetaContextManagementConfig|BetaContextManagementConfigShape|null $contextManagement
+     * @param BetaDiagnosticsParam|BetaDiagnosticsParamShape|null $diagnostics
+     * @param FallbackCreditTokenShape|null $fallbackCreditToken
+     * @param BetaFallbacksParamShape|null $fallbacks
      * @param list<BetaRequestMCPServerURLDefinition|BetaRequestMCPServerURLDefinitionShape>|null $mcpServers
      * @param BetaMetadata|BetaMetadataShape|null $metadata
      * @param BetaOutputConfig|BetaOutputConfigShape|null $outputConfig
@@ -432,6 +487,7 @@ final class Params implements BaseModel
      * @param list<string>|null $stopSequences
      * @param SystemShape|null $system
      * @param BetaThinkingConfigParamShape|null $thinking
+     * @param BetaMessageThreadParamShape|null $thread
      * @param BetaToolChoiceShape|null $toolChoice
      * @param list<BetaToolUnionShape>|null $tools
      */
@@ -439,9 +495,14 @@ final class Params implements BaseModel
         int $maxTokens,
         array $messages,
         Model|string $model,
+        BetaBillingPolicy|array|null $billingPolicy = null,
         BetaCacheControlEphemeral|array|null $cacheControl = null,
+        BetaCompactionConfig|array|null $compaction = null,
         string|BetaContainerParams|array|null $container = null,
         BetaContextManagementConfig|array|null $contextManagement = null,
+        BetaDiagnosticsParam|array|null $diagnostics = null,
+        string|BetaFallbackCreditTokenParam|array|null $fallbackCreditToken = null,
+        string|array|null $fallbacks = null,
         ?string $inferenceGeo = null,
         ?array $mcpServers = null,
         BetaMetadata|array|null $metadata = null,
@@ -452,13 +513,10 @@ final class Params implements BaseModel
         ?array $stopSequences = null,
         ?bool $stream = null,
         string|array|null $system = null,
-        ?float $temperature = null,
-        BetaThinkingConfigEnabled|array|BetaThinkingConfigDisabled|BetaThinkingConfigAdaptive|null $thinking = null,
+        BetaThinkingConfigEnabled|array|BetaThinkingConfigDisabled|BetaThinkingConfigBetweenTools|BetaThinkingConfigAdaptive|null $thinking = null,
+        BetaThreadCreateParams|array|BetaThreadContinueParams|null $thread = null,
         BetaToolChoiceAuto|array|BetaToolChoiceAny|BetaToolChoiceTool|BetaToolChoiceNone|null $toolChoice = null,
         ?array $tools = null,
-        ?int $topK = null,
-        ?float $topP = null,
-        ?string $userProfileID = null,
     ): self {
         $self = new self;
 
@@ -466,9 +524,14 @@ final class Params implements BaseModel
         $self['messages'] = $messages;
         $self['model'] = $model;
 
+        null !== $billingPolicy && $self['billingPolicy'] = $billingPolicy;
         null !== $cacheControl && $self['cacheControl'] = $cacheControl;
+        null !== $compaction && $self['compaction'] = $compaction;
         null !== $container && $self['container'] = $container;
         null !== $contextManagement && $self['contextManagement'] = $contextManagement;
+        null !== $diagnostics && $self['diagnostics'] = $diagnostics;
+        null !== $fallbackCreditToken && $self['fallbackCreditToken'] = $fallbackCreditToken;
+        null !== $fallbacks && $self['fallbacks'] = $fallbacks;
         null !== $inferenceGeo && $self['inferenceGeo'] = $inferenceGeo;
         null !== $mcpServers && $self['mcpServers'] = $mcpServers;
         null !== $metadata && $self['metadata'] = $metadata;
@@ -479,13 +542,10 @@ final class Params implements BaseModel
         null !== $stopSequences && $self['stopSequences'] = $stopSequences;
         null !== $stream && $self['stream'] = $stream;
         null !== $system && $self['system'] = $system;
-        null !== $temperature && $self['temperature'] = $temperature;
         null !== $thinking && $self['thinking'] = $thinking;
+        null !== $thread && $self['thread'] = $thread;
         null !== $toolChoice && $self['toolChoice'] = $toolChoice;
         null !== $tools && $self['tools'] = $tools;
-        null !== $topK && $self['topK'] = $topK;
-        null !== $topP && $self['topP'] = $topP;
-        null !== $userProfileID && $self['userProfileID'] = $userProfileID;
 
         return $self;
     }
@@ -495,7 +555,9 @@ final class Params implements BaseModel
      *
      * Note that our models may stop _before_ reaching this maximum. This parameter only specifies the absolute maximum number of tokens to generate.
      *
-     * Different models have different maximum values for this parameter.  See [models](https://docs.claude.com/en/docs/models-overview) for details.
+     * Set to `0` to populate the [prompt cache](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#pre-warming-the-cache) without generating a response.
+     *
+     * Different models have different maximum values for this parameter.  See [models](https://platform.claude.com/docs/en/about-claude/models/overview) for details.
      */
     public function withMaxTokens(int $maxTokens): self
     {
@@ -512,7 +574,7 @@ final class Params implements BaseModel
      *
      * Each input message must be an object with a `role` and `content`. You can specify a single `user`-role message, or you can include multiple `user` and `assistant` messages.
      *
-     * If the final message uses the `assistant` role, the response content will continue immediately from the content in that message. This can be used to constrain part of the model's response.
+     * If the final message uses the `assistant` role, the response content will continue immediately from the content in that message. This can be used to constrain part of the model's response. This is called prefill. On models that don't support prefill, creating a message that ends with a partial `assistant` response returns a 400 error. See [Prefill not supported](https://platform.claude.com/docs/en/api/errors#prefill-not-supported).
      *
      * Example with a single `user` message:
      *
@@ -530,7 +592,7 @@ final class Params implements BaseModel
      * ]
      * ```
      *
-     * Example with a partially-filled response from Claude:
+     * Example with a partially-filled response from Claude, for models that support prefill:
      *
      * ```json
      * [
@@ -549,13 +611,13 @@ final class Params implements BaseModel
      * {"role": "user", "content": [{"type": "text", "text": "Hello, Claude"}]}
      * ```
      *
-     * See [input examples](https://docs.claude.com/en/api/messages-examples).
+     * See [input examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages).
      *
-     * Note that if you want to include a [system prompt](https://docs.claude.com/en/docs/system-prompts), you can use the top-level `system` parameter — there is no `"system"` role for input messages in the Messages API.
+     * Note that if you want to include a [system prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role), you can use the top-level `system` parameter.
      *
      * There is a limit of 100,000 messages in a single request.
      *
-     * @param list<BetaMessageParam|BetaMessageParamShape> $messages
+     * @param list<BetaMessageParamShape> $messages
      */
     public function withMessages(array $messages): self
     {
@@ -566,7 +628,9 @@ final class Params implements BaseModel
     }
 
     /**
-     * The model that will complete your prompt.\n\nSee [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
+     * The model that will complete your prompt.
+     *
+     * See [models](https://docs.anthropic.com/en/docs/models-overview) for additional details and options.
      *
      * @param string|Model|value-of<Model> $model
      */
@@ -574,6 +638,22 @@ final class Params implements BaseModel
     {
         $self = clone $this;
         $self['model'] = $model;
+
+        return $self;
+    }
+
+    /**
+     * Declares which organization is billed for this request. `{"type": "billing_policy", "bill_to": "user_profile"}` bills the customer behind the user profile named in the `anthropic-user-profile-id` header, instead of your organization. If that customer has not linked an Anthropic organization to the profile, or has not allowed your organization to bill it, the request is rejected rather than billed to you. Omit the field, or send `"bill_to": "self"` (the default), to be billed as usual.
+     *
+     * Message Batches does not currently support billing the customer behind a user profile. In a batch, omit the field or send `"bill_to": "self"`. A request in a batch that sets `"bill_to": "user_profile"` gets an `errored` result with an `invalid_request_error`, nobody is billed for it, and the batch's other requests run as usual.
+     *
+     * @param BetaBillingPolicy|BetaBillingPolicyShape|null $billingPolicy
+     */
+    public function withBillingPolicy(
+        BetaBillingPolicy|array|null $billingPolicy
+    ): self {
+        $self = clone $this;
+        $self['billingPolicy'] = $billingPolicy;
 
         return $self;
     }
@@ -588,6 +668,22 @@ final class Params implements BaseModel
     ): self {
         $self = clone $this;
         $self['cacheControl'] = $cacheControl;
+
+        return $self;
+    }
+
+    /**
+     * Compaction configuration.
+     *
+     * When set on `POST /v1/messages`, the request is a compaction request: the conversation in `messages` is summarized and the response holds only the resulting `compaction` block (`stop_reason` `"compaction"`), which later requests send first in `messages` in place of the messages it summarizes. `POST /v1/messages/count_tokens` accepts this parameter and ignores it: the count it returns is for the conversation in `messages` as sent. Cannot be combined with `context_management`.
+     *
+     * @param BetaCompactionConfig|BetaCompactionConfigShape|null $compaction
+     */
+    public function withCompaction(
+        BetaCompactionConfig|array|null $compaction
+    ): self {
+        $self = clone $this;
+        $self['compaction'] = $compaction;
 
         return $self;
     }
@@ -623,6 +719,66 @@ final class Params implements BaseModel
     }
 
     /**
+     * Request-level diagnostics. Supply `previous_message_id` to have the response include `diagnostics.cache_miss_reason` explaining any prompt-cache divergence from that prior request.
+     *
+     * @param BetaDiagnosticsParam|BetaDiagnosticsParamShape|null $diagnostics
+     */
+    public function withDiagnostics(
+        BetaDiagnosticsParam|array|null $diagnostics
+    ): self {
+        $self = clone $this;
+        $self['diagnostics'] = $diagnostics;
+
+        return $self;
+    }
+
+    /**
+     * The `fallback_credit_token` from a prior refusal's `stop_details`.
+     *
+     * When a preceding request was refused and returned a `fallback_credit_token`,
+     * pass that code here on the retry to have the retry's cache-creation tokens
+     * for the prefix that was warm on the refused model billed at the cache-read
+     * rate. Must be redeemed by the same organization and workspace, with the same
+     * request body (optionally extended by one appended `assistant` message whose
+     * content is the partial text — with any trailing whitespace stripped from
+     * the final text block — and paired server-tool blocks streamed before the
+     * refusal; the appended-assistant form is not available for requests with
+     * `output_format` set or forced `tool_choice`), on an eligible fallback
+     * model, on the same platform,
+     * and within 5 minutes of the refusal; a mismatch is a 400. A token minted
+     * mid-server-tool-loop whose partial content was continuable may only be
+     * redeemed with the appended-assistant form — if an exact-body retry is
+     * rejected with a 400 saying the token must be redeemed by continuing the
+     * partial response, retry with the appended-assistant form instead.
+     *
+     * When the appended-assistant form is used on a model that otherwise disallows
+     * assistant-turn prefill, this token also authorizes that one prefill.
+     *
+     * @param FallbackCreditTokenShape|null $fallbackCreditToken
+     */
+    public function withFallbackCreditToken(
+        string|BetaFallbackCreditTokenParam|array|null $fallbackCreditToken
+    ): self {
+        $self = clone $this;
+        $self['fallbackCreditToken'] = $fallbackCreditToken;
+
+        return $self;
+    }
+
+    /**
+     * Opt-in server-side retry on one or more substitute models when the requested model declines for policy reasons. Tried in order: if the first entry also declines, the second is tried, and so on. Some models don't support fallbacks; on those models, a list of fallback models returns a 400 error. See [Server-side fallback](https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback#server-side-fallback). The string "default" requests the requested model's server-defined default fallback configuration. On a model that doesn't support fallbacks, the request runs on the requested model alone, so a declined request stays declined.
+     *
+     * @param BetaFallbacksParamShape|null $fallbacks
+     */
+    public function withFallbacks(string|array|null $fallbacks): self
+    {
+        $self = clone $this;
+        $self['fallbacks'] = $fallbacks;
+
+        return $self;
+    }
+
+    /**
      * Specifies the geographic region for inference processing. If not specified, the workspace's `default_inference_geo` is used.
      */
     public function withInferenceGeo(?string $inferenceGeo): self
@@ -634,7 +790,7 @@ final class Params implements BaseModel
     }
 
     /**
-     * MCP servers to be utilized in this request.
+     * MCP servers to be utilized in this request
      *
      * @param list<BetaRequestMCPServerURLDefinition|BetaRequestMCPServerURLDefinitionShape> $mcpServers
      */
@@ -673,7 +829,7 @@ final class Params implements BaseModel
     }
 
     /**
-     * Deprecated: Use `output_config.format` instead. See [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs).
+     * Deprecated: Use `output_config.format` instead. See [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
      *
      * A schema to specify Claude's output format in responses. This parameter will be removed in a future release.
      *
@@ -691,7 +847,7 @@ final class Params implements BaseModel
     /**
      * Determines whether to use priority capacity (if available) or standard capacity for this request.
      *
-     * Anthropic offers different levels of service for your API requests. See [service-tiers](https://docs.claude.com/en/api/service-tiers) for details.
+     * Anthropic offers different levels of service for your API requests. See [service-tiers](https://platform.claude.com/docs/en/api/service-tiers) for details.
      *
      * @param ServiceTier|value-of<ServiceTier> $serviceTier
      */
@@ -705,6 +861,8 @@ final class Params implements BaseModel
 
     /**
      * The inference speed mode for this request. `"fast"` enables high output-tokens-per-second inference.
+     *
+     * Some models require the `fast-mode-2026-02-01` beta header for any `speed` value. See [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) for which models.
      *
      * @param Speed|value-of<Speed>|null $speed
      */
@@ -734,9 +892,9 @@ final class Params implements BaseModel
     }
 
     /**
-     * Whether to incrementally stream the response using server-sent events.
+     * Whether to incrementally stream the response using server-sent events. When `true`, SDKs return a raw event stream.
      *
-     * See [streaming](https://docs.claude.com/en/api/messages-streaming) for details.
+     * In the TypeScript, Python and Ruby SDKs, the recommended way to stream is `messages.stream()`. It sets `stream` for you and accumulates the events into the final message. See [Streaming with SDKs](https://platform.claude.com/docs/en/build-with-claude/streaming#streaming-with-sdks) for an example in each language.
      */
     public function withStream(bool $stream): self
     {
@@ -749,7 +907,7 @@ final class Params implements BaseModel
     /**
      * System prompt.
      *
-     * A system prompt is a way of providing context and instructions to Claude, such as specifying a particular goal or role. See our [guide to system prompts](https://docs.claude.com/en/docs/system-prompts).
+     * A system prompt is a way of providing context and instructions to Claude, such as specifying a particular goal or role. See our [guide to system prompts](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#give-claude-a-role).
      *
      * @param SystemShape $system
      */
@@ -762,34 +920,33 @@ final class Params implements BaseModel
     }
 
     /**
-     * Amount of randomness injected into the response.
+     * Configuration for Claude's thinking.
      *
-     * Defaults to `1.0`. Ranges from `0.0` to `1.0`. Use `temperature` closer to `0.0` for analytical / multiple choice, and closer to `1.0` for creative and generative tasks.
+     * With `{"type": "adaptive"}`, Claude decides when and how much to think. With `{"type": "enabled"}` (manual extended thinking), you set a `budget_tokens` of at least 1,024. Thinking tokens count toward your `max_tokens` limit.
      *
-     * Note that even with `temperature` of `0.0`, the results will not be fully deterministic.
+     * Which `type` values are accepted, and what happens when you omit `thinking`, depend on the model. See [thinking](https://platform.claude.com/docs/en/build-with-claude/thinking#configuring-thinking) for each model's behavior.
+     *
+     * @param BetaThinkingConfigParamShape $thinking
      */
-    public function withTemperature(float $temperature): self
-    {
+    public function withThinking(
+        BetaThinkingConfigEnabled|array|BetaThinkingConfigDisabled|BetaThinkingConfigBetweenTools|BetaThinkingConfigAdaptive $thinking,
+    ): self {
         $self = clone $this;
-        $self['temperature'] = $temperature;
+        $self['thinking'] = $thinking;
 
         return $self;
     }
 
     /**
-     * Configuration for enabling Claude's extended thinking.
+     * Server-held conversation state (a Thread). `{"type": "create"}` asks the server to hold this conversation's state under the response's `id`; `{"type": "continue", "previous_message_id": ...}` resumes from a previous response so only the new turn's messages are sent. The response shape is unchanged.
      *
-     * When enabled, responses include `thinking` content blocks showing Claude's thinking process before the final answer. Requires a minimum budget of 1,024 tokens and counts towards your `max_tokens` limit.
-     *
-     * See [extended thinking](https://docs.claude.com/en/docs/build-with-claude/extended-thinking) for details.
-     *
-     * @param BetaThinkingConfigParamShape $thinking
+     * @param BetaMessageThreadParamShape|null $thread
      */
-    public function withThinking(
-        BetaThinkingConfigEnabled|array|BetaThinkingConfigDisabled|BetaThinkingConfigAdaptive $thinking,
+    public function withThread(
+        BetaThreadCreateParams|array|BetaThreadContinueParams|null $thread
     ): self {
         $self = clone $this;
-        $self['thinking'] = $thinking;
+        $self['thread'] = $thread;
 
         return $self;
     }
@@ -813,7 +970,7 @@ final class Params implements BaseModel
      *
      * If you include `tools` in your API request, the model may return `tool_use` content blocks that represent the model's use of those tools. You can then run those tools using the tool input generated by the model and then optionally return results back to the model using `tool_result` content blocks.
      *
-     * There are two types of tools: **client tools** and **server tools**. The behavior described below applies to client tools. For [server tools](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview\#server-tools), see their individual documentation as each has its own behavior (e.g., the [web search tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/web-search-tool)).
+     * There are two types of tools: **client tools** and **server tools**. The behavior described below applies to client tools. For [server tools](https://platform.claude.com/docs/en/agents-and-tools/tool-use/server-tools), see their individual documentation as each has its own behavior (e.g., the [web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool)).
      *
      * Each tool definition includes:
      *
@@ -869,7 +1026,7 @@ final class Params implements BaseModel
      *
      * Tools can be used for workflows that include running client-side tools and functions, or more generally whenever you want the model to produce a particular JSON structure of output.
      *
-     * See our [guide](https://docs.claude.com/en/docs/tool-use) for more details.
+     * See our [guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview) for more details.
      *
      * @param list<BetaToolUnionShape> $tools
      */
@@ -877,47 +1034,6 @@ final class Params implements BaseModel
     {
         $self = clone $this;
         $self['tools'] = $tools;
-
-        return $self;
-    }
-
-    /**
-     * Only sample from the top K options for each subsequent token.
-     *
-     * Used to remove "long tail" low probability responses. [Learn more technical details here](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277).
-     *
-     * Recommended for advanced use cases only.
-     */
-    public function withTopK(int $topK): self
-    {
-        $self = clone $this;
-        $self['topK'] = $topK;
-
-        return $self;
-    }
-
-    /**
-     * Use nucleus sampling.
-     *
-     * In nucleus sampling, we compute the cumulative distribution over all the options for each subsequent token in decreasing probability order and cut it off once it reaches a particular probability specified by `top_p`.
-     *
-     * Recommended for advanced use cases only.
-     */
-    public function withTopP(float $topP): self
-    {
-        $self = clone $this;
-        $self['topP'] = $topP;
-
-        return $self;
-    }
-
-    /**
-     * The user profile ID to attribute this request to. Use when acting on behalf of a party other than your organization.
-     */
-    public function withUserProfileID(?string $userProfileID): self
-    {
-        $self = clone $this;
-        $self['userProfileID'] = $userProfileID;
 
         return $self;
     }

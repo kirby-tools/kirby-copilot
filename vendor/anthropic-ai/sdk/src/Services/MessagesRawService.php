@@ -4,16 +4,41 @@ declare(strict_types=1);
 
 namespace Anthropic\Services;
 
+use Anthropic\ClaudeCodeKeyCreatorNotMemberException;
+use Anthropic\ClaudeCodeVersionTooOldException;
 use Anthropic\Client;
+use Anthropic\CMEKKeyDisabledException;
+use Anthropic\CMEKKeyNetworkBlockedException;
+use Anthropic\CMEKKeyUnreachableException;
+use Anthropic\ContractSpendLimitReachedException;
 use Anthropic\Core\Contracts\BaseResponse;
 use Anthropic\Core\Contracts\BaseStream;
 use Anthropic\Core\Exceptions\APIException;
+use Anthropic\Core\Implementation\ApiCallInfo;
+use Anthropic\Core\Implementation\RawResponse;
+use Anthropic\Core\Util;
+use Anthropic\EnforcedSpendLimitReachedException;
+use Anthropic\Lib\Tracing\Tracing;
+use Anthropic\LinkedOrganizationBillingUnavailableException;
+use Anthropic\LinkedOrganizationSpendLimitReachedException;
+use Anthropic\Messages\AvailableToolsLimitExceededException;
 use Anthropic\Messages\CacheControlEphemeral;
+use Anthropic\Messages\CompactionBlockAmbiguousException;
+use Anthropic\Messages\CompactionBlockMisplacedException;
+use Anthropic\Messages\CompactionContentMismatchException;
+use Anthropic\Messages\CompactionIncompleteTurnException;
+use Anthropic\Messages\CompactionNothingToSummarizeException;
+use Anthropic\Messages\CompactionSignatureInvalidException;
+use Anthropic\Messages\CompactionToolChangesMismatchException;
+use Anthropic\Messages\CompactionTooManyToolReferencesException;
+use Anthropic\Messages\CompactionUnavailableException;
+use Anthropic\Messages\DiagnosticsParam;
+use Anthropic\Messages\ImageDimensionsTooLargeException;
 use Anthropic\Messages\Message;
 use Anthropic\Messages\MessageCountTokensParams;
 use Anthropic\Messages\MessageCreateParams;
 use Anthropic\Messages\MessageCreateParams\ServiceTier;
-use Anthropic\Messages\MessageParam;
+use Anthropic\Messages\MessageCreateParams\Speed;
 use Anthropic\Messages\MessageTokensCount;
 use Anthropic\Messages\Metadata;
 use Anthropic\Messages\Model;
@@ -25,22 +50,40 @@ use Anthropic\Messages\RawMessageDeltaEvent;
 use Anthropic\Messages\RawMessageStartEvent;
 use Anthropic\Messages\RawMessageStopEvent;
 use Anthropic\Messages\RawMessageStreamEvent;
+use Anthropic\Messages\ThreadAlreadyContinuedException;
+use Anthropic\Messages\ThreadContinueInFlightException;
+use Anthropic\Messages\ThreadFingerprintMismatchException;
+use Anthropic\Messages\ThreadNotFoundException;
+use Anthropic\Messages\ThreadUnsupportedRequestException;
+use Anthropic\Messages\ToolNameConflictException;
+use Anthropic\Messages\ToolReferenceUnresolvedException;
+use Anthropic\OrganizationOnHoldException;
+use Anthropic\RampLimitExceededException;
+use Anthropic\RequestBodyEncodingInvalidException;
+use Anthropic\RequestBodyEncodingUnsupportedException;
+use Anthropic\RequestBodyTooLargeAfterDecodingException;
 use Anthropic\RequestOptions;
 use Anthropic\ServiceContracts\MessagesRawContract;
+use Anthropic\Skills\SkillReadBlockedUndecryptableException;
 use Anthropic\SSEStream;
+use Anthropic\UserProfiles\UserProfileBillingNotAuthorizedException;
+use Anthropic\UserProfiles\UserProfileNotBillableException;
+use Anthropic\UserProfiles\UserProfileRequiredException;
 
 /**
- * @phpstan-import-type SystemShape from \Anthropic\Messages\MessageCountTokensParams\System
- * @phpstan-import-type MessageCountTokensToolShape from \Anthropic\Messages\MessageCountTokensTool
  * @phpstan-import-type MessageParamShape from \Anthropic\Messages\MessageParam
  * @phpstan-import-type CacheControlEphemeralShape from \Anthropic\Messages\CacheControlEphemeral
+ * @phpstan-import-type MessageCreateParamsContainerShape from \Anthropic\Messages\MessageCreateParamsContainer
+ * @phpstan-import-type DiagnosticsParamShape from \Anthropic\Messages\DiagnosticsParam
  * @phpstan-import-type MetadataShape from \Anthropic\Messages\Metadata
  * @phpstan-import-type OutputConfigShape from \Anthropic\Messages\OutputConfig
- * @phpstan-import-type SystemShape from \Anthropic\Messages\MessageCreateParams\System as SystemShape1
+ * @phpstan-import-type SystemShape from \Anthropic\Messages\MessageCreateParams\System
  * @phpstan-import-type ThinkingConfigParamShape from \Anthropic\Messages\ThinkingConfigParam
  * @phpstan-import-type ToolChoiceShape from \Anthropic\Messages\ToolChoice
  * @phpstan-import-type ToolUnionShape from \Anthropic\Messages\ToolUnion
  * @phpstan-import-type RequestOpts from \Anthropic\RequestOptions
+ * @phpstan-import-type SystemShape from \Anthropic\Messages\MessageCountTokensParams\System as SystemShape1
+ * @phpstan-import-type MessageCountTokensToolShape from \Anthropic\Messages\MessageCountTokensTool
  */
 final class MessagesRawService implements MessagesRawContract
 {
@@ -57,31 +100,68 @@ final class MessagesRawService implements MessagesRawContract
      *
      * The Messages API can be used for either single queries or stateless multi-turn conversations.
      *
-     * Learn more about the Messages API in our [user guide](https://docs.claude.com/en/docs/initial-setup)
+     * Learn more about the Messages API in our [user guide](https://platform.claude.com/docs/en/get-started)
      *
      * @param array{
      *   maxTokens: int,
-     *   messages: list<MessageParam|MessageParamShape>,
+     *   messages: list<MessageParamShape>,
      *   model: string|Model|value-of<Model>,
      *   cacheControl?: CacheControlEphemeral|CacheControlEphemeralShape|null,
-     *   container?: string|null,
+     *   container?: MessageCreateParamsContainerShape|null,
+     *   diagnostics?: DiagnosticsParam|DiagnosticsParamShape|null,
      *   inferenceGeo?: string|null,
      *   metadata?: Metadata|MetadataShape,
      *   outputConfig?: OutputConfig|OutputConfigShape,
      *   serviceTier?: ServiceTier|value-of<ServiceTier>,
+     *   speed?: Speed|value-of<Speed>|null,
      *   stopSequences?: list<string>,
-     *   system?: SystemShape1,
-     *   temperature?: float,
+     *   system?: SystemShape,
      *   thinking?: ThinkingConfigParamShape,
      *   toolChoice?: ToolChoiceShape,
      *   tools?: list<ToolUnionShape>,
-     *   topK?: int,
-     *   topP?: float,
+     *   userProfileID?: string,
+     *   workspaceID?: string,
      * }|MessageCreateParams $params
      * @param RequestOpts|null $requestOptions
      *
      * @return BaseResponse<Message>
      *
+     * @throws AvailableToolsLimitExceededException
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws ClaudeCodeVersionTooOldException
+     * @throws CMEKKeyDisabledException
+     * @throws CMEKKeyNetworkBlockedException
+     * @throws CompactionBlockAmbiguousException
+     * @throws CompactionBlockMisplacedException
+     * @throws CompactionContentMismatchException
+     * @throws CompactionIncompleteTurnException
+     * @throws CompactionNothingToSummarizeException
+     * @throws CompactionSignatureInvalidException
+     * @throws CompactionTooManyToolReferencesException
+     * @throws CompactionToolChangesMismatchException
+     * @throws ImageDimensionsTooLargeException
+     * @throws OrganizationOnHoldException
+     * @throws RequestBodyEncodingInvalidException
+     * @throws RequestBodyEncodingUnsupportedException
+     * @throws ThreadAlreadyContinuedException
+     * @throws ThreadContinueInFlightException
+     * @throws ThreadFingerprintMismatchException
+     * @throws ThreadUnsupportedRequestException
+     * @throws ToolNameConflictException
+     * @throws ToolReferenceUnresolvedException
+     * @throws UserProfileRequiredException
+     * @throws LinkedOrganizationBillingUnavailableException
+     * @throws LinkedOrganizationSpendLimitReachedException
+     * @throws UserProfileBillingNotAuthorizedException
+     * @throws UserProfileNotBillableException
+     * @throws ThreadNotFoundException
+     * @throws SkillReadBlockedUndecryptableException
+     * @throws RequestBodyTooLargeAfterDecodingException
+     * @throws ContractSpendLimitReachedException
+     * @throws EnforcedSpendLimitReachedException
+     * @throws RampLimitExceededException
+     * @throws CMEKKeyUnreachableException
+     * @throws CompactionUnavailableException
      * @throws APIException
      */
     public function create(
@@ -92,15 +172,35 @@ final class MessagesRawService implements MessagesRawContract
             $params,
             $requestOptions,
         );
+        $header_params = [
+            'userProfileID' => 'anthropic-user-profile-id',
+            'workspaceID' => 'anthropic-workspace-id',
+        ];
 
-        // @phpstan-ignore-next-line return.type
-        return $this->client->request(
+        $callSpan = Tracing::startCallSpan($this->client, 'anthropic.messages.create', '/v1/messages', $parsed, $options, $header_params);
+        Tracing::recordMessagesCreateRequest($this->client, $callSpan, $parsed);
+
+        $response = $this->client->request(
             method: 'post',
             path: 'v1/messages',
-            body: (object) $parsed,
-            options: $options,
+            headers: Util::array_transform_keys(
+                array_intersect_key($parsed, array_flip(array_keys($header_params))),
+                $header_params,
+            ),
+            body: (object) array_diff_key(
+                $parsed,
+                array_flip(array_keys($header_params))
+            ),
+            options: $options->withApiCall(new ApiCallInfo(
+                name: $callSpan?->name,
+                span: $callSpan?->span,
+            )),
             convert: Message::class,
         );
+
+        // Only the response that the SDK's own `request()` returns records on the span: any other is returned as it is.
+        // @phpstan-ignore-next-line return.type
+        return $response instanceof RawResponse ? $response->thenUnwrap(fn (mixed $message, mixed $decoded): mixed => Tracing::recordMessagesCreateResponse($this->client, $callSpan, $parsed, $message, $decoded)) : $response;
     }
 
     /**
@@ -108,27 +208,64 @@ final class MessagesRawService implements MessagesRawContract
      *
      * @param array{
      *   maxTokens: int,
-     *   messages: list<MessageParam|MessageParamShape>,
+     *   messages: list<MessageParamShape>,
      *   model: string|Model|value-of<Model>,
      *   cacheControl?: CacheControlEphemeral|CacheControlEphemeralShape|null,
-     *   container?: string|null,
+     *   container?: MessageCreateParamsContainerShape|null,
+     *   diagnostics?: DiagnosticsParam|DiagnosticsParamShape|null,
      *   inferenceGeo?: string|null,
      *   metadata?: Metadata|MetadataShape,
      *   outputConfig?: OutputConfig|OutputConfigShape,
      *   serviceTier?: ServiceTier|value-of<ServiceTier>,
+     *   speed?: Speed|value-of<Speed>|null,
      *   stopSequences?: list<string>,
-     *   system?: SystemShape1,
-     *   temperature?: float,
+     *   system?: SystemShape,
      *   thinking?: ThinkingConfigParamShape,
      *   toolChoice?: ToolChoiceShape,
      *   tools?: list<ToolUnionShape>,
-     *   topK?: int,
-     *   topP?: float,
+     *   userProfileID?: string,
+     *   workspaceID?: string,
      * }|MessageCreateParams $params
      * @param RequestOpts|null $requestOptions
      *
-     * @return BaseResponse<BaseStream<RawMessageStartEvent|RawMessageDeltaEvent|RawMessageStopEvent|RawContentBlockStartEvent|RawContentBlockDeltaEvent|RawContentBlockStopEvent,>,>
+     * @return BaseResponse<BaseStream<RawMessageStartEvent|RawMessageDeltaEvent|RawMessageStopEvent|RawContentBlockStartEvent|RawContentBlockDeltaEvent|RawContentBlockStopEvent>>
      *
+     * @throws AvailableToolsLimitExceededException
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws ClaudeCodeVersionTooOldException
+     * @throws CMEKKeyDisabledException
+     * @throws CMEKKeyNetworkBlockedException
+     * @throws CompactionBlockAmbiguousException
+     * @throws CompactionBlockMisplacedException
+     * @throws CompactionContentMismatchException
+     * @throws CompactionIncompleteTurnException
+     * @throws CompactionNothingToSummarizeException
+     * @throws CompactionSignatureInvalidException
+     * @throws CompactionTooManyToolReferencesException
+     * @throws CompactionToolChangesMismatchException
+     * @throws ImageDimensionsTooLargeException
+     * @throws OrganizationOnHoldException
+     * @throws RequestBodyEncodingInvalidException
+     * @throws RequestBodyEncodingUnsupportedException
+     * @throws ThreadAlreadyContinuedException
+     * @throws ThreadContinueInFlightException
+     * @throws ThreadFingerprintMismatchException
+     * @throws ThreadUnsupportedRequestException
+     * @throws ToolNameConflictException
+     * @throws ToolReferenceUnresolvedException
+     * @throws UserProfileRequiredException
+     * @throws LinkedOrganizationBillingUnavailableException
+     * @throws LinkedOrganizationSpendLimitReachedException
+     * @throws UserProfileBillingNotAuthorizedException
+     * @throws UserProfileNotBillableException
+     * @throws ThreadNotFoundException
+     * @throws SkillReadBlockedUndecryptableException
+     * @throws RequestBodyTooLargeAfterDecodingException
+     * @throws ContractSpendLimitReachedException
+     * @throws EnforcedSpendLimitReachedException
+     * @throws RampLimitExceededException
+     * @throws CMEKKeyUnreachableException
+     * @throws CompactionUnavailableException
      * @throws APIException
      */
     public function createStream(
@@ -140,14 +277,36 @@ final class MessagesRawService implements MessagesRawContract
             $requestOptions,
         );
         $parsed['stream'] = true;
+        $header_params = [
+            'userProfileID' => 'anthropic-user-profile-id',
+            'workspaceID' => 'anthropic-workspace-id',
+        ];
+
+        $callSpan = Tracing::startCallSpan($this->client, 'anthropic.messages.create', '/v1/messages', $parsed, $options, $header_params);
+        Tracing::recordMessagesCreateRequest($this->client, $callSpan, $parsed);
 
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
             path: 'v1/messages',
-            headers: ['Accept' => 'text/event-stream'],
-            body: (object) $parsed,
-            options: $options,
+            headers: Util::array_transform_keys(
+                [
+                    'Accept' => 'text/event-stream',
+                    ...array_intersect_key(
+                        $parsed,
+                        array_flip(array_keys($header_params))
+                    ),
+                ],
+                $header_params,
+            ),
+            body: (object) array_diff_key(
+                $parsed,
+                array_flip(array_keys($header_params))
+            ),
+            options: $options->withApiCall(new ApiCallInfo(
+                name: $callSpan?->name,
+                span: $callSpan?->span,
+            )),
             convert: RawMessageStreamEvent::class,
             stream: SSEStream::class,
         );
@@ -160,22 +319,41 @@ final class MessagesRawService implements MessagesRawContract
      *
      * The Token Count API can be used to count the number of tokens in a Message, including tools, images, and documents, without creating it.
      *
-     * Learn more about token counting in our [user guide](https://docs.claude.com/en/docs/build-with-claude/token-counting)
+     * Learn more about token counting in our [user guide](https://platform.claude.com/docs/en/build-with-claude/token-counting)
      *
      * @param array{
-     *   messages: list<MessageParam|MessageParamShape>,
+     *   messages: list<MessageParamShape>,
      *   model: string|Model|value-of<Model>,
      *   cacheControl?: CacheControlEphemeral|CacheControlEphemeralShape|null,
      *   outputConfig?: OutputConfig|OutputConfigShape,
-     *   system?: SystemShape,
+     *   speed?: MessageCountTokensParams\Speed|value-of<MessageCountTokensParams\Speed>|null,
+     *   system?: SystemShape1,
      *   thinking?: ThinkingConfigParamShape,
      *   toolChoice?: ToolChoiceShape,
      *   tools?: list<MessageCountTokensToolShape>,
+     *   userProfileID?: string,
+     *   workspaceID?: string,
      * }|MessageCountTokensParams $params
      * @param RequestOpts|null $requestOptions
      *
      * @return BaseResponse<MessageTokensCount>
      *
+     * @throws AvailableToolsLimitExceededException
+     * @throws ClaudeCodeKeyCreatorNotMemberException
+     * @throws CompactionBlockAmbiguousException
+     * @throws CompactionBlockMisplacedException
+     * @throws CompactionContentMismatchException
+     * @throws CompactionNothingToSummarizeException
+     * @throws CompactionSignatureInvalidException
+     * @throws CompactionToolChangesMismatchException
+     * @throws OrganizationOnHoldException
+     * @throws RequestBodyEncodingInvalidException
+     * @throws RequestBodyEncodingUnsupportedException
+     * @throws ToolNameConflictException
+     * @throws ToolReferenceUnresolvedException
+     * @throws RequestBodyTooLargeAfterDecodingException
+     * @throws EnforcedSpendLimitReachedException
+     * @throws CompactionUnavailableException
      * @throws APIException
      */
     public function countTokens(
@@ -186,13 +364,29 @@ final class MessagesRawService implements MessagesRawContract
             $params,
             $requestOptions,
         );
+        $header_params = [
+            'userProfileID' => 'anthropic-user-profile-id',
+            'workspaceID' => 'anthropic-workspace-id',
+        ];
+
+        $callSpan = Tracing::startCallSpan($this->client, 'anthropic.messages.count_tokens', '/v1/messages/count_tokens', $parsed, $options, $header_params);
 
         // @phpstan-ignore-next-line return.type
         return $this->client->request(
             method: 'post',
             path: 'v1/messages/count_tokens',
-            body: (object) $parsed,
-            options: $options,
+            headers: Util::array_transform_keys(
+                array_intersect_key($parsed, array_flip(array_keys($header_params))),
+                $header_params,
+            ),
+            body: (object) array_diff_key(
+                $parsed,
+                array_flip(array_keys($header_params))
+            ),
+            options: $options->withApiCall(new ApiCallInfo(
+                name: $callSpan?->name,
+                span: $callSpan?->span,
+            )),
             convert: MessageTokensCount::class,
         );
     }

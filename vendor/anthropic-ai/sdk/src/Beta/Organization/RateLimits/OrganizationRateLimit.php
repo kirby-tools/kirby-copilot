@@ -1,0 +1,180 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Beta\Organization\RateLimits;
+
+use Anthropic\Beta\Organization\RateLimits\OrganizationRateLimit\Group;
+use Anthropic\Core\Attributes\Required;
+use Anthropic\Core\Concerns\SdkModel;
+use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
+
+/**
+ * @phpstan-import-type GroupShape from \Anthropic\Beta\Organization\RateLimits\OrganizationRateLimit\Group
+ * @phpstan-import-type OrganizationRateLimitValueShape from \Anthropic\Beta\Organization\RateLimits\OrganizationRateLimitValue
+ * @phpstan-import-type GroupVariants from \Anthropic\Beta\Organization\RateLimits\OrganizationRateLimit\Group
+ *
+ * @phpstan-type OrganizationRateLimitShape = array{
+ *   id: string,
+ *   group: GroupShape,
+ *   limits: list<OrganizationRateLimitValue|OrganizationRateLimitValueShape>,
+ *   models: list<string>|null,
+ *   type: 'rate_limit',
+ * }
+ */
+final class OrganizationRateLimit implements BaseModel
+{
+    /** @use SdkModel<OrganizationRateLimitShape> */
+    use SdkModel;
+
+    /**
+     * Object type. Always `rate_limit` for organization rate-limit entries.
+     *
+     * @var 'rate_limit' $type
+     */
+    #[Required(type: new ConstantOf('rate_limit'))]
+    public string $type = 'rate_limit';
+
+    /**
+     * Identifier of this rate-limit entry. It is stable within the organization and differs between organizations; the group's own identifier is `group.id`. Pass it as `rate_limit_id` to set a workspace's overrides for this group.
+     */
+    #[Required]
+    public string $id;
+
+    /**
+     * The rate-limit group this entry's limits apply to.
+     *
+     * @var GroupVariants $group
+     */
+    #[Required(union: Group::class)]
+    public OrganizationRateLimitModelGroup|OrganizationRateLimitBatchGroup|OrganizationRateLimitTokenCountGroup|OrganizationRateLimitFilesGroup|OrganizationRateLimitSkillsGroup|OrganizationRateLimitWebSearchGroup $group;
+
+    /**
+     * The limiter values that apply to this group.
+     *
+     * @var list<OrganizationRateLimitValue> $limits
+     */
+    #[Required(list: OrganizationRateLimitValue::class)]
+    public array $limits;
+
+    /**
+     * Model names this entry's limits apply to, including aliases. `null` when `group.type` is not `"model_group"`. The list covers the models your organization has access to, so it can differ between organizations.
+     *
+     * @var list<string>|null $models
+     */
+    #[Required(list: 'string')]
+    public ?array $models;
+
+    /**
+     * `new OrganizationRateLimit()` is missing required properties by the API.
+     *
+     * To enforce required parameters use
+     * ```
+     * OrganizationRateLimit::with(id: ..., group: ..., limits: ..., models: ...)
+     * ```
+     *
+     * Otherwise ensure the following setters are called
+     *
+     * ```
+     * (new OrganizationRateLimit())
+     *   ->withID(...)
+     *   ->withGroup(...)
+     *   ->withLimits(...)
+     *   ->withModels(...)
+     * ```
+     */
+    public function __construct()
+    {
+        $this->initialize();
+    }
+
+    /**
+     * Construct an instance from the required parameters.
+     *
+     * You must use named parameters to construct any parameters with a default value.
+     *
+     * @param GroupShape $group
+     * @param list<OrganizationRateLimitValue|OrganizationRateLimitValueShape> $limits
+     * @param list<string>|null $models
+     */
+    public static function with(
+        string $id,
+        OrganizationRateLimitModelGroup|array|OrganizationRateLimitBatchGroup|OrganizationRateLimitTokenCountGroup|OrganizationRateLimitFilesGroup|OrganizationRateLimitSkillsGroup|OrganizationRateLimitWebSearchGroup $group,
+        array $limits,
+        ?array $models,
+    ): self {
+        $self = new self;
+
+        $self['id'] = $id;
+        $self['group'] = $group;
+        $self['limits'] = $limits;
+        $self['models'] = $models;
+
+        return $self;
+    }
+
+    /**
+     * Identifier of this rate-limit entry. It is stable within the organization and differs between organizations; the group's own identifier is `group.id`. Pass it as `rate_limit_id` to set a workspace's overrides for this group.
+     */
+    public function withID(string $id): self
+    {
+        $self = clone $this;
+        $self['id'] = $id;
+
+        return $self;
+    }
+
+    /**
+     * The rate-limit group this entry's limits apply to.
+     *
+     * @param GroupShape $group
+     */
+    public function withGroup(
+        OrganizationRateLimitModelGroup|array|OrganizationRateLimitBatchGroup|OrganizationRateLimitTokenCountGroup|OrganizationRateLimitFilesGroup|OrganizationRateLimitSkillsGroup|OrganizationRateLimitWebSearchGroup $group,
+    ): self {
+        $self = clone $this;
+        $self['group'] = $group;
+
+        return $self;
+    }
+
+    /**
+     * The limiter values that apply to this group.
+     *
+     * @param list<OrganizationRateLimitValue|OrganizationRateLimitValueShape> $limits
+     */
+    public function withLimits(array $limits): self
+    {
+        $self = clone $this;
+        $self['limits'] = $limits;
+
+        return $self;
+    }
+
+    /**
+     * Model names this entry's limits apply to, including aliases. `null` when `group.type` is not `"model_group"`. The list covers the models your organization has access to, so it can differ between organizations.
+     *
+     * @param list<string>|null $models
+     */
+    public function withModels(?array $models): self
+    {
+        $self = clone $this;
+        $self['models'] = $models;
+
+        return $self;
+    }
+
+    /**
+     * Object type. Always `rate_limit` for organization rate-limit entries.
+     *
+     * @param 'rate_limit' $type
+     */
+    public function withType(string $type): self
+    {
+        $self = clone $this;
+        $self['type'] = $type;
+
+        return $self;
+    }
+}

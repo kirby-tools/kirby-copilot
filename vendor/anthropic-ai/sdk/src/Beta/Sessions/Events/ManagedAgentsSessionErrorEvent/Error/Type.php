@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Beta\Sessions\Events\ManagedAgentsSessionErrorEvent\Error;
+
+enum Type: string
+{
+    case UNKNOWN_ERROR = 'unknown_error';
+
+    case MODEL_OVERLOADED_ERROR = 'model_overloaded_error';
+
+    case MODEL_RATE_LIMITED_ERROR = 'model_rate_limited_error';
+
+    case MODEL_REQUEST_FAILED_ERROR = 'model_request_failed_error';
+
+    case MCP_CONNECTION_FAILED_ERROR = 'mcp_connection_failed_error';
+
+    case MCP_AUTHENTICATION_FAILED_ERROR = 'mcp_authentication_failed_error';
+
+    case BILLING_ERROR = 'billing_error';
+
+    case CREDENTIAL_HOST_UNREACHABLE_ERROR = 'credential_host_unreachable_error';
+
+    case TOOL_USE_LIMIT_REACHED_ERROR = 'tool_use_limit_reached_error';
+
+    case COMPACTION_LIMIT_REACHED_ERROR = 'compaction_limit_reached_error';
+
+    case REPOSITORY_AUTHENTICATION_ERROR = 'repository_authentication_error';
+
+    case REPOSITORY_FORBIDDEN_ERROR = 'repository_forbidden_error';
+
+    case REPOSITORY_NOT_FOUND_ERROR = 'repository_not_found_error';
+
+    case REPOSITORY_CHECKOUT_ERROR = 'repository_checkout_error';
+
+    case REPOSITORY_CLONE_ERROR = 'repository_clone_error';
+}

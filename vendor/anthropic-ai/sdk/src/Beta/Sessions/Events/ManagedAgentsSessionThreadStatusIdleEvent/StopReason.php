@@ -1,0 +1,48 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Anthropic\Beta\Sessions\Events\ManagedAgentsSessionThreadStatusIdleEvent;
+
+use Anthropic\Beta\Sessions\Events\ManagedAgentsSessionBudgetReached;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsSessionEndTurn;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsSessionRefusal;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsSessionRequiresAction;
+use Anthropic\Beta\Sessions\Events\ManagedAgentsSessionRetriesExhausted;
+use Anthropic\Core\Concerns\SdkUnion;
+use Anthropic\Core\Conversion\Contracts\Converter;
+use Anthropic\Core\Conversion\Contracts\ConverterSource;
+
+/**
+ * @phpstan-import-type ManagedAgentsSessionEndTurnShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsSessionEndTurn
+ * @phpstan-import-type ManagedAgentsSessionRequiresActionShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsSessionRequiresAction
+ * @phpstan-import-type ManagedAgentsSessionRetriesExhaustedShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsSessionRetriesExhausted
+ * @phpstan-import-type ManagedAgentsSessionBudgetReachedShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsSessionBudgetReached
+ * @phpstan-import-type ManagedAgentsSessionRefusalShape from \Anthropic\Beta\Sessions\Events\ManagedAgentsSessionRefusal
+ *
+ * @phpstan-type StopReasonVariants = ManagedAgentsSessionEndTurn|ManagedAgentsSessionRequiresAction|ManagedAgentsSessionRetriesExhausted|ManagedAgentsSessionBudgetReached|ManagedAgentsSessionRefusal
+ * @phpstan-type StopReasonShape = StopReasonVariants|ManagedAgentsSessionEndTurnShape|ManagedAgentsSessionRequiresActionShape|ManagedAgentsSessionRetriesExhaustedShape|ManagedAgentsSessionBudgetReachedShape|ManagedAgentsSessionRefusalShape
+ */
+final class StopReason implements ConverterSource
+{
+    use SdkUnion;
+
+    public static function discriminator(): string
+    {
+        return 'type';
+    }
+
+    /**
+     * @return list<string|Converter|ConverterSource>|array<string,string|Converter|ConverterSource>
+     */
+    public static function variants(): array
+    {
+        return [
+            'end_turn' => ManagedAgentsSessionEndTurn::class,
+            'requires_action' => ManagedAgentsSessionRequiresAction::class,
+            'retries_exhausted' => ManagedAgentsSessionRetriesExhausted::class,
+            'budget_reached' => ManagedAgentsSessionBudgetReached::class,
+            'refusal' => ManagedAgentsSessionRefusal::class,
+        ];
+    }
+}

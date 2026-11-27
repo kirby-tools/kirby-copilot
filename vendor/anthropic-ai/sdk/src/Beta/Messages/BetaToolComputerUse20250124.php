@@ -9,6 +9,7 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Core\Conversion\MapOf;
 
 /**
@@ -39,11 +40,11 @@ final class BetaToolComputerUse20250124 implements BaseModel
      *
      * @var 'computer' $name
      */
-    #[Required]
+    #[Required(type: new ConstantOf('computer'))]
     public string $name = 'computer';
 
     /** @var 'computer_20250124' $type */
-    #[Required]
+    #[Required(type: new ConstantOf('computer_20250124'))]
     public string $type = 'computer_20250124';
 
     /**
@@ -85,7 +86,7 @@ final class BetaToolComputerUse20250124 implements BaseModel
     public ?array $inputExamples;
 
     /**
-     * When true, guarantees schema validation on tool names and inputs.
+     * When true, guarantees schema validation on tool names and inputs
      */
     #[Optional]
     public ?bool $strict;
@@ -101,7 +102,7 @@ final class BetaToolComputerUse20250124 implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new BetaToolComputerUse20250124)
+     * (new BetaToolComputerUse20250124())
      *   ->withDisplayHeightPx(...)
      *   ->withDisplayWidthPx(...)
      * ```
@@ -252,7 +253,7 @@ final class BetaToolComputerUse20250124 implements BaseModel
     }
 
     /**
-     * When true, guarantees schema validation on tool names and inputs.
+     * When true, guarantees schema validation on tool names and inputs
      */
     public function withStrict(bool $strict): self
     {

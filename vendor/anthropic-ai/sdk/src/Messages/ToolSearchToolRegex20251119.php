@@ -8,6 +8,7 @@ use Anthropic\Core\Attributes\Optional;
 use Anthropic\Core\Attributes\Required;
 use Anthropic\Core\Concerns\SdkModel;
 use Anthropic\Core\Contracts\BaseModel;
+use Anthropic\Core\Conversion\ConstantOf;
 use Anthropic\Messages\ToolSearchToolRegex20251119\AllowedCaller;
 use Anthropic\Messages\ToolSearchToolRegex20251119\Type;
 
@@ -35,7 +36,7 @@ final class ToolSearchToolRegex20251119 implements BaseModel
      *
      * @var 'tool_search_tool_regex' $name
      */
-    #[Required]
+    #[Required(type: new ConstantOf('tool_search_tool_regex'))]
     public string $name = 'tool_search_tool_regex';
 
     /** @var value-of<Type> $type */
@@ -59,7 +60,7 @@ final class ToolSearchToolRegex20251119 implements BaseModel
     public ?bool $deferLoading;
 
     /**
-     * When true, guarantees schema validation on tool names and inputs.
+     * When true, guarantees schema validation on tool names and inputs
      */
     #[Optional]
     public ?bool $strict;
@@ -75,7 +76,7 @@ final class ToolSearchToolRegex20251119 implements BaseModel
      * Otherwise ensure the following setters are called
      *
      * ```
-     * (new ToolSearchToolRegex20251119)->withType(...)
+     * (new ToolSearchToolRegex20251119())->withType(...)
      * ```
      */
     public function __construct()
@@ -174,7 +175,7 @@ final class ToolSearchToolRegex20251119 implements BaseModel
     }
 
     /**
-     * When true, guarantees schema validation on tool names and inputs.
+     * When true, guarantees schema validation on tool names and inputs
      */
     public function withStrict(bool $strict): self
     {

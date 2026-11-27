@@ -1,0 +1,28 @@
+name: Java Lint
+
+on:
+  pull_request:
+    paths:
+      - "libraries/java/**"
+      - ".github/workflows/java-lint.yml"
+
+jobs:
+  build:
+    name: Java Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: |
+            8
+            11
+
+      - name: Build
+        run: |
+          mvn clean compile test integration-test
+        working-directory: libraries/java
