@@ -11,6 +11,7 @@ import { useContent, usePanel } from "kirbyuse";
 import { ref } from "vue";
 import { z } from "zod";
 import {
+  createItemNormalizer,
   ensurePlaygroundApiKey,
   runStructuredGeneration,
   useBlocks,
@@ -110,6 +111,7 @@ async function initPromptDialog() {
     }
 
     const _currentContent = { ...currentContent.value };
+    const normalizeItems = createItemNormalizer();
 
     const { Output } = await loadAISDK();
 
@@ -130,6 +132,7 @@ async function initPromptDialog() {
             object: partialOutput as Record<string, unknown>,
             selectedFields,
             currentContent: _currentContent,
+            normalizeItems,
           });
 
           if (Object.keys(updatedContent).length > 0) {
@@ -147,6 +150,7 @@ async function initPromptDialog() {
             object: structuredOutput as Record<string, unknown>,
             selectedFields,
             currentContent: _currentContent,
+            normalizeItems,
           });
 
           return updateContent(finalContent);
@@ -175,14 +179,13 @@ function processFieldValues({
   object,
   selectedFields,
   currentContent,
+  normalizeItems,
 }: {
   object: Record<string, unknown>;
   selectedFields: KirbyFieldProps[];
   currentContent: Record<string, unknown>;
+  normalizeItems: ReturnType<typeof createItemNormalizer>;
 }) {
-  const { normalizeBlock } = useBlocks();
-  const { normalizeLayout } = useLayouts();
-
   const processedContent: Record<string, unknown> = {};
 
   for (const field of selectedFields) {
@@ -197,14 +200,12 @@ function processFieldValues({
     }
 
     const currentFieldContent = currentContent[field.name] as unknown[];
-    const normalizer =
-      field.type === "layout" ? normalizeLayout : normalizeBlock;
 
     if (field.type === "layout" || field.type === "blocks") {
       if (Array.isArray(fieldValue)) {
         processedContent[field.name] = [
           ...currentFieldContent,
-          ...fieldValue.map(normalizer as (item: unknown) => unknown),
+          ...normalizeItems(field.type, fieldValue, field.name),
         ];
       }
     } else {

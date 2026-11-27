@@ -19,6 +19,7 @@ import {
 } from "kirbyuse/props";
 import { computed, ref, watch } from "vue";
 import {
+  createItemNormalizer,
   ensurePlaygroundApiKey,
   runStructuredGeneration,
   runTextGeneration,
@@ -205,16 +206,16 @@ async function generate() {
   isAbortRequested = false;
 
   try {
-    const { getZodSchema: getBlocksZodSchema, normalizeBlock } = useBlocks();
-    const { getZodSchema: getLayoutZodSchema, normalizeLayout } = useLayouts();
+    const { getZodSchema: getBlocksZodSchema } = useBlocks();
+    const { getZodSchema: getLayoutZodSchema } = useLayouts();
     const { Output } = await loadAISDK();
 
-    if (field.type === "layout" || field.type === "blocks") {
-      const normalizer = (field.type === "layout"
-        ? normalizeLayout
-        : normalizeBlock) as unknown as (item: unknown) => unknown;
+    const fieldType = field.type;
+
+    if (fieldType === "layout" || fieldType === "blocks") {
+      const normalizeItems = createItemNormalizer();
       const schema =
-        field.type === "layout"
+        fieldType === "layout"
           ? await getLayoutZodSchema(field as KirbyLayoutFieldProps)
           : await getBlocksZodSchema(field as KirbyBlocksFieldProps);
 
@@ -235,7 +236,7 @@ async function generate() {
               {
                 [fieldName]: [
                   ...currentFieldContent.value,
-                  ...partialOutput.map(normalizer),
+                  ...normalizeItems(fieldType, partialOutput, fieldName),
                 ],
               },
               // Only the final output is saved.
@@ -246,13 +247,17 @@ async function generate() {
             updateContent({
               [fieldName]: [
                 ...currentFieldContent.value,
-                ...((structuredOutput as unknown[]) ?? []).map(normalizer),
+                ...normalizeItems(
+                  fieldType,
+                  (structuredOutput as unknown[]) ?? [],
+                  fieldName,
+                ),
               ],
             }),
         },
       });
     } else {
-      const responseFormat = getResponseFormat(field.type);
+      const responseFormat = getResponseFormat(fieldType);
       let text = "";
 
       activeRun = runTextGeneration({
