@@ -26,7 +26,7 @@
     "getkirby/composer-installer": "^1",
     "johannschopplich/kirby-tools-licensing": "^1",
     "johannschopplich/kirby-tools-utils": "^1",
-    "openai-php/client": "^0.19",
+    "openai-php/client": "^0.22",
     "anthropic-ai/sdk": "^1",
     "guzzlehttp/guzzle": "^7.10 || ^8"
   },
