@@ -4,7 +4,6 @@
   "johannschopplich.copilot.generate": "Generate",
   "johannschopplich.copilot.stop": "Stop",
   "johannschopplich.copilot.undo": "Undo",
-  "johannschopplich.copilot.delete": "Clear",
   "johannschopplich.copilot.fields": "Fields",
   "johannschopplich.copilot.fields.empty": "No fields available for generation",
   "johannschopplich.copilot.selectFields": "Pick one or more fields to generate content for.",

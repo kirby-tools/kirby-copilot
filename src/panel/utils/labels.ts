@@ -20,7 +20,6 @@ export function createPromptDialogLabels(t: Translate): PromptDialogLabels {
   return {
     preview: t("johannschopplich.copilot.preview"),
     selectFiles: t("johannschopplich.copilot.files.select"),
-    clearFiles: t("johannschopplich.copilot.delete"),
     insert: t("johannschopplich.copilot.fieldPicker.insert"),
     search: t("johannschopplich.copilot.fieldPicker.search"),
     selectPages: t("johannschopplich.copilot.pages.select"),

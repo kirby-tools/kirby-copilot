@@ -12,6 +12,7 @@ import {
   name as nameProp,
 } from "kirbyuse/props";
 import { computed, nextTick, useTemplateRef } from "vue";
+import FileTags from "./FileTags.vue";
 
 const props = defineProps({
   ...disabledProp,
@@ -79,14 +80,8 @@ const canResetPrompt = computed(
 );
 // Kirby's input frame reads as "type here", so it needs a prompt or files.
 const hasInputFrame = computed(() => props.editable || canAttachFiles.value);
-const fileTags = computed(() =>
-  canAttachFiles.value
-    ? props.filePreviews.map(({ name, image }, index) => ({
-        text: name,
-        value: index,
-        image,
-      }))
-    : [],
+const hasFileTags = computed(
+  () => canAttachFiles.value && props.filePreviews.length > 0,
 );
 const actionButtons = computed(() => [
   ...(props.canUndo
@@ -121,16 +116,12 @@ const actionButtons = computed(() => [
       },
 ]);
 
-async function removeFileTag(remainingIndexes: number[]) {
-  const index = fileTags.value.findIndex(
-    (tag) => !remainingIndexes.includes(tag.value),
-  );
-  if (index < 0) return;
-
+async function removeFile(index: number) {
+  const isLastFile = props.filePreviews.length === 1;
   emit("removeFile", index);
 
   // The tags unmount with the last one, which would drop focus to the body.
-  if (remainingIndexes.length === 0) {
+  if (isLastFile) {
     await nextTick();
     attachButton.value?.focus();
   }
@@ -187,16 +178,13 @@ async function removeFileTag(remainingIndexes: number[]) {
         @submit="canGenerate && emit('generate')"
       />
       <div
-        v-if="fileTags.length"
+        v-if="hasFileTags"
         class="kai-px-[var(--input-padding)] kai-pb-[var(--input-padding)] first:kai-pt-[var(--input-padding)]"
       >
-        <k-tags
-          :value="fileTags"
+        <FileTags
+          :previews="filePreviews"
           :disabled="disabled || isGenerating"
-          :draggable="false"
-          removable
-          theme="light"
-          @input="removeFileTag"
+          @remove="removeFile"
         />
       </div>
       <!-- `k-input` focuses the textarea on any click inside it. -->

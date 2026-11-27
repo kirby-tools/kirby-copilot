@@ -139,7 +139,6 @@ export interface InsertOption {
 export interface PromptDialogLabels {
   preview: string;
   selectFiles: string;
-  clearFiles: string;
   insert: string;
   search: string;
   selectPages: string;

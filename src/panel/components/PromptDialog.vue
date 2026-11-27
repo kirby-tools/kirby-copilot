@@ -8,6 +8,7 @@ import { usePanel } from "kirbyuse";
 import { TEMPLATE_PLACEHOLDER_RE } from "utilful";
 import { computed, ref } from "vue";
 import {
+  useFilePreviews,
   useGenerationHistory,
   useModelFields,
   usePluginContext,
@@ -60,6 +61,7 @@ const contentContext = createContentContext();
 
 const { prompt, files, selectedFieldNames, insertOption } =
   usePromptDialogState();
+const filePreviews = useFilePreviews(files);
 
 const editorComponent = ref<InstanceType<typeof PromptEditor>>();
 const hasLicenseButtons = !__PLAYGROUND__;
@@ -238,7 +240,7 @@ function getFieldPreview(fieldName: string) {
       :labels="labels"
       :prompt="prompt"
       :preview="hasPlaceholders ? resolvedPrompt : undefined"
-      :file-count="files.length"
+      :file-previews="filePreviews"
       :fields="isFieldGenerationMode ? modelFields : undefined"
       :selection="selection"
       :insert-options="selectionInsertOptions"
@@ -247,7 +249,7 @@ function getFieldPreview(fieldName: string) {
       :all-templates="allTemplates"
       :recent-prompts="recentPrompts"
       @pick-files="pickFiles()"
-      @clear-files="files = []"
+      @remove-file="files.splice($event, 1)"
       @pick-pages="pickPages()"
       @insert-placeholder="insertFieldPlaceholder($event)"
       @save-template="openSaveTemplateDialog(prompt)"

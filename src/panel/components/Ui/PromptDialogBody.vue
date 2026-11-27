@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import type { PropType } from "vue";
 import type {
+  FilePreview,
   InsertOption,
   PlaceholderField,
   PromptContext,
   PromptDialogLabels,
   PromptTemplate,
 } from "../../types";
-import { computed, ref } from "vue";
+import { computed, nextTick, ref, useTemplateRef } from "vue";
 import ContentDropdown from "./ContentDropdown.vue";
+import FileTags from "./FileTags.vue";
 
 const props = defineProps({
   labels: {
@@ -22,9 +24,9 @@ const props = defineProps({
   /** Prompt with its placeholders filled in. */
   preview: String,
   previewOpen: Boolean,
-  fileCount: {
-    type: Number,
-    default: 0,
+  filePreviews: {
+    type: Array as PropType<FilePreview[]>,
+    default: () => [],
   },
   /** Fields of a multi-field generation. */
   fields: Array as PropType<Pick<PlaceholderField, "name" | "label">[]>,
@@ -64,7 +66,7 @@ const props = defineProps({
 
 const emit = defineEmits<{
   (event: "pickFiles"): void;
-  (event: "clearFiles"): void;
+  (event: "removeFile", index: number): void;
   (event: "pickPages"): void;
   (event: "insertPlaceholder", fieldName: string): void;
   (event: "saveTemplate"): void;
@@ -83,6 +85,7 @@ const emit = defineEmits<{
 // Placeholder entries, the title included, from which the dropdown offers a search.
 const SEARCHABLE_PLACEHOLDER_COUNT = 7;
 
+const attachButton = useTemplateRef<{ focus: () => void }>("attachButton");
 const fieldsDropdown = ref<{ toggle: () => void }>();
 const placeholderDropdown = ref<InstanceType<typeof ContentDropdown>>();
 const templateDropdown = ref<InstanceType<typeof ContentDropdown>>();
@@ -102,6 +105,17 @@ const filteredPlaceholderFields = computed(() => {
       field.label?.toLowerCase().includes(query),
   );
 });
+
+async function removeFile(index: number) {
+  const isLastFile = props.filePreviews.length === 1;
+  emit("removeFile", index);
+
+  // The tags unmount with the last one, which would drop focus to the body.
+  if (isLastFile) {
+    await nextTick();
+    attachButton.value?.focus();
+  }
+}
 
 function togglePlaceholderDropdown() {
   if (!isPlaceholderDropdownOpen.value) {
@@ -158,6 +172,13 @@ function loadPrompt(prompt: string) {
     </details>
 
     <div
+      v-if="filePreviews.length"
+      class="kai-px-[var(--spacing-2)] kai-pb-[var(--spacing-2)]"
+    >
+      <FileTags :previews="filePreviews" @remove="removeFile" />
+    </div>
+
+    <div
       class="kai-flex kai-items-center kai-justify-between kai-px-[var(--spacing-2)] kai-pb-[var(--spacing-2)]"
     >
       <div
@@ -165,23 +186,10 @@ function loadPrompt(prompt: string) {
       >
         <!-- File picker button -->
         <k-button
+          ref="attachButton"
           icon="attachment"
-          :badge="
-            fileCount > 0 ? { theme: 'notice', text: fileCount } : undefined
-          "
-          :aria-label="
-            fileCount > 0
-              ? `${labels.selectFiles} (${fileCount})`
-              : labels.selectFiles
-          "
+          :aria-label="labels.selectFiles"
           @click="emit('pickFiles')"
-        />
-        <k-button
-          v-if="fileCount > 0"
-          :text="labels.clearFiles"
-          variant="dimmed"
-          size="sm"
-          @click="emit('clearFiles')"
         />
 
         <!-- Placeholder insertion dropdown -->
