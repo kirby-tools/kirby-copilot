@@ -439,7 +439,7 @@ describe("generateKirbyBlocksSchema", () => {
         schema.parse({
           type: "rich-text",
           content: {
-            heading: null,
+            heading: "",
             content: [
               {
                 type: "text",
@@ -463,7 +463,7 @@ describe("generateKirbyBlocksSchema", () => {
         schema.parse({
           type: "rich-text",
           content: {
-            heading: null,
+            heading: "",
             content: [
               {
                 type: "rich-text",
@@ -483,7 +483,7 @@ describe("generateKirbyBlocksSchema", () => {
         schema.parse({
           type: "rich-text",
           content: {
-            heading: null,
+            heading: "",
             content: [
               {
                 type: "heading",

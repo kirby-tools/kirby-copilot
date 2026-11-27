@@ -187,7 +187,8 @@ function processFieldValues({
 
   for (const field of selectedFields) {
     const fieldValue = object[field.name];
-    if (fieldValue == null) continue;
+    // The empty value of a field that isn't required leaves it as it is.
+    if (fieldValue == null || fieldValue === "") continue;
 
     const currentFieldContent = currentContent[field.name] as unknown[];
     const normalizer =

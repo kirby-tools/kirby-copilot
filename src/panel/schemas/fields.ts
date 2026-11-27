@@ -246,6 +246,7 @@ export function fieldToZodSchema(
   const guidance = [
     field.help && `Help: ${field.help}`,
     field.placeholder && `Placeholder: ${field.placeholder}`,
+    field.required !== true && field.type !== "toggle" && "May stay empty.",
   ].filter(Boolean);
 
   if (guidance.length > 0) {
@@ -272,11 +273,27 @@ export function fieldToZodSchema(
       }
     }
   } else {
-    // Optional schema properties are not supported by OpenAI.
-    schema = schema.nullable();
+    schema = allowEmpty(schema);
   }
 
   return schema;
+}
+
+/**
+ * Prefers the type's own empty value over `.nullable()`: OpenAI accepts no
+ * optional property, and Anthropic caps the nullable ones in a response format.
+ */
+function allowEmpty(schema: z.ZodType): z.ZodType {
+  if (["", [], false].some((value) => schema.safeParse(value).success)) {
+    return schema;
+  }
+
+  if (schema instanceof z.ZodEnum) {
+    const options = [...(schema.options as string[]), ""];
+    return z.enum(options).describe(schema.description!);
+  }
+
+  return schema.nullable();
 }
 
 function createNestedFieldsSchema(

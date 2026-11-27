@@ -14,12 +14,11 @@ describe("fieldToZodSchema", () => {
       ["tel", "Phone"],
       ["slug", "Slug"],
       ["password", "Password"],
-    ] as const)("accepts a string or null for a %s field", (type, label) => {
+    ] as const)("accepts a string for a %s field", (type, label) => {
       const schema = assertSchema(
         fieldToZodSchema(field({ type, label, name: type })),
       );
       expect(schema.safeParse("sample-value").success).toBe(true);
-      expect(schema.safeParse(null).success).toBe(true);
     });
 
     it("enforces minlength/maxlength constraints", () => {
@@ -469,20 +468,51 @@ describe("fieldToZodSchema", () => {
       expect(() => schema.parse(null)).toThrow();
     });
 
-    it("accepts null for a field that is not required", () => {
+    it("lets a text field that is not required stay empty with an empty string instead of null", () => {
+      const schema = assertSchema(
+        fieldToZodSchema(
+          field({ type: "text", label: "Description", name: "description" }),
+        ),
+      );
+
+      expect(schema.safeParse("").success).toBe(true);
+      expect(schema.safeParse(null).success).toBe(false);
+    });
+
+    it("adds an empty option to a select field that is not required", () => {
       const schema = assertSchema(
         fieldToZodSchema(
           field({
-            type: "text",
-            label: "Description",
-            name: "description",
-            required: false,
+            type: "select",
+            label: "Status",
+            name: "status",
+            options: [
+              {
+                value: "draft",
+                text: "Draft",
+                disabled: false,
+                icon: null,
+                info: null,
+              },
+            ],
           }),
         ),
       );
 
-      expect(schema.safeParse(null).success).toBe(true);
-      expect(() => schema.parse(null)).not.toThrow();
+      expect(schema.safeParse("").success).toBe(true);
+      expect(schema.safeParse(null).success).toBe(false);
+      expect(schema.description).toContain('"Status"');
+    });
+
+    it("accepts null for a field that is not required and has no empty value", () => {
+      const boundedTextSchema = assertSchema(
+        fieldToZodSchema(
+          field({ type: "text", label: "Code", name: "code", minlength: 3 }),
+        ),
+      );
+
+      expect(boundedTextSchema.safeParse(null).success).toBe(true);
+      expect(boundedTextSchema.safeParse("").success).toBe(false);
     });
   });
 
@@ -504,6 +534,28 @@ describe("fieldToZodSchema", () => {
       expect(schema.description).toBe(
         '"Title", single-line plain text without line breaks or formatting\nHelp: Keep it under 60 characters\nPlaceholder: Summer festival',
       );
+    });
+
+    it("tells the model that a field that is not required may stay empty", () => {
+      const schema = assertSchema(
+        fieldToZodSchema(
+          field({ type: "text", label: "Title", name: "title" }),
+        ),
+      );
+
+      expect(schema.description).toBe(
+        '"Title", single-line plain text without line breaks or formatting\nMay stay empty.',
+      );
+    });
+
+    it("leaves the hint out for a toggle, whose false is an answer", () => {
+      const schema = assertSchema(
+        fieldToZodSchema(
+          field({ type: "toggle", label: "Featured", name: "featured" }),
+        ),
+      );
+
+      expect(schema.description).toBe('"Featured", a boolean');
     });
   });
 
