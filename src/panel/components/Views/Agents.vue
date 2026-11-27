@@ -106,8 +106,7 @@ function copyMcpUrl() {
         >
           <p>
             {{ panel.t("johannschopplich.copilot.agents.mcpUrl.help") }}
-            <k-link :to="DOCS_URL" target="_blank">{{ docsLinkText }}</k-link
-            >.
+            <k-link :to="DOCS_URL" target="_blank">{{ docsLinkText }}</k-link>.
           </p>
         </k-text>
         <k-box
@@ -142,8 +141,9 @@ function copyMcpUrl() {
           <k-text>
             <p>
               {{ panel.t("johannschopplich.copilot.agents.empty") }}
-              <k-link :to="DOCS_URL" target="_blank">{{ docsLinkText }}</k-link
-              >.
+              <k-link :to="DOCS_URL" target="_blank">{{
+                docsLinkText
+              }}</k-link>.
             </p>
           </k-text>
         </k-empty>
