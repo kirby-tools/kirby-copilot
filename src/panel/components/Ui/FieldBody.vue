@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import type { PropType } from "vue";
-import type { CopilotFieldError, CopilotFieldLabels } from "../../types";
+import type {
+  CopilotFieldError,
+  CopilotFieldLabels,
+  FilePreview,
+} from "../../types";
 import {
   disabled as disabledProp,
   help as helpProp,
@@ -48,8 +52,8 @@ const props = defineProps({
   userPrompt: String,
   isGenerating: Boolean,
   canUndo: Boolean,
-  fileNames: {
-    type: Array as PropType<string[]>,
+  filePreviews: {
+    type: Array as PropType<FilePreview[]>,
     default: () => [],
   },
   /** Note on the file a file view attaches with `files: auto`. */
@@ -77,10 +81,10 @@ const canResetPrompt = computed(
 const hasInputFrame = computed(() => props.editable || canAttachFiles.value);
 const fileTags = computed(() =>
   canAttachFiles.value
-    ? props.fileNames.map((name, index) => ({
+    ? props.filePreviews.map(({ name, image }, index) => ({
         text: name,
         value: index,
-        icon: "attachment",
+        image,
       }))
     : [],
 );

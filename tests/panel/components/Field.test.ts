@@ -23,6 +23,7 @@ vi.mock("@kirby-tools/licensing/components", () => ({
 }));
 
 vi.mock("../../../src/panel/composables", () => ({
+  useFilePreviews: () => ref([]),
   usePluginContext: async () => ({ config: {} }),
 }));
 

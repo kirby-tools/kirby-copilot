@@ -1,5 +1,5 @@
 import type { PluginContext } from "@kirby-tools/licensing";
-import type { KirbyFieldProps } from "kirby-types";
+import type { KirbyFieldProps, KirbyModelImage } from "kirby-types";
 import type { LogLevel, ReasoningEffort } from "./constants";
 
 export type OutputFormat = "text" | "markdown" | "rich-text";
@@ -119,6 +119,11 @@ export interface CopilotFieldLabels {
   placeholder: string;
   reset: string;
   selectFiles: string;
+}
+
+export interface FilePreview {
+  name: string;
+  image: Partial<KirbyModelImage>;
 }
 
 export type CopilotFieldError =

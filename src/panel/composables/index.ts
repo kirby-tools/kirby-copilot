@@ -1,5 +1,6 @@
 export * from "./ai";
 export * from "./dialogs";
+export * from "./file-previews";
 export * from "./generation-history";
 export * from "./generation-run";
 export * from "./kirby-content";

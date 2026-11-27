@@ -23,6 +23,7 @@ import {
   runStructuredGeneration,
   runTextGeneration,
   useBlocks,
+  useFilePreviews,
   useLayouts,
   usePluginContext,
 } from "../composables";
@@ -107,6 +108,7 @@ const currentPrompt = ref(
 );
 const currentFieldContent = ref<any>();
 const files = ref<File[]>([]);
+const filePreviews = useFilePreviews(files);
 
 let activeRun: ReturnType<typeof runTextGeneration>;
 let isAbortRequested = false;
@@ -337,7 +339,7 @@ function onModelSave() {
     :user-prompt="userPrompt"
     :is-generating="isGenerating"
     :can-undo="canUndo"
-    :file-names="files.map((file) => file.name)"
+    :file-previews="filePreviews"
     :model-file-text="modelFileText"
     @generate="generate()"
     @abort="abort()"
