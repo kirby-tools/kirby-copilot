@@ -28,7 +28,7 @@
     "johannschopplich/kirby-tools-utils": "^1",
     "openai-php/client": "^0.19",
     "anthropic-ai/sdk": "^0.17",
-    "guzzlehttp/guzzle": "^7.10"
+    "guzzlehttp/guzzle": "^7.10 || ^8"
   },
   "require-dev": {
     "getkirby/cms": "^6.0",
