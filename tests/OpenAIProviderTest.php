@@ -2,13 +2,19 @@
 
 declare(strict_types = 1);
 
+use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response;
 use JohannSchopplich\Copilot\AI\Exception\ProviderException;
 use JohannSchopplich\Copilot\AI\ProviderConfig;
 use JohannSchopplich\Copilot\AI\ProviderName;
+use JohannSchopplich\Copilot\AI\Providers\ErrorBodyNormalizer;
 use JohannSchopplich\Copilot\AI\Providers\GeminiProvider;
 use JohannSchopplich\Copilot\AI\Providers\MistralProvider;
 use JohannSchopplich\Copilot\AI\Providers\OpenAIProvider;
 use Kirby\Exception\AuthException;
+use OpenAI\Client as OpenAIClient;
 use OpenAI\Exceptions\ErrorException;
 use OpenAI\Exceptions\TransporterException;
 use OpenAI\Exceptions\UnserializableResponse;
@@ -69,6 +75,20 @@ final class OpenAIProviderTest extends TestCase
         return static function (int $seconds) use (&$sleeps): void {
             $sleeps[] = $seconds;
         };
+    }
+
+    private function clientAnswering(int $statusCode, string $body): OpenAIClient
+    {
+        $handler = new MockHandler([
+            new Response($statusCode, ['Content-Type' => 'application/json'], $body),
+        ]);
+
+        return OpenAI::factory()
+            ->withApiKey('sk-test')
+            ->withHttpClient(new ErrorBodyNormalizer(
+                new GuzzleClient(['handler' => HandlerStack::create($handler)]),
+            ))
+            ->make();
     }
 
     private function errorException(int $statusCode, string $retryAfter = ''): ErrorException
@@ -603,5 +623,78 @@ final class OpenAIProviderTest extends TestCase
             return $method === 'create' &&
                 ($parameters['reasoning_effort'] ?? null) === 'low';
         });
+    }
+
+    /**
+     * @return array<string, array{0: int, 1: string, 2: string}>
+     */
+    public static function mistralErrorBodies(): array
+    {
+        return [
+            'an error object' => [
+                400,
+                '{"object":"error","message":"Invalid model: no-such-model","type":"invalid_model","param":null,"code":"1500","raw_status_code":400}',
+                'request failed: Invalid model: no-such-model',
+            ],
+            'a detail string' => [
+                401,
+                '{"detail":"Invalid API Key"}',
+                'request failed: Invalid API Key',
+            ],
+            'a detail list' => [
+                422,
+                '{"detail":[{"type":"list_type","msg":"Input should be a valid list"}]}',
+                'request failed: [{"type":"list_type","msg":"Input should be a valid list"}]',
+            ],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('mistralErrorBodies')]
+    public function throws_provider_exception_for_a_failed_response_without_an_error_key(
+        int $statusCode,
+        string $body,
+        string $expectedReason,
+    ): void {
+        $provider = new MistralProvider(
+            config: new ProviderConfig(apiKey: 'sk-test'),
+            client: $this->clientAnswering($statusCode, $body),
+        );
+
+        try {
+            $provider->generateText(messages: [['role' => 'user', 'content' => 'hi']]);
+            $this->fail('Expected ProviderException');
+        } catch (ProviderException $e) {
+            $this->assertStringStartsWith('mistral provider error: ' . $expectedReason, $e->getMessage());
+            $this->assertSame($statusCode, $e->getHttpCode());
+        }
+    }
+
+    /**
+     * @return array<string, array{0: string}>
+     */
+    public static function errorBodiesTheSdkReads(): array
+    {
+        return [
+            'an error object' => ['{"error":{"message":"Invalid model","type":"invalid_request_error","code":null}}'],
+            'a list of error objects' => ['[{"error":{"code":400,"message":"Invalid model","status":"INVALID_ARGUMENT"}}]'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('errorBodiesTheSdkReads')]
+    public function keeps_the_message_of_a_failed_response_that_has_an_error_key(string $body): void
+    {
+        $provider = new OpenAIProvider(
+            config: new ProviderConfig(apiKey: 'sk-test'),
+            client: $this->clientAnswering(400, $body),
+        );
+
+        try {
+            $provider->generateText(messages: [['role' => 'user', 'content' => 'hi']]);
+            $this->fail('Expected ProviderException');
+        } catch (ProviderException $e) {
+            $this->assertStringStartsWith('openai provider error: request failed: Invalid model', $e->getMessage());
+        }
     }
 }

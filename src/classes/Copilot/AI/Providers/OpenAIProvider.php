@@ -140,7 +140,7 @@ class OpenAIProvider implements Provider
         return $this->client ?? OpenAI::factory()
             ->withApiKey($this->apiKey())
             ->withBaseUri($this->baseUrl())
-            ->withHttpClient($this->config->httpClient())
+            ->withHttpClient(new ErrorBodyNormalizer($this->config->httpClient()))
             ->make();
     }
 
