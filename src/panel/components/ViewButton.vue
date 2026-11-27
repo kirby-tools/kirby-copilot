@@ -187,8 +187,14 @@ function processFieldValues({
 
   for (const field of selectedFields) {
     const fieldValue = object[field.name];
-    // The empty value of a field that isn't required leaves it as it is.
-    if (fieldValue == null || fieldValue === "") continue;
+    // The model leaves a field as it is with `null`, an empty string, or an empty list.
+    if (
+      fieldValue == null ||
+      fieldValue === "" ||
+      (Array.isArray(fieldValue) && fieldValue.length === 0)
+    ) {
+      continue;
+    }
 
     const currentFieldContent = currentContent[field.name] as unknown[];
     const normalizer =
