@@ -12,6 +12,7 @@ use Kirby\Cms\File;
 use Kirby\Cms\Files;
 use Kirby\Cms\PageRules;
 use Kirby\Content\LockedContentException;
+use Kirby\Exception\PermissionException;
 
 final class DeletePage
 {
@@ -40,9 +41,16 @@ final class DeletePage
         $page = $arguments->page('page');
 
         return AgentWrites::lock(function () use ($page) {
-            PageRules::delete($page);
+            try {
+                PageRules::delete($page);
+            } catch (PermissionException $exception) {
+                // Kirby 5.6.2 and later refuse the page at the first file the account may not delete; the agent learns them all below.
+                if ($page->permissions()->can('delete') !== true) {
+                    throw $exception;
+                }
+            }
 
-            // Kirby deletes the page's files one by one, so a file it refuses to delete would stop the deletion after others are gone.
+            // Earlier releases delete the page's files one by one, so a file Kirby refuses to delete would stop the deletion after others are gone.
             $protectedFiles = $page->files()->filter(fn (File $file) => $file->permissions()->can('delete') !== true);
 
             if ($protectedFiles->count() > 0) {
